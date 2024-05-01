@@ -1,6 +1,6 @@
 import type { Payload, RequestContext } from '../../../index.js'
 import type { GeneratedTypes } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -9,7 +9,7 @@ import { verifyEmailOperation } from '../verifyEmail.js'
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   context?: RequestContext
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   token: string
 }
 

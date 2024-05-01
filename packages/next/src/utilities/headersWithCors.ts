@@ -1,12 +1,12 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 type CorsArgs = {
   headers: Headers
-  req: PayloadRequest
+  req: Partial<PayloadRequestWithData>
 }
 export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
-  const cors = req.payload.config.cors
-  const requestOrigin = req.headers.get('Origin')
+  const cors = req?.payload.config.cors
+  const requestOrigin = req?.headers.get('Origin')
 
   if (cors) {
     headers.set('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS')

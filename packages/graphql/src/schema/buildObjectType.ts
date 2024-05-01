@@ -41,13 +41,12 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-/* eslint-disable no-use-before-define */
-import { GraphQLJSON } from 'graphql-type-json'
 import { tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
 
 import type { Context } from '../resolvers/types.js'
 
+import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import formatOptions from '../utilities/formatOptions.js'
@@ -301,7 +300,7 @@ function buildObjectType({
             value: {
               type: new GraphQLUnionType({
                 name: relationshipName,
-                async resolveType(data, { req }) {
+                resolveType(data, { req }) {
                   return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
@@ -463,6 +462,10 @@ function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          if (typeof field?.editor === 'function') {
+            throw new Error('Attempted to access unsanitized rich text editor.')
+          }
+
           const editor: RichTextAdapter = field?.editor
 
           // RichText fields have their own depth argument in GraphQL.
@@ -470,19 +473,24 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.populationPromise) {
-            await editor?.populationPromise({
+          if (editor?.populationPromises) {
+            const fieldPromises = []
+            const populationPromises = []
+            editor?.populationPromises({
               context,
               depth,
               field,
+              fieldPromises,
               findMany: false,
               flattenLocales: false,
               overrideAccess: false,
-              populationPromises: [],
+              populationPromises,
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
             })
+            await Promise.all(fieldPromises)
+            await Promise.all(populationPromises)
           }
 
           return parent[field.name]

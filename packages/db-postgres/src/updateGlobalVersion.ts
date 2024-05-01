@@ -1,12 +1,12 @@
 import type { TypeWithVersion, UpdateGlobalVersionArgs } from 'payload/database'
-import type { PayloadRequest, SanitizedGlobalConfig, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedGlobalConfig, TypeWithID } from 'payload/types'
 
 import { buildVersionGlobalFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
-import { getTableName } from './schema/getTableName.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
@@ -15,7 +15,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     id,
     global,
     locale,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     versionData,
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
@@ -25,11 +25,11 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     ({ slug }) => slug === global,
   )
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = getTableName({
-    adapter: this,
-    config: globalConfig,
-    versions: true,
-  })
+
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
+  )
+
   const fields = buildVersionGlobalFields(globalConfig)
 
   const { where } = await buildQuery({

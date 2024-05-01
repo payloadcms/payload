@@ -3,6 +3,7 @@ import type { ClientUser, Permissions } from 'payload/auth'
 import type { MeOperationResult } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
+import { stayLoggedInModalSlug } from '@payloadcms/ui/elements/StayLoggedIn'
 import { usePathname, useRouter } from 'next/navigation.js'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
@@ -278,7 +279,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       reminder = setTimeout(
         () => {
-          openModal('stay-logged-in')
+          openModal(stayLoggedInModalSlug)
         },
         Math.max(Math.min((remainingTime - 60) * 1000, maxTimeoutTime)),
       )

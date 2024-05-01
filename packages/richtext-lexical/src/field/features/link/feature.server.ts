@@ -1,15 +1,15 @@
-import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
+import { sanitizeFields } from 'payload/config'
+import { deepCopyObject } from 'payload/utilities'
 
-import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { createNode } from '../typeUtilities.js'
 import { LinkFeatureClientComponent } from './feature.client.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
@@ -47,7 +47,6 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
     | ((args: {
         config: SanitizedConfig
         defaultFields: FieldWithRichTextRequiredEditor[]
-        i18n: I18n
       }) => FieldWithRichTextRequiredEditor[])
     | FieldWithRichTextRequiredEditor[]
 }
@@ -59,34 +58,44 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
     props = {}
   }
   return {
-    feature: () => {
+    feature: async ({ config: _config }) => {
+      const validRelationships = _config.collections.map((c) => c.slug) || []
+
+      const _transformedFields = transformExtraFields(
+        deepCopyObject(props.fields),
+        _config,
+        props.enabledCollections,
+        props.disabledCollections,
+      )
+
+      const sanitizedFields = (await sanitizeFields({
+        config: _config as unknown as Config,
+        fields: _transformedFields,
+        requireFieldLevelRichTextEditor: true,
+        validRelationships,
+      })) as FieldWithRichTextRequiredEditor[]
+      props.fields = sanitizedFields
+
       return {
         ClientComponent: LinkFeatureClientComponent,
         clientFeatureProps: {
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateSchemaMap: ({ config, i18n, props }) => {
-          if (!props?.fields || !Array.isArray(props.fields) || props.fields.length === 0) {
+        generateSchemaMap: ({ config, i18n }) => {
+          if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
             return null
           }
+
           const schemaMap = new Map<string, Field[]>()
 
           const validRelationships = config.collections.map((c) => c.slug) || []
 
-          const transformedFields = transformExtraFields(
-            props.fields,
-            config,
-            i18n,
-            props.enabledCollections,
-            props.disabledCollections,
-          )
-
-          schemaMap.set('fields', transformedFields)
+          schemaMap.set('fields', sanitizedFields)
 
           traverseFields({
             config,
-            fields: transformedFields,
+            fields: sanitizedFields,
             i18n,
             schemaMap,
             schemaPath: 'fields',
@@ -96,7 +105,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           return schemaMap
         },
         nodes: [
-          {
+          createNode({
             converters: {
               html: {
                 converter: async ({ converters, node, parent, payload }) => {
@@ -123,12 +132,19 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   return `<a href="${href}"${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [AutoLinkNode.getType()],
-              } as HTMLConverter<SerializedAutoLinkNode>,
+              },
+            },
+            hooks: {
+              afterRead: [
+                ({ node }) => {
+                  return node
+                },
+              ],
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-          },
-          {
+          }),
+          createNode({
             converters: {
               html: {
                 converter: async ({ converters, node, parent, payload }) => {
@@ -152,11 +168,11 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   return `<a href="${href}"${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [LinkNode.getType()],
-              } as HTMLConverter<SerializedLinkNode>,
+              },
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

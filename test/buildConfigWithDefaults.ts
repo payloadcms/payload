@@ -34,6 +34,7 @@ import sharp from 'sharp'
 
 import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
+import { testEmailAdapter } from './testEmailAdapter.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 export async function buildConfigWithDefaults(
@@ -74,30 +75,15 @@ export async function buildConfigWithDefaults(
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
     secret: 'TEST_SECRET',
-    //editor: slateEditor({}),
-    // editor: slateEditor({
-    //   admin: {
-    //     upload: {
-    //       collections: {
-    //         media: {
-    //           fields: [
-    //             {
-    //               name: 'alt',
-    //               type: 'text',
-    //             },
-    //           ],
-    //         },
-    //       },
-    //     },
-    //   },
-    // }),
+    email: testEmailAdapter,
     endpoints: [localAPIEndpoint, reInitEndpoint],
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
         RelationshipFeature(),
         LinkFeature({
-          fields: [
+          fields: ({ defaultFields }) => [
+            ...defaultFields,
             {
               name: 'description',
               type: 'text',
@@ -204,5 +190,5 @@ export async function buildConfigWithDefaults(
     config.admin.disable = true
   }
 
-  return buildConfig(config)
+  return await buildConfig(config)
 }

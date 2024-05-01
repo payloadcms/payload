@@ -1,13 +1,7 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
-import lexicalUtilsImport from '@lexical/utils'
-const { mergeRegister } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const { $getSelection } = lexicalImport
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { mergeRegister } from '@lexical/utils'
+import { $getSelection } from 'lexical'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import React from 'react'
 import { createPortal } from 'react-dom'

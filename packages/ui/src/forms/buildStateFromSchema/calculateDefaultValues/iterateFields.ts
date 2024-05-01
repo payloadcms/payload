@@ -1,4 +1,4 @@
-import type { Data, Field, PayloadRequest, TabAsField } from 'payload/types'
+import type { Data, Field, PayloadRequestWithData, TabAsField } from 'payload/types'
 
 import { defaultValuePromise } from './promise.js'
 
@@ -6,7 +6,7 @@ type Args<T> = {
   data: T
   fields: (Field | TabAsField)[]
   id?: number | string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   siblingData: Data
 }
 

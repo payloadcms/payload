@@ -1,12 +1,9 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalImport from 'lexical'
-const { $getNodeByKey, COMMAND_PRIORITY_EDITOR } = lexicalImport
-
 import type { LexicalEditor } from 'lexical'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useListDrawer } from '@payloadcms/ui/elements/ListDrawer'
+import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition.js'
@@ -17,21 +14,21 @@ import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands.js'
 const baseClass = 'lexical-upload-drawer'
 
 const insertUpload = ({
-  id,
   editor,
   relationTo,
   replaceNodeKey,
+  value,
 }: {
   editor: LexicalEditor
-  id: string
   relationTo: string
   replaceNodeKey: null | string
+  value: number | string
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_UPLOAD_COMMAND, {
-      id,
       fields: null,
       relationTo,
+      value,
     })
   } else {
     editor.update(() => {
@@ -42,9 +39,7 @@ const insertUpload = ({
             data: {
               fields: null,
               relationTo,
-              value: {
-                id,
-              },
+              value,
             },
           }),
         )
@@ -84,10 +79,10 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const onSelect = useCallback(
     ({ collectionSlug, docID }) => {
       insertUpload({
-        id: docID,
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
+        value: docID,
       })
       closeDrawer()
     },

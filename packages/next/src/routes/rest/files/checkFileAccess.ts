@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequest, Where } from 'payload/types'
+import type { Collection, PayloadRequestWithData, Where } from 'payload/types'
 
 import { executeAccess } from 'payload/auth'
 import { Forbidden } from 'payload/errors'
@@ -12,7 +12,7 @@ export async function checkFileAccess({
 }: {
   collection: Collection
   filename: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) {
   const { config } = collection
   const disableEndpoints = endpointsAreDisabled({ endpoints: config.endpoints, request: req })

@@ -1,9 +1,9 @@
-import type { NodemailerAdapter } from '@payloadcms/email-nodemailer'
-
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 
 import type { PayloadCloudEmailOptions } from './types.js'
+
+type NodemailerAdapter = ReturnType<typeof nodemailerAdapter>
 
 export const payloadCloudEmail = async (
   args: PayloadCloudEmailOptions,

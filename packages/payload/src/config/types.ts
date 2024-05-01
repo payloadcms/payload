@@ -6,6 +6,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { User } from '../auth/types.js'
@@ -19,7 +20,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
@@ -69,7 +70,7 @@ export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url
 
 type GeneratePreviewURLOptions = {
   locale: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: null | string
 }
 
@@ -172,7 +173,7 @@ export type AccessArgs<T = any, U = any> = {
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequest<U>
+  req: PayloadRequestWithData<U>
 }
 
 /**
@@ -527,7 +528,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -640,9 +641,11 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization'
+  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 > & {
   collections: SanitizedCollectionConfig[]
+  /** Default richtext editor to use for richText fields */
+  editor: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
@@ -651,6 +654,12 @@ export type SanitizedConfig = Omit<
     config: string
     configDir: string
     rawConfig: string
+  }
+  upload: ExpressFileUploadOptions & {
+    /**
+     * Deduped list of adapters used in the project
+     */
+    adapters: string[]
   }
 }
 

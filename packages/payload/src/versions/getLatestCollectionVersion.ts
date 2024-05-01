@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
-import type { Payload, PayloadRequest } from '../types/index.js'
+import type { Payload, PayloadRequestWithData } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
 import { docHasTimestamps } from '../types/index.js'
@@ -10,7 +10,7 @@ type Args = {
   id: number | string
   payload: Payload
   query: FindOneArgs
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
 }
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({

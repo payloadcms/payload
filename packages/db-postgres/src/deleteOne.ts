@@ -1,26 +1,25 @@
 import type { DeleteOne } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
-import { getTableName } from './schema/getTableName.js'
 import { transform } from './transform/read/index.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
-  { collection: collectionSlug, req = {} as PayloadRequest, where: whereArg },
+  { collection: collectionSlug, req = {} as PayloadRequestWithData, where: whereArg },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = getTableName({
-    adapter: this,
-    config: collection,
-  })
+
+  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+
   let docToDelete: Record<string, unknown>
 
   const { joinAliases, joins, selectFields, where } = await buildQuery({

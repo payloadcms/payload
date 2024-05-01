@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState, PayloadRequest } from 'payload/types'
+import type { FormState, PayloadRequestWithData } from 'payload/types'
 
 import { Email } from '@payloadcms/ui/fields/Email'
 import { Form } from '@payloadcms/ui/forms/Form'
@@ -69,7 +69,8 @@ export const ForgotPasswordForm: React.FC = () => {
             name: 'email',
             type: 'email',
             data: {},
-            req: { t } as PayloadRequest,
+            preferences: { fields: {} },
+            req: { t } as PayloadRequestWithData,
             required: true,
             siblingData: {},
           })

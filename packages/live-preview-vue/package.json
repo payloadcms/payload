@@ -2,17 +2,26 @@
   "name": "@payloadcms/live-preview-vue",
   "version": "0.1.0",
   "description": "The official live preview Vue SDK for Payload",
+  "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/live-preview-vue"
   },
   "license": "MIT",
-  "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -26,17 +35,11 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "vue": "^3.0.0",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "vue": "^3.0.0"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
-  },
-  "exports": {
-    ".": {
-      "default": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
   },
   "publishConfig": {
     "exports": {
@@ -49,8 +52,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

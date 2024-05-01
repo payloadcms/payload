@@ -1,4 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
+import type { Permissions } from 'payload/auth'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -22,8 +23,9 @@ export const DocumentTabs: React.FC<{
   config: SanitizedConfig
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
+  permissions: Permissions
 }> = (props) => {
-  const { collectionConfig, config, globalConfig } = props
+  const { collectionConfig, config, globalConfig, permissions } = props
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
@@ -51,7 +53,8 @@ export const DocumentTabs: React.FC<{
 
                 const meetsCondition =
                   !condition ||
-                  (condition && Boolean(condition({ collectionConfig, config, globalConfig })))
+                  (condition &&
+                    Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
 
                 if (meetsCondition) {
                   return (

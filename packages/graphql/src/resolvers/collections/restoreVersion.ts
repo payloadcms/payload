@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { restoreVersionOperation } from 'payload/operations'
@@ -12,7 +12,7 @@ export type Resolver = (
     id: number | string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<Document>
 

@@ -45,16 +45,13 @@ export { sql } from 'drizzle-orm'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
-  const payloadIDType = postgresIDType ? 'number' : 'text'
+  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
-
-      // Postgres-specific
-      blockTableNames: {},
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
@@ -70,6 +67,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       schema: {},
       schemaName: args.schemaName,
       sessions: {},
+      tableNameMap: new Map<string, string>(),
       tables: {},
       versionsSuffix: args.versionsSuffix || '_v',
 

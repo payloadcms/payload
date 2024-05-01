@@ -68,6 +68,10 @@ export const traverseFields = ({
         break
 
       case 'richText':
+        if (typeof field.editor === 'function') {
+          throw new Error('Attempted to access unsanitized rich text editor.')
+        }
+
         if (typeof field.editor.generateSchemaMap === 'function') {
           field.editor.generateSchemaMap({
             config,

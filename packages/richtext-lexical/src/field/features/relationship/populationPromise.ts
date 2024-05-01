@@ -9,18 +9,20 @@ export const relationshipPopulationPromise: PopulationPromise<SerializedRelation
   field,
   node,
   overrideAccess,
+  populationPromises,
   req,
   showHiddenFields,
 }) => {
-  const promises: Promise<void>[] = []
+  if (node?.value) {
+    // @ts-expect-error
+    const id = node?.value?.id || node?.value // for backwards-compatibility
 
-  if (node?.value?.id) {
     const collection = req.payload.collections[node?.relationTo]
 
     if (collection) {
-      promises.push(
+      populationPromises.push(
         populate({
-          id: node.value.id,
+          id,
           collection,
           currentDepth,
           data: node,
@@ -34,6 +36,4 @@ export const relationshipPopulationPromise: PopulationPromise<SerializedRelation
       )
     }
   }
-
-  return promises
 }

@@ -18,9 +18,10 @@ import type {
   LabelFunction,
   LivePreviewConfig,
 } from '../../config/types.js'
+import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
@@ -50,7 +51,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -68,7 +69,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -86,7 +87,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
@@ -99,7 +100,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
@@ -108,7 +109,7 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   query: { [key: string]: any }
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
@@ -118,7 +119,7 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T
   findMany?: boolean
   query?: { [key: string]: any }
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type BeforeDeleteHook = (args: {
@@ -126,7 +127,7 @@ export type BeforeDeleteHook = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   id: number | string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
@@ -135,7 +136,7 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   id: number | string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterOperationHook<T extends TypeWithID = any> = (
@@ -154,7 +155,7 @@ export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequestWithData
   user: T
 }) => any
 
@@ -162,7 +163,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: string
   user: T
 }) => any
@@ -171,14 +172,14 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequestWithData
   response: unknown
 }) => any
 
@@ -187,7 +188,7 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   exp: number
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: string
 }) => any
 
@@ -298,7 +299,7 @@ export type CollectionConfig = {
    * Access control
    */
   access?: {
-    admin?: ({ req }: { req: PayloadRequest }) => Promise<boolean> | boolean
+    admin?: ({ req }: { req: PayloadRequestWithData }) => Promise<boolean> | boolean
     create?: Access
     delete?: Access
     read?: Access
@@ -318,6 +319,11 @@ export type CollectionConfig = {
   auth?: IncomingAuthType | boolean
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Used to override the default naming of the database table or collection with your using a function or string
+   * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
+   */
+  dbName?: DBIdentifierName
   /**
    * Default field to sort by in collection list view
    */

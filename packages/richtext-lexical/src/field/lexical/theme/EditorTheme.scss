@@ -292,8 +292,7 @@
 
   &__ol1 {
     padding: 0;
-    margin: 0;
-    list-style-position: inside;
+    list-style-position: outside;
     margin: 0 0 1.5em;
   }
 
@@ -301,34 +300,34 @@
     padding: 0;
     margin: 0;
     list-style-type: upper-alpha;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ol3 {
     padding: 0;
     margin: 0;
     list-style-type: lower-alpha;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ol4 {
     padding: 0;
     margin: 0;
     list-style-type: upper-roman;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ol5 {
     padding: 0;
     margin: 0;
     list-style-type: lower-roman;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ul {
     padding: 0;
     margin: 0 0 1.5em;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ul ul {
@@ -336,7 +335,7 @@
   }
 
   &__listItem {
-    margin: 0 0px 0.4em 16px;
+    margin: 0 0 0.4em 16px;
   }
 
   &__listItemChecked,

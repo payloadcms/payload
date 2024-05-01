@@ -2,17 +2,26 @@
   "name": "@payloadcms/live-preview-react",
   "version": "0.2.0",
   "description": "The official live preview React SDK for Payload",
+  "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/live-preview-react"
   },
   "license": "MIT",
-  "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -32,12 +41,6 @@
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    }
-  },
   "publishConfig": {
     "exports": {
       ".": {
@@ -49,8 +52,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

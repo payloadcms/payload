@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Collection, Field, RichTextField } from 'payload/types'
 
 import type { AdapterProps } from '../types.js'
@@ -11,7 +11,7 @@ type Arguments = {
   field: RichTextField<SerializedEditorState, AdapterProps>
   key: number | string
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
 }
 
@@ -28,7 +28,7 @@ export const populate = async ({
 }: Omit<Arguments, 'field'> & {
   collection: Collection
   field: Field
-  id: string
+  id: number | string
 }): Promise<void> => {
   const dataRef = data as Record<string, unknown>
 

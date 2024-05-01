@@ -1,6 +1,6 @@
 import type { Payload, RequestContext } from '../../../index.js'
 import type { GeneratedTypes } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 import type { Result } from '../resetPassword.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -15,7 +15,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
     token: string
   }
   overrideAccess: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
 }
 
 async function localResetPassword<T extends keyof GeneratedTypes['collections']>(

@@ -1,6 +1,6 @@
 import type {
   InitPageResult,
-  PayloadRequest,
+  PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -25,7 +25,15 @@ type Args = {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-const authRoutes = ['/login', '/logout', '/create-first-user', '/forgot', '/reset', '/verify']
+const authRoutes = [
+  '/login',
+  '/logout',
+  '/create-first-user',
+  '/forgot',
+  '/reset',
+  '/verify',
+  '/logout-inactivity',
+]
 
 export const initPage = async ({
   config: configPromise,
@@ -63,7 +71,7 @@ export const initPage = async ({
           ignoreQueryPrefix: true,
         }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequest,
+      } as PayloadRequestWithData,
     },
     payload,
   )

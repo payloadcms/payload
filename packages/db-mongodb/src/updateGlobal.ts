@@ -1,5 +1,5 @@
 import type { UpdateGlobal } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -8,7 +8,7 @@ import { withSession } from './withSession.js'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
-  { slug, data, req = {} as PayloadRequest },
+  { slug, data, req = {} as PayloadRequestWithData },
 ) {
   const Model = this.globals
   const options = {

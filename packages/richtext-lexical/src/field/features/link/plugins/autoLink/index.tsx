@@ -1,12 +1,9 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
+import type { ElementNode, LexicalEditor, LexicalNode } from 'lexical'
 
-import lexicalUtilsImport from '@lexical/utils'
-const { mergeRegister } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const {
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { mergeRegister } from '@lexical/utils'
+import {
   $createTextNode,
   $getSelection,
   $isElementNode,
@@ -14,11 +11,8 @@ const {
   $isNodeSelection,
   $isRangeSelection,
   $isTextNode,
-  TextNode: TextNodeValue,
-} = lexicalImport
-
-import type { ElementNode, LexicalEditor, LexicalNode } from 'lexical'
-
+  TextNode as TextNodeValue,
+} from 'lexical'
 import { type TextNode } from 'lexical'
 import { useEffect } from 'react'
 

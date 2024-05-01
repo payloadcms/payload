@@ -10,6 +10,7 @@ export const groupFieldsSlug = 'group-fields'
 export const indexedFieldsSlug = 'indexed-fields'
 export const jsonFieldsSlug = 'json-fields'
 export const lexicalFieldsSlug = 'lexical-fields'
+export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
@@ -24,6 +25,7 @@ export const uploadsSlug = 'uploads'
 export const uploads2Slug = 'uploads2'
 export const uploads3Slug = 'uploads3'
 export const uiSlug = 'ui-fields'
+
 export const collectionSlugs = [
   usersSlug,
   arrayFieldsSlug,

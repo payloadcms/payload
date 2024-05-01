@@ -1,12 +1,11 @@
-import type { HeadingTagType, SerializedHeadingNode } from '@lexical/rich-text'
+import type { HeadingTagType } from '@lexical/rich-text'
 
-import lexicalRichTextImport from '@lexical/rich-text'
-const { HeadingNode } = lexicalRichTextImport
+import { HeadingNode } from '@lexical/rich-text'
 
-import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { createNode } from '../typeUtilities.js'
 import { HeadingFeatureClientComponent } from './feature.client.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
@@ -28,10 +27,10 @@ export const HeadingFeature: FeatureProviderProviderServer<
     feature: () => {
       return {
         ClientComponent: HeadingFeatureClientComponent,
+        clientFeatureProps: props,
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
         nodes: [
-          {
-            type: HeadingNode.getType(),
+          createNode({
             converters: {
               html: {
                 converter: async ({ converters, node, parent, payload }) => {
@@ -48,10 +47,10 @@ export const HeadingFeature: FeatureProviderProviderServer<
                   return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'
                 },
                 nodeTypes: [HeadingNode.getType()],
-              } as HTMLConverter<SerializedHeadingNode>,
+              },
             },
             node: HeadingNode,
-          },
+          }),
         ],
         serverFeatureProps: props,
       }
