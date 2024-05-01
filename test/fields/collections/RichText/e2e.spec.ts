@@ -118,6 +118,7 @@ describe('Rich Text', () => {
       await editLinkModal.locator('label[for="field-linkType-custom"]').click()
       await editLinkModal.locator('#field-url').fill('https://payloadcms.com')
       await editLinkModal.locator('button[type="submit"]').click()
+      await expect(editLinkModal).toBeHidden()
       await wait(400)
       await saveDocAndAssert(page)
 
