@@ -1,30 +1,63 @@
+import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { isValidID } from 'payload/utilities'
 
 import type { NodeValidation } from '../types.js'
+import type { UploadFeatureProps } from './feature.server.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
-import { CAN_USE_DOM } from '../../lexical/utils/canUseDOM.js'
-
-export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
-  return ({
+export const uploadValidation = (
+  props: UploadFeatureProps,
+): NodeValidation<SerializedUploadNode> => {
+  return async ({
     node,
     validation: {
       options: {
+        id,
+        operation,
+        preferences,
+        req,
         req: { payload, t },
       },
     },
   }) => {
-    if (!CAN_USE_DOM) {
-      const idType = payload.collections[node.relationTo].customIDType || payload.db.defaultIDType
-      // @ts-expect-error
-      const id = node?.value?.id || node?.value // for backwards-compatibility
+    const idType = payload.collections[node.relationTo].customIDType || payload.db.defaultIDType
+    // @ts-expect-error
+    const nodeID = node?.value?.id || node?.value // for backwards-compatibility
 
-      if (!isValidID(id, idType)) {
-        return t('validation:validUploadID')
+    if (!isValidID(nodeID, idType)) {
+      return t('validation:validUploadID')
+    }
+
+    if (Object.keys(props?.collections).length === 0) {
+      return true
+    }
+
+    const collection = props?.collections[node.relationTo]
+
+    if (!collection.fields?.length) {
+      return true
+    }
+
+    const result = await buildStateFromSchema({
+      id,
+      data: node?.fields ?? {},
+      fieldSchema: collection.fields,
+      operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      preferences,
+      req,
+      siblingData: node?.fields ?? {},
+    })
+
+    let errorPaths = []
+    for (const fieldKey in result) {
+      if (result[fieldKey].errorPaths) {
+        errorPaths = errorPaths.concat(result[fieldKey].errorPaths)
       }
     }
 
-    // TODO: validate upload collection fields
+    if (errorPaths.length) {
+      return 'Block validation failed: ' + errorPaths.join(', ')
+    }
 
     return true
   }
