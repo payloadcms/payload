@@ -28,4 +28,5 @@ export default defineConfig({
   },
   workers: 16,
   maxFailures: process.env.CI ? 1 : undefined,
+  reporter: process.env.CI ? 'list' : 'list',
 })

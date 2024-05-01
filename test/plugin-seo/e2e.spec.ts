@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
@@ -151,13 +152,17 @@ describe('SEO Plugin', () => {
 
       // Change language to Spanish
       await languageField.click()
+      await wait(200)
       await options.locator('text=Español').click()
       await expect(languageField).toContainText('Español')
+      await wait(600)
 
       // Navigate back to the page
       await page.goto(url.edit(id))
+      await wait(600)
 
       await secondTab.click()
+      await wait(600)
 
       await expect(autoGenButton).toContainText('Auto-génerar')
     })
