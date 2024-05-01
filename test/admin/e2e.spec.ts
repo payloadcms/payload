@@ -91,8 +91,6 @@ describe('admin', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-
-    testInfo.setTimeout(TEST_TIMEOUT)
   })
   beforeEach(async () => {
     await reInitializeDB({

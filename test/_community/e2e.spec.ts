@@ -26,7 +26,6 @@ test.describe('Admin Panel', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
-    testInfo.setTimeout(TEST_TIMEOUT)
   })
 
   test('example test', async () => {

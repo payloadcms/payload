@@ -74,7 +74,6 @@ describe('access control', () => {
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
-    testInfo.setTimeout(TEST_TIMEOUT)
   })
 
   test('field without read access should not show', async () => {
