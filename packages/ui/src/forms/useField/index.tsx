@@ -58,6 +58,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const showError = valid === false && submitted
 
   const prevValid = useRef(valid)
+  const prevErrorMessage = useRef(field?.errorMessage)
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -172,11 +173,12 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           valid = isValid
           errorMessage = undefined
         }
-
+        // debugger
         // Only dispatch if the validation result has changed
         // This will prevent unnecessary rerenders
-        if (valid !== prevValid.current) {
+        if (valid !== prevValid.current || errorMessage !== prevErrorMessage.current) {
           prevValid.current = valid
+          prevErrorMessage.current = errorMessage
 
           const update: UPDATE = {
             type: 'UPDATE',
@@ -184,7 +186,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
             path,
             rows: field?.rows,
             valid,
-            // validate,
+            validate,
             value,
           }
 
