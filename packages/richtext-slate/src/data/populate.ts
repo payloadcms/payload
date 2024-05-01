@@ -42,6 +42,8 @@ export const populate = async ({
       req.fallbackLocale,
       typeof overrideAccess === 'undefined' ? false : overrideAccess,
       showHiddenFields,
+      false,
+      false,
     ]),
   )
 

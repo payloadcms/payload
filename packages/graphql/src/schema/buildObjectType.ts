@@ -421,6 +421,8 @@ function buildObjectType({
                 fallbackLocale,
                 false,
                 false,
+                false,
+                false,
               ]),
             )
 
@@ -623,6 +625,8 @@ function buildObjectType({
                 0,
                 locale,
                 fallbackLocale,
+                false,
+                false,
                 false,
                 false,
               ]),
