@@ -141,6 +141,10 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       user,
     })
 
+    // /////////////////////////////////////
+    // beforeLogin - Collection
+    // /////////////////////////////////////
+
     await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
       await priorHook
 
