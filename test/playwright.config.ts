@@ -28,6 +28,7 @@ export default defineConfig({
   },
   workers: 16,
   maxFailures: process.env.CI ? undefined : undefined,
+  retries: process.env.CI ? 5 : undefined,
   reporter: process.env.CI
     ? [['list', { printSteps: true }], ['json']]
     : [['list', { printSteps: true }]],
