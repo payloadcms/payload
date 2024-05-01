@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldTypes } from '../../../../forms/field-types'
@@ -12,6 +12,7 @@ import Meta from '../../../../utilities/Meta'
 import Auth from '../Auth'
 import { SetStepNav } from '../SetStepNav'
 import { Upload } from '../Upload'
+import formatFields from '../formatFields'
 import './index.scss'
 
 const baseClass = 'collection-default-edit'
@@ -37,7 +38,9 @@ export const DefaultCollectionEdit: React.FC<
     permissions,
   } = props
 
-  const { auth, fields, upload } = collection
+  const { auth, upload } = collection
+
+  const [fields] = useState(() => formatFields(collection, isEditing))
 
   const operation = isEditing ? 'update' : 'create'
 
