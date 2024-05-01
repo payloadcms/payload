@@ -56,7 +56,7 @@ export const uploadValidation = (
     }
 
     if (errorPaths.length) {
-      return 'Block validation failed: ' + errorPaths.join(', ')
+      return 'Upload fields validation failed: ' + errorPaths.join(', ')
     }
 
     return true
