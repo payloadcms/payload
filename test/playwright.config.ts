@@ -29,9 +29,6 @@ export default defineConfig({
   workers: 16,
   maxFailures: process.env.CI ? 1 : undefined,
   reporter: process.env.CI
-    ? [
-        ['list', { printSteps: true }],
-        ['json', { outputFile: 'results_' + process.env.SUITE_NAME + '.json' }],
-      ]
+    ? [['list', { printSteps: true }], ['json']]
     : [['list', { printSteps: true }]],
 })

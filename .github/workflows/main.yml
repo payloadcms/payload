@@ -305,7 +305,9 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: pnpm test:e2e ${{ matrix.suite }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -317,7 +319,9 @@ jobs:
 
       - uses: daun/playwright-report-summary@v3
         with:
-          report-file: results_${{ env.SUITE_NAME }}.json
+          report-file: results_${{ matrix.suite }}.json
+          report-tag: ${{ matrix.suite }}
+          job-summary: true
 
   app-build-with-packed:
     runs-on: ubuntu-latest
