@@ -761,6 +761,51 @@ describe('Select Fields', () => {
       expect(doc.item.title).toBeUndefined()
       expect(doc.array[0].item.title).toBeTruthy()
     })
+
+    it('should populate polymorphic relationship doc with the selected fields', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        populate: {
+          polymorphic: [
+            {
+              relationTo: 'relationships-items-nested',
+              value: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          ],
+        },
+      })
+
+      console.log(doc)
+      expect(doc.polymorphic.value.title).toBeTruthy()
+      expect(doc.polymorphic.value.subtitle).toBeFalsy()
+    })
+
+    it('should respect defaultPopulate select', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 1,
+      })
+
+      expect(doc.withDefaultPopulate.title).toBeTruthy()
+      expect(doc.withDefaultPopulate.subtitle).toBeUndefined()
+    })
+
+    it('should respect defaultPopulate select polymorphic', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 1,
+      })
+
+      expect(doc.polymorphicDefault.value.title).toBeTruthy()
+      expect(doc.polymorphicDefault.value.subtitle).toBeUndefined()
+    })
   })
 
   // TODO: REST tests.

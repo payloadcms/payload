@@ -31,6 +31,15 @@ export const createDocWithRelation = async (payload: Payload) => {
     data: {
       item: doc.id,
       other: docOther.id,
+      withDefaultPopulate: doc.id,
+      polymorphic: {
+        relationTo: 'relationships-items-nested',
+        value: docNested.id,
+      },
+      polymorphicDefault: {
+        relationTo: 'relationships-items',
+        value: docOther.id,
+      },
       array: [
         {
           item: doc.id,

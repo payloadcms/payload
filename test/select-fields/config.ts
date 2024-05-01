@@ -349,6 +349,36 @@ export default buildConfigWithDefaults({
           relationTo: 'relationships-items',
         },
         {
+          name: 'withDefaultPopulate',
+          type: 'relationship',
+          relationTo: 'relationships-items',
+          defaultPopulate: {
+            select: {
+              title: true,
+            },
+          },
+        },
+        {
+          name: 'polymorphic',
+          type: 'relationship',
+          relationTo: ['relationships-items', 'relationships-items-nested'],
+        },
+        {
+          name: 'polymorphicDefault',
+          type: 'relationship',
+          defaultPopulate: [
+            {
+              relationTo: 'relationships-items',
+              value: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          ],
+          relationTo: ['relationships-items', 'relationships-items-nested'],
+        },
+        {
           name: 'array',
           type: 'array',
           fields: [

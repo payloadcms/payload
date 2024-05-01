@@ -20,7 +20,17 @@ import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
+import type {
+  Operation,
+  PayloadRequestWithData,
+  Populate,
+  PopulatePolymorphicValue,
+  PopulateSingleValue,
+  PopulateValue,
+  RequestContext,
+  Select,
+  Where,
+} from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
@@ -445,6 +455,7 @@ export type UploadField = FieldBase & {
       Label?: CustomComponent<LabelProps>
     }
   }
+  defaultPopulate?: PopulateSingleValue
   filterOptions?: FilterOptions
   maxDepth?: number
   relationTo: string
@@ -549,12 +560,14 @@ export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
     sortOptions?: { [collectionSlug: string]: string }
   }
+  defaultPopulate?: PopulatePolymorphicValue | PopulateValue
   relationTo: string[]
 }
 export type SingleRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
     sortOptions?: string
   }
+  defaultPopulate?: PopulateValue
   relationTo: string
 }
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField

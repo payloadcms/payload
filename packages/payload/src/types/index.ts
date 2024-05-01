@@ -102,13 +102,25 @@ export type Select = {
   [key: string]: Select | boolean
 }
 
-export type Populate = {
-  [key: string]:
+export type PopulatePolymorphicValue = {
+  relationTo: string
+  value:
     | {
         populate?: Populate
         select?: Select
       }
     | boolean
+}[]
+
+export type PopulateSingleValue = {
+  populate?: Populate
+  select?: Select
+}
+
+export type PopulateValue = PopulatePolymorphicValue | PopulateSingleValue
+
+export type Populate = {
+  [key: string]: PopulateValue | boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

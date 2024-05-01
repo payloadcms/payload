@@ -17,7 +17,7 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: string
   overrideAccess: boolean
-  populateArg: Populate
+  populateArg?: Populate
   req: PayloadRequestWithData
   showHiddenFields: boolean
 }
