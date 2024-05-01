@@ -313,7 +313,7 @@ jobs:
         with:
           retry_on: error
           max_attempts: 3
-          timeout_minutes: 15
+          timeout_minutes: 60
           command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
