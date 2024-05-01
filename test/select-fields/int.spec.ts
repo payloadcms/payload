@@ -208,6 +208,12 @@ describe('Select Fields', () => {
             title: expect.any(String),
             blockType: 'section',
             id: expect.any(String),
+            blockName: null,
+          },
+          {
+            blockType: 'cta',
+            blockName: null,
+            id: expect.any(String),
           },
         ],
         groupArray: {
@@ -244,7 +250,7 @@ describe('Select Fields', () => {
             secondTitle: expect.any(String),
           },
           {
-            title: expect.any(String),
+            cta: expect.any(String),
             blockType: 'cta',
             id: expect.any(String),
             blockName: null,
@@ -281,7 +287,7 @@ describe('Select Fields', () => {
             secondTitle: expect.any(String),
           },
           {
-            title: expect.any(String),
+            cta: expect.any(String),
             blockType: 'cta',
             id: expect.any(String),
             blockName: null,
@@ -458,6 +464,7 @@ describe('Select Fields', () => {
           {
             id: expect.any(String),
             blockType: 'first',
+            blockName: null,
             array: [
               {
                 id: expect.any(String),
@@ -469,6 +476,7 @@ describe('Select Fields', () => {
           },
           {
             id: expect.any(String),
+            blockName: null,
             blockType: 'second',
             group: {
               title: expect.any(String),
@@ -491,13 +499,11 @@ describe('Select Fields', () => {
       })
 
       expect(serializeObject(localizedPost)).toEqual({
-        title: 'title en',
         id: expect.anything(),
         array: [],
         arrayLocalized: [],
         blocks: [],
-        // group: {},
-        // groupLocalized: {},
+        title: expect.any(String),
       })
     })
 
@@ -517,8 +523,6 @@ describe('Select Fields', () => {
         array: [],
         blocks: [],
         arrayLocalized: [],
-        // group: {},
-        // groupLocalized: {},
       })
     })
 
@@ -538,8 +542,6 @@ describe('Select Fields', () => {
         array: [],
         title: 'title en',
         blocks: [],
-        // group: {},
-        // groupLocalized: {},
         arrayLocalized: [
           {
             id: expect.any(String),
@@ -563,8 +565,6 @@ describe('Select Fields', () => {
         id: expect.anything(),
         array: [],
         blocks: [],
-        // group: {},
-        // groupLocalized: {},
         arrayLocalized: [
           {
             id: expect.any(String),
@@ -585,11 +585,8 @@ describe('Select Fields', () => {
       })
 
       expect(serializeObject(localizedPost)).toEqual({
-        title: 'title en',
         id: expect.anything(),
         blocks: [],
-        // group: {},
-        // groupLocalized: {},
         array: [
           {
             id: expect.any(String),
@@ -620,37 +617,14 @@ describe('Select Fields', () => {
           {
             blockType: 'some',
             id: expect.any(String),
+            blockName: null,
             title: 'title en',
           },
         ],
-        // group: {},
-        // groupLocalized: {},
         array: [],
         arrayLocalized: [],
       })
     })
-
-    // Bug with updating localized group in Postgres adapter.
-    // it('should select field inside of localized group', async () => {
-    //   const localizedPost = await payload.findByID({
-    //     id: localizedPostId,
-    //     collection: localizedPostsSlug,
-    //     locale: 'en',
-    //     select: {
-    //       groupLocalized: { title: true },
-    //     },
-    //   })
-
-    //   expect(serializeObject(localizedPost)).toEqual({
-    //     id: expect.anything(),
-    //     array: [],
-    //     group: {},
-    //     groupLocalized: {
-    //       title: 'title en',
-    //     },
-    //     arrayLocalized: [],
-    //   })
-    // })
   })
 
   describe('Relationships population', () => {
@@ -780,7 +754,6 @@ describe('Select Fields', () => {
         },
       })
 
-      console.log(doc)
       expect(doc.polymorphic.value.title).toBeTruthy()
       expect(doc.polymorphic.value.subtitle).toBeFalsy()
     })

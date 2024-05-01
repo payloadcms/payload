@@ -1,21 +1,30 @@
-import type { MongooseQueryOptions } from 'mongoose'
+import type { QueryOptions } from 'mongoose'
 import type { FindOne } from 'payload/database'
 import type { PayloadRequestWithData } from 'payload/types'
 import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildProjection } from './queries/projection/buildProjection.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequestWithData, where },
+  { collection, locale, req = {} as PayloadRequestWithData, select, where },
 ) {
   const Model = this.collections[collection]
-  const options: MongooseQueryOptions = {
+  const collectionConfig = this.payload.collections[collection].config
+
+  const options: QueryOptions = {
     ...withSession(this, req.transactionID),
     lean: true,
+    projection: buildProjection({
+      fields: collectionConfig.fields,
+      localeCodes:
+        (this.payload.config.localization && this.payload.config.localization.localeCodes) || [],
+      select,
+    }),
   }
 
   const query = await Model.buildQuery({

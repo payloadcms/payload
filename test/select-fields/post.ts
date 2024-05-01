@@ -41,10 +41,12 @@ export const createPost = async (payload: Payload) => {
           blockType: 'section',
           title: 'some title',
           secondTitle: 'some title',
+          blockName: null,
         },
         {
           blockType: 'cta',
-          title: 'some cta',
+          cta: 'some cta',
+          blockName: null,
         },
       ],
       select: ['hello', 'world'],

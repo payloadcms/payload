@@ -12,12 +12,7 @@ export const createLocalizedPost = async (payload: Payload) => {
       // groupLocalized: {
       //   title: 'title en',
       // },
-      blocks: [
-        {
-          blockType: 'some',
-          title: 'title en',
-        },
-      ],
+      blocks: [{ blockName: null, blockType: 'some', title: 'title en' }],
       arrayLocalized: [
         {
           title: 'title en',
@@ -46,6 +41,7 @@ export const createLocalizedPost = async (payload: Payload) => {
       blocks: [
         {
           blockType: 'some',
+          blockName: null,
           title: 'title de',
         },
       ],

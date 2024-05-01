@@ -123,7 +123,7 @@ export default buildConfigWithDefaults({
               fields: [
                 {
                   type: 'text',
-                  name: 'title',
+                  name: 'cta',
                 },
               ],
             },

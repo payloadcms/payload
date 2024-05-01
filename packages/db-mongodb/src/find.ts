@@ -7,6 +7,7 @@ import { flattenWhereToOperators } from 'payload/database'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
+import { buildProjection } from './queries/projection/buildProjection.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -19,6 +20,7 @@ export const find: Find = async function find(
     page,
     pagination,
     req = {} as PayloadRequestWithData,
+    select,
     sort: sortArg,
     where,
   },
@@ -60,6 +62,12 @@ export const find: Find = async function find(
     options,
     page,
     pagination,
+    projection: buildProjection({
+      fields: collectionConfig.fields,
+      localeCodes:
+        (this.payload.config.localization && this.payload.config.localization.localeCodes) || [],
+      select,
+    }),
     sort,
     useEstimatedCount,
   }

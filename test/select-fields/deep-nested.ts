@@ -19,6 +19,7 @@ export const createDeepNested = (payload: Payload) => {
       blocks: [
         {
           blockType: 'first',
+          blockName: null,
           array: [
             {
               group: {
@@ -29,6 +30,7 @@ export const createDeepNested = (payload: Payload) => {
         },
         {
           blockType: 'second',
+          blockName: null,
           group: {
             title: 'some title',
           },

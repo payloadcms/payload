@@ -107,7 +107,15 @@ export const traverseFields = ({
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
-          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
+          if (adapter.tables[arrayTableNameWithLocales])
+            withArray.with._locales = {
+              columns: buildColumns({
+                exclude: ['id', '_parentID'],
+                include: ['_locale'],
+                withSelection,
+              }),
+            }
+
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
@@ -155,7 +163,6 @@ export const traverseFields = ({
 
           field.blocks.forEach((block) => {
             const blockSelect = buildFieldSelect({ field: block, select: currentSelect })
-            if (withSelection && !blockSelect) return
 
             const blockKey = `_blocks_${block.slug}`
 
@@ -163,7 +170,7 @@ export const traverseFields = ({
               const withBlock: Result = {
                 columns: buildColumns({
                   exclude: ['_parentID'],
-                  include: ['id', '_path', '_order'],
+                  include: ['id', '_path', '_order', 'blockName'],
                   localized: field.localized,
                   withSelection,
                 }),
@@ -176,7 +183,13 @@ export const traverseFields = ({
               )
 
               if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
-                withBlock.with._locales = _locales
+                withBlock.with._locales = {
+                  columns: buildColumns({
+                    exclude: ['id', '_parentID'],
+                    include: ['_locale'],
+                    withSelection,
+                  }),
+                }
               }
               topLevelArgs.with[blockKey] = withBlock
 
@@ -236,12 +249,18 @@ export const traverseFields = ({
 
         default: {
           if (!select) break
-          const columns =
-            field.localized || localizedGroupOrTabParent ? _locales.columns : currentArgs.columns
+          let columns
+
+          if (field.localized || localizedGroupOrTabParent) {
+            if (typeof currentArgs.with._locales === 'object')
+              columns = currentArgs.with._locales.columns
+            else columns = _locales.columns
+          } else {
+            columns = currentArgs.columns
+          }
 
           if (typeof select === 'boolean') columns[`${path}${field.name}`] = true
           if (select?.[field.name]) columns[`${path}${field.name}`] = true
-
           break
         }
       }
