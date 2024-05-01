@@ -15,7 +15,7 @@ import type { Config, LexicalField, Upload } from '../../payload-types.js'
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../slugs.js'
 import { lexicalDocData } from './data.js'
 
@@ -55,7 +55,8 @@ async function navigateToLexicalFields(
 }
 
 describe('lexical', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 

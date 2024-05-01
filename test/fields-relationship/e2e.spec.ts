@@ -26,6 +26,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
@@ -56,7 +57,8 @@ describe('fields - relationship', () => {
   let relationWithTitle: RelationWithTitle
   let serverURL: string
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
