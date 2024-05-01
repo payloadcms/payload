@@ -72,7 +72,8 @@ export const LexicalFields: CollectionConfig = {
           TreeViewFeature(),
           //HTMLConverterFeature(),
           LinkFeature({
-            fields: [
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
               {
                 name: 'rel',
                 label: 'Rel Attribute',
