@@ -14,7 +14,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -65,7 +65,14 @@ describe('Rich Text', () => {
     const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
     await page.goto(url.list)
     await page.waitForURL(url.list)
-    await page.locator('.row-1 .cell-title a').click()
+
+    const linkToDoc = page.locator('.row-1 .cell-title a').first()
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    const linkDocHref = await linkToDoc.getAttribute('href')
+
+    await linkToDoc.click()
+
+    await page.waitForURL(`**${linkDocHref}`)
   }
 
   describe('cell', () => {
@@ -79,9 +86,19 @@ describe('Rich Text', () => {
       const entireRow = table.locator('.row-1').first()
 
       // Make sure each of the 3 above are no larger than 300px in height:
-      expect((await lexicalCell.boundingBox()).height).toBeLessThanOrEqual(300)
-      expect((await lexicalHtmlCell.boundingBox()).height).toBeLessThanOrEqual(300)
-      expect((await entireRow.boundingBox()).height).toBeLessThanOrEqual(300)
+      await expect
+        .poll(async () => (await lexicalCell.boundingBox()).height, {
+          timeout: POLL_TOPASS_TIMEOUT,
+        })
+        .toBeLessThanOrEqual(300)
+      await expect
+        .poll(async () => (await lexicalHtmlCell.boundingBox()).height, {
+          timeout: POLL_TOPASS_TIMEOUT,
+        })
+        .toBeLessThanOrEqual(300)
+      await expect
+        .poll(async () => (await entireRow.boundingBox()).height, { timeout: POLL_TOPASS_TIMEOUT })
+        .toBeLessThanOrEqual(300)
     })
   })
 
