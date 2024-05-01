@@ -1,3 +1,5 @@
+import type { Populate, Select } from 'payload/types'
+
 import httpStatus from 'http-status'
 import { findByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
@@ -15,6 +17,11 @@ export const findByID: CollectionRouteHandlerWithID = async ({
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
+  const { populate, select } = req.query as {
+    populate?: Populate
+    select?: Select
+  }
+
   const id = sanitizeCollectionID({
     id: incomingID,
     collectionSlug: collection.config.slug,
@@ -26,7 +33,9 @@ export const findByID: CollectionRouteHandlerWithID = async ({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
+    populate,
     req,
+    select,
   })
 
   return Response.json(result, {

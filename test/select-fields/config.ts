@@ -10,7 +10,31 @@ export default buildConfigWithDefaults({
     locales: ['en', 'de'],
     defaultLocale: 'en',
   },
-  globals: [],
+  globals: [
+    {
+      slug: 'someGlobal',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'label',
+          type: 'text',
+        },
+        {
+          name: 'relFirst',
+          type: 'relationship',
+          relationTo: 'relationships-items',
+        },
+        {
+          name: 'relSecond',
+          type: 'relationship',
+          relationTo: 'relationships-items',
+        },
+      ],
+    },
+  ],
   collections: [
     {
       slug: 'users',

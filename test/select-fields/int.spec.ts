@@ -6,6 +6,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { createDeepNested } from './deep-nested.js'
 import { createDocWithRelation } from './doc-with-relation.js'
+import { createGlobal, globalSlug } from './global.js'
 import { createLocalizedPost } from './localizedPost.js'
 import { createPost } from './post.js'
 
@@ -40,6 +41,8 @@ describe('Select Fields', () => {
 
     const docWithRelation = await createDocWithRelation(payload)
     docWithRelationId = docWithRelation.id
+
+    await createGlobal(payload)
   })
 
   afterAll(async () => {
@@ -778,6 +781,26 @@ describe('Select Fields', () => {
 
       expect(doc.polymorphicDefault.value.title).toBeTruthy()
       expect(doc.polymorphicDefault.value.subtitle).toBeUndefined()
+    })
+
+    it('should populate and select fields in globals', async () => {
+      const global = await payload.findGlobal({
+        slug: globalSlug,
+        populate: {
+          relFirst: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      })
+
+      console.log(global)
+      expect(global.relFirst.title).toBe('title')
+      expect(global.relFirst.subtitle).toBeUndefined()
+
+      expect(global.relSecond.title).toBeUndefined()
+      expect(global.relSecond.subtitle).toBeUndefined()
     })
   })
 

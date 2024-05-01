@@ -1,6 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Populate, Select, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -15,7 +14,9 @@ type Args = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
+  populate?: Populate
   req: PayloadRequestWithData
+  select?: Select
   showHiddenFields?: boolean
   slug: string
 }
@@ -29,8 +30,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
+    populate,
     req: { fallbackLocale, locale },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -55,8 +58,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       slug,
       locale,
       req,
+      select,
       where: overrideAccess ? undefined : (accessResult as Where),
     })
+
     if (!doc) {
       doc = {}
     }
@@ -105,6 +110,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       global: globalConfig,
       locale,
       overrideAccess,
+      populateArg: populate,
       req,
       showHiddenFields,
     })
