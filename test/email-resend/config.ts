@@ -1,4 +1,4 @@
-import { resendAdapter } from '@payloadcms/email-resend-rest'
+import { resendAdapter } from '@payloadcms/email-resend'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -6,6 +6,9 @@ import { devUser } from '../credentials.js'
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [],
+
+  // NOTE: The from address and api key should be properly set
+  // See email-resend README for more information
   email: resendAdapter({
     defaultFromAddress: 'dev@payloadcms.com',
     defaultFromName: 'Payload CMS',
