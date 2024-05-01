@@ -13,11 +13,11 @@ export const buildProjection = ({
 }) => {
   if (!select || typeof select === 'boolean') return
 
-  let projection = ''
+  const projection: string[] = []
 
   const addProjection = (path: string) => {
-    if (!projection) projection = path
-    else projection += ' ' + path
+    if (projection.includes(path)) return
+    projection.push(path)
   }
 
   traverseFields({
@@ -27,5 +27,5 @@ export const buildProjection = ({
     select,
   })
 
-  return projection
+  return projection.join(' ')
 }

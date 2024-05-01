@@ -55,14 +55,14 @@ export const traverseFields = ({
           const arrayPath = `${path}${field.name}.`
 
           if (field.localized) {
-            localeCodes.map((locale) => {
+            localeCodes.forEach((locale) => {
               const localePath = `${arrayPath}${locale}.`
-              addProjection(`${localePath}id`)
+
               traverseFields({
                 addProjection,
                 fields: field.fields,
                 localeCodes,
-                path: `${arrayPath}${locale}.`,
+                path: localePath,
                 select: currentSelect,
               })
             })
@@ -85,13 +85,12 @@ export const traverseFields = ({
           const blocksPath = `${path}${field.name}.`
 
           if (field.localized) {
-            localeCodes.forEach((locale) => {
+            localeCodes.map((locale) => {
               const localePath = `${blocksPath}${locale}.`
+              addProjection(`${localePath}blockName`)
 
-              const result = field.blocks.map((block) => {
+              field.blocks.forEach((block) => {
                 const blockSelect = buildFieldSelect({ field: block, select: currentSelect })
-
-                if (!blockSelect) return false
 
                 traverseFields({
                   addProjection,
@@ -100,18 +99,12 @@ export const traverseFields = ({
                   path: localePath,
                   select: blockSelect,
                 })
-
-                return true
               })
-
-              if (result.some(Boolean)) {
-                addProjection(`${localePath}id`)
-                addProjection(`${localePath}blockType`)
-                addProjection(`${localePath}blockName`)
-              }
             })
           } else {
-            const result = field.blocks.map((block) => {
+            addProjection(`${blocksPath}blockName`)
+
+            field.blocks.forEach((block) => {
               const blockSelect = buildFieldSelect({ field: block, select: currentSelect })
 
               if (!blockSelect) return false
@@ -126,12 +119,6 @@ export const traverseFields = ({
 
               return true
             })
-
-            if (result.some(Boolean)) {
-              addProjection(`${blocksPath}id`)
-              addProjection(`${blocksPath}blockType`)
-              addProjection(`${blocksPath}blockName`)
-            }
           }
 
           break
