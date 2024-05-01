@@ -520,7 +520,7 @@ describe('lexical', () => {
       const drawerContent = page.locator('.drawer__content').first()
       await expect(drawerContent).toBeVisible()
 
-      const urlField = drawerContent.locator('input#field-fields__url').first()
+      const urlField = drawerContent.locator('input#field-url').first()
       await expect(urlField).toBeVisible()
       // Fill with https://www.payloadcms.com
       await urlField.fill('https://www.payloadcms.com')
