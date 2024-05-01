@@ -32,7 +32,7 @@ export const getBaseFields = (
       .map(({ slug }) => slug)
   }
 
-  const baseFields = [
+  const baseFields: Field[] = [
     {
       name: 'text',
       type: 'text',
@@ -40,63 +40,49 @@ export const getBaseFields = (
       required: true,
     },
     {
-      name: 'fields',
-      type: 'group',
+      name: 'linkType',
+      type: 'radio',
       admin: {
-        style: {
-          borderBottom: 0,
-          borderTop: 0,
-          margin: 0,
-          padding: 0,
-        },
+        description: ({ t }) => t('fields:chooseBetweenCustomTextOrDocument'),
       },
-      fields: [
+      defaultValue: 'custom',
+      label: ({ t }) => t('fields:linkType'),
+      options: [
         {
-          name: 'linkType',
-          type: 'radio',
-          admin: {
-            description: ({ t }) => t('fields:chooseBetweenCustomTextOrDocument'),
-          },
-          defaultValue: 'custom',
-          label: ({ t }) => t('fields:linkType'),
-          options: [
-            {
-              label: ({ t }) => t('fields:customURL'),
-              value: 'custom',
-            },
-          ],
-          required: true,
+          label: ({ t }) => t('fields:customURL'),
+          value: 'custom',
         },
-        {
-          name: 'url',
-          type: 'text',
-          label: ({ t }) => t('fields:enterURL'),
-          required: true,
-          validate: (value: string) => {
-            if (!validateUrl(value)) {
-              return 'Invalid URL'
-            }
-          },
-        },
-      ] as Field[],
+      ],
+      required: true,
+    } as RadioField,
+    {
+      name: 'url',
+      type: 'text',
+      label: ({ t }) => t('fields:enterURL'),
+      required: true,
+      validate: (value: string) => {
+        if (!validateUrl(value)) {
+          return 'Invalid URL'
+        }
+      },
     },
   ]
 
   // Only display internal link-specific fields / options / conditions if there are enabled relations
   if (enabledRelations?.length) {
-    ;(baseFields[1].fields[0] as RadioField).options.push({
+    ;(baseFields[1] as RadioField).options.push({
       label: ({ t }) => t('fields:internalLink'),
       value: 'internal',
     })
-    ;(baseFields[1].fields[1] as TextField).admin = {
-      condition: ({ fields }) => fields?.linkType !== 'internal',
+    ;(baseFields[2] as TextField).admin = {
+      condition: ({ linkType }) => linkType !== 'internal',
     }
 
-    baseFields[1].fields.push({
+    baseFields.push({
       name: 'doc',
       admin: {
-        condition: ({ fields }) => {
-          return fields?.linkType === 'internal'
+        condition: ({ linkType }) => {
+          return linkType === 'internal'
         },
       },
       // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
@@ -116,7 +102,7 @@ export const getBaseFields = (
     })
   }
 
-  baseFields[1].fields.push({
+  baseFields.push({
     name: 'newTab',
     type: 'checkbox',
     label: ({ t }) => t('fields:openInNewTab'),
