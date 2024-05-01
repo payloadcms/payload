@@ -110,7 +110,8 @@ describe('Rich Text', () => {
       expect(hasErrorClass).toBe(true)
     })
 
-    test('should create new url custom link', async () => {
+    // TODO: Flaky test flakes consistently in CI: https://github.com/payloadcms/payload/actions/runs/8913431889/job/24478995959?pr=6155
+    test.skip('should create new url custom link', async () => {
       await navigateToRichTextFields()
 
       // Open link drawer

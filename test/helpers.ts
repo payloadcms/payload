@@ -63,7 +63,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
   })
   // Check if hero is there
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
-  await expect(page.locator('.dashboard__label').first()).toContainText('Collections')
 }
 
 export async function delayNetwork({

@@ -377,6 +377,7 @@ describe('fields - relationship', () => {
     await expect(options).not.toContainText('whatever')
   })
 
+  // TODO: Flaky test in CI - fix.
   test('should show a relationship when filterOptions returns true', async () => {
     await payload.create({
       collection: relationTrueFilterOptionSlug,
