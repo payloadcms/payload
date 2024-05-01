@@ -62,8 +62,8 @@ export async function ensureAutoLoginAndCompilationIsDone({
     timeout: POLL_TOPASS_TIMEOUT,
   })
   // Check if hero is there
-  await expect(page.locator('.dashboard__label')).toBeVisible()
-  await expect(page.locator('.dashboard__label')).toContainText('Collections')
+  await expect(page.locator('.dashboard__label').first()).toBeVisible()
+  await expect(page.locator('.dashboard__label').first()).toContainText('Collections')
 }
 
 export async function delayNetwork({
