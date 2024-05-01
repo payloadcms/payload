@@ -61,6 +61,9 @@ export async function ensureAutoLoginAndCompilationIsDone({
   await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
+  // Check if hero is there
+  await expect(page.locator('.dashboard__label')).toBeVisible()
+  await expect(page.locator('.dashboard__label')).toContainText('Collections')
 }
 
 export async function delayNetwork({

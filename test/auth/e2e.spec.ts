@@ -10,7 +10,11 @@ import { v4 as uuid } from 'uuid'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -79,6 +83,7 @@ describe('auth', () => {
         enableAPIKey: true,
       },
     })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('authenticated users', () => {

@@ -48,6 +48,7 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({

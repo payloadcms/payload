@@ -74,6 +74,7 @@ describe('access control', () => {
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('field without read access should not show', async () => {

@@ -67,6 +67,7 @@ describe('fields - relationship', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {

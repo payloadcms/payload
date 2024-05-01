@@ -12,7 +12,11 @@ import { fileURLToPath } from 'url'
 
 import type { Config, LexicalField, Upload } from '../../payload-types.js'
 
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../../../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -64,6 +68,7 @@ describe('lexical', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
