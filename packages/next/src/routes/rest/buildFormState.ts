@@ -227,6 +227,8 @@ export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) =
       status: httpStatus.OK,
     })
   } catch (err) {
+    req.payload.logger.error({ err, msg: `There was an error building form state` })
+
     return routeError({
       config: req.payload.config,
       err,

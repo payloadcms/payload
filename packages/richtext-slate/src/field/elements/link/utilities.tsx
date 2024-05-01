@@ -1,5 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
-import type { Config, SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 import type { Editor } from 'slate'
 
@@ -64,7 +63,7 @@ export function transformExtraFields(
     }
   }
 
-  if (Array.isArray(customFieldSchema) || fields.length > 0) {
+  if ((Array.isArray(customFieldSchema) && customFieldSchema?.length) || extraFields?.length) {
     fields.push({
       name: 'fields',
       type: 'group',
