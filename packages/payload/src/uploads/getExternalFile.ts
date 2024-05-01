@@ -1,25 +1,37 @@
-import type { File, FileData } from './types'
-import { Request } from 'express'
+import type { Request } from 'express'
+import type { IncomingHttpHeaders } from 'http'
+
+import type { File, FileData, IncomingUploadType } from './types'
+
 import { APIError } from '../errors'
 
 type Args = {
-  req: Request
   data: FileData
+  req: Request
+  uploadConfig: IncomingUploadType
 }
-export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
-  const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
-  const { url, filename } = data
+export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
+  const { filename, url } = data
 
   if (typeof url === 'string') {
-    const fileURL = `${baseUrl}${url}`
+    let fileURL = url
+    if (!url.startsWith('http')) {
+      const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
+      fileURL = `${baseUrl}${url}`
+    }
+
     const { default: fetch } = (await import('node-fetch')) as any
+
+    const headers = uploadConfig.externalFileHeaderFilter
+      ? uploadConfig.externalFileHeaderFilter(headersToObject(req.headers))
+      : {
+          cookie: req.headers['cookie'],
+        }
 
     const res = await fetch(fileURL, {
       credentials: 'include',
+      headers,
       method: 'GET',
-      headers: {
-        ...req.headers,
-      },
     })
 
     if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
@@ -35,4 +47,19 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
   }
 
   throw new APIError('Invalid file url', 400)
+}
+
+function headersToObject(headers: IncomingHttpHeaders) {
+  return Object.entries(headers).reduce(
+    (acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        acc[key] = value.join(',')
+      } else {
+        acc[key] = value
+      }
+
+      return acc
+    },
+    {} as Record<string, string>,
+  )
 }

@@ -3,7 +3,7 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type {
   CustomPreviewButtonProps,
-  CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
@@ -17,8 +17,8 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { RequestContext } from '../../express/types'
+import type { DBIdentifierName } from '../../database/types'
+import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
@@ -33,7 +33,7 @@ export type BeforeValidateHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook = (args: {
@@ -86,7 +86,7 @@ export type GlobalAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButtonType
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -170,6 +170,10 @@ export type GlobalConfig = {
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   endpoints?: Omit<Endpoint, 'root'>[] | false
   fields: Field[]
   graphQL?:

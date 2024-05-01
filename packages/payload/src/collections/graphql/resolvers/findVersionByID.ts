@@ -11,7 +11,6 @@ import findVersionByID from '../../operations/findVersionByID'
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
   args: {
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
@@ -32,11 +31,12 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
+    context.req = req
+
     const options = {
       id: args.id,
       collection,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 

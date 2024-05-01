@@ -635,6 +635,37 @@ export const CustomArrayManager = () => {
   ]}
 />
 
+### useCollapsible
+
+The `useCollapsible` hook allows you to control parent collapsibles:
+
+| Property                  | Description                                                                                                        |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------|
+| **`collapsed`**          | State of the collapsible. `true` if open, `false` if collapsed                                                 |
+| **`isVisible`**              | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise                                                        |
+| **`toggle`**                  | Toggles the state of the nearest collapsible                                                                |
+| **`withinCollapsible`**      | Determine when you are within another collaspible                                 |                                               |
+
+**Example:**
+
+```tsx
+import React from 'react'
+
+import { useCollapsible } from 'payload/components/utilities'
+
+const CustomComponent: React.FC = () => {
+  const { collapsed, toggle } = useCollapsible()
+  return (
+    <div>
+      <p className="field-type">I am {collapsed ? 'closed' : 'open'}</p>
+      <button onClick={toggle} type="button">
+        Toggle
+      </button>
+    </div>
+  )
+}
+```
+
 ### useDocumentInfo
 
 The `useDocumentInfo` hook provides lots of information about the document currently being edited, including the following:
@@ -774,8 +805,8 @@ const MyComponent: React.FC = () => {
   return (
     <>
       <span>The current theme is {theme} and autoMode is {autoMode}</span>
-      <button 
-        type="button" 
+      <button
+        type="button"
         onClick={() => setTheme(prev => prev === "light" ? "dark" : "light")}
       >
         Toggle theme

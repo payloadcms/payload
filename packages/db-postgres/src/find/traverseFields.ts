@@ -78,9 +78,13 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`
+          const arrayTableName = adapter.tableNameMap.get(
+            `${currentTableName}_${path}${toSnakeCase(field.name)}`,
+          )
 
-          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
+          const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
+
+          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
@@ -128,9 +132,13 @@ export const traverseFields = ({
                 with: {},
               }
 
-              const tableName = `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`
+              const tableName = adapter.tableNameMap.get(
+                `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+              )
 
-              if (adapter.tables[`${tableName}_locales`]) withBlock.with._locales = _locales
+              if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
+                withBlock.with._locales = _locales
+              }
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({

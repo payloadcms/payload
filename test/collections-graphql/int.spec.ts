@@ -102,6 +102,18 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should count', async () => {
+      const query = `query {
+        countPosts {
+          totalDocs
+        }
+      }`
+      const response = await client.request<{ countPosts: { totalDocs: number } }>(query)
+      const { totalDocs } = response.countPosts
+
+      expect(typeof totalDocs).toBe('number')
+    })
+
     it('should read using multiple queries', async () => {
       const query = `query {
           postIDs: Posts {
@@ -858,6 +870,80 @@ describe('collections-graphql', () => {
         const { docs } = response.Posts
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
+      })
+
+      it('should query relationships with locale', async () => {
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            title: {
+              en: 'English title',
+              es: 'Spanish title',
+            },
+          },
+          locale: '*',
+        })
+
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          data: {
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `query($locale: LocaleInputType) {
+          CyclicalRelationships(locale: $locale) {
+            docs {
+              title
+              relationToSelf {
+                title
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query, { locale: 'es' })) as any
+
+        const queriedDoc = response.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
+
+      it('should query correctly with draft argument', async () => {
+        // publish doc
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          draft: false,
+          data: {
+            title: '1',
+          },
+        })
+
+        // save new version
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          draft: true,
+          data: {
+            title: '2',
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `{
+          CyclicalRelationships(draft: true) {
+            docs {
+              title
+              relationToSelf(draft: false) {
+                title
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+
+        const queriedDoc = response.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual('2')
+        expect(queriedDoc.relationToSelf.title).toEqual('1')
       })
     })
   })

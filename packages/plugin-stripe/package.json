@@ -1,8 +1,12 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-stripe.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-stripe"
+  },
   "description": "Stripe plugin for Payload",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,7 +32,8 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^1.1.8 || ^2.0.0"
+    "payload": "^1.1.8 || ^2.0.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
     "lodash.get": "^4.4.2",
@@ -43,7 +48,6 @@
     "@types/react": "18.0.21",
     "payload": "workspace:*",
     "prettier": "^2.7.1",
-    "react": "^18.0.0",
     "webpack": "^5.78.0"
   },
   "files": [

@@ -249,6 +249,7 @@ describe('fields', () => {
             unique: uniqueText,
           },
           text: 'text',
+          uniqueRequiredText: 'text',
           uniqueText,
         },
       })
@@ -353,6 +354,29 @@ describe('fields', () => {
 
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText('One')
+    })
+
+    test('should not allow filtering by hasMany field / equals / not equals', async () => {
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Select Has Many').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+
+      await expect(dropdownOperatorOptions.locator('text=equals')).toBeHidden()
+      await expect(dropdownOperatorOptions.locator('text=not equals')).toBeHidden()
     })
   })
 
@@ -813,6 +837,95 @@ describe('fields', () => {
           page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
         ).toHaveValue(`${assertGroupText3} duplicate`)
       })
+    })
+    test('should bulk update', async () => {
+      await Promise.all([
+        payload.create({
+          collection: 'array-fields',
+          data: {
+            title: 'for test 1',
+            items: [
+              {
+                text: 'test 1',
+              },
+              {
+                text: 'test 2',
+              },
+            ],
+          },
+        }),
+        payload.create({
+          collection: 'array-fields',
+          data: {
+            title: 'for test 2',
+            items: [
+              {
+                text: 'test 3',
+              },
+            ],
+          },
+        }),
+        payload.create({
+          collection: 'array-fields',
+          data: {
+            title: 'for test 3',
+            items: [
+              {
+                text: 'test 4',
+              },
+              {
+                text: 'test 5',
+              },
+              {
+                text: 'test 6',
+              },
+            ],
+          },
+        }),
+      ])
+
+      const bulkText = 'Bulk update text'
+      await page.goto(url.list)
+      await page.waitForSelector('.table > table > tbody > tr td.cell-title')
+      const rows = page.locator('.table > table > tbody > tr', {
+        has: page.locator('td.cell-title span', {
+          hasText: 'for test',
+        }),
+      })
+      const count = await rows.count()
+
+      for (let i = 0; i < count; i++) {
+        await rows
+          .nth(i)
+          .locator('td.cell-_select .checkbox-input__input > input[type="checkbox"]')
+          .check()
+      }
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const arrayOption = page.locator('.rs__option', {
+        hasText: exactText('Items'),
+      })
+
+      await expect(arrayOption).toBeVisible()
+
+      await arrayOption.click()
+      const addRowButton = page.locator('#field-items > .btn.array-field__add-row')
+
+      await expect(addRowButton).toBeVisible()
+
+      await addRowButton.click()
+
+      const targetInput = page.locator('#field-items__0__text')
+
+      await expect(targetInput).toBeVisible()
+
+      await targetInput.fill(bulkText)
+
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Updated 3 Array Fields successfully.',
+      )
     })
   })
 

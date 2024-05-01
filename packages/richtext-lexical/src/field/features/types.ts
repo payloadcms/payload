@@ -3,7 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
-import type { RequestContext } from 'payload'
+import type { Payload, RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
@@ -32,6 +32,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context: RequestContext
   currentDepth: number
   depth: number
+  draft: boolean
   /**
    * This maps all population promises to the node type
    */
@@ -68,11 +69,16 @@ export type Feature = {
   }
   generatedTypes?: {
     modifyOutputSchema: ({
+      collectionIDFieldTypes,
+      config,
       currentSchema,
       field,
       interfaceNameDefinitions,
       isRequired,
+      payload,
     }: {
+      collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+      config?: SanitizedConfig
       /**
        * Current schema which will be modified by this function.
        */
@@ -83,6 +89,7 @@ export type Feature = {
        */
       interfaceNameDefinitions: Map<string, JSONSchema4>
       isRequired: boolean
+      payload?: Payload
     }) => JSONSchema4
   }
   hooks?: {
@@ -223,11 +230,16 @@ export type SanitizedFeatures = Required<
   generatedTypes: {
     modifyOutputSchemas: Array<
       ({
+        collectionIDFieldTypes,
+        config,
         currentSchema,
         field,
         interfaceNameDefinitions,
         isRequired,
+        payload,
       }: {
+        collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+        config?: SanitizedConfig
         /**
          * Current schema which will be modified by this function.
          */
@@ -238,6 +250,7 @@ export type SanitizedFeatures = Required<
          */
         interfaceNameDefinitions: Map<string, JSONSchema4>
         isRequired: boolean
+        payload?: Payload
       }) => JSONSchema4
     >
   }

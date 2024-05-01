@@ -168,7 +168,9 @@ Specifying custom `Type`s let you extend your custom elements by adding addition
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload/types'
+
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -182,57 +184,59 @@ export const ExampleCollection: CollectionConfig = {
         },
       ],
       required: true,
-      admin: {
-        elements: [
-          'h2',
-          'h3',
-          'h4',
-          'link',
-          'blockquote',
-          {
-            name: 'cta',
-            Button: CustomCallToActionButton,
-            Element: CustomCallToActionElement,
-            plugins: [
-              // any plugins that are required by this element go here
-            ],
-          },
-        ],
-        leaves: [
-          'bold',
-          'italic',
-          {
-            name: 'highlight',
-            Button: CustomHighlightButton,
-            Leaf: CustomHighlightLeaf,
-            plugins: [
-              // any plugins that are required by this leaf go here
-            ],
-          },
-        ],
-        link: {
-          // Inject your own fields into the Link element
-          fields: [
+      editor: slateEditor({
+        admin: {
+          elements: [
+            'h2',
+            'h3',
+            'h4',
+            'link',
+            'blockquote',
             {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-            },
-          ],
-        },
-        upload: {
-          collections: {
-            media: {
-              fields: [
-                // any fields that you would like to save
-                // on an upload element in the `media` collection
+              name: 'cta',
+              Button: CustomCallToActionButton,
+              Element: CustomCallToActionElement,
+              plugins: [
+                // any plugins that are required by this element go here
               ],
             },
+          ],
+          leaves: [
+            'bold',
+            'italic',
+            {
+              name: 'highlight',
+              Button: CustomHighlightButton,
+              Leaf: CustomHighlightLeaf,
+              plugins: [
+                // any plugins that are required by this leaf go here
+              ],
+            },
+          ],
+          link: {
+            // Inject your own fields into the Link element
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              media: {
+                fields: [
+                  // any fields that you would like to save
+                  // on an upload element in the `media` collection
+                ],
+              },
+            },
           },
         },
-      },
+      }),
     },
   ],
 }
@@ -264,6 +268,10 @@ const serialize = (children) =>
 
       if (node.italic) {
         text = <em key={i}>{text}</em>;
+      }
+
+      if (node.text === '') {
+        text = <br />;
       }
 
       // Handle other leaf types here...

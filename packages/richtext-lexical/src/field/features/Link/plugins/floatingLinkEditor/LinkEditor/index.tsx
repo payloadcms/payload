@@ -23,7 +23,7 @@ import {
 } from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
 import { getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { LinkFeatureProps } from '../../..'
@@ -34,6 +34,8 @@ import { useEditorConfigContext } from '../../../../../lexical/config/EditorConf
 import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor'
 import { LinkDrawer } from '../../../drawer'
+import { $isAutoLinkNode } from '../../../nodes/AutoLinkNode'
+import { $createLinkNode } from '../../../nodes/LinkNode'
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
 import { transformExtraFields } from '../utilities'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands'
@@ -62,8 +64,8 @@ export function LinkEditor({
 
   const [initialState, setInitialState] = useState<Fields>({})
 
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(
+  const fieldSchema = useMemo(() => {
+    const fieldsUnSanitized = transformExtraFields(
       customFieldSchema,
       config,
       i18n,
@@ -72,22 +74,22 @@ export function LinkEditor({
     )
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
-      config: config,
-      fields: fieldsUnsanitized,
+    return sanitizeFields({
+      config,
+      fields: fieldsUnSanitized,
+      requireFieldLevelRichTextEditor: true,
       validRelationships,
     })
-
-    return fields
-  })
+  }, [config, customFieldSchema, disabledCollections, enabledCollections, i18n])
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
+  const [isAutoLink, setIsAutoLink] = useState(false)
 
   const drawerSlug = formatDrawerSlug({
-    depth: editDepth,
     slug: `lexical-rich-text-link-` + uuid,
+    depth: editDepth,
   })
 
   const updateLinkEditor = useCallback(async () => {
@@ -98,9 +100,10 @@ export function LinkEditor({
     if ($isRangeSelection(selection)) {
       const node = getSelectedNode(selection)
       selectedNodeDomRect = editor.getElementByKey(node.getKey())?.getBoundingClientRect()
-      const linkParent: LinkNode = $findMatchingParent(node, $isLinkNode) as LinkNode
+      const linkParent: LinkNode = $findMatchingParent(node, $isLinkNode)
       if (linkParent == null) {
         setIsLink(false)
+        setIsAutoLink(false)
         setLinkUrl('')
         setLinkLabel('')
         return
@@ -152,6 +155,11 @@ export function LinkEditor({
       })
       setInitialState(state)
       setIsLink(true)
+      if ($isAutoLinkNode(linkParent)) {
+        setIsAutoLink(true)
+      } else {
+        setIsAutoLink(false)
+      }
     }
 
     const editorElem = editorRef.current
@@ -265,6 +273,7 @@ export function LinkEditor({
         () => {
           if (isLink) {
             setIsLink(false)
+            setIsAutoLink(false)
             return true
           }
           return false
@@ -301,18 +310,20 @@ export function LinkEditor({
                 tabIndex={0}
                 type="button"
               />
-              <button
-                aria-label="Remove link"
-                className="link-trash"
-                onClick={() => {
-                  editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
-                }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
-                tabIndex={0}
-                type="button"
-              />
+              {!isAutoLink && (
+                <button
+                  aria-label="Remove link"
+                  className="link-trash"
+                  onClick={() => {
+                    editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
+                  }}
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                  }}
+                  tabIndex={0}
+                  type="button"
+                />
+              )}
             </React.Fragment>
           )}
         </div>
@@ -325,6 +336,22 @@ export function LinkEditor({
 
           const newLinkPayload: LinkPayload = data as LinkPayload
 
+          // See: https://github.com/facebook/lexical/pull/5536. This updates autolink nodes to link nodes whenever a change was made (which is good!).
+          editor.update(() => {
+            const selection = $getSelection()
+            if ($isRangeSelection(selection)) {
+              const parent = getSelectedNode(selection).getParent()
+              if ($isAutoLinkNode(parent)) {
+                const linkNode = $createLinkNode({
+                  fields: newLinkPayload.fields,
+                })
+                parent.replace(linkNode, true)
+              }
+            }
+          })
+
+          // Needs to happen AFTER a potential auto link => link node conversion, as otherwise, the updated text to display may be lost due to
+          // it being applied to the auto link node instead of the link node.
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)
         }}
         initialState={initialState}

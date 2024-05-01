@@ -7,6 +7,7 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
 import { connect } from './connect'
+import { count } from './count'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
 import { createGlobalVersion } from './createGlobalVersion'
@@ -40,35 +41,44 @@ import { updateVersion } from './updateVersion'
 export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
+  const postgresIDType = args.idType || 'serial'
+  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
-
-      // Postgres-specific
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
+      idType: postgresIDType,
+      localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      pgSchema: undefined,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,
       relations: {},
+      relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
+      schemaName: args.schemaName,
       sessions: {},
+      tableNameMap: new Map<string, string>(),
       tables: {},
+      versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
       beginTransaction,
       commitTransaction,
       connect,
+      count,
       create,
       createGlobal,
       createGlobalVersion,
       createMigration,
       createVersion,
-      defaultIDType: 'number',
+      defaultIDType: payloadIDType,
       deleteMany,
       deleteOne,
       deleteVersions,

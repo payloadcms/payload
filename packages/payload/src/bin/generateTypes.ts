@@ -21,7 +21,7 @@ export async function generateTypes(): Promise<void> {
 
   logger.info('Compiling TS types for Collections and Globals...')
 
-  const jsonSchema = configToJSONSchema(payload.config, payload.db.defaultIDType)
+  const jsonSchema = configToJSONSchema(payload.config, payload.db.defaultIDType, payload)
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
 

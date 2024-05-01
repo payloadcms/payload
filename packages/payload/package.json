@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.10.0",
+  "version": "2.14.2",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -101,7 +101,6 @@
     "jwt-decode": "3.1.2",
     "md5": "2.3.0",
     "method-override": "3.0.0",
-    "micro-memoize": "4.1.2",
     "minimist": "1.2.8",
     "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
@@ -119,11 +118,11 @@
     "process": "0.11.10",
     "qs": "6.11.2",
     "qs-middleware": "1.0.3",
-    "react": "18.2.0",
+    "react": "^18.0.0",
     "react-animate-height": "2.1.2",
     "react-datepicker": "4.16.0",
     "react-diff-viewer-continued": "3.2.6",
-    "react-dom": "18.2.0",
+    "react-dom": "^18.0.0",
     "react-helmet": "6.1.0",
     "react-i18next": "11.18.6",
     "react-image-crop": "10.1.8",
@@ -193,7 +192,7 @@
     "get-port": "5.1.1",
     "mini-css-extract-plugin": "1.6.2",
     "node-fetch": "2.6.12",
-    "nodemon": "3.0.1",
+    "nodemon": "3.0.3",
     "object.assign": "4.1.4",
     "object.entries": "1.1.6",
     "passport-strategy": "1.0.0",
@@ -267,7 +266,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"

@@ -18,6 +18,7 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword'
 import type { BulkOperationResult, Collection } from './collections/config/types'
+import type { Options as CountOptions } from './collections/operations/local/count'
 import type { Options as CreateOptions } from './collections/operations/local/create'
 import type {
   ByIDOptions as DeleteByIDOptions,
@@ -73,6 +74,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   } = {}
 
   config: SanitizedConfig
+
+  /**
+   * @description Performs count operation
+   * @param options
+   * @returns count of documents satisfying query
+   */
+  count = async <T extends keyof TGeneratedTypes['collections']>(
+    options: CountOptions<T>,
+  ): Promise<{ totalDocs: number }> => {
+    const { count } = localOperations
+    return count(this, options)
+  }
 
   /**
    * @description Performs create operation
@@ -285,13 +298,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     [slug: string]: any // TODO: Type this
   } = {}
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
-    const { deleteLocal } = localOperations
-    return deleteLocal<T>(this, options)
-  }
-
   /**
    * @description delete one or more documents
    * @param options
@@ -305,11 +311,17 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     options: DeleteManyOptions<T>,
   ): Promise<BulkOperationResult<T>>
 
+  delete<T extends keyof TGeneratedTypes['collections']>(
+    options: DeleteOptions<T>,
+  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+    const { deleteLocal } = localOperations
+    return deleteLocal<T>(this, options)
+  }
+
   /**
    * @description Initializes Payload
    * @param options
    */
-  // @ts-expect-error // TODO: TypeScript hallucinating again. fix later
   async init(options: InitOptions): Promise<Payload> {
     this.logger =
       options.logger ?? Logger('payload', options.loggerOptions, options.loggerDestination)

@@ -99,18 +99,32 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     },
     editorConfig: finalSanitizedEditorConfig,
-    outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
+    outputSchema: ({
+      collectionIDFieldTypes,
+      config,
+      field,
+      interfaceNameDefinitions,
+      isRequired,
+      payload,
+    }) => {
       let outputSchema: JSONSchema4 = {
         // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
         // In the future, we should
         // 1) allow recursive children
         // 2) Pass in all the different types for every node added to the editorconfig. This can be done with refs in the schema.
+        type: withNullableJSONSchemaType('object', isRequired),
         properties: {
           root: {
+            type: 'object',
             additionalProperties: false,
             properties: {
+              type: {
+                type: 'string',
+              },
               children: {
+                type: 'array',
                 items: {
+                  type: 'object',
                   additionalProperties: true,
                   properties: {
                     type: {
@@ -121,9 +135,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     },
                   },
                   required: ['type', 'version'],
-                  type: 'object',
                 },
-                type: 'array',
               },
               direction: {
                 oneOf: [
@@ -136,33 +148,31 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 ],
               },
               format: {
-                enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
                 type: 'string',
+                enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
               },
               indent: {
                 type: 'integer',
-              },
-              type: {
-                type: 'string',
               },
               version: {
                 type: 'integer',
               },
             },
             required: ['children', 'direction', 'format', 'indent', 'type', 'version'],
-            type: 'object',
           },
         },
         required: ['root'],
-        type: withNullableJSONSchemaType('object', isRequired),
       }
       for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
         .modifyOutputSchemas) {
         outputSchema = modifyOutputSchema({
+          collectionIDFieldTypes,
+          config,
           currentSchema: outputSchema,
           field,
           interfaceNameDefinitions,
           isRequired,
+          payload,
         })
       }
 
@@ -172,6 +182,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       context,
       currentDepth,
       depth,
+      draft,
       field,
       findMany,
       flattenLocales,
@@ -187,6 +198,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           context,
           currentDepth,
           depth,
+          draft,
           editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
           field,
           findMany,
@@ -208,7 +220,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
-export { BlocksFeature } from './field/features/Blocks'
+export { BlocksFeature, type BlocksFeatureProps, type LexicalBlock } from './field/features/Blocks'
 export {
   $createBlockNode,
   $isBlockNode,

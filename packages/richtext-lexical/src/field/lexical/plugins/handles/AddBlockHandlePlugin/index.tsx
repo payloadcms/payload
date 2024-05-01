@@ -2,12 +2,8 @@
 import type { ParagraphNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import {
-  $getNearestNodeFromDOMNode,
-  $getNodeByKey,
-  type LexicalEditor,
-  type LexicalNode,
-} from 'lexical'
+import { $createParagraphNode } from 'lexical'
+import { $getNodeByKey, type LexicalEditor, type LexicalNode } from 'lexical'
 import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -50,14 +46,13 @@ function getBlockElement(
   horizontalOffset = 0,
 ): {
   blockElem: HTMLElement | null
-  shouldRemove: boolean
+  blockNode: LexicalNode | null
 } {
   const anchorElementRect = anchorElem.getBoundingClientRect()
   const topLevelNodeKeys = getTopLevelNodeKeys(editor)
 
   let blockElem: HTMLElement | null = null
   let blockNode: LexicalNode | null = null
-  let shouldRemove = false
 
   // Return null if matching block element is the first or last node
   editor.getEditorState().read(() => {
@@ -82,7 +77,6 @@ function getBlockElement(
         if (blockElem) {
           return {
             blockElem: null,
-            shouldRemove,
           }
         }
       }
@@ -118,16 +112,6 @@ function getBlockElement(
         blockElem = elem
         blockNode = $getNodeByKey(key)
         prevIndex = index
-
-        // Check if blockNode is an empty text node
-        if (
-          !blockNode ||
-          blockNode.getType() !== 'paragraph' ||
-          blockNode.getTextContent() !== ''
-        ) {
-          blockElem = null
-          shouldRemove = true
-        }
         break
       }
 
@@ -147,8 +131,8 @@ function getBlockElement(
   })
 
   return {
-    blockElem: blockElem,
-    shouldRemove,
+    blockElem,
+    blockNode,
   }
 }
 
@@ -160,7 +144,10 @@ function useAddBlockHandle(
   const scrollerElem = anchorElem.parentElement
 
   const menuRef = useRef<HTMLButtonElement>(null)
-  const [emptyBlockElem, setEmptyBlockElem] = useState<HTMLElement | null>(null)
+  const [hoveredElement, setHoveredElement] = useState<{
+    elem: HTMLElement
+    node: LexicalNode
+  } | null>(null)
 
   useEffect(() => {
     function onDocumentMouseMove(event: MouseEvent) {
@@ -185,7 +172,9 @@ function useAddBlockHandle(
           pageX < left - horizontalBuffer ||
           pageX > right + horizontalBuffer
         ) {
-          setEmptyBlockElem(null)
+          if (hoveredElement !== null) {
+            setHoveredElement(null)
+          }
           return
         }
 
@@ -199,66 +188,115 @@ function useAddBlockHandle(
       if (isOnHandleElement(target, ADD_BLOCK_MENU_CLASSNAME)) {
         return
       }
-      const { blockElem: _emptyBlockElem, shouldRemove } = getBlockElement(
+      const { blockElem: _emptyBlockElem, blockNode } = getBlockElement(
         anchorElem,
         editor,
         event,
         false,
         -distanceFromScrollerElem,
       )
-      if (!_emptyBlockElem && !shouldRemove) {
+      if (!_emptyBlockElem) {
         return
       }
-      setEmptyBlockElem(_emptyBlockElem)
+      if (hoveredElement?.node !== blockNode || hoveredElement?.elem !== _emptyBlockElem) {
+        setHoveredElement({
+          elem: _emptyBlockElem,
+          node: blockNode,
+        })
+      }
     }
 
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
-    // to be able to detect when the mouse is outside the editor and respect a buffer around the
+    // to be able to detect when the mouse is outside the editor and respect a buffer around
     // the scrollerElem to avoid the draggableBlockElem disappearing too early.
     document?.addEventListener('mousemove', onDocumentMouseMove)
 
     return () => {
       document?.removeEventListener('mousemove', onDocumentMouseMove)
     }
-  }, [scrollerElem, anchorElem, editor])
+  }, [scrollerElem, anchorElem, editor, hoveredElement])
 
   useEffect(() => {
-    if (menuRef.current) {
-      setHandlePosition(emptyBlockElem, menuRef.current, anchorElem, SPACE)
+    if (menuRef.current && hoveredElement?.node) {
+      editor.getEditorState().read(() => {
+        // Check if blockNode is an empty text node
+        let isEmptyParagraph = true
+        if (
+          hoveredElement.node.getType() !== 'paragraph' ||
+          hoveredElement.node.getTextContent() !== ''
+        ) {
+          isEmptyParagraph = false
+        }
+
+        setHandlePosition(
+          hoveredElement?.elem,
+          menuRef.current,
+          anchorElem,
+          isEmptyParagraph ? SPACE : SPACE - 20,
+        )
+      })
     }
-  }, [anchorElem, emptyBlockElem])
+  }, [anchorElem, hoveredElement, editor])
 
   const handleAddClick = useCallback(
     (event) => {
-      if (!emptyBlockElem) {
+      let hoveredElementToUse = hoveredElement
+      if (!hoveredElementToUse?.node) {
         return
       }
-      let node: ParagraphNode
-      editor.update(() => {
-        node = $getNearestNodeFromDOMNode(emptyBlockElem) as ParagraphNode
-        if (!node || node.getType() !== 'paragraph') {
-          return
-        }
-        editor.focus()
 
-        node.select()
-        /*const ns = $createNodeSelection();
-        ns.add(node.getKey())
-        $setSelection(ns)*/
+      // 1. Update hoveredElement.node to a new paragraph node if the hoveredElement.node is not a paragraph node
+      editor.update(() => {
+        // Check if blockNode is an empty text node
+        let isEmptyParagraph = true
+        if (
+          hoveredElementToUse.node.getType() !== 'paragraph' ||
+          hoveredElementToUse.node.getTextContent() !== ''
+        ) {
+          isEmptyParagraph = false
+        }
+
+        if (!isEmptyParagraph) {
+          const newParagraph = $createParagraphNode()
+          hoveredElementToUse.node.insertAfter(newParagraph)
+
+          setTimeout(() => {
+            hoveredElementToUse = {
+              elem: editor.getElementByKey(newParagraph.getKey()),
+              node: newParagraph,
+            }
+            setHoveredElement(hoveredElementToUse)
+          }, 0)
+        }
       })
 
-      // Make sure this is called AFTER the editorfocus() event has been processed by the browser
+      // 2. Focus on the new paragraph node
+      setTimeout(() => {
+        editor.update(() => {
+          editor.focus()
+
+          if (
+            hoveredElementToUse.node &&
+            'select' in hoveredElementToUse.node &&
+            typeof hoveredElementToUse.node.select === 'function'
+          ) {
+            hoveredElementToUse.node.select()
+          }
+        })
+      }, 1)
+
+      // Make sure this is called AFTER the focusing has been processed by the browser
       // Otherwise, this won't work
       setTimeout(() => {
         editor.dispatchCommand(ENABLE_SLASH_MENU_COMMAND, {
-          node: node,
+          node: hoveredElementToUse.node as ParagraphNode,
         })
-      }, 0)
+      }, 2)
 
       event.stopPropagation()
       event.preventDefault()
     },
-    [editor, emptyBlockElem],
+    [editor, hoveredElement],
   )
 
   return createPortal(
