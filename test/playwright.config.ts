@@ -27,7 +27,7 @@ export default defineConfig({
     timeout: EXPECT_TIMEOUT,
   },
   workers: 16,
-  maxFailures: process.env.CI ? 1 : undefined,
+  maxFailures: process.env.CI ? undefined : undefined,
   reporter: process.env.CI
     ? [['list', { printSteps: true }], ['json']]
     : [['list', { printSteps: true }]],

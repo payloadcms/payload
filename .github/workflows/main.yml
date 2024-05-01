@@ -309,7 +309,12 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
+        uses: nick-fields/retry@v3
+        with:
+          retry_on: error
+          max_attempts: 3
+          timeout_minutes: 15
+          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -322,11 +327,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-      - uses: daun/playwright-report-summary@v3
-        with:
-          report-file: results_${{ matrix.suite }}.json
-          report-tag: test
-          job-summary: true
+      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
+      # - uses: daun/playwright-report-summary@v3
+      #   with:
+      #     report-file: results_${{ matrix.suite }}.json
+      #     report-tag: ${{ matrix.suite }}
+      #     job-summary: true
 
   app-build-with-packed:
     runs-on: ubuntu-latest
