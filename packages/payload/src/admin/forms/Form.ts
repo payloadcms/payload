@@ -25,7 +25,6 @@ export type FormField = {
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  validate?: ClientValidate
   value: unknown
 }
 

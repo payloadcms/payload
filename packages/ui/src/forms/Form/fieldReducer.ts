@@ -113,15 +113,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newField = Object.entries(action).reduce(
         (field, [key, value]) => {
           if (
-            [
-              'disableFormData',
-              'errorMessage',
-              'initialValue',
-              'rows',
-              'valid',
-              'validate',
-              'value',
-            ].includes(key)
+            ['disableFormData', 'errorMessage', 'initialValue', 'rows', 'valid', 'value'].includes(
+              key,
+            )
           ) {
             return {
               ...field,
