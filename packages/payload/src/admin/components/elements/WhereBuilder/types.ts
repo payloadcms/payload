@@ -44,7 +44,11 @@ export type UPDATE = {
   value?: unknown
 }
 
-export type Action = ADD | REMOVE | UPDATE
+export type RESET = {
+  type: 'reset'
+}
+
+export type Action = ADD | REMOVE | RESET | UPDATE
 
 export type State = {
   or: Where[]

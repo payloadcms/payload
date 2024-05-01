@@ -1,5 +1,5 @@
 import queryString from 'qs'
-import React, { useReducer, useState } from 'react'
+import React, { useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 
@@ -98,6 +98,19 @@ const WhereBuilder: React.FC<Props> = (props) => {
     }
     return []
   })
+
+  // Listen for changes in the URL
+  useEffect(() => {
+    const unlisten = history.listen((location) => {
+      // Check if the pathname matches the current collection path
+      if (location.pathname === '/admin/collections/' + collection.slug && !location.search) {
+        // Reset conditions if the search part of the URL is empty
+        dispatchConditions({ type: 'reset' })
+      }
+    })
+
+    return () => unlisten()
+  }, [history, collection.slug])
 
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
 

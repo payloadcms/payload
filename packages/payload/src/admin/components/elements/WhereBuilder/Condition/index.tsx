@@ -52,9 +52,9 @@ const Condition: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatch({
+      type: 'update',
       andIndex,
       orIndex,
-      type: 'update',
       value: debouncedValue || '',
     })
   }, [debouncedValue, dispatch, orIndex, andIndex])
@@ -80,10 +80,10 @@ const Condition: React.FC<Props> = (props) => {
               isClearable={false}
               onChange={(field) => {
                 dispatch({
-                  andIndex: andIndex,
-                  field: field?.value,
-                  orIndex: orIndex,
                   type: 'update',
+                  andIndex,
+                  field: field?.value,
+                  orIndex,
                 })
               }}
               options={fields}
@@ -96,10 +96,10 @@ const Condition: React.FC<Props> = (props) => {
               isClearable={false}
               onChange={(operator) => {
                 dispatch({
+                  type: 'update',
                   andIndex,
                   operator: operator.value,
                   orIndex,
-                  type: 'update',
                 })
                 setInternalOperatorField(operator.value)
               }}
@@ -134,9 +134,9 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               dispatch({
+                type: 'remove',
                 andIndex,
                 orIndex,
-                type: 'remove',
               })
             }
             round
@@ -148,11 +148,11 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               dispatch({
+                type: 'add',
                 andIndex: andIndex + 1,
                 field: fields[0].value,
                 orIndex,
                 relation: 'and',
-                type: 'add',
               })
             }
             round
