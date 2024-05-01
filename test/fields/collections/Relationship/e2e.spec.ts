@@ -165,7 +165,8 @@ describe('relationship', () => {
     expect(count).toEqual(0)
   })
 
-  test('should clear relationship values', async () => {
+  // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991
+  test.skip('should clear relationship values', async () => {
     await page.goto(url.create)
 
     const field = page.locator('#field-relationship')
