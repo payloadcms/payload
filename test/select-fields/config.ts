@@ -6,6 +6,7 @@ export default buildConfigWithDefaults({
     user: 'users',
     autoLogin: { email: devUser.email, password: devUser.password },
   },
+
   localization: {
     locales: ['en', 'de'],
     defaultLocale: 'en',
@@ -13,6 +14,9 @@ export default buildConfigWithDefaults({
   globals: [
     {
       slug: 'someGlobal',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'title',
@@ -52,6 +56,9 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'posts',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           type: 'text',
@@ -259,6 +266,9 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'localized-posts',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'title',
@@ -330,6 +340,9 @@ export default buildConfigWithDefaults({
 
     {
       slug: 'relationships-items-nested',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'title',
@@ -343,6 +356,9 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'relationships-items',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'title',
@@ -361,6 +377,9 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'relationships',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'item',

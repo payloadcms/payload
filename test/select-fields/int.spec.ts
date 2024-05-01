@@ -795,7 +795,6 @@ describe('Select Fields', () => {
         },
       })
 
-      console.log(global)
       expect(global.relFirst.title).toBe('title')
       expect(global.relFirst.subtitle).toBeUndefined()
 
@@ -804,8 +803,77 @@ describe('Select Fields', () => {
     })
   })
 
-  // TODO: REST tests.
-  describe('REST', () => {})
+  describe('REST', () => {
+    it('should select text and id inside of array', async () => {
+      const post = await restClient.GET(`/${postsSlug}/${postId}`, {
+        query: {
+          select: {
+            array: {
+              title: true,
+            },
+          },
+        },
+      })
 
-  describe('graphql', () => {})
+      expect(serializeObject(await post.json())).toEqual({
+        id: expect.anything(),
+        tab: {},
+        array: [
+          {
+            title: expect.any(String),
+            id: expect.any(String),
+          },
+        ],
+        group: {},
+        groupMultiple: {},
+        arrayMultiple: [],
+        blocks: [],
+        groupArray: {
+          array: [],
+        },
+      })
+    })
+
+    it('should populate relationship with the selected fields', async () => {
+      const res = await restClient.GET(`/${docWithRelationSlug}/${docWithRelationId}`, {
+        query: {
+          populate: {
+            item: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+      })
+
+      const doc = await res.json()
+
+      expect(doc.item.title).toBeTruthy()
+      expect(doc.item.subtitle).toBeUndefined()
+      expect(doc.other.title).toBeUndefined()
+    })
+
+    it('should populate and select fields in globals', async () => {
+      const res = await restClient.GET(`/globals/${globalSlug}`, {
+        query: {
+          populate: {
+            relFirst: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+      })
+
+      const global = await res.json()
+
+      expect(global.relFirst.title).toBe('title')
+      expect(global.relFirst.subtitle).toBeUndefined()
+
+      expect(global.relSecond.title).toBeUndefined()
+      expect(global.relSecond.subtitle).toBeUndefined()
+    })
+  })
 })

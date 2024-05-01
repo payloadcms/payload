@@ -1,5 +1,5 @@
 import type { SanitizedConfig } from 'payload/config'
-import type { Where } from 'payload/types'
+import type { Populate, Select, Where } from 'payload/types'
 import type { ParsedQs } from 'qs'
 
 import {
@@ -22,6 +22,8 @@ type RequestOptions = {
     limit?: number
     locale?: string
     page?: number
+    populate?: Populate
+    select?: Select
     sort?: string
     where?: Where
   }
