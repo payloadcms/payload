@@ -1,15 +1,15 @@
 # Payload Auth Example
 
-The [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview) in various headless capacities. Follow the [Quick Start](#quick-start) to get up and running quickly.
+This [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview) into all types of applications. Follow the [Quick Start](#quick-start) to get up and running quickly.
 
-This example includes a fully integrated Next.js App Router front-end that runs on the same instance as Payload. If you are working on an application running on a separate server, there are various fully working front-ends made explicitly for this example, including:
+**IMPORTANT: This example includes a fully integrated Next.js App Router front-end that runs on the same server as Payload.** If you are working on an application running on an entirely separate server, there are various fully working, separately running front-ends made explicitly for this example, including:
 
 - [Next.js App Router](../next-app)
 - [Next.js Pages Router](../next-pages)
 
 Follow the instructions in each respective README to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
 
-For more information on using Payload in its various headless capacities, [check out this blog post](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
+To learn more, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
 
 ## Quick Start
 
