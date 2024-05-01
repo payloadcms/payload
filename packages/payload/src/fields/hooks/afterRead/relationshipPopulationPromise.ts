@@ -10,7 +10,7 @@ type PopulateArgs = {
   depth: number
   fallbackLocale: null | string
   field: RelationshipField | UploadField
-  fieldPathSegments: string[]
+  fieldPopulatePath: string
   index?: number
   key?: string
   locale: null | string
@@ -27,7 +27,7 @@ const populate = async ({
   depth,
   fallbackLocale,
   field,
-  fieldPathSegments,
+  fieldPopulatePath,
   index,
   key,
   locale,
@@ -52,8 +52,7 @@ const populate = async ({
       | undefined
 
     if ((populateArg && typeof populateArg === 'object') || field.defaultPopulate) {
-      const fieldPath = [...fieldPathSegments].join('.')
-      const populateValue = populateArg?.[fieldPath] ?? field.defaultPopulate
+      const populateValue = populateArg?.[fieldPopulatePath] ?? field.defaultPopulate
 
       if (!populateValue) fieldDepth = 0
       else if (typeof populateValue === 'object') {
@@ -126,7 +125,7 @@ type PromiseArgs = {
   depth: number
   fallbackLocale: null | string
   field: RelationshipField | UploadField
-  fieldPathSegments: string[]
+  fieldPopulatePath: string
   locale: null | string
   overrideAccess: boolean
   populateArg?: Populate
@@ -140,7 +139,7 @@ export const relationshipPopulationPromise = async ({
   depth,
   fallbackLocale,
   field,
-  fieldPathSegments,
+  fieldPopulatePath,
   locale,
   overrideAccess,
   populateArg,
@@ -169,7 +168,7 @@ export const relationshipPopulationPromise = async ({
                 depth: populateDepth,
                 fallbackLocale,
                 field,
-                fieldPathSegments,
+                fieldPopulatePath,
                 index,
                 key,
                 locale,
@@ -194,7 +193,7 @@ export const relationshipPopulationPromise = async ({
               depth: populateDepth,
               fallbackLocale,
               field,
-              fieldPathSegments,
+              fieldPopulatePath,
               index,
               locale,
               overrideAccess,
@@ -222,7 +221,7 @@ export const relationshipPopulationPromise = async ({
           depth: populateDepth,
           fallbackLocale,
           field,
-          fieldPathSegments,
+          fieldPopulatePath,
           key,
           locale,
           overrideAccess,
@@ -243,7 +242,7 @@ export const relationshipPopulationPromise = async ({
       depth: populateDepth,
       fallbackLocale,
       field,
-      fieldPathSegments,
+      fieldPopulatePath,
       locale,
       overrideAccess,
       populateArg,

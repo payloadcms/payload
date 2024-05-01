@@ -12,7 +12,7 @@ type Args = {
   depth: number
   doc: Record<string, unknown>
   fallbackLocale: null | string
-  fieldPathSegments?: string[]
+  fieldPopulatePath?: string
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -39,7 +39,7 @@ export const traverseFields = ({
   depth,
   doc,
   fallbackLocale,
-  fieldPathSegments = [],
+  fieldPopulatePath = '',
   fieldPromises,
   fields,
   findMany,
@@ -65,7 +65,7 @@ export const traverseFields = ({
         doc,
         fallbackLocale,
         field,
-        fieldPathSegments,
+        fieldPopulatePath,
         fieldPromises,
         findMany,
         flattenLocales,

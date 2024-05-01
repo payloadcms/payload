@@ -18,7 +18,7 @@ type Args = {
   doc: Record<string, unknown>
   fallbackLocale: null | string
   field: Field | TabAsField
-  fieldPathSegments: string[]
+  fieldPopulatePath: string
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -53,7 +53,7 @@ export const promise = async ({
   doc,
   fallbackLocale,
   field,
-  fieldPathSegments,
+  fieldPopulatePath,
   fieldPromises,
   findMany,
   flattenLocales,
@@ -285,7 +285,7 @@ export const promise = async ({
           depth,
           fallbackLocale,
           field,
-          fieldPathSegments: [...fieldPathSegments, field.name],
+          fieldPopulatePath: `${fieldPopulatePath}${field.name}`,
           locale,
           overrideAccess,
           populateArg,
@@ -309,7 +309,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
-        fieldPathSegments: [...fieldPathSegments, field.name],
+        fieldPopulatePath: `${fieldPopulatePath}.${field.name}.`,
         fieldPromises,
         fields: field.fields,
         findMany,
@@ -340,7 +340,7 @@ export const promise = async ({
             depth,
             doc,
             fallbackLocale,
-            fieldPathSegments: [...fieldPathSegments, field.name],
+            fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
             fieldPromises,
             fields: field.fields,
             findMany,
@@ -367,7 +367,7 @@ export const promise = async ({
                 depth,
                 doc,
                 fallbackLocale,
-                fieldPathSegments: [...fieldPathSegments, field.name],
+                fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
                 fieldPromises,
                 fields: field.fields,
                 findMany,
@@ -406,7 +406,7 @@ export const promise = async ({
               depth,
               doc,
               fallbackLocale,
-              fieldPathSegments: [...fieldPathSegments, field.name, block.slug],
+              fieldPopulatePath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
               fieldPromises,
               fields: block.fields,
               findMany,
@@ -437,7 +437,7 @@ export const promise = async ({
                   depth,
                   doc,
                   fallbackLocale,
-                  fieldPathSegments: [...fieldPathSegments, field.name, block.slug],
+                  fieldPopulatePath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
                   fieldPromises,
                   fields: block.fields,
                   findMany,
@@ -472,7 +472,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
-        fieldPathSegments,
+        fieldPopulatePath,
         fieldPromises,
         fields: field.fields,
         findMany,
@@ -493,10 +493,10 @@ export const promise = async ({
 
     case 'tab': {
       let tabDoc = siblingDoc
-      let tabPathSegments = fieldPathSegments
+      let tabPopulatePath = fieldPopulatePath
       if (tabHasName(field)) {
         tabDoc = siblingDoc[field.name] as Record<string, unknown>
-        tabPathSegments = [...fieldPathSegments, field.name]
+        tabPopulatePath = `${fieldPopulatePath}${field.name}.`
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
@@ -507,7 +507,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
-        fieldPathSegments: tabPathSegments,
+        fieldPopulatePath: tabPopulatePath,
         fieldPromises,
         fields: field.fields,
         findMany,
