@@ -67,6 +67,7 @@ properties:
 
 ```ts
 import { CollectionConfig } from 'payload/types'
+import { RowLabelArgs } from 'payload/dist/admin/components/forms/RowLabel/types'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -101,7 +102,7 @@ export const ExampleCollection: CollectionConfig = {
       ],
       admin: {
         components: {
-          RowLabel: ({ data, index }) => {
+          RowLabel: ({ data, index }: RowLabelArgs) => {
             return data?.title || `Slide ${String(index).padStart(2, '0')}`
           },
         },
