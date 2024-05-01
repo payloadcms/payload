@@ -38,6 +38,11 @@ describe('Rich Text', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsRichTextTest',
+      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+    })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {

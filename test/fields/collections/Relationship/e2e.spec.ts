@@ -45,6 +45,11 @@ describe('relationship', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsRelationshipTest',
+      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+    })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {

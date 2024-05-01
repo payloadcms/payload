@@ -68,6 +68,11 @@ describe('lexical', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsLexicalTest',
+      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+    })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
