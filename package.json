@@ -13,7 +13,7 @@
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
     "build:email-nodemailer": "turbo build --filter email-nodemailer",
-    "build:email-resend-rest": "turbo build --filter email-resend-rest",
+    "build:email-resend": "turbo build --filter email-resend",
     "build:eslint-config-payload": "turbo build --filter eslint-config-payload",
     "build:graphql": "turbo build --filter graphql",
     "build:live-preview": "turbo build --filter live-preview",

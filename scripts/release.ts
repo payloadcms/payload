@@ -37,7 +37,7 @@ const packageWhitelist = [
 
   // Adapters
   'email-nodemailer',
-  'email-resend-rest',
+  'email-resend',
 
   'storage-s3',
   'storage-azure',

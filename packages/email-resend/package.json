@@ -1,12 +1,12 @@
 {
-  "name": "@payloadcms/email-resend-rest",
+  "name": "@payloadcms/email-resend",
   "version": "0.0.0",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/email-resend-rest"
+    "directory": "packages/email-resend"
   },
   "license": "MIT",
   "author": "Payload CMS, Inc.",
