@@ -309,7 +309,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
-        fieldPopulatePath: `${fieldPopulatePath}.${field.name}.`,
+        fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
         fieldPromises,
         fields: field.fields,
         findMany,
