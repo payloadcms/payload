@@ -28,7 +28,5 @@ export default defineConfig({
   },
   workers: 16,
   maxFailures: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI
-    ? [['list', { printSteps: false }], ['@estruyf/github-actions-reporter']]
-    : [['list', { printSteps: false }]],
+  reporter: process.env.CI ? 'github' : [['list', { printSteps: true }]],
 })
