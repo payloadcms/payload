@@ -13,6 +13,8 @@ concurrency:
 env:
   NODE_VERSION: 18.20.2
   PNPM_VERSION: 8.15.7
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
   changes:
@@ -89,6 +91,8 @@ jobs:
 
       - run: pnpm install
       - run: pnpm run build:all
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
         uses: actions/cache@v4
@@ -253,7 +257,8 @@ jobs:
           - plugin-seo
           - versions
           - uploads
-
+    env:
+      SUITE_NAME: ${{ matrix.suite }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -281,11 +286,33 @@ jobs:
         run: pnpm docker:start
         if: ${{ matrix.suite == 'plugin-cloud-storage' }}
 
-      - name: Install Playwright
-        run: pnpm exec playwright install --with-deps
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: pnpm test:e2e ${{ matrix.suite }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -294,6 +321,13 @@ jobs:
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
+
+      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
+      # - uses: daun/playwright-report-summary@v3
+      #   with:
+      #     report-file: results_${{ matrix.suite }}.json
+      #     report-tag: ${{ matrix.suite }}
+      #     job-summary: true
 
   app-build-with-packed:
     runs-on: ubuntu-latest
