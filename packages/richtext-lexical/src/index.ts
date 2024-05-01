@@ -6,282 +6,297 @@ import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
-import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
+import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider } from './types.js'
 
 import { RichTextCell } from './cell/index.js'
 import { RichTextField } from './field/index.js'
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
-  defaultSanitizedServerEditorConfig,
 } from './field/lexical/config/server/default.js'
 import { loadFeatures } from './field/lexical/config/server/loader.js'
-import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.js'
+import {
+  sanitizeServerEditorConfig,
+  sanitizeServerFeatures,
+} from './field/lexical/config/server/sanitize.js'
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
 import { richTextValidateHOC } from './validate/index.js'
 
-export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
-  let resolvedFeatureMap: ResolvedServerFeatureMap = null
+let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
-  let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
-  if (!props || (!props.features && !props.lexical)) {
-    finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
-    resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
-  } else {
-    let features: FeatureProviderServer<unknown, unknown>[] =
-      props.features && typeof props.features === 'function'
-        ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
-        : (props.features as FeatureProviderServer<unknown, unknown>[])
-    if (!features) {
-      features = cloneDeep(defaultEditorFeatures)
-    }
+export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
+  return async ({ config }) => {
+    let resolvedFeatureMap: ResolvedServerFeatureMap = null
 
-    const lexical: LexicalEditorConfig = props.lexical
+    let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
+    if (!props || (!props.features && !props.lexical)) {
+      if (!defaultSanitizedServerEditorConfig) {
+        defaultSanitizedServerEditorConfig = await sanitizeServerEditorConfig(
+          defaultEditorConfig,
+          config,
+        )
+      }
 
-    resolvedFeatureMap = loadFeatures({
-      unSanitizedEditorConfig: {
-        features,
+      finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
+
+      resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
+    } else {
+      let features: FeatureProviderServer<unknown, unknown>[] =
+        props.features && typeof props.features === 'function'
+          ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
+          : (props.features as FeatureProviderServer<unknown, unknown>[])
+      if (!features) {
+        features = cloneDeep(defaultEditorFeatures)
+      }
+
+      const lexical: LexicalEditorConfig = props.lexical
+
+      resolvedFeatureMap = await loadFeatures({
+        config,
+        unSanitizedEditorConfig: {
+          features,
+          lexical: lexical ? lexical : defaultEditorConfig.lexical,
+        },
+      })
+
+      finalSanitizedEditorConfig = {
+        features: sanitizeServerFeatures(resolvedFeatureMap),
         lexical: lexical ? lexical : defaultEditorConfig.lexical,
-      },
-    })
-
-    finalSanitizedEditorConfig = {
-      features: sanitizeServerFeatures(resolvedFeatureMap),
-      lexical: lexical ? lexical : defaultEditorConfig.lexical,
-      resolvedFeatureMap,
+        resolvedFeatureMap,
+      }
     }
-  }
 
-  return {
-    CellComponent: withMergedProps({
-      Component: RichTextCell,
-      toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
-    }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
-    }),
-    editorConfig: finalSanitizedEditorConfig,
-    generateComponentMap: getGenerateComponentMap({
-      resolvedFeatureMap,
-    }),
-    generateSchemaMap: getGenerateSchemaMap({
-      resolvedFeatureMap,
-    }),
-    /* hooks: {
-      afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
-      afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
-      beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
-      beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
-      beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
-    },*/
-    /* // TODO: Figure out docWithLocales / originalSiblingDoc => node matching. Can't use indexes, as the order of nodes could technically change between hooks.
-    hooks: {
-      afterChange: [
-        async ({ context, findMany, operation, overrideAccess, req, value }) => {
-          await recurseNodesAsync({
-            callback: async (node) => {
-              const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
-              if (afterChangeHooks?.has(node.type)) {
-                for (const hook of afterChangeHooks.get(node.type)) {
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+    return {
+      CellComponent: withMergedProps({
+        Component: RichTextCell,
+        toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+      }),
+      FieldComponent: withMergedProps({
+        Component: RichTextField,
+        toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+      }),
+      editorConfig: finalSanitizedEditorConfig,
+      generateComponentMap: getGenerateComponentMap({
+        resolvedFeatureMap,
+      }),
+      generateSchemaMap: getGenerateSchemaMap({
+        resolvedFeatureMap,
+      }),
+      /* hooks: {
+        afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
+        afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
+        beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
+        beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
+        beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
+      },*/
+      /* // TODO: Figure out docWithLocales / originalSiblingDoc => node matching. Can't use indexes, as the order of nodes could technically change between hooks.
+      hooks: {
+        afterChange: [
+          async ({ context, findMany, operation, overrideAccess, req, value }) => {
+            await recurseNodesAsync({
+              callback: async (node) => {
+                const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
+                if (afterChangeHooks?.has(node.type)) {
+                  for (const hook of afterChangeHooks.get(node.type)) {
+                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                  }
                 }
-              }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
-
-          return value
-        },
-      ],
-      afterRead: [
-        async ({ context, findMany, operation, overrideAccess, req, value }) => {
-          await recurseNodesAsync({
-            callback: async (node) => {
-              const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
-              if (afterReadHooks?.has(node.type)) {
-                for (const hook of afterReadHooks.get(node.type)) {
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                }
-              }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
-
-          return value
-        },
-      ],
-      beforeChange: [
-        async ({ context, findMany, operation, overrideAccess, req, value }) => {
-          await recurseNodesAsync({
-            callback: async (node) => {
-              const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
-              if (beforeChangeHooks?.has(node.type)) {
-                for (const hook of beforeChangeHooks.get(node.type)) {
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                }
-              }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
-
-          return value
-        },
-      ],
-      beforeDuplicate: [
-        async ({ context, findMany, operation, overrideAccess, req, value }) => {
-          await recurseNodesAsync({
-            callback: async (node) => {
-              const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
-              if (beforeDuplicateHooks?.has(node.type)) {
-                for (const hook of beforeDuplicateHooks.get(node.type)) {
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                }
-              }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
-
-          return value
-        },
-      ],
-      beforeValidate: [
-        async ({ context, findMany, operation, overrideAccess, req, value }) => {
-          await recurseNodesAsync({
-            callback: async (node) => {
-              const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
-              if (beforeValidateHooks?.has(node.type)) {
-                for (const hook of beforeValidateHooks.get(node.type)) {
-                  /**
-                   * We cannot pass the originalNode here, as there is no way to map one node to a previous one, as a previous originalNode might be in a different position
-                   */ /*
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                }
-              }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
-
-          return value
-        },
-      ],
-    },*/
-    outputSchema: ({
-      collectionIDFieldTypes,
-      config,
-      field,
-      interfaceNameDefinitions,
-      isRequired,
-    }) => {
-      let outputSchema: JSONSchema4 = {
-        // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
-        // In the future, we should
-        // 1) allow recursive children
-        // 2) Pass in all the different types for every node added to the editorconfig. This can be done with refs in the schema.
-        type: withNullableJSONSchemaType('object', isRequired),
-        properties: {
-          root: {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              type: {
-                type: 'string',
               },
-              children: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  additionalProperties: true,
-                  properties: {
-                    type: {
-                      type: 'string',
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            return value
+          },
+        ],
+        afterRead: [
+          async ({ context, findMany, operation, overrideAccess, req, value }) => {
+            await recurseNodesAsync({
+              callback: async (node) => {
+                const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
+                if (afterReadHooks?.has(node.type)) {
+                  for (const hook of afterReadHooks.get(node.type)) {
+                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                  }
+                }
+              },
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            return value
+          },
+        ],
+        beforeChange: [
+          async ({ context, findMany, operation, overrideAccess, req, value }) => {
+            await recurseNodesAsync({
+              callback: async (node) => {
+                const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
+                if (beforeChangeHooks?.has(node.type)) {
+                  for (const hook of beforeChangeHooks.get(node.type)) {
+                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                  }
+                }
+              },
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            return value
+          },
+        ],
+        beforeDuplicate: [
+          async ({ context, findMany, operation, overrideAccess, req, value }) => {
+            await recurseNodesAsync({
+              callback: async (node) => {
+                const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
+                if (beforeDuplicateHooks?.has(node.type)) {
+                  for (const hook of beforeDuplicateHooks.get(node.type)) {
+                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                  }
+                }
+              },
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            return value
+          },
+        ],
+        beforeValidate: [
+          async ({ context, findMany, operation, overrideAccess, req, value }) => {
+            await recurseNodesAsync({
+              callback: async (node) => {
+                const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
+                if (beforeValidateHooks?.has(node.type)) {
+                  for (const hook of beforeValidateHooks.get(node.type)) {
+                    /**
+                     * We cannot pass the originalNode here, as there is no way to map one node to a previous one, as a previous originalNode might be in a different position
+                     */ /*
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+    },*/
+      outputSchema: ({
+        collectionIDFieldTypes,
+        config,
+        field,
+        interfaceNameDefinitions,
+        isRequired,
+      }) => {
+        let outputSchema: JSONSchema4 = {
+          // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
+          // In the future, we should
+          // 1) allow recursive children
+          // 2) Pass in all the different types for every node added to the editorconfig. This can be done with refs in the schema.
+          type: withNullableJSONSchemaType('object', isRequired),
+          properties: {
+            root: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                type: {
+                  type: 'string',
+                },
+                children: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: {
+                      type: {
+                        type: 'string',
+                      },
+                      version: {
+                        type: 'integer',
+                      },
                     },
-                    version: {
-                      type: 'integer',
-                    },
+                    required: ['type', 'version'],
                   },
-                  required: ['type', 'version'],
+                },
+                direction: {
+                  oneOf: [
+                    {
+                      enum: ['ltr', 'rtl'],
+                    },
+                    {
+                      type: 'null',
+                    },
+                  ],
+                },
+                format: {
+                  type: 'string',
+                  enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
+                },
+                indent: {
+                  type: 'integer',
+                },
+                version: {
+                  type: 'integer',
                 },
               },
-              direction: {
-                oneOf: [
-                  {
-                    enum: ['ltr', 'rtl'],
-                  },
-                  {
-                    type: 'null',
-                  },
-                ],
-              },
-              format: {
-                type: 'string',
-                enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
-              },
-              indent: {
-                type: 'integer',
-              },
-              version: {
-                type: 'integer',
-              },
+              required: ['children', 'direction', 'format', 'indent', 'type', 'version'],
             },
-            required: ['children', 'direction', 'format', 'indent', 'type', 'version'],
           },
-        },
-        required: ['root'],
-      }
-      for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
-        .modifyOutputSchemas) {
-        outputSchema = modifyOutputSchema({
-          collectionIDFieldTypes,
-          config,
-          currentSchema: outputSchema,
-          field,
-          interfaceNameDefinitions,
-          isRequired,
-        })
-      }
+          required: ['root'],
+        }
+        for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
+          .modifyOutputSchemas) {
+          outputSchema = modifyOutputSchema({
+            collectionIDFieldTypes,
+            config,
+            currentSchema: outputSchema,
+            field,
+            interfaceNameDefinitions,
+            isRequired,
+          })
+        }
 
-      return outputSchema
-    },
-    populationPromises({
-      context,
-      currentDepth,
-      depth,
-      field,
-      fieldPromises,
-      findMany,
-      flattenLocales,
-      overrideAccess,
-      populationPromises,
-      req,
-      showHiddenFields,
-      siblingDoc,
-    }) {
-      // check if there are any features with nodes which have populationPromises for this field
-      if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
-        populateLexicalPopulationPromises({
-          context,
-          currentDepth,
-          depth,
-          editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
-          field,
-          fieldPromises,
-          findMany,
-          flattenLocales,
-          overrideAccess,
-          populationPromises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-      }
-    },
-    validate: richTextValidateHOC({
-      editorConfig: finalSanitizedEditorConfig,
-    }),
+        return outputSchema
+      },
+      populationPromises({
+        context,
+        currentDepth,
+        depth,
+        field,
+        fieldPromises,
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        showHiddenFields,
+        siblingDoc,
+      }) {
+        // check if there are any features with nodes which have populationPromises for this field
+        if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
+          populateLexicalPopulationPromises({
+            context,
+            currentDepth,
+            depth,
+            editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
+            field,
+            fieldPromises,
+            findMany,
+            flattenLocales,
+            overrideAccess,
+            populationPromises,
+            req,
+            showHiddenFields,
+            siblingDoc,
+          })
+        }
+      },
+      validate: richTextValidateHOC({
+        editorConfig: finalSanitizedEditorConfig,
+      }),
+    }
   }
 }
 
@@ -435,7 +450,6 @@ export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
-  defaultSanitizedServerEditorConfig,
 } from './field/lexical/config/server/default.js'
 export {
   loadFeatures,

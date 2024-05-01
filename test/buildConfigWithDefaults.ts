@@ -82,7 +82,8 @@ export async function buildConfigWithDefaults(
         ParagraphFeature(),
         RelationshipFeature(),
         LinkFeature({
-          fields: [
+          fields: ({ defaultFields }) => [
+            ...defaultFields,
             {
               name: 'description',
               type: 'text',
@@ -189,5 +190,5 @@ export async function buildConfigWithDefaults(
     config.admin.disable = true
   }
 
-  return buildConfig(config)
+  return await buildConfig(config)
 }

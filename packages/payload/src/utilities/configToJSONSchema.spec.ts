@@ -4,7 +4,7 @@ import { sanitizeConfig } from '../config/sanitize.js'
 import { configToJSONSchema } from './configToJSONSchema.js'
 
 describe('configToJSONSchema', () => {
-  it('should handle optional arrays with required fields', () => {
+  it('should handle optional arrays with required fields', async () => {
     const config: Config = {
       collections: [
         {
@@ -27,7 +27,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = sanitizeConfig(config)
+    const sanitizedConfig = await sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.definitions?.test).toStrictEqual({

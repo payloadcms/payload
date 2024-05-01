@@ -1,5 +1,3 @@
-import { sanitizeFields } from 'payload/config'
-
 import type { PopulationPromise } from '../types.js'
 import type { UploadFeatureProps } from './feature.server.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
@@ -25,8 +23,6 @@ export const uploadPopulationPromiseHOC = (
     req,
     showHiddenFields,
   }) => {
-    const payloadConfig = req.payload.config
-
     if (node?.value) {
       const collection = req.payload.collections[node?.relationTo]
 
@@ -50,17 +46,7 @@ export const uploadPopulationPromiseHOC = (
         )
       }
       if (Array.isArray(props?.collections?.[node?.relationTo]?.fields)) {
-        const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-
-        // TODO: Sanitize & transform ahead of time! On startup!
-        const sanitizedFields = sanitizeFields({
-          config: payloadConfig,
-          fields: props?.collections?.[node?.relationTo]?.fields,
-          requireFieldLevelRichTextEditor: true,
-          validRelationships,
-        })
-
-        if (!sanitizedFields?.length) {
+        if (!props?.collections?.[node?.relationTo]?.fields?.length) {
           return
         }
         recurseNestedFields({
@@ -70,7 +56,7 @@ export const uploadPopulationPromiseHOC = (
           depth,
           editorPopulationPromises,
           fieldPromises,
-          fields: sanitizedFields,
+          fields: props?.collections?.[node?.relationTo]?.fields,
           findMany,
           flattenLocales,
           overrideAccess,
