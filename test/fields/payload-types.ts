@@ -584,6 +584,7 @@ export interface TextField {
   localizedHasMany?: string[] | null
   withMinRows?: string[] | null
   withMaxRows?: string[] | null
+  disabledListColumnText?: string | null
   updatedAt: string
   createdAt: string
 }

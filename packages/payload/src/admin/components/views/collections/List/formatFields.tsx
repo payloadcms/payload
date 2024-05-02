@@ -9,15 +9,18 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
 
   const defaultIDField: Field = {
     name: 'id',
+    type: 'text',
     admin: {
       disableBulkEdit: true,
     },
     label: 'ID',
-    type: 'text',
   }
 
   const shouldSkipField = (field: Field): boolean =>
-    !fieldIsPresentationalOnly(field) && (field.hidden === true || field.admin?.disabled === true)
+    !fieldIsPresentationalOnly(field) &&
+    (field.hidden === true ||
+      field.admin?.disabled === true ||
+      field.admin?.disabledListColumn === true)
 
   const fields: Field[] = config.fields.reduce(
     (formatted, field) => {

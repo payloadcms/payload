@@ -64,6 +64,18 @@ describe('fields', () => {
       await expect(textCell).toHaveText(textDoc.text)
     })
 
+    test('should not display field in list view if admin.disabledListColumn is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disabled List Column Text'),
+        }),
+      ).toBeHidden()
+    })
+
     test('should display i18n label in cells when missing field data', async () => {
       await page.goto(url.list)
       const textCell = page.locator('.row-1 .cell-i18nText')

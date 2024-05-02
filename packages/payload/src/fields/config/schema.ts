@@ -20,6 +20,7 @@ export const baseAdminFields = joi.object().keys({
     .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), componentSchema),
   disableBulkEdit: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
+  disabledListColumn: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   initCollapsed: joi.boolean().default(false),
   position: joi.string().valid('sidebar'),

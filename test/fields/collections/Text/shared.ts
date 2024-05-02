@@ -6,6 +6,7 @@ export const textFieldsSlug = 'text-fields'
 export const textDoc: Partial<TextField> = {
   text: 'Seeded text document',
   localizedText: 'Localized text',
+  disabledListColumnText: 'Disabled List Column Text',
 }
 
 export const anotherTextDoc: Partial<TextField> = {

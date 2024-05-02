@@ -140,6 +140,13 @@ const TextFields: CollectionConfig = {
       hasMany: true,
       maxRows: 4,
     },
+    {
+      name: 'disabledListColumnText',
+      type: 'text',
+      admin: {
+        disabledListColumn: true,
+      },
+    },
   ],
   slug: textFieldsSlug,
 }
