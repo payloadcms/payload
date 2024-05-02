@@ -1,10 +1,10 @@
 'use client'
-import type { FormState, Validate } from 'payload/types'
+import type { FormState } from 'payload/types'
 
 import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
 import { HiddenInput } from '@payloadcms/ui/fields/HiddenInput'
 import { Password } from '@payloadcms/ui/fields/Password'
-import { Form } from '@payloadcms/ui/forms/Form'
+import { Form, useFormFields } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { useAuth } from '@payloadcms/ui/providers/Auth'
 import { useConfig } from '@payloadcms/ui/providers/Config'
@@ -17,8 +17,6 @@ type Args = {
   token: string
 }
 
-const passwordValidate: Validate = () => true
-
 const initialState: FormState = {
   'confirm-password': {
     initialValue: '',
@@ -28,7 +26,6 @@ const initialState: FormState = {
   password: {
     initialValue: '',
     valid: false,
-    validate: passwordValidate,
     value: '',
   },
 }
@@ -65,15 +62,42 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       method="POST"
       onSuccess={onSuccess}
     >
-      <Password
-        autoComplete="off"
-        label={i18n.t('authentication:newPassword')}
-        name="password"
-        required
-      />
+      <PasswordToConfirm />
       <ConfirmPassword />
       <HiddenInput forceUsePathFromProps name="token" value={token} />
       <FormSubmit>{i18n.t('authentication:resetPassword')}</FormSubmit>
     </Form>
+  )
+}
+
+const PasswordToConfirm = () => {
+  const { t } = useTranslation()
+  const { value: confirmValue } = useFormFields(([fields]) => {
+    return fields['confirm-password']
+  })
+
+  const validate = React.useCallback(
+    (value: string) => {
+      if (!value) {
+        return t('validation:required')
+      }
+
+      if (value === confirmValue) {
+        return true
+      }
+
+      return t('fields:passwordsDoNotMatch')
+    },
+    [confirmValue, t],
+  )
+
+  return (
+    <Password
+      autoComplete="off"
+      label={t('authentication:newPassword')}
+      name="password"
+      required
+      validate={validate}
+    />
   )
 }

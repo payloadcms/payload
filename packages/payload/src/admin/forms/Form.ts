@@ -1,4 +1,4 @@
-import type { Field } from '../../fields/config/types.js'
+import type { ClientValidate, Field } from '../../fields/config/types.js'
 import type { Where } from '../../types/index.js'
 
 export type Data = {
@@ -25,6 +25,7 @@ export type FormField = {
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
+  validate?: ClientValidate
   value: unknown
 }
 
