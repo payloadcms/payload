@@ -12,12 +12,14 @@
   "types": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "echo \"Build temporarily disabled.\" && exit 0",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "test": "echo 'No tests available.'",
-    "prepublishOnly": "pnpm clean && pnpm turbo run build && pnpm test"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "keywords": [
     "payload",
@@ -33,7 +35,9 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
@@ -48,27 +52,31 @@
     "@types/react": "18.2.74",
     "@types/uuid": "^9.0.0",
     "payload": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@payloadcms/next": "workspace:*",
     "prettier": "^2.7.1",
     "react": "^18.0.0",
     "webpack": "^5.78.0"
   },
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
+      "import": "./src/index.tsx",
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
     }
   },
   "publishConfig": {
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
       }
-    }
+    },
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
   },
   "files": [
     "dist",

@@ -20,7 +20,6 @@ export const stripeWebhooks = async (args: {
   if (stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, {
       // api version can only be the latest, stripe recommends ts ignoring it
-      // @ts-expect-error
       apiVersion: '2022-08-01',
       appInfo: {
         name: 'Stripe Payload Plugin',

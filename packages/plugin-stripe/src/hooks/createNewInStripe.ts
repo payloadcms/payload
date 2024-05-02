@@ -9,7 +9,6 @@ import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 // api version can only be the latest, stripe recommends ts ignoring it
-// @ts-expect-error
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
 type HookArgsWithCustomCollection = Omit<
