@@ -1,10 +1,10 @@
 import type { Config } from 'payload/config'
 
-import type { SanitizedStripeConfig, StripeConfig } from './types'
+import type { SanitizedStripeConfig, StripeConfig } from './types.js'
 
-import { getFields } from './fields/getFields'
+import { getFields } from './fields/getFields.js'
 
-const stripePlugin =
+export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -42,5 +42,3 @@ const stripePlugin =
       }),
     }
   }
-
-export default stripePlugin

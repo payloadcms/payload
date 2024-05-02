@@ -1188,9 +1188,6 @@ importers:
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2
-      react:
-        specifier: ^18.0.0
-        version: 18.2.0
       stripe:
         specifier: ^10.2.0
         version: 10.17.0
@@ -1201,6 +1198,12 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@types/express':
         specifier: ^4.17.9
         version: 4.17.21
@@ -1216,12 +1219,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      prettier:
-        specifier: ^2.7.1
-        version: 2.8.8
-      webpack:
-        specifier: ^5.78.0
-        version: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
 
   packages/richtext-lexical:
     dependencies:
@@ -13875,6 +13872,7 @@ packages:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+    dev: false
 
   /prettier@3.2.5:
     resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}

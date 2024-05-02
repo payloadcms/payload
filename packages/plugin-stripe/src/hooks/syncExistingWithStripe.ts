@@ -3,11 +3,12 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripeConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+// api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
 type HookArgsWithCustomCollection = Omit<
@@ -39,12 +40,15 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
     if (syncConfig) {
       if (operation === 'update') {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce((acc, field) => {
-          const { fieldPath, stripeProperty } = field
+        let syncedFields = syncConfig.fields.reduce(
+          (acc, field) => {
+            const { fieldPath, stripeProperty } = field
 
-          acc[stripeProperty] = data[fieldPath]
-          return acc
-        }, {} as Record<string, any>)
+            acc[stripeProperty] = data[fieldPath]
+            return acc
+          },
+          {} as Record<string, any>,
+        )
 
         syncedFields = deepen(syncedFields)
 
