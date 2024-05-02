@@ -1,7 +1,7 @@
 import type { SanitizedConfig } from 'payload/config'
 import type { AdminViewComponent } from 'payload/types'
 
-import type { initPage } from '../../utilities/initPage.js'
+import type { initPage } from '../../utilities/initPage/index.js'
 
 import { Account } from '../Account/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
