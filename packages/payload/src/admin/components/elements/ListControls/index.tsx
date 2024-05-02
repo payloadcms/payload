@@ -9,7 +9,6 @@ import { fieldAffectsData } from '../../../../fields/config/types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import Chevron from '../../icons/Chevron'
 import { useSearchParams } from '../../utilities/SearchParams'
-import Button from '../Button'
 import ColumnSelector from '../ColumnSelector'
 import DeleteMany from '../DeleteMany'
 import EditMany from '../EditMany'
@@ -47,10 +46,10 @@ export const ListControls: React.FC<Props> = (props) => {
     titleField,
   } = props
 
-  const hasWhereParam = React.useRef<boolean>()
-
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
+
+  const hasWhereParam = React.useRef(Boolean(params?.where))
 
   const [textFieldsToBeSearched, setFieldsToBeSearched] = useState(
     getTextFieldsToBeSearched(listSearchableFields, fields),
