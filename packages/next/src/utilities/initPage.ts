@@ -100,7 +100,7 @@ export const initPage = async ({
   const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
   const isAdminRoute = route.startsWith(adminRoute)
-  const isAuthRoute = authRoutes.some((r) => r === route.replace(adminRoute, ''))
+  const isAuthRoute = authRoutes.some((r) => route.replace(adminRoute, '').startsWith(r))
 
   if (redirectUnauthenticatedUser && !user && !isAuthRoute) {
     if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
