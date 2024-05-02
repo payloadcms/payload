@@ -482,9 +482,9 @@ export type {
 } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 export type { AdapterProps }
 
-export {
-  type InlineToolbarGroup,
-  type InlineToolbarGroupItem,
+export type {
+  InlineToolbarGroup,
+  InlineToolbarGroupItem,
 } from './field/lexical/plugins/toolbars/inline/types.js'
 export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM.js'
 export { cloneDeep } from './field/lexical/utils/cloneDeep.js'
