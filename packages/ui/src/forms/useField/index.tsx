@@ -173,7 +173,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           valid = isValid
           errorMessage = undefined
         }
-        // debugger
+
         // Only dispatch if the validation result has changed
         // This will prevent unnecessary rerenders
         if (valid !== prevValid.current || errorMessage !== prevErrorMessage.current) {
