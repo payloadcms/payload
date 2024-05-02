@@ -535,6 +535,9 @@ importers:
       pluralize:
         specifier: 8.0.0
         version: 8.0.0
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.4.5)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -548,9 +551,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      ts-essentials:
-        specifier: 7.0.3
-        version: 7.0.3(typescript@5.4.5)
 
   packages/live-preview:
     devDependencies:
@@ -803,6 +803,9 @@ importers:
       scmp:
         specifier: 2.1.0
         version: 2.1.0
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.4.5)
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -930,9 +933,6 @@ importers:
       sharp:
         specifier: 0.32.6
         version: 0.32.6
-      ts-essentials:
-        specifier: 7.0.3
-        version: 7.0.3(typescript@5.4.5)
 
   packages/plugin-cloud:
     dependencies:
@@ -15638,7 +15638,6 @@ packages:
       typescript: 5.4.5
     dependencies:
       typescript: 5.4.5
-    dev: true
 
   /ts-jest@29.1.2(@babel/core@7.24.4)(esbuild@0.19.12)(jest@29.7.0)(typescript@5.4.5):
     resolution: {integrity: sha512-br6GJoH/WUX4pu7FbZXuWGKGNDuU7b8Uj77g/Sp7puZV6EXzuByl6JrECvm0MzVzSTkSHWTihsXt+5XYER5b+g==}
