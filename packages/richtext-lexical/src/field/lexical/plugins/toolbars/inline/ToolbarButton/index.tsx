@@ -4,18 +4,18 @@ import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { FloatingToolbarSectionEntry } from '../types.js'
+import type { InlineToolbarGroupItem } from '../types.js'
 
 import './index.scss'
 
-const baseClass = 'floating-select-toolbar-popup__button'
+const baseClass = 'inline-toolbar-popup__button'
 
 export const ToolbarButton = ({
   children,
-  entry,
+  item,
 }: {
   children: React.JSX.Element
-  entry: FloatingToolbarSectionEntry
+  item: InlineToolbarGroupItem
 }) => {
   const [editor] = useLexicalComposerContext()
   const [enabled, setEnabled] = useState<boolean>(true)
@@ -25,20 +25,20 @@ export const ToolbarButton = ({
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
-      if (entry.isActive) {
-        const isActive = entry.isActive({ editor, selection })
+      if (item.isActive) {
+        const isActive = item.isActive({ editor, selection })
         if (active !== isActive) {
           setActive(isActive)
         }
       }
-      if (entry.isEnabled) {
-        const isEnabled = entry.isEnabled({ editor, selection })
+      if (item.isEnabled) {
+        const isEnabled = item.isEnabled({ editor, selection })
         if (enabled !== isEnabled) {
           setEnabled(isEnabled)
         }
       }
     })
-  }, [active, editor, enabled, entry])
+  }, [active, editor, enabled, item])
 
   useEffect(() => {
     updateStates()
@@ -65,7 +65,7 @@ export const ToolbarButton = ({
         baseClass,
         enabled === false ? 'disabled' : '',
         active ? 'active' : '',
-        entry?.key ? `${baseClass}-` + entry.key : '',
+        item?.key ? `${baseClass}-` + item.key : '',
       ]
         .filter(Boolean)
         .join(' '),
@@ -77,7 +77,7 @@ export const ToolbarButton = ({
       className={className}
       onClick={() => {
         if (enabled !== false) {
-          entry.onClick({
+          item.onSelect({
             editor,
             isActive: active,
           })

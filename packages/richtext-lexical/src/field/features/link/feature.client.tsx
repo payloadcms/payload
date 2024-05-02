@@ -9,8 +9,8 @@ import type { LinkFields } from './nodes/types.js'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link/index.js'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode.js'
-import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { inlineToolbarFeatureButtonsGroupWithItems } from '../shared/inlineToolbar/featureButtonsGroup.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode.js'
 import { AutoLinkPlugin } from './plugins/autoLink/index.js'
@@ -26,9 +26,28 @@ const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) =>
     clientFeatureProps: props,
     feature: () => ({
       clientFeatureProps: props,
-      floatingSelectToolbar: {
-        sections: [
-          FeaturesSectionWithEntries([
+      nodes: [LinkNode, AutoLinkNode],
+      plugins: [
+        {
+          Component: LinkPlugin,
+          position: 'normal',
+        },
+        {
+          Component: AutoLinkPlugin,
+          position: 'normal',
+        },
+        {
+          Component: ClickableLinkPlugin,
+          position: 'normal',
+        },
+        {
+          Component: FloatingLinkEditorPlugin,
+          position: 'floatingAnchorElem',
+        },
+      ],
+      toolbarInline: {
+        groups: [
+          inlineToolbarFeatureButtonsGroupWithItems([
             {
               ChildComponent: LinkIcon,
               isActive: ({ selection }) => {
@@ -41,7 +60,7 @@ const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) =>
               },
               key: 'link',
               label: `Link`,
-              onClick: ({ editor, isActive }) => {
+              onSelect: ({ editor, isActive }) => {
                 if (!isActive) {
                   let selectedText = null
                   editor.getEditorState().read(() => {
@@ -67,25 +86,6 @@ const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) =>
           ]),
         ],
       },
-      nodes: [LinkNode, AutoLinkNode],
-      plugins: [
-        {
-          Component: LinkPlugin,
-          position: 'normal',
-        },
-        {
-          Component: AutoLinkPlugin,
-          position: 'normal',
-        },
-        {
-          Component: ClickableLinkPlugin,
-          position: 'normal',
-        },
-        {
-          Component: FloatingLinkEditorPlugin,
-          position: 'floatingAnchorElem',
-        },
-      ],
     }),
   }
 }

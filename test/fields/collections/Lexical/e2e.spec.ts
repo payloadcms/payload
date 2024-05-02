@@ -209,16 +209,14 @@ describe('lexical', () => {
     }
     // The following text should now be selected: Node
 
-    const floatingToolbar_formatSection = page.locator(
-      '.floating-select-toolbar-popup__section-format',
-    )
+    const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
 
     await expect(floatingToolbar_formatSection).toBeVisible()
 
-    await expect(page.locator('.floating-select-toolbar-popup__button').first()).toBeVisible()
+    await expect(page.locator('.inline-toolbar-popup__button').first()).toBeVisible()
 
     const boldButton = floatingToolbar_formatSection
-      .locator('.floating-select-toolbar-popup__button')
+      .locator('.inline-toolbar-popup__button')
       .first()
 
     await expect(boldButton).toBeVisible()
@@ -441,16 +439,14 @@ describe('lexical', () => {
       }
       // The following text should now be selectedelationship node 1
 
-      const floatingToolbar_formatSection = page.locator(
-        '.floating-select-toolbar-popup__section-format',
-      )
+      const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
 
       await expect(floatingToolbar_formatSection).toBeVisible()
 
-      await expect(page.locator('.floating-select-toolbar-popup__button').first()).toBeVisible()
+      await expect(page.locator('.inline-toolbar-popup__button').first()).toBeVisible()
 
       const boldButton = floatingToolbar_formatSection
-        .locator('.floating-select-toolbar-popup__button')
+        .locator('.inline-toolbar-popup__button')
         .first()
 
       await expect(boldButton).toBeVisible()
@@ -521,13 +517,11 @@ describe('lexical', () => {
       }
       // The following text should now be "Node"
 
-      const floatingToolbar = page.locator('.floating-select-toolbar-popup')
+      const floatingToolbar = page.locator('.inline-toolbar-popup')
 
       await expect(floatingToolbar).toBeVisible()
 
-      const linkButton = floatingToolbar
-        .locator('.floating-select-toolbar-popup__button-link')
-        .first()
+      const linkButton = floatingToolbar.locator('.inline-toolbar-popup__button-link').first()
 
       await expect(linkButton).toBeVisible()
       await linkButton.click()

@@ -17,8 +17,9 @@ import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
-import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import type { FixedToolbarGroup } from '../lexical/plugins/toolbars/fixed/types.js'
+import type { InlineToolbarGroup } from '../lexical/plugins/toolbars/inline/types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
@@ -131,10 +132,6 @@ export type ClientFeature<ClientFeatureProps> = {
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
   clientFeatureProps: ClientComponentProps<ClientFeatureProps>
-
-  floatingSelectToolbar?: {
-    sections: FloatingToolbarSection[]
-  }
   hooks?: {
     load?: ({
       incomingEditorState,
@@ -172,14 +169,26 @@ export type ClientFeature<ClientFeatureProps> = {
       }
   >
   slashMenu?: {
-    dynamicOptions?: ({
+    dynamicGroups?: ({
       editor,
       queryString,
     }: {
       editor: LexicalEditor
       queryString: string
     }) => SlashMenuGroup[]
-    options?: SlashMenuGroup[]
+    groups?: SlashMenuGroup[]
+  }
+  /**
+   * An opt-in, classic fixed toolbar which stays at the top of the editor
+   */
+  toolbarFixed?: {
+    groups: FixedToolbarGroup[]
+  }
+  /**
+   * The default, floating toolbar which appears when you select text.
+   */
+  toolbarInline?: {
+    groups: InlineToolbarGroup[]
   }
 }
 
@@ -381,13 +390,13 @@ export type SanitizedServerFeatures = Required<
 }
 
 export type SanitizedClientFeatures = Required<
-  Pick<ResolvedClientFeature<unknown>, 'markdownTransformers' | 'nodes'>
+  Pick<
+    ResolvedClientFeature<unknown>,
+    'markdownTransformers' | 'nodes' | 'toolbarFixed' | 'toolbarInline'
+  >
 > & {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  floatingSelectToolbar: {
-    sections: FloatingToolbarSection[]
-  }
   hooks: {
     load: Array<
       ({
@@ -406,9 +415,9 @@ export type SanitizedClientFeatures = Required<
   }
   plugins?: Array<SanitizedPlugin>
   slashMenu: {
-    dynamicOptions: Array<
+    dynamicGroups: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
     >
-    groupsWithOptions: SlashMenuGroup[]
+    groups: SlashMenuGroup[]
   }
 }

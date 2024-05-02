@@ -4,10 +4,10 @@ import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { SlashMenuItem } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList/index.js'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
+import { inlineToolbarTextDropdownGroupWithItems } from '../../shared/inlineToolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../plugin/index.js'
 import { UNORDERED_LIST } from './markdownTransformer.js'
 
@@ -17,22 +17,6 @@ const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (pr
     feature: () => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            TextDropdownSectionWithEntries([
-              {
-                ChildComponent: UnorderedListIcon,
-                isActive: () => false,
-                key: 'unorderedList',
-                label: `Unordered List`,
-                onClick: ({ editor }) => {
-                  editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
-                },
-                order: 11,
-              },
-            ]),
-          ],
-        },
         markdownTransformers: [UNORDERED_LIST],
         nodes: [ListNode, ListItemNode],
         plugins: [
@@ -42,21 +26,38 @@ const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (pr
           },
         ],
         slashMenu: {
-          options: [
+          groups: [
             {
               displayName: 'Lists',
-              key: 'lists',
-              options: [
-                new SlashMenuOption('unorderedlist', {
+              items: [
+                {
                   Icon: UnorderedListIcon,
                   displayName: 'Unordered List',
+                  key: 'unorderedlist',
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
                   },
-                }),
+                },
               ],
+              key: 'lists',
             },
+          ],
+        },
+        toolbarInline: {
+          groups: [
+            inlineToolbarTextDropdownGroupWithItems([
+              {
+                ChildComponent: UnorderedListIcon,
+                isActive: () => false,
+                key: 'unorderedList',
+                label: `Unordered List`,
+                onSelect: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+                },
+                order: 11,
+              },
+            ]),
           ],
         },
       }

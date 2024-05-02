@@ -2,7 +2,6 @@
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { HorizontalRuleIcon } from '../../lexical/ui/icons/HorizontalRule/index.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
@@ -23,20 +22,21 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
         },
       ],
       slashMenu: {
-        options: [
+        groups: [
           {
             displayName: 'Basic',
-            key: 'basic',
-            options: [
-              new SlashMenuOption(`horizontalrule`, {
+            items: [
+              {
                 Icon: HorizontalRuleIcon,
                 displayName: `Horizontal Rule`,
+                key: 'horizontalrule',
                 keywords: ['hr', 'horizontal rule', 'line', 'separator'],
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
                 },
-              }),
+              },
             ],
+            key: 'basic',
           },
         ],
       },

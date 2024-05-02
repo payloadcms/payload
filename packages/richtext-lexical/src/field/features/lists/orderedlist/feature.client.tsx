@@ -3,10 +3,10 @@ import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/li
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { SlashMenuItem } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList/index.js'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
+import { inlineToolbarTextDropdownGroupWithItems } from '../../shared/inlineToolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../plugin/index.js'
 import { ORDERED_LIST } from './markdownTransformer.js'
 
@@ -16,22 +16,6 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
     feature: ({ featureProviderMap }) => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            TextDropdownSectionWithEntries([
-              {
-                ChildComponent: OrderedListIcon,
-                isActive: () => false,
-                key: 'orderedList',
-                label: `Ordered List`,
-                onClick: ({ editor }) => {
-                  editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
-                },
-                order: 10,
-              },
-            ]),
-          ],
-        },
         markdownTransformers: [ORDERED_LIST],
         nodes: featureProviderMap.has('unorderedlist') ? [] : [ListNode, ListItemNode],
         plugins: featureProviderMap.has('unorderedlist')
@@ -43,21 +27,38 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
               },
             ],
         slashMenu: {
-          options: [
+          groups: [
             {
               displayName: 'Lists',
-              key: 'lists',
-              options: [
-                new SlashMenuOption('orderedlist', {
+              items: [
+                {
                   Icon: OrderedListIcon,
                   displayName: 'Ordered List',
+                  key: 'orderedlist',
                   keywords: ['ordered list', 'ol'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                   },
-                }),
+                },
               ],
+              key: 'lists',
             },
+          ],
+        },
+        toolbarInline: {
+          groups: [
+            inlineToolbarTextDropdownGroupWithItems([
+              {
+                ChildComponent: OrderedListIcon,
+                isActive: () => false,
+                key: 'orderedList',
+                label: `Ordered List`,
+                onSelect: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+                },
+                order: 10,
+              },
+            ]),
           ],
         },
       }

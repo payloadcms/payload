@@ -1,12 +1,12 @@
-@import '../../../../scss/styles.scss';
+@import '../../../../../../scss/styles';
 
 html[data-theme='light'] {
-  .floating-select-toolbar-popup {
+  .inline-toolbar-popup {
     @include shadow-m;
   }
 }
 
-.floating-select-toolbar-popup {
+.inline-toolbar-popup {
   display: flex;
   align-items: center;
   background: var(--color-base-0);
@@ -31,9 +31,10 @@ html[data-theme='light'] {
     border-top-color: var(--color-base-0);
   }
 
-  &__section {
+  &__group {
     display: flex;
     align-items: center;
+    gap: 2px;
 
     .icon {
       min-width: 20px;

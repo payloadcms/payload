@@ -7,16 +7,16 @@ import type { FeatureProviderProviderClient } from '../types.js'
 import { IndentDecreaseIcon } from '../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientComponent } from '../createClientComponent.js'
-import { IndentSectionWithEntries } from './floatingSelectToolbarIndentSection.js'
+import { indentGroupWithItems } from './inlineToolbarIndentGroup.js'
 
 const IndentFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
     feature: () => ({
       clientFeatureProps: props,
-      floatingSelectToolbar: {
-        sections: [
-          IndentSectionWithEntries([
+      toolbarInline: {
+        groups: [
+          indentGroupWithItems([
             {
               ChildComponent: IndentDecreaseIcon,
               isActive: () => false,
@@ -39,19 +39,17 @@ const IndentFeatureClient: FeatureProviderProviderClient<undefined> = (props) =>
               },
               key: 'indent-decrease',
               label: `Decrease Indent`,
-              onClick: ({ editor }) => {
+              onSelect: ({ editor }) => {
                 editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined)
               },
               order: 1,
             },
-          ]),
-          IndentSectionWithEntries([
             {
               ChildComponent: IndentIncreaseIcon,
               isActive: () => false,
               key: 'indent-increase',
               label: `Increase Indent`,
-              onClick: ({ editor }) => {
+              onSelect: ({ editor }) => {
                 editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined)
               },
               order: 2,

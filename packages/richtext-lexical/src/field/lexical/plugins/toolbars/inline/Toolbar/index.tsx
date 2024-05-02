@@ -14,93 +14,88 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { FloatingToolbarSection, FloatingToolbarSectionEntry } from './types.js'
+import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../types.js'
 
-import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
-import { getDOMRangeRect } from '../../utils/getDOMRangeRect.js'
-import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition.js'
-import { ToolbarButton } from './ToolbarButton/index.js'
-import { ToolbarDropdown } from './ToolbarDropdown/index.js'
+import { useEditorConfigContext } from '../../../../config/client/EditorConfigProvider.js'
+import { getDOMRangeRect } from '../../../../utils/getDOMRangeRect.js'
+import { setFloatingElemPosition } from '../../../../utils/setFloatingElemPosition.js'
+import { ToolbarButton } from '../ToolbarButton/index.js'
+import { ToolbarDropdown } from '../ToolbarDropdown/index.js'
 import './index.scss'
 
-function ButtonSectionEntry({
+function ButtonGroupItem({
   anchorElem,
   editor,
-  entry,
+  item,
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-  entry: FloatingToolbarSectionEntry
+  item: InlineToolbarGroupItem
 }): React.ReactNode {
-  if (entry.Component) {
+  if (item.Component) {
     return (
-      entry?.Component && (
-        <entry.Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />
+      item?.Component && (
+        <item.Component anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
       )
     )
   }
 
   return (
-    <ToolbarButton entry={entry} key={entry.key}>
-      {entry?.ChildComponent && <entry.ChildComponent />}
+    <ToolbarButton item={item} key={item.key}>
+      {item?.ChildComponent && <item.ChildComponent />}
     </ToolbarButton>
   )
 }
 
-function ToolbarSection({
+function ToolbarGroup({
   anchorElem,
   editor,
+  group,
   index,
-  section,
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
+  group: InlineToolbarGroup
   index: number
-  section: FloatingToolbarSection
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
   const Icon =
-    section?.type === 'dropdown' && section.entries.length && section.ChildComponent
-      ? section.ChildComponent
+    group?.type === 'dropdown' && group.items.length && group.ChildComponent
+      ? group.ChildComponent
       : null
 
   return (
     <div
-      className={`floating-select-toolbar-popup__section floating-select-toolbar-popup__section-${section.key}`}
-      key={section.key}
+      className={`inline-toolbar-popup__group inline-toolbar-popup__group-${group.key}`}
+      key={group.key}
     >
-      {section.type === 'dropdown' &&
-        section.entries.length &&
+      {group.type === 'dropdown' &&
+        group.items.length &&
         (Icon ? (
           <ToolbarDropdown
             Icon={Icon}
             anchorElem={anchorElem}
             editor={editor}
-            entries={section.entries}
-            sectionKey={section.key}
+            groupKey={group.key}
+            items={group.items}
           />
         ) : (
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            entries={section.entries}
-            sectionKey={section.key}
+            groupKey={group.key}
+            items={group.items}
           />
         ))}
-      {section.type === 'buttons' &&
-        section.entries.length &&
-        section.entries.map((entry) => {
+      {group.type === 'buttons' &&
+        group.items.length &&
+        group.items.map((item) => {
           return (
-            <ButtonSectionEntry
-              anchorElem={anchorElem}
-              editor={editor}
-              entry={entry}
-              key={entry.key}
-            />
+            <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
           )
         })}
-      {index < editorConfig.features.floatingSelectToolbar?.sections.length - 1 && (
+      {index < editorConfig.features.toolbarInline?.groups.length - 1 && (
         <div className="divider" />
       )}
     </div>
@@ -262,19 +257,19 @@ function FloatingSelectToolbar({
   }, [editor, updateTextFormatFloatingToolbar])
 
   return (
-    <div className="floating-select-toolbar-popup" ref={floatingToolbarRef}>
+    <div className="inline-toolbar-popup" ref={floatingToolbarRef}>
       <div className="caret" ref={caretRef} />
       {editor.isEditable() && (
         <React.Fragment>
           {editorConfig?.features &&
-            editorConfig.features?.floatingSelectToolbar?.sections.map((section, i) => {
+            editorConfig.features?.toolbarInline?.groups.map((group, i) => {
               return (
-                <ToolbarSection
+                <ToolbarGroup
                   anchorElem={anchorElem}
                   editor={editor}
+                  group={group}
                   index={i}
-                  key={section.key}
-                  section={section}
+                  key={group.key}
                 />
               )
             })}

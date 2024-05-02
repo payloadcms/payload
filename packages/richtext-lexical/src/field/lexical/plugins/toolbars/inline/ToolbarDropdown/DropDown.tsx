@@ -6,9 +6,9 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { FloatingToolbarSectionEntry } from '../types.js'
+import type { InlineToolbarGroupItem } from '../types.js'
 
-const baseClass = 'floating-select-toolbar-popup__dropdown-item'
+const baseClass = 'inline-toolbar-popup__dropdown-item'
 
 interface DropDownContextType {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
@@ -18,11 +18,11 @@ const DropDownContext = React.createContext<DropDownContextType | null>(null)
 
 export function DropDownItem({
   children,
-  entry,
+  item,
   title,
 }: {
   children: React.ReactNode
-  entry: FloatingToolbarSectionEntry
+  item: InlineToolbarGroupItem
   title?: string
 }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
@@ -33,20 +33,20 @@ export function DropDownItem({
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
-      if (entry.isActive) {
-        const isActive = entry.isActive({ editor, selection })
+      if (item.isActive) {
+        const isActive = item.isActive({ editor, selection })
         if (active !== isActive) {
           setActive(isActive)
         }
       }
-      if (entry.isEnabled) {
-        const isEnabled = entry.isEnabled({ editor, selection })
+      if (item.isEnabled) {
+        const isEnabled = item.isEnabled({ editor, selection })
         if (enabled !== isEnabled) {
           setEnabled(isEnabled)
         }
       }
     })
-  }, [active, editor, enabled, entry])
+  }, [active, editor, enabled, item])
 
   useEffect(() => {
     updateStates()
@@ -73,12 +73,12 @@ export function DropDownItem({
         baseClass,
         enabled === false ? 'disabled' : '',
         active ? 'active' : '',
-        entry?.key ? `${baseClass}-${entry.key}` : '',
+        item?.key ? `${baseClass}-${item.key}` : '',
       ]
         .filter(Boolean)
         .join(' '),
     )
-  }, [enabled, active, className, entry.key])
+  }, [enabled, active, className, item.key])
 
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -101,7 +101,7 @@ export function DropDownItem({
       className={className}
       onClick={() => {
         if (enabled !== false) {
-          entry.onClick({
+          item.onSelect({
             editor,
             isActive: active,
           })
@@ -185,7 +185,7 @@ function DropDownItems({
   return (
     <DropDownContext.Provider value={contextValue}>
       <div
-        className="floating-select-toolbar-popup__dropdown-items"
+        className="inline-toolbar-popup__dropdown-items"
         onKeyDown={handleKeyDown}
         ref={dropDownRef}
       >
@@ -277,7 +277,7 @@ export function DropDown({
         type="button"
       >
         <Icon />
-        <i className="floating-select-toolbar-popup__dropdown-caret" />
+        <i className="inline-toolbar-popup__dropdown-caret" />
       </button>
 
       {showDropDown &&

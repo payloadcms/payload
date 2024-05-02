@@ -6,7 +6,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { CodeIcon } from '../../../lexical/ui/icons/Code/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 import { INLINE_CODE } from './markdownTransformers.js'
 
 const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
@@ -15,9 +15,11 @@ const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props
     feature: () => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        markdownTransformers: [INLINE_CODE],
+
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: CodeIcon,
                 isActive: ({ selection }) => {
@@ -27,7 +29,7 @@ const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props
                   return false
                 },
                 key: 'code',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
                 },
                 order: 7,
@@ -35,8 +37,6 @@ const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props
             ]),
           ],
         },
-
-        markdownTransformers: [INLINE_CODE],
       }
     },
   }
