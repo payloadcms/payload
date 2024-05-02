@@ -1,6 +1,5 @@
 'use client'
-import lexicalListPluginImport from '@lexical/react/LexicalListPlugin.js'
-const { ListPlugin } = lexicalListPluginImport
+import { ListPlugin } from '@lexical/react/LexicalListPlugin.js'
 import React from 'react'
 
 export function LexicalListPlugin() {

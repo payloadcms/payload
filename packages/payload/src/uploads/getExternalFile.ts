@@ -9,11 +9,14 @@ type Args = {
   uploadConfig: UploadConfig
 }
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
-  const baseUrl = req.origin || `${req.protocol}://${req.host}`
   const { filename, url } = data
 
   if (typeof url === 'string') {
-    const fileURL = `${baseUrl}${url}`
+    let fileURL = url
+    if (!url.startsWith('http')) {
+      const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
+      fileURL = `${baseUrl}${url}`
+    }
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))

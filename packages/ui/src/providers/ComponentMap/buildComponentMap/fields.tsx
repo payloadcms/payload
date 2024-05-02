@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { CustomComponent } from 'packages/payload/src/config/types.js'
+import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -567,6 +567,9 @@ export const mapFields = (args: {
               required: field.required,
               style: field.admin?.style,
               width: field.admin?.width,
+            }
+            if (typeof field?.editor === 'function') {
+              throw new Error('Attempted to access unsanitized rich text editor.')
             }
 
             const RichTextFieldComponent = field.editor.FieldComponent

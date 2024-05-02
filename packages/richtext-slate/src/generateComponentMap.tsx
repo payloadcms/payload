@@ -1,14 +1,12 @@
-import type { RichTextAdapter } from 'payload/types'
+import type { Field, RichTextAdapter } from 'payload/types'
 
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
-import { sanitizeFields } from 'payload/config'
 import React from 'react'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.js'
 
 import { elements as elementTypes } from './field/elements/index.js'
 import { linkFieldsSchemaPath } from './field/elements/link/shared.js'
-import { transformExtraFields } from './field/elements/link/utilities.js'
 import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 
@@ -16,8 +14,6 @@ export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>
   ({ WithServerSideProps, config, i18n }) => {
     const componentMap = new Map()
-
-    const validRelationships = config.collections.map((c) => c.slug) || []
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
       let leafObject: RichTextCustomLeaf
@@ -66,16 +62,10 @@ export const getGenerateComponentMap =
 
         switch (element.name) {
           case 'link': {
-            const linkFields = sanitizeFields({
-              config,
-              fields: transformExtraFields(args.admin?.link?.fields, config, i18n),
-              validRelationships,
-            })
-
             const mappedFields = mapFields({
               WithServerSideProps,
               config,
-              fieldSchema: linkFields,
+              fieldSchema: args.admin?.link?.fields as Field[],
               i18n,
               readOnly: false,
             })
@@ -98,16 +88,10 @@ export const getGenerateComponentMap =
 
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-                const uploadFields = sanitizeFields({
-                  config,
-                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
-                  validRelationships,
-                })
-
                 const mappedFields = mapFields({
                   WithServerSideProps,
                   config,
-                  fieldSchema: uploadFields,
+                  fieldSchema: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
                   readOnly: false,
                 })

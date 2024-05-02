@@ -10,6 +10,9 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   noAdminAccessEmail,
+  nonAdminUserEmail,
+  nonAdminUserSlug,
+  readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
@@ -73,6 +76,19 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    {
+      slug: readOnlyGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+    },
   ],
   collections: [
     {
@@ -107,6 +123,11 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+    },
+    {
+      slug: nonAdminUserSlug,
+      auth: true,
+      fields: [],
     },
     {
       slug,
@@ -469,6 +490,14 @@ export default buildConfigWithDefaults({
       collection: 'users',
       data: {
         email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await payload.create({
+      collection: nonAdminUserSlug,
+      data: {
+        email: nonAdminUserEmail,
         password: 'test',
       },
     })

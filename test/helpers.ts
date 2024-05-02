@@ -1,8 +1,9 @@
-import type { BrowserContext, Locator, Page } from '@playwright/test'
+import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { wait } from 'payload/utilities'
 import shelljs from 'shelljs'
+import { setTimeout } from 'timers/promises'
 
 import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
@@ -20,6 +21,7 @@ type LoginArgs = {
   page: Page
   serverURL: string
 }
+const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
 const networkConditions = {
   'Slow 3G': {
@@ -61,9 +63,14 @@ export async function ensureAutoLoginAndCompilationIsDone({
   await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
+  // Check if hero is there
+  await expect(page.locator('.dashboard__label').first()).toBeVisible()
 }
 
-export async function delayNetwork({
+/**
+ * CPU throttling & 2 different kinds of network throttling
+ */
+export async function throttleTest({
   context,
   page,
   delay,
@@ -80,6 +87,14 @@ export async function delayNetwork({
     latency: networkConditions[delay].latency,
     offline: false,
   })
+
+  await page.route('**/*', async (route) => {
+    await setTimeout(random(500, 1000))
+    await route.continue()
+  })
+
+  const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
+  await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {

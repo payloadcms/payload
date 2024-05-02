@@ -33,14 +33,11 @@ async function main() {
 
   const packageWhitelist = [
     'payload',
-    'translations',
     'ui',
     'next',
-    'graphql',
     'db-mongodb',
-    'db-postgres',
-    'richtext-slate',
     'richtext-lexical',
+    'translations',
   ]
 
   const packageDetails = await getPackageDetails(packageWhitelist)
@@ -52,9 +49,9 @@ async function main() {
 
   const filtered = packageDetails.filter((p): p is Exclude<typeof p, null> => p !== null)
 
-  header(`\n Outputting ${filtered.length} packages...
+  header(`\nOutputting ${filtered.length} packages...
 
-    ${filtered.map((p) => p.name).join('\n')}
+${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
 `)
 
   execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
@@ -63,7 +60,6 @@ async function main() {
 
   await Promise.all(
     filtered.map(async (p) => {
-      await exec(`pnpm -r --filter ${p.shortName} run prepublishOnly`)
       await exec(`pnpm pack -C ${p.packagePath} --pack-destination ${resolvedDest}`)
     }),
   )
@@ -72,8 +68,5 @@ async function main() {
 }
 
 function header(message: string, opts?: { enable?: boolean }) {
-  const { enable } = opts ?? {}
-  if (!enable) return
-
   console.log(chalk.bold.green(`${message}\n`))
 }

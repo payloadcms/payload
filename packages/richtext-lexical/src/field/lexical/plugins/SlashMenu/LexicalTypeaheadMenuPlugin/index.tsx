@@ -7,16 +7,15 @@ import type {
   TextNode,
 } from 'lexical'
 
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
-import lexicalUtilsImport from '@lexical/utils'
-const { mergeRegister } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const { $getSelection, $isRangeSelection, $isTextNode, COMMAND_PRIORITY_LOW, createCommand } =
-  lexicalImport
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { mergeRegister } from '@lexical/utils'
+import {
+  $getSelection,
+  $isRangeSelection,
+  $isTextNode,
+  COMMAND_PRIORITY_LOW,
+  createCommand,
+} from 'lexical'
 import { useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 

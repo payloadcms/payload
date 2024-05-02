@@ -16,10 +16,10 @@ export default buildConfigWithDefaults({
     PostsCollection,
     // MediaCollection
   ],
-  // globals: [
-  //   MenuGlobal,
-  //   // ...add more globals here
-  // ],
+  globals: [
+    MenuGlobal,
+    // ...add more globals here
+  ],
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({

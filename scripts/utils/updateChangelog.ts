@@ -1,155 +1,206 @@
-import type {
-  GitRawCommitsOptions,
-  ParserOptions,
-  WriterOptions,
-} from 'conventional-changelog-core'
+import type { GitCommit, RawGitCommit } from 'changelogen'
 
-import { Octokit } from '@octokit/core'
-import addStream from 'add-stream'
-import conventionalChangelog from 'conventional-changelog'
-import { default as getConventionalPreset } from 'conventional-changelog-conventionalcommits'
-import { once } from 'events'
+import chalk from 'chalk'
+import { execSync } from 'child_process'
 import fse from 'fs-extra'
 import minimist from 'minimist'
-import { simpleGit } from 'simple-git'
-import tempfile from 'tempfile'
+import open from 'open'
+import semver from 'semver'
 
-const { createReadStream, createWriteStream } = fse
-
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
-const git = simpleGit()
+import { getLatestCommits } from './getLatestCommits.js'
+import { getRecommendedBump } from './getRecommendedBump.js'
 
 type Args = {
-  newVersion: string
+  fromVersion?: string
+  toVersion?: string
+  bump?: 'major' | 'minor' | 'patch' | 'prerelease'
   dryRun?: boolean
+  openReleaseUrl?: boolean
+  writeChangelog?: boolean
 }
 
-export const updateChangelog = async ({ newVersion, dryRun }: Args) => {
-  const monorepoVersion = fse.readJSONSync('package.json')?.version
+export const updateChangelog = async (args: Args = {}) => {
+  const { toVersion = 'HEAD', dryRun, bump, openReleaseUrl, writeChangelog } = args
 
-  if (!monorepoVersion) {
-    throw new Error('Could not find version in package.json')
+  const fromVersion =
+    args.fromVersion || execSync('git describe --tags --abbrev=0').toString().trim()
+
+  const tag = fromVersion.match(/-(\w+)\.\d+$/)?.[1] || 'latest'
+
+  const recommendedBump =
+    tag !== 'latest' ? 'prerelease' : await getRecommendedBump(fromVersion, toVersion)
+
+  if (bump && bump !== recommendedBump) {
+    console.log(`WARNING: Recommended bump is ${recommendedBump}, but you specified ${bump}`)
   }
 
-  const lastTag = (await git.tags()).all.reverse().filter((t) => t.startsWith('v'))?.[0]
+  const calculatedBump = bump || recommendedBump
 
-  if (monorepoVersion !== lastTag.replace('v', '')) {
-    throw new Error(
-      `Version in package.json (${monorepoVersion}) does not match last tag (${lastTag})`,
-    )
-  }
+  const proposedReleaseVersion = semver.inc(fromVersion, calculatedBump, undefined, tag)
 
-  // Load conventional commits preset and modify it
-  const conventionalPreset = (await getConventionalPreset()) as {
-    conventionalChangelog: unknown
-    gitRawCommitsOpts: GitRawCommitsOptions
-    parserOpts: ParserOptions
-    writerOpts: WriterOptions
-  }
-
-  // Unbold scope
-  conventionalPreset.writerOpts.commitPartial =
-    conventionalPreset.writerOpts?.commitPartial?.replace('**{{scope}}:**', '{{scope}}:')
-
-  // Add footer to end of main template
-  conventionalPreset.writerOpts.mainTemplate = conventionalPreset.writerOpts?.mainTemplate?.replace(
-    /\n*$/,
-    '{{footer}}\n',
-  )
-
-  // Fetch commits from last tag to HEAD
-  const credits = await createContributorSection(lastTag)
-
-  // Add Credits to footer
-  conventionalPreset.writerOpts.finalizeContext = (context) => {
-    context.footer = credits
-    return context
-  }
-
-  const changelogStream = conventionalChangelog(
-    // Options
-    {
-      preset: 'conventionalcommits',
-    },
-    // Context
-    {
-      version: newVersion, // next release
-    },
-    // GitRawCommitsOptions
-    {
-      path: 'packages',
-    },
-    undefined,
-    conventionalPreset.writerOpts,
-  ).on('error', (err) => {
-    console.error(err.stack)
-    console.error(err.toString())
-    process.exit(1)
+  console.log({
+    tag,
+    recommendedBump,
+    fromVersion,
+    toVersion,
+    proposedVersion: proposedReleaseVersion,
   })
 
-  const changelogFile = 'CHANGELOG.md'
-  const readStream = fse.createReadStream(changelogFile)
-  const tmp = tempfile()
+  const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
 
-  // Output to stdout if debug is true
-  const emitter = dryRun
-    ? changelogStream.pipe(createWriteStream(tmp)).on('finish', () => {
-        createReadStream(tmp).pipe(process.stdout)
-      })
-    : changelogStream
-        .pipe(addStream(readStream))
-        .pipe(createWriteStream(tmp))
-        .on('finish', () => {
-          createReadStream(tmp).pipe(createWriteStream(changelogFile))
-        })
+  const sections: Record<'breaking' | 'feat' | 'fix', string[]> = {
+    feat: [],
+    fix: [],
+    breaking: [],
+  }
 
-  // Wait for the stream to finish
-  await once(emitter, 'finish')
+  // Group commits by type
+  conventionalCommits.forEach((c) => {
+    if (c.isBreaking) {
+      sections.breaking.push(formatCommitForChangelog(c, true))
+    }
+
+    if (c.type === 'feat' || c.type === 'fix') {
+      sections[c.type].push(formatCommitForChangelog(c))
+    }
+  })
+
+  // Fetch commits for fromVersion to toVersion
+  const contributors = await createContributorSection(conventionalCommits)
+
+  const yyyyMMdd = new Date().toISOString().split('T')[0]
+  // Might need to swap out HEAD for the new proposed version
+  let output = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
+  if (sections.feat.length) {
+    output += `### Features\n\n${sections.feat.join('\n')}\n\n`
+  }
+  if (sections.fix.length) {
+    output += `### Bug Fixes\n\n${sections.fix.join('\n')}\n\n`
+  }
+  if (sections.breaking.length) {
+    output += `### BREAKING CHANGES\n\n${sections.breaking.join('\n')}\n\n`
+  }
+
+  console.log(chalk.green('\nChangelog Preview:\n'))
+  console.log(chalk.gray(output))
+
+  if (writeChangelog) {
+    const changelogPath = 'CHANGELOG.md'
+    const changelog = await fse.readFile(changelogPath, 'utf8')
+    const newChangelog = output + '\n\n' + changelog
+    await fse.writeFile(changelogPath, newChangelog)
+    console.log(`Changelog updated at ${changelogPath}`)
+  }
+
+  // Add contributors after writing to file
+  output += contributors
+
+  let url = `https://github.com/payloadcms/payload/releases/new?tag=${proposedReleaseVersion}&title=${proposedReleaseVersion}&body=${encodeURIComponent(output)}`
+  if (tag !== 'latest') {
+    url += `&prerelease=1`
+  }
+  console.log(`Release URL: ${chalk.dim(url)}`)
+  if (!openReleaseUrl) {
+    await open(url)
+  }
+}
+
+// Helper functions
+
+async function createContributorSection(commits: GitCommit[]): Promise<string> {
+  const contributors = await getContributors(commits)
+  if (!contributors.length) return ''
+
+  let contributorsSection = `### Contributors\n\n`
+
+  for (const contributor of contributors) {
+    contributorsSection += `- ${contributor.name} (@${contributor.username})\n`
+  }
+
+  return contributorsSection
+}
+
+async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
+  const contributors: Contributor[] = []
+  const emails = new Set<string>()
+
+  for (const commit of commits) {
+    if (emails.has(commit.author.email) || commit.author.name === 'dependabot[bot]') {
+      continue
+    }
+
+    const res = await fetch(
+      `https://api.github.com/repos/payloadcms/payload/commits/${commit.shortHash}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
+      },
+    )
+
+    if (!res.ok) {
+      console.error(await res.text())
+      console.log(`Failed to fetch commit: ${res.status} ${res.statusText}`)
+      continue
+    }
+
+    const { author } = (await res.json()) as { author: { login: string; email: string } }
+
+    // TODO: Handle co-authors
+
+    if (!contributors.some((c) => c.username === author.login)) {
+      contributors.push({ name: commit.author.name, username: author.login })
+    }
+    emails.add(author.email)
+  }
+  return contributors
+}
+
+type Contributor = { name: string; username: string }
+
+function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = false): string {
+  const { scope, references, description, isBreaking } = commit
+
+  let formatted = `* ${scope ? `${scope}: ` : ''}${description}`
+  references.forEach((ref) => {
+    if (ref.type === 'pull-request') {
+      // /issues will redirect to /pulls if the issue is a PR
+      formatted += ` ([${ref.value}](https://github.com/payloadcms/payload/issues/${ref.value.replace('#', '')}))`
+    }
+
+    if (ref.type === 'hash') {
+      const shortHash = ref.value.slice(0, 7)
+      formatted += ` ([${shortHash}](https://github.com/payloadcms/payload/commit/${shortHash}))`
+    }
+  })
+
+  if (isBreaking && includeBreakingNotes) {
+    // Parse breaking change notes from commit body
+    const [rawNotes, _] = commit.body.split('\n\n')
+    const notes = rawNotes
+      .split('\n')
+      .filter((l) => !l.toUpperCase().startsWith('BREAKING'))
+      .map((l) => `> ${l}`)
+      .join('\n')
+      .trim()
+    formatted += `\n\n${notes}`
+  }
+
+  return formatted
 }
 
 // module import workaround for ejs
 if (import.meta.url === `file://${process.argv[1]}`) {
   // This module is being run directly
-  const { newVersion } = minimist(process.argv.slice(2))
-  updateChangelog({ dryRun: true, newVersion })
+  const { fromVersion, toVersion, bump, openReleaseUrl, writeChangelog } = minimist(
+    process.argv.slice(2),
+  )
+  updateChangelog({ bump, fromVersion, toVersion, dryRun: false, openReleaseUrl, writeChangelog })
     .then(() => {
       console.log('Done')
     })
     .catch((err) => {
       console.error(err)
     })
-}
-
-async function createContributorSection(lastTag: string): Promise<string> {
-  const commits = await git.log({ from: lastTag, to: 'HEAD' })
-  console.log(`Fetching contributors from ${commits.total} commits`)
-  const usernames = await Promise.all(
-    commits.all.map((c) =>
-      octokit
-        .request('GET /repos/{owner}/{repo}/commits/{ref}', {
-          owner: 'payloadcms',
-          repo: 'payload',
-          ref: c.hash,
-        })
-        .then(({ data }) => data.author?.login),
-    ),
-  )
-
-  if (!usernames.length) return ''
-
-  // List of unique contributors
-  const contributors = Array.from(new Set(usernames)).map((c) => `@${c}`)
-
-  const formats = {
-    1: (contributors: string[]) => contributors[0],
-    2: (contributors: string[]) => contributors.join(' and '),
-    // Oxford comma ;)
-    default: (contributors: string[]) => contributors.join(', ').replace(/,([^,]*)$/, ', and$1'),
-  }
-
-  const formattedContributors =
-    formats[contributors.length]?.(contributors) || formats['default'](contributors)
-
-  const credits = `### Credits\n\nThanks to ${formattedContributors} for their contributions!\n`
-  return credits
 }

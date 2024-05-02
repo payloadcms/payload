@@ -36,12 +36,20 @@ html[data-theme='light'] {
     position: relative;
     font-family: var(--font-body);
 
+    &__label-pure {
+      color: var(--color-base-1000);
+      margin-right: 15px;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
     a {
       text-decoration: none;
       display: block;
       white-space: nowrap;
       overflow: hidden;
-      margin-right: 30px;
+      margin-right: 15px;
       text-overflow: ellipsis;
       color: var(--color-blue-600);
       border-bottom: 1px dotted;

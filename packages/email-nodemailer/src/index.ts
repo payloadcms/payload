@@ -27,6 +27,7 @@ export const nodemailerAdapter = async (
   const { defaultFromAddress, defaultFromName, transport } = await buildEmail(args)
 
   const adapter: NodemailerAdapter = () => ({
+    name: 'nodemailer',
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {

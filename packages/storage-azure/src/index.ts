@@ -120,6 +120,7 @@ function azureStorageInternal({
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
+      name: 'azure',
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({

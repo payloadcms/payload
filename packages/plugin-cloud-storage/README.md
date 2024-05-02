@@ -2,7 +2,7 @@
 
 This repository contains the officially supported Payload Cloud Storage plugin. It extends Payload to allow you to store all uploaded media in third-party permanent storage.
 
-**NOTE:** If you are using Payload 3.0 and one of the following storage services, you can use the following packages instead of this one:
+**NOTE:** If you are using Payload 3.0 and one of the following storage services, you should use one of following packages instead of this one:
 
 | Service              | Package                                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -94,109 +94,6 @@ This plugin is configurable to work across many different Payload collections. A
 | `disablePayloadAccessControl` | `true`                                                                                             | Set to `true` to disable Payload's access control. [More](#payload-access-control)                                                                                                                            |
 | `prefix`                      | `string`                                                                                           | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                                                                                                             |
 | `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/plugin-cloud-storage/blob/master/src/types.ts#L53) | Override the generated file URL with one that you create.                                                                                                                                                     |
-
-### Azure Blob Storage Adapter
-
-To use the Azure Blob Storage adapter, you need to have `@azure/storage-blob` installed in your project dependencies. To do so, run `yarn add @azure/storage-blob`.
-
-From there, create the adapter, passing in all of its required properties:
-
-```js
-import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
-
-const adapter = azureBlobStorageAdapter({
-  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
-  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
-  allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
-  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
-})
-
-// Now you can pass this adapter to the plugin
-```
-
-### S3 Adapter
-
-To use the S3 adapter, some peer dependencies need to be installed:
-
-`yarn add @aws-sdk/client-s3 @aws-sdk/lib-storage aws-crt`.
-
-From there, create the adapter, passing in all of its required properties:
-
-```js
-import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
-
-const adapter = s3Adapter({
-  config: {
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    },
-    region: process.env.S3_REGION,
-    // ... Other S3 configuration
-  },
-  bucket: process.env.S3_BUCKET,
-})
-
-// Now you can pass this adapter to the plugin
-```
-
-Note that the credentials option does not have to be used when you are using PayloadCMS on an EC2 instance that has been configured with an IAM Role with necessary permissions.
-
-Other S3 Client configuration is documented [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html).
-
-Any upload over 50MB will automatically be uploaded using S3's multi-part upload.
-
-#### Other S3-Compatible Storage
-
-If you're running an S3-compatible object storage such as MinIO or Digital Ocean Spaces, you'll have to set the `endpoint` appropriately for the provider.
-
-```js
-import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
-
-const adapter = s3Adapter({
-  config: {
-    endpoint: process.env.S3_ENDPOINT, // Configure for your provider
-    // ...
-  },
-  // ...
-})
-```
-
-### GCS Adapter
-
-To use the GCS adapter, you need to have `@google-cloud/storage` installed in your project dependencies. To do so, run `yarn add @google-cloud/storage`.
-
-From there, create the adapter, passing in all of its required properties:
-
-```js
-import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs'
-
-const adapter = gcsAdapter({
-  options: {
-    // you can choose any method for authentication, and authorization which is being provided by `@google-cloud/storage`
-    keyFilename: './gcs-credentials.json',
-    //OR
-    credentials: JSON.parse(process.env.GCS_CREDENTIALS || '{}'), // this env variable will have stringify version of your credentials.json file
-  },
-  bucket: process.env.GCS_BUCKET,
-})
-
-// Now you can pass this adapter to the plugin
-```
-
-### Vercel Blob Adapter
-
-To use the Vercel Blob adapter, you need to have `@vercel/blob` installed in your project dependencies.
-
-```ts
-import { vercelBlobAdapter } from '@payloadcms/plugin-cloud-storage/vercelBlob'
-
-const adapter = vercelBlobAdapter({
-  token: process.env.BLOB_READ_WRITE_TOKEN || '',
-})
-```
-
-Credit to @JarvisPrestidge for the original implementation of this plugin.
 
 ### Payload Access Control
 

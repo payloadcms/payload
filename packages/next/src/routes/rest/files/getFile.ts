@@ -1,12 +1,12 @@
 import type { Collection, PayloadRequestWithData } from 'payload/types'
 
-import getFileType from 'file-type'
+import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
 import path from 'path'
 import { APIError } from 'payload/errors'
 
-import { streamFile } from '../../../next-stream-file/index.js'
+import { streamFile } from '../../../fetchAPI-stream-file/index.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 import { checkFileAccess } from './checkFileAccess.js'
@@ -58,7 +58,7 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       'Content-Length': stats.size + '',
     })
 
-    const fileTypeResult = (await getFileType.fromFile(filePath)) || getFileTypeFallback(filePath)
+    const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
     headers.set('Content-Type', fileTypeResult.mime)
 
     return new Response(data, {

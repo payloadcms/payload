@@ -1,5 +1,8 @@
+// @ts-check
+
 import { existsSync, promises } from 'fs'
-import json5 from 'json5'
+import { parse, stringify } from 'comment-json'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -9,7 +12,8 @@ const dirname = path.dirname(filename)
 
 export const createTestHooks = async (testSuiteName = '_community') => {
   const tsConfigPath = path.resolve(dirname, '../tsconfig.json')
-  const tsConfig = await json5.parse(await readFile(tsConfigPath, 'utf8'))
+  const tsConfigContent = await readFile(tsConfigPath, 'utf8')
+  const tsConfig = parse(tsConfigContent)
 
   return {
     /**
@@ -23,19 +27,12 @@ export const createTestHooks = async (testSuiteName = '_community') => {
       }
 
       // Set '@payload-config' in tsconfig.json
+
+      // @ts-expect-error
       tsConfig.compilerOptions.paths['@payload-config'] = [`./test/${testSuiteName}/config.ts`]
-      await writeFile(tsConfigPath, JSON.stringify(tsConfig, null, 2))
+      await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
 
       process.env.PAYLOAD_CONFIG_PATH = path.resolve(testSuiteName, 'config')
-    },
-    /**
-     * Reset the changes made to tsconfig.json
-     */
-    afterTest: async () => {
-      // Set original value of '@payload-config' back to default of _community
-      tsConfig.compilerOptions.paths['@payload-config'] = ['./test/_community/config.ts']
-
-      await writeFile(tsConfigPath, JSON.stringify(tsConfig, null, 2) + '\n')
     },
   }
 }

@@ -149,7 +149,10 @@ const handleCustomEndpoints = ({
     })
 
     if (customEndpoint) {
-      payloadRequest.routeParams = handlerParams
+      payloadRequest.routeParams = {
+        ...payloadRequest.routeParams,
+        ...handlerParams,
+      }
       return customEndpoint.handler(payloadRequest)
     }
   }
@@ -211,9 +214,6 @@ export const GET =
     try {
       req = await createPayloadRequest({
         config,
-        params: {
-          collection: slug1,
-        },
         request,
       })
 
@@ -227,6 +227,7 @@ export const GET =
       collection = req.payload.collections?.[slug1]
 
       if (collection) {
+        req.routeParams.collection = slug1
         const disableEndpoints = endpointsAreDisabled({
           endpoints: collection.config.endpoints,
           request,
@@ -295,12 +296,12 @@ export const GET =
         }
       } else if (slug1 === 'globals') {
         const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
+        req.routeParams.global = globalConfig.slug
 
         const disableEndpoints = endpointsAreDisabled({
           endpoints: globalConfig.endpoints,
           request,
         })
-
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
@@ -391,7 +392,6 @@ export const POST =
     try {
       req = await createPayloadRequest({
         config,
-        params: { collection: slug1 },
         request,
       })
 
@@ -405,6 +405,7 @@ export const POST =
       if (disableEndpoints) return disableEndpoints
 
       if (collection) {
+        req.routeParams.collection = slug1
         const disableEndpoints = endpointsAreDisabled({
           endpoints: collection.config.endpoints,
           request,
@@ -466,6 +467,8 @@ export const POST =
         }
       } else if (slug1 === 'globals' && slug2) {
         const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
+        req.routeParams.global = globalConfig.slug
+
         const disableEndpoints = endpointsAreDisabled({
           endpoints: globalConfig.endpoints,
           request,
@@ -553,9 +556,6 @@ export const DELETE =
     try {
       req = await createPayloadRequest({
         config,
-        params: {
-          collection: slug1,
-        },
         request,
       })
       collection = req.payload.collections?.[slug1]
@@ -567,6 +567,8 @@ export const DELETE =
       if (disableEndpoints) return disableEndpoints
 
       if (collection) {
+        req.routeParams.collection = slug1
+
         const disableEndpoints = endpointsAreDisabled({
           endpoints: collection.config.endpoints,
           request,
@@ -635,9 +637,6 @@ export const PATCH =
     try {
       req = await createPayloadRequest({
         config,
-        params: {
-          collection: slug1,
-        },
         request,
       })
       collection = req.payload.collections?.[slug1]
@@ -649,6 +648,8 @@ export const PATCH =
       if (disableEndpoints) return disableEndpoints
 
       if (collection) {
+        req.routeParams.collection = slug1
+
         const disableEndpoints = endpointsAreDisabled({
           endpoints: collection.config.endpoints,
           request,

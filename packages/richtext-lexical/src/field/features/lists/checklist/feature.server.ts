@@ -1,5 +1,4 @@
-import lexicalListImport from '@lexical/list'
-const { ListItemNode, ListNode } = lexicalListImport
+import { ListItemNode, ListNode } from '@lexical/list'
 
 import type { FeatureProviderProviderServer } from '../../types.js'
 
