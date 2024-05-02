@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FieldAffectingData, Where } from 'payload/types'
+import type { ClientCollectionConfig, Where } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -59,7 +59,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
-  const hasWhereParam = useRef<boolean>(Boolean(searchParams?.where))
+  const hasWhereParam = useRef(Boolean(searchParams?.where))
 
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
