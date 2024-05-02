@@ -1,18 +1,26 @@
+import { initPage } from '@payloadcms/next/utilities'
 import Link from 'next/link'
 import React from 'react'
 
+import configPromise from '../../../payload.config'
 import { Button } from '../_components/Button'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
-import { getMeUser } from '../_utilities/getMeUser'
 import { AccountForm } from './AccountForm'
 import classes from './index.module.scss'
 
-export default async function Account() {
-  await getMeUser({
-    nullUserRedirect: `/login?error=${encodeURIComponent(
-      'You must be logged in to access your account.',
-    )}&redirect=${encodeURIComponent('/account')}`,
+export default async function Account({
+  searchParams,
+}: {
+  searchParams: {
+    [key: string]: string | string[]
+  }
+}) {
+  await initPage({
+    config: configPromise,
+    redirectUnauthenticatedUser: `/login?error=${encodeURIComponent('You must be logged in to access your account.')}`,
+    route: '/account',
+    searchParams,
   })
 
   return (

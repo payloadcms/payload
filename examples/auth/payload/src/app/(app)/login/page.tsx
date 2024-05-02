@@ -1,15 +1,29 @@
+import { initPage } from '@payloadcms/next/utilities'
+import { redirect } from 'next/navigation'
 import React from 'react'
 
+import configPromise from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
-import { getMeUser } from '../_utilities/getMeUser'
 import { LoginForm } from './LoginForm'
 import classes from './index.module.scss'
 
-export default async function Login() {
-  await getMeUser({
-    validUserRedirect: `/account?message=${encodeURIComponent('You are already logged in.')}`,
+export default async function Login({
+  searchParams,
+}: {
+  searchParams: {
+    [key: string]: string | string[]
+  }
+}) {
+  const initPageResult = await initPage({
+    config: configPromise,
+    route: '/login',
+    searchParams,
   })
+
+  if (initPageResult.req.user) {
+    redirect(`/account?message=${encodeURIComponent('You are already logged in.')}`)
+  }
 
   return (
     <Gutter className={classes.login}>
