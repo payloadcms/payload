@@ -52,7 +52,7 @@ const packageWhitelist = [
   'plugin-redirects',
   'plugin-search',
   'plugin-seo',
-  // 'plugin-stripe',
+  'plugin-stripe',
   // 'plugin-sentry',
 ]
 

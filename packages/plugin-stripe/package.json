@@ -24,8 +24,8 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "main": "./src/index.ts",
@@ -36,12 +36,14 @@
     "types.d.ts"
   ],
   "scripts": {
-    "build": "echo \"Build temporarily disabled.\" && exit 0",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo run build && pnpm test",
-    "test": "echo 'No tests available.'"
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
@@ -51,17 +53,19 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/lodash.get": "^4.4.7",
     "@types/react": "18.2.74",
     "@types/uuid": "^9.0.0",
-    "payload": "workspace:*",
-    "prettier": "^2.7.1",
-    "webpack": "^5.78.0"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {
@@ -72,6 +76,7 @@
       }
     },
     "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
   "homepage:": "https://payloadcms.com"

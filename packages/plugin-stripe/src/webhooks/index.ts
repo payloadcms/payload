@@ -1,9 +1,9 @@
-import type { StripeWebhookHandler } from '../types'
+import type { StripeWebhookHandler } from '../types.js'
 
-import { handleCreatedOrUpdated } from './handleCreatedOrUpdated'
-import { handleDeleted } from './handleDeleted'
+import { handleCreatedOrUpdated } from './handleCreatedOrUpdated.js'
+import { handleDeleted } from './handleDeleted.js'
 
-export const handleWebhooks: StripeWebhookHandler = async (args) => {
+export const handleWebhooks: StripeWebhookHandler = (args) => {
   const { event, payload, stripeConfig } = args
 
   if (stripeConfig?.logs)
@@ -21,7 +21,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
   if (syncConfig) {
     switch (method) {
       case 'created': {
-        await handleCreatedOrUpdated({
+        void handleCreatedOrUpdated({
           ...args,
           resourceType,
           stripeConfig,
@@ -30,7 +30,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
         break
       }
       case 'updated': {
-        await handleCreatedOrUpdated({
+        void handleCreatedOrUpdated({
           ...args,
           resourceType,
           stripeConfig,
@@ -39,7 +39,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
         break
       }
       case 'deleted': {
-        await handleDeleted({
+        void handleDeleted({
           ...args,
           resourceType,
           stripeConfig,
