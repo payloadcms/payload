@@ -60,9 +60,7 @@
     "@types/lodash.get": "^4.4.7",
     "@types/react": "18.2.74",
     "@types/uuid": "^9.0.0",
-    "payload": "workspace:*",
-    "prettier": "^2.7.1",
-    "webpack": "^5.78.0"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "@payloadcms/translations": "workspace:*",
