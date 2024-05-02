@@ -158,7 +158,7 @@ export const ListControls: React.FC<Props> = (props) => {
         <WhereBuilder
           collection={collection}
           handleChange={handleWhereChange}
-          key={hasWhereParam.current && !params?.where ? 'reset' : 'initialParams'}
+          key={String(hasWhereParam.current && !params?.where)}
           modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>
