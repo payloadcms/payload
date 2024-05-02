@@ -1,9 +1,19 @@
+import { initPage } from '@payloadcms/next/utilities'
 import Link from 'next/link'
 import React from 'react'
 
+import configPromise from '../../payload.config'
 import { Gutter } from './_components/Gutter'
 
-export default function Home() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: {
+    [key: string]: string | string[]
+  }
+}) {
+  const initPageResult = await initPage({ config: configPromise, route: '/', searchParams })
+
   return (
     <Gutter>
       <h1>Payload Auth Example</h1>
