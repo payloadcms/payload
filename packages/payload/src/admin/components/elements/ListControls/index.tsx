@@ -47,6 +47,8 @@ export const ListControls: React.FC<Props> = (props) => {
     titleField,
   } = props
 
+  const hasWhereParam = React.useRef<boolean>()
+
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 
@@ -64,6 +66,15 @@ export const ListControls: React.FC<Props> = (props) => {
   React.useEffect(() => {
     setFieldsToBeSearched(getTextFieldsToBeSearched(listSearchableFields, fields))
   }, [listSearchableFields, fields])
+
+  React.useEffect(() => {
+    if (hasWhereParam.current && !params?.where) {
+      setVisibleDrawer(undefined)
+      hasWhereParam.current = false
+    } else if (params?.where) {
+      hasWhereParam.current = true
+    }
+  }, [setVisibleDrawer, params?.where])
 
   return (
     <div className={baseClass}>
@@ -147,6 +158,7 @@ export const ListControls: React.FC<Props> = (props) => {
         <WhereBuilder
           collection={collection}
           handleChange={handleWhereChange}
+          key={hasWhereParam.current && !params?.where ? 'reset' : 'initialParams'}
           modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>

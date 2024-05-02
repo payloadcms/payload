@@ -4,9 +4,11 @@ import type { Action } from './types'
 const reducer = (state: Where[], action: Action): Where[] => {
   const newState = [...state]
 
+  const { andIndex, orIndex } = action
+
   switch (action.type) {
     case 'add': {
-      const { andIndex, field, orIndex, relation } = action
+      const { field, relation } = action
 
       if (relation === 'and') {
         newState[orIndex].and.splice(andIndex, 0, { [field]: {} })
@@ -26,7 +28,6 @@ const reducer = (state: Where[], action: Action): Where[] => {
     }
 
     case 'remove': {
-      const { andIndex, orIndex } = action
       newState[orIndex].and.splice(andIndex, 1)
 
       if (newState[orIndex].and.length === 0) {
@@ -37,7 +38,6 @@ const reducer = (state: Where[], action: Action): Where[] => {
     }
 
     case 'update': {
-      const { andIndex, orIndex } = action
       const { field, operator, value } = action
 
       if (typeof newState[orIndex].and[andIndex] === 'object') {
@@ -75,10 +75,6 @@ const reducer = (state: Where[], action: Action): Where[] => {
       }
 
       return newState
-    }
-
-    case 'reset': {
-      return []
     }
 
     default: {
