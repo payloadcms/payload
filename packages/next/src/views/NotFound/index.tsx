@@ -7,7 +7,7 @@ import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { initPage } from '../../utilities/initPage.js'
+import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generatePageMetadata = async ({
