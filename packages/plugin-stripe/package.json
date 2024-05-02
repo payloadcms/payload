@@ -23,9 +23,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.tsx",
-      "types": "./src/index.tsx",
-      "default": "./src/index.tsx"
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "main": "./src/index.ts",
