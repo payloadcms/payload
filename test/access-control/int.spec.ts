@@ -1,4 +1,4 @@
-import type { Payload, PayloadRequest } from 'payload/types'
+import type { Payload, PayloadRequestWithData } from 'payload/types'
 
 import { Forbidden } from 'payload/errors'
 
@@ -184,10 +184,9 @@ describe('Access Control', () => {
     })
     describe('non-enumerated request properties passed to access control', () => {
       it('access control ok when passing request headers', async () => {
-        const req = Object.defineProperty({}, 'headers', {
-          value: requestHeaders,
-          enumerable: false,
-        }) as PayloadRequest
+        const req = {
+          headers: requestHeaders,
+        } as PayloadRequestWithData
         const name = 'name'
         const overrideAccess = false
 
@@ -248,7 +247,7 @@ describe('Access Control', () => {
     describe('Fields', () => {
       it('should allow overrideAccess: false', async () => {
         const req = async () =>
-          payload.update({
+          await payload.update({
             collection: slug,
             id: post1.id,
             data: { restrictedField: restricted.id },
@@ -281,7 +280,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: false - update many', async () => {
         const req = async () =>
-          payload.update({
+          await payload.update({
             collection: slug,
             where: {
               id: { equals: post1.id },
@@ -324,7 +323,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: false', async () => {
         const req = async () =>
-          payload.update({
+          await payload.update({
             collection: restrictedSlug,
             id: restricted.id,
             data: { name: updatedName },
@@ -357,7 +356,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: false - update many', async () => {
         const req = async () =>
-          payload.update({
+          await payload.update({
             collection: restrictedSlug,
             where: {
               id: { equals: restricted.id },
@@ -477,9 +476,9 @@ describe('Access Control', () => {
 async function createDoc<Collection>(
   data: Partial<Collection>,
   overrideSlug = slug,
-  options?: Partial<Collection>,
-): Promise<Collection> {
-  return payload.create({
+  options?: Partial<Parameters<Payload['create']>[0]>,
+) {
+  return await payload.create({
     ...options,
     collection: overrideSlug,
     data: data ?? {},

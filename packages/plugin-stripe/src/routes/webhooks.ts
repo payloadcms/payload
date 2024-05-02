@@ -1,5 +1,5 @@
 import type { Config as PayloadConfig } from 'payload/config'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import Stripe from 'stripe'
 
@@ -9,7 +9,7 @@ import { handleWebhooks } from '../webhooks/index.js'
 
 export const stripeWebhooks = async (args: {
   config: PayloadConfig
-  req: PayloadRequest
+  req: PayloadRequestWithData
   stripeConfig: StripeConfig
 }): Promise<any> => {
   const { config, req, stripeConfig } = args

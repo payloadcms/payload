@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { BulkOperationResult, Collection } from '../config/types.js'
 import type { CreateUpdateType } from './create.js'
 
@@ -36,7 +36,7 @@ export type Arguments<T extends CreateUpdateType> = {
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
   where: Where
 }

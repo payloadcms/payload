@@ -1,5 +1,5 @@
 import type { CreateVersion } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
@@ -13,7 +13,7 @@ export const createVersion: CreateVersion = async function createVersion(
     collectionSlug,
     createdAt,
     parent,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     updatedAt,
     versionData,
   },

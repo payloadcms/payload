@@ -1,33 +1,67 @@
-import type { PayloadRequest } from 'payload/types'
-
-type AddLocalesToRequestArgs = {
-  request: PayloadRequest
-}
+import type {
+  PayloadRequest,
+  PayloadRequestData,
+  PayloadRequestWithData,
+  SanitizedConfig,
+} from 'payload/types'
 
 /**
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams
  */
-export function addLocalesToRequest({ request }: AddLocalesToRequestArgs): void {
+type Args = {
+  request: PayloadRequest & PayloadRequestData
+}
+export function addLocalesToRequestFromData({ request }: Args): PayloadRequestWithData {
   const {
     data,
     payload: { config },
   } = request
-  const { localization } = config
-  const urlProperties = new URL(request.url)
-  const { searchParams } = urlProperties
-
-  let locale = searchParams.get('locale')
-  let fallbackLocale = searchParams.get('fallback-locale')
 
   if (data) {
-    if (data?.locale && typeof data.locale === 'string') {
-      locale = data.locale
+    let localeOnReq = request.locale
+    let fallbackLocaleOnReq = request.fallbackLocale
+
+    if (!localeOnReq && data?.locale && typeof data.locale === 'string') {
+      localeOnReq = data.locale
     }
-    if (data?.['fallback-locale'] && typeof data?.['fallback-locale'] === 'string') {
-      fallbackLocale = data['fallback-locale']
+
+    if (
+      !fallbackLocaleOnReq &&
+      data?.['fallback-locale'] &&
+      typeof data?.['fallback-locale'] === 'string'
+    ) {
+      fallbackLocaleOnReq = data['fallback-locale']
     }
+
+    const { fallbackLocale, locale } = sanitizeLocales({
+      fallbackLocale: fallbackLocaleOnReq,
+      locale: localeOnReq,
+      localization: config.localization,
+    })
+
+    const mutableRequest = request
+    if (locale) mutableRequest.locale = locale
+    if (fallbackLocale) mutableRequest.fallbackLocale = fallbackLocale
+    return mutableRequest
   }
 
+  return request
+}
+
+type SanitizeLocalesArgs = {
+  fallbackLocale: string
+  locale: string
+  localization: SanitizedConfig['localization']
+}
+type SanitizeLocalesReturn = {
+  fallbackLocale?: string
+  locale?: string
+}
+export const sanitizeLocales = ({
+  fallbackLocale,
+  locale,
+  localization,
+}: SanitizeLocalesArgs): SanitizeLocalesReturn => {
   if (fallbackLocale === 'none') {
     fallbackLocale = 'null'
   } else if (localization && !localization.localeCodes.includes(fallbackLocale)) {
@@ -40,6 +74,8 @@ export function addLocalesToRequest({ request }: AddLocalesToRequestArgs): void 
     locale = localization.defaultLocale
   }
 
-  if (locale) request.locale = locale
-  if (fallbackLocale) request.fallbackLocale = fallbackLocale
+  return {
+    fallbackLocale,
+    locale,
+  }
 }

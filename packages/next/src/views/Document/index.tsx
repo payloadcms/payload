@@ -200,6 +200,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           config={payload.config}
           globalConfig={globalConfig}
           i18n={i18n}
+          permissions={permissions}
         />
       )}
       <HydrateClientUser permissions={permissions} user={user} />

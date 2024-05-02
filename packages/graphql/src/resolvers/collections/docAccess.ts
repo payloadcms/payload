@@ -1,5 +1,5 @@
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { Collection, PayloadRequest } from 'payload/types'
+import type { Collection, PayloadRequestWithData } from 'payload/types'
 
 import { docAccessOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
@@ -12,7 +12,7 @@ export type Resolver = (
     id: number | string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<CollectionPermission | GlobalPermission>
 

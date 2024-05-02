@@ -1,8 +1,8 @@
-import type { Collection, CustomPayloadRequest, SanitizedConfig } from 'payload/types'
+import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/types'
 
-import type { NextFileUploadOptions } from '../next-fileupload/index.js'
+import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 
-import { nextFileUpload } from '../next-fileupload/index.js'
+import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
 
 type GetDataAndFile = (args: {
   collection: Collection
@@ -10,7 +10,7 @@ type GetDataAndFile = (args: {
   request: Request
 }) => Promise<{
   data: Record<string, any>
-  file: CustomPayloadRequest['file']
+  file: PayloadRequestWithData['file']
 }>
 export const getDataAndFile: GetDataAndFile = async ({
   collection,
@@ -18,7 +18,7 @@ export const getDataAndFile: GetDataAndFile = async ({
   request: incomingRequest,
 }) => {
   let data: Record<string, any> = undefined
-  let file: CustomPayloadRequest['file'] = undefined
+  let file: PayloadRequestWithData['file'] = undefined
 
   if (
     ['PATCH', 'POST', 'PUT'].includes(incomingRequest.method.toUpperCase()) &&
@@ -44,8 +44,8 @@ export const getDataAndFile: GetDataAndFile = async ({
       }
     } else {
       if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
-        const { error, fields, files } = await nextFileUpload({
-          options: config.upload as NextFileUploadOptions,
+        const { error, fields, files } = await fetchAPIFileUpload({
+          options: config.upload as FetchAPIFileUploadOptions,
           request,
         })
 

@@ -1,4 +1,4 @@
-import type { Document, PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
+import type { Document, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
 
 import { findVersionByIDOperationGlobal } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
@@ -14,7 +14,7 @@ export type Resolver = (
     locale?: string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<Document>
 

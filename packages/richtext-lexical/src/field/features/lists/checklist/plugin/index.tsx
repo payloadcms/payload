@@ -1,7 +1,5 @@
 'use client'
-import lexicalCheckListPluginImport from '@lexical/react/LexicalCheckListPlugin.js'
-const { CheckListPlugin } = lexicalCheckListPluginImport
-
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin.js'
 import React from 'react'
 
 export function LexicalCheckListPlugin() {

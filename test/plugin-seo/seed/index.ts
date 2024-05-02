@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
@@ -8,7 +8,7 @@ import { mediaSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
-  const req = {} as PayloadRequest
+  const req = {} as PayloadRequestWithData
 
   try {
     // Create image

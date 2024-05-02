@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequest, PayloadRequestWithData } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
@@ -111,7 +111,7 @@ const batchAndLoadDocs =
         locale,
         overrideAccess: Boolean(overrideAccess),
         pagination: false,
-        req,
+        req: req as PayloadRequestWithData,
         showHiddenFields: Boolean(showHiddenFields),
         where: {
           id: {

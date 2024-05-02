@@ -4,8 +4,7 @@ import type { ListNode, ListType } from '@lexical/list'
 import type { ElementTransformer } from '@lexical/markdown'
 import type { ElementNode } from 'lexical'
 
-import lexicalListImport from '@lexical/list'
-const { $createListItemNode, $createListNode, $isListItemNode, $isListNode } = lexicalListImport
+import { $createListItemNode, $createListNode, $isListItemNode, $isListNode } from '@lexical/list'
 
 // Amount of spaces that define indentation level
 const LIST_INDENT_SIZE = 4

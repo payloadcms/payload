@@ -10,6 +10,9 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   noAdminAccessEmail,
+  nonAdminUserEmail,
+  nonAdminUserSlug,
+  readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
@@ -35,9 +38,9 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
   return false
 }
 
-export const requestHeaders = { authorization: 'Bearer testBearerToken' }
+export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
-  return !!headers && headers.authorization === requestHeaders.authorization
+  return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
 
 export default buildConfigWithDefaults({
@@ -71,6 +74,19 @@ export default buildConfigWithDefaults({
           const access = await payload.findGlobal({ slug: 'settings' })
           return Boolean(access.test)
         },
+      },
+    },
+    {
+      slug: readOnlyGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: () => false,
       },
     },
   ],
@@ -107,6 +123,11 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+    },
+    {
+      slug: nonAdminUserSlug,
+      auth: true,
+      fields: [],
     },
     {
       slug,
@@ -469,6 +490,14 @@ export default buildConfigWithDefaults({
       collection: 'users',
       data: {
         email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await payload.create({
+      collection: nonAdminUserSlug,
+      data: {
+        email: nonAdminUserEmail,
         password: 'test',
       },
     })

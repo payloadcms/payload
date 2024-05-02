@@ -2,14 +2,9 @@
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { MutableRefObject, ReactPortal } from 'react'
 
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
-import lexicalUtilsImport from '@lexical/utils'
-const { mergeRegister } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const {
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { mergeRegister } from '@lexical/utils'
+import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
@@ -19,8 +14,7 @@ const {
   KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
   createCommand,
-} = lexicalImport
-
+} from 'lexical'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import type { MenuTextMatch } from '../useMenuTriggerMatch.js'
@@ -469,7 +463,7 @@ export function useMenuAnchorRef(
     const rootElement = editor.getRootElement()
     const containerDiv = anchorElementRef.current
 
-    const VERTICAL_OFFSET = 32 as const
+    const VERTICAL_OFFSET = 32
 
     const menuEle = containerDiv.firstChild as Element
     if (rootElement !== null && resolution !== null) {

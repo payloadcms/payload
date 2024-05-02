@@ -8,7 +8,7 @@ import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type {
   Field,
-  PayloadRequest,
+  PayloadRequestWithData,
   ReplaceAny,
   RichTextField,
   ValidateOptions,
@@ -54,7 +54,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   node: T
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }) => void
@@ -84,14 +84,20 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
   /** Keys of soft-dependencies needed for this feature. The FeatureProviders dependencies are optional, but are considered as last-priority in the loading process */
   dependenciesSoft?: string[]
 
+  /**
+   * This is being called during the payload sanitization process
+   */
   feature: (props: {
+    config: SanitizedConfig
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ServerFeatureProviderMap
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedServerFeatureMap
     // unSanitized EditorConfig,
     unSanitizedEditorConfig: ServerEditorConfig
-  }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>
+  }) =>
+    | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
+    | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerFeatureProps
@@ -192,7 +198,7 @@ export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   operation?: 'create' | 'delete' | 'read' | 'update'
   overrideAccess?: boolean
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export type FieldNodeHook<T extends SerializedLexicalNode> = (

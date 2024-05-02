@@ -1,12 +1,12 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { Payload } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
   doc: TypeWithID & Record<string, unknown>
   payload: Payload
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export const incrementLoginAttempts = async ({

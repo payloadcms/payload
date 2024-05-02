@@ -1,10 +1,16 @@
-import type { CustomPayloadRequest, PayloadRequest } from 'payload/types'
+import type { PayloadRequest, PayloadRequestData } from 'payload/types'
 
-import type { NextFileUploadOptions } from '../next-fileupload/index.js'
+import { APIError } from 'payload/errors'
 
-import { nextFileUpload } from '../next-fileupload/index.js'
+import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 
-type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<void>
+import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
+
+const KB = 1024
+const MB = KB * KB
+
+type ReturnType = PayloadRequest & PayloadRequestData
+type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<ReturnType>
 
 /**
  * Mutates the Request to contain 'data' and 'file' if present
@@ -13,38 +19,62 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
   request: incomingRequest,
 }) => {
   const config = incomingRequest.payload.config
-  let data: Record<string, any> | undefined = undefined
-  let file: CustomPayloadRequest['file'] = undefined
 
   if (
     incomingRequest.method &&
     ['PATCH', 'POST', 'PUT'].includes(incomingRequest.method.toUpperCase()) &&
     incomingRequest.body
   ) {
-    // @ts-expect-error todo: fix type
-    const request = new Request(incomingRequest)
-    const [contentType] = (request.headers.get('Content-Type') || '').split(';')
+    const [contentType] = (incomingRequest.headers.get('Content-Type') || '').split(';')
+    const mutableRequest = incomingRequest as ReturnType
+    const bodyByteSize = parseInt(incomingRequest.headers.get('Content-Length') || '0', 10)
 
     if (contentType === 'application/json') {
-      const bodyByteSize = parseInt(request.headers.get('Content-Length') || '0', 10)
-      const upperByteLimit =
-        typeof config.upload?.limits?.fieldSize === 'number'
-          ? config.upload.limits.fields
-          : undefined
-      if ((upperByteLimit && bodyByteSize <= upperByteLimit) || upperByteLimit === undefined) {
-        try {
-          data = await request.json()
-        } catch (error) {
-          data = {}
+      let data = {}
+      try {
+        data = await mutableRequest.json()
+      } catch (error) {
+        mutableRequest.payload.logger.error(error)
+      } finally {
+        mutableRequest.data = data
+        mutableRequest.json = () => Promise.resolve(data)
+      }
+    } else if (bodyByteSize && contentType.includes('multipart/')) {
+      // body is <= 4MB
+      if (bodyByteSize <= 4 * MB) {
+        const formData = await mutableRequest.formData()
+        mutableRequest.formData = async () => Promise.resolve(formData)
+
+        const payloadData = formData.get('_payload')
+        if (typeof payloadData === 'string') {
+          mutableRequest.data = JSON.parse(payloadData)
+        }
+
+        const formFile = formData.get('file')
+        if (formFile instanceof Blob) {
+          const maxFileSizeLimit = config.upload.limits?.fileSize ?? undefined
+          if (
+            maxFileSizeLimit === undefined ||
+            (maxFileSizeLimit && formFile.size <= maxFileSizeLimit)
+          ) {
+            const fileBytes = await formFile.arrayBuffer()
+            const buffer = Buffer.from(fileBytes)
+
+            mutableRequest.file = {
+              name: formFile.name,
+              data: buffer,
+              mimetype: formFile.type,
+              size: formFile.size,
+            }
+          } else if (config.upload?.abortOnLimit) {
+            throw new APIError('File size limit has been reached', 413)
+          }
         }
       } else {
-        throw new Error('Request body size exceeds the limit')
-      }
-    } else {
-      if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
-        const { error, fields, files } = await nextFileUpload({
-          options: config.upload as NextFileUploadOptions,
-          request,
+        // body is > 4MB
+        const { error, fields, files } = await fetchAPIFileUpload({
+          options: config.upload as FetchAPIFileUploadOptions,
+          request: mutableRequest as Request,
         })
 
         if (error) {
@@ -52,19 +82,17 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
         }
 
         if (files?.file) {
-          file = files.file
+          mutableRequest.file = files.file
         }
 
         if (fields?._payload && typeof fields._payload === 'string') {
-          data = JSON.parse(fields._payload)
+          mutableRequest.data = JSON.parse(fields._payload)
         }
       }
     }
+
+    return mutableRequest
   }
 
-  if (data) {
-    incomingRequest.data = data
-    incomingRequest.json = () => Promise.resolve(data)
-  }
-  if (file) incomingRequest.file = file
+  return incomingRequest
 }

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
@@ -13,7 +13,7 @@ type Args<T> = {
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
   previousDoc: Record<string, unknown> | T
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 /**

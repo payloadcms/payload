@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import type { FieldSchemaMap } from './types.js'
 
@@ -7,7 +7,7 @@ import { traverseFields } from './traverseFields.js'
 export const buildFieldSchemaMap = ({
   i18n,
   payload: { config },
-}: PayloadRequest): FieldSchemaMap => {
+}: PayloadRequestWithData): FieldSchemaMap => {
   const result: FieldSchemaMap = new Map()
 
   const validRelationships = config.collections.map((c) => c.slug) || []

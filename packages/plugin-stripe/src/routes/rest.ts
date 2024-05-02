@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { Forbidden } from 'payload/errors'
 
@@ -7,7 +7,7 @@ import type { StripeConfig } from '../types.js'
 import { stripeProxy } from '../utilities/stripeProxy.js'
 
 export const stripeREST = async (args: {
-  req: PayloadRequest
+  req: PayloadRequestWithData
   stripeConfig: StripeConfig
 }): Promise<any> => {
   let responseStatus = 200

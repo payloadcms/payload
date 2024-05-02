@@ -1,5 +1,4 @@
-import lexicalRichTextImport from '@lexical/rich-text'
-const { QuoteNode } = lexicalRichTextImport
+import { QuoteNode } from '@lexical/rich-text'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 

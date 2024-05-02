@@ -62,7 +62,6 @@
     "@types/uuid": "^9.0.0",
     "payload": "workspace:*",
     "prettier": "^2.7.1",
-    "react": "^18.0.0",
     "webpack": "^5.78.0"
   },
   "peerDependencies": {

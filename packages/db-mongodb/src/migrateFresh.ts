@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import {
   commitTransaction,
@@ -50,7 +50,7 @@ export async function migrateFresh(
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = { payload } as PayloadRequest
+  const req = { payload } as PayloadRequestWithData
 
   // Run all migrate up
   for (const migration of migrationFiles) {

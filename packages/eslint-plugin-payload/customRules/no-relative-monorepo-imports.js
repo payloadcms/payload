@@ -1,3 +1,9 @@
+/**
+ * Disallows imports from relative monorepo package paths.
+ *
+ * ie. `import { mongooseAdapter } from '../../../packages/mongoose-adapter/src'`
+ */
+
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
   meta: {

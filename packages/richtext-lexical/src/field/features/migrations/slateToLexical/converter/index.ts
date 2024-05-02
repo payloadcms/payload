@@ -58,7 +58,7 @@ export function convertSlateNodesToLexical({
           // This is a paragraph node. They do not have a type property in Slate
           return convertParagraphNode(converters, slateNode)
         } else {
-          // This is a simple text node. canContainParagraphs may be false if this is nested inside of a paragraph already, since paragraphs cannot contain paragraphs
+          // This is a simple text node. canContainParagraphs may be false if this is nested inside a paragraph already, since paragraphs cannot contain paragraphs
           return convertTextNode(slateNode)
         }
       }
@@ -98,6 +98,7 @@ export function convertParagraphNode(
     direction: 'ltr',
     format: '',
     indent: 0,
+    textFormat: 0,
     version: 1,
   }
 }

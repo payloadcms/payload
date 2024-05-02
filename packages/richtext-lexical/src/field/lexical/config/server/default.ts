@@ -1,4 +1,4 @@
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import type { FeatureProviderServer } from '../../../features/types.js'
 import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types.js'
@@ -23,7 +23,6 @@ import { ParagraphFeature } from '../../../features/paragraph/feature.server.js'
 import { RelationshipFeature } from '../../../features/relationship/feature.server.js'
 import { UploadFeature } from '../../../features/upload/feature.server.js'
 import { LexicalEditorTheme } from '../../theme/EditorTheme.js'
-import { sanitizeServerEditorConfig } from './sanitize.js'
 
 export const defaultEditorLexicalConfig: LexicalEditorConfig = {
   namespace: 'lexical',
@@ -56,6 +55,3 @@ export const defaultEditorConfig: ServerEditorConfig = {
   features: defaultEditorFeatures,
   lexical: defaultEditorLexicalConfig,
 }
-
-export const defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig =
-  sanitizeServerEditorConfig(defaultEditorConfig)

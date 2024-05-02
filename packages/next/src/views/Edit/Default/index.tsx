@@ -88,7 +88,7 @@ export const DefaultEditView: React.FC = () => {
     globalSlug: globalConfig?.slug,
   })
 
-  const operation = id ? 'update' : 'create'
+  const operation = collectionSlug && !id ? 'create' : 'update'
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined

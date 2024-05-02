@@ -1,5 +1,5 @@
 import type { GeneratedTypes, Payload } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -19,7 +19,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   id: string
   locale?: 'all' | GeneratedTypes['locale']
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   user?: Document
 }

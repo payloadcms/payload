@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import { URL } from 'url'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
@@ -19,7 +19,7 @@ export type Arguments = {
   }
   disableEmail?: boolean
   expiration?: number
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export type Result = string
@@ -101,11 +101,11 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     })
 
     if (!disableEmail) {
-      const protocol = new URL(req.url).protocol
+      const protocol = new URL(req.url).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
-          : `${protocol}://${req.headers.get('host')}`
+          : `${protocol}//${req.headers.get('host')}`
 
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
     <a href="${serverURL}${config.routes.admin}/reset/${token}">

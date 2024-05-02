@@ -1,7 +1,6 @@
 import type { LexicalEditor } from 'lexical'
 
-import lexicalImport from 'lexical'
-const { $getRoot } = lexicalImport
+import { $getRoot } from 'lexical'
 
 export function getTopLevelNodeKeys(editor: LexicalEditor): string[] {
   return editor.getEditorState().read(() => $getRoot().getChildrenKeys())

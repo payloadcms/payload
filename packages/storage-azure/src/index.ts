@@ -16,8 +16,18 @@ import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
 export type AzureStorageOptions = {
+  /**
+   * Whether or not to allow the container to be created if it does not exist
+   *
+   * @default false
+   */
   allowContainerCreate: boolean
+
+  /**
+   * Base URL for the Azure Blob storage account
+   */
   baseURL: string
+
   /**
    * Collection options to apply the Azure Blob adapter to.
    */
@@ -110,6 +120,7 @@ function azureStorageInternal({
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
+      name: 'azure',
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({

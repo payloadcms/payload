@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
@@ -15,7 +15,7 @@ type Args = {
   global?: SanitizedGlobalConfig
   id?: number | string
   payload: Payload
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
 }
 
 export const saveVersion = async ({

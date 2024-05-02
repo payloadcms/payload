@@ -1,9 +1,4 @@
-import type {
-  Collection,
-  CustomPayloadRequest,
-  PayloadRequest,
-  SanitizedConfig,
-} from 'payload/types'
+import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
 import { executeAuthStrategies } from 'payload/auth'
@@ -12,6 +7,7 @@ import { getDataLoader } from 'payload/utilities'
 import qs from 'qs'
 import { URL } from 'url'
 
+import { sanitizeLocales } from './addLocalesToRequest.js'
 import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
@@ -31,15 +27,10 @@ export const createPayloadRequest = async ({
   const cookies = parseCookies(request.headers)
   const payload = await getPayloadHMR({ config: configPromise })
 
-  const { collections, config } = payload
-
-  let collection: Collection = undefined
-  if (params?.collection && collections?.[params.collection]) {
-    collection = collections[params.collection]
-  }
+  const { config } = payload
 
   const urlProperties = new URL(request.url)
-  const { pathname } = urlProperties
+  const { pathname, searchParams } = urlProperties
 
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
@@ -56,12 +47,26 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  const customRequest: CustomPayloadRequest = {
+  let locale
+  let fallbackLocale
+  if (config.localization) {
+    const locales = sanitizeLocales({
+      fallbackLocale: searchParams.get('fallback-locale'),
+      locale: searchParams.get('locale'),
+      localization: payload.config.localization,
+    })
+    locale = locales.locale
+    fallbackLocale = locales.fallbackLocale
+  }
+
+  const customRequest: CustomPayloadRequestProperties = {
     context: {},
+    fallbackLocale,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
     i18n,
+    locale,
     origin: urlProperties.origin,
     pathname: urlProperties.pathname,
     payload,

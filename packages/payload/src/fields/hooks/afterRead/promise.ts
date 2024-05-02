@@ -2,7 +2,7 @@
 import type { RichTextAdapter } from '../../../admin/types.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -28,7 +28,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
   triggerAccessControl?: boolean
@@ -141,6 +141,10 @@ export const promise = async ({
     }
 
     case 'richText': {
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
       if (editor?.populationPromises) {

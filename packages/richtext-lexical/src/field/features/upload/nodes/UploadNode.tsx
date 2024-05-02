@@ -1,12 +1,5 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { ElementFormatType, NodeKey } from 'lexical'
-
-import lexicalDecoratorBlockNodeImport from '@lexical/react/LexicalDecoratorBlockNode.js'
-const { DecoratorBlockNode } = lexicalDecoratorBlockNodeImport
-
-import lexicalImport from 'lexical'
-const { $applyNodeReplacement } = lexicalImport
-
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -15,6 +8,8 @@ import type {
   Spread,
 } from 'lexical'
 
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
 const RawUploadComponent = React.lazy(() =>
@@ -31,10 +26,6 @@ export type UploadData = {
 }
 
 function convertUploadElement(domNode: Node): DOMConversionOutput | null {
-  //if (domNode instanceof HTMLImageElement) {
-  // const { alt: altText, src } = domNode;
-  // const node = $createImageNode({ altText, src });
-  // return { node };
   // TODO: Auto-upload functionality here!
   //}
   return null

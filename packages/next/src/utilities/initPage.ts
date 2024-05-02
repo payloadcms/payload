@@ -1,6 +1,6 @@
 import type {
   InitPageResult,
-  PayloadRequest,
+  PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -25,7 +25,15 @@ type Args = {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-const authRoutes = ['/login', '/logout', '/create-first-user', '/forgot', '/reset', '/verify']
+const authRoutes = [
+  '/login',
+  '/logout',
+  '/create-first-user',
+  '/forgot',
+  '/reset',
+  '/verify',
+  '/logout-inactivity',
+]
 
 export const initPage = async ({
   config: configPromise,
@@ -63,7 +71,7 @@ export const initPage = async ({
           ignoreQueryPrefix: true,
         }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequest,
+      } as PayloadRequestWithData,
     },
     payload,
   )
@@ -91,6 +99,7 @@ export const initPage = async ({
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
   const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
+  const isAdminRoute = route.startsWith(adminRoute)
   const isAuthRoute = authRoutes.some((r) => r === route.replace(adminRoute, ''))
 
   if (redirectUnauthenticatedUser && !user && !isAuthRoute) {
@@ -103,7 +112,7 @@ export const initPage = async ({
     redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
   }
 
-  if (!permissions.canAccessAdmin && !isAuthRoute) {
+  if (!permissions.canAccessAdmin && isAdminRoute && !isAuthRoute) {
     notFound()
   }
 

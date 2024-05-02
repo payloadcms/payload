@@ -112,6 +112,7 @@ function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adap
     }
 
     return {
+      name: 's3',
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

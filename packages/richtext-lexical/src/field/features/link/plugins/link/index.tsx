@@ -1,13 +1,13 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalUtilsImport from '@lexical/utils'
-const { mergeRegister } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const { $getSelection, $isElementNode, $isRangeSelection, COMMAND_PRIORITY_LOW, PASTE_COMMAND } =
-  lexicalImport
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { mergeRegister } from '@lexical/utils'
+import {
+  $getSelection,
+  $isElementNode,
+  $isRangeSelection,
+  COMMAND_PRIORITY_LOW,
+  PASTE_COMMAND,
+} from 'lexical'
 import { useEffect } from 'react'
 
 import type { LinkFields } from '../../nodes/types.js'
@@ -27,13 +27,6 @@ export function LinkPlugin(): null {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
-          // validate
-          if (payload?.fields.linkType === 'custom') {
-            if (!(validateUrl === undefined || validateUrl(payload?.fields.url))) {
-              return false
-            }
-          }
-
           toggleLink(payload)
           return true
         },

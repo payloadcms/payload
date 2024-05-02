@@ -3,9 +3,9 @@ import type { TFunction } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
-import APIError from './APIError.js'
+import { APIError } from './APIError.js'
 
-class ValidationError extends APIError<{ field: string; message: string }[]> {
+export class ValidationError extends APIError<{ field: string; message: string }[]> {
   constructor(results: { field: string; message: string }[], t?: TFunction) {
     const message = t
       ? t('error:followingFieldsInvalid', { count: results.length })
@@ -16,5 +16,3 @@ class ValidationError extends APIError<{ field: string; message: string }[]> {
     super(`${message} ${results.map((f) => f.field).join(', ')}`, httpStatus.BAD_REQUEST, results)
   }
 }
-
-export default ValidationError

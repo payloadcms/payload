@@ -1,4 +1,4 @@
-import type { FieldBase } from 'packages/payload/src/exports/types.js'
+import type { FieldBase } from 'payload/types'
 import type React from 'react'
 
 import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'

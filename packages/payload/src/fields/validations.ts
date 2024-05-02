@@ -264,6 +264,10 @@ export const richText: Validate<object, unknown, unknown, RichTextField> = async
   value,
   options,
 ) => {
+  if (typeof options?.editor === 'function') {
+    throw new Error('Attempted to access unsanitized rich text editor.')
+  }
+
   const editor: RichTextAdapter = options?.editor
 
   return editor.validate(value, options)
