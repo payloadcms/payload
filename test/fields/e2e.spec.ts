@@ -64,7 +64,7 @@ describe('fields', () => {
       await expect(textCell).toHaveText(textDoc.text)
     })
 
-    test('should not display field in list view if admin.disabledListColumn is true', async () => {
+    test('should not display field in list view column selector if admin.disabledListColumn is true', async () => {
       await page.goto(url.list)
       await page.locator('.list-controls__toggle-columns').click()
 
@@ -74,6 +74,25 @@ describe('fields', () => {
           hasText: exactText('Disabled List Column Text'),
         }),
       ).toBeHidden()
+    })
+
+    test('should not display field in list view filter condition selector if admin.disabledListColumn is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+      const initialFieldOptions = initialField.locator('.rs__option')
+
+      // Get all text contents of options
+      const optionsTexts = await initialFieldOptions.allTextContents()
+
+      // Check if "Disabled List Column Text" is not present in any of the options
+      for (const text of optionsTexts) {
+        await expect(text).not.toContain('Disabled List Column Text')
+      }
     })
 
     test('should display i18n label in cells when missing field data', async () => {
