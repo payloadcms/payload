@@ -99,6 +99,7 @@ export const initPage = async ({
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
   const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
+  const isAdminRoute = route.startsWith(adminRoute)
   const isAuthRoute = authRoutes.some((r) => r === route.replace(adminRoute, ''))
 
   if (redirectUnauthenticatedUser && !user && !isAuthRoute) {
@@ -111,7 +112,7 @@ export const initPage = async ({
     redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
   }
 
-  if (!permissions.canAccessAdmin && !isAuthRoute) {
+  if (!permissions.canAccessAdmin && isAdminRoute && !isAuthRoute) {
     notFound()
   }
 

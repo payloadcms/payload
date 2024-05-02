@@ -46,10 +46,13 @@ export const NotFoundPage = async ({
     [key: string]: string | string[]
   }
 }) => {
+  const config = await configPromise
+  const { routes: { admin: adminRoute } = {} } = config
+
   const initPageResult = await initPage({
-    config: configPromise,
+    config,
     redirectUnauthenticatedUser: true,
-    route: '/not-found',
+    route: `${adminRoute}/not-found`,
     searchParams,
   })
 
