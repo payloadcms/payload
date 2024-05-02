@@ -1,3 +1,4 @@
+import { textFieldsSlug } from '../../slugs.js'
 import { loremIpsum } from './loremIpsum.js'
 
 export function generateLexicalRichText() {
@@ -90,8 +91,8 @@ export function generateLexicalRichText() {
               fields: {
                 url: 'https://',
                 doc: {
-                  value: '{{ARRAY_DOC_ID}}',
-                  relationTo: 'array-fields',
+                  value: '{{TEXT_DOC_ID}}',
+                  relationTo: textFieldsSlug,
                 },
                 newTab: false,
                 linkType: 'internal',
