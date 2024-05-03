@@ -594,7 +594,7 @@ export const Form: React.FC<FormProps> = (props) => {
         >
           <SubmittedContext.Provider value={submitted}>
             <ProcessingContext.Provider value={processing}>
-              <ModifiedContext.Provider value={modified}>
+              <ModifiedContext.Provider value={operation === 'create' || modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
                   {children}
                 </FormFieldsContext.Provider>
