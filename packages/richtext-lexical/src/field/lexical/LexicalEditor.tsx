@@ -15,6 +15,7 @@ import type { LexicalProviderProps } from './LexicalProvider.js'
 import { useEditorFocus } from './EditorFocusProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
+import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
@@ -25,6 +26,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
   props,
 ) => {
   const { editorConfig, onChange } = props
+  const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const editorFocus = useEditorFocus()
 
@@ -40,7 +42,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       editor.registerCommand<MouseEvent>(
         FOCUS_COMMAND,
         () => {
-          editorFocus.focusEditor(editor, editorConfig)
+          editorFocus.focusEditor(editor, editorConfigContext)
           return true
         },
 

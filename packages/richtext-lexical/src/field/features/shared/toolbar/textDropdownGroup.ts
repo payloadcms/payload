@@ -8,6 +8,6 @@ export const toolbarTextDropdownGroupWithItems = (items: ToolbarGroupItem[]): To
     ChildComponent: TextIcon,
     items,
     key: 'text',
-    order: 1,
+    order: 25,
   }
 }

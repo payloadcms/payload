@@ -5,6 +5,6 @@ export const toolbarIndentGroupWithItems = (items: ToolbarGroupItem[]): ToolbarG
     type: 'buttons',
     items,
     key: 'indent',
-    order: 3,
+    order: 35,
   }
 }

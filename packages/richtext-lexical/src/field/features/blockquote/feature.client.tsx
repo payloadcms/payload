@@ -51,13 +51,12 @@ const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
       slashMenu: {
         groups: [
           {
-            displayName: 'Basic',
             items: [
               {
                 Icon: BlockquoteIcon,
-                displayName: 'Blockquote',
                 key: 'blockquote',
                 keywords: ['quote', 'blockquote'],
+                label: 'Blockquote',
                 onSelect: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
@@ -67,6 +66,7 @@ const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
               },
             ],
             key: 'basic',
+            label: 'Basic',
           },
         ],
       },

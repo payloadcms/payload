@@ -6,10 +6,12 @@ const baseClass = 'toolbar-popup__dropdown'
 import type { LexicalEditor } from 'lexical'
 
 import { mergeRegister } from '@lexical/utils'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { $getSelection } from 'lexical'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
+import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
 
@@ -26,6 +28,8 @@ const ToolbarItem = ({
   enabled?: boolean
   item: ToolbarGroupItem
 }) => {
+  const { i18n } = useTranslation()
+
   if (item.Component) {
     return (
       item?.Component && (
@@ -41,10 +45,19 @@ const ToolbarItem = ({
     )
   }
 
+  let title = item.key
+  if (item.label) {
+    title = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+  }
+  // Crop title to max. 25 characters
+  if (title.length > 25) {
+    title = title.substring(0, 25) + '...'
+  }
+
   return (
     <DropDownItem active={active} editor={editor} enabled={enabled} item={item} key={item.key}>
       {item?.ChildComponent && <item.ChildComponent />}
-      <span className="text">{item.label}</span>
+      <span className="text">{title}</span>
     </DropDownItem>
   )
 }
@@ -78,6 +91,7 @@ export const ToolbarDropdown = ({
 }) => {
   const [activeItemKeys, setActiveItemKeys] = React.useState<string[]>([])
   const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
+  const editorFocusContext = useEditorFocus()
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -86,25 +100,22 @@ export const ToolbarDropdown = ({
       const _activeItemKeys: string[] = []
       const _activeItems: ToolbarGroupItem[] = []
       const _enabledItemKeys: string[] = []
-      const _enabledItems: ToolbarGroupItem[] = []
 
       for (const item of items) {
         if (item.isActive && (!maxActiveItems || _activeItemKeys.length < maxActiveItems)) {
-          const isActive = item.isActive({ editor, selection })
+          const isActive = item.isActive({ editor, editorFocusContext, selection })
           if (isActive) {
             _activeItemKeys.push(item.key)
             _activeItems.push(item)
           }
         }
         if (item.isEnabled) {
-          const isEnabled = item.isEnabled({ editor, selection })
+          const isEnabled = item.isEnabled({ editor, editorFocusContext, selection })
           if (isEnabled) {
             _enabledItemKeys.push(item.key)
-            _enabledItems.push(item)
           }
         } else {
           _enabledItemKeys.push(item.key)
-          _enabledItems.push(item)
         }
       }
       setActiveItemKeys(_activeItemKeys)
@@ -114,7 +125,7 @@ export const ToolbarDropdown = ({
         onActiveChange({ activeItems: _activeItems })
       }
     })
-  }, [editor, items, maxActiveItems, onActiveChange])
+  }, [editor, editorFocusContext, items, maxActiveItems, onActiveChange])
 
   useEffect(() => {
     updateStates()

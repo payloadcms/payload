@@ -5,6 +5,6 @@ export const toolbarFormatGroupWithItems = (items: ToolbarGroupItem[]): ToolbarG
     type: 'buttons',
     items,
     key: 'format',
-    order: 4,
+    order: 40,
   }
 }

@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
+import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import './index.scss'
 
 const baseClass = 'toolbar-popup__button'
@@ -23,24 +24,25 @@ export const ToolbarButton = ({
   const [enabled, setEnabled] = useState<boolean>(true)
   const [active, setActive] = useState<boolean>(false)
   const [className, setClassName] = useState<string>(baseClass)
+  const editorFocusContext = useEditorFocus()
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
       if (item.isActive) {
-        const isActive = item.isActive({ editor, selection })
+        const isActive = item.isActive({ editor, editorFocusContext, selection })
         if (active !== isActive) {
           setActive(isActive)
         }
       }
       if (item.isEnabled) {
-        const isEnabled = item.isEnabled({ editor, selection })
+        const isEnabled = item.isEnabled({ editor, editorFocusContext, selection })
         if (enabled !== isEnabled) {
           setEnabled(isEnabled)
         }
       }
     })
-  }, [active, editor, enabled, item])
+  }, [active, editor, editorFocusContext, enabled, item])
 
   useEffect(() => {
     updateStates()

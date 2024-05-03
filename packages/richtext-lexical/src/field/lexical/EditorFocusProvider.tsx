@@ -3,20 +3,20 @@ import type { LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
-import type { SanitizedClientEditorConfig } from './config/types.js'
+import type { EditorConfigContextType } from './config/client/EditorConfigProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 
 export type EditorFocusContextType = {
   blurEditor: () => void
   editor: LexicalEditor
-  focusEditor: (_editor?: LexicalEditor, _editorConfig?: SanitizedClientEditorConfig) => void
+  focusEditor: (_editor?: LexicalEditor, _editorConfigContext?: EditorConfigContextType) => void
   focusedEditor: LexicalEditor | null
-  focusedEditorConfig: SanitizedClientEditorConfig
+  focusedEditorConfigContext: EditorConfigContextType
   isChildEditorFocused: () => boolean
   isEditorFocused: () => boolean
   isParentEditorFocused: () => boolean
-  parentEditorConfig: SanitizedClientEditorConfig
+  parentEditorConfigContext: EditorConfigContextType
   parentEditorFocus: EditorFocusContextType
 }
 
@@ -25,11 +25,11 @@ const EditorFocusContext = createContext<EditorFocusContextType>({
   editor: null,
   focusEditor: null,
   focusedEditor: null,
-  focusedEditorConfig: null,
+  focusedEditorConfigContext: null,
   isChildEditorFocused: null,
   isEditorFocused: null,
   isParentEditorFocused: null,
-  parentEditorConfig: null,
+  parentEditorConfigContext: null,
   parentEditorFocus: null,
 })
 
@@ -39,19 +39,22 @@ export const useEditorFocus = (): EditorFocusContextType => {
 
 export const EditorFocusProvider = ({ children }) => {
   const parentEditorFocus = useEditorFocus()
-  const parentEditorConfig = useEditorConfigContext() // Is parent, as this EditorFocusProvider sits outside the EditorConfigProvider
+  const parentEditorConfigContext = useEditorConfigContext() // Is parent, as this EditorFocusProvider sits outside the EditorConfigProvider
   const [editor] = useLexicalComposerContext()
 
   const [focusedEditor, setFocusedEditor] = useState<LexicalEditor | null>(null)
-  const [focusedEditorConfig, setFocusedEditorConfig] =
-    useState<SanitizedClientEditorConfig | null>(null)
+  const [focusedEditorConfigContext, setFocusedEditorConfigContext] =
+    useState<EditorConfigContextType | null>(null)
 
   const focusEditor = useCallback(
-    (_editor: LexicalEditor, _editorConfig: SanitizedClientEditorConfig) => {
+    (_editor: LexicalEditor, _editorConfigContext: EditorConfigContextType) => {
       setFocusedEditor(_editor !== undefined ? _editor : editor)
-      setFocusedEditorConfig(_editorConfig)
+      setFocusedEditorConfigContext(_editorConfigContext)
       if (parentEditorFocus.focusEditor) {
-        parentEditorFocus.focusEditor(_editor !== undefined ? _editor : editor, _editorConfig)
+        parentEditorFocus.focusEditor(
+          _editor !== undefined ? _editor : editor,
+          _editorConfigContext,
+        )
       }
     },
     [editor, parentEditorFocus],
@@ -60,7 +63,7 @@ export const EditorFocusProvider = ({ children }) => {
   const blurEditor = useCallback(() => {
     if (focusedEditor === editor) {
       setFocusedEditor(null)
-      setFocusedEditorConfig(null)
+      setFocusedEditorConfigContext(null)
     }
   }, [editor, focusedEditor])
 
@@ -83,11 +86,11 @@ export const EditorFocusProvider = ({ children }) => {
         editor,
         focusEditor,
         focusedEditor,
-        focusedEditorConfig,
+        focusedEditorConfigContext,
         isChildEditorFocused,
         isEditorFocused,
         isParentEditorFocused,
-        parentEditorConfig: parentEditorConfig?.editorConfig,
+        parentEditorConfigContext,
         parentEditorFocus,
       }}
     >

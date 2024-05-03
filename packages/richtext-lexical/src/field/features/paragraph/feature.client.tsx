@@ -46,13 +46,12 @@ const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props)
       slashMenu: {
         groups: [
           {
-            displayName: 'Basic',
             items: [
               {
                 Icon: TextIcon,
-                displayName: 'Paragraph',
                 key: 'paragraph',
                 keywords: ['normal', 'paragraph', 'p', 'text'],
+                label: 'Paragraph',
                 onSelect: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
@@ -62,6 +61,7 @@ const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props)
               },
             ],
             key: 'basic',
+            label: 'Basic',
           },
         ],
       },

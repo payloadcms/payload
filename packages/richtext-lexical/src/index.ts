@@ -408,7 +408,9 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
+export { toolbarAddDropdownGroupWithItems } from './field/features/shared/toolbar/addDropdownGroup.js'
 export { toolbarFeatureButtonsGroupWithItems } from './field/features/shared/toolbar/featureButtonsGroup.js'
+
 export { toolbarTextDropdownGroupWithItems } from './field/features/shared/toolbar/textDropdownGroup.js'
 export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
 export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'

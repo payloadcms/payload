@@ -8,6 +8,6 @@ export const toolbarAlignGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGr
     ChildComponent: AlignLeftIcon,
     items,
     key: 'align',
-    order: 2,
+    order: 30,
   }
 }

@@ -85,13 +85,12 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
           groups: enabledHeadingSizes?.length
             ? [
                 {
-                  displayName: 'Basic',
                   items: enabledHeadingSizes.map((headingSize) => {
                     return {
                       Icon: iconImports[headingSize],
-                      displayName: `Heading ${headingSize.charAt(1)}`,
                       key: `heading-${headingSize.charAt(1)}`,
                       keywords: ['heading', headingSize],
+                      label: `Heading ${headingSize.charAt(1)}`,
                       onSelect: ({ editor }) => {
                         editor.update(() => {
                           setHeading(headingSize)
@@ -100,6 +99,7 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
                     }
                   }),
                   key: 'basic',
+                  label: 'Basic',
                 },
               ]
             : [],

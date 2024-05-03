@@ -1,5 +1,8 @@
+import type { I18n } from '@payloadcms/translations'
 import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
+
+import type { EditorFocusContextType } from '../../lexical/EditorFocusProvider.js'
 
 export type ToolbarGroup =
   | {
@@ -26,17 +29,27 @@ export type ToolbarGroupItem = {
     enabled?: boolean
     item: ToolbarGroupItem
   }>
-  isActive?: ({ editor, selection }: { editor: LexicalEditor; selection: BaseSelection }) => boolean
-  isEnabled?: ({
+  isActive?: ({
     editor,
+    editorFocusContext,
     selection,
   }: {
     editor: LexicalEditor
+    editorFocusContext: EditorFocusContextType
+    selection: BaseSelection
+  }) => boolean
+  isEnabled?: ({
+    editor,
+    editorFocusContext,
+    selection,
+  }: {
+    editor: LexicalEditor
+    editorFocusContext: EditorFocusContextType
     selection: BaseSelection
   }) => boolean
   key: string
   /** The label is displayed as text if the item is part of a dropdown group */
-  label?: string
+  label?: (({ i18n }: { i18n: I18n }) => string) | string
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }

@@ -69,19 +69,19 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
         slashMenu: {
           groups: [
             {
-              displayName: 'Lists',
               items: [
                 {
                   Icon: OrderedListIcon,
-                  displayName: 'Ordered List',
                   key: 'orderedList',
                   keywords: ['ordered list', 'ol'],
+                  label: 'Ordered List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                   },
                 },
               ],
               key: 'lists',
+              label: 'Lists',
             },
           ],
         },

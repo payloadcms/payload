@@ -5,6 +5,6 @@ export const toolbarFeatureButtonsGroupWithItems = (items: ToolbarGroupItem[]): 
     type: 'buttons',
     items,
     key: 'features',
-    order: 5,
+    order: 50,
   }
 }

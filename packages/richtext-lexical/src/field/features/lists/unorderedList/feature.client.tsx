@@ -68,19 +68,19 @@ const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (pr
         slashMenu: {
           groups: [
             {
-              displayName: 'Lists',
               items: [
                 {
                   Icon: UnorderedListIcon,
-                  displayName: 'Unordered List',
                   key: 'unorderedList',
                   keywords: ['unordered list', 'ul'],
+                  label: 'Unordered List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
                   },
                 },
               ],
               key: 'lists',
+              label: 'Lists',
             },
           ],
         },

@@ -80,19 +80,19 @@ const ChecklistFeatureClient: FeatureProviderProviderClient<undefined> = (props)
         slashMenu: {
           groups: [
             {
-              displayName: 'Lists',
               items: [
                 {
                   Icon: ChecklistIcon,
-                  displayName: 'Check List',
                   key: 'checklist',
                   keywords: ['check list', 'check', 'checklist', 'cl'],
+                  label: 'Check List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                   },
                 },
               ],
               key: 'lists',
+              label: 'Lists',
             },
           ],
         },

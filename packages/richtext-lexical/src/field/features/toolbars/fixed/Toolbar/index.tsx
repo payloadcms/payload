@@ -2,6 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import * as React from 'react'
 
 import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
@@ -51,6 +52,8 @@ function ToolbarGroupComponent({
   group: ToolbarGroup
   index: number
 }): React.ReactNode {
+  const { i18n } = useTranslation()
+
   const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
   const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
 
@@ -64,16 +67,26 @@ function ToolbarGroupComponent({
 
   const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
     if (!activeItems.length) {
-      setDropdownLabel(null)
       if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
         setDropdownIcon(() => group.ChildComponent)
+        setDropdownLabel(null)
       } else {
         setDropdownIcon(null)
+        setDropdownLabel(null)
       }
       return
     }
     const item = activeItems[0]
-    setDropdownLabel(item.label)
+
+    let label = item.key
+    if (item.label) {
+      label = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+    }
+    // Crop title to max. 25 characters
+    if (label.length > 25) {
+      label = label.substring(0, 25) + '...'
+    }
+    setDropdownLabel(label)
     setDropdownIcon(() => item.ChildComponent)
   }
 
@@ -157,8 +170,10 @@ function FixedToolbar({
 }
 
 const checkParentEditor = (editorFocus: EditorFocusContextType): boolean => {
-  if (editorFocus.parentEditorConfig) {
-    if (editorFocus.parentEditorConfig.resolvedFeatureMap.has('toolbarFixed')) {
+  if (editorFocus.parentEditorConfigContext?.editorConfig) {
+    if (
+      editorFocus.parentEditorConfigContext?.editorConfig.resolvedFeatureMap.has('toolbarFixed')
+    ) {
       return true
     } else {
       if (editorFocus.parentEditorFocus) {
@@ -175,12 +190,12 @@ export function FixedToolbarPlugin({
   anchorElem?: HTMLElement
 }): React.ReactElement | null {
   const [currentEditor] = useLexicalComposerContext()
-  const { editorConfig: currentEditorConfig } = useEditorConfigContext()
+  const { editorConfig: currentEditorConfig, uuid } = useEditorConfigContext()
 
   const editorFocus = useEditorFocus()
   const editor = editorFocus.focusedEditor || currentEditor
 
-  const editorConfig = editorFocus.focusedEditorConfig || currentEditorConfig
+  const editorConfig = editorFocus.focusedEditorConfigContext?.editorConfig || currentEditorConfig
 
   // Check if there is a parent editor with a fixed toolbar already
   const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
