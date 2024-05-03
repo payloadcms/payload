@@ -38,8 +38,8 @@ import type { FormFieldBase } from '../shared/index.js'
 
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
-  disableSortable?: boolean
   forceRender?: boolean
+  isSortable?: boolean
   label?: FieldBase['label']
   labels?: BlockField['labels']
   maxRows?: number
@@ -61,9 +61,9 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     blocks,
     className,
     descriptionProps,
-    disableSortable = false,
     errorProps,
     forceRender = false,
+    isSortable = true,
     label,
     labelProps,
     labels: labelsFromProps,
@@ -279,23 +279,19 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                 errorPath.startsWith(`${path}.${i}`),
               ).length
               return (
-                <DraggableSortableItem
-                  disabled={readOnly || disableSortable}
-                  id={row.id}
-                  key={row.id}
-                >
+                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockToRender}
                       blocks={blocks}
-                      disableSortable={disableSortable}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
+                      isSortable={isSortable}
                       labels={labels}
                       moveRow={moveRow}
                       path={path}

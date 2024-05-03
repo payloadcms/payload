@@ -14,10 +14,10 @@ const baseClass = 'array-actions'
 
 export type Props = {
   addRow: (current: number, blockType?: string) => void
-  disableSortable?: boolean
   duplicateRow: (current: number) => void
   hasMaxRows: boolean
   index: number
+  isSortable?: boolean
   moveRow: (from: number, to: number) => void
   removeRow: (index: number) => void
   rowCount: number
@@ -25,10 +25,10 @@ export type Props = {
 
 export const ArrayAction: React.FC<Props> = ({
   addRow,
-  disableSortable,
   duplicateRow,
   hasMaxRows,
   index,
+  isSortable,
   moveRow,
   removeRow,
   rowCount,
@@ -44,7 +44,7 @@ export const ArrayAction: React.FC<Props> = ({
       render={({ close }) => {
         return (
           <PopupList.ButtonGroup buttonSize="small">
-            {!disableSortable && index !== 0 && (
+            {isSortable && index !== 0 && (
               <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}
                 onClick={() => {
@@ -58,7 +58,7 @@ export const ArrayAction: React.FC<Props> = ({
                 {t('general:moveUp')}
               </PopupList.Button>
             )}
-            {!disableSortable && index < rowCount - 1 && (
+            {isSortable && index < rowCount - 1 && (
               <PopupList.Button
                 className={`${baseClass}__action`}
                 onClick={() => {

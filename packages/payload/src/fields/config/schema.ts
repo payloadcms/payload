@@ -318,7 +318,7 @@ export const array = baseField.keys({
           RowLabel: componentSchema,
         })
         .default({}),
-      disableSortable: joi.boolean(),
+      isSortable: joi.boolean(),
     })
     .default({}),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
@@ -418,7 +418,7 @@ export const blocks = baseField.keys({
   type: joi.string().valid('blocks').required(),
   admin: baseAdminFields
     .keys({
-      disableSortable: joi.boolean(),
+      isSortable: joi.boolean(),
     })
     .default({}),
   blocks: joi

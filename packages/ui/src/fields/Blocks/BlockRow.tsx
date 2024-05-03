@@ -23,12 +23,12 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   addRow: (rowIndex: number, blockType: string) => void
   block: ReducedBlock
   blocks: ReducedBlock[]
-  disableSortable?: boolean
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   forceRender?: boolean
   hasMaxRows?: boolean
   indexPath: string
+  isSortable?: boolean
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   path: string
@@ -47,11 +47,11 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   attributes,
   block,
   blocks,
-  disableSortable,
   duplicateRow,
   errorCount,
   forceRender,
   hasMaxRows,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -96,10 +96,10 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               addRow={addRow}
               blockType={row.blockType}
               blocks={blocks}
-              disableSortable={disableSortable}
               duplicateRow={duplicateRow}
               fieldMap={block.fieldMap}
               hasMaxRows={hasMaxRows}
+              isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
               removeRow={removeRow}

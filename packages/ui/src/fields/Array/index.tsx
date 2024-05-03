@@ -35,9 +35,9 @@ const baseClass = 'array-field'
 
 export type ArrayFieldProps = FormFieldBase & {
   CustomRowLabel?: React.ReactNode
-  disableSortable?: boolean
   fieldMap: FieldMap
   forceRender?: boolean
+  isSortable?: boolean
   label?: FieldBase['label']
   labels?: ArrayFieldType['labels']
   maxRows?: ArrayFieldType['maxRows']
@@ -56,10 +56,10 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     CustomRowLabel,
     className,
     descriptionProps,
-    disableSortable = false,
     errorProps,
     fieldMap,
     forceRender = false,
+    isSortable = true,
     label,
     labelProps,
     localized,
@@ -263,23 +263,19 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               errorPath.startsWith(`${path}.${i}.`),
             ).length
             return (
-              <DraggableSortableItem
-                disabled={readOnly || disableSortable}
-                id={row.id}
-                key={row.id}
-              >
+              <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
                     CustomRowLabel={CustomRowLabel}
                     addRow={addRow}
-                    disableSortable={disableSortable}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fieldMap={fieldMap}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     indexPath={indexPath}
+                    isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
                     path={path}

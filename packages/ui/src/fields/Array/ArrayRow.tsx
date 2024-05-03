@@ -21,13 +21,13 @@ const baseClass = 'array-field'
 type ArrayRowProps = UseDraggableSortableReturn & {
   CustomRowLabel?: React.ReactNode
   addRow: (rowIndex: number) => void
-  disableSortable?: boolean
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fieldMap: FieldMap
   forceRender?: boolean
   hasMaxRows?: boolean
   indexPath: string
+  isSortable?: boolean
   labels: ArrayField['labels']
   moveRow: (fromIndex: number, toIndex: number) => void
   path: string
@@ -45,13 +45,13 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   CustomRowLabel,
   addRow,
   attributes,
-  disableSortable,
   duplicateRow,
   errorCount,
   fieldMap,
   forceRender = false,
   hasMaxRows,
   indexPath,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -99,10 +99,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           !readOnly ? (
             <ArrayAction
               addRow={addRow}
-              disableSortable={disableSortable}
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
               index={rowIndex}
+              isSortable={isSortable}
               moveRow={moveRow}
               removeRow={removeRow}
               rowCount={rowCount}

@@ -143,7 +143,7 @@ const ArrayFields: CollectionConfig = {
       name: 'disableSortItems',
       defaultValue: arrayDefaultValue,
       admin: {
-        disableSortable: true,
+        isSortable: false,
       },
       fields: [
         {
