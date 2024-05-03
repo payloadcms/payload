@@ -42,7 +42,7 @@ const ToolbarItem = ({
   }
 
   return (
-    <DropDownItem active={active} enabled={enabled} item={item} key={item.key}>
+    <DropDownItem active={active} editor={editor} enabled={enabled} item={item} key={item.key}>
       {item?.ChildComponent && <item.ChildComponent />}
       <span className="text">{item.label}</span>
     </DropDownItem>
@@ -112,7 +112,7 @@ export const ToolbarDropdown = ({
         onActiveChange({ activeItems: _activeItems })
       }
     })
-  }, [editor, items, onActiveChange])
+  }, [editor, items, maxActiveItems, onActiveChange])
 
   useEffect(() => {
     updateStates()

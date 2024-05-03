@@ -1,5 +1,6 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import type { LexicalEditor } from 'lexical'
+
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import React from 'react'
 import { createPortal } from 'react-dom'
@@ -17,17 +18,18 @@ const DropDownContext = React.createContext<DropDownContextType | null>(null)
 export function DropDownItem({
   active,
   children,
+  editor,
   enabled,
   item,
   title,
 }: {
   active?: boolean
   children: React.ReactNode
+  editor: LexicalEditor
   enabled?: boolean
   item: InlineToolbarGroupItem
   title?: string
 }): React.ReactNode {
-  const [editor] = useLexicalComposerContext()
   const [className, setClassName] = useState<string>(baseClass)
 
   useEffect(() => {
