@@ -2,7 +2,7 @@ import { initPage } from '@payloadcms/next/utilities'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import configPromise from '../../payload.config'
+import config from '../../payload.config'
 import { Gutter } from './_components/Gutter'
 import { HydrateClientUser } from './_components/HydrateClientUser'
 
@@ -16,7 +16,7 @@ export default async function HomePage({
   const {
     permissions,
     req: { user },
-  } = await initPage({ config: configPromise, route: '/', searchParams })
+  } = await initPage({ config, route: '/', searchParams })
 
   return (
     <Fragment>
@@ -43,7 +43,7 @@ export default async function HomePage({
           {". This example demonstrates how to implement Payload's "}
           <Link href="https://payloadcms.com/docs/authentication/overview">Authentication</Link>
           {
-            ' strategies in both the REST and GraphQL APIs. To toggle between these APIs, see `_layout.tsx`.'
+            ' strategies using the Local API, as well as through HTTP via the REST and GraphQL APIs. To toggle between the two HTTP APIs, see `_layout.tsx`.'
           }
         </p>
         <p>

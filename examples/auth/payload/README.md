@@ -7,9 +7,9 @@ This [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/exam
 - [Next.js App Router](../next-app)
 - [Next.js Pages Router](../next-pages)
 
-Follow the instructions in each respective README to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
+Those applications run directly alongside this one. Follow the instructions in each respective README to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
 
-To learn more, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
+To learn more about this, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
 
 ## Quick Start
 
@@ -24,26 +24,96 @@ To spin up this example locally, follow these steps:
 
    > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
 
-1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server, press `y` when prompted to seed the database
+1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+   - Press `y` when prompted to seed the database
+1. `open http://localhost:3000` to access the home page
 1. `open http://localhost:3000/admin` to access the admin panel
-1. Login with email `demo@payloadcms.com` and password `demo`
+   - Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 
 ## How it works
 
-The `users` collection exposes all [auth-related operations](https://payloadcms.com/docs/authentication/operations) needed to create a fully custom workflow on your front-end using the REST or GraphQL APIs, including:
+### Collections
 
-- `Me`
-- `Login`
-- `Logout`
-- `Refresh Token`
-- `Verify Email`
-- `Unlock`
-- `Forgot Password`
-- `Reset Password`
+See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
 
-The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are also configured to ensure that the admin panel and front-end can communicate with each other securely.
+- #### Users (Authentication)
+
+  Users are auth-enabled and encompass both admins and regular users based on the value of their `roles` field. Only `admin` users can access your admin panel to manage your content whereas `user` can authenticate on your front-end and access-controlled interfaces. See [Access Control](#access-control) for more details.
+
+  **Local API**
+
+  On the server, Payload provides all operations needed to authenticate users server-side using the Local API. In Next.js that might look something like this:
+
+  ```ts
+    import { headers as getHeaders } from 'next/headers.js'
+    import { getPayloadHMR } from '@payloadcms/next'
+    import config from '../../payload.config'
+
+    export default async function HomePage({ searchParams }) {
+      const headers = getHeaders()
+      const payload = await getPayloadHMR({ config: configPromise })
+      const req = {} // There is no `req` in Next.js, you'd have to create one (see below)
+      const { permissions, user } = await payload.auth({ headers, req })
+      return ...
+    }
+  ```
+
+  However, this requires `payload` and a `req`. Fortunately, there's an `initPage` utility that does all of this for you (and much more):
+
+  ```ts
+  import { initPage } from '@payloadcms/next/utilities'
+  import config from '../../payload.config'
+
+  export default async function HomePage({ searchParams }) {
+    const {
+      permissions,
+      req: { user, payload },
+    } = await initPage({
+      config,
+      route: '/',
+      searchParams
+    })
+
+    return ...
+  }
+  ```
+
+  With `InitPageResult` you can redirect the user as needed, make additional requests using the Local API, or whatever else your application requires.
+
+  **HTTP**
+
+  The `users` collection also opens an http-layer to expose all [auth-related operations](https://payloadcms.com/docs/authentication/operations) through the REST and GraphQL APIs, including:
+
+  - `Me`
+  - `Login`
+  - `Logout`
+  - `Refresh Token`
+  - `Verify Email`
+  - `Unlock`
+  - `Forgot Password`
+  - `Reset Password`
+
+  This might look something like this:
+
+  ```ts
+  await fetch('/api/users/me', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  ```
+
+  > NOTE: You can still use the HTTP APIs on the server if you don't have access to the Local API.
+
+### Security
+
+The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are all configured to ensure that the admin panel and front-end can communicate with each other securely.
+
+For additional help, see the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
 
 ### Access Control
 
@@ -78,3 +148,7 @@ If you are using an integrated Next.js setup, the easiest way to deploy your Nex
 ## Questions
 
 If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+
+```
+
+```
