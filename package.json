@@ -56,6 +56,7 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release:alpha": "tsx ./scripts/release.ts --bump prerelease --tag alpha",
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
+    "script:list-published": "tsx scripts/lib/getPackageRegistryVersions.ts",
     "script:pack": "tsx scripts/pack-all-to-dest.ts",
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",

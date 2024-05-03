@@ -19,7 +19,22 @@ type Args = {
   writeChangelog?: boolean
 }
 
-export const updateChangelog = async (args: Args = {}) => {
+type ChangelogResult = {
+  /**
+   * URL to open releases/new with the changelog pre-filled
+   */
+  releaseUrl: string
+  /**
+   * The changelog content, does not include contributors
+   */
+  changelog: string
+  /**
+   * The release notes, includes contributors. This is the content used for the releaseUrl
+   */
+  releaseNotes: string
+}
+
+export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult> => {
   const { toVersion = 'HEAD', dryRun, bump, openReleaseUrl, writeChangelog } = args
 
   const fromVersion =
@@ -31,7 +46,7 @@ export const updateChangelog = async (args: Args = {}) => {
     tag !== 'latest' ? 'prerelease' : await getRecommendedBump(fromVersion, toVersion)
 
   if (bump && bump !== recommendedBump) {
-    console.log(`WARNING: Recommended bump is ${recommendedBump}, but you specified ${bump}`)
+    console.log(`WARNING: Recommended bump is '${recommendedBump}', but you specified '${bump}'`)
   }
 
   const calculatedBump = bump || recommendedBump
@@ -70,38 +85,40 @@ export const updateChangelog = async (args: Args = {}) => {
 
   const yyyyMMdd = new Date().toISOString().split('T')[0]
   // Might need to swap out HEAD for the new proposed version
-  let output = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
+  let changelog = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
   if (sections.feat.length) {
-    output += `### Features\n\n${sections.feat.join('\n')}\n\n`
+    changelog += `### Features\n\n${sections.feat.join('\n')}\n\n`
   }
   if (sections.fix.length) {
-    output += `### Bug Fixes\n\n${sections.fix.join('\n')}\n\n`
+    changelog += `### Bug Fixes\n\n${sections.fix.join('\n')}\n\n`
   }
   if (sections.breaking.length) {
-    output += `### BREAKING CHANGES\n\n${sections.breaking.join('\n')}\n\n`
+    changelog += `### BREAKING CHANGES\n\n${sections.breaking.join('\n')}\n\n`
   }
-
-  console.log(chalk.green('\nChangelog Preview:\n'))
-  console.log(chalk.gray(output))
 
   if (writeChangelog) {
     const changelogPath = 'CHANGELOG.md'
     const changelog = await fse.readFile(changelogPath, 'utf8')
-    const newChangelog = output + '\n\n' + changelog
+    const newChangelog = changelog + '\n\n' + changelog
     await fse.writeFile(changelogPath, newChangelog)
     console.log(`Changelog updated at ${changelogPath}`)
   }
 
   // Add contributors after writing to file
-  output += contributors
+  const releaseNotes = changelog + contributors
 
-  let url = `https://github.com/payloadcms/payload/releases/new?tag=${proposedReleaseVersion}&title=${proposedReleaseVersion}&body=${encodeURIComponent(output)}`
+  let releaseUrl = `https://github.com/payloadcms/payload/releases/new?tag=${proposedReleaseVersion}&title=${proposedReleaseVersion}&body=${encodeURIComponent(releaseNotes)}`
   if (tag !== 'latest') {
-    url += `&prerelease=1`
+    releaseUrl += `&prerelease=1`
   }
-  console.log(`Release URL: ${chalk.dim(url)}`)
   if (!openReleaseUrl) {
-    await open(url)
+    await open(releaseUrl)
+  }
+
+  return {
+    releaseUrl,
+    changelog,
+    releaseNotes,
   }
 }
 
@@ -180,11 +197,10 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
     const [rawNotes, _] = commit.body.split('\n\n')
     const notes = rawNotes
       .split('\n')
-      .filter((l) => !l.toUpperCase().startsWith('BREAKING'))
       .map((l) => `> ${l}`)
       .join('\n')
       .trim()
-    formatted += `\n\n${notes}`
+    formatted += `\n\n${notes}\n\n`
   }
 
   return formatted
