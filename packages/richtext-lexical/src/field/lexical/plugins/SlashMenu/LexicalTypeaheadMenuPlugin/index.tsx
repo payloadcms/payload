@@ -21,7 +21,7 @@ import * as React from 'react'
 
 import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch.js'
 import type { MenuRenderFn, MenuResolution } from './LexicalMenu.js'
-import type { SlashMenuGroup, SlashMenuOption } from './types.js'
+import type { SlashMenuGroup, SlashMenuGroupInternal, SlashMenuItem } from './types.js'
 
 import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu.js'
 
@@ -128,13 +128,13 @@ export { useDynamicPositioning } from './LexicalMenu.js'
 export type TypeaheadMenuPluginProps = {
   anchorClassName?: string
   anchorElem: HTMLElement
-  groupsWithOptions: Array<SlashMenuGroup>
+  groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
   onClose?: () => void
   onOpen?: (resolution: MenuResolution) => void
   onQueryChange: (matchingString: null | string) => void
-  onSelectOption: (
-    option: SlashMenuOption,
+  onSelectItem: (
+    item: SlashMenuItem,
     textNodeContainingQuery: TextNode | null,
     closeMenu: () => void,
     matchingString: string,
@@ -149,12 +149,12 @@ export const ENABLE_SLASH_MENU_COMMAND: LexicalCommand<{
 export function LexicalTypeaheadMenuPlugin({
   anchorClassName,
   anchorElem,
-  groupsWithOptions,
+  groups,
   menuRenderFn,
   onClose,
   onOpen,
   onQueryChange,
-  onSelectOption,
+  onSelectItem,
   triggerFn,
 }: TypeaheadMenuPluginProps): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
@@ -270,9 +270,9 @@ export function LexicalTypeaheadMenuPlugin({
       anchorElementRef={anchorElementRef}
       close={closeTypeahead}
       editor={editor}
-      groupsWithOptions={groupsWithOptions}
+      groups={groups}
       menuRenderFn={menuRenderFn}
-      onSelectOption={onSelectOption}
+      onSelectItem={onSelectItem}
       resolution={resolution}
       shouldSplitNodeWithQuery
     />

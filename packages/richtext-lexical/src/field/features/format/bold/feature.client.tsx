@@ -5,7 +5,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { BoldIcon } from '../../../lexical/ui/icons/Bold/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
@@ -24,9 +24,10 @@ const BoldFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
 
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        markdownTransformers,
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: BoldIcon,
                 isActive: ({ selection }) => {
@@ -36,7 +37,7 @@ const BoldFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
                   return false
                 },
                 key: 'bold',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
                 },
                 order: 1,
@@ -44,7 +45,6 @@ const BoldFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
             ]),
           ],
         },
-        markdownTransformers,
       }
     },
   }

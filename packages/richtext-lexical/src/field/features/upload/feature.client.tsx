@@ -2,7 +2,6 @@
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { UploadIcon } from '../../lexical/ui/icons/Upload/index.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'
@@ -30,22 +29,23 @@ const UploadFeatureClient: FeatureProviderProviderClient<UploadFeaturePropsClien
         },
       ],
       slashMenu: {
-        options: [
+        groups: [
           {
             displayName: 'Basic',
-            key: 'basic',
-            options: [
-              new SlashMenuOption('upload', {
+            items: [
+              {
                 Icon: UploadIcon,
                 displayName: 'Upload',
+                key: 'upload',
                 keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
                     replace: false,
                   })
                 },
-              }),
+              },
             ],
+            key: 'basic',
           },
         ],
       },

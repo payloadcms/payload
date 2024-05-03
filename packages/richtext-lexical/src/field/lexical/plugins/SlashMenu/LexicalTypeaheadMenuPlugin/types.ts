@@ -3,7 +3,7 @@ import type { LexicalEditor } from 'lexical'
 import type { MutableRefObject } from 'react'
 import type React from 'react'
 
-export class SlashMenuOption {
+export type SlashMenuItem = {
   // Icon for display
   Icon: React.FC
 
@@ -13,41 +13,22 @@ export class SlashMenuOption {
   // TBD
   keyboardShortcut?: string
   // For extra searching.
-  keywords: Array<string>
-  // What happens when you select this option?
+  keywords?: Array<string>
+  // What happens when you select this item?
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
-
-  ref?: MutableRefObject<HTMLElement | null>
-
-  constructor(
-    key: string,
-    options: {
-      Icon: React.FC
-      displayName?: (({ i18n }: { i18n: I18n }) => string) | string
-      keyboardShortcut?: string
-      keywords?: Array<string>
-      onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
-    },
-  ) {
-    this.key = key
-    this.ref = { current: null }
-    this.setRefElement = this.setRefElement.bind(this)
-
-    this.displayName = options.displayName
-    this.keywords = options.keywords || []
-    this.Icon = options.Icon
-    this.keyboardShortcut = options.keyboardShortcut
-    this.onSelect = options.onSelect.bind(this)
-  }
-
-  setRefElement(element: HTMLElement | null) {
-    this.ref = { current: element }
-  }
 }
 
-export class SlashMenuGroup {
+export type SlashMenuGroup = {
   // Used for class names and, if displayName is not provided, for display.
   displayName?: (({ i18n }: { i18n: I18n }) => string) | string
+  items: Array<SlashMenuItem>
   key: string
-  options: Array<SlashMenuOption>
+}
+
+export type SlashMenuItemInternal = SlashMenuItem & {
+  ref: MutableRefObject<HTMLButtonElement | null>
+}
+
+export type SlashMenuGroupInternal = SlashMenuGroup & {
+  items: Array<SlashMenuItemInternal>
 }
