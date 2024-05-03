@@ -12,12 +12,11 @@ html[data-theme='light'] {
   background: var(--color-base-0);
   padding: 0 3.72px 0 6.25px;
   vertical-align: middle;
-  position: relative;
-  z-index: 10;
   border-radius: 6.25px;
-  transition: opacity 0.2s;
   height: 37.5px;
-  will-change: transform;
+  position: sticky;
+  z-index: 1;
+  top: var(--doc-controls-height);
 
   .caret {
     z-index: 93;
