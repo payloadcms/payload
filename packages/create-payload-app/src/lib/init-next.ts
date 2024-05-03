@@ -6,23 +6,22 @@ import execa from 'execa'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { promisify } from 'util'
+
+import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } from '../types.js'
+
+import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
+import { debug as origDebug, warning } from '../utils/log.js'
+import { moveMessage } from '../utils/messages.js'
+import { wrapNextConfig } from './wrap-next-config.js'
 
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-import { fileURLToPath } from 'node:url'
-
-import type { CliArgs, DbType, PackageManager } from '../types.js'
-
-import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
-import { debug as origDebug, warning } from '../utils/log.js'
-import { moveMessage } from '../utils/messages.js'
-import { wrapNextConfig } from './wrap-next-config.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
   dbType: DbType
@@ -31,8 +30,6 @@ type InitNextArgs = Pick<CliArgs, '--debug'> & {
   projectDir: string
   useDistFiles?: boolean
 }
-
-type NextConfigType = 'cjs' | 'esm'
 
 type InitNextResult =
   | {
@@ -55,7 +52,8 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     nextAppDetails.nextAppDir = createdAppDir
   }
 
-  const { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigType } = nextAppDetails
+  const { hasTopLevelLayout, isPayloadInstalled, isSrcDir, nextAppDir, nextConfigType } =
+    nextAppDetails
 
   if (!nextConfigType) {
     return {
@@ -228,6 +226,9 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
 
   packagesToInstall.push(`@payloadcms/db-${dbType}@beta`)
 
+  // Match graphql version of @payloadcms/next
+  packagesToInstall.push('graphql@^16.8.1')
+
   let exitCode = 0
   switch (packageManager) {
     case 'npm': {
@@ -253,25 +254,29 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
   return { success: exitCode === 0 }
 }
 
-type NextAppDetails = {
-  hasTopLevelLayout: boolean
-  isSrcDir: boolean
-  nextAppDir?: string
-  nextConfigPath?: string
-  nextConfigType?: NextConfigType
-}
-
 export async function getNextAppDetails(projectDir: string): Promise<NextAppDetails> {
   const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
 
   const nextConfigPath: string | undefined = (
     await globby('next.config.*js', { absolute: true, cwd: projectDir })
   )?.[0]
+
   if (!nextConfigPath || nextConfigPath.length === 0) {
     return {
       hasTopLevelLayout: false,
       isSrcDir,
       nextConfigPath: undefined,
+    }
+  }
+
+  // TODO: Check if Payload is already installed
+  const packageObj = await fse.readJson(path.resolve(projectDir, 'package.json'))
+  if (packageObj.dependencies?.payload) {
+    return {
+      hasTopLevelLayout: false,
+      isPayloadInstalled: true,
+      isSrcDir,
+      nextConfigPath,
     }
   }
 
