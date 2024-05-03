@@ -146,6 +146,9 @@ export type ClientFeature<ClientFeatureProps> = {
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+  /**
+   * Plugins are react component which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   */
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -169,6 +172,12 @@ export type ClientFeature<ClientFeatureProps> = {
       }
   >
   slashMenu?: {
+    /**
+     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
+     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
+     *
+     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
+     */
     dynamicGroups?: ({
       editor,
       queryString,
@@ -176,6 +185,10 @@ export type ClientFeature<ClientFeatureProps> = {
       editor: LexicalEditor
       queryString: string
     }) => SlashMenuGroup[]
+    /**
+     * Static array of groups together with the items in them. These will always be present.
+     * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
+     */
     groups?: SlashMenuGroup[]
   }
   /**
@@ -188,6 +201,9 @@ export type ClientFeature<ClientFeatureProps> = {
    * The default, floating toolbar which appears when you select text.
    */
   toolbarInline?: {
+    /**
+     * Array of toolbar groups / sections. Each section can contain multiple toolbar items.
+     */
     groups: InlineToolbarGroup[]
   }
 }
@@ -311,6 +327,9 @@ export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown>>
 export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown>>
 
+/**
+ * Plugins are react component which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+ */
 export type SanitizedPlugin =
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -413,11 +432,24 @@ export type SanitizedClientFeatures = Required<
       }) => SerializedEditorState
     >
   }
+  /**
+   * Plugins are react component which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   */
   plugins?: Array<SanitizedPlugin>
   slashMenu: {
+    /**
+     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
+     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
+     *
+     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
+     */
     dynamicGroups: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
     >
+    /**
+     * Static array of groups together with the items in them. These will always be present.
+     * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
+     */
     groups: SlashMenuGroup[]
   }
 }
