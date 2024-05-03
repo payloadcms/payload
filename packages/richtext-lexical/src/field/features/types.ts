@@ -41,6 +41,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context: RequestContext
   currentDepth: number
   depth: number
+  draft: boolean
   /**
    * This maps all population promises to the node type
    */

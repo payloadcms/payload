@@ -11,6 +11,7 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
@@ -36,6 +37,7 @@ export const traverseFields = ({
   currentDepth,
   depth,
   doc,
+  draft,
   fallbackLocale,
   fieldPromises,
   fields,
@@ -59,6 +61,7 @@ export const traverseFields = ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         field,
         fieldPromises,

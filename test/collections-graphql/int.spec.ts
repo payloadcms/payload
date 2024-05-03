@@ -1014,6 +1014,15 @@ describe('collections-graphql', () => {
       },
     })
 
+    // create cyclical relationship
+    await payload.update({
+      collection: 'cyclical-relationship',
+      id: newDoc.id,
+      data: {
+        relationToSelf: newDoc.id,
+      },
+    })
+
     // save new version
     await payload.update({
       collection: 'cyclical-relationship',
@@ -1021,7 +1030,6 @@ describe('collections-graphql', () => {
       draft: true,
       data: {
         title: draftValue,
-        relationToSelf: newDoc.id,
       },
     })
 

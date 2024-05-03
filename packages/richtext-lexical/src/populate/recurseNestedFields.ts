@@ -10,6 +10,7 @@ type NestedRichTextFieldsArgs = {
   currentDepth?: number
   data: unknown
   depth: number
+  draft: boolean
   /**
    * This maps all the population promises to the node types
    */
@@ -33,6 +34,7 @@ export const recurseNestedFields = ({
   currentDepth = 0,
   data,
   depth,
+  draft,
   fieldPromises,
   fields,
   findMany,
@@ -49,6 +51,7 @@ export const recurseNestedFields = ({
     currentDepth,
     depth,
     doc: data as any, // Looks like it's only needed for hooks and access control, so doesn't matter what we pass here right now
+    draft,
     fallbackLocale: req.fallbackLocale,
     fieldPromises,
     fields,
