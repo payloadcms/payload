@@ -43,12 +43,12 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
     schemas: {},
     tables: {},
   },
-  dialect: 'pg',
+  dialect: 'postgresql',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
   tables: {},
-  version: '5',
+  version: '6',
 })
 
 export const createMigration: CreateMigration = async function createMigration(
