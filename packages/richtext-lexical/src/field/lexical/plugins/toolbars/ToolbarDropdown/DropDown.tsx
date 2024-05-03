@@ -6,9 +6,9 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { InlineToolbarGroupItem } from '../types.js'
+import type { InlineToolbarGroupItem } from '../inline/types.js'
 
-const baseClass = 'inline-toolbar-popup__dropdown-item'
+const baseClass = 'toolbar-popup__dropdown-item'
 
 interface DropDownContextType {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
@@ -129,7 +129,7 @@ function DropDownItems({
   children: React.ReactNode
   dropDownRef: React.Ref<HTMLDivElement>
   onClose: () => void
-}): JSX.Element {
+}): React.ReactElement {
   const [items, setItems] = useState<Array<React.RefObject<HTMLButtonElement>>>()
   const [highlightedItem, setHighlightedItem] = useState<React.RefObject<HTMLButtonElement>>()
 
@@ -177,18 +177,14 @@ function DropDownItems({
       setHighlightedItem(items[0])
     }
 
-    if (highlightedItem?.current != null) {
+    if (highlightedItem != null && highlightedItem?.current != null) {
       highlightedItem.current.focus()
     }
   }, [items, highlightedItem])
 
   return (
     <DropDownContext.Provider value={contextValue}>
-      <div
-        className="inline-toolbar-popup__dropdown-items"
-        onKeyDown={handleKeyDown}
-        ref={dropDownRef}
-      >
+      <div className="toolbar-popup__dropdown-items" onKeyDown={handleKeyDown} ref={dropDownRef}>
         {children}
       </div>
     </DropDownContext.Provider>
@@ -227,7 +223,7 @@ export function DropDown({
 
     if (showDropDown && button !== null && dropDown !== null) {
       const { left, top } = button.getBoundingClientRect()
-      const scrollTopOffset = window.pageYOffset || document.documentElement.scrollTop
+      const scrollTopOffset = window.scrollY || document.documentElement.scrollTop
       dropDown.style.top = `${top + scrollTopOffset + button.offsetHeight + 5}px`
       dropDown.style.left = `${Math.min(left - 5, window.innerWidth - dropDown.offsetWidth - 20)}px`
     }
@@ -277,7 +273,7 @@ export function DropDown({
         type="button"
       >
         <Icon />
-        <i className="inline-toolbar-popup__dropdown-caret" />
+        <i className="toolbar-popup__dropdown-caret" />
       </button>
 
       {showDropDown &&

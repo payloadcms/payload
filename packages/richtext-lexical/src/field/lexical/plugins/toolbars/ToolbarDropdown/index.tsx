@@ -1,16 +1,16 @@
 'use client'
 import React from 'react'
 
-const baseClass = 'inline-toolbar-popup__dropdown'
+const baseClass = 'toolbar-popup__dropdown'
 
 import type { LexicalEditor } from 'lexical'
 
-import type { InlineToolbarGroupItem } from '../types.js'
+import type { InlineToolbarGroupItem } from '../inline/types.js'
 
 import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
 
-export const ToolbarItem = ({
+const ToolbarItem = ({
   anchorElem,
   editor,
   item,

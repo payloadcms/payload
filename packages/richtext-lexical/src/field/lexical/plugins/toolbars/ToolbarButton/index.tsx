@@ -4,11 +4,11 @@ import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { InlineToolbarGroupItem } from '../types.js'
+import type { InlineToolbarGroupItem } from '../inline/types.js'
 
 import './index.scss'
 
-const baseClass = 'inline-toolbar-popup__button'
+const baseClass = 'toolbar-popup__button'
 
 export const ToolbarButton = ({
   children,
@@ -70,7 +70,7 @@ export const ToolbarButton = ({
         .filter(Boolean)
         .join(' '),
     )
-  }, [enabled, active, className])
+  }, [enabled, active, className, item.key])
 
   return (
     <button

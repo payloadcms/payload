@@ -384,8 +384,8 @@ export { SlateRelationshipConverter } from './field/features/migrations/slateToL
 export { SlateUnknownConverter } from './field/features/migrations/slateToLexical/converter/converters/unknown/index.js'
 export { SlateUnorderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/unorderedList/index.js'
 export { SlateUploadConverter } from './field/features/migrations/slateToLexical/converter/converters/upload/index.js'
-
 export { defaultSlateConverters } from './field/features/migrations/slateToLexical/converter/defaultConverters.js'
+
 export {
   convertSlateNodesToLexical,
   convertSlateToLexical,
@@ -394,8 +394,8 @@ export type {
   SlateNode,
   SlateNodeConverter,
 } from './field/features/migrations/slateToLexical/converter/types.js'
-
 export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server.js'
+
 export { ParagraphFeature } from './field/features/paragraph/feature.server.js'
 export {
   RelationshipFeature,
@@ -410,6 +410,7 @@ export {
 } from './field/features/relationship/nodes/RelationshipNode.js'
 export { inlineToolbarFeatureButtonsGroupWithItems } from './field/features/shared/inlineToolbar/featureButtonsGroup.js'
 export { inlineToolbarTextDropdownGroupWithItems } from './field/features/shared/inlineToolbar/textDropdownGroup.js'
+export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
 export { createNode } from './field/features/typeUtilities.js'
 export type {
   ClientComponentProps,

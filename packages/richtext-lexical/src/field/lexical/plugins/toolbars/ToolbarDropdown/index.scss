@@ -1,6 +1,6 @@
-@import '../../../../../../scss/styles';
+@import '../../../../../scss/styles';
 
-.inline-toolbar-popup__dropdown {
+.toolbar-popup__dropdown {
   display: flex;
   align-items: center;
   vertical-align: middle;
@@ -29,7 +29,7 @@
   &.active {
     background-color: var(--color-base-100);
 
-    .inline-toolbar-popup__dropdown-caret {
+    .toolbar-popup__dropdown-caret {
       &:after {
         transform: rotate(0deg);
       }
@@ -50,9 +50,9 @@
       height: 4px;
 
       opacity: 0.3;
-      background-image: url(../../../../ui/icons/Caret/index.svg);
-      background-position-y: 0px;
-      background-position-x: 0px;
+      background-image: url(../../../ui/icons/Caret/index.svg);
+      background-position-y: 0;
+      background-position-x: 0;
     }
   }
 
@@ -63,7 +63,7 @@
     width: 132.5px;
     z-index: 100;
 
-    .inline-toolbar-popup__dropdown-item {
+    .toolbar-popup__dropdown-item {
       all: unset; // reset all default button styles
       cursor: pointer;
       color: var(--color-base-900);
@@ -91,7 +91,7 @@
 }
 
 html[data-theme='light'] {
-  .inline-toolbar-popup__dropdown {
+  .toolbar-popup__dropdown {
     &-items {
       position: absolute;
       @include shadow-m;

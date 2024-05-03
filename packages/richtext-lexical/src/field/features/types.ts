@@ -18,9 +18,9 @@ import type React from 'react'
 import type { AdapterProps } from '../../types.js'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-import type { FixedToolbarGroup } from '../lexical/plugins/toolbars/fixed/types.js'
 import type { InlineToolbarGroup } from '../lexical/plugins/toolbars/inline/types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
+import type { FixedToolbarGroup } from './toolbars/fixed/types.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -147,7 +147,7 @@ export type ClientFeature<ClientFeatureProps> = {
   markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
   /**
-   * Plugins are react component which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */
   plugins?: Array<
     | {
@@ -328,7 +328,7 @@ export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown
 export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown>>
 
 /**
- * Plugins are react component which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+ * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
  */
 export type SanitizedPlugin =
   | {
@@ -433,7 +433,7 @@ export type SanitizedClientFeatures = Required<
     >
   }
   /**
-   * Plugins are react component which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */
   plugins?: Array<SanitizedPlugin>
   slashMenu: {

@@ -19,8 +19,8 @@ import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../types.js'
 import { useEditorConfigContext } from '../../../../config/client/EditorConfigProvider.js'
 import { getDOMRangeRect } from '../../../../utils/getDOMRangeRect.js'
 import { setFloatingElemPosition } from '../../../../utils/setFloatingElemPosition.js'
-import { ToolbarButton } from '../ToolbarButton/index.js'
-import { ToolbarDropdown } from '../ToolbarDropdown/index.js'
+import { ToolbarButton } from '../../ToolbarButton/index.js'
+import { ToolbarDropdown } from '../../ToolbarDropdown/index.js'
 import './index.scss'
 
 function ButtonGroupItem({
@@ -102,7 +102,7 @@ function ToolbarGroup({
   )
 }
 
-function FloatingSelectToolbar({
+function InlineToolbar({
   anchorElem,
   editor,
 }: {
@@ -279,10 +279,10 @@ function FloatingSelectToolbar({
   )
 }
 
-function useFloatingTextFormatToolbar(
+function useInlineToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLElement,
-): JSX.Element | null {
+): React.ReactElement | null {
   const [isText, setIsText] = useState(false)
 
   const updatePopup = useCallback(() => {
@@ -360,14 +360,14 @@ function useFloatingTextFormatToolbar(
     return null
   }
 
-  return createPortal(<FloatingSelectToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
+  return createPortal(<InlineToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
 }
 
-export function FloatingSelectToolbarPlugin({
+export function InlineToolbarPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const [editor] = useLexicalComposerContext()
-  return useFloatingTextFormatToolbar(editor, anchorElem)
+  return useInlineToolbar(editor, anchorElem)
 }
