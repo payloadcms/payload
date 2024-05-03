@@ -453,6 +453,12 @@ export {
   UploadNode,
 } from './field/features/upload/nodes/UploadNode.js'
 export {
+  type EditorFocusContextType,
+  EditorFocusProvider,
+  useEditorFocus,
+} from './field/lexical/EditorFocusProvider.js'
+
+export {
   EditorConfigProvider,
   useEditorConfigContext,
 } from './field/lexical/config/client/EditorConfigProvider.js'
