@@ -696,6 +696,12 @@ describe('fields', () => {
         })
       })
     })
+
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-collapsedByDefaultBlocks .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
   })
 
   describe('array', () => {
@@ -714,6 +720,12 @@ describe('fields', () => {
       await page.goto(url.create)
       const field = page.locator('#field-readOnly__0__text')
       await expect(field).toHaveValue('defaultValue')
+    })
+
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSortItems .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
     })
 
     test('should render RowLabel using a function', async () => {
