@@ -960,6 +960,44 @@ describe('collections-graphql', () => {
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
       })
+
+      it('should query relationships with locale', async () => {
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            title: {
+              en: 'English title',
+              es: 'Spanish title',
+            },
+          },
+          locale: '*',
+        })
+
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          data: {
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `query {
+          CyclicalRelationships(locale: es) {
+            docs {
+              title
+              relationToSelf {
+                title
+              }
+            }
+          }
+        }`
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
     })
   })
 
