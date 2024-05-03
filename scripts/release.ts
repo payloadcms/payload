@@ -16,45 +16,11 @@ import { simpleGit } from 'simple-git'
 import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
+import { packageWhitelist } from './lib/whitelist.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
 const npmPublishLimit = pLimit(6)
-
-// Update this list with any packages to publish
-const packageWhitelist = [
-  'payload',
-  'translations',
-  'ui',
-  'next',
-  'graphql',
-  'db-mongodb',
-  'db-postgres',
-  'richtext-slate',
-  'richtext-lexical',
-
-  'create-payload-app',
-
-  // Adapters
-  'email-nodemailer',
-  'email-resend',
-
-  'storage-s3',
-  'storage-azure',
-  'storage-gcs',
-  'storage-vercel-blob',
-
-  // Plugins
-  'plugin-cloud',
-  'plugin-cloud-storage',
-  'plugin-form-builder',
-  'plugin-nested-docs',
-  'plugin-redirects',
-  'plugin-search',
-  'plugin-seo',
-  'plugin-stripe',
-  // 'plugin-sentry',
-]
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -162,7 +128,11 @@ async function main() {
 
   // Preview/Update changelog
   header(`${logPrefix}📝 Updating changelog...`)
-  await updateChangelog({
+  const {
+    changelog: changelogContent,
+    releaseNotes,
+    releaseUrl,
+  } = await updateChangelog({
     bump,
     dryRun,
     toVersion: 'HEAD',
@@ -170,6 +140,10 @@ async function main() {
     openReleaseUrl: true,
     writeChangelog: changelog,
   })
+
+  console.log(chalk.green('\nChangelog Preview:\n'))
+  console.log(chalk.gray(changelogContent) + '\n\n')
+  console.log(`Release URL: ${chalk.dim(releaseUrl)}`)
 
   let packageDetails = await getPackageDetails(packageWhitelist)
 
@@ -238,7 +212,7 @@ async function main() {
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
   runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  const results = await Promise.all(
+  const results = await Promise.allSettled(
     packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun })),
   )
 
@@ -247,7 +221,12 @@ async function main() {
   // New results format
   console.log(
     results
-      .map(({ name, success, details }) => {
+      .map((result) => {
+        if (result.status === 'rejected') {
+          console.error(result.reason)
+          return `  ❌ ${String(result.reason)}`
+        }
+        const { name, success, details } = result.value
         let summary = `  ${success ? '✅' : '❌'} ${name}`
         if (details) {
           summary += `\n    ${details}\n`
@@ -265,6 +244,8 @@ async function main() {
   // }
 
   header('🎉 Done!')
+
+  console.log(chalk.bold.green(`\n\nRelease URL: ${releaseUrl}`))
 }
 
 main().catch((error) => {
@@ -281,23 +262,36 @@ async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: bo
 async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
   const { dryRun = false } = opts ?? {}
   console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
-  const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
-  if (dryRun) {
-    cmdArgs.push('--dry-run')
-  }
-  const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
-    cwd,
-    stdio: ['ignore', 'ignore', 'pipe'],
-    // stdio: 'inherit',
-  })
 
-  if (exitCode !== 0) {
-    console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
-    return { name: pkg.name, success: false, details: stderr }
-  }
+  try {
+    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
+    if (dryRun) {
+      cmdArgs.push('--dry-run')
+    }
+    const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
+      cwd,
+      stdio: ['ignore', 'ignore', 'pipe'],
+      // stdio: 'inherit',
+    })
 
-  console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
-  return { name: pkg.name, success: true }
+    if (exitCode !== 0) {
+      console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
+      return { name: pkg.name, success: false, details: stderr }
+    }
+
+    console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
+    return { name: pkg.name, success: true }
+  } catch (err: unknown) {
+    console.error(err)
+    return {
+      name: pkg.name,
+      success: false,
+      details:
+        err instanceof Error
+          ? `Error publishing ${pkg.name}: ${err.message}`
+          : `Unexpected error publishing ${pkg.name}: ${String(err)}`,
+    }
+  }
 }
 
 function abort(message = 'Abort', exitCode = 1) {

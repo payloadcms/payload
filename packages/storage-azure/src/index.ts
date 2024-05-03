@@ -8,7 +8,7 @@ import type {
 import type { Config, Plugin } from 'payload/config'
 
 import { BlobServiceClient } from '@azure/storage-blob'
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
@@ -94,7 +94,7 @@ export const azureStorage: AzureStoragePlugin =
       }),
     }
 
-    return cloudStorage({
+    return cloudStoragePlugin({
       collections: collectionsWithAdapter,
     })(config)
   }

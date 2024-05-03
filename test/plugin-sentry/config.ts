@@ -1,4 +1,4 @@
-import { sentry } from '@payloadcms/plugin-sentry'
+import { sentryPlugin } from '@payloadcms/plugin-sentry'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -24,7 +24,7 @@ export default buildConfigWithDefaults({
     })
   },
   plugins: [
-    sentry({
+    sentryPlugin({
       dsn: 'https://61edebe5ee6d4d38a9d6459c7323d777@o4505289711681536.ingest.sentry.io/4505357688242176',
       options: {
         captureErrors: [400, 403, 404],
