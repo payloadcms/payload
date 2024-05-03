@@ -8,7 +8,7 @@ import type { LexicalEditor } from 'lexical'
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 
-import type { InlineToolbarGroupItem } from '../../inline/types.js'
+import type { ToolbarGroupItem } from '../../types.js'
 
 import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
@@ -24,7 +24,7 @@ const ToolbarItem = ({
   anchorElem: HTMLElement
   editor: LexicalEditor
   enabled?: boolean
-  item: InlineToolbarGroupItem
+  item: ToolbarGroupItem
 }) => {
   if (item.Component) {
     return (
@@ -66,7 +66,7 @@ export const ToolbarDropdown = ({
   classNames?: string[]
   editor: LexicalEditor
   groupKey: string
-  items: InlineToolbarGroupItem[]
+  items: ToolbarGroupItem[]
   itemsContainerClassNames?: string[]
   label?: string
   /**
@@ -74,7 +74,7 @@ export const ToolbarDropdown = ({
    * unnecessary item active checks when the maximum number of active items is reached.
    */
   maxActiveItems?: number
-  onActiveChange?: ({ activeItems }: { activeItems: InlineToolbarGroupItem[] }) => void
+  onActiveChange?: ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => void
 }) => {
   const [activeItemKeys, setActiveItemKeys] = React.useState<string[]>([])
   const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
@@ -84,9 +84,9 @@ export const ToolbarDropdown = ({
       const selection = $getSelection()
 
       const _activeItemKeys: string[] = []
-      const _activeItems: InlineToolbarGroupItem[] = []
+      const _activeItems: ToolbarGroupItem[] = []
       const _enabledItemKeys: string[] = []
-      const _enabledItems: InlineToolbarGroupItem[] = []
+      const _enabledItems: ToolbarGroupItem[] = []
 
       for (const item of items) {
         if (item.isActive && (!maxActiveItems || _activeItemKeys.length < maxActiveItems)) {

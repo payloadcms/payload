@@ -14,8 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { FixedToolbarGroupItem } from '../../fixed/types.js'
-import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../types.js'
+import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { getDOMRangeRect } from '../../../../lexical/utils/getDOMRangeRect.js'
@@ -31,7 +30,7 @@ function ButtonGroupItem({
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-  item: InlineToolbarGroupItem
+  item: ToolbarGroupItem
 }): React.ReactNode {
   if (item.Component) {
     return (
@@ -48,7 +47,7 @@ function ButtonGroupItem({
   )
 }
 
-function ToolbarGroup({
+function ToolbarGroupComponent({
   anchorElem,
   editor,
   group,
@@ -56,7 +55,7 @@ function ToolbarGroup({
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-  group: InlineToolbarGroup
+  group: ToolbarGroup
   index: number
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
@@ -71,7 +70,7 @@ function ToolbarGroup({
     }
   }, [group])
 
-  const onActiveChange = ({ activeItems }: { activeItems: FixedToolbarGroupItem[] }) => {
+  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
     if (!activeItems.length) {
       if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
         setDropdownIcon(() => group.ChildComponent)
@@ -287,7 +286,7 @@ function InlineToolbar({
           {editorConfig?.features &&
             editorConfig.features?.toolbarInline?.groups.map((group, i) => {
               return (
-                <ToolbarGroup
+                <ToolbarGroupComponent
                   anchorElem={anchorElem}
                   editor={editor}
                   group={group}
@@ -392,5 +391,6 @@ export function InlineToolbarPlugin({
   anchorElem?: HTMLElement
 }): React.ReactElement | null {
   const [editor] = useLexicalComposerContext()
+
   return useInlineToolbar(editor, anchorElem)
 }

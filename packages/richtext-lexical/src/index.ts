@@ -340,7 +340,7 @@ export { BoldFeature } from './field/features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './field/features/format/inlineCode/feature.server.js'
 
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
-export { inlineToolbarFormatGroupWithItems } from './field/features/format/shared/inlineToolbarFormatGroup.js'
+export { toolbarFormatGroupWithItems } from './field/features/format/shared/toolbarFormatGroup.js'
 export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
@@ -408,15 +408,12 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
-export { inlineToolbarFeatureButtonsGroupWithItems } from './field/features/shared/inlineToolbar/featureButtonsGroup.js'
-export { inlineToolbarTextDropdownGroupWithItems } from './field/features/shared/inlineToolbar/textDropdownGroup.js'
+export { toolbarFeatureButtonsGroupWithItems } from './field/features/shared/toolbar/featureButtonsGroup.js'
+export { toolbarTextDropdownGroupWithItems } from './field/features/shared/toolbar/textDropdownGroup.js'
 export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
 export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'
 
-export type {
-  InlineToolbarGroup,
-  InlineToolbarGroupItem,
-} from './field/features/toolbars/inline/types.js'
+export type { ToolbarGroup, ToolbarGroupItem } from './field/features/toolbars/types.js'
 export { createNode } from './field/features/typeUtilities.js'
 export type {
   ClientComponentProps,

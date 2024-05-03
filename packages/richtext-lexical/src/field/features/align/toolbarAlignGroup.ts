@@ -1,8 +1,8 @@
-import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../toolbars/inline/types.js'
+import type { ToolbarGroup, ToolbarGroupItem } from '../toolbars/types.js'
 
 import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft/index.js'
 
-export const alignGroupWithItems = (items: InlineToolbarGroupItem[]): InlineToolbarGroup => {
+export const toolbarAlignGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGroup => {
   return {
     type: 'dropdown',
     ChildComponent: AlignLeftIcon,

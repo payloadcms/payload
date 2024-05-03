@@ -16,14 +16,10 @@ import type {
 import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'
-import type {
-  InlineToolbarGroup,
-  InlineToolbarGroupItem,
-} from '../features/toolbars/inline/types.js'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
-import type { FixedToolbarGroup } from './toolbars/fixed/types.js'
+import type { ToolbarGroup } from './toolbars/types.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -198,7 +194,7 @@ export type ClientFeature<ClientFeatureProps> = {
    * An opt-in, classic fixed toolbar which stays at the top of the editor
    */
   toolbarFixed?: {
-    groups: FixedToolbarGroup[]
+    groups: ToolbarGroup[]
   }
   /**
    * The default, floating toolbar which appears when you select text.
@@ -207,7 +203,7 @@ export type ClientFeature<ClientFeatureProps> = {
     /**
      * Array of toolbar groups / sections. Each section can contain multiple toolbar items.
      */
-    groups: InlineToolbarGroup[]
+    groups: ToolbarGroup[]
   }
 }
 

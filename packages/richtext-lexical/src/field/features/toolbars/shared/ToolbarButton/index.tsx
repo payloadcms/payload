@@ -5,7 +5,7 @@ import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { InlineToolbarGroupItem } from '../../inline/types.js'
+import type { ToolbarGroupItem } from '../../types.js'
 
 import './index.scss'
 
@@ -18,7 +18,7 @@ export const ToolbarButton = ({
 }: {
   children: React.JSX.Element
   editor: LexicalEditor
-  item: InlineToolbarGroupItem
+  item: ToolbarGroupItem
 }) => {
   const [enabled, setEnabled] = useState<boolean>(true)
   const [active, setActive] = useState<boolean>(false)

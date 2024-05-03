@@ -6,8 +6,27 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
+import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
 import { STRIKETHROUGH } from './markdownTransformers.js'
+
+const toolbarGroups = [
+  toolbarFormatGroupWithItems([
+    {
+      ChildComponent: StrikethroughIcon,
+      isActive: ({ selection }) => {
+        if ($isRangeSelection(selection)) {
+          return selection.hasFormat('strikethrough')
+        }
+        return false
+      },
+      key: 'strikethrough',
+      onSelect: ({ editor }) => {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
+      },
+      order: 4,
+    },
+  ]),
+]
 
 const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
@@ -17,25 +36,11 @@ const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (pr
         clientFeatureProps: props,
 
         markdownTransformers: [STRIKETHROUGH],
+        toolbarFixed: {
+          groups: toolbarGroups,
+        },
         toolbarInline: {
-          groups: [
-            inlineToolbarFormatGroupWithItems([
-              {
-                ChildComponent: StrikethroughIcon,
-                isActive: ({ selection }) => {
-                  if ($isRangeSelection(selection)) {
-                    return selection.hasFormat('strikethrough')
-                  }
-                  return false
-                },
-                key: 'strikethrough',
-                onSelect: ({ editor }) => {
-                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
-                },
-                order: 4,
-              },
-            ]),
-          ],
+          groups: toolbarGroups,
         },
       }
     },

@@ -7,6 +7,7 @@ import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
+import type { ToolbarGroup } from '../toolbars/types.js'
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { HeadingFeatureProps } from './feature.server.js'
 
@@ -17,7 +18,7 @@ import { H4Icon } from '../../lexical/ui/icons/H4/index.js'
 import { H5Icon } from '../../lexical/ui/icons/H5/index.js'
 import { H6Icon } from '../../lexical/ui/icons/H6/index.js'
 import { createClientComponent } from '../createClientComponent.js'
-import { inlineToolbarTextDropdownGroupWithItems } from '../shared/inlineToolbar/textDropdownGroup.js'
+import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
 const setHeading = (headingSize: HeadingTagType) => {
@@ -35,11 +36,47 @@ const iconImports = {
 }
 
 const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> = (props) => {
-  const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
-
   return {
     clientFeatureProps: props,
     feature: () => {
+      const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
+
+      const toolbarGroups: ToolbarGroup[] = [
+        toolbarTextDropdownGroupWithItems(
+          enabledHeadingSizes.map((headingSize, i) => {
+            return {
+              ChildComponent: iconImports[headingSize],
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if ($isHeadingNode(node) && node.getTag() === headingSize) {
+                    continue
+                  }
+
+                  const parent = node.getParent()
+                  if ($isHeadingNode(parent) && parent.getTag() === headingSize) {
+                    continue
+                  }
+
+                  return false
+                }
+                return true
+              },
+              key: headingSize,
+              label: `Heading ${headingSize.charAt(1)}`,
+              onSelect: ({ editor }) => {
+                editor.update(() => {
+                  setHeading(headingSize)
+                })
+              },
+              order: i + 2,
+            }
+          }),
+        ),
+      ]
+
       return {
         clientFeatureProps: props,
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
@@ -67,44 +104,11 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
               ]
             : [],
         },
+        toolbarFixed: {
+          groups: enabledHeadingSizes?.length ? toolbarGroups : [],
+        },
         toolbarInline: {
-          groups: enabledHeadingSizes?.length
-            ? [
-                inlineToolbarTextDropdownGroupWithItems(
-                  enabledHeadingSizes.map((headingSize, i) => {
-                    return {
-                      ChildComponent: iconImports[headingSize],
-                      isActive: ({ selection }) => {
-                        if (!$isRangeSelection(selection)) {
-                          return false
-                        }
-                        for (const node of selection.getNodes()) {
-                          if ($isHeadingNode(node) && node.getTag() === headingSize) {
-                            continue
-                          }
-
-                          const parent = node.getParent()
-                          if ($isHeadingNode(parent) && parent.getTag() === headingSize) {
-                            continue
-                          }
-
-                          return false
-                        }
-                        return true
-                      },
-                      key: headingSize,
-                      label: `Heading ${headingSize.charAt(1)}`,
-                      onSelect: ({ editor }) => {
-                        editor.update(() => {
-                          setHeading(headingSize)
-                        })
-                      },
-                      order: i + 2,
-                    }
-                  }),
-                ),
-              ]
-            : [],
+          groups: enabledHeadingSizes?.length ? toolbarGroups : [],
         },
       }
     },

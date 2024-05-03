@@ -5,7 +5,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { InlineToolbarGroupItem } from '../../inline/types.js'
+import type { ToolbarGroupItem } from '../../types.js'
 
 const baseClass = 'toolbar-popup__dropdown-item'
 
@@ -27,7 +27,7 @@ export function DropDownItem({
   children: React.ReactNode
   editor: LexicalEditor
   enabled?: boolean
-  item: InlineToolbarGroupItem
+  item: ToolbarGroupItem
   title?: string
 }): React.ReactNode {
   const [className, setClassName] = useState<string>(baseClass)

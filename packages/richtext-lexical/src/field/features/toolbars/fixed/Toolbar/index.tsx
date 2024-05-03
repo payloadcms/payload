@@ -6,7 +6,7 @@ import * as React from 'react'
 
 import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
-import type { FixedToolbarGroup, FixedToolbarGroupItem } from '../types.js'
+import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -21,7 +21,7 @@ function ButtonGroupItem({
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-  item: FixedToolbarGroupItem
+  item: ToolbarGroupItem
 }): React.ReactNode {
   if (item.Component) {
     return (
@@ -38,7 +38,7 @@ function ButtonGroupItem({
   )
 }
 
-function ToolbarGroup({
+function ToolbarGroupComponent({
   anchorElem,
   editor,
   editorConfig,
@@ -48,7 +48,7 @@ function ToolbarGroup({
   anchorElem: HTMLElement
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
-  group: FixedToolbarGroup
+  group: ToolbarGroup
   index: number
 }): React.ReactNode {
   const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
@@ -62,7 +62,7 @@ function ToolbarGroup({
     }
   }, [group])
 
-  const onActiveChange = ({ activeItems }: { activeItems: FixedToolbarGroupItem[] }) => {
+  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
     if (!activeItems.length) {
       setDropdownLabel(null)
       if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
@@ -112,9 +112,7 @@ function ToolbarGroup({
             <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
           )
         })}
-      {index < editorConfig.features.toolbarInline?.groups.length - 1 && (
-        <div className="divider" />
-      )}
+      {index < editorConfig.features.toolbarFixed?.groups.length - 1 && <div className="divider" />}
     </div>
   )
 }
@@ -140,9 +138,9 @@ function FixedToolbar({
       {editor.isEditable() && (
         <React.Fragment>
           {editorConfig?.features &&
-            editorConfig.features?.toolbarInline?.groups.map((group, i) => {
+            editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
               return (
-                <ToolbarGroup
+                <ToolbarGroupComponent
                   anchorElem={anchorElem}
                   editor={editor}
                   editorConfig={editorConfig}
@@ -188,6 +186,10 @@ export function FixedToolbarPlugin({
   const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
 
   if (hasParentWithFixedToolbar) {
+    return null
+  }
+
+  if (!editorConfig?.features?.toolbarFixed?.groups?.length) {
     return null
   }
 
