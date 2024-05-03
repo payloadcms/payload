@@ -32,7 +32,7 @@ export const OrderedListFeature: FeatureProviderProviderServer<undefined, undefi
         serverFeatureProps: props,
       }
     },
-    key: 'orderedlist',
+    key: 'orderedList',
     serverFeatureProps: props,
   }
 }

@@ -30,7 +30,7 @@ export const HorizontalRuleFeature: FeatureProviderProviderServer<undefined, und
         serverFeatureProps: props,
       }
     },
-    key: 'horizontalrule',
+    key: 'horizontalRule',
     serverFeatureProps: props,
   }
 }

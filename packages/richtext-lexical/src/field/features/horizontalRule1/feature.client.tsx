@@ -29,7 +29,7 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
               {
                 Icon: HorizontalRuleIcon,
                 displayName: `Horizontal Rule`,
-                key: 'horizontalrule',
+                key: 'horizontalRule',
                 keywords: ['hr', 'horizontal rule', 'line', 'separator'],
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)

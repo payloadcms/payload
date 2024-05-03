@@ -28,7 +28,7 @@ const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props
                   }
                   return false
                 },
-                key: 'code',
+                key: 'inlineCode',
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
                 },

@@ -33,7 +33,7 @@ const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (pr
                 {
                   Icon: UnorderedListIcon,
                   displayName: 'Unordered List',
-                  key: 'unorderedlist',
+                  key: 'unorderedList',
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)

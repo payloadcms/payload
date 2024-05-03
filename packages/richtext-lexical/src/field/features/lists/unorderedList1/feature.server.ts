@@ -32,7 +32,7 @@ export const UnorderedListFeature: FeatureProviderProviderServer<undefined, unde
         serverFeatureProps: props,
       }
     },
-    key: 'unorderedlist',
+    key: 'unorderedList',
     serverFeatureProps: props,
   }
 }

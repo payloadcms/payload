@@ -2,7 +2,6 @@
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuItem } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { UploadIcon } from '../../lexical/ui/icons/Upload/index.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'

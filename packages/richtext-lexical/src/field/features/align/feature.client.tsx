@@ -22,7 +22,7 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             {
               ChildComponent: AlignLeftIcon,
               isActive: () => false,
-              key: 'align-left',
+              key: 'alignLeft',
               label: `Align Left`,
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')
@@ -32,7 +32,7 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             {
               ChildComponent: AlignCenterIcon,
               isActive: () => false,
-              key: 'align-center',
+              key: 'alignCenter',
               label: `Align Center`,
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')
@@ -42,7 +42,7 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             {
               ChildComponent: AlignRightIcon,
               isActive: () => false,
-              key: 'align-right',
+              key: 'alignRight',
               label: `Align Right`,
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')
@@ -52,7 +52,7 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             {
               ChildComponent: AlignJustifyIcon,
               isActive: () => false,
-              key: 'align-justify',
+              key: 'alignJustify',
               label: `Align Justify`,
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')

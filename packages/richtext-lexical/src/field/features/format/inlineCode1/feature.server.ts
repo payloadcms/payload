@@ -12,7 +12,7 @@ export const InlineCodeFeature: FeatureProviderProviderServer<undefined, undefin
         serverFeatureProps: props,
       }
     },
-    key: 'inlinecode',
+    key: 'inlineCode',
     serverFeatureProps: props,
   }
 }

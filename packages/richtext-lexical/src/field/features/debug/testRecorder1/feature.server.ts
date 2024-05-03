@@ -10,7 +10,7 @@ export const TestRecorderFeature: FeatureProviderProviderServer<undefined, undef
         serverFeatureProps: props,
       }
     },
-    key: 'testrecorder',
+    key: 'testRecorder',
     serverFeatureProps: props,
   }
 }

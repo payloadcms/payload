@@ -5,7 +5,6 @@ import { $createParagraphNode, $getSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuItem } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { TextIcon } from '../../lexical/ui/icons/Text/index.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { inlineToolbarTextDropdownGroupWithItems } from '../shared/inlineToolbar/textDropdownGroup.js'
@@ -43,7 +42,7 @@ const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props)
             {
               ChildComponent: TextIcon,
               isActive: () => false,
-              key: 'normal-text',
+              key: 'paragraph',
               label: 'Normal Text',
               onSelect: ({ editor }) => {
                 editor.update(() => {

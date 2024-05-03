@@ -6,7 +6,6 @@ import { $getSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuItem } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote/index.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { inlineToolbarTextDropdownGroupWithItems } from '../shared/inlineToolbar/textDropdownGroup.js'

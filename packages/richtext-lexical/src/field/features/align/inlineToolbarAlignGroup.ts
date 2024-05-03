@@ -10,7 +10,7 @@ export const alignGroupWithItems = (items: InlineToolbarGroupItem[]): InlineTool
     type: 'dropdown',
     ChildComponent: AlignLeftIcon,
     items,
-    key: 'dropdown-align',
+    key: 'align',
     order: 2,
   }
 }

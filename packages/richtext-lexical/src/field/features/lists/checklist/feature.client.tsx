@@ -3,7 +3,6 @@ import { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list
 
 import type { ClientFeature, FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuItem } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
 import { inlineToolbarTextDropdownGroupWithItems } from '../../shared/inlineToolbar/textDropdownGroup.js'
@@ -11,7 +10,7 @@ import { LexicalListPlugin } from '../plugin/index.js'
 import { CHECK_LIST } from './markdownTransformers.js'
 import { LexicalCheckListPlugin } from './plugin/index.js'
 
-const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
+const ChecklistFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
     feature: ({ featureProviderMap }) => {
@@ -22,7 +21,7 @@ const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props)
         },
       ]
 
-      if (!featureProviderMap.has('unorderedlist') && !featureProviderMap.has('orderedlist')) {
+      if (!featureProviderMap.has('unorderedList') && !featureProviderMap.has('orderedList')) {
         plugins.push({
           Component: LexicalListPlugin,
           position: 'normal',
@@ -33,7 +32,7 @@ const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props)
         clientFeatureProps: props,
         markdownTransformers: [CHECK_LIST],
         nodes:
-          featureProviderMap.has('unorderedlist') || featureProviderMap.has('orderedlist')
+          featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
             ? []
             : [ListNode, ListItemNode],
         plugins,
@@ -62,7 +61,7 @@ const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props)
               {
                 ChildComponent: ChecklistIcon,
                 isActive: () => false,
-                key: 'checkList',
+                key: 'checklist',
                 label: `Check List`,
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
@@ -77,4 +76,4 @@ const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props)
   }
 }
 
-export const CheckListFeatureClientComponent = createClientComponent(CheckListFeatureClient)
+export const ChecklistFeatureClientComponent = createClientComponent(ChecklistFeatureClient)

@@ -12,7 +12,7 @@ export const inlineToolbarTextDropdownGroupWithItems = (
     type: 'dropdown',
     ChildComponent: TextIcon,
     items,
-    key: 'dropdown-text',
+    key: 'text',
     order: 1,
   }
 }

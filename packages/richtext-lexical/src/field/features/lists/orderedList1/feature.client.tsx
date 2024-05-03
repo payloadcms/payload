@@ -3,7 +3,6 @@ import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/li
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuItem } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
 import { inlineToolbarTextDropdownGroupWithItems } from '../../shared/inlineToolbar/textDropdownGroup.js'
@@ -17,8 +16,8 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
       return {
         clientFeatureProps: props,
         markdownTransformers: [ORDERED_LIST],
-        nodes: featureProviderMap.has('unorderedlist') ? [] : [ListNode, ListItemNode],
-        plugins: featureProviderMap.has('unorderedlist')
+        nodes: featureProviderMap.has('orderedList') ? [] : [ListNode, ListItemNode],
+        plugins: featureProviderMap.has('orderedList')
           ? []
           : [
               {
@@ -34,7 +33,7 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
                 {
                   Icon: OrderedListIcon,
                   displayName: 'Ordered List',
-                  key: 'orderedlist',
+                  key: 'orderedList',
                   keywords: ['ordered list', 'ol'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)

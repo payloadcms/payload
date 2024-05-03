@@ -10,7 +10,7 @@ export const TreeViewFeature: FeatureProviderProviderServer<undefined, undefined
         serverFeatureProps: props,
       }
     },
-    key: 'treeview',
+    key: 'treeView',
     serverFeatureProps: props,
   }
 }
