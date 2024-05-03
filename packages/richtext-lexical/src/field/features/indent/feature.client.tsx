@@ -8,10 +8,10 @@ import type { FeatureProviderProviderClient } from '../types.js'
 import { IndentDecreaseIcon } from '../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientComponent } from '../createClientComponent.js'
-import { indentGroupWithItems } from './inlineToolbarIndentGroup.js'
+import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
-  indentGroupWithItems([
+  toolbarIndentGroupWithItems([
     {
       ChildComponent: IndentDecreaseIcon,
       isActive: () => false,
