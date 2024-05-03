@@ -334,10 +334,10 @@ export {
   lexicalHTML,
 } from './field/features/converters/html/field/index.js'
 export { createClientComponent } from './field/features/createClientComponent.js'
-export { TestRecorderFeature } from './field/features/debug/testRecorder1/feature.server.js'
-export { TreeViewFeature } from './field/features/debug/treeView1/feature.server.js'
+export { TestRecorderFeature } from './field/features/debug/testRecorder/feature.server.js'
+export { TreeViewFeature } from './field/features/debug/treeView/feature.server.js'
 export { BoldFeature } from './field/features/format/bold/feature.server.js'
-export { InlineCodeFeature } from './field/features/format/inlineCode1/feature.server.js'
+export { InlineCodeFeature } from './field/features/format/inlineCode/feature.server.js'
 
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
 export { inlineToolbarFormatGroupWithItems } from './field/features/format/shared/inlineToolbarFormatGroup.js'
@@ -349,7 +349,7 @@ export {
   HeadingFeature,
   type HeadingFeatureProps,
 } from './field/features/heading/feature.server.js'
-export { HorizontalRuleFeature } from './field/features/horizontalRule1/feature.server.js'
+export { HorizontalRuleFeature } from './field/features/horizontalRule/feature.server.js'
 
 export { IndentFeature } from './field/features/indent/feature.server.js'
 export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server.js'
@@ -371,8 +371,8 @@ export type {
   SerializedLinkNode,
 } from './field/features/link/nodes/types.js'
 export { ChecklistFeature } from './field/features/lists/checklist/feature.server.js'
-export { OrderedListFeature } from './field/features/lists/orderedList1/feature.server.js'
-export { UnorderedListFeature } from './field/features/lists/unorderedList1/feature.server.js'
+export { OrderedListFeature } from './field/features/lists/orderedList/feature.server.js'
+export { UnorderedListFeature } from './field/features/lists/unorderedList/feature.server.js'
 export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical/feature.server.js'
 export { SlateBlockquoteConverter } from './field/features/migrations/slateToLexical/converter/converters/blockquote/index.js'
 export { SlateHeadingConverter } from './field/features/migrations/slateToLexical/converter/converters/heading/index.js'

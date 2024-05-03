@@ -2,14 +2,14 @@ import type { ElementTransformer } from '@lexical/markdown'
 
 import { $isListNode, ListItemNode, ListNode } from '@lexical/list'
 
-import { listExport, listReplace } from '../common/markdown.js'
+import { listExport, listReplace } from '../shared/markdown.js'
 
-export const UNORDERED_LIST: ElementTransformer = {
+export const ORDERED_LIST: ElementTransformer = {
   type: 'element',
   dependencies: [ListNode, ListItemNode],
   export: (node, exportChildren) => {
     return $isListNode(node) ? listExport(node, exportChildren, 0) : null
   },
-  regExp: /^(\s*)[-*+]\s/,
-  replace: listReplace('bullet'),
+  regExp: /^(\s*)(\d+)\.\s/,
+  replace: listReplace('number'),
 }
