@@ -1,7 +1,5 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { mergeRegister } from '@lexical/utils'
-import { $getSelection } from 'lexical'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import React from 'react'
 import { createPortal } from 'react-dom'
@@ -17,55 +15,20 @@ interface DropDownContextType {
 const DropDownContext = React.createContext<DropDownContextType | null>(null)
 
 export function DropDownItem({
+  active,
   children,
+  enabled,
   item,
   title,
 }: {
+  active?: boolean
   children: React.ReactNode
+  enabled?: boolean
   item: InlineToolbarGroupItem
   title?: string
 }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
-  const [enabled, setEnabled] = useState<boolean>(true)
-  const [active, setActive] = useState<boolean>(false)
   const [className, setClassName] = useState<string>(baseClass)
-
-  const updateStates = useCallback(() => {
-    editor.getEditorState().read(() => {
-      const selection = $getSelection()
-      if (item.isActive) {
-        const isActive = item.isActive({ editor, selection })
-        if (active !== isActive) {
-          setActive(isActive)
-        }
-      }
-      if (item.isEnabled) {
-        const isEnabled = item.isEnabled({ editor, selection })
-        if (enabled !== isEnabled) {
-          setEnabled(isEnabled)
-        }
-      }
-    })
-  }, [active, editor, enabled, item])
-
-  useEffect(() => {
-    updateStates()
-  }, [updateStates])
-
-  useEffect(() => {
-    document.addEventListener('mouseup', updateStates)
-    return () => {
-      document.removeEventListener('mouseup', updateStates)
-    }
-  }, [updateStates])
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerUpdateListener(() => {
-        updateStates()
-      }),
-    )
-  }, [editor, updateStates])
 
   useEffect(() => {
     setClassName(
@@ -197,6 +160,7 @@ export function DropDown({
   buttonClassName,
   children,
   disabled = false,
+  label,
   stopCloseOnClickSelf,
 }: {
   Icon?: React.FC
@@ -204,6 +168,7 @@ export function DropDown({
   buttonClassName: string
   children: ReactNode
   disabled?: boolean
+  label?: string
   stopCloseOnClickSelf?: boolean
 }): React.ReactNode {
   const dropDownRef = useRef<HTMLDivElement>(null)
@@ -272,7 +237,8 @@ export function DropDown({
         ref={buttonRef}
         type="button"
       >
-        <Icon />
+        {Icon && <Icon />}
+        {label && <span className="toolbar-popup__dropdown-label">{label}</span>}
         <i className="toolbar-popup__dropdown-caret" />
       </button>
 

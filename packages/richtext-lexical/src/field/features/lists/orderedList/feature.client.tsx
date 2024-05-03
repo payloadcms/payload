@@ -1,5 +1,6 @@
 'use client'
-import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isListNode, INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 
@@ -49,7 +50,31 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
             inlineToolbarTextDropdownGroupWithItems([
               {
                 ChildComponent: OrderedListIcon,
-                isActive: () => false,
+                isActive: ({ selection }) => {
+                  if (!$isRangeSelection(selection)) {
+                    return false
+                  }
+                  for (const node of selection.getNodes()) {
+                    if ($isListNode(node) && node.getListType() === 'number') {
+                      continue
+                    }
+
+                    const parent = node.getParent()
+
+                    if ($isListNode(parent) && parent.getListType() === 'number') {
+                      continue
+                    }
+
+                    const parentParent = parent?.getParent()
+                    // Example scenario: Node = textNode, parent = listItemNode, parentParent = listNode
+                    if ($isListNode(parentParent) && parentParent.getListType() === 'number') {
+                      continue
+                    }
+
+                    return false
+                  }
+                  return true
+                },
                 key: 'orderedList',
                 label: `Ordered List`,
                 onSelect: ({ editor }) => {

@@ -48,22 +48,46 @@ function ToolbarGroup({
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const Icon =
-    group?.type === 'dropdown' && group.items.length && group.ChildComponent
-      ? group.ChildComponent
-      : null
+  const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
+
+  React.useEffect(() => {
+    if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+      setDropdownIcon(() => group.ChildComponent)
+    } else {
+      setDropdownIcon(null)
+    }
+  }, [group])
+
+  const onActiveChange = ({ activeItems }: { activeItems: FixedToolbarGroupItem[] }) => {
+    if (!activeItems.length) {
+      setDropdownLabel(null)
+      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+        setDropdownIcon(() => group.ChildComponent)
+      } else {
+        setDropdownIcon(null)
+      }
+      return
+    }
+    const item = activeItems[0]
+    setDropdownLabel(item.label)
+    setDropdownIcon(() => item.ChildComponent)
+  }
 
   return (
     <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>
       {group.type === 'dropdown' &&
         group.items.length &&
-        (Icon ? (
+        (DropdownIcon ? (
           <ToolbarDropdown
-            Icon={Icon}
+            Icon={DropdownIcon}
             anchorElem={anchorElem}
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            label={dropdownLabel}
+            maxActiveItems={1}
+            onActiveChange={onActiveChange}
           />
         ) : (
           <ToolbarDropdown
@@ -71,6 +95,9 @@ function ToolbarGroup({
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            label={dropdownLabel}
+            maxActiveItems={1}
+            onActiveChange={onActiveChange}
           />
         ))}
       {group.type === 'buttons' &&

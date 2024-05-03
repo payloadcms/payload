@@ -1,10 +1,10 @@
 'use client'
 
-import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isListNode, INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuItem } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
 import { inlineToolbarTextDropdownGroupWithItems } from '../../shared/inlineToolbar/textDropdownGroup.js'
@@ -49,7 +49,31 @@ const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (pr
             inlineToolbarTextDropdownGroupWithItems([
               {
                 ChildComponent: UnorderedListIcon,
-                isActive: () => false,
+                isActive: ({ selection }) => {
+                  if (!$isRangeSelection(selection)) {
+                    return false
+                  }
+                  for (const node of selection.getNodes()) {
+                    if ($isListNode(node) && node.getListType() === 'bullet') {
+                      continue
+                    }
+
+                    const parent = node.getParent()
+
+                    if ($isListNode(parent) && parent.getListType() === 'bullet') {
+                      continue
+                    }
+
+                    const parentParent = parent?.getParent()
+                    // Example scenario: Node = textNode, parent = listItemNode, parentParent = listNode
+                    if ($isListNode(parentParent) && parentParent.getListType() === 'bullet') {
+                      continue
+                    }
+
+                    return false
+                  }
+                  return true
+                },
                 key: 'unorderedList',
                 label: `Unordered List`,
                 onSelect: ({ editor }) => {

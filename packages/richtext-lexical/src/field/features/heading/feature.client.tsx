@@ -2,9 +2,10 @@
 
 import type { HeadingTagType } from '@lexical/rich-text'
 
+import { $isHeadingNode } from '@lexical/rich-text'
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import { $getSelection } from 'lexical'
+import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { HeadingFeatureProps } from './feature.server.js'
@@ -73,7 +74,24 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
                   enabledHeadingSizes.map((headingSize, i) => {
                     return {
                       ChildComponent: iconImports[headingSize],
-                      isActive: () => false,
+                      isActive: ({ selection }) => {
+                        if (!$isRangeSelection(selection)) {
+                          return false
+                        }
+                        for (const node of selection.getNodes()) {
+                          if ($isHeadingNode(node) && node.getTag() === headingSize) {
+                            continue
+                          }
+
+                          const parent = node.getParent()
+                          if ($isHeadingNode(parent) && parent.getTag() === headingSize) {
+                            continue
+                          }
+
+                          return false
+                        }
+                        return true
+                      },
                       key: headingSize,
                       label: `Heading ${headingSize.charAt(1)}`,
                       onSelect: ({ editor }) => {

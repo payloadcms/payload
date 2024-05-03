@@ -7,7 +7,7 @@ html[data-theme='light'] {
 }
 
 .fixed-toolbar {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   background: var(--color-base-0);
   padding: 0 3.72px 0 6.25px;

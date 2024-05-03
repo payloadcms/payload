@@ -1,6 +1,6 @@
 'use client'
 
-import { FORMAT_ELEMENT_COMMAND } from 'lexical'
+import { $isElementNode, $isRangeSelection, FORMAT_ELEMENT_COMMAND } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
@@ -21,7 +21,28 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
           alignGroupWithItems([
             {
               ChildComponent: AlignLeftIcon,
-              isActive: () => false,
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if ($isElementNode(node)) {
+                    if (node.getFormatType() === 'left') {
+                      continue
+                    }
+                  }
+
+                  const parent = node.getParent()
+                  if ($isElementNode(parent)) {
+                    if (parent.getFormatType() === 'left') {
+                      continue
+                    }
+                  }
+
+                  return false
+                }
+                return true
+              },
               key: 'alignLeft',
               label: `Align Left`,
               onSelect: ({ editor }) => {
@@ -31,7 +52,28 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             },
             {
               ChildComponent: AlignCenterIcon,
-              isActive: () => false,
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if ($isElementNode(node)) {
+                    if (node.getFormatType() === 'center') {
+                      continue
+                    }
+                  }
+
+                  const parent = node.getParent()
+                  if ($isElementNode(parent)) {
+                    if (parent.getFormatType() === 'center') {
+                      continue
+                    }
+                  }
+
+                  return false
+                }
+                return true
+              },
               key: 'alignCenter',
               label: `Align Center`,
               onSelect: ({ editor }) => {
@@ -41,7 +83,28 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             },
             {
               ChildComponent: AlignRightIcon,
-              isActive: () => false,
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if ($isElementNode(node)) {
+                    if (node.getFormatType() === 'right') {
+                      continue
+                    }
+                  }
+
+                  const parent = node.getParent()
+                  if ($isElementNode(parent)) {
+                    if (parent.getFormatType() === 'right') {
+                      continue
+                    }
+                  }
+
+                  return false
+                }
+                return true
+              },
               key: 'alignRight',
               label: `Align Right`,
               onSelect: ({ editor }) => {
@@ -51,7 +114,28 @@ const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => 
             },
             {
               ChildComponent: AlignJustifyIcon,
-              isActive: () => false,
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if ($isElementNode(node)) {
+                    if (node.getFormatType() === 'justify') {
+                      continue
+                    }
+                  }
+
+                  const parent = node.getParent()
+                  if ($isElementNode(parent)) {
+                    if (parent.getFormatType() === 'justify') {
+                      continue
+                    }
+                  }
+
+                  return false
+                }
+                return true
+              },
               key: 'alignJustify',
               label: `Align Justify`,
               onSelect: ({ editor }) => {

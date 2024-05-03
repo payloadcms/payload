@@ -6,13 +6,17 @@
   vertical-align: middle;
   justify-content: center;
   height: 30px;
-  width: 40px;
   border: 0;
   background: none;
   border-radius: 4px;
   cursor: pointer;
   position: relative;
-  padding: 0;
+  padding: 0 10px;
+
+  &-label {
+    color: var(--color-base-900);
+    padding: 0 10px;
+  }
 
   &:disabled {
     cursor: not-allowed;
@@ -26,7 +30,7 @@
     background-color: var(--color-base-100);
   }
 
-  &.active {
+  .active {
     background-color: var(--color-base-100);
 
     .toolbar-popup__dropdown-caret {
@@ -68,9 +72,10 @@
       cursor: pointer;
       color: var(--color-base-900);
 
-      &:hover:not([disabled]) {
+      &:hover:not([disabled]), &.active {
         background-color: var(--color-base-100);
       }
+
       padding-left: 6.25px;
       padding-right: 6.25px;
       width: 100%;

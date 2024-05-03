@@ -20,8 +20,10 @@ export type InlineToolbarGroupItem = {
   ChildComponent?: React.FC
   /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
   Component?: React.FC<{
+    active?: boolean
     anchorElem: HTMLElement
     editor: LexicalEditor
+    enabled?: boolean
     item: InlineToolbarGroupItem
   }>
   isActive?: ({ editor, selection }: { editor: LexicalEditor; selection: BaseSelection }) => boolean

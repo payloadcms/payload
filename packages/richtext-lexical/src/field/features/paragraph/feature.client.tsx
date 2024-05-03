@@ -1,7 +1,7 @@
 'use client'
 
 import { $setBlocksType } from '@lexical/selection'
-import { $createParagraphNode, $getSelection } from 'lexical'
+import { $createParagraphNode, $getSelection, $isParagraphNode, $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
@@ -41,7 +41,17 @@ const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props)
           inlineToolbarTextDropdownGroupWithItems([
             {
               ChildComponent: TextIcon,
-              isActive: () => false,
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if (!$isParagraphNode(node) && !$isParagraphNode(node.getParent())) {
+                    return false
+                  }
+                }
+                return true
+              },
               key: 'paragraph',
               label: 'Normal Text',
               onSelect: ({ editor }) => {

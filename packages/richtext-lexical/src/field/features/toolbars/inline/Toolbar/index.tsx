@@ -79,6 +79,7 @@ function ToolbarGroup({
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            maxActiveItems={1}
           />
         ) : (
           <ToolbarDropdown
@@ -86,6 +87,7 @@ function ToolbarGroup({
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            maxActiveItems={1}
           />
         ))}
       {group.type === 'buttons' &&

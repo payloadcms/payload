@@ -1,8 +1,8 @@
 'use client'
 
-import { $createQuoteNode, QuoteNode } from '@lexical/rich-text'
+import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import { $getSelection } from 'lexical'
+import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
@@ -46,7 +46,17 @@ const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
           inlineToolbarTextDropdownGroupWithItems([
             {
               ChildComponent: BlockquoteIcon,
-              isActive: () => false,
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if (!$isQuoteNode(node) && !$isQuoteNode(node.getParent())) {
+                    return false
+                  }
+                }
+                return true
+              },
               key: 'blockquote',
               label: `Blockquote`,
               onSelect: ({ editor }) => {

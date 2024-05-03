@@ -1,5 +1,6 @@
 'use client'
-import { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isListNode, INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isRangeSelection } from 'lexical'
 
 import type { ClientFeature, FeatureProviderProviderClient } from '../../types.js'
 
@@ -60,7 +61,31 @@ const ChecklistFeatureClient: FeatureProviderProviderClient<undefined> = (props)
             inlineToolbarTextDropdownGroupWithItems([
               {
                 ChildComponent: ChecklistIcon,
-                isActive: () => false,
+                isActive: ({ selection }) => {
+                  if (!$isRangeSelection(selection)) {
+                    return false
+                  }
+                  for (const node of selection.getNodes()) {
+                    if ($isListNode(node) && node.getListType() === 'check') {
+                      continue
+                    }
+
+                    const parent = node.getParent()
+
+                    if ($isListNode(parent) && parent.getListType() === 'check') {
+                      continue
+                    }
+
+                    const parentParent = parent?.getParent()
+                    // Example scenario: Node = textNode, parent = listItemNode, parentParent = listNode
+                    if ($isListNode(parentParent) && parentParent.getListType() === 'check') {
+                      continue
+                    }
+
+                    return false
+                  }
+                  return true
+                },
                 key: 'checklist',
                 label: `Check List`,
                 onSelect: ({ editor }) => {
