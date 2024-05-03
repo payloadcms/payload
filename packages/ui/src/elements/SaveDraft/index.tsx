@@ -9,6 +9,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
@@ -25,8 +26,13 @@ const DefaultSaveDraftButton: React.FC = () => {
   const editDepth = useEditDepth()
   const { t } = useTranslation()
   const { submit } = useForm()
+  const operation = useOperation()
+
+  const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
+    if (forceDisable) return
+
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
@@ -48,12 +54,10 @@ const DefaultSaveDraftButton: React.FC = () => {
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (!modified) {
-      return
-    }
+    if (forceDisable) return
 
     e.preventDefault()
     e.stopPropagation()
@@ -67,7 +71,7 @@ const DefaultSaveDraftButton: React.FC = () => {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={!modified}
+      disabled={forceDisable}
       onClick={saveDraft}
       ref={ref}
       size="small"

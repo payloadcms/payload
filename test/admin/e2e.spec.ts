@@ -465,7 +465,6 @@ describe('admin', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
-      await saveDocAndAssert(page)
     })
 
     test('global — should render slug in sentence case as fallback', async () => {
@@ -478,7 +477,6 @@ describe('admin', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
-      await saveDocAndAssert(page)
     })
   })
 

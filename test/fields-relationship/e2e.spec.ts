@@ -438,8 +438,10 @@ describe('fields - relationship', () => {
     ).toHaveCount(1)
 
     // save the same document again to ensure the relationship field doesn't receive duplicative values
+    await drawerField.fill('Updated document')
     await saveButton.click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.Toastify')).toContainText('Updated successfully')
+    await page.locator('.doc-drawer__header-close').click()
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
     ).toHaveCount(1)
