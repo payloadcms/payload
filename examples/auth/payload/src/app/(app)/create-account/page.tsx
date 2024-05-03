@@ -1,27 +1,18 @@
-import { initPage } from '@payloadcms/next/utilities'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-import configPromise from '../../../payload.config'
+import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
 import { CreateAccountForm } from './CreateAccountForm'
 import classes from './index.module.scss'
 
-export default async function CreateAccount({
-  searchParams,
-}: {
-  searchParams: {
-    [key: string]: string | string[]
-  }
-}) {
-  const {
-    req: { user },
-  } = await initPage({
-    config: configPromise,
-    route: '/create-account',
-    searchParams,
-  })
+export default async function CreateAccount() {
+  const headers = getHeaders()
+  const payload = await getPayloadHMR({ config })
+  const { user } = await payload.auth({ headers })
 
   if (user) {
     redirect(

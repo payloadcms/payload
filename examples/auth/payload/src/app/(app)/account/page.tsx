@@ -1,8 +1,10 @@
-import { initPage } from '@payloadcms/next/utilities'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
 
-import configPromise from '../../../payload.config'
+import config from '../../../payload.config'
 import { Button } from '../_components/Button'
 import { Gutter } from '../_components/Gutter'
 import { HydrateClientUser } from '../_components/HydrateClientUser'
@@ -10,22 +12,16 @@ import { RenderParams } from '../_components/RenderParams'
 import { AccountForm } from './AccountForm'
 import classes from './index.module.scss'
 
-export default async function Account({
-  searchParams,
-}: {
-  searchParams: {
-    [key: string]: string | string[]
+export default async function Account() {
+  const headers = getHeaders()
+  const payload = await getPayloadHMR({ config })
+  const { permissions, user } = await payload.auth({ headers })
+
+  if (!user) {
+    redirect(
+      `/login?error=${encodeURIComponent('You must be logged in to access your account.')}&redirect=/account`,
+    )
   }
-}) {
-  const {
-    permissions,
-    req: { user },
-  } = await initPage({
-    config: configPromise,
-    redirectUnauthenticatedUser: `/login?error=${encodeURIComponent('You must be logged in to access your account.')}`,
-    route: '/account',
-    searchParams,
-  })
 
   return (
     <Fragment>

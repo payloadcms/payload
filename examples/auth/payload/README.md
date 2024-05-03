@@ -51,36 +51,20 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
     import { getPayloadHMR } from '@payloadcms/next'
     import config from '../../payload.config'
 
-    export default async function HomePage({ searchParams }) {
+    export default async function AccountPage({ searchParams }) {
       const headers = getHeaders()
       const payload = await getPayloadHMR({ config: configPromise })
-      const req = {} // There is no `req` in Next.js, you'd have to create one (see below)
-      const { permissions, user } = await payload.auth({ headers, req })
+      const { permissions, user } = await payload.auth({ headers })
+
+      if (!user) {
+        redirect(
+          `/login?error=${encodeURIComponent('You must be logged in to access your account.')}&redirect=/account`,
+        )
+      }
+
       return ...
     }
   ```
-
-  However, this requires `payload` and a `req`. Fortunately, there's an `initPage` utility that does all of this for you (and much more):
-
-  ```ts
-  import { initPage } from '@payloadcms/next/utilities'
-  import config from '../../payload.config'
-
-  export default async function HomePage({ searchParams }) {
-    const {
-      permissions,
-      req: { user, payload },
-    } = await initPage({
-      config,
-      route: '/',
-      searchParams
-    })
-
-    return ...
-  }
-  ```
-
-  With `InitPageResult` you can redirect the user as needed, make additional requests using the Local API, or whatever else your application requires.
 
   **HTTP**
 
