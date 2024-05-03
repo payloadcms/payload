@@ -16,7 +16,7 @@ html[data-theme='light'] {
   height: 37.5px;
   position: sticky;
   z-index: 1;
-  top: var(--doc-controls-height);
+  top: calc(var(--doc-controls-height) + 10px);
   margin-bottom: 15px;
 
 
