@@ -37,7 +37,7 @@ const IndentFeatureClient: FeatureProviderProviderClient<undefined> = (props) =>
                 }
                 return false
               },
-              key: 'indent-decrease',
+              key: 'indentDecrease',
               label: `Decrease Indent`,
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined)
@@ -47,7 +47,7 @@ const IndentFeatureClient: FeatureProviderProviderClient<undefined> = (props) =>
             {
               ChildComponent: IndentIncreaseIcon,
               isActive: () => false,
-              key: 'indent-increase',
+              key: 'indentIncrease',
               label: `Increase Indent`,
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined)
