@@ -29,6 +29,7 @@ export default function duplicateResolver<T extends keyof GeneratedTypes['collec
     const fallbackLocale = req.fallbackLocale
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    context.req = req
 
     const options = {
       id: args.id,
