@@ -477,7 +477,6 @@ describe('admin', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
-      await saveDocAndAssert(page)
     })
   })
 
