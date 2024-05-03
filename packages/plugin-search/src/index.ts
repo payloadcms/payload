@@ -6,7 +6,7 @@ import deleteFromSearch from './Search/hooks/deleteFromSearch.js'
 import syncWithSearch from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
 
-const Search =
+export const searchPlugin =
   (incomingSearchConfig: SearchConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -61,5 +61,3 @@ const Search =
 
     return config
   }
-
-export default Search

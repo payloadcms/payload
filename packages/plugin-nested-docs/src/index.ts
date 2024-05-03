@@ -12,7 +12,7 @@ import { populateBreadcrumbs } from './utilities/populateBreadcrumbs.js'
 
 export { createBreadcrumbsField, createParentField }
 
-export const nestedDocs =
+export const nestedDocsPlugin =
   (pluginConfig: PluginConfig): Plugin =>
   (config) => ({
     ...config,
