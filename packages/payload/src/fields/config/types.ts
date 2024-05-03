@@ -113,8 +113,9 @@ type Admin = {
   condition?: Condition
   description?: Description
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
-  disabledListColumn?: boolean
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
@@ -388,7 +389,8 @@ export type UIField = {
     }
     condition?: Condition
     disableBulkEdit?: boolean
-    disabledListColumn?: boolean
+    disableListColumn?: boolean
+    disableListFilter?: boolean
     position?: string
     width?: string
   }

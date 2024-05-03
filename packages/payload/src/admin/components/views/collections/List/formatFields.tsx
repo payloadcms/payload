@@ -17,10 +17,7 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   }
 
   const shouldSkipField = (field: Field): boolean =>
-    !fieldIsPresentationalOnly(field) &&
-    (field.hidden === true ||
-      field.admin?.disabled === true ||
-      field.admin?.disabledListColumn === true)
+    !fieldIsPresentationalOnly(field) && (field.hidden === true || field.admin?.disabled === true)
 
   const fields: Field[] = config.fields.reduce(
     (formatted, field) => {

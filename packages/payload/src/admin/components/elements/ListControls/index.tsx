@@ -146,7 +146,7 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          <ColumnSelector collection={collection} />
+          <ColumnSelector slug={collection.slug} />
         </AnimateHeight>
       )}
       <AnimateHeight

@@ -141,10 +141,19 @@ const TextFields: CollectionConfig = {
       maxRows: 4,
     },
     {
-      name: 'disabledListColumnText',
+      name: 'disableListColumnText',
       type: 'text',
       admin: {
-        disabledListColumn: true,
+        disableListColumn: true,
+        disableListFilter: false,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListColumn: false,
+        disableListFilter: true,
       },
     },
   ],
