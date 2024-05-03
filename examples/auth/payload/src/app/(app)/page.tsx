@@ -37,7 +37,7 @@ export default async function HomePage() {
           {". This example demonstrates how to implement Payload's "}
           <Link href="https://payloadcms.com/docs/authentication/overview">Authentication</Link>
           {
-            ' strategies using the Local API, as well as through HTTP via the REST and GraphQL APIs. To toggle between the two HTTP APIs, see `_layout.tsx`.'
+            ' strategies using the Local API, as well as through HTTP via the REST and GraphQL APIs. To toggle between these two HTTP APIs, see `_layout.tsx`.'
           }
         </p>
         <p>
