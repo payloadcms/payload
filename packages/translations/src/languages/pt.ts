@@ -210,6 +210,7 @@ export const pt: Language = {
       error: 'Erro',
       errors: 'Erros',
       fallbackToDefaultLocale: 'Recuo para o local padrão',
+      false: 'Falso',
       filter: 'Filtro',
       filterWhere: 'Filtrar {{label}} em que',
       filters: 'Filtros',
@@ -266,6 +267,7 @@ export const pt: Language = {
       successfullyDuplicated: '{{label}} duplicado com sucesso.',
       thisLanguage: 'Português',
       titleDeleted: '{{label}} {{title}} excluído com sucesso.',
+      true: 'Verdadeiro',
       unauthorized: 'Não autorizado',
       unsavedChangesDuplicate:
         'Você tem mudanças não salvas. Você gostaria de continuar a duplicar?',

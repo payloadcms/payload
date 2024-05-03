@@ -211,6 +211,7 @@ export const ru: Language = {
       error: 'Ошибка',
       errors: 'Ошибки',
       fallbackToDefaultLocale: 'Возврат к локали по умолчанию',
+      false: 'Ложь',
       filter: 'Фильтр',
       filterWhere: 'Где фильтровать',
       filters: 'Фильтры',
@@ -267,6 +268,7 @@ export const ru: Language = {
       successfullyDuplicated: '{{label}} успешно продублирован.',
       thisLanguage: 'Русский',
       titleDeleted: '{{label}} {{title}} успешно удалено.',
+      true: 'Правда',
       unauthorized: 'Нет доступа',
       unsavedChangesDuplicate:
         'У вас есть несохраненные изменения. Вы хотите продолжить дублирование?',

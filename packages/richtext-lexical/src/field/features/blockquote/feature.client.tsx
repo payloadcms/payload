@@ -6,10 +6,9 @@ import { $getSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote/index.js'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { inlineToolbarTextDropdownGroupWithItems } from '../shared/inlineToolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
 const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
@@ -17,15 +16,40 @@ const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
     clientFeatureProps: props,
     feature: () => ({
       clientFeatureProps: props,
-      floatingSelectToolbar: {
-        sections: [
-          TextDropdownSectionWithEntries([
+      markdownTransformers: [MarkdownTransformer],
+      nodes: [QuoteNode],
+
+      slashMenu: {
+        groups: [
+          {
+            displayName: 'Basic',
+            items: [
+              {
+                Icon: BlockquoteIcon,
+                displayName: 'Blockquote',
+                key: 'blockquote',
+                keywords: ['quote', 'blockquote'],
+                onSelect: ({ editor }) => {
+                  editor.update(() => {
+                    const selection = $getSelection()
+                    $setBlocksType(selection, () => $createQuoteNode())
+                  })
+                },
+              },
+            ],
+            key: 'basic',
+          },
+        ],
+      },
+      toolbarInline: {
+        groups: [
+          inlineToolbarTextDropdownGroupWithItems([
             {
               ChildComponent: BlockquoteIcon,
               isActive: () => false,
               key: 'blockquote',
               label: `Blockquote`,
-              onClick: ({ editor }) => {
+              onSelect: ({ editor }) => {
                 editor.update(() => {
                   const selection = $getSelection()
                   $setBlocksType(selection, () => $createQuoteNode())
@@ -34,28 +58,6 @@ const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
               order: 20,
             },
           ]),
-        ],
-      },
-      markdownTransformers: [MarkdownTransformer],
-
-      nodes: [QuoteNode],
-      slashMenu: {
-        options: [
-          {
-            displayName: 'Basic',
-            key: 'basic',
-            options: [
-              new SlashMenuOption(`blockquote`, {
-                Icon: BlockquoteIcon,
-                displayName: `Blockquote`,
-                keywords: ['quote', 'blockquote'],
-                onSelect: () => {
-                  const selection = $getSelection()
-                  $setBlocksType(selection, () => $createQuoteNode())
-                },
-              }),
-            ],
-          },
         ],
       },
     }),

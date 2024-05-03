@@ -20,7 +20,7 @@ import { translations } from './translations/index.js'
 import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
 
-const seo =
+export const seoPlugin =
   (pluginConfig: PluginConfig) =>
   (config: Config): Config => {
     const seoFields: GroupField[] = [
@@ -297,5 +297,3 @@ const seo =
       },
     }
   }
-
-export { seo }

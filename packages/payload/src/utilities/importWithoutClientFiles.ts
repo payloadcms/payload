@@ -12,7 +12,7 @@ export const importWithoutClientFiles = async <T = unknown>(filePath: string) =>
   const { href: loaderUrl } = pathToFileURL(path.resolve(dirname, '../../dist/bin/loader/index.js'))
 
   register(loaderUrl, filePathUrl)
-  const result = await import(filePathUrl)
+  const result = await import(filePath)
   return result as T
 }
 

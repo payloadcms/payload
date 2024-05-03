@@ -4,7 +4,7 @@ import type { Payload } from 'payload'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload/config'
 
-import { payloadCloud } from './plugin.js'
+import { payloadCloudPlugin } from './plugin.js'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 const mockedPayload: Payload = jest.fn() as unknown as Payload
@@ -34,7 +34,7 @@ describe('plugin', () => {
   describe('not in Payload Cloud', () => {
     // eslint-disable-next-line jest/expect-expect
     it('should return unmodified config', async () => {
-      const plugin = payloadCloud()
+      const plugin = payloadCloudPlugin()
       const config = await plugin(createConfig())
 
       assertNoCloudStorage(config)
@@ -52,7 +52,7 @@ describe('plugin', () => {
     describe('storage', () => {
       // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud storage', async () => {
-        const plugin = payloadCloud()
+        const plugin = payloadCloudPlugin()
         const config = await plugin(createConfig())
 
         assertCloudStorage(config)
@@ -60,7 +60,7 @@ describe('plugin', () => {
 
       // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', async () => {
-        const plugin = payloadCloud({ storage: false })
+        const plugin = payloadCloudPlugin({ storage: false })
         const config = await plugin(createConfig())
 
         assertNoCloudStorage(config)
@@ -70,7 +70,7 @@ describe('plugin', () => {
     describe('email', () => {
       // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud email', async () => {
-        const plugin = payloadCloud()
+        const plugin = payloadCloudPlugin()
         const config = await plugin(createConfig())
 
         expect(createTransportSpy).toHaveBeenCalledWith(
@@ -82,7 +82,7 @@ describe('plugin', () => {
 
       // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', async () => {
-        const plugin = payloadCloud({ email: false })
+        const plugin = payloadCloudPlugin({ email: false })
         const config = await plugin(createConfig())
 
         expect(config.email).toBeUndefined()
@@ -93,7 +93,7 @@ describe('plugin', () => {
         delete process.env.PAYLOAD_CLOUD_EMAIL_API_KEY
         delete process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN
 
-        const plugin = payloadCloud()
+        const plugin = payloadCloudPlugin()
         const config = await plugin(createConfig())
 
         expect(config.email).toBeUndefined()
@@ -120,7 +120,7 @@ describe('plugin', () => {
           }),
         })
 
-        const plugin = payloadCloud()
+        const plugin = payloadCloudPlugin()
         const config = await plugin(configWithTransport)
 
         expect(logSpy).toHaveBeenCalledWith(
@@ -141,7 +141,7 @@ describe('plugin', () => {
           }),
         })
 
-        const plugin = payloadCloud()
+        const plugin = payloadCloudPlugin()
         const config = await plugin(configWithPartialEmail)
         const emailConfig = config.email as Awaited<ReturnType<typeof nodemailerAdapter>>
 

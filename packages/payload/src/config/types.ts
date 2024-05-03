@@ -6,6 +6,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { User } from '../auth/types.js'
@@ -527,7 +528,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -640,9 +641,11 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 > & {
   collections: SanitizedCollectionConfig[]
+  /** Default richtext editor to use for richText fields */
+  editor: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>

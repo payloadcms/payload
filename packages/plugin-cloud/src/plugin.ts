@@ -11,7 +11,7 @@ import {
 } from './hooks/uploadCache.js'
 import { getStaticHandler } from './staticHandler.js'
 
-export const payloadCloud =
+export const payloadCloudPlugin =
   (pluginOptions?: PluginOptions) =>
   async (incomingConfig: Config): Promise<Config> => {
     let config = { ...incomingConfig }

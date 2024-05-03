@@ -141,6 +141,10 @@ export const promise = async ({
     }
 
     case 'richText': {
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
       if (editor?.populationPromises) {

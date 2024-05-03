@@ -10,10 +10,14 @@ import { v4 as uuid } from 'uuid'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -52,7 +56,8 @@ describe('auth', () => {
   // Allows for testing create-first-user
   process.env.SKIP_ON_INIT = 'true'
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
@@ -78,6 +83,7 @@ describe('auth', () => {
         enableAPIKey: true,
       },
     })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('authenticated users', () => {

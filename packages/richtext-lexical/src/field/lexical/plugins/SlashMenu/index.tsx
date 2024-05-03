@@ -7,7 +7,12 @@ import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types.js'
+import type {
+  SlashMenuGroup,
+  SlashMenuGroupInternal,
+  SlashMenuItemInternal,
+  SlashMenuItem as SlashMenuItemType,
+} from './LexicalTypeaheadMenuPlugin/types.js'
 
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
@@ -18,27 +23,26 @@ const baseClass = 'slash-menu-popup'
 
 function SlashMenuItem({
   isSelected,
+  item,
   onClick,
   onMouseEnter,
-  option,
 }: {
   index: number
   isSelected: boolean
+  item: SlashMenuItemInternal
   onClick: () => void
   onMouseEnter: () => void
-  option: SlashMenuOption
 }) {
   const { i18n } = useTranslation()
 
-  let className = `${baseClass}__item ${baseClass}__item-${option.key}`
+  let className = `${baseClass}__item ${baseClass}__item-${item.key}`
   if (isSelected) {
     className += ` ${baseClass}__item--selected`
   }
 
-  let title = option.key
-  if (option.displayName) {
-    title =
-      typeof option.displayName === 'function' ? option.displayName({ i18n }) : option.displayName
+  let title = item.key
+  if (item.displayName) {
+    title = typeof item.displayName === 'function' ? item.displayName({ i18n }) : item.displayName
   }
   // Crop title to max. 50 characters
   if (title.length > 25) {
@@ -49,16 +53,16 @@ function SlashMenuItem({
     <button
       aria-selected={isSelected}
       className={className}
-      id={baseClass + '__item-' + option.key}
-      key={option.key}
+      id={baseClass + '__item-' + item.key}
+      key={item.key}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={option.setRefElement}
-      role="option"
+      ref={item.ref}
+      role="item"
       tabIndex={-1}
       type="button"
     >
-      {option?.Icon && <option.Icon />}
+      {item?.Icon && <item.Icon />}
 
       <span className={`${baseClass}__item-text`}>{title}</span>
     </button>
@@ -69,7 +73,7 @@ export function SlashMenuPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement
-}): JSX.Element {
+}): React.ReactElement {
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
@@ -79,94 +83,97 @@ export function SlashMenuPlugin({
     minLength: 0,
   })
 
-  const getDynamicOptions = useCallback(() => {
-    let groupWithOptions: Array<SlashMenuGroup> = []
+  const getDynamicItems = useCallback(() => {
+    let groupWithItems: Array<SlashMenuGroup> = []
 
-    for (const dynamicOption of editorConfig.features.slashMenu.dynamicOptions) {
-      const dynamicGroupWithOptions = dynamicOption({
+    for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
+      const dynamicGroupWithItems = dynamicItem({
         editor,
         queryString,
       })
-      groupWithOptions = groupWithOptions.concat(dynamicGroupWithOptions)
+      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
     }
 
-    return groupWithOptions
+    return groupWithItems
   }, [editor, queryString, editorConfig?.features])
 
   const groups: SlashMenuGroup[] = useMemo(() => {
-    let groupsWithOptions: SlashMenuGroup[] = []
-    for (const groupWithOption of editorConfig?.features.slashMenu.groupsWithOptions ?? []) {
-      groupsWithOptions.push(groupWithOption)
+    let groupsWithItems: SlashMenuGroup[] = []
+    for (const groupWithItem of editorConfig?.features.slashMenu.groups ?? []) {
+      groupsWithItems.push(groupWithItem)
     }
 
     if (queryString) {
       // Filter current groups first
-      groupsWithOptions = groupsWithOptions.map((group) => {
-        const filteredOptions = group.options.filter((option) => {
-          let optionTitle = option.key
-          if (option.displayName) {
-            optionTitle =
-              typeof option.displayName === 'function'
-                ? option.displayName({ i18n })
-                : option.displayName
+      groupsWithItems = groupsWithItems.map((group) => {
+        const filteredItems = group.items.filter((item) => {
+          let itemTitle = item.key
+          if (item.displayName) {
+            itemTitle =
+              typeof item.displayName === 'function' ? item.displayName({ i18n }) : item.displayName
           }
 
-          return new RegExp(queryString, 'gi').exec(optionTitle) || option.keywords != null
-            ? option.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
-            : false
+          if (new RegExp(queryString, 'gi').exec(itemTitle)) {
+            return true
+          }
+          if (item.keywords != null) {
+            return item.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
+          }
+          return false
         })
-        if (filteredOptions.length) {
+        if (filteredItems.length) {
           return {
             ...group,
-            options: filteredOptions,
+            items: filteredItems,
           }
         }
         return null
       })
 
-      groupsWithOptions = groupsWithOptions.filter((group) => group != null)
+      groupsWithItems = groupsWithItems.filter((group) => group != null)
 
       // Now add dynamic groups
-      const dynamicOptionGroups = getDynamicOptions()
+      const dynamicItemGroups = getDynamicItems()
 
-      // merge dynamic options into groups
-      for (const dynamicGroup of dynamicOptionGroups) {
+      // merge dynamic items into groups
+      for (const dynamicGroup of dynamicItemGroups) {
         // 1. find the group with the same name or create new one
-        let group = groupsWithOptions.find((group) => group.key === dynamicGroup.key)
+        let group = groupsWithItems.find((group) => group.key === dynamicGroup.key)
         if (!group) {
           group = {
             ...dynamicGroup,
-            options: [],
+            items: [],
           }
         } else {
-          groupsWithOptions = groupsWithOptions.filter((group) => group.key !== dynamicGroup.key)
+          groupsWithItems = groupsWithItems.filter((group) => group.key !== dynamicGroup.key)
         }
 
-        // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
-        if (group?.options?.length) {
-          group.options = group.options.concat(group.options)
+        // 2. Add items to group items array and add to sanitized.slashMenu.groupsWithItems
+        if (group?.items?.length) {
+          group.items = group.items.concat(group.items)
         }
-        groupsWithOptions.push(group)
+        groupsWithItems.push(group)
       }
     }
 
-    return groupsWithOptions
-  }, [getDynamicOptions, queryString, editorConfig?.features, i18n])
+    return groupsWithItems
+  }, [getDynamicItems, queryString, editorConfig?.features, i18n])
 
-  const onSelectOption = useCallback(
+  const onSelectItem = useCallback(
     (
-      selectedOption: SlashMenuOption,
+      selectedItem: SlashMenuItemType,
       nodeToRemove: TextNode | null,
       closeMenu: () => void,
       matchingString: string,
     ) => {
-      editor.update(() => {
-        if (nodeToRemove) {
+      if (nodeToRemove) {
+        editor.update(() => {
           nodeToRemove.remove()
-        }
-        selectedOption.onSelect({ editor, queryString: matchingString })
-        closeMenu()
-      })
+        })
+      }
+      selectedItem.onSelect({ editor, queryString: matchingString })
+
+      closeMenu()
     },
     [editor],
   )
@@ -175,10 +182,10 @@ export function SlashMenuPlugin({
     <React.Fragment>
       <LexicalTypeaheadMenuPlugin
         anchorElem={anchorElem}
-        groupsWithOptions={groups}
+        groups={groups as SlashMenuGroupInternal[]}
         menuRenderFn={(
           anchorElementRef,
-          { selectOptionAndCleanUp, selectedOptionKey, setSelectedOptionKey },
+          { selectItemAndCleanUp, selectedItemKey, setSelectedItemKey },
         ) =>
           anchorElementRef.current && groups.length
             ? ReactDOM.createPortal(
@@ -198,19 +205,19 @@ export function SlashMenuPlugin({
                         key={group.key}
                       >
                         <div className={`${baseClass}__group-title`}>{groupTitle}</div>
-                        {group.options.map((option, oi: number) => (
+                        {group.items.map((item, oi: number) => (
                           <SlashMenuItem
                             index={oi}
-                            isSelected={selectedOptionKey === option.key}
-                            key={option.key}
+                            isSelected={selectedItemKey === item.key}
+                            item={item as SlashMenuItemInternal}
+                            key={item.key}
                             onClick={() => {
-                              setSelectedOptionKey(option.key)
-                              selectOptionAndCleanUp(option)
+                              setSelectedItemKey(item.key)
+                              selectItemAndCleanUp(item)
                             }}
                             onMouseEnter={() => {
-                              setSelectedOptionKey(option.key)
+                              setSelectedItemKey(item.key)
                             }}
-                            option={option}
                           />
                         ))}
                       </div>
@@ -222,7 +229,7 @@ export function SlashMenuPlugin({
             : null
         }
         onQueryChange={setQueryString}
-        onSelectOption={onSelectOption}
+        onSelectItem={onSelectItem}
         triggerFn={checkForTriggerMatch}
       />
     </React.Fragment>

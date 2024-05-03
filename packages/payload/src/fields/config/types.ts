@@ -7,12 +7,12 @@ import type { CSSProperties } from 'react'
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type React from 'react'
 
+import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ConditionalDateProps,
   Description,
   ErrorProps,
   LabelProps,
-  RichTextAdapter,
   RowLabel,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
@@ -585,7 +585,9 @@ export type RichTextField<
       Label?: CustomComponent<LabelProps>
     }
   }
-  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  editor?:
+    | RichTextAdapter<Value, AdapterProps, AdapterProps>
+    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties
 
@@ -594,7 +596,9 @@ export type RichTextFieldRequiredEditor<
   AdapterProps = any,
   ExtraProperties = object,
 > = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor: RichTextAdapter<Value, AdapterProps, ExtraProperties>
+  editor:
+    | RichTextAdapter<Value, AdapterProps, AdapterProps>
+    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
 }
 
 export type ArrayField = FieldBase & {

@@ -27,13 +27,6 @@ export function LinkPlugin(): null {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
-          // validate
-          if (payload?.fields.linkType === 'custom') {
-            if (!(validateUrl === undefined || validateUrl(payload?.fields.url))) {
-              return false
-            }
-          }
-
           toggleLink(payload)
           return true
         },

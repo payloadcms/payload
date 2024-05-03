@@ -19,6 +19,7 @@ export const stripeWebhooks = async (args: {
 
   if (stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, {
+      // api version can only be the latest, stripe recommends ts ignoring it
       apiVersion: '2022-08-01',
       appInfo: {
         name: 'Stripe Payload Plugin',
@@ -26,17 +27,14 @@ export const stripeWebhooks = async (args: {
       },
     })
 
+    const body = await req.text()
     const stripeSignature = req.headers.get('stripe-signature')
 
     if (stripeSignature) {
       let event: Stripe.Event | undefined
 
       try {
-        event = stripe.webhooks.constructEvent(
-          await req.text(),
-          stripeSignature,
-          stripeWebhooksEndpointSecret,
-        )
+        event = stripe.webhooks.constructEvent(body, stripeSignature, stripeWebhooksEndpointSecret)
       } catch (err: unknown) {
         const msg: string = err instanceof Error ? err.message : JSON.stringify(err)
         req.payload.logger.error(`Error constructing Stripe event: ${msg}`)

@@ -568,6 +568,9 @@ export const mapFields = (args: {
               style: field.admin?.style,
               width: field.admin?.width,
             }
+            if (typeof field?.editor === 'function') {
+              throw new Error('Attempted to access unsanitized rich text editor.')
+            }
 
             const RichTextFieldComponent = field.editor.FieldComponent
             const RichTextCellComponent = field.editor.CellComponent

@@ -3,11 +3,12 @@ import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload/typ
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripeConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+// api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
 type HookArgsWithCustomCollection = Omit<
@@ -52,12 +53,15 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
       if (syncConfig) {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce((acc, field) => {
-          const { fieldPath, stripeProperty } = field
+        let syncedFields = syncConfig.fields.reduce(
+          (acc, field) => {
+            const { fieldPath, stripeProperty } = field
 
-          acc[stripeProperty] = dataRef[fieldPath]
-          return acc
-        }, {} as Record<string, any>)
+            acc[stripeProperty] = dataRef[fieldPath]
+            return acc
+          },
+          {} as Record<string, any>,
+        )
 
         syncedFields = deepen(syncedFields)
 
@@ -72,6 +76,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
             try {
               // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
               const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(
+                // @ts-expect-error
                 syncedFields,
               )
 
@@ -105,6 +110,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
             // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
             const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(
+              // @ts-expect-error
               syncedFields,
             )
 

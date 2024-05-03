@@ -1,7 +1,3 @@
-import type { Block } from 'payload/types'
-
-import { sanitizeFields } from 'payload/config'
-
 import type { PopulationPromise } from '../types.js'
 import type { BlocksFeatureProps } from './feature.server.js'
 import type { SerializedBlockNode } from './nodes/BlocksNode.js'
@@ -26,20 +22,7 @@ export const blockPopulationPromiseHOC = (
     showHiddenFields,
     siblingDoc,
   }) => {
-    const blocks: Block[] = props.blocks
     const blockFieldData = node.fields
-
-    // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
-    const payloadConfig = req.payload.config
-    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-    blocks.forEach((block) => {
-      block.fields = sanitizeFields({
-        config: payloadConfig,
-        fields: block.fields,
-        requireFieldLevelRichTextEditor: true,
-        validRelationships,
-      })
-    })
 
     // find block used in this node
     const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)

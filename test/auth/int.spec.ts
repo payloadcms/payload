@@ -730,5 +730,25 @@ describe('Auth', () => {
 
       expect(authenticated.token).toBeTruthy()
     })
+
+    it('should forget and reset password', async () => {
+      const forgot = await payload.forgotPassword({
+        collection: 'users',
+        data: {
+          email: 'dev@payloadcms.com',
+        },
+      })
+
+      const reset = await payload.resetPassword({
+        collection: 'users',
+        overrideAccess: true,
+        data: {
+          password: 'test',
+          token: forgot,
+        },
+      })
+
+      expect(reset.user.email).toStrictEqual('dev@payloadcms.com')
+    })
   })
 })

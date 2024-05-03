@@ -212,6 +212,7 @@ export const de: Language = {
       error: 'Fehler',
       errors: 'Fehler',
       fallbackToDefaultLocale: 'Rückgriff auf das Standardgebietsschema',
+      false: 'Falsch',
       filter: 'Filter',
       filterWhere: 'Filter {{label}} wo',
       filters: 'Filter',
@@ -268,6 +269,7 @@ export const de: Language = {
       successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
       thisLanguage: 'Deutsch',
       titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
+      true: 'Wahr',
       unauthorized: 'Nicht autorisiert',
       unsavedChangesDuplicate:
         'Du hast ungespeicherte Änderungen, möchtest du mit dem Duplizieren fortfahren?',

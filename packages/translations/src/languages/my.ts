@@ -211,6 +211,7 @@ export const my: Language = {
       error: 'အမှား',
       errors: 'အမှားများ',
       fallbackToDefaultLocale: 'မူရင်းဒေသသို့ ပြန်ပြောင်းပါ။',
+      false: 'မှား',
       filter: 'ဇကာ',
       filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',
       filters: 'စစ်ထုတ်မှုများ',
@@ -267,6 +268,7 @@ export const my: Language = {
       successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
       thisLanguage: 'မြန်မာစာ',
       titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
+      true: 'အမှန်',
       unauthorized: 'အခွင့်မရှိပါ။',
       unsavedChangesDuplicate:
         'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',

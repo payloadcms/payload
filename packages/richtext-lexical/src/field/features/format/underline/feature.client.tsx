@@ -6,7 +6,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { UnderlineIcon } from '../../../lexical/ui/icons/Underline/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 
 const UnderlineFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
@@ -14,9 +14,9 @@ const UnderlineFeatureClient: FeatureProviderProviderClient<undefined> = (props)
     feature: () => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: UnderlineIcon,
                 isActive: ({ selection }) => {
@@ -26,7 +26,7 @@ const UnderlineFeatureClient: FeatureProviderProviderClient<undefined> = (props)
                   return false
                 },
                 key: 'underline',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
                 },
                 order: 3,

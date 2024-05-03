@@ -9,15 +9,14 @@ import { $getSelection } from 'lexical'
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { HeadingFeatureProps } from './feature.server.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { H1Icon } from '../../lexical/ui/icons/H1/index.js'
 import { H2Icon } from '../../lexical/ui/icons/H2/index.js'
 import { H3Icon } from '../../lexical/ui/icons/H3/index.js'
 import { H4Icon } from '../../lexical/ui/icons/H4/index.js'
 import { H5Icon } from '../../lexical/ui/icons/H5/index.js'
 import { H6Icon } from '../../lexical/ui/icons/H6/index.js'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { inlineToolbarTextDropdownGroupWithItems } from '../shared/inlineToolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
 const setHeading = (headingSize: HeadingTagType) => {
@@ -42,47 +41,52 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
     feature: () => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            ...enabledHeadingSizes.map((headingSize, i) =>
-              TextDropdownSectionWithEntries([
-                {
-                  ChildComponent: iconImports[headingSize],
-                  isActive: () => false,
-                  key: headingSize,
-                  label: `Heading ${headingSize.charAt(1)}`,
-                  onClick: ({ editor }) => {
-                    editor.update(() => {
-                      setHeading(headingSize)
-                    })
-                  },
-                  order: i + 2,
-                },
-              ]),
-            ),
-          ],
-        },
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
         nodes: [HeadingNode],
         slashMenu: {
-          options: [
-            ...enabledHeadingSizes.map((headingSize) => {
-              return {
-                displayName: 'Basic',
-                key: 'basic',
-                options: [
-                  new SlashMenuOption(`heading-${headingSize.charAt(1)}`, {
-                    Icon: iconImports[headingSize],
-                    displayName: `Heading ${headingSize.charAt(1)}`,
-                    keywords: ['heading', headingSize],
-                    onSelect: () => {
-                      setHeading(headingSize)
-                    },
+          groups: enabledHeadingSizes?.length
+            ? [
+                {
+                  displayName: 'Basic',
+                  items: enabledHeadingSizes.map((headingSize) => {
+                    return {
+                      Icon: iconImports[headingSize],
+                      displayName: `Heading ${headingSize.charAt(1)}`,
+                      key: `heading-${headingSize.charAt(1)}`,
+                      keywords: ['heading', headingSize],
+                      onSelect: ({ editor }) => {
+                        editor.update(() => {
+                          setHeading(headingSize)
+                        })
+                      },
+                    }
                   }),
-                ],
-              }
-            }),
-          ],
+                  key: 'basic',
+                },
+              ]
+            : [],
+        },
+        toolbarInline: {
+          groups: enabledHeadingSizes?.length
+            ? [
+                inlineToolbarTextDropdownGroupWithItems(
+                  enabledHeadingSizes.map((headingSize, i) => {
+                    return {
+                      ChildComponent: iconImports[headingSize],
+                      isActive: () => false,
+                      key: headingSize,
+                      label: `Heading ${headingSize.charAt(1)}`,
+                      onSelect: ({ editor }) => {
+                        editor.update(() => {
+                          setHeading(headingSize)
+                        })
+                      },
+                      order: i + 2,
+                    }
+                  }),
+                ),
+              ]
+            : [],
         },
       }
     },

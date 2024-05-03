@@ -215,6 +215,7 @@ export const fr: Language = {
       error: 'Erreur',
       errors: 'Erreurs',
       fallbackToDefaultLocale: 'Retour à la locale par défaut',
+      false: 'Faux',
       filter: 'Filtrer',
       filterWhere: 'Filtrer {{label}} où',
       filters: 'Filtres',
@@ -271,6 +272,7 @@ export const fr: Language = {
       successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
       thisLanguage: 'Français',
       titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
+      true: 'Vrai',
       unauthorized: 'Non autorisé',
       unsavedChangesDuplicate:
         'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',
