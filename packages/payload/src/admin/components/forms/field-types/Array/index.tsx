@@ -29,7 +29,7 @@ const baseClass = 'array-field'
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, components, condition, description, disableSortable = false, readOnly },
+    admin: { className, components, condition, description, isSortable = true, readOnly },
     fieldTypes,
     fields,
     forceRender = false,
@@ -227,19 +227,19 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => (
-            <DraggableSortableItem disabled={readOnly || disableSortable} id={row.id} key={row.id}>
+            <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
                   CustomRowLabel={CustomRowLabel}
                   addRow={addRow}
-                  disableSortable={disableSortable}
                   duplicateRow={duplicateRow}
                   fieldTypes={fieldTypes}
                   fields={fields}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
+                  isSortable={isSortable}
                   labels={labels}
                   moveRow={moveRow}
                   path={path}
