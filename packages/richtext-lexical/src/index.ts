@@ -411,6 +411,8 @@ export {
 export { inlineToolbarFeatureButtonsGroupWithItems } from './field/features/shared/inlineToolbar/featureButtonsGroup.js'
 export { inlineToolbarTextDropdownGroupWithItems } from './field/features/shared/inlineToolbar/textDropdownGroup.js'
 export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
+export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'
+
 export { createNode } from './field/features/typeUtilities.js'
 export type {
   ClientComponentProps,

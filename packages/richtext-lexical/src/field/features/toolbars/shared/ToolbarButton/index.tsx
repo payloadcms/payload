@@ -4,7 +4,7 @@ import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { InlineToolbarGroupItem } from '../inline/types.js'
+import type { InlineToolbarGroupItem } from '../../inline/types.js'
 
 import './index.scss'
 

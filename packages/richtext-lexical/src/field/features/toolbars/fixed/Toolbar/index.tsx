@@ -7,8 +7,8 @@ import * as React from 'react'
 import type { FixedToolbarGroup, FixedToolbarGroupItem } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { ToolbarButton } from '../../../../lexical/plugins/toolbars/ToolbarButton/index.js'
-import { ToolbarDropdown } from '../../../../lexical/plugins/toolbars/ToolbarDropdown/index.js'
+import { ToolbarButton } from '../../shared/ToolbarButton/index.js'
+import { ToolbarDropdown } from '../../shared/ToolbarDropdown/index.js'
 import './index.scss'
 
 function ButtonGroupItem({

@@ -22,6 +22,7 @@ import { UnorderedListFeature } from '../../../features/lists/unorderedList/feat
 import { ParagraphFeature } from '../../../features/paragraph/feature.server.js'
 import { RelationshipFeature } from '../../../features/relationship/feature.server.js'
 import { FixedToolbarFeature } from '../../../features/toolbars/fixed/feature.server.js'
+import { InlineToolbarFeature } from '../../../features/toolbars/inline/feature.server.js'
 import { UploadFeature } from '../../../features/upload/feature.server.js'
 import { LexicalEditorTheme } from '../../theme/EditorTheme.js'
 
@@ -50,6 +51,7 @@ export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = 
   BlockQuoteFeature(),
   UploadFeature(),
   HorizontalRuleFeature(),
+  InlineToolbarFeature(),
 ]
 
 export const defaultEditorConfig: ServerEditorConfig = {

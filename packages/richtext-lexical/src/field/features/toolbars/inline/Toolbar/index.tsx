@@ -16,11 +16,11 @@ import { createPortal } from 'react-dom'
 
 import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../types.js'
 
-import { useEditorConfigContext } from '../../../../config/client/EditorConfigProvider.js'
-import { getDOMRangeRect } from '../../../../utils/getDOMRangeRect.js'
-import { setFloatingElemPosition } from '../../../../utils/setFloatingElemPosition.js'
-import { ToolbarButton } from '../../ToolbarButton/index.js'
-import { ToolbarDropdown } from '../../ToolbarDropdown/index.js'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import { getDOMRangeRect } from '../../../../lexical/utils/getDOMRangeRect.js'
+import { setFloatingElemPosition } from '../../../../lexical/utils/setFloatingElemPosition.js'
+import { ToolbarButton } from '../../shared/ToolbarButton/index.js'
+import { ToolbarDropdown } from '../../shared/ToolbarDropdown/index.js'
 import './index.scss'
 
 function ButtonGroupItem({

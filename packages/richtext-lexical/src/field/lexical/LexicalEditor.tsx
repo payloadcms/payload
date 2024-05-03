@@ -105,7 +105,6 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
           })}
           {editor.isEditable() && (
             <React.Fragment>
-              <InlineToolbarPlugin anchorElem={floatingAnchorElem} />
               <SlashMenuPlugin anchorElem={floatingAnchorElem} />
             </React.Fragment>
           )}

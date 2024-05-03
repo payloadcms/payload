@@ -6,7 +6,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { InlineToolbarGroupItem } from '../inline/types.js'
+import type { InlineToolbarGroupItem } from '../../inline/types.js'
 
 const baseClass = 'toolbar-popup__dropdown-item'
 

@@ -5,7 +5,7 @@ const baseClass = 'toolbar-popup__dropdown'
 
 import type { LexicalEditor } from 'lexical'
 
-import type { InlineToolbarGroupItem } from '../inline/types.js'
+import type { InlineToolbarGroupItem } from '../../inline/types.js'
 
 import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
