@@ -209,6 +209,7 @@ export const fa: Language = {
       error: 'خطا',
       errors: 'خطاها',
       fallbackToDefaultLocale: 'بازگردان پیشفرض زبان',
+      false: 'غلط',
       filter: 'علامت‌گذاری',
       filterWhere: 'علامت گذاری کردن {{label}} جایی که',
       filters: 'علامت‌گذاری‌ها',
@@ -265,6 +266,7 @@ export const fa: Language = {
       successfullyDuplicated: '{{label}} با موفقیت رونوشت شد.',
       thisLanguage: 'فارسی',
       titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
+      true: 'درست',
       unauthorized: 'غیرمجاز',
       unsavedChangesDuplicate:
         'شما تغییرات ذخیره نشده دارید. مطمئنید میخواهید به رونوشت ادامه دهید؟',
