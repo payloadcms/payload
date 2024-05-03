@@ -1,4 +1,4 @@
-@import '../../../../../../scss/styles';
+@import '../../../../../scss/styles';
 
 html[data-theme='light'] {
   .inline-toolbar-popup {
@@ -10,12 +10,12 @@ html[data-theme='light'] {
   display: flex;
   align-items: center;
   background: var(--color-base-0);
-  padding: 0px 3.72px 0px 6.25px;
+  padding: 0 3.72px 0 6.25px;
   vertical-align: middle;
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 10;
+  z-index: 1;
   opacity: 0;
   border-radius: 6.25px;
   transition: opacity 0.2s;
@@ -50,9 +50,4 @@ html[data-theme='light'] {
     }
   }
 
-  @media (max-width: 1024px) {
-    button.insert-comment {
-      display: none;
-    }
-  }
 }

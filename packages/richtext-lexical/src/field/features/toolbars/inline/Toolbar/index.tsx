@@ -14,13 +14,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../types.js'
+import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
-import { useEditorConfigContext } from '../../../../config/client/EditorConfigProvider.js'
-import { getDOMRangeRect } from '../../../../utils/getDOMRangeRect.js'
-import { setFloatingElemPosition } from '../../../../utils/setFloatingElemPosition.js'
-import { ToolbarButton } from '../ToolbarButton/index.js'
-import { ToolbarDropdown } from '../ToolbarDropdown/index.js'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import { getDOMRangeRect } from '../../../../lexical/utils/getDOMRangeRect.js'
+import { setFloatingElemPosition } from '../../../../lexical/utils/setFloatingElemPosition.js'
+import { ToolbarButton } from '../../shared/ToolbarButton/index.js'
+import { ToolbarDropdown } from '../../shared/ToolbarDropdown/index.js'
 import './index.scss'
 
 function ButtonGroupItem({
@@ -30,7 +30,7 @@ function ButtonGroupItem({
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-  item: InlineToolbarGroupItem
+  item: ToolbarGroupItem
 }): React.ReactNode {
   if (item.Component) {
     return (
@@ -41,13 +41,13 @@ function ButtonGroupItem({
   }
 
   return (
-    <ToolbarButton item={item} key={item.key}>
+    <ToolbarButton editor={editor} item={item} key={item.key}>
       {item?.ChildComponent && <item.ChildComponent />}
     </ToolbarButton>
   )
 }
 
-function ToolbarGroup({
+function ToolbarGroupComponent({
   anchorElem,
   editor,
   group,
@@ -55,15 +55,33 @@ function ToolbarGroup({
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-  group: InlineToolbarGroup
+  group: ToolbarGroup
   index: number
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const Icon =
-    group?.type === 'dropdown' && group.items.length && group.ChildComponent
-      ? group.ChildComponent
-      : null
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
+
+  React.useEffect(() => {
+    if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+      setDropdownIcon(() => group.ChildComponent)
+    } else {
+      setDropdownIcon(null)
+    }
+  }, [group])
+
+  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
+    if (!activeItems.length) {
+      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+        setDropdownIcon(() => group.ChildComponent)
+      } else {
+        setDropdownIcon(null)
+      }
+      return
+    }
+    const item = activeItems[0]
+    setDropdownIcon(() => item.ChildComponent)
+  }
 
   return (
     <div
@@ -72,13 +90,15 @@ function ToolbarGroup({
     >
       {group.type === 'dropdown' &&
         group.items.length &&
-        (Icon ? (
+        (DropdownIcon ? (
           <ToolbarDropdown
-            Icon={Icon}
+            Icon={DropdownIcon}
             anchorElem={anchorElem}
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            maxActiveItems={1}
+            onActiveChange={onActiveChange}
           />
         ) : (
           <ToolbarDropdown
@@ -86,6 +106,8 @@ function ToolbarGroup({
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            maxActiveItems={1}
+            onActiveChange={onActiveChange}
           />
         ))}
       {group.type === 'buttons' &&
@@ -102,7 +124,7 @@ function ToolbarGroup({
   )
 }
 
-function FloatingSelectToolbar({
+function InlineToolbar({
   anchorElem,
   editor,
 }: {
@@ -264,7 +286,7 @@ function FloatingSelectToolbar({
           {editorConfig?.features &&
             editorConfig.features?.toolbarInline?.groups.map((group, i) => {
               return (
-                <ToolbarGroup
+                <ToolbarGroupComponent
                   anchorElem={anchorElem}
                   editor={editor}
                   group={group}
@@ -279,10 +301,10 @@ function FloatingSelectToolbar({
   )
 }
 
-function useFloatingTextFormatToolbar(
+function useInlineToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLElement,
-): JSX.Element | null {
+): React.ReactElement | null {
   const [isText, setIsText] = useState(false)
 
   const updatePopup = useCallback(() => {
@@ -360,14 +382,15 @@ function useFloatingTextFormatToolbar(
     return null
   }
 
-  return createPortal(<FloatingSelectToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
+  return createPortal(<InlineToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
 }
 
-export function FloatingSelectToolbarPlugin({
+export function InlineToolbarPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const [editor] = useLexicalComposerContext()
-  return useFloatingTextFormatToolbar(editor, anchorElem)
+
+  return useInlineToolbar(editor, anchorElem)
 }

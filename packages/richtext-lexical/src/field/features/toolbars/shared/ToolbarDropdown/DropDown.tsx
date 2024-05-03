@@ -1,14 +1,13 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { mergeRegister } from '@lexical/utils'
-import { $getSelection } from 'lexical'
+import type { LexicalEditor } from 'lexical'
+
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { InlineToolbarGroupItem } from '../types.js'
+import type { ToolbarGroupItem } from '../../types.js'
 
-const baseClass = 'inline-toolbar-popup__dropdown-item'
+const baseClass = 'toolbar-popup__dropdown-item'
 
 interface DropDownContextType {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
@@ -17,55 +16,21 @@ interface DropDownContextType {
 const DropDownContext = React.createContext<DropDownContextType | null>(null)
 
 export function DropDownItem({
+  active,
   children,
+  editor,
+  enabled,
   item,
   title,
 }: {
+  active?: boolean
   children: React.ReactNode
-  item: InlineToolbarGroupItem
+  editor: LexicalEditor
+  enabled?: boolean
+  item: ToolbarGroupItem
   title?: string
 }): React.ReactNode {
-  const [editor] = useLexicalComposerContext()
-  const [enabled, setEnabled] = useState<boolean>(true)
-  const [active, setActive] = useState<boolean>(false)
   const [className, setClassName] = useState<string>(baseClass)
-
-  const updateStates = useCallback(() => {
-    editor.getEditorState().read(() => {
-      const selection = $getSelection()
-      if (item.isActive) {
-        const isActive = item.isActive({ editor, selection })
-        if (active !== isActive) {
-          setActive(isActive)
-        }
-      }
-      if (item.isEnabled) {
-        const isEnabled = item.isEnabled({ editor, selection })
-        if (enabled !== isEnabled) {
-          setEnabled(isEnabled)
-        }
-      }
-    })
-  }, [active, editor, enabled, item])
-
-  useEffect(() => {
-    updateStates()
-  }, [updateStates])
-
-  useEffect(() => {
-    document.addEventListener('mouseup', updateStates)
-    return () => {
-      document.removeEventListener('mouseup', updateStates)
-    }
-  }, [updateStates])
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerUpdateListener(() => {
-        updateStates()
-      }),
-    )
-  }, [editor, updateStates])
 
   useEffect(() => {
     setClassName(
@@ -124,12 +89,14 @@ export function DropDownItem({
 function DropDownItems({
   children,
   dropDownRef,
+  itemsContainerClassNames,
   onClose,
 }: {
   children: React.ReactNode
   dropDownRef: React.Ref<HTMLDivElement>
+  itemsContainerClassNames?: string[]
   onClose: () => void
-}): JSX.Element {
+}): React.ReactElement {
   const [items, setItems] = useState<Array<React.RefObject<HTMLButtonElement>>>()
   const [highlightedItem, setHighlightedItem] = useState<React.RefObject<HTMLButtonElement>>()
 
@@ -177,7 +144,7 @@ function DropDownItems({
       setHighlightedItem(items[0])
     }
 
-    if (highlightedItem?.current != null) {
+    if (highlightedItem != null && highlightedItem?.current != null) {
       highlightedItem.current.focus()
     }
   }, [items, highlightedItem])
@@ -185,7 +152,7 @@ function DropDownItems({
   return (
     <DropDownContext.Provider value={contextValue}>
       <div
-        className="inline-toolbar-popup__dropdown-items"
+        className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
         onKeyDown={handleKeyDown}
         ref={dropDownRef}
       >
@@ -201,6 +168,8 @@ export function DropDown({
   buttonClassName,
   children,
   disabled = false,
+  itemsContainerClassNames,
+  label,
   stopCloseOnClickSelf,
 }: {
   Icon?: React.FC
@@ -208,6 +177,8 @@ export function DropDown({
   buttonClassName: string
   children: ReactNode
   disabled?: boolean
+  itemsContainerClassNames?: string[]
+  label?: string
   stopCloseOnClickSelf?: boolean
 }): React.ReactNode {
   const dropDownRef = useRef<HTMLDivElement>(null)
@@ -227,7 +198,7 @@ export function DropDown({
 
     if (showDropDown && button !== null && dropDown !== null) {
       const { left, top } = button.getBoundingClientRect()
-      const scrollTopOffset = window.pageYOffset || document.documentElement.scrollTop
+      const scrollTopOffset = window.scrollY || document.documentElement.scrollTop
       dropDown.style.top = `${top + scrollTopOffset + button.offsetHeight + 5}px`
       dropDown.style.left = `${Math.min(left - 5, window.innerWidth - dropDown.offsetWidth - 20)}px`
     }
@@ -276,13 +247,18 @@ export function DropDown({
         ref={buttonRef}
         type="button"
       >
-        <Icon />
-        <i className="inline-toolbar-popup__dropdown-caret" />
+        {Icon && <Icon />}
+        {label && <span className="toolbar-popup__dropdown-label">{label}</span>}
+        <i className="toolbar-popup__dropdown-caret" />
       </button>
 
       {showDropDown &&
         createPortal(
-          <DropDownItems dropDownRef={dropDownRef} onClose={handleClose}>
+          <DropDownItems
+            dropDownRef={dropDownRef}
+            itemsContainerClassNames={itemsContainerClassNames}
+            onClose={handleClose}
+          >
             {children}
           </DropDownItems>,
           document.body,

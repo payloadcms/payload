@@ -340,7 +340,7 @@ export { BoldFeature } from './field/features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './field/features/format/inlineCode/feature.server.js'
 
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
-export { inlineToolbarFormatGroupWithItems } from './field/features/format/shared/inlineToolbarFormatGroup.js'
+export { toolbarFormatGroupWithItems } from './field/features/format/shared/toolbarFormatGroup.js'
 export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
@@ -384,8 +384,8 @@ export { SlateRelationshipConverter } from './field/features/migrations/slateToL
 export { SlateUnknownConverter } from './field/features/migrations/slateToLexical/converter/converters/unknown/index.js'
 export { SlateUnorderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/unorderedList/index.js'
 export { SlateUploadConverter } from './field/features/migrations/slateToLexical/converter/converters/upload/index.js'
-
 export { defaultSlateConverters } from './field/features/migrations/slateToLexical/converter/defaultConverters.js'
+
 export {
   convertSlateNodesToLexical,
   convertSlateToLexical,
@@ -394,8 +394,8 @@ export type {
   SlateNode,
   SlateNodeConverter,
 } from './field/features/migrations/slateToLexical/converter/types.js'
-
 export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server.js'
+
 export { ParagraphFeature } from './field/features/paragraph/feature.server.js'
 export {
   RelationshipFeature,
@@ -408,8 +408,14 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
-export { inlineToolbarFeatureButtonsGroupWithItems } from './field/features/shared/inlineToolbar/featureButtonsGroup.js'
-export { inlineToolbarTextDropdownGroupWithItems } from './field/features/shared/inlineToolbar/textDropdownGroup.js'
+export { toolbarAddDropdownGroupWithItems } from './field/features/shared/toolbar/addDropdownGroup.js'
+export { toolbarFeatureButtonsGroupWithItems } from './field/features/shared/toolbar/featureButtonsGroup.js'
+
+export { toolbarTextDropdownGroupWithItems } from './field/features/shared/toolbar/textDropdownGroup.js'
+export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
+export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'
+
+export type { ToolbarGroup, ToolbarGroupItem } from './field/features/toolbars/types.js'
 export { createNode } from './field/features/typeUtilities.js'
 export type {
   ClientComponentProps,
@@ -434,10 +440,10 @@ export type {
   ServerFeature,
   ServerFeatureProviderMap,
 } from './field/features/types.js'
+
 export { UploadFeature } from './field/features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './field/features/upload/feature.server.js'
-
 export {
   $createUploadNode,
   $isUploadNode,
@@ -445,6 +451,7 @@ export {
   type UploadData,
   UploadNode,
 } from './field/features/upload/nodes/UploadNode.js'
+
 export {
   EditorConfigProvider,
   useEditorConfigContext,
@@ -462,30 +469,26 @@ export {
   loadFeatures,
   sortFeaturesForOptimalLoading,
 } from './field/lexical/config/server/loader.js'
+
 export {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './field/lexical/config/server/sanitize.js'
-
 export type {
   ClientEditorConfig,
   SanitizedClientEditorConfig,
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './field/lexical/config/types.js'
-export { getEnabledNodes } from './field/lexical/nodes/index.js'
 
+export { getEnabledNodes } from './field/lexical/nodes/index.js'
 export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
+export type { AdapterProps }
+
 export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-export type { AdapterProps }
-
-export type {
-  InlineToolbarGroup,
-  InlineToolbarGroupItem,
-} from './field/lexical/plugins/toolbars/inline/types.js'
 export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM.js'
 export { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect.js'

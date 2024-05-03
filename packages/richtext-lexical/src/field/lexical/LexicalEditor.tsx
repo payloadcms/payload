@@ -5,25 +5,30 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
+import { mergeRegister } from '@lexical/utils'
+import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
+import { useEditorFocus } from './EditorFocusProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
+import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
-import { FloatingSelectToolbarPlugin } from './plugins/toolbars/inline/Toolbar/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>> = (
   props,
 ) => {
   const { editorConfig, onChange } = props
+  const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
+  const editorFocus = useEditorFocus()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -31,6 +36,29 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       setFloatingAnchorElem(_floatingAnchorElem)
     }
   }
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand<MouseEvent>(
+        FOCUS_COMMAND,
+        () => {
+          editorFocus.focusEditor(editor, editorConfigContext)
+          return true
+        },
+
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand<MouseEvent>(
+        BLUR_COMMAND,
+        () => {
+          editorFocus.blurEditor()
+          return true
+        },
+
+        COMMAND_PRIORITY_LOW,
+      ),
+    )
+  }, [editor, editorConfig, editorFocus])
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
 
@@ -105,7 +133,6 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
           })}
           {editor.isEditable() && (
             <React.Fragment>
-              <FloatingSelectToolbarPlugin anchorElem={floatingAnchorElem} />
               <SlashMenuPlugin anchorElem={floatingAnchorElem} />
             </React.Fragment>
           )}
