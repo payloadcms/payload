@@ -11,7 +11,7 @@ import type { SanitizedClientEditorConfig } from '../types.js'
 function generateQuickGuid(): string {
   return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12)
 }
-interface ContextType {
+export interface EditorConfigContextType {
   editorConfig: SanitizedClientEditorConfig
   field: FormFieldBase & {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
@@ -21,7 +21,7 @@ interface ContextType {
   uuid: string
 }
 
-const Context: React.Context<ContextType> = createContext({
+const Context: React.Context<EditorConfigContextType> = createContext({
   editorConfig: null,
   field: null,
   uuid: generateQuickGuid(),
@@ -56,7 +56,7 @@ export const EditorConfigProvider = ({
   return <Context.Provider value={editorContext}>{children}</Context.Provider>
 }
 
-export const useEditorConfigContext = (): ContextType => {
+export const useEditorConfigContext = (): EditorConfigContextType => {
   const context = useContext(Context)
   if (context === undefined) {
     throw new Error('useEditorConfigContext must be used within an EditorConfigProvider')

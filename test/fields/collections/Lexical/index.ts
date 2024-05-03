@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import {
   BlocksFeature,
+  FixedToolbarFeature,
   HeadingFeature,
   LinkFeature,
   TreeViewFeature,
@@ -71,6 +72,7 @@ export const LexicalFields: CollectionConfig = {
           //TestRecorderFeature(),
           TreeViewFeature(),
           //HTMLConverterFeature(),
+          FixedToolbarFeature(),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,

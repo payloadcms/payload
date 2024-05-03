@@ -41,10 +41,10 @@ function SlashMenuItem({
   }
 
   let title = item.key
-  if (item.displayName) {
-    title = typeof item.displayName === 'function' ? item.displayName({ i18n }) : item.displayName
+  if (item.label) {
+    title = typeof item.label === 'function' ? item.label({ i18n }) : item.label
   }
-  // Crop title to max. 50 characters
+  // Crop title to max. 25 characters
   if (title.length > 25) {
     title = title.substring(0, 25) + '...'
   }
@@ -108,9 +108,8 @@ export function SlashMenuPlugin({
       groupsWithItems = groupsWithItems.map((group) => {
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
-          if (item.displayName) {
-            itemTitle =
-              typeof item.displayName === 'function' ? item.displayName({ i18n }) : item.displayName
+          if (item.label) {
+            itemTitle = typeof item.label === 'function' ? item.label({ i18n }) : item.label
           }
 
           if (new RegExp(queryString, 'gi').exec(itemTitle)) {
@@ -192,11 +191,9 @@ export function SlashMenuPlugin({
                 <div className={baseClass}>
                   {groups.map((group) => {
                     let groupTitle = group.key
-                    if (group.displayName) {
+                    if (group.label) {
                       groupTitle =
-                        typeof group.displayName === 'function'
-                          ? group.displayName({ i18n })
-                          : group.displayName
+                        typeof group.label === 'function' ? group.label({ i18n }) : group.label
                     }
 
                     return (

@@ -1,13 +1,42 @@
 'use client'
 
 import { $setBlocksType } from '@lexical/selection'
-import { $createParagraphNode, $getSelection } from 'lexical'
+import { $createParagraphNode, $getSelection, $isParagraphNode, $isRangeSelection } from 'lexical'
 
+import type { ToolbarGroup } from '../toolbars/types.js'
 import type { FeatureProviderProviderClient } from '../types.js'
 
 import { TextIcon } from '../../lexical/ui/icons/Text/index.js'
 import { createClientComponent } from '../createClientComponent.js'
-import { inlineToolbarTextDropdownGroupWithItems } from '../shared/inlineToolbar/textDropdownGroup.js'
+import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
+
+const toolbarGroups: ToolbarGroup[] = [
+  toolbarTextDropdownGroupWithItems([
+    {
+      ChildComponent: TextIcon,
+      isActive: ({ selection }) => {
+        if (!$isRangeSelection(selection)) {
+          return false
+        }
+        for (const node of selection.getNodes()) {
+          if (!$isParagraphNode(node) && !$isParagraphNode(node.getParent())) {
+            return false
+          }
+        }
+        return true
+      },
+      key: 'paragraph',
+      label: 'Normal Text',
+      onSelect: ({ editor }) => {
+        editor.update(() => {
+          const selection = $getSelection()
+          $setBlocksType(selection, () => $createParagraphNode())
+        })
+      },
+      order: 1,
+    },
+  ]),
+]
 
 const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
@@ -17,13 +46,12 @@ const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props)
       slashMenu: {
         groups: [
           {
-            displayName: 'Basic',
             items: [
               {
                 Icon: TextIcon,
-                displayName: 'Paragraph',
                 key: 'paragraph',
                 keywords: ['normal', 'paragraph', 'p', 'text'],
+                label: 'Paragraph',
                 onSelect: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
@@ -33,27 +61,15 @@ const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props)
               },
             ],
             key: 'basic',
+            label: 'Basic',
           },
         ],
       },
+      toolbarFixed: {
+        groups: toolbarGroups,
+      },
       toolbarInline: {
-        groups: [
-          inlineToolbarTextDropdownGroupWithItems([
-            {
-              ChildComponent: TextIcon,
-              isActive: () => false,
-              key: 'paragraph',
-              label: 'Normal Text',
-              onSelect: ({ editor }) => {
-                editor.update(() => {
-                  const selection = $getSelection()
-                  $setBlocksType(selection, () => $createParagraphNode())
-                })
-              },
-              order: 1,
-            },
-          ]),
-        ],
+        groups: toolbarGroups,
       },
     }),
   }

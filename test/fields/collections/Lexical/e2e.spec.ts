@@ -213,11 +213,9 @@ describe('lexical', () => {
 
     await expect(floatingToolbar_formatSection).toBeVisible()
 
-    await expect(page.locator('.inline-toolbar-popup__button').first()).toBeVisible()
+    await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
 
-    const boldButton = floatingToolbar_formatSection
-      .locator('.inline-toolbar-popup__button')
-      .first()
+    const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
     await expect(boldButton).toBeVisible()
     await boldButton.click()
@@ -443,11 +441,9 @@ describe('lexical', () => {
 
       await expect(floatingToolbar_formatSection).toBeVisible()
 
-      await expect(page.locator('.inline-toolbar-popup__button').first()).toBeVisible()
+      await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
 
-      const boldButton = floatingToolbar_formatSection
-        .locator('.inline-toolbar-popup__button')
-        .first()
+      const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
       await expect(boldButton).toBeVisible()
       await boldButton.click()
@@ -521,7 +517,7 @@ describe('lexical', () => {
 
       await expect(floatingToolbar).toBeVisible()
 
-      const linkButton = floatingToolbar.locator('.inline-toolbar-popup__button-link').first()
+      const linkButton = floatingToolbar.locator('.toolbar-popup__button-link').first()
 
       await expect(linkButton).toBeVisible()
       await linkButton.click()

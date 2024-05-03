@@ -1,40 +1,55 @@
+import type { I18n } from '@payloadcms/translations'
 import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 
-export type FixedToolbarGroup =
+import type { EditorFocusContextType } from '../../lexical/EditorFocusProvider.js'
+
+export type ToolbarGroup =
   | {
       ChildComponent?: React.FC
-      items: Array<FixedToolbarGroupItem>
+      items: Array<ToolbarGroupItem>
       key: string
       order?: number
       type: 'dropdown'
     }
   | {
-      items: Array<FixedToolbarGroupItem>
+      items: Array<ToolbarGroupItem>
       key: string
       order?: number
       type: 'buttons'
     }
 
-export type FixedToolbarGroupItem = {
+export type ToolbarGroupItem = {
   ChildComponent?: React.FC
   /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
   Component?: React.FC<{
+    active?: boolean
     anchorElem: HTMLElement
     editor: LexicalEditor
-    item: FixedToolbarGroupItem
+    enabled?: boolean
+    item: ToolbarGroupItem
   }>
-  isActive?: ({ editor, selection }: { editor: LexicalEditor; selection: BaseSelection }) => boolean
-  isEnabled?: ({
+  isActive?: ({
     editor,
+    editorFocusContext,
     selection,
   }: {
     editor: LexicalEditor
+    editorFocusContext: EditorFocusContextType
+    selection: BaseSelection
+  }) => boolean
+  isEnabled?: ({
+    editor,
+    editorFocusContext,
+    selection,
+  }: {
+    editor: LexicalEditor
+    editorFocusContext: EditorFocusContextType
     selection: BaseSelection
   }) => boolean
   key: string
   /** The label is displayed as text if the item is part of a dropdown group */
-  label?: string
-  onClick?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
+  label?: (({ i18n }: { i18n: I18n }) => string) | string
+  onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }
