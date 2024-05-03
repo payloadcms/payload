@@ -1,4 +1,4 @@
-import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
 import dotenv from 'dotenv'
 import path from 'path'
 
@@ -23,6 +23,6 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  plugins: [payloadCloud()],
+  plugins: [payloadCloudPlugin()],
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
 })
