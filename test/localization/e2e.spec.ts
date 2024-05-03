@@ -241,7 +241,6 @@ describe('Localization', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.id-label')).not.toContainText(originalID)
-      await page.locator('#action-save').click()
 
       // verify that the locale did copy
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
