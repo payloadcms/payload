@@ -5,7 +5,6 @@ import type { Collection } from 'payload/types'
 import { updateByIDOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
 
-import type { Arguments } from '../../../../payload/src/collections/operations/updateByID.js'
 import type { Context } from '../types.js'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (

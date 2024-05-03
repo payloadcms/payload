@@ -28,7 +28,6 @@ export function findVersionByIDResolver(collection: Collection): Resolver {
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
-    if (!req.query) req.query = {}
 
     context.req = req
 

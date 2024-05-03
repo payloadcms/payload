@@ -7,20 +7,22 @@ import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 
-export type Resolver = (
+export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
   args: {
-    draft?: boolean
+    draft: boolean
     fallbackLocale?: string
-    id?: number | string
+    id: number | string
     locale?: string
   },
   context: {
     req: PayloadRequestWithData
   },
-) => Promise<{ totalDocs: number }>
+) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export function getDeleteResolver(collection: Collection): Resolver {
+export function getDeleteResolver<TSlug extends keyof GeneratedTypes['collections']>(
+  collection: Collection,
+): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
