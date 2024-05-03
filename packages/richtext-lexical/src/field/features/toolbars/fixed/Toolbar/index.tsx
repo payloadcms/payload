@@ -88,6 +88,7 @@ function ToolbarGroup({
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
             onActiveChange={onActiveChange}
@@ -98,6 +99,7 @@ function ToolbarGroup({
             editor={editor}
             groupKey={group.key}
             items={group.items}
+            itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
             maxActiveItems={1}
             onActiveChange={onActiveChange}

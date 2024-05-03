@@ -89,10 +89,12 @@ export function DropDownItem({
 function DropDownItems({
   children,
   dropDownRef,
+  itemsContainerClassNames,
   onClose,
 }: {
   children: React.ReactNode
   dropDownRef: React.Ref<HTMLDivElement>
+  itemsContainerClassNames?: string[]
   onClose: () => void
 }): React.ReactElement {
   const [items, setItems] = useState<Array<React.RefObject<HTMLButtonElement>>>()
@@ -149,7 +151,11 @@ function DropDownItems({
 
   return (
     <DropDownContext.Provider value={contextValue}>
-      <div className="toolbar-popup__dropdown-items" onKeyDown={handleKeyDown} ref={dropDownRef}>
+      <div
+        className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
+        onKeyDown={handleKeyDown}
+        ref={dropDownRef}
+      >
         {children}
       </div>
     </DropDownContext.Provider>
@@ -162,6 +168,7 @@ export function DropDown({
   buttonClassName,
   children,
   disabled = false,
+  itemsContainerClassNames,
   label,
   stopCloseOnClickSelf,
 }: {
@@ -170,6 +177,7 @@ export function DropDown({
   buttonClassName: string
   children: ReactNode
   disabled?: boolean
+  itemsContainerClassNames?: string[]
   label?: string
   stopCloseOnClickSelf?: boolean
 }): React.ReactNode {
@@ -246,7 +254,11 @@ export function DropDown({
 
       {showDropDown &&
         createPortal(
-          <DropDownItems dropDownRef={dropDownRef} onClose={handleClose}>
+          <DropDownItems
+            dropDownRef={dropDownRef}
+            itemsContainerClassNames={itemsContainerClassNames}
+            onClose={handleClose}
+          >
             {children}
           </DropDownItems>,
           document.body,

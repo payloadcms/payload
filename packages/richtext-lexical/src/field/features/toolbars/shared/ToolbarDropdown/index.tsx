@@ -56,6 +56,7 @@ export const ToolbarDropdown = ({
   editor,
   groupKey,
   items,
+  itemsContainerClassNames,
   label,
   maxActiveItems,
   onActiveChange,
@@ -66,6 +67,7 @@ export const ToolbarDropdown = ({
   editor: LexicalEditor
   groupKey: string
   items: InlineToolbarGroupItem[]
+  itemsContainerClassNames?: string[]
   label?: string
   /**
    * Maximum number of active items allowed. This is a performance optimization to prevent
@@ -140,6 +142,7 @@ export const ToolbarDropdown = ({
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}
+      itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}
       label={label}
     >
