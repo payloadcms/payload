@@ -4,7 +4,7 @@ This is a [Next.js](https://nextjs.org) [App Router](https://nextjs.org/docs/app
 
 > This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/main/examples/auth/next-pages).
 
-**IMPORTANT: This application runs on a different server as Payload and establishes a connection from another domain or port**. For an integrated setup that runs on a single server, [check out how to serve Payload directly within your Next.js app](https://github.com/payloadcms/payload/tree/main/examples/auth/payload). To learn more, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
+**IMPORTANT: This application runs on a different server as Payload and establishes a connection from another domain or port over HTTP.**. For an integrated setup that runs on a single server and uses the Local API, [check out how to serve Payload directly within your Next.js app](https://github.com/payloadcms/payload/tree/main/examples/auth/payload). To learn more, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
 
 ## Getting Started
 
