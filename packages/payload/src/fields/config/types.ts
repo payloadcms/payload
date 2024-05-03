@@ -563,11 +563,11 @@ export type ArrayField = FieldBase & {
     components?: {
       RowLabel?: RowLabel
     } & Admin['components']
+    initCollapsed?: boolean | false
     /**
      * Disable drag and drop sorting
      */
-    disableSortable?: boolean
-    initCollapsed?: boolean | false
+    isSortable?: boolean
   }
   /**
    * Customize the SQL table name
@@ -634,11 +634,11 @@ export type Block = {
 
 export type BlockField = FieldBase & {
   admin?: Admin & {
+    initCollapsed?: boolean | false
     /**
      * Disable drag and drop sorting
      */
-    disableSortable?: boolean
-    initCollapsed?: boolean | false
+    isSortable?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown

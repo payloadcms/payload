@@ -124,7 +124,7 @@ const BlockFields: CollectionConfig = {
       name: 'collapsedByDefaultBlocks',
       admin: {
         initCollapsed: true,
-        disableSortable: true,
+        isSortable: false,
       },
       localized: true,
     },

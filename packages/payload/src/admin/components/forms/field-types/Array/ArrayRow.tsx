@@ -23,10 +23,10 @@ type ArrayRowProps = UseDraggableSortableReturn &
   Pick<Props, 'fieldTypes' | 'fields' | 'indexPath' | 'labels' | 'path' | 'permissions'> & {
     CustomRowLabel?: RowLabelType
     addRow: (rowIndex: number) => void
-    disableSortable: boolean
     duplicateRow: (rowIndex: number) => void
     forceRender?: boolean
     hasMaxRows?: boolean
+    isSortable: boolean
     moveRow: (fromIndex: number, toIndex: number) => void
     readOnly?: boolean
     removeRow: (rowIndex: number) => void
@@ -39,13 +39,13 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   CustomRowLabel,
   addRow,
   attributes,
-  disableSortable,
   duplicateRow,
   fieldTypes,
   fields,
   forceRender = false,
   hasMaxRows,
   indexPath,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -93,10 +93,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           !readOnly ? (
             <ArrayAction
               addRow={addRow}
-              disableSortable={disableSortable}
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
               index={rowIndex}
+              isSortable={isSortable}
               moveRow={moveRow}
               removeRow={removeRow}
               rowCount={rowCount}

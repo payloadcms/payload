@@ -34,7 +34,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
-    admin: { className, condition, description, disableSortable = false, readOnly },
+    admin: { className, condition, description, isSortable = true, readOnly },
     blocks,
     fieldTypes,
     forceRender = false,
@@ -230,23 +230,19 @@ const BlocksField: React.FC<Props> = (props) => {
 
             if (blockToRender) {
               return (
-                <DraggableSortableItem
-                  disabled={readOnly || disableSortable}
-                  id={row.id}
-                  key={row.id}
-                >
+                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       blockToRender={blockToRender}
                       blocks={blocks}
-                      disableSortable={disableSortable}
                       duplicateRow={duplicateRow}
                       fieldTypes={fieldTypes}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
+                      isSortable={isSortable}
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
