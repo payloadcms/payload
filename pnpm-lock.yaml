@@ -1661,6 +1661,9 @@ importers:
       create-payload-app:
         specifier: workspace:*
         version: link:../packages/create-payload-app
+      dotenv:
+        specifier: 8.6.0
+        version: 8.6.0
       eslint-plugin-payload:
         specifier: workspace:*
         version: link:../packages/eslint-plugin-payload
