@@ -40,6 +40,7 @@
     "@payloadcms/ui": "workspace:*",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
+    "dotenv": "8.6.0",
     "eslint-plugin-payload": "workspace:*",
     "eslint-plugin-playwright": "1.5.3",
     "execa": "5.1.1",
