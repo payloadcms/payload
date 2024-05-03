@@ -4,7 +4,7 @@ import type { PluginConfig } from './types.js'
 
 import deepMerge from './deepMerge.js'
 
-const redirects =
+export const redirectsPlugin =
   (pluginConfig: PluginConfig) =>
   (incomingConfig: Config): Config => ({
     ...incomingConfig,
@@ -78,5 +78,3 @@ const redirects =
       ),
     ],
   })
-
-export { redirects }

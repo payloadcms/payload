@@ -1,2 +1,2 @@
-export { sentry } from './plugin'
-export type { PluginOptions } from './types'
+export { sentryPlugin } from './plugin.js'
+export type { PluginOptions } from './types.js'

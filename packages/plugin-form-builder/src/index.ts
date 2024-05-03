@@ -8,7 +8,7 @@ import { generateFormCollection } from './collections/Forms/index.js'
 export { fields } from './collections/Forms/fields.js'
 export { getPaymentTotal } from './utilities/getPaymentTotal.js'
 
-const FormBuilder =
+export const formBuilderPlugin =
   (incomingFormConfig: PluginConfig) =>
   (config: Config): Config => {
     const formConfig: PluginConfig = {
@@ -51,5 +51,3 @@ const FormBuilder =
       ],
     }
   }
-
-export default FormBuilder
