@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
+import type { FixedToolbarGroupItem } from '../../fixed/types.js'
 import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -60,10 +61,28 @@ function ToolbarGroup({
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const Icon =
-    group?.type === 'dropdown' && group.items.length && group.ChildComponent
-      ? group.ChildComponent
-      : null
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
+
+  React.useEffect(() => {
+    if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+      setDropdownIcon(() => group.ChildComponent)
+    } else {
+      setDropdownIcon(null)
+    }
+  }, [group])
+
+  const onActiveChange = ({ activeItems }: { activeItems: FixedToolbarGroupItem[] }) => {
+    if (!activeItems.length) {
+      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+        setDropdownIcon(() => group.ChildComponent)
+      } else {
+        setDropdownIcon(null)
+      }
+      return
+    }
+    const item = activeItems[0]
+    setDropdownIcon(() => item.ChildComponent)
+  }
 
   return (
     <div
@@ -72,14 +91,15 @@ function ToolbarGroup({
     >
       {group.type === 'dropdown' &&
         group.items.length &&
-        (Icon ? (
+        (DropdownIcon ? (
           <ToolbarDropdown
-            Icon={Icon}
+            Icon={DropdownIcon}
             anchorElem={anchorElem}
             editor={editor}
             groupKey={group.key}
             items={group.items}
             maxActiveItems={1}
+            onActiveChange={onActiveChange}
           />
         ) : (
           <ToolbarDropdown
@@ -88,6 +108,7 @@ function ToolbarGroup({
             groupKey={group.key}
             items={group.items}
             maxActiveItems={1}
+            onActiveChange={onActiveChange}
           />
         ))}
       {group.type === 'buttons' &&
