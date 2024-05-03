@@ -5,7 +5,6 @@ import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { RelationshipFeatureProps } from './feature.server.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { RelationshipIcon } from '../../lexical/ui/icons/Relationship/index.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands.js'
@@ -30,14 +29,14 @@ const RelationshipFeatureClient: FeatureProviderProviderClient<RelationshipFeatu
         },
       ],
       slashMenu: {
-        options: [
+        groups: [
           {
             displayName: 'Basic',
-            key: 'basic',
-            options: [
-              new SlashMenuOption('relationship', {
+            items: [
+              {
                 Icon: RelationshipIcon,
                 displayName: 'Relationship',
+                key: 'relationship',
                 keywords: ['relationship', 'relation', 'rel'],
                 onSelect: ({ editor }) => {
                   // dispatch INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND
@@ -45,8 +44,9 @@ const RelationshipFeatureClient: FeatureProviderProviderClient<RelationshipFeatu
                     replace: false,
                   })
                 },
-              }),
+              },
             ],
+            key: 'basic',
           },
         ],
       },
