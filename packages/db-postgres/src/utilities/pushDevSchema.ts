@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url)
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (db: PostgresAdapter) => {
-  const { pushSchema } = require('drizzle-kit/payload')
+  const { pushSchema } = await import('drizzle-kit/payload')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(

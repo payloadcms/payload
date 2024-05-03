@@ -62,7 +62,7 @@ export const createMigration: CreateMigration = async function createMigration(
     fs.mkdirSync(dir)
   }
 
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
+  const { generateDrizzleJson, generateMigration } = await import('drizzle-kit/payload')
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
