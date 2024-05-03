@@ -1,7 +1,4 @@
-import type {
-  InlineToolbarGroup,
-  InlineToolbarGroupItem,
-} from '../../lexical/plugins/toolbars/inline/types.js'
+import type { InlineToolbarGroup, InlineToolbarGroupItem } from '../toolbars/inline/types.js'
 
 import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft/index.js'
 

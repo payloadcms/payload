@@ -16,9 +16,12 @@ import type {
 import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'
+import type {
+  InlineToolbarGroup,
+  InlineToolbarGroupItem,
+} from '../features/toolbars/inline/types.js'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-import type { InlineToolbarGroup } from '../lexical/plugins/toolbars/inline/types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
 import type { FixedToolbarGroup } from './toolbars/fixed/types.js'
 

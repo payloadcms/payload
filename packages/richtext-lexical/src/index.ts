@@ -413,6 +413,10 @@ export { inlineToolbarTextDropdownGroupWithItems } from './field/features/shared
 export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
 export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'
 
+export type {
+  InlineToolbarGroup,
+  InlineToolbarGroupItem,
+} from './field/features/toolbars/inline/types.js'
 export { createNode } from './field/features/typeUtilities.js'
 export type {
   ClientComponentProps,
@@ -437,10 +441,10 @@ export type {
   ServerFeature,
   ServerFeatureProviderMap,
 } from './field/features/types.js'
+
 export { UploadFeature } from './field/features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './field/features/upload/feature.server.js'
-
 export {
   $createUploadNode,
   $isUploadNode,
@@ -465,30 +469,26 @@ export {
   loadFeatures,
   sortFeaturesForOptimalLoading,
 } from './field/lexical/config/server/loader.js'
+
 export {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './field/lexical/config/server/sanitize.js'
-
 export type {
   ClientEditorConfig,
   SanitizedClientEditorConfig,
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './field/lexical/config/types.js'
-export { getEnabledNodes } from './field/lexical/nodes/index.js'
 
+export { getEnabledNodes } from './field/lexical/nodes/index.js'
 export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
+export type { AdapterProps }
+
 export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-export type { AdapterProps }
-
-export type {
-  InlineToolbarGroup,
-  InlineToolbarGroupItem,
-} from './field/lexical/plugins/toolbars/inline/types.js'
 export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM.js'
 export { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect.js'
