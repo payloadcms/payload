@@ -15,13 +15,15 @@ export default async function Login({
     [key: string]: string | string[]
   }
 }) {
-  const initPageResult = await initPage({
+  const {
+    req: { user },
+  } = await initPage({
     config: configPromise,
     route: '/login',
     searchParams,
   })
 
-  if (initPageResult.req.user) {
+  if (user) {
     redirect(`/account?message=${encodeURIComponent('You are already logged in.')}`)
   }
 

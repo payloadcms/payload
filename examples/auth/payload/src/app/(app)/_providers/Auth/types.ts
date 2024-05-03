@@ -1,3 +1,5 @@
+import type { Permissions } from 'payload/auth'
+
 import type { User } from '../../../../payload-types'
 
 // eslint-disable-next-line no-unused-vars
@@ -25,7 +27,9 @@ export interface AuthContext {
   forgotPassword: ForgotPassword
   login: Login
   logout: Logout
+  permissions?: Permissions | null
   resetPassword: ResetPassword
+  setPermissions: (permissions: Permissions | null) => void
   setUser: (user: User | null) => void // eslint-disable-line no-unused-vars
   user?: User | null
 }

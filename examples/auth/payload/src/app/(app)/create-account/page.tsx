@@ -15,13 +15,15 @@ export default async function CreateAccount({
     [key: string]: string | string[]
   }
 }) {
-  const initPageResult = await initPage({
+  const {
+    req: { user },
+  } = await initPage({
     config: configPromise,
     route: '/create-account',
     searchParams,
   })
 
-  if (initPageResult.req.user) {
+  if (user) {
     redirect(
       `/account?message=${encodeURIComponent(
         'Cannot create a new account while logged in, please log out and try again.',

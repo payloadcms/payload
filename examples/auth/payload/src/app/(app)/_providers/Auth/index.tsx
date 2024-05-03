@@ -1,5 +1,7 @@
 'use client'
 
+import type { Permissions } from 'payload/auth'
+
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { User } from '../../../../payload-types'
@@ -15,6 +17,7 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
   children,
 }) => {
   const [user, setUser] = useState<User | null>()
+  const [permissions, setPermissions] = useState<Permissions | null>(null)
 
   const create = useCallback<Create>(
     async (args) => {
@@ -166,7 +169,9 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
         forgotPassword,
         login,
         logout,
+        permissions,
         resetPassword,
+        setPermissions,
         setUser,
         user,
       }}
