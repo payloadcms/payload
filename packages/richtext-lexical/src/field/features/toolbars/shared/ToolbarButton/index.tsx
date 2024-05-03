@@ -1,5 +1,6 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import type { LexicalEditor } from 'lexical'
+
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -12,12 +13,13 @@ const baseClass = 'toolbar-popup__button'
 
 export const ToolbarButton = ({
   children,
+  editor,
   item,
 }: {
   children: React.JSX.Element
+  editor: LexicalEditor
   item: InlineToolbarGroupItem
 }) => {
-  const [editor] = useLexicalComposerContext()
   const [enabled, setEnabled] = useState<boolean>(true)
   const [active, setActive] = useState<boolean>(false)
   const [className, setClassName] = useState<string>(baseClass)

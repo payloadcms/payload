@@ -42,7 +42,7 @@ function ButtonGroupItem({
   }
 
   return (
-    <ToolbarButton item={item} key={item.key}>
+    <ToolbarButton editor={editor} item={item} key={item.key}>
       {item?.ChildComponent && <item.ChildComponent />}
     </ToolbarButton>
   )

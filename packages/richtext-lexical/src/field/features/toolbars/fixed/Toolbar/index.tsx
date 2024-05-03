@@ -4,8 +4,11 @@ import type { LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
 
+import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
+import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
 import type { FixedToolbarGroup, FixedToolbarGroupItem } from '../types.js'
 
+import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../shared/ToolbarDropdown/index.js'
@@ -29,7 +32,7 @@ function ButtonGroupItem({
   }
 
   return (
-    <ToolbarButton item={item} key={item.key}>
+    <ToolbarButton editor={editor} item={item} key={item.key}>
       {item?.ChildComponent && <item.ChildComponent />}
     </ToolbarButton>
   )
@@ -38,16 +41,16 @@ function ButtonGroupItem({
 function ToolbarGroup({
   anchorElem,
   editor,
+  editorConfig,
   group,
   index,
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
+  editorConfig: SanitizedClientEditorConfig
   group: FixedToolbarGroup
   index: number
 }): React.ReactNode {
-  const { editorConfig } = useEditorConfigContext()
-
   const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
   const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
 
@@ -114,17 +117,24 @@ function ToolbarGroup({
   )
 }
 
-function FloatingSelectToolbar({
+function FixedToolbar({
   anchorElem,
   editor,
+  editorConfig,
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
+  editorConfig: SanitizedClientEditorConfig
 }): React.ReactNode {
-  const { editorConfig } = useEditorConfigContext()
-
   return (
-    <div className="fixed-toolbar">
+    <div
+      className="fixed-toolbar"
+      onFocus={(event) => {
+        // Prevent other focus events being triggered. Otherwise, if this was to be clicked while in a child editor,
+        // the parent editor will be focused, and the child editor will lose focus.
+        event.stopPropagation()
+      }}
+    >
       {editor.isEditable() && (
         <React.Fragment>
           {editorConfig?.features &&
@@ -133,6 +143,7 @@ function FloatingSelectToolbar({
                 <ToolbarGroup
                   anchorElem={anchorElem}
                   editor={editor}
+                  editorConfig={editorConfig}
                   group={group}
                   index={i}
                   key={group.key}
@@ -145,11 +156,38 @@ function FloatingSelectToolbar({
   )
 }
 
+const checkParentEditor = (editorFocus: EditorFocusContextType): boolean => {
+  if (editorFocus.parentEditorConfig) {
+    if (editorFocus.parentEditorConfig.resolvedFeatureMap.has('toolbarFixed')) {
+      return true
+    } else {
+      if (editorFocus.parentEditorFocus) {
+        return checkParentEditor(editorFocus.parentEditorFocus)
+      }
+    }
+  }
+  return false
+}
+
 export function FixedToolbarPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement
 }): React.ReactElement | null {
-  const [editor] = useLexicalComposerContext()
-  return <FloatingSelectToolbar anchorElem={anchorElem} editor={editor} />
+  const [currentEditor] = useLexicalComposerContext()
+  const { editorConfig: currentEditorConfig } = useEditorConfigContext()
+
+  const editorFocus = useEditorFocus()
+  const editor = editorFocus.focusedEditor || currentEditor
+
+  const editorConfig = editorFocus.focusedEditorConfig || currentEditorConfig
+
+  // Check if there is a parent editor with a fixed toolbar already
+  const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
+
+  if (hasParentWithFixedToolbar) {
+    return null
+  }
+
+  return <FixedToolbar anchorElem={anchorElem} editor={editor} editorConfig={editorConfig} />
 }
