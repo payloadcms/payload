@@ -228,7 +228,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   }
 
   return (
-    <TableColumnsProvider collection={{ ...collection, fields }}>
+    <TableColumnsProvider collection={collection}>
       <RenderCustomComponent
         CustomComponent={ListToRender}
         DefaultComponent={DefaultList}

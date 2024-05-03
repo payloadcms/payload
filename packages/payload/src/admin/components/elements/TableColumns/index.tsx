@@ -56,10 +56,11 @@ export const TableColumnsProvider: React.FC<{
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>()
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
-  const [formattedFields] = useState<Field[]>(() => filterTableFields(collection.fields))
+  const [formattedFields] = useState<Field[]>(() => formatFields(collection))
+  const filteredFields = filterTableFields(formattedFields)
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
-    const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
+    const initialColumns = getInitialColumnState(filteredFields, useAsTitle, defaultColumns)
 
     return buildColumns({
       cellProps,
@@ -84,14 +85,14 @@ export const TableColumnsProvider: React.FC<{
 
         const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
         prevCollection.current = collection.slug
-        const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
+        const initialColumns = getInitialColumnState(filteredFields, useAsTitle, defaultColumns)
         const newCols = currentPreferences?.columns || initialColumns
 
         dispatchTableColumns({
           type: 'set',
           payload: {
             cellProps,
-            collection: { ...collection, fields: filterTableFields(collection.fields) },
+            collection: { ...collection, fields: filteredFields },
             columns: newCols.map((column) => {
               // 'string' is for backwards compatibility
               // the preference used to be stored as an array of strings
@@ -120,7 +121,7 @@ export const TableColumnsProvider: React.FC<{
     defaultColumns,
     collection,
     cellProps,
-    formattedFields,
+    filteredFields,
   ])
 
   // /////////////////////////////////////
