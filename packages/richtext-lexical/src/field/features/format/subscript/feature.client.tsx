@@ -6,7 +6,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { SubscriptIcon } from '../../../lexical/ui/icons/Subscript/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 
 const SubscriptFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
@@ -14,9 +14,9 @@ const SubscriptFeatureClient: FeatureProviderProviderClient<undefined> = (props)
     feature: () => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: SubscriptIcon,
                 isActive: ({ selection }) => {
@@ -26,7 +26,7 @@ const SubscriptFeatureClient: FeatureProviderProviderClient<undefined> = (props)
                   return false
                 },
                 key: 'subscript',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
                 },
                 order: 5,

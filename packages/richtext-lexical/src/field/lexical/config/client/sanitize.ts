@@ -10,9 +10,6 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
-    floatingSelectToolbar: {
-      sections: [],
-    },
     hooks: {
       load: [],
       save: [],
@@ -21,8 +18,14 @@ export const sanitizeClientFeatures = (
     nodes: [],
     plugins: [],
     slashMenu: {
-      dynamicOptions: [],
-      groupsWithOptions: [],
+      dynamicGroups: [],
+      groups: [],
+    },
+    toolbarFixed: {
+      groups: [],
+    },
+    toolbarInline: {
+      groups: [],
     },
   }
 
@@ -53,60 +56,82 @@ export const sanitizeClientFeatures = (
       })
     }
 
-    if (feature.floatingSelectToolbar?.sections?.length) {
-      for (const section of feature.floatingSelectToolbar.sections) {
-        // 1. find the section with the same key or create new one
-        let foundSection = sanitized.floatingSelectToolbar.sections.find(
-          (sanitizedSection) => sanitizedSection.key === section.key,
+    if (feature.toolbarInline?.groups?.length) {
+      for (const group of feature.toolbarInline.groups) {
+        // 1. find the group with the same key or create new one
+        let foundGroup = sanitized.toolbarInline.groups.find(
+          (sanitizedGroup) => sanitizedGroup.key === group.key,
         )
-        if (!foundSection) {
-          foundSection = {
-            ...section,
-            entries: [],
+        if (!foundGroup) {
+          foundGroup = {
+            ...group,
+            items: [],
           }
         } else {
-          sanitized.floatingSelectToolbar.sections =
-            sanitized.floatingSelectToolbar.sections.filter(
-              (sanitizedSection) => sanitizedSection.key !== section.key,
-            )
+          sanitized.toolbarInline.groups = sanitized.toolbarInline.groups.filter(
+            (sanitizedGroup) => sanitizedGroup.key !== group.key,
+          )
         }
 
         // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
-        if (section?.entries?.length) {
-          foundSection.entries = foundSection.entries.concat(section.entries)
+        if (group?.items?.length) {
+          foundGroup.items = foundGroup.items.concat(group.items)
         }
-        sanitized.floatingSelectToolbar?.sections.push(foundSection)
+        sanitized.toolbarInline?.groups.push(foundGroup)
       }
     }
 
-    if (feature.slashMenu?.options) {
-      if (feature.slashMenu.dynamicOptions?.length) {
-        sanitized.slashMenu.dynamicOptions = sanitized.slashMenu.dynamicOptions.concat(
-          feature.slashMenu.dynamicOptions,
+    if (feature.toolbarFixed?.groups?.length) {
+      for (const group of feature.toolbarFixed.groups) {
+        // 1. find the group with the same key or create new one
+        let foundGroup = sanitized.toolbarFixed.groups.find(
+          (sanitizedGroup) => sanitizedGroup.key === group.key,
+        )
+        if (!foundGroup) {
+          foundGroup = {
+            ...group,
+            items: [],
+          }
+        } else {
+          sanitized.toolbarFixed.groups = sanitized.toolbarFixed.groups.filter(
+            (sanitizedGroup) => sanitizedGroup.key !== group.key,
+          )
+        }
+
+        // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
+        if (group?.items?.length) {
+          foundGroup.items = foundGroup.items.concat(group.items)
+        }
+        sanitized.toolbarFixed?.groups.push(foundGroup)
+      }
+    }
+
+    if (feature.slashMenu?.groups) {
+      if (feature.slashMenu.dynamicGroups?.length) {
+        sanitized.slashMenu.dynamicGroups = sanitized.slashMenu.dynamicGroups.concat(
+          feature.slashMenu.dynamicGroups,
         )
       }
 
-      for (const optionGroup of feature.slashMenu.options) {
+      for (const optionGroup of feature.slashMenu.groups) {
         // 1. find the group with the same name or create new one
-        let group = sanitized.slashMenu.groupsWithOptions.find(
-          (group) => group.key === optionGroup.key,
-        )
+        let group = sanitized.slashMenu.groups.find((group) => group.key === optionGroup.key)
         if (!group) {
           group = {
             ...optionGroup,
-            options: [],
+            items: [],
           }
         } else {
-          sanitized.slashMenu.groupsWithOptions = sanitized.slashMenu.groupsWithOptions.filter(
+          sanitized.slashMenu.groups = sanitized.slashMenu.groups.filter(
             (group) => group.key !== optionGroup.key,
           )
         }
 
         // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
-        if (optionGroup?.options?.length) {
-          group.options = group.options.concat(optionGroup.options)
+        if (optionGroup?.items?.length) {
+          group.items = group.items.concat(optionGroup.items)
         }
-        sanitized.slashMenu.groupsWithOptions.push(group)
+        sanitized.slashMenu.groups.push(group)
       }
     }
 
@@ -118,8 +143,20 @@ export const sanitizeClientFeatures = (
     sanitized.enabledFeatures.push(feature.key)
   })
 
-  // Sort sanitized.floatingSelectToolbar.sections by order property
-  sanitized.floatingSelectToolbar.sections.sort((a, b) => {
+  // Sort sanitized.toolbarInline.groups by order property
+  sanitized.toolbarInline.groups.sort((a, b) => {
+    if (a.order && b.order) {
+      return a.order - b.order
+    } else if (a.order) {
+      return -1
+    } else if (b.order) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+  // Sort sanitized.toolbarFixed.groups by order property
+  sanitized.toolbarFixed.groups.sort((a, b) => {
     if (a.order && b.order) {
       return a.order - b.order
     } else if (a.order) {
@@ -131,9 +168,24 @@ export const sanitizeClientFeatures = (
     }
   })
 
-  // Sort sanitized.floatingSelectToolbar.sections.[section].entries by order property
-  for (const section of sanitized.floatingSelectToolbar.sections) {
-    section.entries.sort((a, b) => {
+  // Sort sanitized.toolbarInline.groups.[group].entries by order property
+  for (const group of sanitized.toolbarInline.groups) {
+    group.items.sort((a, b) => {
+      if (a.order && b.order) {
+        return a.order - b.order
+      } else if (a.order) {
+        return -1
+      } else if (b.order) {
+        return 1
+      } else {
+        return 0
+      }
+    })
+  }
+
+  // Sort sanitized.toolbarFixed.groups.[group].entries by order property
+  for (const group of sanitized.toolbarFixed.groups) {
+    group.items.sort((a, b) => {
       if (a.order && b.order) {
         return a.order - b.order
       } else if (a.order) {

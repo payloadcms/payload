@@ -6,7 +6,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { SuperscriptIcon } from '../../../lexical/ui/icons/Superscript/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 
 const SuperscriptFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
@@ -14,9 +14,9 @@ const SuperscriptFeatureClient: FeatureProviderProviderClient<undefined> = (prop
     feature: () => {
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: SuperscriptIcon,
                 isActive: ({ selection }) => {
@@ -26,7 +26,7 @@ const SuperscriptFeatureClient: FeatureProviderProviderClient<undefined> = (prop
                   return false
                 },
                 key: 'superscript',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')
                 },
                 order: 6,

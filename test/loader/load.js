@@ -1,16 +1,10 @@
-import { register } from 'node:module'
-import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
-
 export const load = async (filePath) => {
-  const filename = fileURLToPath(import.meta.url)
-  const dirname = path.dirname(filename)
-  const url = pathToFileURL(dirname).toString() + '/'
+  const importConfigImport = await import(
+    '../../packages/payload/dist/utilities/importWithoutClientFiles.js'
+  )
+  const importConfig = importConfigImport.importConfig
 
-  // Need to register loader from payload/dist for a true test of functionality
-  register('../../packages/payload/dist/bin/loader/index.js', url)
-
-  const result = await import(filePath)
+  const result = await importConfig(filePath)
 
   return result
 }

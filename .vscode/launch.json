@@ -59,6 +59,13 @@
       }
     },
     {
+      "command": "node --no-deprecation test/dev.js collections-graphql",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev GraphQL",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "node --no-deprecation test/dev.js fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",

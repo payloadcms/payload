@@ -27,6 +27,8 @@ export const clientTranslationKeys = [
   'authentication:loggingOut',
   'authentication:login',
   'authentication:logOut',
+  'authentication:loggedIn',
+  'authentication:loggedInChangePassword',
   'authentication:logout',
   'authentication:logoutUser',
   'authentication:logoutSuccessful',

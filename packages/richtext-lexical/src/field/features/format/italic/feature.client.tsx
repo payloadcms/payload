@@ -6,7 +6,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { ItalicIcon } from '../../../lexical/ui/icons/Italic/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers.js'
 
 const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
@@ -16,9 +16,10 @@ const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) =>
       return {
         clientFeatureProps: props,
 
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: ItalicIcon,
                 isActive: ({ selection }) => {
@@ -28,7 +29,7 @@ const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) =>
                   return false
                 },
                 key: 'italic',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
                 },
                 order: 2,
@@ -36,7 +37,6 @@ const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) =>
             ]),
           ],
         },
-        markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
       }
     },
   }

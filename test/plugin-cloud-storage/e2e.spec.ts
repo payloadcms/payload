@@ -4,9 +4,10 @@ import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { saveDocAndAssert } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -16,12 +17,14 @@ test.describe('Admin Panel', () => {
   let page: Page
   let mediaURL: AdminUrlUtil
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const { serverURL } = await initPayloadE2ENoConfig({ dirname })
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('should create file upload', async () => {

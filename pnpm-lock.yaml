@@ -253,7 +253,7 @@ importers:
         specifier: ^4.7.1
         version: 4.7.2
       turbo:
-        specifier: ^1.13.2
+        specifier: ^1.13.3
         version: 1.13.3
       typescript:
         specifier: 5.4.5
@@ -425,7 +425,7 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
-  packages/email-resend-rest:
+  packages/email-resend:
     devDependencies:
       '@types/jest':
         specifier: 29.5.12
@@ -535,6 +535,9 @@ importers:
       pluralize:
         specifier: 8.0.0
         version: 8.0.0
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.4.5)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -548,9 +551,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      ts-essentials:
-        specifier: 7.0.3
-        version: 7.0.3(typescript@5.4.5)
 
   packages/live-preview:
     devDependencies:
@@ -619,6 +619,9 @@ importers:
       deep-equal:
         specifier: 2.2.2
         version: 2.2.2
+      file-type:
+        specifier: 19.0.0
+        version: 19.0.0
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
@@ -674,9 +677,6 @@ importers:
       css-minimizer-webpack-plugin:
         specifier: ^6.0.0
         version: 6.0.0(esbuild@0.19.12)(webpack@5.91.0)
-      file-type:
-        specifier: 16.5.4
-        version: 16.5.4
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.91.0)
@@ -803,6 +803,9 @@ importers:
       scmp:
         specifier: 2.1.0
         version: 2.1.0
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.4.5)
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -930,9 +933,6 @@ importers:
       sharp:
         specifier: 0.32.6
         version: 0.32.6
-      ts-essentials:
-        specifier: 7.0.3
-        version: 7.0.3(typescript@5.4.5)
 
   packages/plugin-cloud:
     dependencies:
@@ -1188,9 +1188,6 @@ importers:
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2
-      react:
-        specifier: ^18.0.0
-        version: 18.2.0
       stripe:
         specifier: ^10.2.0
         version: 10.17.0
@@ -1201,6 +1198,12 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@types/express':
         specifier: ^4.17.9
         version: 4.17.21
@@ -1216,12 +1219,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      prettier:
-        specifier: ^2.7.1
-        version: 2.8.8
-      webpack:
-        specifier: ^5.78.0
-        version: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
 
   packages/richtext-lexical:
     dependencies:
@@ -1589,9 +1586,9 @@ importers:
       '@payloadcms/email-nodemailer':
         specifier: workspace:*
         version: link:../packages/email-nodemailer
-      '@payloadcms/email-resend-rest':
+      '@payloadcms/email-resend':
         specifier: workspace:*
-        version: link:../packages/email-resend-rest
+        version: link:../packages/email-resend
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../packages/eslint-config-payload
@@ -9701,6 +9698,7 @@ packages:
       readable-web-to-node-stream: 3.0.2
       strtok3: 6.3.0
       token-types: 4.2.1
+    dev: false
 
   /file-type@17.1.6:
     resolution: {integrity: sha512-hlDw5Ev+9e883s0pwUsuuYNu4tD7GgpUnOvykjv1Gya0ZIjuKumthDRua90VUn6/nlRKAjcxLUnHNTIUWwWIiw==}
@@ -9710,6 +9708,15 @@ packages:
       strtok3: 7.0.0
       token-types: 5.0.1
     dev: true
+
+  /file-type@19.0.0:
+    resolution: {integrity: sha512-s7cxa7/leUWLiXO78DVVfBVse+milos9FitauDLG1pI7lNaJ2+5lzPnr2N24ym+84HVwJL6hVuGfgVE+ALvU8Q==}
+    engines: {node: '>=18'}
+    dependencies:
+      readable-web-to-node-stream: 3.0.2
+      strtok3: 7.0.0
+      token-types: 5.0.1
+    dev: false
 
   /filename-reserved-regex@3.0.0:
     resolution: {integrity: sha512-hn4cQfU6GOT/7cFHXBqeBg2TbrMBgdD0kcjLhvSQYYwm3s4B6cjvBfb7nBALJLAXqmU5xajSa7X2NnUud/VCdw==}
@@ -12886,11 +12893,11 @@ packages:
   /peek-readable@4.1.0:
     resolution: {integrity: sha512-ZI3LnwUv5nOGbQzD9c2iDG6toheuXSZP5esSHBjopsXH4dg19soufvpUGA3uohi5anFtGb2lhAVdHzH6R/Evvg==}
     engines: {node: '>=8'}
+    dev: false
 
   /peek-readable@5.0.0:
     resolution: {integrity: sha512-YtCKvLUOvwtMGmrniQPdO7MwPjgkFBtFIrmfSbYmYuq3tKDV/mcfAhBth1+C3ru7uXIZasc/pHnb+YDYNkkj4A==}
     engines: {node: '>=14.16'}
-    dev: true
 
   /pend@1.2.0:
     resolution: {integrity: sha512-F3asv42UuXchdzt+xXqfW1OGlVBe+mxa2mqI0pg5yAHZPvFmY3Y6drSf/GQ1A86WgWEN9Kzh/WrgKa6iGcHXLg==}
@@ -13865,6 +13872,7 @@ packages:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+    dev: false
 
   /prettier@3.2.5:
     resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
@@ -15211,6 +15219,7 @@ packages:
     dependencies:
       '@tokenizer/token': 0.3.0
       peek-readable: 4.1.0
+    dev: false
 
   /strtok3@7.0.0:
     resolution: {integrity: sha512-pQ+V+nYQdC5H3Q7qBZAz/MO6lwGhoC2gOAjuouGf/VO0m7vQRh8QNMl2Uf6SwAtzZ9bOw3UIeBukEGNJl5dtXQ==}
@@ -15218,7 +15227,6 @@ packages:
     dependencies:
       '@tokenizer/token': 0.3.0
       peek-readable: 5.0.0
-    dev: true
 
   /stubs@3.0.0:
     resolution: {integrity: sha512-PdHt7hHUJKxvTCgbKX9C1V/ftOcjJQgz8BZwNfV5c4B6dcGqlpelTbJ999jBGZ2jYiPAwcX5dP6oBwVlBlUbxw==}
@@ -15562,6 +15570,7 @@ packages:
     dependencies:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
+    dev: false
 
   /token-types@5.0.1:
     resolution: {integrity: sha512-Y2fmSnZjQdDb9W4w4r1tswlMHylzWIeOKpx0aZH9BgGtACHhrk3OkT52AzwcuqTRBZtvvnTjDBh8eynMulu8Vg==}
@@ -15569,7 +15578,6 @@ packages:
     dependencies:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
-    dev: true
 
   /totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
@@ -15630,7 +15638,6 @@ packages:
       typescript: 5.4.5
     dependencies:
       typescript: 5.4.5
-    dev: true
 
   /ts-jest@29.1.2(@babel/core@7.24.4)(esbuild@0.19.12)(jest@29.7.0)(typescript@5.4.5):
     resolution: {integrity: sha512-br6GJoH/WUX4pu7FbZXuWGKGNDuU7b8Uj77g/Sp7puZV6EXzuByl6JrECvm0MzVzSTkSHWTihsXt+5XYER5b+g==}

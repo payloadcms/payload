@@ -36,6 +36,10 @@ export const pointSlug = 'point'
 export const errorOnHookSlug = 'error-on-hooks'
 
 export default buildConfigWithDefaults({
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   collections: [
     {
       access: openAccess,
@@ -332,6 +336,22 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'content-type',
+    },
+    {
+      slug: 'cyclical-relationship',
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'relationToSelf',
+          type: 'relationship',
+          relationTo: 'cyclical-relationship',
+        },
+      ],
     },
   ],
   graphQL: {

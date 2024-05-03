@@ -15,6 +15,7 @@ import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
 import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
 import { linkPopulationPromiseHOC } from './populationPromise.js'
+import { linkValidation } from './validate.js'
 
 export type ExclusiveLinkCollectionsProps =
   | {
@@ -143,6 +144,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
+            validations: [linkValidation(props)],
           }),
           createNode({
             converters: {
@@ -172,6 +174,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
+            validations: [linkValidation(props)],
           }),
         ],
         serverFeatureProps: props,

@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
@@ -22,7 +22,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
   noAdminAccessEmail,
@@ -59,7 +59,8 @@ describe('access control', () => {
   let serverURL: string
   let context: BrowserContext
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
@@ -73,6 +74,7 @@ describe('access control', () => {
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('field without read access should not show', async () => {

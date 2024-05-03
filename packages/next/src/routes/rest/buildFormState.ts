@@ -218,6 +218,8 @@ export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) =
         !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
       ) {
         if (formState.password) result.password = formState.password
+        if (formState['confirm-password'])
+          result['confirm-password'] = formState['confirm-password']
         if (formState.email) result.email = formState.email
       }
     }
@@ -227,6 +229,8 @@ export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) =
       status: httpStatus.OK,
     })
   } catch (err) {
+    req.payload.logger.error({ err, msg: `There was an error building form state` })
+
     return routeError({
       config: req.payload.config,
       err,

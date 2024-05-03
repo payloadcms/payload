@@ -6,7 +6,7 @@ import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { inlineToolbarFormatGroupWithItems } from '../shared/inlineToolbarFormatGroup.js'
 import { STRIKETHROUGH } from './markdownTransformers.js'
 
 const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
@@ -16,9 +16,10 @@ const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (pr
       return {
         clientFeatureProps: props,
 
-        floatingSelectToolbar: {
-          sections: [
-            SectionWithEntries([
+        markdownTransformers: [STRIKETHROUGH],
+        toolbarInline: {
+          groups: [
+            inlineToolbarFormatGroupWithItems([
               {
                 ChildComponent: StrikethroughIcon,
                 isActive: ({ selection }) => {
@@ -28,7 +29,7 @@ const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (pr
                   return false
                 },
                 key: 'strikethrough',
-                onClick: ({ editor }) => {
+                onSelect: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
                 },
                 order: 4,
@@ -36,7 +37,6 @@ const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (pr
             ]),
           ],
         },
-        markdownTransformers: [STRIKETHROUGH],
       }
     },
   }
