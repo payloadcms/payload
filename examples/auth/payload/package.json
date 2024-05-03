@@ -18,7 +18,6 @@
   "dependencies": {
     "@payloadcms/db-mongodb": "3.0.0-beta.24",
     "@payloadcms/next": "3.0.0-beta.24",
-    "@payloadcms/richtext-lexical": "3.0.0-beta.24",
     "@payloadcms/richtext-slate": "3.0.0-beta.24",
     "@payloadcms/ui": "3.0.0-beta.24",
     "cross-env": "^7.0.3",
