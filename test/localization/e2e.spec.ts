@@ -116,7 +116,6 @@ describe('Localization', () => {
 
       await fillValues({ description, title })
       await saveDocAndAssert(page)
-      await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
