@@ -98,6 +98,9 @@ const RelationshipField: React.FC<Props> = (props) => {
               const optionFilter =
                 typeof filterOptions === 'function'
                   ? await filterOptions({
+                      // data and siblingData are empty since we cannot fetch with the values covering the
+                      // entire list this limitation means that filterOptions functions using a document's
+                      //  data are unsupported in the whereBuilder
                       id: undefined,
                       data: {},
                       relationTo: collection.slug,
