@@ -195,6 +195,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
             currentDepth,
             depth,
             doc,
+            draft: draftsEnabled,
             fallbackLocale,
             findMany: true,
             global: null,

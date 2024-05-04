@@ -107,6 +107,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
       fallbackLocale,
       global: globalConfig,
       locale,

@@ -177,6 +177,7 @@ export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collec
           context: req.context,
           depth,
           doc: result || doc,
+          draft: undefined,
           fallbackLocale,
           global: null,
           locale,
