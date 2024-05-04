@@ -1,19 +1,19 @@
 import type { Config } from 'payload/config'
 
-import type { SearchConfig } from './types.js'
+import type { PluginConfig } from './types.js'
 
-import deleteFromSearch from './Search/hooks/deleteFromSearch.js'
-import syncWithSearch from './Search/hooks/syncWithSearch.js'
+import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
+import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
 
 export const searchPlugin =
-  (incomingSearchConfig: SearchConfig) =>
+  (incomingPluginConfig: PluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     if (collections) {
-      const searchConfig: SearchConfig = {
-        ...incomingSearchConfig,
+      const pluginConfig: PluginConfig = {
+        ...incomingPluginConfig,
         deleteDrafts: true,
         syncDrafts: false,
         // write any config defaults here
@@ -24,7 +24,7 @@ export const searchPlugin =
         ?.map((collection) => {
           const { hooks: existingHooks } = collection
 
-          const enabledCollections = searchConfig.collections || []
+          const enabledCollections = pluginConfig.collections || []
           const isEnabled = enabledCollections.indexOf(collection.slug) > -1
           if (isEnabled) {
             return {
@@ -37,7 +37,7 @@ export const searchPlugin =
                     await syncWithSearch({
                       ...args,
                       collection: collection.slug,
-                      searchConfig,
+                      pluginConfig,
                     })
                   },
                 ],
@@ -54,7 +54,7 @@ export const searchPlugin =
         ...config,
         collections: [
           ...(collectionsWithSearchHooks || []),
-          generateSearchCollection(searchConfig),
+          generateSearchCollection(pluginConfig),
         ],
       }
     }

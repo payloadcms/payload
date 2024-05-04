@@ -23,14 +23,17 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
+    "dist"
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
