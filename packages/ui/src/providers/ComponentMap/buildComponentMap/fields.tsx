@@ -597,6 +597,7 @@ export const mapFields = (args: {
               )
             }
 
+            fieldComponentProps = richTextField
             break
           }
           case 'row': {
