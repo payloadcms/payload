@@ -24,14 +24,17 @@
       "import": "./src/index.tsx",
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
     }
   },
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
   "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
+    "dist"
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
