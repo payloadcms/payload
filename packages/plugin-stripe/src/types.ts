@@ -6,8 +6,8 @@ export type StripeWebhookHandler<T = any> = (args: {
   config: PayloadConfig
   event: T
   payload: Payload
+  pluginConfig?: PluginConfig
   stripe: Stripe
-  stripeConfig?: StripeConfig
 }) => void
 
 export interface StripeWebhookHandlers {
@@ -26,7 +26,7 @@ export interface SyncConfig {
   stripeResourceTypeSingular: 'customer' | 'product' // TODO: there must be a better way to do this
 }
 
-export interface StripeConfig {
+export interface PluginConfig {
   isTestKey?: boolean
   logs?: boolean
   // @deprecated this will default as `false` in the next major version release
@@ -37,7 +37,7 @@ export interface StripeConfig {
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
 }
 
-export type SanitizedStripeConfig = StripeConfig & {
+export type SanitizedPluginConfig = PluginConfig & {
   sync: SyncConfig[] // convert to required
 }
 
