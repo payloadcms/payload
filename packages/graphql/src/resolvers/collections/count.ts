@@ -19,7 +19,7 @@ export type Resolver = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<{ totalDocs: number }>
 
-export default function countResolver(collection: Collection): Resolver {
+export function countResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale

@@ -6,6 +6,7 @@ import { populate } from '../../../populate/populate.js'
 export const relationshipPopulationPromise: PopulationPromise<SerializedRelationshipNode> = ({
   currentDepth,
   depth,
+  draft,
   field,
   node,
   overrideAccess,
@@ -27,6 +28,7 @@ export const relationshipPopulationPromise: PopulationPromise<SerializedRelation
           currentDepth,
           data: node,
           depth,
+          draft,
           field,
           key: 'value',
           overrideAccess,

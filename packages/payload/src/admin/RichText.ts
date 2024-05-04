@@ -58,6 +58,7 @@ type RichTextAdapterBase<
     context: RequestContext
     currentDepth?: number
     depth: number
+    draft: boolean
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     fieldPromises: Promise<void>[]
     findMany: boolean
