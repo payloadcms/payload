@@ -269,7 +269,6 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
     }
   }
 
-  // TODO: Check if Payload is already installed
   const packageObj = await fse.readJson(path.resolve(projectDir, 'package.json'))
   if (packageObj.dependencies?.payload) {
     return {
@@ -293,7 +292,7 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
     nextAppDir = undefined
   }
 
-  const configType = await getProjectType(projectDir, nextConfigPath)
+  const configType = getProjectType({ nextConfigPath, packageObj })
 
   const hasTopLevelLayout = nextAppDir
     ? fs.existsSync(path.resolve(nextAppDir, 'layout.tsx'))
@@ -302,7 +301,11 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
   return { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigPath, nextConfigType: configType }
 }
 
-async function getProjectType(projectDir: string, nextConfigPath: string): Promise<'cjs' | 'esm'> {
+function getProjectType(args: {
+  nextConfigPath: string
+  packageObj: Record<string, unknown>
+}): 'cjs' | 'esm' {
+  const { nextConfigPath, packageObj } = args
   if (nextConfigPath.endsWith('.mjs')) {
     return 'esm'
   }
@@ -310,7 +313,6 @@ async function getProjectType(projectDir: string, nextConfigPath: string): Promi
     return 'cjs'
   }
 
-  const packageObj = await fse.readJson(path.resolve(projectDir, 'package.json'))
   const packageJsonType = packageObj.type
   if (packageJsonType === 'module') {
     return 'esm'

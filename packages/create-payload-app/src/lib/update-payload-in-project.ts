@@ -104,9 +104,12 @@ export async function updatePayloadInProject(
     ? path.resolve(dirname, '../..', 'dist/template')
     : path.resolve(dirname, '../../../../templates/blank-3.0')
 
-  const templateSrcDir = path.resolve(templateFilesPath ? '' : 'src')
+  const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')
 
-  copyRecursiveSync(templateSrcDir, path.dirname(dirname))
+  copyRecursiveSync(
+    templateSrcDir,
+    path.resolve(projectDir, appDetails.isSrcDir ? 'src/app' : 'app', '(payload)'),
+  )
 
   return { success: true }
 }

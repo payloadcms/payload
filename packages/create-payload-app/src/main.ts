@@ -95,7 +95,7 @@ export class Main {
           message: chalk.bold(`Upgrade Payload in this project?`),
         })
 
-        if (p.isCancel(shouldUpdate) || !shouldUpdate) {
+        if (!p.isCancel(shouldUpdate) || shouldUpdate) {
           await updatePayloadInProject(nextAppDetails)
         }
 
