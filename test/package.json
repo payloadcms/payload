@@ -12,6 +12,7 @@
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
   "devDependencies": {
+    "@netlify/blobs": "^7.3.0",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
@@ -34,6 +35,7 @@
     "@payloadcms/richtext-slate": "workspace:*",
     "@payloadcms/storage-azure": "workspace:*",
     "@payloadcms/storage-gcs": "workspace:*",
+    "@payloadcms/storage-netlify-blobs": "workspace:*",
     "@payloadcms/storage-s3": "workspace:*",
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
