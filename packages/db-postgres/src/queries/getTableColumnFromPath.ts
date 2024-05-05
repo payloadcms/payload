@@ -335,6 +335,8 @@ export const getTableColumnFromPath = ({
       }
 
       case 'blocks': {
+        if (adapter.storeBlocksAsJSON) break
+
         let blockTableColumn: TableColumn
         let newTableName: string
 

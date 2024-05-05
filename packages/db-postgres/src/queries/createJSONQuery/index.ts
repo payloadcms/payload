@@ -83,5 +83,12 @@ export const createJSONQuery = ({
     })
   }
 
+  if (operator === 'in' && Array.isArray(value)) {
+    const constrains = value.map((each, index) => {
+      return `${index ? 'OR ' : ''}${createConstraint({ operator: 'equals', pathSegments, treatAsArray, value: each })}`
+    })
+    return constrains.join('\n')
+  }
+
   return createConstraint({ operator, pathSegments, treatAsArray, value })
 }

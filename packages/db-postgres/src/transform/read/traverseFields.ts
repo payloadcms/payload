@@ -47,10 +47,12 @@ type TraverseFieldsArgs = {
    * All related documents, as returned by Drizzle, keyed on an object by field path
    */
   relationships: Record<string, Record<string, unknown>[]>
+  storeBlocksAsJSON?: boolean
   /**
    * Data structure representing the nearest table from db
    */
   table: Record<string, unknown>
+
   /**
    * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
    */
@@ -69,6 +71,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   numbers,
   path,
   relationships,
+  storeBlocksAsJSON,
   table,
   texts,
 }: TraverseFieldsArgs): T => {
@@ -187,7 +190,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.type === 'blocks') {
+      if (field.type === 'blocks' && storeBlocksAsJSON) {
         const blockFieldPath = `${sanitizedPath}${field.name}`
 
         if (Array.isArray(blocks[blockFieldPath])) {

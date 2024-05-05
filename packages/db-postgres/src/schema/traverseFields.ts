@@ -129,7 +129,10 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index) &&
-        !['array', 'blocks', 'group', 'point', 'relationship', 'upload'].includes(field.type) &&
+        !(
+          ['array', 'group', 'point', 'relationship', 'upload'].includes(field.type) ||
+          (field.type === 'blocks' && !adapter.storeBlocksAsJSON)
+        ) &&
         !('hasMany' in field && field.hasMany === true)
       ) {
         const unique = disableUnique !== true && field.unique
@@ -403,6 +406,11 @@ export const traverseFields = ({
       }
 
       case 'blocks': {
+        if (adapter.storeBlocksAsJSON) {
+          targetTable[fieldName] = jsonb(columnName)
+          break
+        }
+
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {

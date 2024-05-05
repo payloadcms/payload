@@ -120,6 +120,8 @@ export const traverseFields = ({
         }
 
         case 'blocks':
+          if (adapter.storeBlocksAsJSON) break
+
           field.blocks.forEach((block) => {
             const blockKey = `_blocks_${block.slug}`
 

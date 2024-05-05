@@ -86,6 +86,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
       resolve: () => Promise<void>
     }
   }
+  storeBlocksAsJSON?: boolean
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable | PgTableWithColumns<any>>
   versionsSuffix?: string

@@ -146,7 +146,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && adapter.storeBlocksAsJSON) {
       field.blocks.forEach(({ slug }) => {
         blocksToDelete.add(toSnakeCase(slug))
       })

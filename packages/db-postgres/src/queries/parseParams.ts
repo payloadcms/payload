@@ -104,18 +104,19 @@ export async function parseParams({
                 })
 
                 if (
-                  ['json', 'richText'].includes(field.type) &&
+                  (['json', 'richText'].includes(field.type) ||
+                    (field.type === 'blocks' && adapter.storeBlocksAsJSON)) &&
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
                   const segments = pathSegments.slice(1)
                   segments.unshift(table[columnName].name)
 
-                  if (field.type === 'richText') {
+                  if (field.type === 'richText' || field.type === 'blocks') {
                     const jsonQuery = createJSONQuery({
                       operator,
                       pathSegments: segments,
-                      treatAsArray: ['children'],
+                      treatAsArray: field.type === 'richText' ? ['children'] : [],
                       treatRootAsArray: true,
                       value: val,
                     })
@@ -125,6 +126,7 @@ export async function parseParams({
                   }
 
                   const jsonQuery = convertPathToJSONTraversal(pathSegments)
+
                   const operatorKeys = {
                     contains: { operator: 'ilike', wildcard: '%' },
                     equals: { operator: '=', wildcard: '' },
