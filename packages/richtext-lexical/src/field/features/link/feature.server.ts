@@ -54,7 +54,7 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
    * This behaves exactly like the maxDepth properties of relationship and upload fields.
    *
-   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-maxDepth
+   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth
    */
   maxDepth?: number
 }
