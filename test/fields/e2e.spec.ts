@@ -83,7 +83,7 @@ describe('fields', () => {
       await expect(textCell).toHaveText(textDoc.text)
     })
 
-    test('should not display field in list view column selector if admin.disableListColumn is true', async () => {
+    test('should hide field in column selector when admin.disableListColumn', async () => {
       await page.goto(url.list)
       await page.locator('.list-controls__toggle-columns').click()
 
@@ -97,24 +97,17 @@ describe('fields', () => {
       ).toBeHidden()
     })
 
-    test('should display field in list view filter selector if admin.disableListColumn is true and admin.disableListFilter is false', async () => {
+    test('should show field in filter when admin.disableListColumn is true', async () => {
       await page.goto(url.list)
       await page.locator('.list-controls__toggle-where').click()
-      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
       await page.locator('.where-builder__add-first-filter').click()
 
       const initialField = page.locator('.condition__field')
       await initialField.click()
-      const initialFieldOptions = initialField.locator('.rs__option')
 
-      // Get all text contents of options
-      const optionsTexts = await initialFieldOptions.allTextContents()
-
-      // Check if any option text contains "Disable List Column Text"
-      const containsText = optionsTexts.some((text) => text.includes('Disable List Column Text'))
-
-      // Assert that at least one option contains the desired text
-      expect(containsText).toBeTruthy()
+      await expect(
+        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+      ).toBeVisible()
     })
 
     test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
@@ -131,24 +124,17 @@ describe('fields', () => {
       ).toBeVisible()
     })
 
-    test('should not display field in list view filter condition selector if admin.disableListFilter is true', async () => {
+    test('should hide field in filter when admin.disableListFilter is true', async () => {
       await page.goto(url.list)
       await page.locator('.list-controls__toggle-where').click()
-      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
       await page.locator('.where-builder__add-first-filter').click()
 
       const initialField = page.locator('.condition__field')
       await initialField.click()
-      const initialFieldOptions = initialField.locator('.rs__option')
 
-      // Get all text contents of options
-      const optionsTexts = await initialFieldOptions.allTextContents()
-
-      // Check if any option text contains "Disable List Filter Text"
-      const containsText = optionsTexts.some((text) => text.includes('Disable List Filter Text'))
-
-      // Assert that none of the options contain the desired text
-      expect(containsText).toBeFalsy()
+      await expect(
+        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+      ).toBeHidden()
     })
 
     test('should display i18n label in cells when missing field data', async () => {
