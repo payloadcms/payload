@@ -38,16 +38,17 @@ export default buildConfig({
 
 ### Options
 
-| Option                | Description                                                                                                                                                                                           |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pool` \*             | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres`.                                                           |
-| `push`                | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                      |
-| `migrationDir`        | Customize the directory that migrations are stored.                                                                                                                                                   |
-| `logger`              | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                                                |
-| `schemaName`   | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
-| `localesSuffix`       | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                                      |
-| `relationshipsSuffix` | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                                            |
-| `versionsSuffix`      | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                                                   |
+| Option                   | Description                                                                                                                                                                                           |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pool` \*                | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres`.                                                           |
+| `push`                   | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                      |
+| `migrationDir`           | Customize the directory that migrations are stored.                                                                                                                                                   |
+| `logger`                 | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                                                |
+| `schemaName`             | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
+| `localesSuffix`          | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                                      |
+| `relationshipsSuffix`    | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                                            |
+| `versionsSuffix`         | A string appended to the end of table names for storing versions. Defaults to '_v'.   
+| `storeBlocksAsJSON`      | Store blocks as JSON column in a tables instead of creating separated tables.                                                                                                                   |
 
 
 
