@@ -23,7 +23,7 @@ export type BeforeSync = (args: {
   searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 
-export interface SearchConfig {
+export interface PluginConfig {
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
@@ -39,5 +39,6 @@ export interface SearchConfig {
 export type SyncWithSearch = (
   Args: Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'> & {
     collection: string
+    pluginConfig: PluginConfig
   },
 ) => ReturnType<CollectionAfterChangeHook>
