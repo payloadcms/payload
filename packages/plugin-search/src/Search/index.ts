@@ -2,12 +2,12 @@ import type { CollectionConfig } from 'payload/types'
 
 import deepMerge from 'deepmerge'
 
-import type { PluginConfig } from '../types.js'
+import type { SearchPluginConfig } from '../types.js'
 
 import { LinkToDoc } from './ui/index.js'
 
 // all settings can be overridden by the config
-export const generateSearchCollection = (pluginConfig: PluginConfig): CollectionConfig =>
+export const generateSearchCollection = (pluginConfig: SearchPluginConfig): CollectionConfig =>
   deepMerge(
     {
       slug: 'search',

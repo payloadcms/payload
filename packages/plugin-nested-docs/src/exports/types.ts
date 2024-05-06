@@ -1,1 +1,1 @@
-export type { GenerateLabel, GenerateURL } from '../types.js'
+export type { Breadcrumb, GenerateLabel, GenerateURL, NestedDocsPluginConfig } from '../types.js'

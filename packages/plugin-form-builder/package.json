@@ -72,9 +72,15 @@
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
     },
     "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
   "homepage:": "https://payloadcms.com"

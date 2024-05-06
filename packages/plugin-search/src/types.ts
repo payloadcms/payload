@@ -5,7 +5,7 @@ import type {
   PayloadRequestWithData,
 } from 'payload/types'
 
-export interface DocToSync {
+export type DocToSync = {
   [key: string]: any
   doc: {
     relationTo: string
@@ -23,7 +23,7 @@ export type BeforeSync = (args: {
   searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 
-export interface PluginConfig {
+export type SearchPluginConfig = {
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
@@ -39,6 +39,6 @@ export interface PluginConfig {
 export type SyncWithSearch = (
   Args: Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'> & {
     collection: string
-    pluginConfig: PluginConfig
+    pluginConfig: SearchPluginConfig
   },
 ) => ReturnType<CollectionAfterChangeHook>

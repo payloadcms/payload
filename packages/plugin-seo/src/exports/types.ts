@@ -1,1 +1,8 @@
-export type { GenerateDescription, GenerateImage, GenerateTitle, GenerateURL } from '../types.js'
+export type {
+  GenerateDescription,
+  GenerateImage,
+  GenerateTitle,
+  GenerateURL,
+  Meta,
+  SEOPluginConfig as PluginConfig,
+} from '../types.js'
