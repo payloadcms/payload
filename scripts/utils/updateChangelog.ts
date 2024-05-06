@@ -195,11 +195,17 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
   if (isBreaking && includeBreakingNotes) {
     // Parse breaking change notes from commit body
     const [rawNotes, _] = commit.body.split('\n\n')
-    const notes = rawNotes
+    let notes = rawNotes
       .split('\n')
       .map((l) => `> ${l}`)
       .join('\n')
       .trim()
+
+    // Remove random trailing quotes that sometimes appear
+    if (notes.endsWith('"')) {
+      notes = notes.slice(0, -1)
+    }
+
     formatted += `\n\n${notes}\n\n`
   }
 

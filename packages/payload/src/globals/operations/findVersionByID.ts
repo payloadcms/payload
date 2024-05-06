@@ -110,6 +110,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       currentDepth,
       depth,
       doc: result.version,
+      draft: undefined,
       fallbackLocale,
       global: globalConfig,
       locale,

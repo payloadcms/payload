@@ -1,18 +1,18 @@
 import type { CollectionConfig, Field } from 'payload/types'
 
-import type { SanitizedStripeConfig } from '../types.js'
+import type { SanitizedStripePluginConfig } from '../types.js'
 
 import { LinkToDoc } from '../ui/LinkToDoc.js'
 
 interface Args {
   collection: CollectionConfig
-  stripeConfig: SanitizedStripeConfig
+  pluginConfig: SanitizedStripePluginConfig
   syncConfig: {
     stripeResourceType: string
   }
 }
 
-export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field[] => {
+export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field[] => {
   const stripeIDField: Field = {
     name: 'stripeID',
     type: 'text',
@@ -42,7 +42,7 @@ export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field
         Field: LinkToDoc,
       },
       custom: {
-        isTestKey: stripeConfig.isTestKey,
+        isTestKey: pluginConfig.isTestKey,
         nameOfIDField: 'stripeID',
         stripeResourceType: syncConfig.stripeResourceType,
       },

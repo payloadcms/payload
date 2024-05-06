@@ -142,6 +142,7 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,

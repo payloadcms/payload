@@ -1,0 +1,81 @@
+@import '../../../../../scss/styles';
+
+
+html[data-theme='dark'] {
+  .fixed-toolbar {
+    &__dropdown-items {
+      background: var(--theme-elevation-0);
+
+      .toolbar-popup__dropdown-item {
+        color: var(--theme-elevation-900);
+
+        &:hover:not([disabled]), &.active {
+          background-color: var(--theme-elevation-100);
+        }
+
+        .icon {
+          color: var(--theme-elevation-600);
+        }
+      }
+    }
+
+    .toolbar-popup {
+      &__button {
+        &.active, &:hover:not([disabled]) {
+          background-color: var(--theme-elevation-100);
+        }
+      }
+
+      &__dropdown {
+        &:hover:not([disabled]) {
+          background-color: var(--theme-elevation-100);
+        }
+
+        &-caret:after {
+          filter: invert(1);
+        }
+
+        &-label {
+          color: var(--theme-elevation-750);
+        }
+      }
+    }
+  }
+}
+
+
+.fixed-toolbar {
+  @include blur-bg(var(--theme-elevation-0));
+  display: flex;
+  align-items: center;
+  padding: 0 3.72px 0 6.25px;
+  vertical-align: middle;
+  height: 37.5px;
+  position: sticky;
+  z-index: 2;
+  top: var(--doc-controls-height);
+  margin-bottom: $baseline;
+  border: $style-stroke-width-s solid var(--theme-elevation-150);
+
+
+  &__group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    z-index: 1;
+
+    .icon {
+      min-width: 20px;
+      height: 20px;
+      color: var(--theme-elevation-600);
+    }
+
+    .divider {
+      width: 1px;
+      height: 15px;
+      background-color: var(--color-base-100);
+      margin: 0 6.25px;
+    }
+  }
+
+}

@@ -4,9 +4,9 @@ import { handleCreatedOrUpdated } from './handleCreatedOrUpdated.js'
 import { handleDeleted } from './handleDeleted.js'
 
 export const handleWebhooks: StripeWebhookHandler = (args) => {
-  const { event, payload, stripeConfig } = args
+  const { event, payload, pluginConfig } = args
 
-  if (stripeConfig?.logs)
+  if (pluginConfig?.logs)
     payload.logger.info(`🪝 Received Stripe '${event.type}' webhook event with ID: '${event.id}'.`)
 
   // could also traverse into event.data.object.object to get the type, but that seems unreliable
@@ -14,7 +14,7 @@ export const handleWebhooks: StripeWebhookHandler = (args) => {
   const resourceType = event.type.split('.')[0]
   const method = event.type.split('.').pop()
 
-  const syncConfig = stripeConfig?.sync?.find(
+  const syncConfig = pluginConfig?.sync?.find(
     (sync) => sync.stripeResourceTypeSingular === resourceType,
   )
 
@@ -23,8 +23,8 @@ export const handleWebhooks: StripeWebhookHandler = (args) => {
       case 'created': {
         void handleCreatedOrUpdated({
           ...args,
+          pluginConfig,
           resourceType,
-          stripeConfig,
           syncConfig,
         })
         break
@@ -32,8 +32,8 @@ export const handleWebhooks: StripeWebhookHandler = (args) => {
       case 'updated': {
         void handleCreatedOrUpdated({
           ...args,
+          pluginConfig,
           resourceType,
-          stripeConfig,
           syncConfig,
         })
         break
@@ -41,8 +41,8 @@ export const handleWebhooks: StripeWebhookHandler = (args) => {
       case 'deleted': {
         void handleDeleted({
           ...args,
+          pluginConfig,
           resourceType,
-          stripeConfig,
           syncConfig,
         })
         break

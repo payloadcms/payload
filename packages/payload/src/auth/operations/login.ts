@@ -189,6 +189,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       context: req.context,
       depth,
       doc: user,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,
