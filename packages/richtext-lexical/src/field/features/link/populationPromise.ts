@@ -30,14 +30,11 @@ export const linkPopulationPromiseHOC = (
      * Should populate all fields, including the doc field (for internal links), as it's treated like a normal field
      */
     if (Array.isArray(props.fields)) {
-      const populateDepth =
-        props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
-
       recurseNestedFields({
         context,
         currentDepth,
         data: node.fields,
-        depth: populateDepth,
+        depth,
         draft,
         editorPopulationPromises,
         fieldPromises,

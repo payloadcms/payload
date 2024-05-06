@@ -51,27 +51,10 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
       }) => FieldWithRichTextRequiredEditor[])
     | FieldWithRichTextRequiredEditor[]
   /**
-   * Sets a maximum population depth for all fields within this link, regardless of the remaining depth when the respective field is reached.
+   * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
    * This behaves exactly like the maxDepth properties of relationship and upload fields.
-   * Examples:
    *
-   * Depth: 10
-   * Current depth when field is accessed: 1
-   * `maxDepth`: undefined
-   *
-   * In this case, the field would be populated to 9 levels of population.
-   *
-   * Depth: 10
-   * Current depth when field is accessed: 0
-   * `maxDepth`: 2
-   *
-   * In this case, the field would be populated to 2 levels of population, despite there being a remaining depth of 8.
-   *
-   * Depth: 10
-   * Current depth when field is accessed: 2
-   * `maxDepth`: 1
-   *
-   * In this case, the field would not be populated, as the current depth (2) has exceeded the `maxDepth` for this field (1).
+   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-maxDepth
    */
   maxDepth?: number
 }
@@ -91,6 +74,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
         _config,
         props.enabledCollections,
         props.disabledCollections,
+        props.maxDepth,
       )
 
       const sanitizedFields = (await sanitizeFields({
