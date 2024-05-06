@@ -563,7 +563,7 @@ describe('fields', () => {
 
     test('should have disabled admin sorting', async () => {
       await page.goto(url.create)
-      const field = page.locator('#field-collapsedByDefaultBlocks .array-actions__action-chevron')
+      const field = page.locator('#field-disableSort .array-actions__action-chevron')
       expect(await field.count()).toEqual(0)
     })
 
