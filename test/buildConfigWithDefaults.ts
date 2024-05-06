@@ -166,7 +166,7 @@ export async function buildConfigWithDefaults(
     ...testConfig,
     i18n: {
       supportedLanguages: {
-        // en,
+        en,
         es,
         de,
       },
