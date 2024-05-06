@@ -5,7 +5,7 @@ import type React from 'react'
 import { isDocumentEvent, ready } from '@payloadcms/live-preview'
 import { useCallback, useEffect, useRef } from 'react'
 
-export const RefreshRouterOnSave: React.FC<{
+export const RefreshRouteOnSave: React.FC<{
   apiRoute?: string
   depth?: number
   refresh: () => void
