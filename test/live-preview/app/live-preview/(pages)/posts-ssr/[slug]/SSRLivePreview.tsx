@@ -8,5 +8,5 @@ import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 
 export const PayloadLivePreview: React.FC = () => {
   const router = useRouter()
-  return <RefreshRouteOnSave refresh={() => router.refresh()} serverURL={PAYLOAD_SERVER_URL} />
+  return <RefreshRouteOnSave refresh={void router.refresh} serverURL={PAYLOAD_SERVER_URL} />
 }
