@@ -609,6 +609,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           const id = value
+          const draft = args.draft ?? context.req.query?.draft
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
@@ -622,6 +623,7 @@ function buildObjectType({
                 fallbackLocale,
                 false,
                 false,
+                Boolean(draft),
               ]),
             )
 
