@@ -124,6 +124,13 @@ const BlockFields: CollectionConfig = {
       name: 'collapsedByDefaultBlocks',
       admin: {
         initCollapsed: true,
+      },
+      localized: true,
+    },
+    {
+      ...getBlocksField('localized'),
+      name: 'disableSort',
+      admin: {
         isSortable: false,
       },
       localized: true,
