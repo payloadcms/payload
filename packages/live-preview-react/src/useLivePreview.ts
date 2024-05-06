@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // To prevent the flicker of stale data while the post message is being sent,
 // you can conditionally render loading UI based on the `isLoading` state
 
+export { RefreshRouterOnChange } from './RefreshRouterOnChange.js'
+
 export const useLivePreview = <T extends any>(props: {
   apiRoute?: string
   depth?: number
