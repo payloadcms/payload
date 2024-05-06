@@ -67,10 +67,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       schema: {},
       schemaName: args.schemaName,
       sessions: {},
+      storeBlocksAsJSON: args.storeBlocksAsJSON,
       tableNameMap: new Map<string, string>(),
       tables: {},
       versionsSuffix: args.versionsSuffix || '_v',
-
       // DatabaseAdapter
       beginTransaction,
       commitTransaction,

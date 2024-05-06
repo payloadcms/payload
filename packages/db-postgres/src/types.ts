@@ -31,6 +31,7 @@ export type Args = {
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
+  storeBlocksAsJSON?: boolean
   versionsSuffix?: string
 }
 
