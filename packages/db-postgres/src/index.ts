@@ -71,6 +71,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       tableNameMap: new Map<string, string>(),
       tables: {},
       versionsSuffix: args.versionsSuffix || '_v',
+
       // DatabaseAdapter
       beginTransaction,
       commitTransaction,
