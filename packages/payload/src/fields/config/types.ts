@@ -446,6 +446,28 @@ export type UploadField = FieldBase & {
     }
   }
   filterOptions?: FilterOptions
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   * Examples:
+   *
+   * Depth: 10
+   * Current depth when field is accessed: 1
+   * `maxDepth`: undefined
+   *
+   * In this case, the field would be populated to 9 levels of population.
+   *
+   * Depth: 10
+   * Current depth when field is accessed: 0
+   * `maxDepth`: 2
+   *
+   * In this case, the field would be populated to 2 levels of population, despite there being a remaining depth of 8.
+   *
+   * Depth: 10
+   * Current depth when field is accessed: 2
+   * `maxDepth`: 1
+   *
+   * In this case, the field would not be populated, as the current depth (2) has exceeded the `maxDepth` for this field (1).
+   */
   maxDepth?: number
   relationTo: string
   type: 'upload'
@@ -506,6 +528,28 @@ export type SelectField = FieldBase & {
 type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
   hasMany?: boolean
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   * Examples:
+   *
+   * Depth: 10
+   * Current depth when field is accessed: 1
+   * `maxDepth`: undefined
+   *
+   * In this case, the field would be populated to 9 levels of population.
+   *
+   * Depth: 10
+   * Current depth when field is accessed: 0
+   * `maxDepth`: 2
+   *
+   * In this case, the field would be populated to 2 levels of population, despite there being a remaining depth of 8.
+   *
+   * Depth: 10
+   * Current depth when field is accessed: 2
+   * `maxDepth`: 1
+   *
+   * In this case, the field would not be populated, as the current depth (2) has exceeded the `maxDepth` for this field (1).
+   */
   maxDepth?: number
   type: 'relationship'
 } & (
