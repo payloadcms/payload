@@ -2,12 +2,12 @@ import type { PayloadRequestWithData } from 'payload/types'
 
 import { Forbidden } from 'payload/errors'
 
-import type { PluginConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { stripeProxy } from '../utilities/stripeProxy.js'
 
 export const stripeREST = async (args: {
-  pluginConfig: PluginConfig
+  pluginConfig: StripePluginConfig
   req: PayloadRequestWithData
 }): Promise<any> => {
   let responseStatus = 200

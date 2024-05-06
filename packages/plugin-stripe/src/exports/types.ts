@@ -1,1 +1,9 @@
-export type { FieldSyncConfig, StripeProxy, StripeWebhookHandler, SyncConfig } from '../types.js'
+export type {
+  FieldSyncConfig,
+  SanitizedStripePluginConfig,
+  StripePluginConfig,
+  StripeProxy,
+  StripeWebhookHandler,
+  StripeWebhookHandlers,
+  SyncConfig,
+} from '../types.js'

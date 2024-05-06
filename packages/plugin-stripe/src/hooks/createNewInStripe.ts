@@ -3,7 +3,7 @@ import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload/typ
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { PluginConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { deepen } from '../utilities/deepen.js'
 
@@ -21,7 +21,7 @@ type HookArgsWithCustomCollection = Omit<
 export type CollectionBeforeValidateHookWithArgs = (
   args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
-    pluginConfig?: PluginConfig
+    pluginConfig?: StripePluginConfig
   },
 ) => void
 

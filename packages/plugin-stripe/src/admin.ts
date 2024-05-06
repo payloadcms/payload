@@ -1,16 +1,16 @@
 import type { Config } from 'payload/config'
 
-import type { PluginConfig, SanitizedPluginConfig } from './types.js'
+import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 
 export const stripePlugin =
-  (incomingPluginConfig: PluginConfig) =>
+  (incomingPluginConfig: StripePluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
-    const pluginConfig: SanitizedPluginConfig = {
+    const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingPluginConfig,
       // TODO: in the next major version, default this to `false`
       rest: incomingPluginConfig?.rest ?? true,

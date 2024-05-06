@@ -1,6 +1,6 @@
 import type { Config, Endpoint } from 'payload/config'
 
-import type { PluginConfig, SanitizedPluginConfig } from './types.js'
+import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { createNewInStripe } from './hooks/createNewInStripe.js'
@@ -13,12 +13,12 @@ export { LinkToDoc } from './ui/LinkToDoc.js'
 export { stripeProxy } from './utilities/stripeProxy.js'
 
 export const stripePlugin =
-  (incomingStripeConfig: PluginConfig) =>
+  (incomingStripeConfig: StripePluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
-    const pluginConfig: SanitizedPluginConfig = {
+    const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingStripeConfig,
       // TODO: in the next major version, default this to `false`
       rest: incomingStripeConfig?.rest ?? true,

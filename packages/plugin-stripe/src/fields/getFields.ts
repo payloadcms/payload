@@ -1,12 +1,12 @@
 import type { CollectionConfig, Field } from 'payload/types'
 
-import type { SanitizedPluginConfig } from '../types.js'
+import type { SanitizedStripePluginConfig } from '../types.js'
 
 import { LinkToDoc } from '../ui/LinkToDoc.js'
 
 interface Args {
   collection: CollectionConfig
-  pluginConfig: SanitizedPluginConfig
+  pluginConfig: SanitizedStripePluginConfig
   syncConfig: {
     stripeResourceType: string
   }

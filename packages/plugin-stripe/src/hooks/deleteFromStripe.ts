@@ -3,7 +3,7 @@ import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { PluginConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 // api version can only be the latest, stripe recommends ts ignoring it
@@ -16,7 +16,7 @@ type HookArgsWithCustomCollection = Omit<Parameters<CollectionAfterDeleteHook>[0
 export type CollectionAfterDeleteHookWithArgs = (
   args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
-    pluginConfig?: PluginConfig
+    pluginConfig?: StripePluginConfig
   },
 ) => void
 

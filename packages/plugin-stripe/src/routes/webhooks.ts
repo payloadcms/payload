@@ -3,13 +3,13 @@ import type { PayloadRequestWithData } from 'payload/types'
 
 import Stripe from 'stripe'
 
-import type { PluginConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { handleWebhooks } from '../webhooks/index.js'
 
 export const stripeWebhooks = async (args: {
   config: PayloadConfig
-  pluginConfig: PluginConfig
+  pluginConfig: StripePluginConfig
   req: PayloadRequestWithData
 }): Promise<any> => {
   const { config, pluginConfig, req } = args
