@@ -111,11 +111,15 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel

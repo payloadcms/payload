@@ -110,11 +110,15 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         }
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__block-header`}>
             <span className={`${baseClass}__block-number`}>
