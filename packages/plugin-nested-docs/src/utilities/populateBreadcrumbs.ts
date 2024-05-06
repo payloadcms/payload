@@ -1,13 +1,13 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { PluginConfig } from '../types.js'
+import type { NestedDocsPluginConfig } from '../types.js'
 
 import { formatBreadcrumb } from './formatBreadcrumb.js'
 import { getParents } from './getParents.js'
 
 export const populateBreadcrumbs = async (
   req: any,
-  pluginConfig: PluginConfig,
+  pluginConfig: NestedDocsPluginConfig,
   collection: CollectionConfig,
   data: any,
   originalDoc?: any,

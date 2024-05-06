@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "3.0.0-beta.24",
+  "version": "3.0.0-beta.25",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
@@ -19,7 +19,7 @@
     "directory": "packages/plugin-stripe"
   },
   "license": "MIT",
-  "author": "dev@payloadcms.com",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
@@ -76,6 +76,11 @@
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
     },
     "main": "./dist/index.js",

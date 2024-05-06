@@ -10,7 +10,7 @@ import type {
   GenerateImage,
   GenerateTitle,
   GenerateURL,
-  PluginConfig,
+  SEOPluginConfig,
 } from './types.js'
 
 import { MetaDescription } from './fields/MetaDescription.js'
@@ -21,7 +21,7 @@ import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
 
 export const seoPlugin =
-  (pluginConfig: PluginConfig) =>
+  (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
     const seoFields: GroupField[] = [
       {
