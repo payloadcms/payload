@@ -164,7 +164,7 @@ function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  async ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
+  async ({ config, context, language = config.fallbackLanguage }: Parameters<InitI18n>[0]) => {
     const translations = getTranslationsByContext(config.supportedLanguages[language], context)
 
     const { t, translations: mergedTranslations } = initTFunction({
