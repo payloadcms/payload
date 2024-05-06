@@ -36,10 +36,6 @@ export default buildConfigWithDefaults({
           type: 'richText',
           editor: slateEditor({}),
         },
-        {
-          name: 'textA',
-          type: 'text',
-        },
       ],
       labels: {
         plural: 'Relation As',
@@ -53,16 +49,11 @@ export default buildConfigWithDefaults({
           name: 'relationship',
           type: 'relationship',
           relationTo: 'relation-a',
-          maxDepth: 4,
         },
         {
           name: 'richText',
           type: 'richText',
           editor: slateEditor({}),
-        },
-        {
-          name: 'textB',
-          type: 'text',
         },
       ],
       labels: {
