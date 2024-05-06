@@ -598,6 +598,12 @@ export type RichTextField<
   editor?:
     | RichTextAdapter<Value, AdapterProps, AdapterProps>
     | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-maxDepth
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
 
