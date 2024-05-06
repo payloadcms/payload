@@ -1,3 +1,5 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
 import { en } from '@payloadcms/translations/languages/en'
 import merge from 'deepmerge'
 
@@ -88,14 +90,28 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  config.i18n = {
+  const i18nConfig: SanitizedConfig['i18n'] = {
     fallbackLanguage: 'en',
     supportedLanguages: {
       en,
     },
     translations: {},
-    ...(incomingConfig?.i18n ?? {}),
   }
+
+  if (incomingConfig?.i18n) {
+    i18nConfig.supportedLanguages =
+      incomingConfig.i18n?.supportedLanguages || i18nConfig.supportedLanguages
+
+    const supportedLangKeys = <AcceptedLanguages[]>Object.keys(i18nConfig.supportedLanguages)
+    const fallbackLang = incomingConfig.i18n?.fallbackLanguage || i18nConfig.fallbackLanguage
+
+    i18nConfig.fallbackLanguage = supportedLangKeys.includes(fallbackLang)
+      ? fallbackLang
+      : supportedLangKeys[0]
+    i18nConfig.translations = incomingConfig.i18n?.translations || i18nConfig.translations
+  }
+
+  config.i18n = i18nConfig
 
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
