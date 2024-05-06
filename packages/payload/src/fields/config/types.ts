@@ -129,6 +129,8 @@ type Admin = {
   custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -428,6 +430,8 @@ export type UIField = {
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     disableBulkEdit?: boolean
+    disableListColumn?: boolean
+    disableListFilter?: boolean
     position?: string
     width?: string
   }
