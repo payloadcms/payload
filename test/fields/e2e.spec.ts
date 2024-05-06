@@ -765,10 +765,22 @@ describe('fields', () => {
       })
     })
 
-    test('should have disabled admin sorting', async () => {
-      await page.goto(url.create)
-      const field = page.locator('#field-collapsedByDefaultBlocks .array-actions__action-chevron')
-      expect(await field.count()).toEqual(0)
+    describe('admin.isSortable: false', () => {
+      beforeAll(async () => {
+        await page.goto(url.create)
+      })
+
+      test('the move action should be hidden', async () => {
+        await expect(
+          page.locator('#field-collapsedByDefaultBlocks .array-actions__action-chevron'),
+        ).toHaveCount(0)
+      })
+
+      test('the drag handle should be hidden', async () => {
+        await expect(
+          page.locator('#field-collapsedByDefaultBlocks .collapsible__drag'),
+        ).toHaveCount(0)
+      })
     })
   })
 
@@ -788,12 +800,6 @@ describe('fields', () => {
       await page.goto(url.create)
       const field = page.locator('#field-readOnly__0__text')
       await expect(field).toHaveValue('defaultValue')
-    })
-
-    test('should have disabled admin sorting', async () => {
-      await page.goto(url.create)
-      const field = page.locator('#field-disableSortItems .array-actions__action-chevron')
-      expect(await field.count()).toEqual(0)
     })
 
     test('should render RowLabel using a function', async () => {
@@ -918,6 +924,23 @@ describe('fields', () => {
         ).toHaveValue(`${assertGroupText3} duplicate`)
       })
     })
+
+    describe('admin.isSortable: false', () => {
+      beforeAll(async () => {
+        await page.goto(url.create)
+      })
+
+      test('the move action should be hidden', async () => {
+        const locator = await expect(
+          page.locator('#field-disableSortItems .array-actions__action-chevron'),
+        ).toHaveCount(0)
+      })
+
+      test('the drag handle should be hidden', async () => {
+        await expect(page.locator('#field-disableSortItems .collapsible__drag')).toHaveCount(0)
+      })
+    })
+
     test('should bulk update', async () => {
       await Promise.all([
         payload.create({
