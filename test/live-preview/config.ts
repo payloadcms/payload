@@ -3,6 +3,7 @@ import Categories from './collections/Categories.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
+import { SSR } from './collections/SSR.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users.js'
 import { Footer } from './globals/Footer.js'
@@ -24,7 +25,7 @@ export default buildConfigWithDefaults({
   },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   csrf: ['http://localhost:3000', 'http://localhost:3001'],
-  collections: [Users, Pages, Posts, Tenants, Categories, Media],
+  collections: [Users, Pages, Posts, SSR, Tenants, Categories, Media],
   globals: [Header, Footer],
   onInit: seed,
 })
