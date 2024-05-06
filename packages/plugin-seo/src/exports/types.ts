@@ -4,5 +4,5 @@ export type {
   GenerateTitle,
   GenerateURL,
   Meta,
-  SEOPluginConfig as PluginConfig,
+  SEOPluginConfig,
 } from '../types.js'
