@@ -52,7 +52,7 @@ html[data-theme='dark'] {
   vertical-align: middle;
   height: 37.5px;
   position: sticky;
-  z-index: 2;
+  z-index: 3;
   top: var(--doc-controls-height);
   margin-bottom: $baseline;
   border: $style-stroke-width-s solid var(--theme-elevation-150);
