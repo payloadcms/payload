@@ -17,8 +17,7 @@ const RadioInput: React.FC<Props> = (props) => {
 
   const classes = [baseClass, isSelected && `${baseClass}--is-selected`].filter(Boolean).join(' ')
 
-  const id =
-    editDepth > 1 ? `field-${path}-${option.value}-${editDepth}` : `field-${path}-${option.value}`
+  const id = `field-${path}-${option.value}${editDepth > 1 ? `-${editDepth}` : ''}`
 
   return (
     <label htmlFor={id}>

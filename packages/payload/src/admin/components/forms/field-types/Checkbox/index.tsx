@@ -65,10 +65,7 @@ const Checkbox: React.FC<Props> = (props) => {
     }
   }, [onChange, readOnly, setValue, value])
 
-  const fieldID =
-    editDepth > 1
-      ? `field-${path.replace(/\./g, '__')}-${editDepth}`
-      : `field-${path.replace(/\./g, '__')}`
+  const fieldID = `field-${path.replace(/\./g, '__')}${editDepth > 1 ? `-${editDepth}` : ''}`
 
   return (
     <div
