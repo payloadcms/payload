@@ -771,15 +771,13 @@ describe('fields', () => {
       })
 
       test('the move action should be hidden', async () => {
-        await expect(
-          page.locator('#field-collapsedByDefaultBlocks .array-actions__action-chevron'),
-        ).toHaveCount(0)
+        await expect(page.locator('#field-disableSort .array-actions__action-chevron')).toHaveCount(
+          0,
+        )
       })
 
       test('the drag handle should be hidden', async () => {
-        await expect(
-          page.locator('#field-collapsedByDefaultBlocks .collapsible__drag'),
-        ).toHaveCount(0)
+        await expect(page.locator('#field-disableSort .collapsible__drag')).toHaveCount(0)
       })
     })
   })
@@ -931,13 +929,13 @@ describe('fields', () => {
       })
 
       test('the move action should be hidden', async () => {
-        const locator = await expect(
-          page.locator('#field-disableSortItems .array-actions__action-chevron'),
-        ).toHaveCount(0)
+        await expect(page.locator('#field-disableSort .array-actions__action-chevron')).toHaveCount(
+          0,
+        )
       })
 
       test('the drag handle should be hidden', async () => {
-        await expect(page.locator('#field-disableSortItems .collapsible__drag')).toHaveCount(0)
+        await expect(page.locator('#field-disableSort .collapsible__drag')).toHaveCount(0)
       })
     })
 
