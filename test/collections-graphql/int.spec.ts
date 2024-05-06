@@ -968,7 +968,9 @@ describe('collections-graphql', () => {
         })
 
         const query = `{
-          CyclicalRelationship(id: "${newDoc.id}") {
+          CyclicalRelationship(id: ${
+            typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`
+          }) {
             media {
               id
               title
