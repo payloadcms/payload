@@ -12,11 +12,17 @@ type TransformArgs = {
   fallbackLocale?: false | string
   fields: Field[]
   locale?: string
+  storeBlocksAsJSON?: boolean
 }
 
 // This is the entry point to transform Drizzle output data
 // into the shape Payload expects based on field schema
-export const transform = <T extends TypeWithID>({ config, data, fields }: TransformArgs): T => {
+export const transform = <T extends TypeWithID>({
+  config,
+  data,
+  fields,
+  storeBlocksAsJSON,
+}: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
   let texts: Record<string, Record<string, unknown>[]> = {}
   let numbers: Record<string, Record<string, unknown>[]> = {}
@@ -51,6 +57,7 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
     numbers,
     path: '',
     relationships,
+    storeBlocksAsJSON,
     table: data,
     texts,
   })

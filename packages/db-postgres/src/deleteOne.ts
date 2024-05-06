@@ -62,6 +62,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     config: this.payload.config,
     data: docToDelete,
     fields: collection.fields,
+    storeBlocksAsJSON: this.storeBlocksAsJSON,
   })
 
   await db.delete(this.tables[tableName]).where(eq(this.tables[tableName].id, docToDelete.id))

@@ -175,6 +175,7 @@ export const findMany = async function find({
       config: adapter.payload.config,
       data,
       fields,
+      storeBlocksAsJSON: adapter.storeBlocksAsJSON,
     })
   })
 

@@ -346,6 +346,7 @@ export const upsertRow = async <T extends TypeWithID>({
     config: adapter.payload.config,
     data: doc,
     fields,
+    storeBlocksAsJSON: adapter.storeBlocksAsJSON,
   })
 
   return result

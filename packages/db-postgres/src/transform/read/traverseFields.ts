@@ -89,6 +89,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         numbers,
         path,
         relationships,
+        storeBlocksAsJSON,
         table,
         texts,
       })
@@ -109,6 +110,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         numbers,
         path,
         relationships,
+        storeBlocksAsJSON,
         table,
         texts,
       })
@@ -146,6 +148,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   numbers,
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
+                  storeBlocksAsJSON,
                   table: row,
                   texts,
                 })
@@ -180,6 +183,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 numbers,
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
+                storeBlocksAsJSON,
                 table: row,
                 texts,
               })
@@ -190,7 +194,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.type === 'blocks' && storeBlocksAsJSON) {
+      if (field.type === 'blocks' && !storeBlocksAsJSON) {
         const blockFieldPath = `${sanitizedPath}${field.name}`
 
         if (Array.isArray(blocks[blockFieldPath])) {
@@ -224,6 +228,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     numbers,
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
+                    storeBlocksAsJSON,
                     table: row,
                     texts,
                   })
@@ -255,6 +260,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   numbers,
                   path: `${blockFieldPath}.${i}`,
                   relationships,
+                  storeBlocksAsJSON,
                   table: row,
                   texts,
                 })
@@ -440,6 +446,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   numbers,
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
+                  storeBlocksAsJSON,
                   table,
                   texts,
                 })
@@ -460,6 +467,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 numbers,
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
+                storeBlocksAsJSON,
                 table,
                 texts,
               })
