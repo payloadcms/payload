@@ -469,4 +469,30 @@ describe('Hooks', () => {
       expect(body).toEqual({ errors: [{ message: "I'm a teapot" }] })
     })
   })
+
+  describe('Endpoint hooks', () => {
+    it('should run beforeEndpoint hook', async () => {
+      const response = await restClient.GET(`/before-endpoint`, {})
+
+      expect(await response.json()).toEqual({
+        beforeEndpoint: true,
+      })
+    })
+
+    it('should run beforeEndpointPayloadRequest hook', async () => {
+      const response = await restClient.GET(`/before-endpoint-payload-request`, {})
+
+      expect(await response.json()).toEqual({
+        beforeEndpointPayloadRequest: true,
+      })
+    })
+
+    it('should run afterEndpoint hook', async () => {
+      const response = await restClient.GET(`/after-endpoint`, {})
+
+      expect(await response.json()).toEqual({
+        afterEndpoint: true,
+      })
+    })
+  })
 })

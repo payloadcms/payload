@@ -200,6 +200,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'X-Payload-Admin': 'true',
               },
             })
 
@@ -325,6 +326,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'X-Payload-Admin': 'true',
             },
           })
 

@@ -98,6 +98,7 @@ export const Autosave: React.FC<Props> = ({
                 headers: {
                   'Accept-Language': i18n.language,
                   'Content-Type': 'application/json',
+                  'X-Payload-Admin': 'true',
                 },
                 method,
               })

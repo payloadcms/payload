@@ -61,6 +61,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
+            'X-Payload-Admin': 'true',
           },
           method: 'post',
         })

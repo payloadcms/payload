@@ -24,8 +24,17 @@ export const createPayloadRequest = async ({
   params,
   request,
 }: Args): Promise<PayloadRequest> => {
-  const cookies = parseCookies(request.headers)
   const payload = await getPayloadHMR({ config: configPromise })
+
+  await payload.config.hooks.beforeEndpoint.reduce(async (priorHook, hook) => {
+    await priorHook
+
+    request = await hook({
+      req: request,
+    })
+  }, Promise.resolve())
+
+  const cookies = parseCookies(request.headers)
 
   const { config } = payload
 
@@ -90,7 +99,7 @@ export const createPayloadRequest = async ({
     user: null,
   }
 
-  const req: PayloadRequest = Object.assign(request, customRequest)
+  let req: PayloadRequest = Object.assign(request, customRequest)
 
   req.payloadDataLoader = getDataLoader(req)
 
@@ -100,6 +109,14 @@ export const createPayloadRequest = async ({
     isGraphQL,
     payload,
   })
+
+  await payload.config.hooks.beforeEndpointPayloadRequest.reduce(async (priorHook, hook) => {
+    await priorHook
+
+    req = await hook({
+      req,
+    })
+  }, Promise.resolve())
 
   return req
 }

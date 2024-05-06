@@ -112,7 +112,10 @@ export default joi.object({
     queries: joi.function(),
   }),
   hooks: joi.object().keys({
+    afterEndpoint: joi.array().items(joi.func()),
     afterError: joi.func(),
+    beforeEndpoint: joi.array().items(joi.func()),
+    beforeEndpointPayloadRequest: joi.array().items(joi.func()),
   }),
   i18n: joi.object(),
   indexSortableFields: joi.boolean(),
