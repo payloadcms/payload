@@ -265,6 +265,10 @@ export interface ArrayField {
         id?: string | null
       }[]
     | null
+  disableSortItems?: {
+    text: string
+    id?: string | null
+  }[]
   updatedAt: string
   createdAt: string
 }
@@ -584,6 +588,8 @@ export interface TextField {
   localizedHasMany?: string[] | null
   withMinRows?: string[] | null
   withMaxRows?: string[] | null
+  disableListColumnText?: string | null
+  disableListFilterText?: string | null
   updatedAt: string
   createdAt: string
 }

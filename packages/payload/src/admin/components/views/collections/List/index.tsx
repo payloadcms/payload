@@ -47,13 +47,13 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const {
     collection,
     collection: {
+      slug,
       admin: {
         components: { views: { List: CustomList } = {} } = {},
         listSearchableFields,
         pagination: { defaultLimit },
       },
       labels: { plural },
-      slug,
     },
   } = props
 
