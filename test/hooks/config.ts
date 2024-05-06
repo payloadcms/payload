@@ -62,8 +62,8 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     afterError: () => console.log('Running afterError hook'),
     beforeEndpoint: [
       ({ req }) => {
-        if (new URL(req.url).pathname.startsWith('/api/before-endpoint')) console.log('yess')
-        req.headers.set('beforeEndpoint', 'true')
+        if (new URL(req.url).pathname.startsWith('/api/before-endpoint'))
+          req.headers.set('beforeEndpoint', 'true')
         return req
       },
     ],
