@@ -6,10 +6,11 @@ import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 export const fetchDoc = async <T>(args: {
   collection: string
   depth?: number
+  draft?: boolean
   slug?: string
 }): Promise<T> => {
   const payload = await getPayloadHMR({ config })
-  const { slug, collection, depth = 2 } = args || {}
+  const { slug, collection, depth = 2, draft } = args || {}
 
   const where: Where = {}
 
@@ -24,6 +25,7 @@ export const fetchDoc = async <T>(args: {
       collection,
       depth,
       where,
+      draft,
     })
 
     if (docs[0]) return docs[0] as T

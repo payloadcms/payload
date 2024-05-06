@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../../credentials.js'
 import removeFiles from '../../helpers/removeFiles.js'
 import { postsSlug } from '../collections/Posts.js'
+import { ssrPostsSlug } from '../collections/PostsSSR.js'
 import { pagesSlug, tenantsSlug } from '../shared.js'
 import { footer } from './footer.js'
 import { header } from './header.js'
@@ -54,6 +55,15 @@ export const seed: Config['onInit'] = async (payload) => {
 
   const post1Doc = await payload.create({
     collection: postsSlug,
+    data: JSON.parse(
+      JSON.stringify(post1)
+        .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+    ),
+  })
+
+  await payload.create({
+    collection: ssrPostsSlug,
     data: JSON.parse(
       JSON.stringify(post1)
         .replace(/"\{\{IMAGE\}\}"/g, mediaID)

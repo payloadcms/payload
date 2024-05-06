@@ -1,2 +1,2 @@
-export { RefreshRouterOnChange } from './RefreshRouterOnChange.js'
+export { RefreshRouterOnSave } from './RefreshRouterOnSave.js'
 export { useLivePreview } from './useLivePreview.js'
