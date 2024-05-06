@@ -34,9 +34,57 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         throw new APIError("I'm a teapot", 418)
       },
     },
+    {
+      path: '/before-endpoint',
+      method: 'get',
+      handler: (req) => {
+        return Response.json({ beforeEndpoint: !!req.headers.get('beforeEndpoint') })
+      },
+    },
+    {
+      path: '/before-endpoint-payload-request',
+      method: 'get',
+      handler: (req) => {
+        return Response.json({
+          beforeEndpointPayloadRequest: !!req.headers.get('beforeEndpointPayloadRequest'),
+        })
+      },
+    },
+    {
+      path: '/after-endpoint',
+      method: 'get',
+      handler: () => {
+        return Response.json({})
+      },
+    },
   ],
   hooks: {
     afterError: () => console.log('Running afterError hook'),
+    beforeEndpoint: [
+      ({ req }) => {
+        if (new URL(req.url).pathname.startsWith('/api/before-endpoint')) console.log('yess')
+        req.headers.set('beforeEndpoint', 'true')
+        return req
+      },
+    ],
+    beforeEndpointPayloadRequest: [
+      ({ req }) => {
+        if (req.pathname.startsWith('/api/before-endpoint-payload-request'))
+          req.headers.set('beforeEndpointPayloadRequest', 'true')
+        return req
+      },
+    ],
+    afterEndpoint: [
+      async ({ req, res }) => {
+        if (!req.pathname.startsWith('/api/after-endpoint')) return res
+        const json = await res.json()
+        json.afterEndpoint = true
+
+        return Response.json(json, {
+          headers: res.headers,
+        })
+      },
+    ],
   },
   onInit: async (payload) => {
     await seedHooksUsers(payload)

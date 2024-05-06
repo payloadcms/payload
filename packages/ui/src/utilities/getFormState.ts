@@ -16,6 +16,7 @@ export const getFormState = async (args: {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'X-Payload-Admin': 'true',
     },
     method: 'POST',
     signal,

@@ -21,6 +21,8 @@ import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { hookedRequest } from '../../utilities/hookedRequest.js'
+import { hookedResponse } from '../../utilities/hookedResponse.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { init } from './auth/init.js'
@@ -161,17 +163,20 @@ const handleCustomEndpoints = ({
 }
 
 const RouteNotFoundResponse = ({ slug, req }: { req: PayloadRequest; slug: string[] }) =>
-  Response.json(
-    {
-      message: `Route Not Found: "${slug.join('/')}"`,
-    },
-    {
-      headers: headersWithCors({
-        headers: new Headers(),
-        req,
-      }),
-      status: httpStatus.NOT_FOUND,
-    },
+  hookedResponse(
+    req,
+    Response.json(
+      {
+        message: `Route Not Found: "${slug.join('/')}"`,
+      },
+      {
+        headers: headersWithCors({
+          headers: new Headers(),
+          req,
+        }),
+        status: httpStatus.NOT_FOUND,
+      },
+    ),
   )
 
 export const OPTIONS =
@@ -184,15 +189,18 @@ export const OPTIONS =
         request,
       })
 
-      return Response.json(
-        {},
-        {
-          headers: headersWithCors({
-            headers: new Headers(),
-            req,
-          }),
-          status: 200,
-        },
+      return hookedResponse(
+        req,
+        Response.json(
+          {},
+          {
+            headers: headersWithCors({
+              headers: new Headers(),
+              req,
+            }),
+            status: 200,
+          },
+        ),
       )
     } catch (error) {
       return routeError({
@@ -240,7 +248,7 @@ export const GET =
           payloadRequest: req,
         })
         if (customEndpointResponse) {
-          return customEndpointResponse
+          return hookedResponse(req, customEndpointResponse)
         } else {
           const reqWithData = await addDataAndFileToRequest({ request: req })
           const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
@@ -311,7 +319,7 @@ export const GET =
         })
 
         if (customEndpointResponse) {
-          return customEndpointResponse
+          return hookedResponse(req, customEndpointResponse)
         } else {
           const reqWithData = await addDataAndFileToRequest({ request: req })
           const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
@@ -358,14 +366,14 @@ export const GET =
         res = await endpoints.root.GET[slug1]({ req: payloadRequest })
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) return hookedResponse(req, res)
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
-      if (customEndpointResponse) return customEndpointResponse
+      if (customEndpointResponse) return hookedResponse(req, customEndpointResponse)
 
       return RouteNotFoundResponse({
         slug,
@@ -419,7 +427,7 @@ export const POST =
         })
 
         if (customEndpointResponse) {
-          return customEndpointResponse
+          return hookedResponse(req, customEndpointResponse)
         } else {
           const reqWithData = await addDataAndFileToRequest({ request: req })
           const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
@@ -482,7 +490,7 @@ export const POST =
         })
 
         if (customEndpointResponse) {
-          return customEndpointResponse
+          return hookedResponse(req, customEndpointResponse)
         } else {
           const reqWithData = await addDataAndFileToRequest({ request: req })
           const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
@@ -522,7 +530,7 @@ export const POST =
         res = await endpoints.root.POST[slug1]({ req: payloadRequest })
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) return hookedResponse(req, res)
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
@@ -581,7 +589,7 @@ export const DELETE =
           payloadRequest: req,
         })
         if (customEndpointResponse) {
-          return customEndpointResponse
+          return hookedResponse(req, customEndpointResponse)
         } else {
           const reqWithData = await addDataAndFileToRequest({ request: req })
           const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
@@ -603,7 +611,7 @@ export const DELETE =
         }
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) return hookedResponse(req, res)
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
@@ -685,7 +693,7 @@ export const PATCH =
         }
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) return hookedResponse(req, res)
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({

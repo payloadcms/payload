@@ -219,6 +219,17 @@ export type Endpoint<U = User> = {
   root?: never
 }
 
+export type AfterEndpointHook = (args: {
+  req: PayloadRequestWithData
+  res: Response
+}) => Promise<Response> | Response
+
+export type BeforeEndpointPayloadRequestHook = (args: {
+  req: PayloadRequest
+}) => PayloadRequest | Promise<PayloadRequest>
+
+export type BeforEndpointHook = (args: { req: Request }) => Promise<Request> | Request
+
 export type EditViewComponent = React.ComponentType<ServerSideEditViewProps>
 
 export type EditViewConfig =
@@ -571,7 +582,13 @@ export type Config = {
    * @see https://payloadcms.com/docs/hooks/overview
    */
   hooks?: {
+    /** Runs before the response is sent */
+    afterEndpoint?: AfterEndpointHook[]
     afterError?: AfterErrorHook
+    /** Runs before PayloadRequest is created */
+    beforeEndpoint?: BeforEndpointHook[]
+    /** Runs after PayloadRequest is created */
+    beforeEndpointPayloadRequest?: BeforeEndpointPayloadRequestHook[]
   }
   /** i18n config settings */
   i18n?: I18nOptions

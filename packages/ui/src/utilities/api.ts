@@ -13,6 +13,7 @@ export const requests = {
       credentials: 'include',
       headers: {
         ...headers,
+        'X-Payload-Admin': 'true',
       },
       method: 'delete',
     }
@@ -27,6 +28,9 @@ export const requests = {
     }
     return fetch(`${url}${query}`, {
       credentials: 'include',
+      headers: {
+        'X-Payload-Admin': 'true',
+      },
       ...options,
     })
   },
@@ -39,6 +43,7 @@ export const requests = {
       credentials: 'include',
       headers: {
         ...headers,
+        'X-Payload-Admin': 'true',
       },
       method: 'PATCH',
     }
@@ -54,6 +59,7 @@ export const requests = {
       credentials: 'include',
       headers: {
         ...headers,
+        'X-Payload-Admin': 'true',
       },
       method: 'post',
     }
@@ -69,6 +75,7 @@ export const requests = {
       credentials: 'include',
       headers: {
         ...headers,
+        'X-Payload-Admin': 'true',
       },
       method: 'put',
     }

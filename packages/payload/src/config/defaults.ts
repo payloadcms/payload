@@ -27,7 +27,11 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     disablePlaygroundInProduction: true,
     maxComplexity: 1000,
   },
-  hooks: {},
+  hooks: {
+    afterEndpoint: [],
+    beforeEndpoint: [],
+    beforeEndpointPayloadRequest: [],
+  },
   localization: false,
   maxDepth: 10,
   routes: {

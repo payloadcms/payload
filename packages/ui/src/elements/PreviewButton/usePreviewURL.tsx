@@ -43,7 +43,11 @@ export const usePreviewURL = (): {
         if (collectionSlug) url = `${url}/${collectionSlug}/${id}/preview`
         if (globalSlug) url = `${url}/globals/${globalSlug}/preview`
 
-        const res = await fetch(`${url}${locale ? `?locale=${locale}` : ''}`)
+        const res = await fetch(`${url}${locale ? `?locale=${locale}` : ''}`, {
+          headers: {
+            'X-Payload-Admin': 'true',
+          },
+        })
 
         if (!res.ok) throw new Error()
         const newPreviewURL = await res.json()
