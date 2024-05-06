@@ -3,7 +3,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { deepen } from '../utilities/deepen.js'
 
@@ -21,14 +21,14 @@ type HookArgsWithCustomCollection = Omit<
 export type CollectionBeforeChangeHookWithArgs = (
   args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
-    stripeConfig?: StripeConfig
+    pluginConfig?: StripePluginConfig
   },
 ) => void
 
 export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
-  const { collection, data, operation, originalDoc, req, stripeConfig } = args
+  const { collection, data, operation, originalDoc, pluginConfig, req } = args
 
-  const { logs, sync } = stripeConfig || {}
+  const { logs, sync } = pluginConfig || {}
 
   const { payload } = req
 

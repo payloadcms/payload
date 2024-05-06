@@ -2,18 +2,18 @@ import type { PayloadRequestWithData } from 'payload/types'
 
 import { Forbidden } from 'payload/errors'
 
-import type { StripeConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { stripeProxy } from '../utilities/stripeProxy.js'
 
 export const stripeREST = async (args: {
+  pluginConfig: StripePluginConfig
   req: PayloadRequestWithData
-  stripeConfig: StripeConfig
 }): Promise<any> => {
   let responseStatus = 200
   let responseJSON
 
-  const { req, stripeConfig } = args
+  const { pluginConfig, req } = args
 
   const {
     data: {
@@ -24,7 +24,7 @@ export const stripeREST = async (args: {
     user,
   } = req
 
-  const { stripeSecretKey } = stripeConfig
+  const { stripeSecretKey } = pluginConfig
 
   try {
     if (!user) {
