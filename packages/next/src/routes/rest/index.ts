@@ -21,7 +21,6 @@ import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { hookedRequest } from '../../utilities/hookedRequest.js'
 import { hookedResponse } from '../../utilities/hookedResponse.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
