@@ -29,7 +29,7 @@ export type SyncConfig = {
 export type StripePluginConfig = {
   isTestKey?: boolean
   logs?: boolean
-  // @deprecated this will default as `false` in the next major version release
+  /** @default false */
   rest?: boolean
   stripeSecretKey: string
   stripeWebhooksEndpointSecret?: string
