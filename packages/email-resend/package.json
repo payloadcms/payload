@@ -9,7 +9,7 @@
     "directory": "packages/email-resend"
   },
   "license": "MIT",
-  "author": "Payload CMS, Inc.",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {

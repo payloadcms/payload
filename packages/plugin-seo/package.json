@@ -17,7 +17,7 @@
     "directory": "packages/plugin-seo"
   },
   "license": "MIT",
-  "author": "dev@payloadcms.com",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {

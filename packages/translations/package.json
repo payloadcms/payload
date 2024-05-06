@@ -41,7 +41,6 @@
     "typescript": "5.4.5"
   },
   "publishConfig": {
-    "access": "public",
     "exports": {
       ".": {
         "import": "./dist/exports/index.js",
