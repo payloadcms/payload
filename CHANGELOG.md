@@ -1,3 +1,17 @@
+## [2.16.0](https://github.com/payloadcms/payload/compare/v2.15.0...v2.16.0) (2024-05-06)
+
+
+### Features
+
+* adds disableListColumn, disableListFilter to fields admin props ([#6188](https://github.com/payloadcms/payload/issues/6188)) ([db4aace](https://github.com/payloadcms/payload/commit/db4aacebb801f1cc11ef8732f9f3b78475256641))
+
+
+### Bug Fixes
+
+* graphql upload relations returning null ([#6233](https://github.com/payloadcms/payload/issues/6233)) ([cac52da](https://github.com/payloadcms/payload/commit/cac52da638a0df4356120a2f61c6aaf25641a5ad))
+* hide drag handles when `admin.isSortable: false` ([#6225](https://github.com/payloadcms/payload/issues/6225)) ([622cdb0](https://github.com/payloadcms/payload/commit/622cdb044002b2c3182c3b0432b51befbfb9b979))
+* **plugin-form-builder:** hook overrides not working as intended ([#6203](https://github.com/payloadcms/payload/issues/6203)) ([b735d6a](https://github.com/payloadcms/payload/commit/b735d6aa169acca8cb638859d2c8ba43e315f02c))
+
 ## [2.15.0](https://github.com/payloadcms/payload/compare/v2.14.2...v2.15.0) (2024-05-03)
 
 
