@@ -114,6 +114,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (fieldAffectsData(field)) {
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
+      const localizedFieldData = {}
+      const valuesToTransform: {
+        ref: Record<string, unknown>
+        table: Record<string, unknown>
+      }[] = []
 
       if (fieldPrefix) {
         deletions.push(() => delete table[fieldName])
@@ -266,9 +271,22 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       if (field.type === 'relationship' || field.type === 'upload') {
-        const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
-        if (!relationPathMatch && !fieldData) {
-          if (('hasMany' in field && !field.hasMany) || typeof field.relationTo === 'string') {
+        if (!('hasMany' in field) || (!field.hasMany && field.relationTo === 'string')) {
+          if (
+            field.localized &&
+            config.localization &&
+            config.localization.locales &&
+            Array.isArray(table?._locales)
+          ) {
+            table._locales.forEach((localeRow) => {
+              result[field.name] = { [localeRow._locale]: localeRow[fieldName] }
+            })
+          } else {
+            valuesToTransform.push({ ref: result, table })
+          }
+        } else {
+          const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
+          if (!relationPathMatch) {
             if ('hasMany' in field && field.hasMany) {
               if (field.localized && config.localization && config.localization.locales) {
                 result[field.name] = {
@@ -278,39 +296,38 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 result[field.name] = []
               }
             }
+
             return result
           }
-        }
 
-        if (field.localized && Array.isArray(field.relationTo)) {
-          result[field.name] = {}
-          const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
+          if (field.localized) {
+            result[field.name] = {}
+            const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
 
-          relationPathMatch.forEach((row) => {
-            if (typeof row.locale === 'string') {
-              if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
-              relationsByLocale[row.locale].push(row)
-            }
-          })
+            relationPathMatch.forEach((row) => {
+              if (typeof row.locale === 'string') {
+                if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
+                relationsByLocale[row.locale].push(row)
+              }
+            })
 
-          Object.entries(relationsByLocale).forEach(([locale, relations]) => {
+            Object.entries(relationsByLocale).forEach(([locale, relations]) => {
+              transformRelationship({
+                field,
+                locale,
+                ref: result,
+                relations,
+              })
+            })
+          } else {
             transformRelationship({
               field,
-              locale,
               ref: result,
-              relations,
+              relations: relationPathMatch,
             })
-          })
-          return result
-        } else if (('hasMany' in field && field.hasMany) || Array.isArray(field.relationTo)) {
-          transformRelationship({
-            field,
-            ref: result,
-            relations: relationPathMatch,
-          })
+          }
           return result
         }
-        result[field.name] = fieldData
       }
 
       if (field.type === 'text' && field?.hasMany) {
@@ -398,12 +415,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
         }
         return result
       }
-
-      const localizedFieldData = {}
-      const valuesToTransform: {
-        ref: Record<string, unknown>
-        table: Record<string, unknown>
-      }[] = []
 
       if (field.localized && Array.isArray(table._locales)) {
         table._locales.forEach((localeRow) => {

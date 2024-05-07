@@ -45,18 +45,12 @@ export async function createVersion<T extends TypeWithID>(
 
   const table = this.tables[tableName]
 
-  const relationshipsTable =
-    this.tables[`_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`]
-
   if (collection.versions.drafts) {
     await db.execute(sql`
       UPDATE ${table}
       SET latest = false
-      FROM ${relationshipsTable}
-      WHERE ${table.id} = ${relationshipsTable.parent}
-        AND ${relationshipsTable.path} = ${'parent'}
-        AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
-        AND ${table.id} != ${result.id};
+      WHERE ${table.id} != ${result.id}
+        AND ${table.parent} = ${parent}
     `)
   }
 

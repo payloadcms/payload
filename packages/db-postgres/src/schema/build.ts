@@ -205,6 +205,7 @@ export const buildTable = ({
           result[key] = one(adapter.tables[target], {
             fields: [localesTable[key]],
             references: [adapter.tables[target].id],
+            relationName: key,
           })
         }
         if (type === 'many') {

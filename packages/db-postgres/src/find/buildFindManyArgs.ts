@@ -31,6 +31,7 @@ export const buildFindManyArgs = ({
       id: false,
       _parentID: false,
     },
+    with: {},
   }
 
   if (adapter.tables[`${tableName}_texts`]) {

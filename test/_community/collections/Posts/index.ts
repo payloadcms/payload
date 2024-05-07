@@ -19,33 +19,36 @@ export const PostsCollection: CollectionConfig = {
       type: 'richText',
     },
     {
-      name: 'category',
+      name: 'postCategory',
       type: 'relationship',
+      // localized: true,
+      relationTo: 'categories',
+    },
+    {
+      name: 'categories',
+      type: 'relationship',
+      hasMany: true,
       localized: true,
       relationTo: 'categories',
     },
     {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          localized: true,
+          relationTo: 'categories',
+          required: true,
+        },
+      ],
+    },
+    {
       name: 'associatedMedia',
-      type: 'upload',
-      access: {
-        create: () => true,
-        update: () => false,
-      },
+      type: 'relationship',
       relationTo: mediaSlug,
     },
-    // {
-    //   type: 'row',
-    //   fields: [],
-    // },
-    // {
-    //   name: 'associatedMedia',
-    //   type: 'upload',
-    //   access: {
-    //     create: () => true,
-    //     update: () => false,
-    //   },
-    //   relationTo: mediaSlug,
-    // },
   ],
   versions: {
     drafts: true,

@@ -385,6 +385,7 @@ export const traverseFields = ({
           relationshipsToDelete.push({ path: relationshipPath })
           return
         }
+
         transformRelationship({
           baseRow: {
             path: relationshipPath,
@@ -395,7 +396,6 @@ export const traverseFields = ({
         })
         return
       } else {
-        fieldName = columnName
         if (
           !field.localized &&
           fieldData &&

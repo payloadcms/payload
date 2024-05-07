@@ -9,7 +9,7 @@ import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 type TraverseFieldArgs = {
-  _locales: Record<string, unknown>
+  _locales: DBQueryConfig<'many', true, any, any>
   adapter: PostgresAdapter
   currentArgs: DBQueryConfig<'many', true, any, any>
   currentTableName: string
@@ -34,13 +34,14 @@ export const traverseFields = ({
   fields.forEach((field) => {
     // handle simple relationship
     if (
-      (field.type === 'upload' ||
-        (field.type === 'relationship' &&
-          !field.hasMany &&
-          typeof field.relationTo === 'string')) &&
-      !field.localized
+      field.type === 'upload' ||
+      (field.type === 'relationship' && !field.hasMany && typeof field.relationTo === 'string')
     ) {
-      currentArgs.with[`${path}${field.name}`] = true
+      if (field.localized) {
+        _locales.with[`${path}${field.name}`] = true
+      } else {
+        currentArgs.with[`${path}${field.name}`] = true
+      }
     }
 
     if (field.type === 'collapsible' || field.type === 'row') {
