@@ -4,7 +4,6 @@ import type { CellComponentProps, DefaultCellComponentProps } from 'payload/type
 import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '@payloadcms/ui/hooks/useIntersect'
 import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useSearchParams } from '@payloadcms/ui/providers/SearchParams'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { canUseDOM } from '@payloadcms/ui/utilities/canUseDOM'
 import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
@@ -34,8 +33,6 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const { documents, getRelationships } = useListRelationships()
   const [hasRequested, setHasRequested] = useState(false)
   const { i18n, t } = useTranslation()
-  const { searchParams } = useSearchParams()
-  const [memoizedSearchParams, setMemoizedSearchParams] = useState(searchParams)
 
   const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
@@ -74,11 +71,11 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   ])
 
   useEffect(() => {
-    if (searchParams !== memoizedSearchParams && hasRequested) {
+    if (hasRequested) {
       setHasRequested(false)
-      setMemoizedSearchParams(searchParams)
     }
-  }, [searchParams, hasRequested, memoizedSearchParams])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cellData])
 
   return (
     <div className={baseClass} ref={intersectionRef}>
