@@ -2,10 +2,10 @@
 import type { User } from '@/payload-types'
 
 import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { revalidateTag } from 'next/cache'
 import { cookies as getCookies } from 'next/headers'
 
 import config from '../../../payload.config'
-import { getUser } from './getUser'
 
 export const login = async (data: { email: string; password: string }): Promise<User | null> => {
   const cookies = getCookies()
@@ -22,8 +22,7 @@ export const login = async (data: { email: string; password: string }): Promise<
   if (token) cookies.set('payload-token', token)
   else cookies.delete('payload-token')
 
-  // invalidate the cached user
-  await getUser(user)
+  revalidateTag('payload-user')
 
   return user
 }

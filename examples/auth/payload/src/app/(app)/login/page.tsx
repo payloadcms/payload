@@ -1,3 +1,4 @@
+import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -8,7 +9,8 @@ import { LoginForm } from './LoginForm'
 import classes from './index.module.scss'
 
 export default async function Login() {
-  const user = await getUser()
+  const headers = getHeaders()
+  const user = await getUser(headers)
 
   if (user) {
     redirect(`/account?message=${encodeURIComponent('You are already logged in.')}`)

@@ -1,3 +1,4 @@
+import { headers as getHeaders } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -8,7 +9,8 @@ import { HeaderNav } from './Nav'
 import classes from './index.module.scss'
 
 export async function Header() {
-  const user = await getUser()
+  const headers = getHeaders()
+  const user = await getUser(headers)
 
   return (
     <header className={classes.header}>

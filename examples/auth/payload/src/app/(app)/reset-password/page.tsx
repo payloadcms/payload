@@ -1,3 +1,4 @@
+import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -7,7 +8,8 @@ import { ResetPasswordForm } from './ResetPasswordForm'
 import classes from './index.module.scss'
 
 export default async function ResetPassword() {
-  const user = await getUser()
+  const headers = getHeaders()
+  const user = await getUser(headers)
 
   if (user) {
     redirect(`/account?message=${encodeURIComponent('Cannot reset password while logged in.')}`)

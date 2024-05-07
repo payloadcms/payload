@@ -1,3 +1,4 @@
+import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
 import React from 'react'
 
@@ -7,7 +8,8 @@ import { LogoutPage } from './LogoutPage'
 import classes from './index.module.scss'
 
 export default async function Logout() {
-  const user = await getUser()
+  const headers = getHeaders()
+  const user = await getUser(headers)
 
   if (!user) {
     return (

@@ -1,3 +1,4 @@
+import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
 import React from 'react'
 
@@ -5,7 +6,8 @@ import { Gutter } from './_components/Gutter'
 import { getUser } from './actions/getUser'
 
 export default async function HomePage() {
-  await getUser()
+  const headers = getHeaders()
+  await getUser(headers)
 
   return (
     <Gutter>

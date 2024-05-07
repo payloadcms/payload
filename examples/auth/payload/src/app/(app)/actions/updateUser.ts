@@ -2,9 +2,9 @@
 import type { User } from '@/payload-types'
 
 import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { revalidateTag } from 'next/cache'
 
 import config from '../../../payload.config'
-import { getUser } from './getUser'
 
 export const updateUser = async (args: {
   data: Partial<User>
@@ -20,8 +20,7 @@ export const updateUser = async (args: {
     data,
   })
 
-  // invalidate the cached user
-  await getUser(user)
+  revalidateTag('payload-user')
 
   return user
 }
