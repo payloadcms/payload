@@ -43,7 +43,7 @@
   "dependencies": {
     "@libsql/client": "^0.5.2",
     "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.20.17-e38e63d",
+    "drizzle-kit": "0.20.18-08d50a4",
     "drizzle-orm": "0.29.4",
     "pg": "8.11.3",
     "prompts": "2.4.2",
