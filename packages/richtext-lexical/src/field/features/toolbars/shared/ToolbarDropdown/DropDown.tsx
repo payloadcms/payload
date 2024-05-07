@@ -66,10 +66,14 @@ export function DropDownItem({
       className={className}
       onClick={() => {
         if (enabled !== false) {
-          item.onSelect({
-            editor,
-            isActive: active,
-          })
+          editor.focus()
+          // We need to wrap the onSelect in a setTimeout, so the editor is properly focused before the onSelect is called.
+          setTimeout(() => {
+            item.onSelect({
+              editor,
+              isActive: active,
+            })
+          }, 0)
         }
       }}
       onMouseDown={(e) => {
