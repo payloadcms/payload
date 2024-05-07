@@ -150,6 +150,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (typeof incomingConfig.editor === 'function') {
     config.editor = await incomingConfig.editor({
       config: config as SanitizedConfig,
+      isRoot: true,
     })
   }
 

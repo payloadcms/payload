@@ -161,7 +161,10 @@ export const sanitizeFields = async ({
         }
 
         if (typeof field.editor === 'function') {
-          field.editor = await field.editor({ config: _config })
+          field.editor = await field.editor({
+            config: _config,
+            isRoot: requireFieldLevelRichTextEditor,
+          })
         }
 
         // Add editor adapter hooks to field hooks

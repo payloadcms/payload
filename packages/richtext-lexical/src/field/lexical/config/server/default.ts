@@ -4,7 +4,7 @@ import type { FeatureProviderServer } from '../../../features/types.js'
 import type { ServerEditorConfig } from '../types.js'
 
 import { AlignFeature } from '../../../features/align/feature.server.js'
-import { BlockQuoteFeature } from '../../../features/blockquote/feature.server.js'
+import { BlockquoteFeature } from '../../../features/blockquote/feature.server.js'
 import { BoldFeature } from '../../../features/format/bold/feature.server.js'
 import { InlineCodeFeature } from '../../../features/format/inlineCode/feature.server.js'
 import { ItalicFeature } from '../../../features/format/italic/feature.server.js'
@@ -48,7 +48,7 @@ export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = 
   ChecklistFeature(),
   LinkFeature(),
   RelationshipFeature(),
-  BlockQuoteFeature(),
+  BlockquoteFeature(),
   UploadFeature(),
   HorizontalRuleFeature(),
   InlineToolbarFeature(),
