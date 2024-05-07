@@ -50,7 +50,8 @@ const EditView: React.FC<IndexProps> = (props) => {
   } = config
 
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>()
-  const history = useHistory()
+  const history = useHistory<{ refetchDocumentData?: boolean }>()
+
   const [internalState, setInternalState] = useState<Fields>()
   const [updatedAt, setUpdatedAt] = useState<string>()
   const { permissions, user } = useAuth()
@@ -58,7 +59,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { docPermissions, getDocPermissions, getDocPreferences, getVersions } = useDocumentInfo()
   const { t } = useTranslation('general')
 
-  const [{ data, isError, isLoading: isLoadingData }] = usePayloadAPI(
+  const [{ data, isError, isLoading: isLoadingData }, { refetchData }] = usePayloadAPI(
     isEditing ? `${serverURL}${api}/${collectionSlug}/${id}` : '',
     { initialData: null, initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
@@ -128,9 +129,15 @@ const EditView: React.FC<IndexProps> = (props) => {
   useEffect(() => {
     setFormQueryParams((params) => ({
       ...params,
-      locale: locale,
+      locale,
     }))
   }, [locale])
+
+  useEffect(() => {
+    if (history.location.state?.refetchDocumentData) {
+      void refetchData()
+    }
+  }, [history.location.state?.refetchDocumentData, refetchData])
 
   if (isError) {
     return <NotFound marginTop="large" />

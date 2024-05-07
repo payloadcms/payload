@@ -33,6 +33,17 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
     const locale = req.locale
     req = isolateObjectProperty(req, 'locale')
     req.locale = args.locale || locale
+    if (!req.query) req.query = {}
+
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+        ? true
+        : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
       collection,

@@ -38,6 +38,10 @@ export const pointSlug = 'point'
 export const errorOnHookSlug = 'error-on-hooks'
 
 export default buildConfigWithDefaults({
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   collections: [
     {
       access: openAccess,
@@ -334,6 +338,46 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'content-type',
+    },
+    {
+      slug: 'cyclical-relationship',
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'relationToSelf',
+          type: 'relationship',
+          relationTo: 'cyclical-relationship',
+        },
+        {
+          name: 'relationToSelfPoly',
+          type: 'relationship',
+          relationTo: ['cyclical-relationship'],
+        },
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: 'media',
+        },
+      ],
+      versions: {
+        drafts: true,
+      },
+    },
+    {
+      slug: 'media',
+      access: openAccess,
+      upload: true,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
     },
   ],
   graphQL: {

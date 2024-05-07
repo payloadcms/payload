@@ -312,12 +312,23 @@ function buildObjectType({
       type = type || newlyCreatedBlockType
 
       const relationshipArgs: {
+        draft?: unknown
         fallbackLocale?: unknown
         limit?: unknown
         locale?: unknown
         page?: unknown
         where?: unknown
       } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => payload.collections[relation].config.versions?.drafts,
+      )
+
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (payload.config.localization) {
         relationshipArgs.locale = {
@@ -330,6 +341,11 @@ function buildObjectType({
       }
 
       const relationship = {
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
         args: relationshipArgs,
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
@@ -337,6 +353,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           let relatedCollectionSlug = field.relationTo
+          const draft = args.draft ?? context.req.query?.draft
 
           if (hasManyValues) {
             const results = []
@@ -362,6 +379,7 @@ function buildObjectType({
                   fallbackLocale,
                   false,
                   false,
+                  draft,
                 ]),
               )
 
@@ -408,6 +426,7 @@ function buildObjectType({
                 fallbackLocale,
                 false,
                 false,
+                draft,
               ]),
             )
 
@@ -430,11 +449,6 @@ function buildObjectType({
 
           return null
         },
-        type: withNullableType(
-          field,
-          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
-          forceNullable,
-        ),
       }
 
       return {
@@ -445,6 +459,7 @@ function buildObjectType({
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
       [field.name]: {
+        type: withNullableType(field, GraphQLJSON, forceNullable),
         args: {
           depth: {
             type: GraphQLInt,
@@ -464,6 +479,7 @@ function buildObjectType({
             await editor?.populationPromise({
               context,
               depth,
+              draft: args.draft,
               field,
               findMany: false,
               flattenLocales: false,
@@ -477,7 +493,6 @@ function buildObjectType({
 
           return parent[field.name]
         },
-        type: withNullableType(field, GraphQLJSON, forceNullable),
       },
     }),
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) =>
@@ -586,6 +601,7 @@ function buildObjectType({
       const relatedCollectionSlug = field.relationTo
 
       const upload = {
+        type,
         args: uploadArgs,
         extensions: { complexity: 20 },
         async resolve(parent, args, context) {
@@ -593,6 +609,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           const id = value
+          const draft = args.draft ?? context.req.query?.draft
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
@@ -606,6 +623,7 @@ function buildObjectType({
                 fallbackLocale,
                 false,
                 false,
+                Boolean(draft),
               ]),
             )
 
@@ -614,7 +632,6 @@ function buildObjectType({
 
           return null
         },
-        type,
       }
 
       const whereFields = payload.collections[relationTo].config.fields

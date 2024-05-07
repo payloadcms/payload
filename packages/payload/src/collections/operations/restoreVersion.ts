@@ -140,6 +140,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,

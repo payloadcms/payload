@@ -66,7 +66,9 @@ const Restore: React.FC<Props> = ({
     if (res.status === 200) {
       const json = await res.json()
       toast.success(json.message)
-      history.push(redirectURL)
+      history.push(redirectURL, {
+        refetchDocumentData: true,
+      })
     } else {
       toast.error(t('problemRestoringVersion'))
     }
