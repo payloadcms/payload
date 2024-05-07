@@ -30,11 +30,7 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
   clientProps,
 }) => {
   const [editor] = useLexicalComposerContext()
-  const {
-    collections,
-    routes: { api },
-    serverURL,
-  } = useConfig()
+  const { collections } = useConfig()
 
   useEffect(() => {
     if (!editor.hasNodes([UploadNode])) {
@@ -82,7 +78,7 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [api, editor, serverURL])
+  }, [editor])
 
   return <UploadDrawer enabledCollectionSlugs={collections.map(({ slug }) => slug)} />
 }
