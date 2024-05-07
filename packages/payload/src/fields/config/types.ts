@@ -607,16 +607,6 @@ export type RichTextField<
   type: 'richText'
 } & ExtraProperties
 
-export type RichTextFieldRequiredEditor<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
-> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor:
-    | RichTextAdapter<Value, AdapterProps, AdapterProps>
-    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
-}
-
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
@@ -729,10 +719,6 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
-
-export type FieldWithRichTextRequiredEditor =
-  | Exclude<Field, RichTextField>
-  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField

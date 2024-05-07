@@ -3,7 +3,6 @@
 import { $isNodeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
-import type { UploadFeatureProps } from './feature.server.js'
 
 import { UploadIcon } from '../../lexical/ui/icons/Upload/index.js'
 import { createClientComponent } from '../createClientComponent.js'
@@ -12,7 +11,7 @@ import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'
 import { $isUploadNode, UploadNode } from './nodes/UploadNode.js'
 import { UploadPlugin } from './plugin/index.js'
 
-export type UploadFeaturePropsClient = Pick<UploadFeatureProps, 'EXPERIMENTAL_autoUpload'> & {
+export type UploadFeaturePropsClient = {
   collections: {
     [collection: string]: {
       hasExtraFields: boolean

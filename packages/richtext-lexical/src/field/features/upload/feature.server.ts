@@ -1,12 +1,5 @@
 import type { Config } from 'payload/config'
-import type {
-  Field,
-  FieldWithRichTextRequiredEditor,
-  FileData,
-  FileSize,
-  Payload,
-  TypeWithID,
-} from 'payload/types'
+import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
 import { sanitizeFields } from 'payload/config'
@@ -21,21 +14,9 @@ import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
-  /**
-   * @experimental Can be used to automatically upload a file to an uploads-enabled
-   * collection if the file is pasted into the lexical editor.
-   *
-   * This property may change or be removed in future minor versions.
-   */
-  EXPERIMENTAL_autoUpload?: {
-    /**
-     * The collection to upload the file to
-     */
-    collection: string
-  }
   collections?: {
     [collection: string]: {
-      fields: FieldWithRichTextRequiredEditor[]
+      fields: Field[]
     }
   }
   /**
@@ -63,7 +44,6 @@ export const UploadFeature: FeatureProviderProviderServer<
   }
 
   const clientProps: UploadFeaturePropsClient = {
-    EXPERIMENTAL_autoUpload: props.EXPERIMENTAL_autoUpload,
     collections: {},
   }
   if (props.collections) {
@@ -75,17 +55,17 @@ export const UploadFeature: FeatureProviderProviderServer<
   }
 
   return {
-    feature: async ({ config: _config }) => {
+    feature: async ({ config: _config, isRoot }) => {
       const validRelationships = _config.collections.map((c) => c.slug) || []
 
       for (const collection in props.collections) {
         if (props.collections[collection].fields?.length) {
-          props.collections[collection].fields = (await sanitizeFields({
+          props.collections[collection].fields = await sanitizeFields({
             config: _config as unknown as Config,
             fields: props.collections[collection].fields,
-            requireFieldLevelRichTextEditor: true,
+            requireFieldLevelRichTextEditor: isRoot,
             validRelationships,
-          })) as FieldWithRichTextRequiredEditor[]
+          })
         }
       }
 
