@@ -449,7 +449,7 @@ export type UploadField = FieldBase & {
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
-   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
   relationTo: string
@@ -514,7 +514,7 @@ type SharedRelationshipProperties = FieldBase & {
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
-   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
   type: 'relationship'
@@ -601,7 +601,7 @@ export type RichTextField<
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
-   * @link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
   type: 'richText'
