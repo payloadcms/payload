@@ -4,7 +4,9 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
   push:
-    branches: ['main', 'beta']
+    branches:
+      - main
+      - beta
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -48,6 +50,49 @@ jobs:
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
+      - name: Setup Node@${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        timeout-minutes: 720
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - run: pnpm install
+      - name: List changed files
+        run: git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}
+      - name: Lint staged
+        run: npx lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
 
   build:
     needs: changes

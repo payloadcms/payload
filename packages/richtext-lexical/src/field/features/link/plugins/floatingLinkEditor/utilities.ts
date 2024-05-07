@@ -16,11 +16,13 @@ export function transformExtraFields(
   config: SanitizedConfig,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
+  maxDepth?: number,
 ): FieldWithRichTextRequiredEditor[] {
   const baseFields: FieldWithRichTextRequiredEditor[] = getBaseFields(
     config,
     enabledCollections,
     disabledCollections,
+    maxDepth,
   )
 
   let fields: FieldWithRichTextRequiredEditor[]

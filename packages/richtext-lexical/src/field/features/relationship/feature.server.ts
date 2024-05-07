@@ -3,9 +3,9 @@ import type { FeatureProviderProviderServer } from '../types.js'
 import { createNode } from '../typeUtilities.js'
 import { RelationshipFeatureClientComponent } from './feature.client.js'
 import { RelationshipNode } from './nodes/RelationshipNode.js'
-import { relationshipPopulationPromise } from './populationPromise.js'
+import { relationshipPopulationPromiseHOC } from './populationPromise.js'
 
-export type RelationshipFeatureProps =
+export type ExclusiveRelationshipFeatureProps =
   | {
       /**
        * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
@@ -27,6 +27,16 @@ export type RelationshipFeatureProps =
       enabledCollections?: string[]
     }
 
+export type RelationshipFeatureProps = ExclusiveRelationshipFeatureProps & {
+  /**
+   * Sets a maximum population depth for this relationship, regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
+}
+
 export const RelationshipFeature: FeatureProviderProviderServer<
   RelationshipFeatureProps,
   RelationshipFeatureProps
@@ -39,7 +49,7 @@ export const RelationshipFeature: FeatureProviderProviderServer<
         nodes: [
           createNode({
             node: RelationshipNode,
-            populationPromises: [relationshipPopulationPromise],
+            populationPromises: [relationshipPopulationPromiseHOC(props)],
             // TODO: Add validation similar to upload
           }),
         ],

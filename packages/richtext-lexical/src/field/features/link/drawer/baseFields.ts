@@ -8,6 +8,7 @@ export const getBaseFields = (
   config: SanitizedConfig,
   enabledCollections: false | string[],
   disabledCollections: false | string[],
+  maxDepth?: number,
 ): FieldWithRichTextRequiredEditor[] => {
   let enabledRelations: string[]
 
@@ -97,6 +98,7 @@ export const getBaseFields = (
             }
           : null,
       label: ({ t }) => t('fields:chooseDocumentToLink'),
+      maxDepth,
       relationTo: enabledRelations,
       required: true,
     })

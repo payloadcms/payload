@@ -128,8 +128,10 @@ const Component: React.FC<ElementProps> = (props) => {
         if (event.shiftKey) {
           setSelected(!isSelected)
         } else {
-          clearSelection()
-          setSelected(true)
+          if (!isSelected) {
+            clearSelection()
+            setSelected(true)
+          }
         }
         return true
       }
