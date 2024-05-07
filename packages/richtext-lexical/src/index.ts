@@ -303,7 +303,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 }
 
 export { AlignFeature } from './field/features/align/feature.server.js'
-export { BlockQuoteFeature } from './field/features/blockquote/feature.server.js'
+export { BlockquoteFeature } from './field/features/blockquote/feature.server.js'
 export {
   BlocksFeature,
   type BlocksFeatureProps,
