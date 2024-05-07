@@ -205,7 +205,6 @@ export const mapFields = (args: {
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
           errorProps,
           labelProps,
-          localized: 'localized' in field ? field.localized : undefined,
           path,
           required: 'required' in field ? field.required : undefined,
         }
@@ -596,6 +595,8 @@ export const mapFields = (args: {
                 <WithServerSideProps Component={RichTextCellComponent} />
               )
             }
+
+            fieldComponentProps = richTextField
 
             break
           }
