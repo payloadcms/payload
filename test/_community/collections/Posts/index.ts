@@ -31,19 +31,19 @@ export const PostsCollection: CollectionConfig = {
       localized: true,
       relationTo: 'categories',
     },
-    // {
-    //   name: 'array',
-    //   type: 'array',
-    //   fields: [
-    //     {
-    //       name: 'category',
-    //       type: 'relationship',
-    //       localized: true,
-    //       relationTo: 'categories',
-    //       required: true,
-    //     },
-    //   ],
-    // },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          localized: true,
+          relationTo: 'categories',
+          required: true,
+        },
+      ],
+    },
     {
       name: 'associatedMedia',
       type: 'relationship',

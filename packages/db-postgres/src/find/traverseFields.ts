@@ -9,9 +9,9 @@ import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 type TraverseFieldArgs = {
-  _locales: DBQueryConfig<'many', true, any, any>
+  _locales: Result
   adapter: PostgresAdapter
-  currentArgs: DBQueryConfig<'many', true, any, any>
+  currentArgs: Result
   currentTableName: string
   depth?: number
   fields: Field[]
@@ -97,11 +97,15 @@ export const traverseFields = ({
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
-          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
+          if (adapter.tables[arrayTableNameWithLocales]) {
+            withArray.with._locales = {
+              with: {},
+            }
+          }
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
-            _locales,
+            _locales: withArray.with._locales,
             adapter,
             currentArgs: withArray,
             currentTableName: arrayTableName,
