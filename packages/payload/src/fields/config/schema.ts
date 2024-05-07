@@ -477,6 +477,7 @@ export const richText = baseField.keys({
       validate: joi.func().required(),
     })
     .unknown(),
+  maxDepth: joi.number(),
 })
 
 export const date = baseField.keys({

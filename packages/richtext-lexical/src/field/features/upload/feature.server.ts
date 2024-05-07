@@ -26,6 +26,13 @@ export type UploadFeatureProps = {
       fields: FieldWithRichTextRequiredEditor[]
     }
   }
+  /**
+   * Sets a maximum population depth for this upload (not the fields for this upload), regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
 }
 
 /**
