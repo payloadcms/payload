@@ -73,15 +73,17 @@ describe('_Community Tests', () => {
         array: [{ category: category.id }],
         categories: [category.id],
         postCategory: category.id,
+        blocks: [{ blockType: 'relationship', category: category.id }],
         richText: {},
         text: 'LOCAL API EXAMPLE',
       },
     })
 
     expect(newPost.associatedMedia?.id).toStrictEqual(media.id)
-    expect(newPost.postCategory?.id).toStrictEqual(category.id)
     expect(newPost.categories[0]).toBeDefined()
+    expect(newPost.postCategory?.id).toStrictEqual(category.id)
     expect(newPost.array[0].category).toBeDefined()
+    expect(newPost.blocks[0].category).toBeDefined()
     expect(newPost.text).toEqual('LOCAL API EXAMPLE')
   })
 

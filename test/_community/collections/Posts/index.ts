@@ -45,6 +45,24 @@ export const PostsCollection: CollectionConfig = {
       ],
     },
     {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'relationship',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              localized: true,
+              relationTo: 'categories',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'associatedMedia',
       type: 'relationship',
       relationTo: mediaSlug,
