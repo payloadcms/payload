@@ -9,7 +9,7 @@ import { fetchDoc } from '../../../_api/fetchDoc.js'
 import { fetchDocs } from '../../../_api/fetchDocs.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { PostHero } from '../../../_heros/PostHero/index.js'
-import { PayloadLivePreview } from './SSRLivePreview.js'
+import { RefreshRouteOnSave } from './RefreshRouteOnSave.js'
 
 export default async function SSRPost({ params: { slug = '' } }) {
   let data: Post | null = null
@@ -30,7 +30,7 @@ export default async function SSRPost({ params: { slug = '' } }) {
 
   return (
     <Fragment>
-      <PayloadLivePreview />
+      <RefreshRouteOnSave />
       <PostHero post={data} />
       <Blocks blocks={data?.layout} />
       <Blocks

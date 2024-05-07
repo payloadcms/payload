@@ -1,0 +1,87 @@
+---
+title: Implementing Live Preview in your server-side front-end application
+label: Server-side Front-end Implementation
+order: 30
+desc: Learn how to implement Live Preview in your server-side front-end application.
+keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, useLivePreview
+---
+
+While using Live Preview, the Admin panel emits a new `window.postMessage` event every time the document is _saved_. Your front-end application can listen for these events, and make a roundtrip to the server using whatever mechanisms your framework provides. In Next.js, this means simply calling `router.refresh()` which will hydrate the HTML using new data straight from the [Local API](../local-api/overview).
+
+<Banner type="info">
+  If your front-end application is built with a client-side framework like Next.js Pages Router, React Router, etc. see [Client](./client).
+</Banner>
+
+Wiring your front-end into Live Preview is easy. It works in both server-side as well as client-side environments. You can choose to setup _either_ or _both_ depending on your use case.
+
+If your front-end application is built with server-side framework like Next.js App Router, React Server Components, etc., you can use the `RefreshRouteOnChange` function that Payload provides. In the future, all other major frameworks like Vue Server Renderer will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own router refresh](#building-your-own-router-refresh) for more information.
+
+### React
+
+If your front-end application is built with React or Next.js, you can use the `RefreshRouteOnSave` component that Payload provides.
+
+First, install the `@payloadcms/live-preview-react` package:
+
+```bash
+npm install @payloadcms/live-preview-react
+```
+
+Then, render it anywhere in your `page.tsx`. Here's an example:
+
+`page.tsx`:
+
+```tsx
+import { RefreshRouteOnSave } from './RefreshRouteOnSave.tsx'
+
+export default async function Page() {
+  // get payload, etc.
+  const page = await payload.find({ ... })
+
+  return (
+    <Fragment>
+      <RefreshRouteOnSave />
+      <h1>Hello, world!</h1>
+    </Fragment>
+  )
+}
+```
+
+`RefreshRouteOnSave.tsx`:
+
+```tsx
+'use client'
+import { RefreshRouteOnSave as PayloadLivePreview } from '@payloadcms/live-preview-react'
+import { useRouter } from 'next/navigation.js'
+import React from 'react'
+
+export const RefreshRouteOnSave: React.FC = () => {
+  const router = useRouter()
+  return <PayloadLivePreview refresh={router.refresh} serverURL={process.env.PAYLOAD_SERVER_URL} />
+}
+```
+
+## Building your own router refresh
+
+
+
+## Troubleshooting
+
+#### Updates do not appear as fast as the client-side `useLivePreview` hook
+
+If you are noticing that updates feel sluggish after moving away from the client-side implementation of Live Preview view the `useLivePreview` hook, and to the server-side implementation view the `RefreshRouteOnSave` component, this is because of how the two differ in how they work. Instead of firing off a new event on every debounced to form state, we create a new _autosave_ document, debounced to your `versions.autoSave` settings. You may try decreasing this value to make the experience feel more responsive.
+
+
+```ts
+// collection.ts
+{
+   versions: {
+    drafts: {
+      autosave: {
+        interval: 10,
+      },
+    },
+  },
+}
+```
+
+This is a more performant setup than the client-side `useLivePreview` hook anyway, because instead of sending document data through the `postMessage` event, merging it in with your initial data, and then potentially re-populating relationships, we simply create a new _autosave_ document, make a roundtrip to the server, which hydrates the HTML with new data straight from the [Local API](../local-api/overview).
