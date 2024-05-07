@@ -1,14 +1,15 @@
 'use client'
 
+import type { User } from '@/payload-types'
+
 import Link from 'next/link'
 import React from 'react'
 
-import { useAuth } from '../../../_providers/Auth'
 import classes from './index.module.scss'
 
-export const HeaderNav: React.FC = () => {
-  const { user } = useAuth()
-
+export const HeaderNav: React.FC<{
+  user?: User | null
+}> = ({ user }) => {
   return (
     <nav
       className={[

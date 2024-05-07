@@ -1,5 +1,7 @@
 'use client'
 
+import type { User } from '@/payload-types'
+
 import { useRouter } from 'next/navigation'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -7,20 +9,20 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../_components/Button'
 import { Input } from '../../_components/Input'
 import { Message } from '../../_components/Message'
-import { useAuth } from '../../_providers/Auth'
+import { updateUser } from '../../actions/updateUser'
 import classes from './index.module.scss'
 
 type FormData = {
   email: string
-  name: string
   password: string
   passwordConfirm: string
 }
 
-export const AccountForm: React.FC = () => {
+export const AccountForm: React.FC<{
+  user: User
+}> = ({ user }) => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const { setUser, user } = useAuth()
   const [changePassword, setChangePassword] = useState(false)
   const router = useRouter()
 
@@ -37,35 +39,26 @@ export const AccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      if (user) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${user.id}`, {
-          // Make sure to include cookies with fetch
-          body: JSON.stringify(data),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'PATCH',
+      try {
+        const result = await updateUser({
+          id: user.id,
+          data,
         })
 
-        if (response.ok) {
-          const json = await response.json()
-          setUser(json.doc)
-          setSuccess('Successfully updated account.')
-          setError('')
-          setChangePassword(false)
-          reset({
-            name: json.doc.name,
-            email: json.doc.email,
-            password: '',
-            passwordConfirm: '',
-          })
-        } else {
-          setError('There was a problem updating your account.')
-        }
+        setSuccess('Successfully updated account.')
+        setError('')
+        setChangePassword(false)
+
+        reset({
+          email: result?.email,
+          password: '',
+          passwordConfirm: '',
+        })
+      } catch {
+        setError('There was a problem updating your account.')
       }
     },
-    [user, setUser, reset],
+    [user, reset],
   )
 
   useEffect(() => {
@@ -136,7 +129,7 @@ export const AccountForm: React.FC = () => {
             register={register}
             required
             type="password"
-            validate={value => value === password.current || 'The passwords do not match'}
+            validate={(value) => value === password.current || 'The passwords do not match'}
           />
         </Fragment>
       )}

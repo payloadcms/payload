@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../_components/Button'
 import { Input } from '../../_components/Input'
 import { Message } from '../../_components/Message'
-import { useAuth } from '../../_providers/Auth'
+import { login } from '../../actions/login'
 import classes from './index.module.scss'
 
 type FormData = {
@@ -20,7 +20,6 @@ export const LoginForm: React.FC = () => {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const redirect = useRef(searchParams.get('redirect'))
-  const { login } = useAuth()
   const router = useRouter()
   const [error, setError] = React.useState<null | string>(null)
 
@@ -38,14 +37,18 @@ export const LoginForm: React.FC = () => {
   const onSubmit = useCallback(
     async (data: FormData) => {
       try {
-        await login(data)
+        await login({
+          email: data.email,
+          password: data.password,
+        })
+
         if (redirect?.current) router.push(redirect.current)
         else router.push('/account')
       } catch (_) {
         setError('There was an error with the credentials provided. Please try again.')
       }
     },
-    [login, router],
+    [router],
   )
 
   return (

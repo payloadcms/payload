@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../_components/Button'
 import { Input } from '../../_components/Input'
 import { Message } from '../../_components/Message'
-import { useAuth } from '../../_providers/Auth'
+import { login } from '../../actions/login'
 import classes from './index.module.scss'
 
 type FormData = {
@@ -20,7 +20,6 @@ type FormData = {
 export const CreateAccountForm: React.FC = () => {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
-  const { login } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<null | string>(null)
@@ -58,7 +57,11 @@ export const CreateAccountForm: React.FC = () => {
       }, 1000)
 
       try {
-        await login(data)
+        await login({
+          email: data.email,
+          password: data.password,
+        })
+
         clearTimeout(timer)
         if (redirect) router.push(redirect)
         else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
@@ -67,7 +70,7 @@ export const CreateAccountForm: React.FC = () => {
         setError('There was an error with the credentials provided. Please try again.')
       }
     },
-    [login, router, searchParams],
+    [router, searchParams],
   )
 
   return (
@@ -103,7 +106,7 @@ export const CreateAccountForm: React.FC = () => {
         register={register}
         required
         type="password"
-        validate={value => value === password.current || 'The passwords do not match'}
+        validate={(value) => value === password.current || 'The passwords do not match'}
       />
       <Button
         appearance="primary"

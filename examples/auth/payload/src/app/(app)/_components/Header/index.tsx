@@ -2,11 +2,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
+import { getUser } from '../../actions/getUser'
 import { Gutter } from '../Gutter'
 import { HeaderNav } from './Nav'
 import classes from './index.module.scss'
 
-export function Header() {
+export async function Header() {
+  const user = await getUser()
+
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
@@ -24,7 +27,7 @@ export function Header() {
             />
           </picture>
         </Link>
-        <HeaderNav />
+        <HeaderNav user={user} />
       </Gutter>
     </header>
   )

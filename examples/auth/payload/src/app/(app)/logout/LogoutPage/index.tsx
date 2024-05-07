@@ -3,10 +3,9 @@
 import Link from 'next/link'
 import React, { Fragment, useEffect, useState } from 'react'
 
-import { useAuth } from '../../_providers/Auth'
+import { logout } from '../../actions/logout'
 
 export const LogoutPage: React.FC = () => {
-  const { logout } = useAuth()
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
@@ -21,7 +20,7 @@ export const LogoutPage: React.FC = () => {
     }
 
     void performLogout()
-  }, [logout])
+  }, [])
 
   return (
     <Fragment>

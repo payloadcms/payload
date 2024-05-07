@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../_components/Button'
 import { Input } from '../../_components/Input'
 import { Message } from '../../_components/Message'
-import { useAuth } from '../../_providers/Auth'
+import { login } from '../../actions/login'
 import classes from './index.module.scss'
 
 type FormData = {
@@ -17,7 +17,6 @@ type FormData = {
 
 export const ResetPasswordForm: React.FC = () => {
   const [error, setError] = useState('')
-  const { login } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -54,7 +53,7 @@ export const ResetPasswordForm: React.FC = () => {
         setError('There was a problem while resetting your password. Please try again later.')
       }
     },
-    [router, login],
+    [router],
   )
 
   // when Next.js populates token within router,

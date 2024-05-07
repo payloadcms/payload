@@ -2,7 +2,6 @@ import React from 'react'
 
 import { Header } from './_components/Header'
 import './_css/app.scss'
-import { AuthProvider } from './_providers/Auth'
 
 export const metadata = {
   description: 'An example of how to authenticate with Payload from a Next.js app.',
@@ -15,14 +14,8 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider
-          // To toggle between the REST and GraphQL APIs,
-          // change the `api` prop to either `rest` or `gql`
-          api="rest" // change this to `gql` to use the GraphQL API
-        >
-          <Header />
-          <main>{children}</main>
-        </AuthProvider>
+        <Header />
+        <main>{children}</main>
       </body>
     </html>
   )
