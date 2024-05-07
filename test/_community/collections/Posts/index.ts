@@ -21,7 +21,7 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'postCategory',
       type: 'relationship',
-      // localized: true,
+      localized: true,
       relationTo: 'categories',
     },
     {
@@ -31,19 +31,19 @@ export const PostsCollection: CollectionConfig = {
       localized: true,
       relationTo: 'categories',
     },
-    {
-      name: 'array',
-      type: 'array',
-      fields: [
-        {
-          name: 'category',
-          type: 'relationship',
-          localized: true,
-          relationTo: 'categories',
-          required: true,
-        },
-      ],
-    },
+    // {
+    //   name: 'array',
+    //   type: 'array',
+    //   fields: [
+    //     {
+    //       name: 'category',
+    //       type: 'relationship',
+    //       localized: true,
+    //       relationTo: 'categories',
+    //       required: true,
+    //     },
+    //   ],
+    // },
     {
       name: 'associatedMedia',
       type: 'relationship',

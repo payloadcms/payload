@@ -404,6 +404,18 @@ export const traverseFields = ({
           fieldData?.id
         ) {
           fieldData = fieldData.id
+        } else if (field.localized) {
+          if (typeof fieldData === 'object') {
+            Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+              if (typeof localeData === 'object') {
+                if ('id' in localeData && localeData?.id) {
+                  fieldData[localeKey] = localeData.id
+                }
+              } else {
+                fieldData[localeKey] = localeData
+              }
+            })
+          }
         }
       }
     }
