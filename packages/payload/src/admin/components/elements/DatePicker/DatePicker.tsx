@@ -54,9 +54,12 @@ const DateTime: React.FC<Props> = (props) => {
 
   const onChange = (incomingDate: Date) => {
     const newDate = incomingDate
-    if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
-      const tzOffset = incomingDate.getTimezoneOffset() / 60
-      newDate.setHours(12 - tzOffset, 0)
+    if (newDate instanceof Date) {
+      newDate.setMilliseconds(0)
+      if (['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
+        const tzOffset = incomingDate.getTimezoneOffset() / 60
+        newDate.setHours(12 - tzOffset, 0)
+      }
     }
     if (typeof onChangeFromProps === 'function') onChangeFromProps(newDate)
   }
