@@ -40,7 +40,7 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
-  generateURL: GenerateURL
+  generateURL?: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload
   name: string
