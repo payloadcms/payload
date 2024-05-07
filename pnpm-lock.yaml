@@ -529,6 +529,18 @@ importers:
 
   packages/graphql:
     dependencies:
+      '@swc-node/core':
+        specifier: ^1.13.0
+        version: 1.13.0(@swc/core@1.4.13)(@swc/types@0.1.6)
+      '@swc-node/sourcemap-support':
+        specifier: ^0.5.0
+        version: 0.5.0
+      find-up:
+        specifier: 4.1.0
+        version: 4.1.0
+      get-tsconfig:
+        specifier: ^4.7.2
+        version: 4.7.3
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
