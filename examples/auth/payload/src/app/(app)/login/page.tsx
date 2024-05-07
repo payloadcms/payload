@@ -4,7 +4,7 @@ import React from 'react'
 
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
-import { getUser } from '../actions/getUser'
+import { getUser } from '../_utilities/getUser'
 import { LoginForm } from './LoginForm'
 import classes from './index.module.scss'
 

@@ -6,7 +6,7 @@ import React from 'react'
 import { Button } from '../_components/Button'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
-import { getUser } from '../actions/getUser'
+import { getUser } from '../_utilities/getUser'
 import { AccountForm } from './AccountForm'
 import classes from './index.module.scss'
 

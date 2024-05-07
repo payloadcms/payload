@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-import { getUser } from '../../actions/getUser'
+import { getUser } from '../../_utilities/getUser'
 import { Gutter } from '../Gutter'
 import { HeaderNav } from './Nav'
 import classes from './index.module.scss'

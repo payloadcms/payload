@@ -3,7 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Gutter } from './_components/Gutter'
-import { getUser } from './actions/getUser'
+import { getUser } from './_utilities/getUser'
 
 export default async function HomePage() {
   const headers = getHeaders()

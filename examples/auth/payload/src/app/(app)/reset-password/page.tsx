@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import React from 'react'
 
 import { Gutter } from '../_components/Gutter'
-import { getUser } from '../actions/getUser'
+import { getUser } from '../_utilities/getUser'
 import { ResetPasswordForm } from './ResetPasswordForm'
 import classes from './index.module.scss'
 
