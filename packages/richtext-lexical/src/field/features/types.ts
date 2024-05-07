@@ -127,6 +127,14 @@ export type FeatureProviderClient<ClientFeatureProps> = {
   }) => ClientFeature<ClientFeatureProps>
 }
 
+export type PluginComponent<ClientFeatureProps = any> = React.FC<{
+  clientProps: ClientFeatureProps
+}>
+export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
+  anchorElem: HTMLElement
+  clientProps: ClientFeatureProps
+}>
+
 export type ClientFeature<ClientFeatureProps> = {
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
@@ -152,22 +160,22 @@ export type ClientFeature<ClientFeatureProps> = {
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'bottom' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'normal' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
+        Component: PluginComponentWithAnchor<ClientFeatureProps>
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
   >
@@ -333,25 +341,29 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown
 export type SanitizedPlugin =
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC<{ anchorElem: HTMLElement }>
+      Component: PluginComponentWithAnchor
+      clientProps: any
       desktopOnly?: boolean
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
+import type { PluginComponentWithAnchor } from '../../../types.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -394,11 +395,7 @@ function useInlineToolbar(
   return createPortal(<InlineToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
 }
 
-export function InlineToolbarPlugin({
-  anchorElem = document.body,
-}: {
-  anchorElem?: HTMLElement
-}): React.ReactElement | null {
+export const InlineToolbarPlugin: PluginComponentWithAnchor<undefined> = ({ anchorElem }) => {
   const [editor] = useLexicalComposerContext()
 
   return useInlineToolbar(editor, anchorElem)

@@ -10,6 +10,8 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
+import type { PluginComponent } from '../../types.js'
+import type { BlocksFeatureClientProps } from '../feature.client.js'
 import type { BlockFields } from '../nodes/BlocksNode.js'
 
 import { BlocksDrawerComponent } from '../drawer/index.js'
@@ -18,7 +20,7 @@ import { INSERT_BLOCK_COMMAND } from './commands.js'
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
-export function BlocksPlugin(): React.ReactNode {
+export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {

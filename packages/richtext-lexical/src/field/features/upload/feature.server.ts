@@ -21,7 +21,19 @@ import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
-  collections: {
+  /**
+   * @experimental Can be used to automatically upload a file to an uploads-enabled
+   * collection if the file is pasted into the lexical editor.
+   *
+   * This property may change or be removed in future minor versions.
+   */
+  EXPERIMENTAL_autoUpload?: {
+    /**
+     * The collection to upload the file to
+     */
+    collection: string
+  }
+  collections?: {
     [collection: string]: {
       fields: FieldWithRichTextRequiredEditor[]
     }
@@ -50,7 +62,10 @@ export const UploadFeature: FeatureProviderProviderServer<
     props = { collections: {} }
   }
 
-  const clientProps: UploadFeaturePropsClient = { collections: {} }
+  const clientProps: UploadFeaturePropsClient = {
+    EXPERIMENTAL_autoUpload: props.EXPERIMENTAL_autoUpload,
+    collections: {},
+  }
   if (props.collections) {
     for (const collection in props.collections) {
       clientProps.collections[collection] = {

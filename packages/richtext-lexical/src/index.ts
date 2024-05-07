@@ -431,6 +431,8 @@ export type {
   FieldNodeHookArgs,
   NodeValidation,
   NodeWithHooks,
+  PluginComponent,
+  PluginComponentWithAnchor,
   PopulationPromise,
   ResolvedClientFeature,
   ResolvedClientFeatureMap,
