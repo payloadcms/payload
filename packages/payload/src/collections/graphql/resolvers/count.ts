@@ -28,6 +28,8 @@ export default function findResolver(collection: Collection): Resolver {
     req.locale = args.locale || locale
     req.fallbackLocale = fallbackLocale
 
+    context.req = req
+
     const options = {
       collection,
       req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),

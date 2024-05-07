@@ -205,6 +205,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: user,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,

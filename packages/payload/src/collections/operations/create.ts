@@ -290,6 +290,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      draft,
       fallbackLocale,
       global: null,
       locale,
