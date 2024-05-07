@@ -26,6 +26,7 @@ type ArrayRowProps = UseDraggableSortableReturn &
     duplicateRow: (rowIndex: number) => void
     forceRender?: boolean
     hasMaxRows?: boolean
+    isSortable: boolean
     moveRow: (fromIndex: number, toIndex: number) => void
     readOnly?: boolean
     removeRow: (rowIndex: number) => void
@@ -44,6 +45,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   indexPath,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -94,6 +96,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
               index={rowIndex}
+              isSortable={isSortable}
               moveRow={moveRow}
               removeRow={removeRow}
               rowCount={rowCount}
@@ -103,11 +106,15 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         className={classNames}
         collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel

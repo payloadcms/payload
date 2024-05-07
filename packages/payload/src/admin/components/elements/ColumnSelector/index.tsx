@@ -15,7 +15,7 @@ import './index.scss'
 const baseClass = 'column-selector'
 
 const ColumnSelector: React.FC<Props> = (props) => {
-  const { collection } = props
+  const { slug } = props
 
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
@@ -53,7 +53,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
             draggable
             icon={active ? <X /> : <Plus />}
             id={accessor}
-            key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

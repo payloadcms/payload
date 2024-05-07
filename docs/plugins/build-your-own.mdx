@@ -247,7 +247,7 @@ In the template, we have stubbed out a basic `onInitExtension` file that you can
 
 ### Webpack
 
-If any of your files use server only packages such as fs, stripe, nodemailer, etc, they will need to be removed from the browser bundle. To do that, you can [alias the file imports with webpack](https://payloadcms.com/docs/admin/webpack#aliasing-server-only-modules).
+If any of your files use server only packages such as fs, stripe, nodemailer, etc, they will need to be removed from the browser bundle. To do that, you can [alias the file imports with webpack](https://payloadcms.com/docs/admin/excluding-server-code#aliasing-server-only-modules).
 
 When files are bundled for the browser, the import paths are essentially crawled to determine what files to include in the bundle. To prevent the server only files from making it into the bundle, we can alias their import paths to a file that can be included in the browser. This will short-circuit the import path crawling and ensure browser only code is bundled.
 

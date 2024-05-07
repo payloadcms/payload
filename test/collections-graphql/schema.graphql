@@ -1,49 +1,55 @@
 type Query {
-  User(id: String!, draft: Boolean): User
-  Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
-  countUsers(draft: Boolean, where: User_where): countUsers
+  User(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): User
+  Users(where: User_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Users
+  countUsers(where: User_where, locale: LocaleInputType): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  Point(id: String!, draft: Boolean): Point
-  Points(draft: Boolean, where: Point_where, limit: Int, page: Int, sort: String): Points
-  countPoints(draft: Boolean, where: Point_where): countPoints
+  Point(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Point
+  Points(where: Point_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Points
+  countPoints(where: Point_where, locale: LocaleInputType): countPoints
   docAccessPoint(id: String!): pointDocAccess
-  Post(id: String!, draft: Boolean): Post
-  Posts(draft: Boolean, where: Post_where, limit: Int, page: Int, sort: String): Posts
-  countPosts(draft: Boolean, where: Post_where): countPosts
+  Post(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Post
+  Posts(where: Post_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Posts
+  countPosts(where: Post_where, locale: LocaleInputType): countPosts
   docAccessPost(id: String!): postsDocAccess
-  CustomId(id: Int!, draft: Boolean): CustomId
-  CustomIds(draft: Boolean, where: CustomId_where, limit: Int, page: Int, sort: String): CustomIds
-  countCustomIds(draft: Boolean, where: CustomId_where): countCustomIds
+  CustomId(id: Int!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CustomId
+  CustomIds(where: CustomId_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): CustomIds
+  countCustomIds(where: CustomId_where, locale: LocaleInputType): countCustomIds
   docAccessCustomId(id: Int!): custom_idsDocAccess
-  Relation(id: String!, draft: Boolean): Relation
-  Relations(draft: Boolean, where: Relation_where, limit: Int, page: Int, sort: String): Relations
-  countRelations(draft: Boolean, where: Relation_where): countRelations
+  Relation(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Relation
+  Relations(where: Relation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Relations
+  countRelations(where: Relation_where, locale: LocaleInputType): countRelations
   docAccessRelation(id: String!): relationDocAccess
-  Dummy(id: String!, draft: Boolean): Dummy
-  Dummies(draft: Boolean, where: Dummy_where, limit: Int, page: Int, sort: String): Dummies
-  countDummies(draft: Boolean, where: Dummy_where): countDummies
+  Dummy(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Dummy
+  Dummies(where: Dummy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Dummies
+  countDummies(where: Dummy_where, locale: LocaleInputType): countDummies
   docAccessDummy(id: String!): dummyDocAccess
-  ErrorOnHook(id: String!, draft: Boolean): ErrorOnHook
-  ErrorOnHooks(draft: Boolean, where: ErrorOnHook_where, limit: Int, page: Int, sort: String): ErrorOnHooks
-  countErrorOnHooks(draft: Boolean, where: ErrorOnHook_where): countErrorOnHooks
+  ErrorOnHook(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ErrorOnHook
+  ErrorOnHooks(where: ErrorOnHook_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): ErrorOnHooks
+  countErrorOnHooks(where: ErrorOnHook_where, locale: LocaleInputType): countErrorOnHooks
   docAccessErrorOnHook(id: String!): error_on_hooksDocAccess
-  PayloadApiTestOne(id: String!, draft: Boolean): PayloadApiTestOne
-  PayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where, limit: Int, page: Int, sort: String): PayloadApiTestOnes
-  countPayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where): countPayloadApiTestOnes
+  PayloadApiTestOne(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadApiTestOne
+  PayloadApiTestOnes(where: PayloadApiTestOne_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadApiTestOnes
+  countPayloadApiTestOnes(where: PayloadApiTestOne_where, locale: LocaleInputType): countPayloadApiTestOnes
   docAccessPayloadApiTestOne(id: String!): payload_api_test_onesDocAccess
-  PayloadApiTestTwo(id: String!, draft: Boolean): PayloadApiTestTwo
-  PayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where, limit: Int, page: Int, sort: String): PayloadApiTestTwos
-  countPayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where): countPayloadApiTestTwos
+  PayloadApiTestTwo(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadApiTestTwo
+  PayloadApiTestTwos(where: PayloadApiTestTwo_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadApiTestTwos
+  countPayloadApiTestTwos(where: PayloadApiTestTwo_where, locale: LocaleInputType): countPayloadApiTestTwos
   docAccessPayloadApiTestTwo(id: String!): payload_api_test_twosDocAccess
-  ContentType(id: String!, draft: Boolean): ContentType
-  ContentTypes(draft: Boolean, where: ContentType_where, limit: Int, page: Int, sort: String): ContentTypes
-  countContentTypes(draft: Boolean, where: ContentType_where): countContentTypes
+  ContentType(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ContentType
+  ContentTypes(where: ContentType_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): ContentTypes
+  countContentTypes(where: ContentType_where, locale: LocaleInputType): countContentTypes
   docAccessContentType(id: String!): content_typeDocAccess
-  PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where): countPayloadPreferences
+  CyclicalRelationship(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CyclicalRelationship
+  CyclicalRelationships(draft: Boolean, where: CyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): CyclicalRelationships
+  countCyclicalRelationships(draft: Boolean, where: CyclicalRelationship_where, locale: LocaleInputType): countCyclicalRelationships
+  docAccessCyclicalRelationship(id: String!): cyclical_relationshipDocAccess
+  versionCyclicalRelationship(id: String, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CyclicalRelationshipVersion
+  versionsCyclicalRelationships(where: versionsCyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): versionsCyclicalRelationships
+  PayloadPreference(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadPreference
+  PayloadPreferences(where: PayloadPreference_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadPreferences
+  countPayloadPreferences(where: PayloadPreference_where, locale: LocaleInputType): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
   QueryWithInternalError: QueryWithInternalError
@@ -72,6 +78,17 @@ scalar DateTime
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
 scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+
+enum FallbackLocaleInputType {
+  en
+  es
+  none
+}
+
+enum LocaleInputType {
+  en
+  es
+}
 
 type Users {
   docs: [User]
@@ -523,11 +540,11 @@ type Post {
   description: String
   number: Float
   min: Float
-  relationField: Relation
-  relationToCustomID: CustomId
-  relationHasManyField: [Relation!]
-  relationMultiRelationTo: Post_RelationMultiRelationTo_Relationship
-  relationMultiRelationToHasMany: [Post_RelationMultiRelationToHasMany_Relationship!]
+  relationField(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  relationToCustomID(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CustomId
+  relationHasManyField(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
+  relationMultiRelationTo(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post_RelationMultiRelationTo_Relationship
+  relationMultiRelationToHasMany(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Post_RelationMultiRelationToHasMany_Relationship!]
   A1: Post_A1
   B1: Post_B1
   C1: Post_C1
@@ -2488,7 +2505,7 @@ type PayloadApiTestOnesDeleteDocAccess {
 type PayloadApiTestTwo {
   id: String
   payloadAPI: String
-  relation: PayloadApiTestOne
+  relation(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadApiTestOne
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -2920,9 +2937,555 @@ type ContentTypeDeleteDocAccess {
   where: JSONObject
 }
 
+type CyclicalRelationship {
+  id: String
+  title: String
+  relationToSelf(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
+  relationToSelfPoly(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship_RelationToSelfPoly_Relationship
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: CyclicalRelationship__status
+}
+
+type CyclicalRelationship_RelationToSelfPoly_Relationship {
+  relationTo: CyclicalRelationship_RelationToSelfPoly_RelationTo
+  value: CyclicalRelationship_RelationToSelfPoly
+}
+
+enum CyclicalRelationship_RelationToSelfPoly_RelationTo {
+  cyclical_relationship
+}
+
+union CyclicalRelationship_RelationToSelfPoly = CyclicalRelationship
+
+enum CyclicalRelationship__status {
+  draft
+  published
+}
+
+type CyclicalRelationships {
+  docs: [CyclicalRelationship]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input CyclicalRelationship_where {
+  title: CyclicalRelationship_title_operator
+  relationToSelf: CyclicalRelationship_relationToSelf_operator
+  relationToSelfPoly: CyclicalRelationship_relationToSelfPoly_Relation
+  updatedAt: CyclicalRelationship_updatedAt_operator
+  createdAt: CyclicalRelationship_createdAt_operator
+  _status: CyclicalRelationship__status_operator
+  id: CyclicalRelationship_id_operator
+  AND: [CyclicalRelationship_where_and]
+  OR: [CyclicalRelationship_where_or]
+}
+
+input CyclicalRelationship_title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input CyclicalRelationship_relationToSelf_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input CyclicalRelationship_relationToSelfPoly_Relation {
+  relationTo: CyclicalRelationship_relationToSelfPoly_Relation_RelationTo
+  value: JSON
+}
+
+enum CyclicalRelationship_relationToSelfPoly_Relation_RelationTo {
+  cyclical_relationship
+}
+
+input CyclicalRelationship_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input CyclicalRelationship_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input CyclicalRelationship__status_operator {
+  equals: CyclicalRelationship__status_Input
+  not_equals: CyclicalRelationship__status_Input
+  in: [CyclicalRelationship__status_Input]
+  not_in: [CyclicalRelationship__status_Input]
+  all: [CyclicalRelationship__status_Input]
+  exists: Boolean
+}
+
+enum CyclicalRelationship__status_Input {
+  draft
+  published
+}
+
+input CyclicalRelationship_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input CyclicalRelationship_where_and {
+  title: CyclicalRelationship_title_operator
+  relationToSelf: CyclicalRelationship_relationToSelf_operator
+  relationToSelfPoly: CyclicalRelationship_relationToSelfPoly_Relation
+  updatedAt: CyclicalRelationship_updatedAt_operator
+  createdAt: CyclicalRelationship_createdAt_operator
+  _status: CyclicalRelationship__status_operator
+  id: CyclicalRelationship_id_operator
+  AND: [CyclicalRelationship_where_and]
+  OR: [CyclicalRelationship_where_or]
+}
+
+input CyclicalRelationship_where_or {
+  title: CyclicalRelationship_title_operator
+  relationToSelf: CyclicalRelationship_relationToSelf_operator
+  relationToSelfPoly: CyclicalRelationship_relationToSelfPoly_Relation
+  updatedAt: CyclicalRelationship_updatedAt_operator
+  createdAt: CyclicalRelationship_createdAt_operator
+  _status: CyclicalRelationship__status_operator
+  id: CyclicalRelationship_id_operator
+  AND: [CyclicalRelationship_where_and]
+  OR: [CyclicalRelationship_where_or]
+}
+
+type countCyclicalRelationships {
+  totalDocs: Int
+}
+
+type cyclical_relationshipDocAccess {
+  fields: CyclicalRelationshipDocAccessFields
+  create: CyclicalRelationshipCreateDocAccess
+  read: CyclicalRelationshipReadDocAccess
+  update: CyclicalRelationshipUpdateDocAccess
+  delete: CyclicalRelationshipDeleteDocAccess
+  readVersions: CyclicalRelationshipReadVersionsDocAccess
+}
+
+type CyclicalRelationshipDocAccessFields {
+  title: CyclicalRelationshipDocAccessFields_title
+  relationToSelf: CyclicalRelationshipDocAccessFields_relationToSelf
+  relationToSelfPoly: CyclicalRelationshipDocAccessFields_relationToSelfPoly
+  updatedAt: CyclicalRelationshipDocAccessFields_updatedAt
+  createdAt: CyclicalRelationshipDocAccessFields_createdAt
+  _status: CyclicalRelationshipDocAccessFields__status
+}
+
+type CyclicalRelationshipDocAccessFields_title {
+  create: CyclicalRelationshipDocAccessFields_title_Create
+  read: CyclicalRelationshipDocAccessFields_title_Read
+  update: CyclicalRelationshipDocAccessFields_title_Update
+  delete: CyclicalRelationshipDocAccessFields_title_Delete
+}
+
+type CyclicalRelationshipDocAccessFields_title_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_title_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_title_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelf {
+  create: CyclicalRelationshipDocAccessFields_relationToSelf_Create
+  read: CyclicalRelationshipDocAccessFields_relationToSelf_Read
+  update: CyclicalRelationshipDocAccessFields_relationToSelf_Update
+  delete: CyclicalRelationshipDocAccessFields_relationToSelf_Delete
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelf_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelf_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelf_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelf_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelfPoly {
+  create: CyclicalRelationshipDocAccessFields_relationToSelfPoly_Create
+  read: CyclicalRelationshipDocAccessFields_relationToSelfPoly_Read
+  update: CyclicalRelationshipDocAccessFields_relationToSelfPoly_Update
+  delete: CyclicalRelationshipDocAccessFields_relationToSelfPoly_Delete
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelfPoly_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelfPoly_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelfPoly_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_relationToSelfPoly_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_updatedAt {
+  create: CyclicalRelationshipDocAccessFields_updatedAt_Create
+  read: CyclicalRelationshipDocAccessFields_updatedAt_Read
+  update: CyclicalRelationshipDocAccessFields_updatedAt_Update
+  delete: CyclicalRelationshipDocAccessFields_updatedAt_Delete
+}
+
+type CyclicalRelationshipDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_createdAt {
+  create: CyclicalRelationshipDocAccessFields_createdAt_Create
+  read: CyclicalRelationshipDocAccessFields_createdAt_Read
+  update: CyclicalRelationshipDocAccessFields_createdAt_Update
+  delete: CyclicalRelationshipDocAccessFields_createdAt_Delete
+}
+
+type CyclicalRelationshipDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields__status {
+  create: CyclicalRelationshipDocAccessFields__status_Create
+  read: CyclicalRelationshipDocAccessFields__status_Read
+  update: CyclicalRelationshipDocAccessFields__status_Update
+  delete: CyclicalRelationshipDocAccessFields__status_Delete
+}
+
+type CyclicalRelationshipDocAccessFields__status_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields__status_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields__status_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipDocAccessFields__status_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipReadVersionsDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipVersion {
+  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
+  version: CyclicalRelationshipVersion_Version
+  createdAt: DateTime
+  updatedAt: DateTime
+  latest: Boolean
+  id: String
+}
+
+type CyclicalRelationshipVersion_Version {
+  title: String
+  relationToSelf(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
+  relationToSelfPoly(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationshipVersion_Version_RelationToSelfPoly_Relationship
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: CyclicalRelationshipVersion_Version__status
+}
+
+type CyclicalRelationshipVersion_Version_RelationToSelfPoly_Relationship {
+  relationTo: CyclicalRelationshipVersion_Version_RelationToSelfPoly_RelationTo
+  value: CyclicalRelationshipVersion_Version_RelationToSelfPoly
+}
+
+enum CyclicalRelationshipVersion_Version_RelationToSelfPoly_RelationTo {
+  cyclical_relationship
+}
+
+union CyclicalRelationshipVersion_Version_RelationToSelfPoly = CyclicalRelationship
+
+enum CyclicalRelationshipVersion_Version__status {
+  draft
+  published
+}
+
+type versionsCyclicalRelationships {
+  docs: [CyclicalRelationshipVersion]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input versionsCyclicalRelationship_where {
+  parent: versionsCyclicalRelationship_parent_operator
+  version__title: versionsCyclicalRelationship_version__title_operator
+  version__relationToSelf: versionsCyclicalRelationship_version__relationToSelf_operator
+  version__relationToSelfPoly: versionsCyclicalRelationship_version__relationToSelfPoly_Relation
+  version__updatedAt: versionsCyclicalRelationship_version__updatedAt_operator
+  version__createdAt: versionsCyclicalRelationship_version__createdAt_operator
+  version___status: versionsCyclicalRelationship_version___status_operator
+  createdAt: versionsCyclicalRelationship_createdAt_operator
+  updatedAt: versionsCyclicalRelationship_updatedAt_operator
+  latest: versionsCyclicalRelationship_latest_operator
+  id: versionsCyclicalRelationship_id_operator
+  AND: [versionsCyclicalRelationship_where_and]
+  OR: [versionsCyclicalRelationship_where_or]
+}
+
+input versionsCyclicalRelationship_parent_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_version__title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_version__relationToSelf_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_version__relationToSelfPoly_Relation {
+  relationTo: versionsCyclicalRelationship_version__relationToSelfPoly_Relation_RelationTo
+  value: JSON
+}
+
+enum versionsCyclicalRelationship_version__relationToSelfPoly_Relation_RelationTo {
+  cyclical_relationship
+}
+
+input versionsCyclicalRelationship_version__updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_version__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_version___status_operator {
+  equals: versionsCyclicalRelationship_version___status_Input
+  not_equals: versionsCyclicalRelationship_version___status_Input
+  in: [versionsCyclicalRelationship_version___status_Input]
+  not_in: [versionsCyclicalRelationship_version___status_Input]
+  all: [versionsCyclicalRelationship_version___status_Input]
+  exists: Boolean
+}
+
+enum versionsCyclicalRelationship_version___status_Input {
+  draft
+  published
+}
+
+input versionsCyclicalRelationship_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_latest_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsCyclicalRelationship_where_and {
+  parent: versionsCyclicalRelationship_parent_operator
+  version__title: versionsCyclicalRelationship_version__title_operator
+  version__relationToSelf: versionsCyclicalRelationship_version__relationToSelf_operator
+  version__relationToSelfPoly: versionsCyclicalRelationship_version__relationToSelfPoly_Relation
+  version__updatedAt: versionsCyclicalRelationship_version__updatedAt_operator
+  version__createdAt: versionsCyclicalRelationship_version__createdAt_operator
+  version___status: versionsCyclicalRelationship_version___status_operator
+  createdAt: versionsCyclicalRelationship_createdAt_operator
+  updatedAt: versionsCyclicalRelationship_updatedAt_operator
+  latest: versionsCyclicalRelationship_latest_operator
+  id: versionsCyclicalRelationship_id_operator
+  AND: [versionsCyclicalRelationship_where_and]
+  OR: [versionsCyclicalRelationship_where_or]
+}
+
+input versionsCyclicalRelationship_where_or {
+  parent: versionsCyclicalRelationship_parent_operator
+  version__title: versionsCyclicalRelationship_version__title_operator
+  version__relationToSelf: versionsCyclicalRelationship_version__relationToSelf_operator
+  version__relationToSelfPoly: versionsCyclicalRelationship_version__relationToSelfPoly_Relation
+  version__updatedAt: versionsCyclicalRelationship_version__updatedAt_operator
+  version__createdAt: versionsCyclicalRelationship_version__createdAt_operator
+  version___status: versionsCyclicalRelationship_version___status_operator
+  createdAt: versionsCyclicalRelationship_createdAt_operator
+  updatedAt: versionsCyclicalRelationship_updatedAt_operator
+  latest: versionsCyclicalRelationship_latest_operator
+  id: versionsCyclicalRelationship_id_operator
+  AND: [versionsCyclicalRelationship_where_and]
+  OR: [versionsCyclicalRelationship_where_or]
+}
+
 type PayloadPreference {
   id: String
-  user: PayloadPreference_User_Relationship!
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadPreference_User_Relationship!
   key: String
   value: JSON
   updatedAt: DateTime
@@ -3217,6 +3780,7 @@ type Access {
   payload_api_test_ones: payload_api_test_onesAccess
   payload_api_test_twos: payload_api_test_twosAccess
   content_type: content_typeAccess
+  cyclical_relationship: cyclical_relationshipAccess
   payload_preferences: payload_preferencesAccess
 }
 
@@ -4832,6 +5396,187 @@ type ContentTypeDeleteAccess {
   where: JSONObject
 }
 
+type cyclical_relationshipAccess {
+  fields: CyclicalRelationshipFields
+  create: CyclicalRelationshipCreateAccess
+  read: CyclicalRelationshipReadAccess
+  update: CyclicalRelationshipUpdateAccess
+  delete: CyclicalRelationshipDeleteAccess
+  readVersions: CyclicalRelationshipReadVersionsAccess
+}
+
+type CyclicalRelationshipFields {
+  title: CyclicalRelationshipFields_title
+  relationToSelf: CyclicalRelationshipFields_relationToSelf
+  relationToSelfPoly: CyclicalRelationshipFields_relationToSelfPoly
+  updatedAt: CyclicalRelationshipFields_updatedAt
+  createdAt: CyclicalRelationshipFields_createdAt
+  _status: CyclicalRelationshipFields__status
+}
+
+type CyclicalRelationshipFields_title {
+  create: CyclicalRelationshipFields_title_Create
+  read: CyclicalRelationshipFields_title_Read
+  update: CyclicalRelationshipFields_title_Update
+  delete: CyclicalRelationshipFields_title_Delete
+}
+
+type CyclicalRelationshipFields_title_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_title_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_title_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_title_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelf {
+  create: CyclicalRelationshipFields_relationToSelf_Create
+  read: CyclicalRelationshipFields_relationToSelf_Read
+  update: CyclicalRelationshipFields_relationToSelf_Update
+  delete: CyclicalRelationshipFields_relationToSelf_Delete
+}
+
+type CyclicalRelationshipFields_relationToSelf_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelf_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelf_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelf_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelfPoly {
+  create: CyclicalRelationshipFields_relationToSelfPoly_Create
+  read: CyclicalRelationshipFields_relationToSelfPoly_Read
+  update: CyclicalRelationshipFields_relationToSelfPoly_Update
+  delete: CyclicalRelationshipFields_relationToSelfPoly_Delete
+}
+
+type CyclicalRelationshipFields_relationToSelfPoly_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelfPoly_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelfPoly_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_relationToSelfPoly_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_updatedAt {
+  create: CyclicalRelationshipFields_updatedAt_Create
+  read: CyclicalRelationshipFields_updatedAt_Read
+  update: CyclicalRelationshipFields_updatedAt_Update
+  delete: CyclicalRelationshipFields_updatedAt_Delete
+}
+
+type CyclicalRelationshipFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_createdAt {
+  create: CyclicalRelationshipFields_createdAt_Create
+  read: CyclicalRelationshipFields_createdAt_Read
+  update: CyclicalRelationshipFields_createdAt_Update
+  delete: CyclicalRelationshipFields_createdAt_Delete
+}
+
+type CyclicalRelationshipFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields__status {
+  create: CyclicalRelationshipFields__status_Create
+  read: CyclicalRelationshipFields__status_Read
+  update: CyclicalRelationshipFields__status_Update
+  delete: CyclicalRelationshipFields__status_Delete
+}
+
+type CyclicalRelationshipFields__status_Create {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields__status_Read {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields__status_Update {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipFields__status_Delete {
+  permission: Boolean!
+}
+
+type CyclicalRelationshipCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CyclicalRelationshipReadVersionsAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type payload_preferencesAccess {
   fields: PayloadPreferencesFields
   create: PayloadPreferencesCreateAccess
@@ -4988,8 +5733,8 @@ type QueryWithInternalError {
 }
 
 type Mutation {
-  createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
+  createUser(data: mutationUserInput!, locale: LocaleInputType): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, locale: LocaleInputType): User
   deleteUser(id: String!): User
   refreshTokenUser(token: String): usersRefreshedUser
   logoutUser: String
@@ -4998,35 +5743,39 @@ type Mutation {
   forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
-  createPoint(data: mutationPointInput!, draft: Boolean): Point
-  updatePoint(id: String!, autosave: Boolean, data: mutationPointUpdateInput!, draft: Boolean): Point
+  createPoint(data: mutationPointInput!, locale: LocaleInputType): Point
+  updatePoint(id: String!, autosave: Boolean, data: mutationPointUpdateInput!, locale: LocaleInputType): Point
   deletePoint(id: String!): Point
-  createPost(data: mutationPostInput!, draft: Boolean): Post
-  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean): Post
+  createPost(data: mutationPostInput!, locale: LocaleInputType): Post
+  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, locale: LocaleInputType): Post
   deletePost(id: String!): Post
-  createCustomId(data: mutationCustomIdInput!, draft: Boolean): CustomId
-  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, draft: Boolean): CustomId
+  createCustomId(data: mutationCustomIdInput!, locale: LocaleInputType): CustomId
+  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, locale: LocaleInputType): CustomId
   deleteCustomId(id: Int!): CustomId
-  createRelation(data: mutationRelationInput!, draft: Boolean): Relation
-  updateRelation(id: String!, autosave: Boolean, data: mutationRelationUpdateInput!, draft: Boolean): Relation
+  createRelation(data: mutationRelationInput!, locale: LocaleInputType): Relation
+  updateRelation(id: String!, autosave: Boolean, data: mutationRelationUpdateInput!, locale: LocaleInputType): Relation
   deleteRelation(id: String!): Relation
-  createDummy(data: mutationDummyInput!, draft: Boolean): Dummy
-  updateDummy(id: String!, autosave: Boolean, data: mutationDummyUpdateInput!, draft: Boolean): Dummy
+  createDummy(data: mutationDummyInput!, locale: LocaleInputType): Dummy
+  updateDummy(id: String!, autosave: Boolean, data: mutationDummyUpdateInput!, locale: LocaleInputType): Dummy
   deleteDummy(id: String!): Dummy
-  createErrorOnHook(data: mutationErrorOnHookInput!, draft: Boolean): ErrorOnHook
-  updateErrorOnHook(id: String!, autosave: Boolean, data: mutationErrorOnHookUpdateInput!, draft: Boolean): ErrorOnHook
+  createErrorOnHook(data: mutationErrorOnHookInput!, locale: LocaleInputType): ErrorOnHook
+  updateErrorOnHook(id: String!, autosave: Boolean, data: mutationErrorOnHookUpdateInput!, locale: LocaleInputType): ErrorOnHook
   deleteErrorOnHook(id: String!): ErrorOnHook
-  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, draft: Boolean): PayloadApiTestOne
-  updatePayloadApiTestOne(id: String!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, draft: Boolean): PayloadApiTestOne
+  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, locale: LocaleInputType): PayloadApiTestOne
+  updatePayloadApiTestOne(id: String!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, locale: LocaleInputType): PayloadApiTestOne
   deletePayloadApiTestOne(id: String!): PayloadApiTestOne
-  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, draft: Boolean): PayloadApiTestTwo
-  updatePayloadApiTestTwo(id: String!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, draft: Boolean): PayloadApiTestTwo
+  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, locale: LocaleInputType): PayloadApiTestTwo
+  updatePayloadApiTestTwo(id: String!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, locale: LocaleInputType): PayloadApiTestTwo
   deletePayloadApiTestTwo(id: String!): PayloadApiTestTwo
-  createContentType(data: mutationContentTypeInput!, draft: Boolean): ContentType
-  updateContentType(id: String!, autosave: Boolean, data: mutationContentTypeUpdateInput!, draft: Boolean): ContentType
+  createContentType(data: mutationContentTypeInput!, locale: LocaleInputType): ContentType
+  updateContentType(id: String!, autosave: Boolean, data: mutationContentTypeUpdateInput!, locale: LocaleInputType): ContentType
   deleteContentType(id: String!): ContentType
-  createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
+  createCyclicalRelationship(data: mutationCyclicalRelationshipInput!, draft: Boolean, locale: LocaleInputType): CyclicalRelationship
+  updateCyclicalRelationship(id: String!, autosave: Boolean, data: mutationCyclicalRelationshipUpdateInput!, draft: Boolean, locale: LocaleInputType): CyclicalRelationship
+  deleteCyclicalRelationship(id: String!): CyclicalRelationship
+  restoreVersionCyclicalRelationship(id: String): CyclicalRelationship
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, locale: LocaleInputType): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, locale: LocaleInputType): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
 }
 
@@ -5311,6 +6060,52 @@ input mutationContentTypeUpdateInput {
   contentType: String
   updatedAt: String
   createdAt: String
+}
+
+input mutationCyclicalRelationshipInput {
+  title: String
+  relationToSelf: String
+  relationToSelfPoly: CyclicalRelationship_RelationToSelfPolyRelationshipInput
+  updatedAt: String
+  createdAt: String
+  _status: CyclicalRelationship__status_MutationInput
+}
+
+input CyclicalRelationship_RelationToSelfPolyRelationshipInput {
+  relationTo: CyclicalRelationship_RelationToSelfPolyRelationshipInputRelationTo
+  value: JSON
+}
+
+enum CyclicalRelationship_RelationToSelfPolyRelationshipInputRelationTo {
+  cyclical_relationship
+}
+
+enum CyclicalRelationship__status_MutationInput {
+  draft
+  published
+}
+
+input mutationCyclicalRelationshipUpdateInput {
+  title: String
+  relationToSelf: String
+  relationToSelfPoly: CyclicalRelationshipUpdate_RelationToSelfPolyRelationshipInput
+  updatedAt: String
+  createdAt: String
+  _status: CyclicalRelationshipUpdate__status_MutationInput
+}
+
+input CyclicalRelationshipUpdate_RelationToSelfPolyRelationshipInput {
+  relationTo: CyclicalRelationshipUpdate_RelationToSelfPolyRelationshipInputRelationTo
+  value: JSON
+}
+
+enum CyclicalRelationshipUpdate_RelationToSelfPolyRelationshipInputRelationTo {
+  cyclical_relationship
+}
+
+enum CyclicalRelationshipUpdate__status_MutationInput {
+  draft
+  published
 }
 
 input mutationPayloadPreferenceInput {
