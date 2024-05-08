@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import { Fragment } from 'react'
 
-import type { Page } from '../../../payload-types'
+import type { Page as PageType } from '../../../payload-types'
 
 import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
@@ -19,20 +19,20 @@ interface PageParams {
 export default async function Page({ params: { slug = 'home' } }: PageParams) {
   const payload = await getPayloadHMR({ config })
 
-  const page = await payload
-    .find({
-      collection: 'pages',
-      draft: true,
-      limit: 1,
-      where: {
-        slug: {
-          equals: slug,
-        },
+  const pageRes = await payload.find({
+    collection: 'pages',
+    draft: true,
+    limit: 1,
+    where: {
+      slug: {
+        equals: slug,
       },
-    })
-    ?.then((res) => res?.docs[0] || null)
+    },
+  })
 
-  if (page === null) {
+  const data = pageRes?.docs?.[0] as PageType | null
+
+  if (data === null) {
     return notFound()
   }
 
@@ -41,7 +41,7 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
       <RefreshRouteOnSave />
       <main className={classes.page}>
         <Gutter>
-          <RichText content={page?.richText} />
+          <RichText content={data?.richText} />
         </Gutter>
       </main>
     </Fragment>
@@ -51,14 +51,13 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config })
 
-  const pages =
-    (await payload
-      .find({
-        collection: 'pages',
-        depth: 0,
-        limit: 100,
-      })
-      ?.then((res) => res?.docs)) ?? []
+  const pagesRes = await payload.find({
+    collection: 'pages',
+    depth: 0,
+    limit: 100,
+  })
+
+  const pages = pagesRes?.docs
 
   return pages.map(({ slug }) =>
     slug !== 'home'
