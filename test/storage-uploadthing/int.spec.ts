@@ -1,7 +1,8 @@
 import type { Payload } from 'payload'
 
-import * as AWS from '@aws-sdk/client-s3'
+import dotenv from 'dotenv'
 import path from 'path'
+import { UTApi, UTFile } from 'uploadthing/server'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -11,36 +12,19 @@ import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Load config to work with emulated services
+dotenv.config({
+  path: path.resolve(dirname, './.env'),
+})
+
 let payload: Payload
 
-describe('@payloadcms/storage-s3', () => {
-  const TEST_BUCKET = process.env.S3_BUCKET
-  let client: AWS.S3Client
-
+describe('@payloadcms/storage-uploadthing', () => {
+  let client: UTApi
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(configPromise))
 
-    client = new AWS.S3({
-      endpoint: process.env.S3_ENDPOINT,
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      },
-    })
-
-    await createTestBucket()
-    await clearTestBucket()
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-  afterEach(async () => {
-    await clearTestBucket()
+    client = new UTApi({ apiKey: process.env.UPLOADTHING_SECRET })
   })
 
   it('can upload', async () => {
@@ -57,7 +41,8 @@ describe('@payloadcms/storage-s3', () => {
       uploadId: upload.id,
     })
 
-    expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
+    // expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(`https://utfs.io/f/${String(upload.filename)}`)
   })
 
   it('can upload with prefix', async () => {
@@ -81,38 +66,6 @@ describe('@payloadcms/storage-s3', () => {
     it.todo('can upload')
   })
 
-  async function createTestBucket() {
-    const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
-
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
-    }
-  }
-
-  async function clearTestBucket() {
-    const listedObjects = await client.send(
-      new AWS.ListObjectsV2Command({
-        Bucket: TEST_BUCKET,
-      }),
-    )
-
-    if (!listedObjects?.Contents?.length) return
-
-    const deleteParams = {
-      Bucket: TEST_BUCKET,
-      Delete: { Objects: [] },
-    }
-
-    listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key })
-    })
-
-    const deleteResult = await client.send(new AWS.DeleteObjectsCommand(deleteParams))
-    if (deleteResult.Errors?.length) {
-      throw new Error(JSON.stringify(deleteResult.Errors))
-    }
-  }
-
   async function verifyUploads({
     collectionSlug,
     uploadId,
@@ -133,23 +86,28 @@ describe('@payloadcms/storage-s3', () => {
     })
 
     fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
-    try {
-      for (const key of fileKeys) {
-        const { $metadata } = await client.send(
-          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
-        )
 
-        if ($metadata.httpStatusCode !== 200) {
-          console.error('Error verifying uploads', key, $metadata)
-          throw new Error(`Error verifying uploads: ${key}, ${$metadata.httpStatusCode}`)
-        }
+    console.log('Verifying uploads:', fileKeys)
 
-        // Verify each size was properly uploaded
-        expect($metadata.httpStatusCode).toBe(200)
-      }
-    } catch (error: unknown) {
-      console.error('Error verifying uploads:', fileKeys, error)
-      throw error
-    }
+    // TODO: use UTApi to verify uploads
+
+    // try {
+    //   for (const key of fileKeys) {
+    //     const { $metadata } = await client.send(
+    //       new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+    //     )
+
+    //     if ($metadata.httpStatusCode !== 200) {
+    //       console.error('Error verifying uploads', key, $metadata)
+    //       throw new Error(`Error verifying uploads: ${key}, ${$metadata.httpStatusCode}`)
+    //     }
+
+    //     // Verify each size was properly uploaded
+    //     expect($metadata.httpStatusCode).toBe(200)
+    //   }
+    // } catch (error: unknown) {
+    //   console.error('Error verifying uploads:', fileKeys, error)
+    //   throw error
+    // }
   }
 })

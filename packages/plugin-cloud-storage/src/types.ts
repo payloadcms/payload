@@ -30,6 +30,7 @@ export type HandleDelete = (args: {
 
 export type GenerateURL = (args: {
   collection: CollectionConfig
+  data: any
   filename: string
   prefix?: string
 }) => Promise<string> | string
@@ -40,6 +41,9 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  /**
+   * Generates the public URL for a file
+   */
   generateURL?: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload

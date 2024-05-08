@@ -10,7 +10,6 @@ import type { UTApiOptions } from 'uploadthing/types'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { UTApi } from 'uploadthing/server'
 
-import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
@@ -111,7 +110,7 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
 
     return {
       name: 'uploadthing',
-      generateURL: getGenerateURL({ utApi }),
+      // No generateURL func, public urls are handled by uploadthing
       handleDelete: getHandleDelete({ utApi }),
       handleUpload: getHandleUpload({ acl, utApi }),
       staticHandler: getHandler({ utApi }),
