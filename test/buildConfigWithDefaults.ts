@@ -4,7 +4,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
   AlignFeature,
-  BlockQuoteFeature,
+  BlockquoteFeature,
   BlocksFeature,
   BoldFeature,
   ChecklistFeature,
@@ -94,7 +94,7 @@ export async function buildConfigWithDefaults(
         UnorderedListFeature(),
         OrderedListFeature(),
         AlignFeature(),
-        BlockQuoteFeature(),
+        BlockquoteFeature(),
         BoldFeature(),
         ItalicFeature(),
         UploadFeature({

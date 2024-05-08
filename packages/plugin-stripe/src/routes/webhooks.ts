@@ -3,19 +3,19 @@ import type { PayloadRequestWithData } from 'payload/types'
 
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { handleWebhooks } from '../webhooks/index.js'
 
 export const stripeWebhooks = async (args: {
   config: PayloadConfig
+  pluginConfig: StripePluginConfig
   req: PayloadRequestWithData
-  stripeConfig: StripeConfig
 }): Promise<any> => {
-  const { config, req, stripeConfig } = args
+  const { config, pluginConfig, req } = args
   let returnStatus = 200
 
-  const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = stripeConfig
+  const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = pluginConfig
 
   if (stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, {
@@ -46,8 +46,8 @@ export const stripeWebhooks = async (args: {
           config,
           event,
           payload: req.payload,
+          pluginConfig,
           stripe,
-          stripeConfig,
         })
 
         // Fire external webhook handlers if they exist
@@ -56,8 +56,8 @@ export const stripeWebhooks = async (args: {
             config,
             event,
             payload: req.payload,
+            pluginConfig,
             stripe,
-            stripeConfig,
           })
         }
 
@@ -68,8 +68,8 @@ export const stripeWebhooks = async (args: {
               config,
               event,
               payload: req.payload,
+              pluginConfig,
               stripe,
-              stripeConfig,
             })
           }
         }

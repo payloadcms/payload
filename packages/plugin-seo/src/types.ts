@@ -20,7 +20,7 @@ export type GenerateURL = <T = any>(
   args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
-export interface PluginConfig {
+export type SEOPluginConfig = {
   collections?: string[]
   fieldOverrides?: {
     description?: Partial<TextareaField>
@@ -38,7 +38,7 @@ export interface PluginConfig {
   uploadsCollection?: string
 }
 
-export interface Meta {
+export type Meta = {
   description?: string
   image?: any // TODO: type this
   keywords?: string

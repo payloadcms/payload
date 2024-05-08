@@ -1,11 +1,11 @@
 import type { Config } from 'payload/config'
 
-import type { PluginConfig } from './types.js'
+import type { RedirectsPluginConfig } from './types.js'
 
 import deepMerge from './deepMerge.js'
 
 export const redirectsPlugin =
-  (pluginConfig: PluginConfig) =>
+  (pluginConfig: RedirectsPluginConfig) =>
   (incomingConfig: Config): Config => ({
     ...incomingConfig,
     collections: [

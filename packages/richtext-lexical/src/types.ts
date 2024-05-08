@@ -26,7 +26,13 @@ export type LexicalRichTextAdapterProvider =
   /**
    * This is being called during the payload sanitization process
    */
-  ({ config }: { config: SanitizedConfig }) => Promise<LexicalRichTextAdapter>
+  ({
+    config,
+    isRoot,
+  }: {
+    config: SanitizedConfig
+    isRoot?: boolean
+  }) => Promise<LexicalRichTextAdapter>
 
 export type FieldProps = RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps> & {
   fieldTypes: FieldTypes

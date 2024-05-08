@@ -1,20 +1,20 @@
 import { v4 as uuid } from 'uuid'
 
-import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types.js'
+import type { SanitizedStripePluginConfig, StripeWebhookHandler } from '../types.js'
 
 import { deepen } from '../utilities/deepen.js'
 
 type HandleCreatedOrUpdated = (
   args: Parameters<StripeWebhookHandler>[0] & {
     resourceType: string
-    syncConfig: SanitizedStripeConfig['sync'][0]
+    syncConfig: SanitizedStripePluginConfig['sync'][0]
   },
 ) => void
 
 export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
-  const { config: payloadConfig, event, payload, resourceType, stripeConfig, syncConfig } = args
+  const { config: payloadConfig, event, payload, pluginConfig, resourceType, syncConfig } = args
 
-  const { logs } = stripeConfig || {}
+  const { logs } = pluginConfig || {}
 
   const stripeDoc: any = event?.data?.object || {}
 

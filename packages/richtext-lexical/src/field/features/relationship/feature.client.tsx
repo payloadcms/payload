@@ -1,6 +1,5 @@
 'use client'
 
-import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { $isNodeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
@@ -23,10 +22,7 @@ const RelationshipFeatureClient: FeatureProviderProviderClient<RelationshipFeatu
       nodes: [RelationshipNode],
       plugins: [
         {
-          Component: withMergedProps({
-            Component: RelationshipPlugin,
-            toMergeIntoProps: props,
-          }),
+          Component: RelationshipPlugin,
           position: 'normal',
         },
       ],

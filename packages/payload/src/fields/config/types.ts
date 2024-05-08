@@ -446,6 +446,11 @@ export type UploadField = FieldBase & {
     }
   }
   filterOptions?: FilterOptions
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
   relationTo: string
   type: 'upload'
@@ -506,6 +511,11 @@ export type SelectField = FieldBase & {
 type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
   hasMany?: boolean
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
   type: 'relationship'
 } & (
@@ -588,18 +598,14 @@ export type RichTextField<
   editor?:
     | RichTextAdapter<Value, AdapterProps, AdapterProps>
     | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
-
-export type RichTextFieldRequiredEditor<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
-> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor:
-    | RichTextAdapter<Value, AdapterProps, AdapterProps>
-    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
-}
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
@@ -713,10 +719,6 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
-
-export type FieldWithRichTextRequiredEditor =
-  | Exclude<Field, RichTextField>
-  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField

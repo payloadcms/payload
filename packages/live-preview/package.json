@@ -9,7 +9,7 @@
     "directory": "packages/live-preview"
   },
   "license": "MIT",
-  "author": "Payload CMS, Inc.",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {

@@ -15,6 +15,7 @@ import {
 import { useEffect } from 'react'
 import React from 'react'
 
+import type { PluginComponent } from '../../types.js'
 import type { RelationshipFeatureProps } from '../feature.server.js'
 import type { RelationshipData } from '../nodes/RelationshipNode.js'
 
@@ -25,17 +26,17 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
   'INSERT_RELATIONSHIP_COMMAND',
 )
 
-export function RelationshipPlugin(props?: RelationshipFeatureProps): React.ReactNode {
+export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 
   let enabledRelations: string[] = null
 
-  if (props?.enabledCollections) {
-    enabledRelations = props?.enabledCollections
-  } else if (props?.disabledCollections) {
+  if (clientProps?.enabledCollections) {
+    enabledRelations = clientProps?.enabledCollections
+  } else if (clientProps?.disabledCollections) {
     enabledRelations = collections
-      .filter(({ slug }) => !props?.disabledCollections?.includes(slug))
+      .filter(({ slug }) => !clientProps?.disabledCollections?.includes(slug))
       .map(({ slug }) => slug)
   }
 
