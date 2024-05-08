@@ -4,14 +4,13 @@ import React from 'react'
 
 import type { MainMenu } from '../../../payload-types'
 
+import { getGlobal } from '../../_api/getGlobal'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
 
 export async function Header() {
-  const mainMenu: MainMenu = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/globals/main-menu`,
-  ).then(res => res.json())
+  const mainMenu: MainMenu = await getGlobal('main-menu')
 
   const { navItems } = mainMenu
 
