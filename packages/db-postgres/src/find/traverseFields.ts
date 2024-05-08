@@ -99,6 +99,10 @@ export const traverseFields = ({
 
           if (adapter.tables[arrayTableNameWithLocales]) {
             withArray.with._locales = {
+              columns: {
+                id: false,
+                _parentID: false,
+              },
               with: {},
             }
           }
