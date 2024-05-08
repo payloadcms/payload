@@ -1,9 +1,9 @@
-import type { Payload } from 'payload'
-
 import { home } from './home'
 import { examplePage } from './page'
 
-export const seed = async (payload: Payload): Promise<void> => {
+import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
+
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
     collection: 'users',
     data: {

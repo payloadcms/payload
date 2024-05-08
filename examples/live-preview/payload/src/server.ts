@@ -8,7 +8,7 @@ dotenv.config({
 import express from 'express'
 import payload from 'payload'
 
-import { seed } from './seed'
+import { seed } from './migrations/seed'
 
 const app = express()
 
