@@ -1,13 +1,23 @@
 import type React from 'react'
 
-import { isValidElement } from 'react'
-
 import { isPlainObject } from './isPlainObject.js'
+
+export function isValidReactComponentType(component: unknown): component is React.ComponentType {
+  const isClassComponent =
+    typeof component === 'function' &&
+    component.prototype &&
+    typeof component.prototype.render === 'function'
+
+  const isFunctionalComponent =
+    typeof component === 'function' && (!component.prototype || !component.prototype.render)
+
+  return isClassComponent || isFunctionalComponent
+}
 
 export function isReactServerComponent<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  return typeof component === 'function' && isValidElement(component)
+  return typeof component === 'function' && isValidReactComponentType(component)
 }
 
 export function isReactClientComponent<T extends any>(
