@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@payloadcms/live-preview-react':
-    specifier: latest
-    version: 0.2.0(react@18.3.1)
+    specifier: 3.0.0-beta.16
+    version: 3.0.0-beta.16(react@18.3.1)
   '@types/escape-html':
     specifier: ^1.0.2
     version: 1.0.4
@@ -284,8 +284,8 @@ packages:
       typescript: 4.8.4
     dev: true
 
-  /@payloadcms/live-preview-react@0.2.0(react@18.3.1):
-    resolution: {integrity: sha512-ao7DN2GJFPoipw2cmt2M0tfwmUa0hIn3UxB5EaMv6RduMuOMQlG5hx5ouX3g5wPMcQpyvLwxCuuiQhj1nKMGhA==}
+  /@payloadcms/live-preview-react@3.0.0-beta.16(react@18.3.1):
+    resolution: {integrity: sha512-wOS9RGewHln+s1rPmY2/BecGXi/cWDDjsjRb287OqCIXNEKmYo4/EDlht4Vn4rPwqkX7r8lrAKVPW4M23RyiWw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:

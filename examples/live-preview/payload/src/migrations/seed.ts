@@ -1,6 +1,6 @@
 import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
 
-import type { Page } from '../../payload-types'
+import type { Page } from '../payload-types'
 
 export const home: Partial<Page> = {
   slug: 'home',
@@ -120,7 +120,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
           link: {
             type: 'custom',
             label: 'Dashboard',
-            reference: null,
+            reference: undefined,
             url: 'http://localhost:3000/admin',
           },
         },

@@ -8,6 +8,9 @@ dependencies:
   '@payloadcms/db-mongodb':
     specifier: 3.0.0-beta.26
     version: 3.0.0-beta.26(@aws-sdk/client-sso-oidc@3.569.0)(payload@3.0.0-beta.26)
+  '@payloadcms/live-preview-react':
+    specifier: 3.0.0-beta.16
+    version: 3.0.0-beta.16(react@18.3.1)
   '@payloadcms/next':
     specifier: 3.0.0-beta.26
     version: 3.0.0-beta.26(@types/react@18.3.1)(graphql@16.8.1)(monaco-editor@0.48.0)(next@14.3.0-canary.7)(payload@3.0.0-beta.26)(react-dom@18.3.1)(react@18.3.1)(scheduler@0.23.2)(typescript@5.4.4)
@@ -1111,8 +1114,8 @@ packages:
   /@faceless-ui/modal@2.0.2(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-CtwUn+hHEaoYUjREzQKGRbEp55VzUx7sC+hxIxmCPwg7Yd5KXkQzSfoUfRAHqT/1MFfE1B2QCHVVbhtSnFL9BA==}
     peerDependencies:
-      react: ^18.2.0
-      react-dom: ^18.2.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       body-scroll-lock: 3.1.5
       focus-trap: 6.9.4
@@ -1427,6 +1430,19 @@ packages:
       ts-essentials: 7.0.3(typescript@5.4.4)
     transitivePeerDependencies:
       - typescript
+    dev: false
+
+  /@payloadcms/live-preview-react@3.0.0-beta.16(react@18.3.1):
+    resolution: {integrity: sha512-wOS9RGewHln+s1rPmY2/BecGXi/cWDDjsjRb287OqCIXNEKmYo4/EDlht4Vn4rPwqkX7r8lrAKVPW4M23RyiWw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@payloadcms/live-preview': 0.2.2
+      react: 18.3.1
+    dev: false
+
+  /@payloadcms/live-preview@0.2.2:
+    resolution: {integrity: sha512-FOcg/HOIzzESjoT4vXgM7Pjd+bODodZTKR/pEJWsjLtyARd6NfF3MNWS+tdlfa3TOZrdT8WnHBAKsKyREyE3og==}
     dev: false
 
   /@payloadcms/next@3.0.0-beta.26(@types/react@18.3.1)(graphql@16.8.1)(monaco-editor@0.48.0)(next@14.3.0-canary.7)(payload@3.0.0-beta.26)(react-dom@18.3.1)(react@18.3.1)(scheduler@0.23.2)(typescript@5.4.4):
