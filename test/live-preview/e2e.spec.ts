@@ -23,16 +23,18 @@ const { beforeAll, describe } = test
 describe('Live Preview', () => {
   let page: Page
   let serverURL: string
-  let url: AdminUrlUtil
 
-  const goToDoc = async (page: Page) => {
-    await page.goto(url.list)
-    await page.waitForURL(url.list)
+  let pagesURLUtil: AdminUrlUtil
+  let ssrPostsURLUtil: AdminUrlUtil
+
+  const goToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
+    await page.goto(urlUtil.list)
+    await page.waitForURL(urlUtil.list)
     await navigateToListCellLink(page)
   }
 
-  const goToCollectionPreview = async (page: Page): Promise<void> => {
-    await goToDoc(page)
+  const goToCollectionPreview = async (page: Page, urlUtil: AdminUrlUtil): Promise<void> => {
+    await goToDoc(page, urlUtil)
     await page.goto(`${page.url()}/preview`)
     await page.waitForURL(`**/preview`)
   }
@@ -47,7 +49,10 @@ describe('Live Preview', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
-    url = new AdminUrlUtil(serverURL, pagesSlug)
+
+    pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
+    ssrPostsURLUtil = new AdminUrlUtil(serverURL, ssrPostsSlug)
+
     const context = await browser.newContext()
     page = await context.newPage()
 
@@ -57,7 +62,7 @@ describe('Live Preview', () => {
   })
 
   test('collection — has tab', async () => {
-    await goToDoc(page)
+    await goToDoc(page, pagesURLUtil)
 
     const livePreviewTab = page.locator('.doc-tab', {
       hasText: exactText('Live Preview'),
@@ -75,20 +80,18 @@ describe('Live Preview', () => {
   })
 
   test('collection — has route', async () => {
-    await goToDoc(page)
-    await goToCollectionPreview(page)
-
+    await goToCollectionPreview(page, pagesURLUtil)
     await expect(page.locator('.live-preview')).toBeVisible()
   })
 
   test('collection — renders iframe', async () => {
-    await goToCollectionPreview(page)
+    await goToCollectionPreview(page, pagesURLUtil)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
   })
 
   test('collection — re-renders iframe client-side when form state changes', async () => {
-    await goToCollectionPreview(page)
+    await goToCollectionPreview(page, pagesURLUtil)
 
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
@@ -97,7 +100,7 @@ describe('Live Preview', () => {
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
-    // Forces the test to wait for the nextjs route to render before we try editing a field
+    // Forces the test to wait for the Next.js route to render before we try editing a field
     await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -118,12 +121,7 @@ describe('Live Preview', () => {
   })
 
   test('collection — re-render iframe server-side when autosave is made', async () => {
-    const ssrUrl = new AdminUrlUtil(serverURL, ssrPostsSlug)
-
-    await page.goto(ssrUrl.list)
-    await page.waitForURL(ssrUrl.list)
-    await navigateToListCellLink(page)
-    await goToCollectionPreview(page)
+    await goToCollectionPreview(page, ssrPostsURLUtil)
 
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
@@ -132,7 +130,7 @@ describe('Live Preview', () => {
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
-    // Forces the test to wait for the nextjs route to render before we try editing a field
+    // Forces the test to wait for the Next.js route to render before we try editing a field
     await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -153,7 +151,7 @@ describe('Live Preview', () => {
   })
 
   test('collection — should show live-preview view-level action in live-preview view', async () => {
-    await goToCollectionPreview(page)
+    await goToCollectionPreview(page, pagesURLUtil)
     await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
   })
 
@@ -207,13 +205,13 @@ describe('Live Preview', () => {
   })
 
   test('properly measures iframe and displays size', async () => {
-    await page.goto(url.create)
-    await page.waitForURL(url.create)
+    await page.goto(pagesURLUtil.create)
+    await page.waitForURL(pagesURLUtil.create)
     await page.locator('#field-title').fill('Title 3')
     await page.locator('#field-slug').fill('slug-3')
 
     await saveDocAndAssert(page)
-    await goToCollectionPreview(page)
+    await goToCollectionPreview(page, pagesURLUtil)
 
     const iframe = page.locator('iframe')
 
@@ -256,13 +254,13 @@ describe('Live Preview', () => {
   })
 
   test('resizes iframe to specified breakpoint', async () => {
-    await page.goto(url.create)
-    await page.waitForURL(url.create)
+    await page.goto(pagesURLUtil.create)
+    await page.waitForURL(pagesURLUtil.create)
     await page.locator('#field-title').fill('Title 4')
     await page.locator('#field-slug').fill('slug-4')
 
     await saveDocAndAssert(page)
-    await goToCollectionPreview(page)
+    await goToCollectionPreview(page, pagesURLUtil)
 
     // Check that the breakpoint select is present
     const breakpointSelector = page.locator(
