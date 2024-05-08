@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-exports */
 import React from 'react'
 
-// import { Header } from './_components/Header'
+import { Header } from './_components/Header'
 import './app.scss'
 
 export const metadata = {
@@ -15,7 +15,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {/* <Header /> */}
+        <Header />
         {children}
       </body>
     </html>
