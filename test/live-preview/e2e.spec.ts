@@ -14,7 +14,8 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { mobileBreakpoint } from './shared.js'
+import { ssrPostsSlug } from './collections/PostsSSR.js'
+import { mobileBreakpoint, pagesSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -47,7 +48,7 @@ describe('Live Preview', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
-    url = new AdminUrlUtil(serverURL, 'pages')
+    url = new AdminUrlUtil(serverURL, pagesSlug)
     const context = await browser.newContext()
     page = await context.newPage()
 
@@ -87,7 +88,7 @@ describe('Live Preview', () => {
     await expect(iframe).toBeVisible()
   })
 
-  test('collection — can edit fields and can preview updated value', async () => {
+  test('collection — re-renders iframe client-side when form state changes', async () => {
     await goToCollectionPreview(page)
     const titleValue = 'Title 1'
     const field = page.locator('#field-title')
@@ -109,12 +110,39 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('collection — should show live-preview view level action in live-preview view', async () => {
+  test('collection —  re-render iframe server-side when autosave is run', async () => {
+    const ssrUrl = new AdminUrlUtil(serverURL, ssrPostsSlug)
+
+    await page.goto(ssrUrl.list)
+    await page.waitForURL(ssrUrl.list)
+    await navigateToListCellLink(page)
+
+    const titleValue = 'Title 1'
+    const field = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
+    await expect(field).toBeVisible()
+
+    // Forces the test to wait for the nextjs route to render before we try editing a field
+    await expect(() => expect(frame.locator('#page-title')).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await field.fill(titleValue)
+
+    await expect(() => expect(frame.locator('#page-title')).toHaveText(titleValue)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await saveDocAndAssert(page)
+  })
+
+  test('collection — should show live-preview view-level action in live-preview view', async () => {
     await goToCollectionPreview(page)
     await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
   })
 
-  test('global — should show live-preview view level action in live-preview view', async () => {
+  test('global — should show live-preview view-level action in live-preview view', async () => {
     await goToGlobalPreview(page, 'footer')
     await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
   })
