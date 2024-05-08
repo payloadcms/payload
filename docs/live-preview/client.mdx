@@ -1,18 +1,18 @@
 ---
-title: Implementing Live Preview in your client-side front-end application
-label: Frontend Implementation
+title: Client-side Live Preview
+label: Client-side
 order: 40
 desc: Learn how to implement Live Preview in your client-side front-end application.
 keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, useLivePreview
 ---
 
-While using Live Preview, the Admin panel emits a new `window.postMessage` event every time the document is _changed_. Your front-end application can listen for these events and re-render accordingly.
-
 <Banner type="info">
-  If your front-end application is built with server-side framework like Next.js App Router, React Server Components, etc., see [Server](./server).
+  If your front-end application is supports Server Components like the [Next.js App Router](https://nextjs.org/docs/app), etc., we suggest setting up [server-side Live Preview](./server).
 </Banner>
 
-If your front-end application is built with client-side React, Next.js, Vue or Nuxt.js, use the `useLivePreview` hook that Payload provides. In the future, all other major frameworks like Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
+While using Live Preview, the Admin panel emits a new `window.postMessage` event every time your document has changed. Your front-end application can listen for these events and re-render accordingly.
+
+If your front-end application is built with [React](#react) or [Vue](#vue), use the `useLivePreview` hooks that Payload provides. In the future, all other major frameworks like Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
 
 By default, all hooks accept the following args:
 
@@ -46,7 +46,7 @@ And return the following values:
 
 ### React
 
-If your front-end application is built with React or Next.js, you can use the `useLivePreview` hook that Payload provides.
+If your front-end application is built with client-side [React](https://react.dev) like [Next.js Pages Router](https://nextjs.org/docs/pages), you can use the `useLivePreview` hook that Payload provides.
 
 First, install the `@payloadcms/live-preview-react` package:
 
@@ -81,7 +81,7 @@ export const PageClient: React.FC<{
 
 ### Vue
 
-If your front-end application is built with Vue 3 or Nuxt 3, you can use the `useLivePreview` composable that Payload provides.
+If your front-end application is built with [Vue 3](https://vuejs.org) or [Nuxt 3](https://nuxt.js), you can use the `useLivePreview` composable that Payload provides.
 
 First, install the `@payloadcms/live-preview-vue` package:
 
@@ -126,11 +126,12 @@ npm install @payloadcms/live-preview
 
 This package provides the following functions:
 
-| Path              | Description                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`subscribe`**   | Subscribes to the Admin panel's `window.postMessage` events and calls the provided callback function.              |
-| **`unsubscribe`** | Unsubscribes from the Admin panel's `window.postMessage` events.                                                   |
-| **`ready`**       | Sends a `window.postMessage` event to the Admin panel to indicate that the front-end is ready to receive messages. |
+| Path                     | Description                                                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **`subscribe`**          | Subscribes to the Admin panel's `window.postMessage` events and calls the provided callback function.                      |
+| **`unsubscribe`**        | Unsubscribes from the Admin panel's `window.postMessage` events.                                                           |
+| **`ready`**              | Sends a `window.postMessage` event to the Admin panel to indicate that the front-end is ready to receive messages.         |
+| **`isLivePreviewEvent`** | Checks if a `MessageEvent` originates from the Admin panel and is a Live Preview event, i.e. debounced form state.         |
 
 The `subscribe` function takes the following args:
 
@@ -146,7 +147,7 @@ With these functions, you can build your own hook using your front-end framework
 ```tsx
 import { subscribe, unsubscribe } from '@payloadcms/live-preview'
 
-// To build your own hook, subscribe to Live Preview events using the`subscribe` function
+// To build your own hook, subscribe to Live Preview events using the `subscribe` function
 // It handles everything from:
 // 1. Listening to `window.postMessage` events
 // 2. Merging initial data with active form state
