@@ -8,8 +8,11 @@ export function isValidReactComponentType(component: unknown): component is Reac
     component.prototype &&
     typeof component.prototype.render === 'function'
 
+  const componentString = String(component)
   const isFunctionalComponent =
-    typeof component === 'function' && (!component.prototype || !component.prototype.render)
+    typeof component === 'function' &&
+    (componentString.includes('return React.createElement') ||
+      componentString.includes('react_jsx_dev_runtime__'))
 
   return isClassComponent || isFunctionalComponent
 }
