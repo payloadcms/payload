@@ -36,8 +36,6 @@ export type Props = {
   }) => void
 }
 
-import type { RelationshipFieldProps } from '@payloadcms/ui/fields/Relationship'
-
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
@@ -192,8 +190,8 @@ export const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               addCondition({
-                andIndex,
-                fieldName,
+                andIndex: andIndex + 1,
+                fieldName: fields[0].value,
                 orIndex,
                 relation: 'and',
               })
