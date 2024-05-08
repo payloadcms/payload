@@ -27,8 +27,8 @@ const Input: React.FC<{ name: string; onChange: (value: string) => void; value: 
 )
 
 type FocalPosition = {
-  x?: number
-  y?: number
+  x: number
+  y: number
 }
 
 export type EditUploadProps = {

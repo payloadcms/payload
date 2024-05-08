@@ -239,7 +239,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
             fileSrc={fileSrc || doc?.url}
             imageCacheTag={lastSubmittedTime}
             initialCrop={formQueryParams?.uploadEdits?.crop ?? {}}
-            initialFocalPoint={formQueryParams?.uploadEdits?.focalPoint || {}}
+            initialFocalPoint={{
+              x: formQueryParams?.uploadEdits?.focalPoint.x || 0,
+              y: formQueryParams?.uploadEdits?.focalPoint.y || 0,
+            }}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
