@@ -1,10 +1,12 @@
 /* eslint-disable no-restricted-exports */
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import { Fragment } from 'react'
 
-import { getPage } from '../_api/getPage'
-import { getPages } from '../_api/getPages'
+import type { Page } from '../../../payload-types'
+
+import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import RichText from '../_components/RichText'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave'
@@ -15,7 +17,18 @@ interface PageParams {
 }
 
 export default async function Page({ params: { slug = 'home' } }: PageParams) {
-  const page = await getPage(slug)
+  const payload = await getPayloadHMR({ config })
+
+  const page = await payload.find({
+    collection: 'pages',
+    draft: true,
+    limit: 1,
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  })?.docs?.[0]
 
   if (page === null) {
     return notFound()
@@ -37,7 +50,14 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
 }
 
 export async function generateStaticParams() {
-  const pages = await getPages()
+  const payload = await getPayloadHMR({ config })
+
+  const pages =
+    (await payload.find({
+      collection: 'pages',
+      depth: 0,
+      limit: 100,
+    })?.docs) ?? []
 
   return pages.map(({ slug }) =>
     slug !== 'home'

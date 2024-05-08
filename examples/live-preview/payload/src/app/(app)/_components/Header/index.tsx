@@ -1,16 +1,20 @@
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-import type { MainMenu } from '../../../payload-types'
-
-import { getGlobal } from '../../_api/getGlobal'
+import config from '../../../payload.config'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
 
-export async function Header() {
-  const mainMenu: MainMenu = await getGlobal('main-menu')
+export const Header = async () => {
+  const payload = await getPayloadHMR({ config })
+
+  const mainMenu = await payload.findGlobal({
+    slug: 'main-menu',
+    depth: 0,
+  })
 
   const { navItems } = mainMenu
 
@@ -44,5 +48,3 @@ export async function Header() {
     </header>
   )
 }
-
-export default Header
