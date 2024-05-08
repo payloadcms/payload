@@ -19,7 +19,7 @@ export const baseAdminFields = joi.object().keys({
   custom: joi.object().pattern(joi.string(), joi.any()),
   description: joi
     .alternatives()
-    .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+    .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function()),
   disableBulkEdit: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
@@ -280,7 +280,9 @@ export const collapsible = baseField.keys({
     })
     .default({}),
   fields: joi.array().items(joi.link('#field')),
-  label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+  label: joi
+    .alternatives()
+    .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function()),
 })
 
 const tab = baseField.keys({
