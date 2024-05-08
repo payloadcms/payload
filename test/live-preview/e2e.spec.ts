@@ -14,7 +14,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { mobileBreakpoint, pagesSlug, ssrPostsSlug } from './shared.js'
+import { mobileBreakpoint, pagesSlug, renderedPageTitleID, ssrPostsSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -89,20 +89,28 @@ describe('Live Preview', () => {
 
   test('collection — re-renders iframe client-side when form state changes', async () => {
     await goToCollectionPreview(page)
-    const titleValue = 'Title 1'
-    const field = page.locator('#field-title')
+
+    const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(field).toBeVisible()
+    await expect(titleField).toBeVisible()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
     // Forces the test to wait for the nextjs route to render before we try editing a field
-    await expect(() => expect(frame.locator('#page-title')).toBeVisible()).toPass({
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
-    await field.fill(titleValue)
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('Home')
 
-    await expect(() => expect(frame.locator('#page-title')).toHaveText(titleValue)).toPass({
+    const newTitleValue = 'Home (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(newTitleValue),
+    ).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
@@ -117,20 +125,27 @@ describe('Live Preview', () => {
     await navigateToListCellLink(page)
     await goToCollectionPreview(page)
 
-    const titleValue = 'Title 1'
-    const field = page.locator('#field-title')
+    const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(field).toBeVisible()
+    await expect(titleField).toBeVisible()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
     // Forces the test to wait for the nextjs route to render before we try editing a field
-    await expect(() => expect(frame.locator('#page-title')).toBeVisible()).toPass({
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
-    await field.fill(titleValue)
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('SSR Post 1')
 
-    await expect(() => expect(frame.locator('#page-title')).toHaveText(titleValue)).toPass({
+    const newTitleValue = 'SSR Post 1 (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(newTitleValue),
+    ).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
 

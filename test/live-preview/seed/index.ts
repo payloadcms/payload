@@ -63,11 +63,18 @@ export const seed: Config['onInit'] = async (payload) => {
 
   await payload.create({
     collection: ssrPostsSlug,
-    data: JSON.parse(
-      JSON.stringify(post1)
-        .replace(/"\{\{IMAGE\}\}"/g, mediaID)
-        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
-    ),
+    data: {
+      ...JSON.parse(
+        JSON.stringify(post1)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+      ),
+      title: 'SSR Post 1',
+      meta: {
+        title: 'SSR Post 1',
+        description: 'This is the first SSR post.',
+      },
+    },
   })
 
   const post2Doc = await payload.create({

@@ -10,3 +10,5 @@ export const mobileBreakpoint = {
   width: 375,
   height: 667,
 }
+
+export const renderedPageTitleID = 'rendered-page-title'
