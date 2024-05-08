@@ -7,6 +7,8 @@ export const packageWhitelist = [
   'graphql',
   'db-mongodb',
   'db-postgres',
+  'live-preview',
+  'live-preview-react',
   'richtext-slate',
   'richtext-lexical',
 
