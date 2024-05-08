@@ -9,8 +9,8 @@ export const getPage = async (slug: string): Promise<Page | null | undefined> =>
 
   const pageRes = await payload.find({
     collection: 'pages',
+    draft: true,
     limit: 1,
-
     where: {
       slug: {
         equals: slug,

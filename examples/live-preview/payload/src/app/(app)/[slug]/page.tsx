@@ -24,6 +24,9 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
   return (
     <Fragment>
       <RefreshRouteOnSave />
+      <Gutter>
+        <p>{`Title: ${page?.title}`}</p>
+      </Gutter>
       <main className={classes.page}>
         <Gutter>
           <RichText content={page?.richText} />

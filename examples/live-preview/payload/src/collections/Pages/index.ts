@@ -40,4 +40,11 @@ export const Pages: CollectionConfig = {
     },
     richText(),
   ],
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 10,
+      },
+    },
+  },
 }
