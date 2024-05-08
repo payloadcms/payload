@@ -5,9 +5,7 @@ import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import { hero } from '../fields/hero.js'
-import { tenantsSlug } from '../shared.js'
-
-export const ssrPostsSlug = 'posts-ssr'
+import { ssrPostsSlug, tenantsSlug } from '../shared.js'
 
 export const PostsSSR: CollectionConfig = {
   slug: ssrPostsSlug,

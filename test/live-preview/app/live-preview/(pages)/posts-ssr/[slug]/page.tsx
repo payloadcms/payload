@@ -4,7 +4,7 @@ import React, { Fragment } from 'react'
 
 import type { Post } from '../../../../../payload-types.js'
 
-import { ssrPostsSlug } from '../../../../../collections/PostsSSR.js'
+import { ssrPostsSlug } from '../../../../../shared.js'
 import { fetchDoc } from '../../../_api/fetchDoc.js'
 import { fetchDocs } from '../../../_api/fetchDocs.js'
 import { Blocks } from '../../../_components/Blocks/index.js'

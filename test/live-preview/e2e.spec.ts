@@ -14,8 +14,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { ssrPostsSlug } from './collections/PostsSSR.js'
-import { mobileBreakpoint, pagesSlug } from './shared.js'
+import { mobileBreakpoint, pagesSlug, ssrPostsSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
