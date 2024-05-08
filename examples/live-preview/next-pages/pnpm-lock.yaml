@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@payloadcms/live-preview-react':
-    specifier: 3.0.0-beta.27
-    version: 3.0.0-beta.27(react@18.3.1)
+    specifier: 3.0.0-beta.28
+    version: 3.0.0-beta.28(react@18.3.1)
   '@types/escape-html':
     specifier: ^1.0.2
     version: 1.0.4
@@ -284,17 +284,17 @@ packages:
       typescript: 4.8.4
     dev: true
 
-  /@payloadcms/live-preview-react@3.0.0-beta.27(react@18.3.1):
-    resolution: {integrity: sha512-Yb5EA1RGZgmRseEb/BqXzcpzJvYdkMLSnD+TlZkQ1EBFafXrww6xlIpwyMYrMh68lPpwIMhiQHa7zK+5KJRLFQ==}
+  /@payloadcms/live-preview-react@3.0.0-beta.28(react@18.3.1):
+    resolution: {integrity: sha512-E99+2omoiDXVbuvk0MNRW3qCq0G0/oOJnZYx/ldJccmMSBsxax79hXfAS8Ioltf1iGCfTnjNvqlHFGKnCb0Z2Q==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@payloadcms/live-preview': 0.2.2
+      '@payloadcms/live-preview': 3.0.0-beta.28
       react: 18.3.1
     dev: false
 
-  /@payloadcms/live-preview@0.2.2:
-    resolution: {integrity: sha512-FOcg/HOIzzESjoT4vXgM7Pjd+bODodZTKR/pEJWsjLtyARd6NfF3MNWS+tdlfa3TOZrdT8WnHBAKsKyREyE3og==}
+  /@payloadcms/live-preview@3.0.0-beta.28:
+    resolution: {integrity: sha512-TybYgFxzNZXPfUHcpIK22zB4zH4/r5IiGyjQ3HUConAUUmaOTZgVBtRnYQB5TjINqQ7FHYnhyvw8KoVVhzadsg==}
     dev: false
 
   /@swc/helpers@0.5.2:
