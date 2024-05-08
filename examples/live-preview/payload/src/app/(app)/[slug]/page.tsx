@@ -54,6 +54,7 @@ export async function generateStaticParams() {
   const pagesRes = await payload.find({
     collection: 'pages',
     depth: 0,
+    draft: true,
     limit: 100,
   })
 
