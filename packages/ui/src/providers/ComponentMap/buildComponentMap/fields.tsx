@@ -137,7 +137,7 @@ export const mapFields = (args: {
           ('admin' in field &&
             field.admin?.components &&
             'Label' in field.admin.components &&
-            field.admin.components?.Label) ??
+            field.admin.components?.Label) ||
           undefined
 
         // If we return undefined here (so if no CUSTOM label component is set), the field client component is responsible for falling back to the default label
@@ -234,7 +234,7 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
           isFieldAffectingData,
-          label: labelProps?.label ?? undefined,
+          label: labelProps?.label || undefined,
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,

@@ -147,7 +147,7 @@ export const mapCollections = (args: {
     }
 
     const DescriptionComponent =
-      collectionConfig.admin?.components?.edit?.Description ??
+      collectionConfig.admin?.components?.edit?.Description ||
       (description ? ViewDescription : undefined)
 
     const Description =
