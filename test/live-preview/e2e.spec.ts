@@ -109,12 +109,13 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('collection —  re-render iframe server-side when autosave is run', async () => {
+  test('collection — re-render iframe server-side when autosave is made', async () => {
     const ssrUrl = new AdminUrlUtil(serverURL, ssrPostsSlug)
 
     await page.goto(ssrUrl.list)
     await page.waitForURL(ssrUrl.list)
     await navigateToListCellLink(page)
+    await goToCollectionPreview(page)
 
     const titleValue = 'Title 1'
     const field = page.locator('#field-title')
