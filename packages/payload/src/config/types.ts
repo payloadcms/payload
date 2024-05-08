@@ -696,10 +696,6 @@ export type EntityDescriptionComponent = CustomComponent
 
 export type EntityDescriptionFunction = () => string
 
-export type EntityDescription =
-  | EntityDescriptionComponent
-  | EntityDescriptionFunction
-  | Record<string, string>
-  | string
+export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
