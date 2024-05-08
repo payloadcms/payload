@@ -11,11 +11,11 @@ import pLimit from 'p-limit'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
-import { simpleGit } from 'simple-git'
 
 import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
+import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { packageWhitelist } from './lib/whitelist.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
@@ -25,8 +25,6 @@ const npmPublishLimit = pLimit(6)
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const cwd = path.resolve(dirname, '..')
-
-const git = simpleGit(cwd)
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const execaOpts: execa.Options = { stdio: 'inherit' }
@@ -90,10 +88,10 @@ async function main() {
   if (bump !== recommendedBump) {
     console.log(
       chalk.bold.yellow(
-        `Recommended bump type is ${recommendedBump} based on commits since last release`,
+        `Recommended bump type is '${recommendedBump}' based on commits since last release`,
       ),
     )
-    const confirmBump = await confirm(`Do you want to continue with ${bump}?`)
+    const confirmBump = await confirm(`Do you want to continue with bump: '${bump}'?`)
     if (!confirmBump) {
       abort()
     }
@@ -200,6 +198,9 @@ async function main() {
   // Commit all staged changes
   runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
 
+  // Wait 500ms to avoid .git/index.lock errors
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
   if (gitCommit) {
     runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
   }
@@ -246,6 +247,9 @@ async function main() {
   header('🎉 Done!')
 
   console.log(chalk.bold.green(`\n\nRelease URL: ${releaseUrl}`))
+
+  // Log out all registry versions
+  await getPackageRegistryVersions()
 }
 
 main().catch((error) => {
@@ -276,7 +280,27 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
 
     if (exitCode !== 0) {
       console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
-      return { name: pkg.name, success: false, details: stderr }
+
+      // Retry publish
+      console.log(chalk.bold.yellow(`\nRetrying publish for ${pkg.name}...`))
+      const { exitCode: retryExitCode, stderr: retryStdError } = await execa('pnpm', cmdArgs, {
+        cwd,
+        stdio: 'inherit', // log full output
+      })
+
+      if (retryExitCode !== 0) {
+        console.error(
+          chalk.bold.red(
+            `\n\n❌ ${pkg.name} ERROR: pnpm publish failed on retry\n\n${retryStdError}`,
+          ),
+        )
+      }
+
+      return {
+        name: pkg.name,
+        success: false,
+        details: `Exit Code: ${retryExitCode}, stderr: ${retryStdError}`,
+      }
     }
 
     console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
