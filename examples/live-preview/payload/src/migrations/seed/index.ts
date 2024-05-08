@@ -1,7 +1,7 @@
+import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
+
 import { home } from './home'
 import { examplePage } from './page'
-
-import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
@@ -31,30 +31,30 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
         {
           link: {
             type: 'reference',
+            label: 'Home',
             reference: {
               relationTo: 'pages',
               value: homePageID,
             },
-            label: 'Home',
             url: '',
           },
         },
         {
           link: {
             type: 'reference',
+            label: 'Example Page',
             reference: {
               relationTo: 'pages',
               value: examplePageID,
             },
-            label: 'Example Page',
             url: '',
           },
         },
         {
           link: {
             type: 'custom',
-            reference: null,
             label: 'Dashboard',
+            reference: null,
             url: 'http://localhost:3000/admin',
           },
         },

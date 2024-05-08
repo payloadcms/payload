@@ -1,7 +1,6 @@
 import type { Page } from '../../payload-types'
 
 export const home: Partial<Page> = {
-  title: 'Home',
   slug: 'home',
   richText: [
     {
@@ -17,25 +16,25 @@ export const home: Partial<Page> = {
         { text: 'This is a ' },
         {
           type: 'link',
-          linkType: 'custom',
-          url: 'https://nextjs.org',
-          newTab: true,
           children: [{ text: 'Next.js' }],
+          linkType: 'custom',
+          newTab: true,
+          url: 'https://nextjs.org',
         },
         { text: " app made explicitly for Payload's " },
         {
           type: 'link',
+          children: [{ text: 'Live Preview Example' }],
           linkType: 'custom',
           newTab: true,
           url: 'https://github.com/payloadcms/payload/tree/master/examples/live-preview/payload',
-          children: [{ text: 'Live Preview Example' }],
         },
         { text: '. With ' },
         {
           type: 'link',
+          children: [{ text: 'Live Preview' }],
           newTab: true,
           url: 'https://payloadcms.com/docs/live-preview',
-          children: [{ text: 'Live Preview' }],
         },
         {
           text: ' you can edit this page in the admin panel and see the changes reflected here in real time.',
@@ -43,4 +42,5 @@ export const home: Partial<Page> = {
       ],
     },
   ],
+  title: 'Home',
 }

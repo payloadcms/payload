@@ -1,12 +1,14 @@
+/* eslint-disable no-restricted-exports */
 import { notFound } from 'next/navigation'
+import React from 'react'
+import { Fragment } from 'react'
 
 import { getPage } from '../_api/getPage'
 import { getPages } from '../_api/getPages'
-import classes from './index.module.scss'
 import { Gutter } from '../_components/Gutter'
 import RichText from '../_components/RichText'
-import { Fragment } from 'react'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave'
+import classes from './index.module.scss'
 
 interface PageParams {
   params: { slug: string }

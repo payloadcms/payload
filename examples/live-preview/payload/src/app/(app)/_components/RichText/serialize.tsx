@@ -1,19 +1,19 @@
-import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
+import React, { Fragment } from 'react'
 import { Text } from 'slate'
 
 // eslint-disable-next-line no-use-before-define
 type Children = Leaf[]
 
 type Leaf = {
-  type: string
-  value?: {
-    url: string
-    alt: string
-  }
-  children: Children
-  url?: string
   [key: string]: unknown
+  children: Children
+  type: string
+  url?: string
+  value?: {
+    alt: string
+    url: string
+  }
 }
 
 const serialize = (children: Children): React.ReactNode[] =>
@@ -35,7 +35,7 @@ const serialize = (children: Children): React.ReactNode[] =>
 
       if (node.underline) {
         text = (
-          <span style={{ textDecoration: 'underline' }} key={i}>
+          <span key={i} style={{ textDecoration: 'underline' }}>
             {text}
           </span>
         )
@@ -43,7 +43,7 @@ const serialize = (children: Children): React.ReactNode[] =>
 
       if (node.strikethrough) {
         text = (
-          <span style={{ textDecoration: 'line-through' }} key={i}>
+          <span key={i} style={{ textDecoration: 'line-through' }}>
             {text}
           </span>
         )

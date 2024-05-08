@@ -13,7 +13,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
-  collections: [Pages, Users],
   admin: {
     components: {
       beforeLogin: [BeforeLogin],
@@ -21,21 +20,22 @@ export default buildConfig({
     livePreview: {
       breakpoints: [
         {
-          label: 'Mobile',
           name: 'mobile',
-          width: 375,
           height: 667,
+          label: 'Mobile',
+          width: 375,
         },
       ],
     },
   },
-  secret: process.env.PAYLOAD_SECRET || '',
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  globals: [MainMenu],
-  editor: slateEditor({}),
+  collections: [Pages, Users],
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
+  editor: slateEditor({}),
+  globals: [MainMenu],
+  secret: process.env.PAYLOAD_SECRET || '',
+  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

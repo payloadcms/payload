@@ -9,5 +9,5 @@ export const getPages = async (): Promise<Page[]> => {
     limit: 100,
   })
 
-  return pageRes?.docs ?? []
+  return pagesRes?.docs ?? []
 }

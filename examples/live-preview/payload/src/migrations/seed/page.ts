@@ -1,7 +1,6 @@
 import type { Page } from '../../payload-types'
 
 export const examplePage: Partial<Page> = {
-  title: 'Example Page',
   slug: 'example-page',
   richText: [
     {
@@ -20,4 +19,5 @@ export const examplePage: Partial<Page> = {
       ],
     },
   ],
+  title: 'Example Page',
 }
