@@ -24,7 +24,14 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { textDoc } from './collections/Text/shared.js'
-import { collapsibleFieldsSlug, pointFieldsSlug, tabsFieldsSlug, textFieldsSlug } from './slugs.js'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  collapsibleFieldsSlug,
+  pointFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -533,6 +540,44 @@ describe('fields', () => {
         `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
+    })
+  })
+
+  describe('sortable arrays', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, arrayFieldsSlug)
+    })
+
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .collapsible__drag')
+      expect(await field.count()).toEqual(0)
+    })
+  })
+
+  describe('sortable blocks', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, blockFieldsSlug)
+    })
+
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .collapsible__drag')
+      expect(await field.count()).toEqual(0)
     })
   })
 

@@ -20,6 +20,7 @@ export const RowActions: React.FC<{
   duplicateRow: (rowIndex: number, blockType: string) => void
   fieldMap: FieldMap
   hasMaxRows?: boolean
+  isSortable?: boolean
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   removeRow: (rowIndex: number) => void
@@ -32,6 +33,7 @@ export const RowActions: React.FC<{
     blocks,
     duplicateRow,
     hasMaxRows,
+    isSortable,
     labels,
     moveRow,
     removeRow,
@@ -67,6 +69,7 @@ export const RowActions: React.FC<{
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
         hasMaxRows={hasMaxRows}
         index={rowIndex}
+        isSortable={isSortable}
         moveRow={moveRow}
         removeRow={removeRow}
         rowCount={rowCount}
