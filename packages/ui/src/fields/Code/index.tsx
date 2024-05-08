@@ -43,6 +43,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     descriptionProps,
     editorOptions = {},
     errorProps,
+    label,
     labelProps,
     language = 'javascript',
     path: pathFromProps,
@@ -87,7 +88,12 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div>
         {BeforeInput}
         <CodeEditor

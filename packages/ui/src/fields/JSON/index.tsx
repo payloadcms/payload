@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { FieldBase, JSONField as JSONFieldType } from 'payload/types'
+import type { JSONField as JSONFieldType } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
@@ -41,6 +41,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     editorOptions,
     errorProps,
     jsonSchema,
+    label,
     labelProps,
     path: pathFromProps,
     readOnly: readOnlyFromProps,
@@ -130,7 +131,12 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div>
         {BeforeInput}
         <CodeEditor

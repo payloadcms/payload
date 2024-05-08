@@ -6,3 +6,5 @@ export type LabelProps = {
   required?: boolean
   unstyled?: boolean
 }
+
+export type LabelPropsStripped = Omit<LabelProps, 'label' | 'required'>

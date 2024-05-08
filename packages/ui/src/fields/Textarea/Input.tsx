@@ -21,6 +21,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     onChange,
     path,
@@ -54,7 +55,12 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       {BeforeInput}
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">

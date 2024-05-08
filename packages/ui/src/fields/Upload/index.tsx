@@ -22,6 +22,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     readOnly: readOnlyFromProps,
@@ -77,6 +78,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
         descriptionProps={descriptionProps}
         errorProps={errorProps}
         filterOptions={filterOptions}
+        label={label}
         labelProps={labelProps}
         onChange={onChange}
         path={path}

@@ -1,6 +1,5 @@
 'use client'
 import type { FieldPermissions } from 'payload/auth'
-import type { FieldBase } from 'payload/types'
 import type { ArrayField as ArrayFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -57,6 +56,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     errorProps,
     fieldMap,
     forceRender = false,
+    label,
     labelProps,
     localized,
     maxRows,
@@ -89,9 +89,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps) => {
+  const getLabels = (p: ArrayFieldProps): ArrayFieldType['labels'] => {
     if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
+    if ('label' in p && p?.label) return { plural: undefined, singular: p?.label }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -212,6 +212,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               <FieldLabel
                 CustomLabel={CustomLabel}
                 as="span"
+                label={label}
                 required={required}
                 unstyled
                 {...(labelProps || {})}

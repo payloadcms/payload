@@ -1,7 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { FieldBase, Option } from 'payload/types'
+import type { Option } from 'payload/types'
 
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
@@ -43,6 +43,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     layout = 'horizontal',
     onChange: onChangeFromProps,
@@ -101,7 +102,12 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
       <div className={`${baseClass}__error-wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       </div>
-      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''

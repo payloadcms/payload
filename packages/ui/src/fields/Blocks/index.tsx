@@ -61,6 +61,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     forceRender = false,
+    label,
     labelProps,
     labels: labelsFromProps,
     localized,
@@ -224,6 +225,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
               <FieldLabel
                 CustomLabel={CustomLabel}
                 as="span"
+                label={label}
                 required={required}
                 unstyled
                 {...(labelProps || {})}

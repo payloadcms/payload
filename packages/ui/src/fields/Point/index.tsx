@@ -39,6 +39,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -89,7 +90,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
 
   const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
-    const fieldLabel = labelProps && labelProps.label ? getTranslation(labelProps.label, i18n) : ''
+    const fieldLabel = label ? getTranslation(label, i18n) : ''
 
     return {
       ...labelProps,

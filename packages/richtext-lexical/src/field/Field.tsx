@@ -1,7 +1,6 @@
 'use client'
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { SerializedEditorState } from 'lexical'
-import type { FieldBase } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
@@ -36,6 +35,7 @@ const _RichText: React.FC<
     descriptionProps,
     editorConfig,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     readOnly,
@@ -86,7 +86,12 @@ const _RichText: React.FC<
     >
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+        <FieldLabel
+          CustomLabel={CustomLabel}
+          label={label}
+          required={required}
+          {...(labelProps || {})}
+        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}

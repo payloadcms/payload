@@ -197,6 +197,7 @@ export const mapFields = (args: {
             <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
           ) : undefined
 
+        // These fields are shared across all field types even if they are not used in the default field, as the custom field component can use them
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
@@ -207,6 +208,7 @@ export const mapFields = (args: {
           descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
           errorProps,
+          label: labelProps?.label,
           labelProps,
           path,
           required: 'required' in field ? field.required : undefined,
@@ -780,9 +782,7 @@ export const mapFields = (args: {
       disableBulkEdit: true,
       fieldComponentProps: {
         name: 'id',
-        labelProps: {
-          label: 'ID',
-        },
+        label: 'ID',
       },
       fieldIsPresentational: false,
       isFieldAffectingData: true,

@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase, Option, OptionObject } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
@@ -56,6 +56,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     hasMany = false,
     isClearable = true,
     isSortable = true,
+    label,
     labelProps,
     onChange: onChangeFromProps,
     options: optionsFromProps = [],
@@ -149,7 +150,12 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div>
         {BeforeInput}
         <ReactSelect

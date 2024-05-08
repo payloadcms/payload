@@ -14,7 +14,7 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { DateField, FieldBase } from 'payload/types'
+import type { DateField } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
@@ -44,6 +44,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     date: datePickerProps,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -93,7 +94,12 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
       <div className={`${baseClass}__error-wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       </div>
-      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
         {BeforeInput}
         <DatePickerField
