@@ -10,7 +10,14 @@ export const subscribe = <T>(args: {
   const { apiRoute, callback, depth, initialData, serverURL } = args
 
   const onMessage = async (event: MessageEvent) => {
-    const mergedData = await handleMessage<T>({ apiRoute, depth, event, initialData, serverURL })
+    const mergedData = await handleMessage<T>({
+      apiRoute,
+      depth,
+      event,
+      initialData,
+      serverURL,
+    })
+
     callback(mergedData)
   }
 
