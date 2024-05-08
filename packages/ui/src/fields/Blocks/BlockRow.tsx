@@ -28,6 +28,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   forceRender?: boolean
   hasMaxRows?: boolean
   indexPath: string
+  isSortable?: boolean
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   path: string
@@ -50,6 +51,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   errorCount,
   forceRender,
   hasMaxRows,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -97,6 +99,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               duplicateRow={duplicateRow}
               fieldMap={block.fieldMap}
               hasMaxRows={hasMaxRows}
+              isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
               removeRow={removeRow}
@@ -107,11 +110,15 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         }
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__block-header`}>
             <span className={`${baseClass}__block-number`}>
