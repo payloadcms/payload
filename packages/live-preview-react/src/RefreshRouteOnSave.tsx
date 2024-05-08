@@ -19,6 +19,9 @@ export const RefreshRouteOnSave: React.FC<{
       if (isDocumentEvent(event, serverURL)) {
         if (typeof refresh === 'function') {
           refresh()
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('You must provide a refresh function to `RefreshRouteOnSave`')
         }
       }
     },
