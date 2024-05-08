@@ -50,7 +50,6 @@ export const RelationshipFeature: FeatureProviderProviderServer<
           createNode({
             node: RelationshipNode,
             populationPromises: [relationshipPopulationPromiseHOC(props)],
-            // TODO: Add validation similar to upload
           }),
         ],
         serverFeatureProps: props,

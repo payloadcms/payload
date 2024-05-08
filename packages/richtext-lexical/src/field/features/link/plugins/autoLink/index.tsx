@@ -16,6 +16,8 @@ import {
 import { type TextNode } from 'lexical'
 import { useEffect } from 'react'
 
+import type { PluginComponent } from '../../../types.js'
+import type { ClientProps } from '../../feature.client.js'
 import type { LinkFields } from '../../nodes/types.js'
 
 import { invariant } from '../../../../lexical/utils/invariant.js'
@@ -428,7 +430,7 @@ const MATCHERS = [
   }),
 ]
 
-export function AutoLinkPlugin(): JSX.Element | null {
+export const AutoLinkPlugin: PluginComponent<ClientProps> = () => {
   const [editor] = useLexicalComposerContext()
 
   useAutoLink(editor, MATCHERS)

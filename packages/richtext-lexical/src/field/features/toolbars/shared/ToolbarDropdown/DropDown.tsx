@@ -66,14 +66,15 @@ export function DropDownItem({
       className={className}
       onClick={() => {
         if (enabled !== false) {
-          editor.focus()
-          // We need to wrap the onSelect in a setTimeout, so the editor is properly focused before the onSelect is called.
-          setTimeout(() => {
+          editor._updateTags = new Set([...editor._updateTags, 'toolbar']) // without setting the tags, our onSelect will not be able to trigger our onChange as focus onChanges are ignored.
+
+          editor.focus(() => {
+            // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
             item.onSelect({
               editor,
               isActive: active,
             })
-          }, 0)
+          })
         }
       }}
       onMouseDown={(e) => {
