@@ -19,16 +19,18 @@ interface PageParams {
 export default async function Page({ params: { slug = 'home' } }: PageParams) {
   const payload = await getPayloadHMR({ config })
 
-  const page = await payload.find({
-    collection: 'pages',
-    draft: true,
-    limit: 1,
-    where: {
-      slug: {
-        equals: slug,
+  const page = await payload
+    .find({
+      collection: 'pages',
+      draft: true,
+      limit: 1,
+      where: {
+        slug: {
+          equals: slug,
+        },
       },
-    },
-  })?.docs?.[0]
+    })
+    ?.then((res) => res?.docs[0] || null)
 
   if (page === null) {
     return notFound()
@@ -37,9 +39,6 @@ export default async function Page({ params: { slug = 'home' } }: PageParams) {
   return (
     <Fragment>
       <RefreshRouteOnSave />
-      <Gutter>
-        <p>{`Title: ${page?.title}`}</p>
-      </Gutter>
       <main className={classes.page}>
         <Gutter>
           <RichText content={page?.richText} />
@@ -53,11 +52,13 @@ export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config })
 
   const pages =
-    (await payload.find({
-      collection: 'pages',
-      depth: 0,
-      limit: 100,
-    })?.docs) ?? []
+    (await payload
+      .find({
+        collection: 'pages',
+        depth: 0,
+        limit: 100,
+      })
+      ?.then((res) => res?.docs)) ?? []
 
   return pages.map(({ slug }) =>
     slug !== 'home'

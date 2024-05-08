@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-import config from '../../../payload.config'
+import config from '../../../../payload.config'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
