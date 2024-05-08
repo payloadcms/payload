@@ -780,7 +780,6 @@ export const mapFields = (args: {
       disableBulkEdit: true,
       fieldComponentProps: {
         name: 'id',
-        label: 'ID',
         labelProps: {
           label: 'ID',
         },

@@ -3,8 +3,6 @@ import type { ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescripti
 import type {
   AdminViewProps,
   EditViewProps,
-  EntityDescriptionComponent,
-  EntityDescriptionFunction,
   SanitizedCollectionConfig,
   SanitizedConfig,
   WithServerSideProps as WithServerSidePropsType,
