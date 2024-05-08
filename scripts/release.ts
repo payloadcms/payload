@@ -247,9 +247,6 @@ async function main() {
   header('🎉 Done!')
 
   console.log(chalk.bold.green(`\n\nRelease URL: ${releaseUrl}`))
-
-  // Log out all registry versions
-  await getPackageRegistryVersions()
 }
 
 main().catch((error) => {
