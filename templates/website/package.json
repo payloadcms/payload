@@ -19,7 +19,7 @@
     "@payloadcms/db-mongodb": "^3.0.0-beta.27",
     "@payloadcms/db-postgres": "^3.0.0-beta.27",
     "@payloadcms/next": "^3.0.0-beta.27",
-    "@payloadcms/plugin-cloud": "^3.0.0-beta.27",
+    "@payloadcms/plugin-cloud": "3.0.0-beta.27",
     "@payloadcms/plugin-nested-docs": "^3.0.0-beta.27",
     "@payloadcms/plugin-redirects": "^3.0.0-beta.27",
     "@payloadcms/plugin-seo": "^3.0.0-beta.27",
@@ -56,5 +56,6 @@
     "slate": "0.91.4",
     "ts-node": "10.9.1",
     "typescript": "^5.4.2"
-  }
+  },
+  "packageManager": "yarn@1.22.21"
 }

@@ -1,10 +1,10 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 
-import { payloadCloud } from '@payloadcms/plugin-cloud'
-import { nestedDocs } from '@payloadcms/plugin-nested-docs'
-import { redirects } from '@payloadcms/plugin-redirects'
-import { seo } from '@payloadcms/plugin-seo'
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
+import { seoPlugin } from '@payloadcms/plugin-seo'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
 import dotenv from 'dotenv'
 import path from 'path'
@@ -44,7 +44,7 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  editor: slateEditor({}), // editor-config
+  editor: lexicalEditor({}), // editor-config
   // database-adapter-config-start
   db: mongooseAdapter({
     url: process.env.DATABASE_URI,
@@ -64,18 +64,19 @@ export default buildConfig({
   ],
   globals: [Settings, Header, Footer],
   plugins: [
-    redirects({
+    redirectsPlugin({
       collections: ['pages', 'posts'],
     }),
-    nestedDocs({
+    nestedDocsPlugin({
       collections: ['categories'],
     }),
-    seo({
+    seoPlugin({
       collections: ['pages', 'posts', 'projects'],
       generateTitle,
+      tabbedUI: true,
       uploadsCollection: 'media',
     }),
-    payloadCloud(),
+    payloadCloudPlugin(),
   ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,

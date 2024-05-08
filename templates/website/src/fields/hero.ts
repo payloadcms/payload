@@ -1,9 +1,7 @@
 import type { Field } from 'payload/types'
 
-import linkGroup from './linkGroup'
-import richText from './richText'
-import label from './richText/label'
-import largeBody from './richText/largeBody'
+import { linkGroup } from './linkGroup'
+import { richText } from './richTextLexical'
 
 export const hero: Field = {
   name: 'hero',
@@ -34,12 +32,13 @@ export const hero: Field = {
       ],
       required: true,
     },
-    richText({
+    /* richText({
       admin: {
         elements: ['h1', largeBody, label, 'link'],
         leaves: [],
       },
-    }),
+    }), */
+    richText(),
     linkGroup({
       overrides: {
         maxRows: 2,

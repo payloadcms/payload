@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { LinkFeature } from '@payloadcms/richtext-lexical'
 import path from 'path'
 
 export const Media: CollectionConfig = {
@@ -17,9 +18,9 @@ export const Media: CollectionConfig = {
     {
       name: 'caption',
       type: 'richText',
-      editor: slateEditor({
-        admin: {
-          elements: ['link'],
+      editor: lexicalEditor({
+        features({ defaultFeatures }) {
+          return [LinkFeature({ enabledCollections: ['pages'] })]
         },
       }),
     },

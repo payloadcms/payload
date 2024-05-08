@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload/types'
 
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { richText } from 'src/fields/richTextLexical'
+
 import { admins } from '../../access/admins'
 import { adminsOrPublished } from '../../access/adminsOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock'
@@ -24,17 +27,58 @@ export const Posts: CollectionConfig = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     preview: (doc) => {
+      const slug = (doc?.slug as string) ?? ''
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
-        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/posts/${doc?.slug}`,
+        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/posts/${slug}`,
       )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
     useAsTitle: 'title',
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      required: true,
+      type: 'tabs',
+      tabs: [
+        {
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            hero,
+          ],
+          label: 'Hero',
+        },
+        {
+          fields: [
+            richText(
+              { name: 'content', required: true },
+              {
+                features: {
+                  blocks: [CallToAction, Archive, MediaBlock, Content],
+                },
+              },
+            ),
+          ],
+          label: 'Content',
+        },
+      ],
+    },
+    {
+      name: 'relatedPosts',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      filterOptions: ({ id }) => {
+        return {
+          id: {
+            not_in: [id],
+          },
+        }
+      },
+      hasMany: true,
+      relationTo: 'posts',
     },
     {
       name: 'categories',
@@ -98,59 +142,13 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
-    {
-      type: 'tabs',
-      tabs: [
-        {
-          fields: [hero],
-          label: 'Hero',
-        },
-        {
-          fields: [
-            {
-              name: 'layout',
-              type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive],
-              required: true,
-            },
-            {
-              name: 'enablePremiumContent',
-              type: 'checkbox',
-              label: 'Enable Premium Content',
-            },
-            {
-              name: 'premiumContent',
-              type: 'blocks',
-              access: {
-                read: ({ req }) => req.user,
-              },
-              blocks: [CallToAction, Content, MediaBlock, Archive],
-            },
-          ],
-          label: 'Content',
-        },
-      ],
-    },
-    {
-      name: 'relatedPosts',
-      type: 'relationship',
-      filterOptions: ({ id }) => {
-        return {
-          id: {
-            not_in: [id],
-          },
-        }
-      },
-      hasMany: true,
-      relationTo: 'posts',
-    },
     slugField(),
   ],
-  hooks: {
+  /* hooks: {
     afterChange: [revalidatePost],
     afterRead: [populateArchiveBlock, populateAuthors],
     beforeChange: [populatePublishedAt],
-  },
+  }, */
   versions: {
     drafts: true,
   },
