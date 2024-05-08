@@ -22,7 +22,6 @@ import './index.scss'
 
 export type NumberFieldProps = FormFieldBase & {
   hasMany?: boolean
-  label?: FieldBase['label']
   max?: number
   maxRows?: number
   min?: number
@@ -46,7 +45,6 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     hasMany = false,
-    label,
     labelProps,
     max = Infinity,
     maxRows = Infinity,
@@ -156,12 +154,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       {hasMany ? (
         <ReactSelect

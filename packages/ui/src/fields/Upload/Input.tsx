@@ -44,7 +44,6 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     descriptionProps,
     errorProps,
     filterOptions,
-    label,
     labelProps,
     onChange,
     readOnly,
@@ -134,12 +133,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
         }}
       >
         <FieldError CustomError={CustomError} {...(errorProps || {})} />
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
+        <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
         {collection?.upload && (
           <React.Fragment>
             {fileDoc && !missingFile && (

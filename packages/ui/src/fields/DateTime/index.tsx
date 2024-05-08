@@ -26,7 +26,6 @@ import { withCondition } from '../../forms/withCondition/index.js'
 
 export type DateFieldProps = FormFieldBase & {
   date?: DateField['admin']['date']
-  label?: FieldBase['label']
   name?: string
   path?: string
   placeholder?: DateField['admin']['placeholder'] | string
@@ -45,7 +44,6 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     date: datePickerProps,
     descriptionProps,
     errorProps,
-    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -95,12 +93,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
       <div className={`${baseClass}__error-wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       </div>
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
         {BeforeInput}
         <DatePickerField

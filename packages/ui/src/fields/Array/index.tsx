@@ -37,7 +37,6 @@ export type ArrayFieldProps = FormFieldBase & {
   CustomRowLabel?: React.ReactNode
   fieldMap: FieldMap
   forceRender?: boolean
-  label?: FieldBase['label']
   labels?: ArrayFieldType['labels']
   maxRows?: ArrayFieldType['maxRows']
   minRows?: ArrayFieldType['minRows']
@@ -58,7 +57,6 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     errorProps,
     fieldMap,
     forceRender = false,
-    label,
     labelProps,
     localized,
     maxRows,
@@ -214,7 +212,6 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               <FieldLabel
                 CustomLabel={CustomLabel}
                 as="span"
-                label={label}
                 required={required}
                 unstyled
                 {...(labelProps || {})}

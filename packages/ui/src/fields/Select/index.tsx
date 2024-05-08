@@ -22,7 +22,6 @@ export type SelectFieldProps = FormFieldBase & {
   hasMany?: boolean
   isClearable?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   name?: string
   onChange?: (e: string) => void
   options?: Option[]
@@ -57,7 +56,6 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     hasMany = false,
     isClearable = true,
     isSortable = true,
-    label,
     labelProps,
     onChange: onChangeFromProps,
     options: optionsFromProps = [],
@@ -151,12 +149,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <ReactSelect

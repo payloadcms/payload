@@ -18,7 +18,6 @@ import './index.scss'
 
 export type CodeFieldProps = FormFieldBase & {
   editorOptions?: CodeFieldType['admin']['editorOptions']
-  label?: FieldBase['label']
   language?: CodeFieldType['admin']['language']
   name?: string
   path?: string
@@ -44,7 +43,6 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     descriptionProps,
     editorOptions = {},
     errorProps,
-    label,
     labelProps,
     language = 'javascript',
     path: pathFromProps,
@@ -89,12 +87,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <CodeEditor

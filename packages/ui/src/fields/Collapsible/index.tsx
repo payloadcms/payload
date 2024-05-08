@@ -28,7 +28,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   initCollapsed?: boolean
-  label?: FieldBase['label']
   permissions: FieldPermissions
   width?: string
 }

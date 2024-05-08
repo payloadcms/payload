@@ -371,7 +371,7 @@ export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
     initCollapsed?: boolean
   }
   fields: Field[]
-  label: RowLabel
+  label: Required<FieldBase['label']>
   type: 'collapsible'
 }
 

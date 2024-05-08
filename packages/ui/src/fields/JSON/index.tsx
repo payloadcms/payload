@@ -23,7 +23,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']
   jsonSchema?: Record<string, unknown>
-  label?: FieldBase['label']
   name?: string
   path?: string
   width?: string
@@ -42,7 +41,6 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     editorOptions,
     errorProps,
     jsonSchema,
-    label,
     labelProps,
     path: pathFromProps,
     readOnly: readOnlyFromProps,
@@ -132,12 +130,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <CodeEditor

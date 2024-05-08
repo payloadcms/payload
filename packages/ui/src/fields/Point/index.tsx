@@ -21,7 +21,6 @@ import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import type { FormFieldBase } from '../shared/index.js'
 
 export type PointFieldProps = FormFieldBase & {
-  label?: FieldBase['label']
   name?: string
   path?: string
   placeholder?: string

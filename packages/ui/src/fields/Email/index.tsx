@@ -19,7 +19,6 @@ import './index.scss'
 
 export type EmailFieldProps = FormFieldBase & {
   autoComplete?: string
-  label?: FieldBase['label']
   name?: string
   path?: string
   placeholder?: EmailFieldType['admin']['placeholder']
@@ -38,7 +37,6 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
-    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -79,12 +77,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <input

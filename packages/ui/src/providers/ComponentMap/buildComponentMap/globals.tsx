@@ -92,7 +92,8 @@ export const mapGlobals = (args: {
       description,
     }
     const DescriptionComponent =
-      globalConfig.admin?.components?.elements?.Description ?? ViewDescription
+      globalConfig.admin?.components?.elements?.Description ??
+      (description ? ViewDescription : undefined)
 
     const Description =
       DescriptionComponent !== undefined ? (

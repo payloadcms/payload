@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { ClientValidate, FieldBase } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -50,7 +50,6 @@ declare module 'slate' {
 const RichTextField: React.FC<
   FormFieldBase & {
     elements: EnabledFeatures['elements']
-    label?: FieldBase['label']
     leaves: EnabledFeatures['leaves']
     name: string
     placeholder?: string
@@ -68,7 +67,6 @@ const RichTextField: React.FC<
     descriptionProps,
     elements,
     errorProps,
-    label,
     labelProps,
     leaves,
     path: pathFromProps,
@@ -318,12 +316,7 @@ const RichTextField: React.FC<
     >
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
+        <FieldLabel CustomLabel={CustomLabel} required={required} {...(labelProps || {})} />
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
