@@ -1,9 +1,5 @@
-import type {
-  AdapterArguments,
-  RichTextElement,
-  RichTextLeaf,
-} from '@payloadcms/richtext-slate/dist/types'
-import type { RichTextField } from 'payload/dist/fields/config/types'
+import type { AdapterArguments, RichTextElement, RichTextLeaf } from '@payloadcms/richtext-slate'
+import type { RichTextField } from 'payload/types'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
@@ -97,9 +93,9 @@ const richText: RichText = (
     {
       name: 'richText',
       type: 'richText',
-      editor: slateEditor({
-        admin: slateOptions,
-      }),
+      // editor: slateEditor({
+      //   admin: slateOptions,
+      // }),
       required: true,
     },
     fieldOverrides || {},

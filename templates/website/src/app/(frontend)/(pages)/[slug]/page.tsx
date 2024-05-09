@@ -1,52 +1,48 @@
 import type { Metadata } from 'next'
 
+import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import type { Page } from '../../../../payload-types'
 
-import { staticHome } from '../../../../seed/home-static'
-import { fetchDoc } from '../../../_api/fetchDoc'
-import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
 import { Hero } from '../../../_components/Hero'
 import { PayloadRedirects } from '../../../_components/PayloadRedirects'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
-// Payload Cloud caches all files through Cloudflare, so we don't need Next.js to cache them as well
-// This means that we can turn off Next.js data caching and instead rely solely on the Cloudflare CDN
-// To do this, we include the `no-cache` header on the fetch requests used to get the data for this page
-// But we also need to force Next.js to dynamically render this page on each request for preview mode to work
-// See https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
-// If you are not using Payload Cloud then this line can be removed, see `../../../README.md#cache`
-export const dynamic = 'force-dynamic'
+const getCachedGetPageBySlug = async ({
+  slug,
+  draft,
+}: {
+  draft: boolean
+  slug: string
+}): Promise<Page | null> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const pages = await payload.find({
+    collection: 'pages',
+    draft,
+    limit: 1,
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  })
+
+  return pages.docs?.[0] || null
+}
 
 export default async function Page({ params: { slug = 'home' } }) {
   const url = '/' + slug
   const { isEnabled: isDraftMode } = draftMode()
-
-  let page: Page | null = null
-
-  try {
-    page = await fetchDoc<Page>({
-      slug,
-      collection: 'pages',
-      draft: isDraftMode,
-    })
-  } catch (error) {
-    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
-    // so swallow the error here and simply render the page with fallback data where necessary
-    // in production you may want to redirect to a 404  page or at least log the error somewhere
-    // console.error(error)
-  }
-
-  // if no `home` page exists, render a static one using dummy content
-  // you should delete this code once you have a home page in the CMS
-  // this is really only useful for those who are demoing this template
-  if (!page && slug === 'home') {
-    page = staticHome
-  }
+  const page = await getCachedGetPageBySlug({
+    slug,
+    draft: isDraftMode,
+  })
 
   if (!page) {
     return notFound()
@@ -67,35 +63,21 @@ export default async function Page({ params: { slug = 'home' } }) {
 }
 
 export async function generateStaticParams() {
-  try {
-    const pages = await fetchDocs<Page>('pages')
-    return pages?.map(({ slug }) => slug)
-  } catch (error) {
-    return []
-  }
+  const payload = await getPayload({ config: configPromise })
+  const pages = await payload.find({
+    collection: 'pages',
+    limit: 1000,
+  })
+
+  return pages.docs?.map(({ slug }) => slug)
 }
 
 export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
   const { isEnabled: isDraftMode } = draftMode()
-
-  let page: Page | null = null
-
-  try {
-    page = await fetchDoc<Page>({
-      slug,
-      collection: 'pages',
-      draft: isDraftMode,
-    })
-  } catch (error) {
-    // don't throw an error if the fetch fails
-    // this is so that we can render static fallback pages for the demo
-    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
-    // in production you may want to redirect to a 404  page or at least log the error somewhere
-  }
-
-  if (!page) {
-    if (slug === 'home') page = staticHome
-  }
+  const page = await getCachedGetPageBySlug({
+    slug,
+    draft: isDraftMode,
+  })
 
   return generateMeta({ doc: page })
 }

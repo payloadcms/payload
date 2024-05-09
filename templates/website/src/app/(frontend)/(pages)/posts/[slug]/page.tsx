@@ -1,47 +1,60 @@
 import type { Metadata } from 'next'
 
+import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import type { Post } from '../../../../../payload-types'
 
-import { Comment } from '../../../../../payload-types'
-import { fetchComments } from '../../../../_api/fetchComments'
-import { fetchDoc } from '../../../../_api/fetchDoc'
-import { fetchDocs } from '../../../../_api/fetchDocs'
 import { Blocks } from '../../../../_components/Blocks'
 import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
 import { PremiumContent } from '../../../../_components/PremiumContent'
 import { PostHero } from '../../../../_heros/PostHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
 
-// Force this page to be dynamic so that Next.js does not cache it
-// See the note in '../../../[slug]/page.tsx' about this
-export const dynamic = 'force-dynamic'
+const getCachedGetPostBySlug = async ({
+  slug,
+  draft,
+}: {
+  draft: boolean
+  slug: string
+}): Promise<Post | null> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const pages = await payload.find({
+    collection: 'posts',
+    draft,
+    limit: 1,
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  })
+
+  return pages.docs?.[0] || null
+}
 
 export default async function Post({ params: { slug } }) {
-  const url = '/posts/' + slug.join('/')
-  const { isEnabled: isDraftMode } = draftMode()
+  const url = '/posts/' + slug
+  const { isEnabled: draft } = draftMode()
 
-  let post: Post | null = null
-
-  try {
-    post = await fetchDoc<Post>({
-      slug,
-      collection: 'posts',
-      draft: isDraftMode,
-    })
-  } catch (error) {
-    console.error(error) // eslint-disable-line no-console
-  }
+  const payload = await getPayload({ config: configPromise })
+  const post = await getCachedGetPostBySlug({ slug, draft })
 
   if (!post) {
     notFound()
   }
 
-  const comments = await fetchComments({
-    doc: post?.id,
+  const comments = await payload.find({
+    collection: 'comments',
+    where: {
+      doc: {
+        equals: post.id,
+      },
+    },
   })
 
   const { enablePremiumContent, layout, premiumContent, relatedPosts } = post
@@ -57,7 +70,7 @@ export default async function Post({ params: { slug } }) {
           {
             blockName: 'Comments',
             blockType: 'comments',
-            comments,
+            comments: comments.docs,
             doc: post,
             introContent: [
               {
@@ -135,29 +148,18 @@ export default async function Post({ params: { slug } }) {
 }
 
 export async function generateStaticParams() {
-  try {
-    const posts = await fetchDocs<Post>('posts')
-    return posts?.map(({ slug }) => slug)
-  } catch (error) {
-    return []
-  }
+  const payload = await getPayload({ config: configPromise })
+  const posts = await payload.find({
+    collection: 'posts',
+    limit: 1000,
+  })
+
+  return posts.docs?.map(({ slug }) => slug)
 }
 
 export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
-  const { isEnabled: isDraftMode } = draftMode()
-
-  let post: Post | null = null
-
-  try {
-    post = await fetchDoc<Post>({
-      slug,
-      collection: 'posts',
-      draft: isDraftMode,
-    })
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error)
-  }
+  const { isEnabled: draft } = draftMode()
+  const post = await getCachedGetPostBySlug({ slug, draft })
 
   return generateMeta({ doc: post })
 }

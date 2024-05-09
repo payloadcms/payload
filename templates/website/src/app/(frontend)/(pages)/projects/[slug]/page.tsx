@@ -1,38 +1,42 @@
 import type { Metadata } from 'next'
 
+import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import type { Project } from '../../../../../payload-types'
 
-import { fetchDoc } from '../../../../_api/fetchDoc'
-import { fetchDocs } from '../../../../_api/fetchDocs'
-import { RelatedPosts } from '../../../../_blocks/RelatedPosts'
 import { Blocks } from '../../../../_components/Blocks'
 import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
 import { ProjectHero } from '../../../../_heros/ProjectHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
 
-// Force this page to be dynamic so that Next.js does not cache it
-// See the note in '../../../[slug]/page.tsx' about this
-export const dynamic = 'force-dynamic'
+const getCachedProjectBySlug = async ({ slug, draft }) => {
+  const payload = await getPayload({ config: configPromise })
+  const projects = await payload.find({
+    collection: 'projects',
+    draft,
+    limit: 1,
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  })
+
+  return projects.docs?.[0] || null
+}
 
 export default async function Project({ params: { slug } }) {
-  const url = '/projects/' + slug.join('/')
-  const { isEnabled: isDraftMode } = draftMode()
+  const url = '/projects/' + slug
+  const { isEnabled: draft } = draftMode()
 
-  let project: Project | null = null
-
-  try {
-    project = await fetchDoc<Project>({
-      slug,
-      collection: 'projects',
-      draft: isDraftMode,
-    })
-  } catch (error) {
-    console.error(error) // eslint-disable-line no-console
-  }
+  const project = await getCachedProjectBySlug({
+    slug,
+    draft,
+  })
 
   if (!project) {
     notFound()
@@ -90,29 +94,21 @@ export default async function Project({ params: { slug } }) {
 }
 
 export async function generateStaticParams() {
-  try {
-    const projects = await fetchDocs<Project>('projects')
-    return projects?.map(({ slug }) => slug)
-  } catch (error) {
-    return []
-  }
+  const payload = await getPayload({ config: configPromise })
+  const projects = await payload.find({
+    collection: 'projects',
+  })
+
+  return projects.docs?.map(({ slug }) => slug)
 }
 
 export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
-  const { isEnabled: isDraftMode } = draftMode()
+  const { isEnabled: draft } = draftMode()
 
-  let project: Project | null = null
-
-  try {
-    project = await fetchDoc<Project>({
-      slug,
-      collection: 'projects',
-      draft: isDraftMode,
-    })
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error)
-  }
+  const project = await getCachedProjectBySlug({
+    slug,
+    draft,
+  })
 
   return generateMeta({ doc: project })
 }
