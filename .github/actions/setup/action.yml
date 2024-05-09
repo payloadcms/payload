@@ -1,9 +1,15 @@
 name: Setup node and pnpm
 description: Configure the Node.js and pnpm versions
 
-env:
-  NODE_VERSION: 18.20.2
-  PNPM_VERSION: 8.15.7
+inputs:
+  node-version:
+    description: 'The Node.js version to use'
+    required: true
+    default: 18.20.2
+  pnpm-version:
+    description: 'The pnpm version to use'
+    required: true
+    default: 8.15.7
 
 runs:
   using: composite
@@ -13,15 +19,15 @@ runs:
       shell: bash
       run: sudo ethtool -K eth0 tx off rx off
 
-    - name: Setup Node@${{ env.NODE_VERSION }}
+    - name: Setup Node@${{ inputs.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ env.NODE_VERSION }}
+        node-version: ${{ inputs.node-version }}
 
     - name: Install pnpm
       uses: pnpm/action-setup@v3
       with:
-        version: ${{ env.PNPM_VERSION }}
+        version: ${{ inputs.pnpm-version }}
         run_install: false
 
     - name: Get pnpm store directory

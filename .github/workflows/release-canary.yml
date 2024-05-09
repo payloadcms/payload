@@ -5,6 +5,10 @@ on:
     branches:
       - beta
 
+env:
+  NODE_VERSION: 18.20.2
+  PNPM_VERSION: 8.15.7
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -13,6 +17,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
       - name: Canary release script
         # dry run hard-coded to true for testing and no npm token provided
         run: pnpm tsx ./scripts/publish-canary.ts
