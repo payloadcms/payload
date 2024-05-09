@@ -370,7 +370,20 @@ jobs:
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
-
+      - name: Upload blob report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: all-blob-reports
+          path: tests/reports/blobs
+          retention-days: 1
+      - name: Upload blob report 2
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: all-blob-reports
+          path: test/reports/blobs
+          retention-days: 1
       # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
       # - uses: daun/playwright-report-summary@v3
       #   with:
@@ -426,7 +439,6 @@ jobs:
       - name: Download blob reports
         uses: actions/download-artifact@v3
         with:
-          pattern: test-result-*
           path: playwright-blob-reports
           name: all-blob-reports
 
