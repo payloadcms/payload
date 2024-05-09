@@ -30,13 +30,6 @@ export default defineConfig({
   maxFailures: process.env.CI ? undefined : undefined,
   retries: process.env.CI ? 5 : undefined,
   reporter: process.env.CI
-    ? [
-        ['list', { printSteps: true }],
-        ['json'],
-        [
-          'blob',
-          { outputDir: 'blob-report', fileName: `${process.env.PLAYWRIGHT_OUTPUT_NAME}.zip` },
-        ],
-      ]
+    ? [['list', { printSteps: true }], ['json']]
     : [['list', { printSteps: true }]],
 })
