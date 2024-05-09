@@ -22,9 +22,6 @@ export const PostClient: React.FC<{
 
   return (
     <React.Fragment>
-      <Gutter>
-        <div id={renderedPageTitleID}>{data.title}</div>
-      </Gutter>
       <PostHero post={data} />
       <Blocks blocks={data?.layout} />
       <Blocks
@@ -68,6 +65,9 @@ export const PostClient: React.FC<{
         ]}
         disableTopPadding
       />
+      <Gutter>
+        <div id={renderedPageTitleID}>{`For Testing: ${data.title}`}</div>
+      </Gutter>
     </React.Fragment>
   )
 }

@@ -105,14 +105,14 @@ describe('Live Preview', () => {
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
-    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('Home')
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: Home')
 
     const newTitleValue = 'Home (Edited)'
 
     await titleField.fill(newTitleValue)
 
     await expect(() =>
-      expect(frame.locator(renderedPageTitleLocator)).toHaveText(newTitleValue),
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
     ).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -135,14 +135,14 @@ describe('Live Preview', () => {
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
-    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('SSR Post 1')
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
 
-    const newTitleValue = 'SSR Post 1 (Edited)'
+    const newTitleValue = 'SSR Home (Edited)'
 
     await titleField.fill(newTitleValue)
 
     await expect(() =>
-      expect(frame.locator(renderedPageTitleLocator)).toHaveText(newTitleValue),
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
     ).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })

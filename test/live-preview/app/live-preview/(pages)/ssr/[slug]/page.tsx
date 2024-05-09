@@ -1,14 +1,15 @@
 /* eslint-disable no-restricted-exports */
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import type { Page } from '../../../../../payload-types.js'
 
-import { ssrPagesSlug } from '../../../../../shared.js'
+import { renderedPageTitleID, ssrPagesSlug } from '../../../../../shared.js'
 import { getDoc } from '../../../_api/getDoc.js'
 import { getDocs } from '../../../_api/getDocs.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
-import { PostHero } from '../../../_heros/PostHero/index.js'
+import { Hero } from '../../../_components/Hero/index.js'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave.js'
 
 export default async function SSRPage({ params: { slug = '' } }) {
@@ -25,8 +26,11 @@ export default async function SSRPage({ params: { slug = '' } }) {
   return (
     <Fragment>
       <RefreshRouteOnSave />
-      <PostHero post={data} />
+      <Hero {...data?.hero} />
       <Blocks blocks={data?.layout} />
+      <Gutter>
+        <div id={renderedPageTitleID}>{`For Testing: ${data.title}`}</div>
+      </Gutter>
     </Fragment>
   )
 }
