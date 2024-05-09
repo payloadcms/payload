@@ -358,31 +358,17 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
+        run: PLAYWRIGHT_OUTPUT_NAME=result_${{ matrix.suite }} pnpm test:e2e ${{ matrix.suite }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          PLAYWRIGHT_OUTPUT_NAME: result_${{ matrix.suite }}
           NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: all-blob-reports
-          path: test/test-results/
+          path: test/blob-report/
           if-no-files-found: ignore
-          retention-days: 1
-      - name: Upload blob report
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: all-blob-reports
-          path: tests/reports/blobs
-          retention-days: 1
-      - name: Upload blob report 2
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: all-blob-reports
-          path: test/reports/blobs
           retention-days: 1
       # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
       # - uses: daun/playwright-report-summary@v3
