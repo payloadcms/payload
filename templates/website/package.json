@@ -8,15 +8,17 @@
     "build": "next build",
     "dev": "next dev",
     "generate:types": "payload generate:types",
+    "ii": "pnpm --ignore-workspace install",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "payload": "payload",
     "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true next dev",
     "serve": "next start",
-    "serve:server": "cross-env NODE_ENV=production node dist/server.js",
-    "ii": "pnpm --ignore-workspace install"
+    "serve:server": "cross-env NODE_ENV=production node dist/server.js"
   },
   "dependencies": {
+    "@lexical/list": "^0.14.5",
+    "@lexical/rich-text": "^0.14.5",
     "@payloadcms/db-mongodb": "^3.0.0-beta.27",
     "@payloadcms/db-postgres": "^3.0.0-beta.27",
     "@payloadcms/next": "^3.0.0-beta.27",
@@ -58,8 +60,8 @@
     "ts-node": "10.9.1",
     "typescript": "^5.4.2"
   },
+  "packageManager": "yarn@1.22.21",
   "overrides": {
     "@types/react": "18.2.74"
-  },
-  "packageManager": "yarn@1.22.21"
+  }
 }

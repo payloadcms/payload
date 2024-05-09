@@ -5,7 +5,7 @@ import type { Post } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
-import RichText from '../../_components/RichText'
+import RichText from '../../_components/RichTextLexical'
 import { formatDateTime } from '../../_utilities/formatDateTime'
 import classes from './index.module.scss'
 

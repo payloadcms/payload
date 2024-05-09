@@ -1,9 +1,8 @@
 import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
-import type { SerializedHeadingNode, SerializedQuoteNode } from '@lexical/rich-text'
+import type { SerializedHeadingNode } from '@lexical/rich-text'
 import type { LinkFields, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { SerializedElementNode, SerializedLexicalNode, SerializedTextNode } from 'lexical'
 
-import escapeHTML from 'escape-html'
 import React, { Fragment } from 'react'
 import { ArchiveBlock } from 'src/app/_blocks/ArchiveBlock'
 import { CallToActionBlock } from 'src/app/_blocks/CallToAction'

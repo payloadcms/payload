@@ -5,7 +5,7 @@ import type { Page } from '../../../payload-types'
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
 import { Media } from '../../_components/Media'
-import RichText from '../../_components/RichText'
+import RichText from '../../_components/RichTextLexical'
 import classes from './index.module.scss'
 
 export const MediumImpactHero: React.FC<Page['hero']> = (props) => {
