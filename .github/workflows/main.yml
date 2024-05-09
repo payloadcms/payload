@@ -94,7 +94,17 @@ jobs:
 
       - run: pnpm install
       - name: List changed files
-        run: git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}
+        run: |
+          # Debug
+          echo github.event.pull_request.head.repo.url: ${{ github.event.pull_request.head.repo.url }}
+          echo github.event.pull_request.head.repo.full_name: ${{ github.event.pull_request.head.repo.full_name }}
+
+          # If base ref is not available, fetch the remote
+          if [ -z "$GITHUB_HEAD_REF" ]; then
+            git remote add pr ${{ github.event.pull_request.head.repo.full_name }}
+          else
+            git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}
+          fi
       - name: Lint staged
         run: npx lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
 
