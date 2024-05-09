@@ -9,6 +9,7 @@ import sharp from 'sharp' // editor-import
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
+import { fileURLToPath } from 'url'
 
 import Categories from './collections/Categories'
 import { Media } from './collections/Media'
@@ -22,12 +23,15 @@ import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 const generateTitle = () => {
   return 'My Website'
 }
 
 dotenv.config({
-  path: path.resolve(__dirname, '../../.env'),
+  path: path.resolve(dirname, '../../.env'),
 })
 
 export default buildConfig({
@@ -78,6 +82,6 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

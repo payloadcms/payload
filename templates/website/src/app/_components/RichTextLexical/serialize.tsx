@@ -5,6 +5,10 @@ import type { SerializedElementNode, SerializedLexicalNode, SerializedTextNode }
 
 import escapeHTML from 'escape-html'
 import React, { Fragment } from 'react'
+import { ArchiveBlock } from 'src/app/_blocks/ArchiveBlock'
+import { CallToActionBlock } from 'src/app/_blocks/CallToAction'
+import { ContentBlock } from 'src/app/_blocks/Content'
+import { MediaBlock } from 'src/app/_blocks/MediaBlock'
 import { CMSLink } from 'src/app/_components/Link'
 
 import {
@@ -163,15 +167,29 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
 
           case 'block': {
             // todo: fix types
-            //@ts-expect-error
-            const blockType = _node.fields.data.blockType
 
-            if (!blockType) {
+            //@ts-expect-error
+            const block = _node.fields
+
+            //@ts-expect-error
+            const blockType = _node.fields?.blockType
+
+            if (!block || !blockType) {
               return null
             }
 
-            // temporary
-            return null
+            switch (blockType) {
+              case 'content':
+                return <ContentBlock {...block} />
+              case 'cta':
+                return <CallToActionBlock {...block} />
+              case 'archive':
+                return <ArchiveBlock {...block} />
+              case 'mediaBlock':
+                return <MediaBlock {...block} />
+              default:
+                return null
+            }
           }
 
           default:

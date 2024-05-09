@@ -1,10 +1,10 @@
 import React from 'react'
+import RichText from 'src/app/_components/RichTextLexical'
 
 import type { ArchiveBlockProps } from './types'
 
 import { CollectionArchive } from '../../_components/CollectionArchive'
 import { Gutter } from '../../_components/Gutter'
-import RichText from '../../_components/RichText'
 import classes from './index.module.scss'
 
 export const ArchiveBlock: React.FC<

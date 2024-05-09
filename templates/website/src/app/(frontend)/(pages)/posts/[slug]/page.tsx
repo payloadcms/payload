@@ -5,6 +5,7 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import React from 'react'
+import RichText from 'src/app/_components/RichTextLexical'
 
 import type { Post } from '../../../../../payload-types'
 
@@ -48,101 +49,13 @@ export default async function Post({ params: { slug } }) {
     notFound()
   }
 
-  const comments = await payload.find({
-    collection: 'comments',
-    where: {
-      doc: {
-        equals: post.id,
-      },
-    },
-  })
-
-  const { enablePremiumContent, layout, premiumContent, relatedPosts } = post
+  const { content, relatedPosts } = post
 
   return (
     <React.Fragment>
       <PayloadRedirects url={url} />
       <PostHero post={post} />
-      <Blocks blocks={layout} />
-      {enablePremiumContent && <PremiumContent disableTopPadding postSlug={slug as string} />}
-      <Blocks
-        blocks={[
-          {
-            blockName: 'Comments',
-            blockType: 'comments',
-            comments: comments.docs,
-            doc: post,
-            introContent: [
-              {
-                type: 'h4',
-                children: [
-                  {
-                    text: 'Comments',
-                  },
-                ],
-              },
-              {
-                type: 'p',
-                children: [
-                  {
-                    text: 'Authenticated users can leave comments on this post. All new comments are given the status "draft" until they are approved by an admin. Draft comments are not accessible to the public and will not show up on this page until it is marked as "published". To manage all comments, ',
-                  },
-                  {
-                    type: 'link',
-                    children: [
-                      {
-                        text: 'navigate to the admin dashboard',
-                      },
-                    ],
-                    url: '/admin/collections/comments',
-                  },
-                  {
-                    text: '.',
-                  },
-                ],
-              },
-            ],
-            relationTo: 'posts',
-          },
-          {
-            blockName: 'Related Posts',
-            blockType: 'relatedPosts',
-            docs: relatedPosts,
-            introContent: [
-              {
-                type: 'h4',
-                children: [
-                  {
-                    text: 'Related posts',
-                  },
-                ],
-              },
-              {
-                type: 'p',
-                children: [
-                  {
-                    text: 'The posts displayed here are individually selected for this page. Admins can select any number of related posts to display here and the layout will adjust accordingly. Alternatively, you could swap this out for the "Archive" block to automatically populate posts by category complete with pagination. To manage related posts, ',
-                  },
-                  {
-                    type: 'link',
-                    children: [
-                      {
-                        text: 'navigate to the admin dashboard',
-                      },
-                    ],
-                    url: `/admin/collections/posts/${post.id}`,
-                  },
-                  {
-                    text: '.',
-                  },
-                ],
-              },
-            ],
-            relationTo: 'posts',
-          },
-        ]}
-        disableTopPadding
-      />
+      <RichText content={content} />
     </React.Fragment>
   )
 }

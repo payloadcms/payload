@@ -3,6 +3,10 @@ import type { CollectionConfig } from 'payload/types'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { LinkFeature } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -26,6 +30,6 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    staticDir: path.resolve(__dirname, '../../../media'),
+    staticDir: path.resolve(dirname, '../../media'),
   },
 }

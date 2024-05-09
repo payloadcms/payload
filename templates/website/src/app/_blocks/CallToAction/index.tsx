@@ -1,10 +1,10 @@
 import React from 'react'
+import RichText from 'src/app/_components/RichTextLexical'
 
 import type { Page } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
-import RichText from '../../_components/RichText'
 import { VerticalPadding } from '../../_components/VerticalPadding'
 import classes from './index.module.scss'
 

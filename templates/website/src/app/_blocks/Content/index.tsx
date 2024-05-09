@@ -1,10 +1,10 @@
 import React from 'react'
+import RichText from 'src/app/_components/RichTextLexical'
 
 import type { Page } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
-import RichText from '../../_components/RichText'
 import classes from './index.module.scss'
 
 type Props = Extract<Page['layout'][0], { blockType: 'content' }>
