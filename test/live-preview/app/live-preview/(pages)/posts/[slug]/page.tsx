@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { Post } from '../../../../../payload-types.js'
 
-import { postsSlug } from '../../../../../collections/Posts.js'
+import { postsSlug } from '../../../../../shared.js'
 import { getDoc } from '../../../_api/getDoc.js'
 import { getDocs } from '../../../_api/getDocs.js'
 import { PostClient } from './page.client.js'

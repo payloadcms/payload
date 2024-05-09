@@ -1,5 +1,6 @@
 import type { Field } from 'payload/types'
 
+import { pagesSlug, postsSlug } from '../shared.js'
 import deepMerge from '../utilities/deepMerge.js'
 
 export const appearanceOptions = {
@@ -76,7 +77,7 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
       name: 'reference',
       label: 'Document to link to',
       type: 'relationship',
-      relationTo: ['posts', 'pages'],
+      relationTo: [postsSlug, pagesSlug],
       required: true,
       maxDepth: 1,
       admin: {

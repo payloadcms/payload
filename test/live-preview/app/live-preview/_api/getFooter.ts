@@ -1,5 +1,5 @@
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 
 import type { Footer } from '../../../payload-types.js'
 

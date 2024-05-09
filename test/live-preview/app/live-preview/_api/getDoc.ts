@@ -1,7 +1,7 @@
 import type { Where } from 'payload/types'
 
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 
 export const getDoc = async <T>(args: {
   collection: string
