@@ -417,7 +417,6 @@ export interface Category {
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr".
- */
 export interface Ssr {
   id: string;
   slug: string;
@@ -639,4 +638,10 @@ export interface Footer {
     | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+
+
+declare module 'payload' {
+ // @ts-ignore 
+ export interface GeneratedTypes extends Config {}
 }

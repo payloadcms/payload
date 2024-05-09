@@ -6,23 +6,10 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SharedMetaArray".
- */
-export type SharedMetaArray =
-  | {
-      title?: string | null;
-      description?: string | null;
-      id?: string | null;
-    }[]
-  | null;
-
 export interface Config {
   collections: {
-    collection1: Collection1;
-    collection2: Collection2;
-    'no-graphql': NoGraphql;
+    media: Media;
+    'media-with-prefix': MediaWithPrefix;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -35,70 +22,55 @@ export interface Config {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection1".
+ * via the `definition` "media".
  */
-export interface Collection1 {
+export interface Media {
   id: string;
-  testing: string;
-  title: string;
-  meta?: SharedMetaArray;
-  blocks: (SharedMetaBlock | AnotherSharedBlock)[];
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SharedMetaBlock".
- */
-export interface SharedMetaBlock {
-  b1title: string;
-  b1description?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block1';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AnotherSharedBlock".
- */
-export interface AnotherSharedBlock {
-  b2title: string;
-  b2description?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block2';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection2".
- */
-export interface Collection2 {
-  id: string;
-  metaArray?: SharedMetaArray;
-  metaGroup?: SharedMeta;
-  nestedGroup?: {
-    meta?: SharedMeta;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  sizes?: {
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sixteenByNineMedium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SharedMeta".
+ * via the `definition` "media-with-prefix".
  */
-export interface SharedMeta {
-  title?: string | null;
-  description?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "no-graphql".
- */
-export interface NoGraphql {
+export interface MediaWithPrefix {
   id: string;
-  name?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -154,5 +126,6 @@ export interface PayloadMigration {
 
 
 declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
+ // @ts-ignore 
+ export interface GeneratedTypes extends Config {}
 }

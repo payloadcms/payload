@@ -8,29 +8,21 @@
 
 export interface Config {
   collections: {
-    posts: Post;
-    'relation-a': RelationA;
-    'relation-b': RelationB;
     users: User;
+    products: Product;
+    customers: Customer;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   globals: {};
-  locale: null;
-  user: User & {
-    collection: 'users';
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  title: string;
-  owner?: (string | null) | User;
-  updatedAt: string;
-  createdAt: string;
+  locale: 'en' | 'es' | 'de';
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (Customer & {
+        collection: 'customers';
+      });
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -38,6 +30,7 @@ export interface Post {
  */
 export interface User {
   id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -51,33 +44,53 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-a".
+ * via the `definition` "products".
  */
-export interface RelationA {
+export interface Product {
   id: string;
-  relationship?: (string | null) | RelationB;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  name?: string | null;
+  price?: {
+    stripePriceID?: string | null;
+    stripeJSON?: string | null;
+  };
+  stripeID?: string | null;
+  skipSync?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-b".
+ * via the `definition` "customers".
  */
-export interface RelationB {
+export interface Customer {
   id: string;
-  relationship?: (string | null) | RelationA;
-  richText?:
+  name?: string | null;
+  subscriptions?:
     | {
-        [k: string]: unknown;
+        stripeSubscriptionID?: string | null;
+        stripeProductID?: string | null;
+        product?: (string | null) | Product;
+        status?:
+          | ('active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'trialing' | 'unpaid')
+          | null;
+        id?: string | null;
       }[]
     | null;
+  stripeID?: string | null;
+  skipSync?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -85,10 +98,15 @@ export interface RelationB {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: string | Customer;
+      };
   key?: string | null;
   value?:
     | {
