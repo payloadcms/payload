@@ -43,7 +43,7 @@ export const Pages: CollectionConfig = {
   versions: {
     drafts: {
       autosave: {
-        interval: 200,
+        interval: 375,
       },
     },
   },

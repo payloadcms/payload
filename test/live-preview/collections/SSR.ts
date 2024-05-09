@@ -22,7 +22,7 @@ export const SSR: CollectionConfig = {
   versions: {
     drafts: {
       autosave: {
-        interval: 200,
+        interval: 375,
       },
     },
   },
