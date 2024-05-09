@@ -8,7 +8,7 @@
 
 export interface Config {
   collections: {
-    posts: Post;
+    'blocks-collection': BlocksCollection;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -21,11 +21,41 @@ export interface Config {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "blocks-collection".
  */
-export interface Post {
+export interface BlocksCollection {
   id: string;
-  text?: string | null;
+  layout?:
+    | {
+        richText?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        field1?: string | null;
+        field2?: string | null;
+        field3?: string | null;
+        field4?: string | null;
+        field5?: string | null;
+        field6?: string | null;
+        field7?: string | null;
+        field8?: string | null;
+        field9?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'content';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

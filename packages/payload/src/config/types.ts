@@ -629,7 +629,18 @@ export type Config = {
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /** Disable declare block in generated types file */
-    declare?: false
+    declare?:
+      | {
+          /**
+           * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
+           *
+           * Adds a @ts-ignore flag above the GeneratedTypes interface declaration
+           *
+           * @default false
+           */
+          ignoreTSError?: boolean
+        }
+      | false
     /** Filename to write the generated types to */
     outputFile?: string
   }
