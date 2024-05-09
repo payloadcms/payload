@@ -7,8 +7,8 @@ import React from 'react'
 
 import type { Props as MediaProps } from '../types.js'
 
+import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 import cssVariables from '../../../cssVariables.js'
-import { PAYLOAD_SERVER_URL } from '../../../serverURL.js'
 import classes from './index.module.scss'
 
 const { breakpoints } = cssVariables

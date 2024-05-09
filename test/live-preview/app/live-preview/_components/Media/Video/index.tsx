@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react'
 
 import type { Props as MediaProps } from '../types.js'
 
-import { PAYLOAD_SERVER_URL } from '../../../serverURL.js'
+import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 import classes from './index.module.scss'
 
 export const Video: React.FC<MediaProps> = (props) => {
