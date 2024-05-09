@@ -6,7 +6,7 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 import type { Post } from '../../../../../payload-types.js'
 import type { ArchiveBlockProps } from '../../../_blocks/ArchiveBlock/types.js'
 
-import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
+import { PAYLOAD_SERVER_URL } from '../../../serverURL.js'
 import { Card } from '../../Card/index.js'
 import { Gutter } from '../../Gutter/index.js'
 import { PageRange } from '../../PageRange/index.js'

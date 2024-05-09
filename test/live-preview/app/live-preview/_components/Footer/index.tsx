@@ -1,7 +1,10 @@
+import config from '@payload-config'
+import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 import LinkWithDefault from 'next/link.js'
 import React from 'react'
 
-import { getFooter } from '../../_api/getFooter.js'
+import type { Footer } from '../../../../payload-types.js'
+
 import { Gutter } from '../Gutter/index.js'
 import { CMSLink } from '../Link/index.js'
 import classes from './index.module.scss'
@@ -9,7 +12,11 @@ import classes from './index.module.scss'
 const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
 export async function Footer() {
-  const footer = await getFooter()
+  const payload = await getPayloadHMR({ config })
+
+  const footer = await payload.findGlobal({
+    slug: 'footer',
+  })
 
   const navItems = footer?.navItems || []
 
@@ -26,7 +33,7 @@ export async function Footer() {
           </picture>
         </Link>
         <nav className={classes.nav}>
-          {navItems.map(({ link }, i) => {
+          {navItems?.map(({ link }, i) => {
             return <CMSLink key={i} {...link} />
           })}
           <Link href="/admin">Admin</Link>

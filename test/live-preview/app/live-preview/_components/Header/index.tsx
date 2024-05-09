@@ -1,7 +1,10 @@
+import config from '@payload-config'
+import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 import LinkWithDefault from 'next/link.js'
 import React from 'react'
 
-import { getHeader } from '../../_api/getHeader.js'
+import type { Header } from '../../../../payload-types.js'
+
 import { Gutter } from '../Gutter/index.js'
 import { HeaderNav } from './Nav/index.js'
 import classes from './index.module.scss'
@@ -9,7 +12,11 @@ import classes from './index.module.scss'
 const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
 export async function Header() {
-  const header = await getHeader()
+  const payload = await getPayloadHMR({ config })
+
+  const header = await payload.findGlobal({
+    slug: 'header',
+  })
 
   return (
     <header className={classes.header}>

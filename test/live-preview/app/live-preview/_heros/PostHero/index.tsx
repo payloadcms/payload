@@ -3,11 +3,11 @@ import React, { Fragment } from 'react'
 
 import type { Post } from '../../../../payload-types.js'
 
-import { PAYLOAD_SERVER_URL } from '../../_api/serverURL.js'
 import { Gutter } from '../../_components/Gutter/index.js'
 import { Media } from '../../_components/Media/index.js'
 import RichText from '../../_components/RichText/index.js'
 import { formatDateTime } from '../../_utilities/formatDateTime.js'
+import { PAYLOAD_SERVER_URL } from '../../serverURL.js'
 import classes from './index.module.scss'
 
 const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default

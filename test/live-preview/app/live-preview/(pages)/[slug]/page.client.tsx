@@ -6,10 +6,10 @@ import React from 'react'
 import type { Page as PageType } from '../../../../payload-types.js'
 
 import { renderedPageTitleID } from '../../../../shared.js'
-import { PAYLOAD_SERVER_URL } from '../../_api/serverURL.js'
 import { Blocks } from '../../_components/Blocks/index.js'
 import { Gutter } from '../../_components/Gutter/index.js'
 import { Hero } from '../../_components/Hero/index.js'
+import { PAYLOAD_SERVER_URL } from '../../serverURL.js'
 
 export const PageClient: React.FC<{
   page: PageType
