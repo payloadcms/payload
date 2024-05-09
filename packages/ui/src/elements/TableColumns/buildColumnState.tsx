@@ -104,7 +104,7 @@ export const buildColumnState = (args: Args): Column[] => {
       <FieldLabel
         CustomLabel={CustomLabelToRender}
         label={field.fieldComponentProps?.label}
-        {...field.fieldComponentProps?.labelProps}
+        {...(field.fieldComponentProps?.labelProps || {})}
         unstyled
       />
     )
