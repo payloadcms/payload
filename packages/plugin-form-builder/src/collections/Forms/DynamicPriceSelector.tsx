@@ -58,7 +58,7 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
   if (valueType === 'valueOfField' && !isNumberField) {
     return (
       <div>
-        <div>{labelValue}</div>
+        <div>{String(labelValue)}</div>
         <div
           style={{
             color: '#9A9A9A',
