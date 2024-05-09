@@ -32,5 +32,11 @@ export const packageWhitelist = [
   'plugin-search',
   'plugin-seo',
   'plugin-stripe',
-  // 'plugin-sentry',
+
+  // Unpublished
+  // 'plugin-sentry'
+  // 'storage-uploadthing',
+  // 'eslint-config-payload',
+  // 'eslint-plugin-payload',
+  // 'live-preview-vue',
 ]

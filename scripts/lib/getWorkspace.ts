@@ -199,7 +199,6 @@ async function publishSinglePackage(
       '-C',
       pkg.packagePath,
       '--no-git-checks',
-      '--json',
       '--tag',
       tag,
       '--dry-run', // TODO: hardcode dry-run for now
