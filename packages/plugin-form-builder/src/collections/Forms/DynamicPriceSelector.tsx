@@ -20,7 +20,7 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
   const { fields, getData, getDataByPath } = useWatchForm()
 
   const locale = useLocale()
-  const { i18n } = useTranslation()
+  const { t } = useTranslation()
 
   const [isNumberField, setIsNumberField] = useState<boolean>()
   const [valueType, setValueType] = useState<'static' | 'valueOfField'>()
@@ -56,7 +56,7 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
 
   const localLabels =
     typeof label === 'function'
-      ? label({ t: i18n.t })
+      ? label({ t })
       : typeof label === 'object'
         ? label
         : { [localeCode]: label }
