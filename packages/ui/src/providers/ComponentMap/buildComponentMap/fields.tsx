@@ -367,7 +367,11 @@ export const mapFields = (args: {
           }
           case 'collapsible': {
             let CustomCollapsibleLabel: React.ReactNode
-            if (field?.admin?.components?.RowLabel) {
+            if (
+              field?.admin?.components &&
+              'RowLabel' in field.admin.components &&
+              field?.admin?.components?.RowLabel
+            ) {
               const CustomCollapsibleLabelComponent = field.admin.components.RowLabel
               CustomCollapsibleLabel = (
                 <WithServerSideProps
