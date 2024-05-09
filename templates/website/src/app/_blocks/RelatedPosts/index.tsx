@@ -22,7 +22,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
     <div className={classes.relatedPosts}>
       {introContent && (
         <Gutter className={classes.introContent}>
-          <RichText content={introContent} />
+          <RichText content={introContent} enableGutter={false} />
         </Gutter>
       )}
       <Gutter>

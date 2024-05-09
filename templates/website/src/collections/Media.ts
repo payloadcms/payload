@@ -5,6 +5,8 @@ import { LinkFeature } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { richText } from '../fields/richTextLexical'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -19,17 +21,17 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      name: 'caption',
-      type: 'richText',
-      editor: lexicalEditor({
-        features({ defaultFeatures }) {
-          return [LinkFeature({ enabledCollections: ['pages'] })]
+    richText(
+      { name: 'caption' },
+      {
+        features: {
+          blocks: [],
+          upload: false,
         },
-      }),
-    },
+      },
+    ),
   ],
   upload: {
-    staticDir: path.resolve(dirname, '../../media'),
+    staticDir: path.resolve(dirname, '../../public/media'),
   },
 }

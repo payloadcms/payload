@@ -14,7 +14,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = (props) => {
   return (
     <Gutter className={classes.hero}>
       <div className={classes.background}>
-        <RichText className={classes.richText} content={richText} />
+        <RichText className={classes.richText} content={richText} enableGutter={false} />
         {Array.isArray(links) && (
           <ul className={classes.links}>
             {links.map(({ link }, i) => {

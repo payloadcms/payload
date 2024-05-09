@@ -22,7 +22,9 @@ export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText 
     <Gutter className={classes.lowImpactHero}>
       <div className={`${classes.content} ${children ? classes.noRichText : ''}`}>
         <VerticalPadding>
-          {children || <RichText className={classes.richText} content={richText} />}
+          {children || (
+            <RichText className={classes.richText} content={richText} enableGutter={false} />
+          )}
         </VerticalPadding>
       </div>
     </Gutter>

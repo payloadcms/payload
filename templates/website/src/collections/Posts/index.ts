@@ -56,6 +56,9 @@ export const Posts: CollectionConfig = {
               {
                 features: {
                   blocks: [CallToAction, Archive, MediaBlock, Content],
+                  link: {
+                    enabledCollections: ['pages', 'posts'],
+                  },
                 },
               },
             ),

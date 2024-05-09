@@ -10,6 +10,8 @@ import type { RichTextField } from 'payload/types'
 import {
   BlocksFeature,
   BoldFeature,
+  FixedToolbarFeature,
+  InlineToolbarFeature,
   ItalicFeature,
   LinkFeature,
   StrikethroughFeature,
@@ -45,7 +47,7 @@ export const richText: RichText = (overrides = {}, additions = {}) => {
     heading: ['h1', 'h2', 'h3', 'h4'],
     italic: true,
     link: {
-      enabledCollections: ['pages'],
+      enabledCollections: ['pages', 'posts'],
     },
     strikethrough: true,
     upload: {
@@ -112,6 +114,8 @@ export const richText: RichText = (overrides = {}, additions = {}) => {
   )
 
   const enabledFeatures: FeatureProviderServer<any, any>[] = [
+    FixedToolbarFeature(),
+    InlineToolbarFeature(),
     ...(features.heading ? [HeadingFeature({ enabledHeadingSizes: features.heading })] : []),
     ...(features.blocks && features.blocks.length > 0
       ? [BlocksFeature({ blocks: features.blocks })]
@@ -122,8 +126,6 @@ export const richText: RichText = (overrides = {}, additions = {}) => {
     ...(features.link ? [LinkFeature(features.link)] : []),
     ...(features.upload ? [UploadFeature(features.upload)] : []),
   ]
-
-  delete overrides.admin
 
   return deepMerge<RichTextField, Partial<RichTextField>>(
     {
