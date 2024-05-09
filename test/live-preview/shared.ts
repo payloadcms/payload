@@ -2,7 +2,7 @@ export const pagesSlug = 'pages'
 
 export const tenantsSlug = 'tenants'
 
-export const ssrPostsSlug = 'posts-ssr'
+export const ssrPagesSlug = 'ssr'
 
 export const mobileBreakpoint = {
   label: 'Mobile',

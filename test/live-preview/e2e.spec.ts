@@ -14,7 +14,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { mobileBreakpoint, pagesSlug, renderedPageTitleID, ssrPostsSlug } from './shared.js'
+import { mobileBreakpoint, pagesSlug, renderedPageTitleID, ssrPagesSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -51,7 +51,7 @@ describe('Live Preview', () => {
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
-    ssrPostsURLUtil = new AdminUrlUtil(serverURL, ssrPostsSlug)
+    ssrPostsURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
