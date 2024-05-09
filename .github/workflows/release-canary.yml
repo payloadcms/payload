@@ -8,6 +8,8 @@ on:
 env:
   NODE_VERSION: 18.20.2
   PNPM_VERSION: 8.15.7
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
   release:

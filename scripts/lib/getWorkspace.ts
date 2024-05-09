@@ -73,7 +73,7 @@ export const getWorkspace = async () => {
     const results: PublishResult[] = []
     for (const pkg of packageDetails) {
       // TODO: Remove hard-coded dry-run
-      const res = await publishSinglePackage(pkg, { dryRun: true, tag: 'canary' })
+      const res = await publishSinglePackage(pkg, { dryRun: true, tag })
       results.push(res)
     }
 
@@ -116,15 +116,6 @@ export const getWorkspace = async () => {
         })
         .join('\n') + '\n',
     )
-  }
-
-  const getCurrentPackageState = async (): Promise<{
-    packages: PackageDetails[]
-    version: string
-  }> => {
-    const packageDetails = await getPackageDetails(packagePublishList)
-    const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
-    return { packages: packageDetails, version: rootPackageJson.version }
   }
 
   const showVersions = async () => {
@@ -182,6 +173,15 @@ export const getWorkspace = async () => {
   }
 
   return workspace
+}
+
+async function getCurrentPackageState(): Promise<{
+  packages: PackageDetails[]
+  version: string
+}> {
+  const packageDetails = await getPackageDetails(packagePublishList)
+  const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
+  return { packages: packageDetails, version: rootPackageJson.version }
 }
 
 /** Publish with promise concurrency throttling */
