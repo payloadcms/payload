@@ -13,7 +13,8 @@
     "payload": "payload",
     "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true next dev",
     "serve": "next start",
-    "serve:server": "cross-env NODE_ENV=production node dist/server.js"
+    "serve:server": "cross-env NODE_ENV=production node dist/server.js",
+    "ii": "pnpm --ignore-workspace install"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "^3.0.0-beta.27",
@@ -49,13 +50,16 @@
     "@types/express": "^4.17.9",
     "@types/node": "18.11.3",
     "@types/qs": "^6.9.8",
-    "@types/react": "18.0.21",
+    "@types/react": "18.2.74",
     "copyfiles": "^2.4.1",
     "nodemon": "^2.0.6",
     "prettier": "^3.0.3",
     "slate": "0.91.4",
     "ts-node": "10.9.1",
     "typescript": "^5.4.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.74"
   },
   "packageManager": "yarn@1.22.21"
 }

@@ -37,10 +37,6 @@ export const Archive: Block = {
           label: 'Posts',
           value: 'posts',
         },
-        {
-          label: 'Projects',
-          value: 'projects',
-        },
       ],
     },
     {
@@ -71,7 +67,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Selection',
-      relationTo: ['posts', 'projects'],
+      relationTo: ['posts'],
     },
     {
       name: 'populatedDocs',
@@ -83,7 +79,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Populated Docs',
-      relationTo: ['posts', 'projects'],
+      relationTo: ['posts'],
     },
     {
       name: 'populatedDocsTotal',

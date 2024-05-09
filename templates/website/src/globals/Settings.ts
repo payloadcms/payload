@@ -12,12 +12,6 @@ export const Settings: GlobalConfig = {
       label: 'Posts page',
       relationTo: 'pages',
     },
-    {
-      name: 'projectsPage',
-      type: 'relationship',
-      label: 'Projects page',
-      relationTo: 'pages',
-    },
   ],
   graphQL: {
     name: 'Settings',

@@ -4,7 +4,6 @@ import type { Config } from '../../payload-types'
 
 import { PAGE } from '../_graphql/pages'
 import { POST } from '../_graphql/posts'
-import { PROJECT } from '../_graphql/projects'
 import { GRAPHQL_API_URL } from './shared'
 import { payloadToken } from './token'
 
@@ -16,10 +15,6 @@ const queryMap = {
   posts: {
     key: 'Posts',
     query: POST,
-  },
-  projects: {
-    key: 'Projects',
-    query: PROJECT,
   },
 }
 

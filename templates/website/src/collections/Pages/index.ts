@@ -36,13 +36,6 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      name: 'publishedAt',
-      type: 'date',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
       type: 'tabs',
       tabs: [
         {
@@ -61,6 +54,13 @@ export const Pages: CollectionConfig = {
           label: 'Content',
         },
       ],
+    },
+    {
+      name: 'publishedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+      },
     },
     slugField(),
   ],

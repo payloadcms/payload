@@ -450,31 +450,6 @@ export const home: Partial<Page> = {
       relationTo: 'posts',
     },
     {
-      blockName: 'Archive Block',
-      blockType: 'archive',
-      categories: [],
-      introContent: [
-        {
-          type: 'h4',
-          children: [
-            {
-              text: 'Recent projects',
-            },
-          ],
-        },
-        {
-          type: 'p',
-          children: [
-            {
-              text: 'The projects below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or projects can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
-            },
-          ],
-        },
-      ],
-      populateBy: 'collection',
-      relationTo: 'projects',
-    },
-    {
       blockName: 'CTA',
       blockType: 'cta',
       links: [

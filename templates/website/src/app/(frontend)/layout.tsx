@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 
 import React from 'react'
 
-import { AdminBar } from '../_components/AdminBar'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import '../_css/app.scss'
@@ -20,11 +19,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Providers>
-          <AdminBar />
-          {/* @ts-expect-error */}
+          {/* <AdminBar /> */}
+
           <Header />
           {children}
-          {/* @ts-expect-error */}
           <Footer />
         </Providers>
       </body>

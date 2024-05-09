@@ -1,4 +1,5 @@
 import Script from 'next/script'
+import React from 'react'
 
 import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
 
