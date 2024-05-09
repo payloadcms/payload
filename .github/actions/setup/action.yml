@@ -10,6 +10,7 @@ runs:
   steps:
     # https://github.com/actions/virtual-environments/issues/1187
     - name: tune linux network
+      shell: bash
       run: sudo ethtool -K eth0 tx off rx off
 
     - name: Setup Node@${{ env.NODE_VERSION }}
@@ -38,4 +39,5 @@ runs:
           pnpm-store-
           pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-    - run: pnpm install
+    - shell: bash
+      run: pnpm install
