@@ -1,5 +1,5 @@
 'use client'
-import type { LabelProps, LabelPropsStripped } from 'payload/types'
+import type { LabelProps, SanitizedLabelProps } from 'payload/types'
 
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
@@ -16,7 +16,7 @@ type Props = {
   id?: string
   inputRef?: React.RefObject<HTMLInputElement>
   label?: LabelProps['label']
-  labelProps?: LabelPropsStripped
+  labelProps?: SanitizedLabelProps
   name?: string
   onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   partialChecked?: boolean

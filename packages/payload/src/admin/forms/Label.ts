@@ -7,4 +7,4 @@ export type LabelProps = {
   unstyled?: boolean
 }
 
-export type LabelPropsStripped = Omit<LabelProps, 'label' | 'required'>
+export type SanitizedLabelProps = Omit<LabelProps, 'label' | 'required'>

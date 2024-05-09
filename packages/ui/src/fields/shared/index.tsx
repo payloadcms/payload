@@ -5,7 +5,7 @@ import type {
   ErrorProps,
   FieldDescriptionProps,
   LabelProps,
-  LabelPropsStripped,
+  SanitizedLabelProps,
   Validate,
 } from 'payload/types'
 
@@ -24,7 +24,7 @@ export type FormFieldBase = {
   docPreferences?: DocumentPreferences
   errorProps?: ErrorProps
   label?: LabelProps['label']
-  labelProps?: LabelPropsStripped
+  labelProps?: SanitizedLabelProps
   locale?: Locale
   localized?: boolean
   path?: string
