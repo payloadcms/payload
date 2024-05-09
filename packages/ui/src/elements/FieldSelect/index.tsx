@@ -35,7 +35,10 @@ const combineLabel = ({
       : null
   const DefaultLabelToRender =
     field && 'labelProps' in field.fieldComponentProps && field.fieldComponentProps.labelProps ? (
-      <FieldLabel {...field.fieldComponentProps.labelProps} />
+      <FieldLabel
+        label={field.fieldComponentProps.label}
+        {...field.fieldComponentProps.labelProps}
+      />
     ) : null
 
   const LabelToRender = CustomLabelToRender || DefaultLabelToRender || customLabel

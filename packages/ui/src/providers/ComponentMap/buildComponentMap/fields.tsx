@@ -221,7 +221,7 @@ export const mapFields = (args: {
           fieldOptions = field.options.map((option) => {
             if (typeof option === 'object' && typeof option.label === 'function') {
               return {
-                label: option.label({ t: i18n.t }),
+                label: option.label({ t }),
                 value: option.value,
               }
             }
