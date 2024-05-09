@@ -15,8 +15,10 @@ export const Pages: CollectionConfig = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) =>
-        `${process.env.PAYLOAD_PUBLIC_SITE_URL}${data.slug !== 'home' ? `/${data.slug}` : ''}`,
+      url: ({ data }) => {
+        const isHomePage = data.slug === 'home'
+        return `${process.env.PAYLOAD_PUBLIC_SITE_URL}${!isHomePage ? `/${data.slug}` : ''}`
+      },
     },
     useAsTitle: 'title',
   },
