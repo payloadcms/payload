@@ -17,7 +17,7 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
-import { packageWhitelist } from './lib/whitelist.js'
+import { packagePublishList } from './lib/publishList.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 

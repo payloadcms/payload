@@ -9,7 +9,7 @@ import path from 'path'
 import semver from 'semver'
 
 import { getPackageDetails } from './getPackageDetails.js'
-import { packageWhitelist } from './whitelist.js'
+import { packagePublishList } from './publishList.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -69,7 +69,7 @@ export const getWorkspace = async () => {
 
   // Publish one package at a time
   const publishSync: Workspace['publishSync'] = async ({ dryRun, tag = 'canary' }) => {
-    const packageDetails = await getPackageDetails(packageWhitelist)
+    const packageDetails = await getPackageDetails(packagePublishList)
     const results: PublishResult[] = []
     for (const pkg of packageDetails) {
       // TODO: Remove hard-coded dry-run
@@ -93,7 +93,7 @@ export const getWorkspace = async () => {
   }
 
   const publish = async () => {
-    const packageDetails = await getPackageDetails(packageWhitelist)
+    const packageDetails = await getPackageDetails(packagePublishList)
     const results = await Promise.allSettled(
       packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun: true })),
     )
@@ -122,7 +122,7 @@ export const getWorkspace = async () => {
     packages: PackageDetails[]
     version: string
   }> => {
-    const packageDetails = await getPackageDetails(packageWhitelist)
+    const packageDetails = await getPackageDetails(packagePublishList)
     const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
     return { packages: packageDetails, version: rootPackageJson.version }
   }
@@ -139,7 +139,7 @@ export const getWorkspace = async () => {
     rootPackageJson.version = version
     await fse.writeJSON(rootPackageJsonPath, rootPackageJson, { spaces: 2 })
 
-    const packageJsons = await getPackageDetails(packageWhitelist)
+    const packageJsons = await getPackageDetails(packagePublishList)
     await Promise.all(
       packageJsons.map(async (pkg) => {
         const packageJson = await fse.readJSON(`${pkg.packagePath}/package.json`)
@@ -173,7 +173,7 @@ export const getWorkspace = async () => {
   const workspace: Workspace = {
     version: async () => (await fse.readJSON(rootPackageJsonPath)).version,
     tag: 'latest',
-    packages: await getPackageDetails(packageWhitelist),
+    packages: await getPackageDetails(packagePublishList),
     showVersions,
     bumpVersion,
     build,

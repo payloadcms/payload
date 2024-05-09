@@ -16,7 +16,7 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
-import { packageWhitelist } from './lib/whitelist.js'
+import { packagePublishList } from './lib/publishList.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
@@ -143,7 +143,7 @@ async function main() {
   console.log(chalk.gray(changelogContent) + '\n\n')
   console.log(`Release URL: ${chalk.dim(releaseUrl)}`)
 
-  let packageDetails = await getPackageDetails(packageWhitelist)
+  let packageDetails = await getPackageDetails(packagePublishList)
 
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
   console.log(chalk.bold.yellow(`  Bump: ${bump}`))

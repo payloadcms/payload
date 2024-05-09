@@ -2,12 +2,12 @@ import chalk from 'chalk'
 import pLimit from 'p-limit'
 
 import { getPackageDetails } from './getPackageDetails.js'
-import { packageWhitelist } from './whitelist.js'
+import { packagePublishList } from './publishList.js'
 
 const npmRequestLimit = pLimit(40)
 
 export const getPackageRegistryVersions = async (): Promise<void> => {
-  const packageDetails = await getPackageDetails(packageWhitelist)
+  const packageDetails = await getPackageDetails(packagePublishList)
 
   const results = await Promise.all(
     packageDetails.map(async (pkg) =>

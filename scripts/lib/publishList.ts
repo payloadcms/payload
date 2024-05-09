@@ -1,5 +1,9 @@
-// Update this list with any packages to publish
-export const packageWhitelist = [
+/**
+ * Packages that should be published to NPM
+ *
+ * Note that this does not include all packages in the monorepo
+ */
+export const packagePublishList = [
   'payload',
   'translations',
   'ui',
