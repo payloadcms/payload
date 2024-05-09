@@ -38,9 +38,9 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   // I.e. append '/posts' to the URL if the document is a post
   // You can also do this on individual collection or global config, if preferred
   const isPage = collectionConfig && collectionConfig.slug === 'pages'
-  const isHomePage = isPage && data.slug === 'home'
+  const isHomePage = isPage && data?.slug === 'home'
 
   return `${baseURL}${
-    !isPage ? `/${collectionConfig.slug}` : ''
+    !isPage && collectionConfig ? `/${collectionConfig.slug}` : ''
   }${!isHomePage && data.slug ? `/${data.slug}` : ''}`
 }
