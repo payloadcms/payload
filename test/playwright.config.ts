@@ -30,6 +30,6 @@ export default defineConfig({
   maxFailures: process.env.CI ? undefined : undefined,
   retries: process.env.CI ? 5 : undefined,
   reporter: process.env.CI
-    ? [['list', { printSteps: true }], ['json']]
+    ? [['list', { printSteps: true }], ['json'], ['blob']]
     : [['list', { printSteps: true }]],
 })
