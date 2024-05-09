@@ -25,6 +25,8 @@ describe('@payloadcms/plugin-relationship-object-ids', () => {
     expect(payload).toBeTruthy()
   })
 
+  // isMongoose() from '../helpers/isMongoose' doesn't work, because here "payload" is still undefined.
+  // As well PAYLOAD_DATABASE could be undefined with MongoDB.
   if (process.env.PAYLOAD_DATABASE !== 'postgres') {
     it('seeds data accordingly', async () => {
       const relationsQuery = await payload.find({
