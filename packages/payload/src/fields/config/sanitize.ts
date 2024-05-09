@@ -84,7 +84,6 @@ export const sanitizeFields = async ({
           : [field.relationTo]
         relationships.forEach((relationship: string) => {
           if (!validRelationships.includes(relationship)) {
-            console.log('validRelationships', validRelationships, 'field', field)
             throw new InvalidFieldRelationship(field, relationship)
           }
         })
