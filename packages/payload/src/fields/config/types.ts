@@ -11,9 +11,11 @@ import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichT
 import type {
   ConditionalDateProps,
   Description,
+  DescriptionComponent,
   ErrorProps,
   LabelProps,
   RowLabel,
+  RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
@@ -117,6 +119,7 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
+    Description?: DescriptionComponent
     Field?: CustomComponent
     Filter?: React.ComponentType<any>
   }
@@ -361,13 +364,25 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 }
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
-  admin?: Admin & {
-    initCollapsed?: boolean
-  }
   fields: Field[]
-  label: RowLabel
   type: 'collapsible'
-}
+} & (
+    | {
+        admin: Admin & {
+          components: {
+            RowLabel: RowLabelComponent
+          } & Admin['components']
+          initCollapsed?: boolean
+        }
+        label?: Required<FieldBase['label']>
+      }
+    | {
+        admin?: Admin & {
+          initCollapsed?: boolean
+        }
+        label: Required<FieldBase['label']>
+      }
+  )
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -610,7 +625,7 @@ export type RichTextField<
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
-      RowLabel?: RowLabel
+      RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
     /**

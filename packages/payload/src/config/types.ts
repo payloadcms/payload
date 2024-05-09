@@ -694,12 +694,8 @@ export type EditConfig =
 
 export type EntityDescriptionComponent = CustomComponent
 
-export type EntityDescriptionFunction = () => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 
-export type EntityDescription =
-  | EntityDescriptionComponent
-  | EntityDescriptionFunction
-  | Record<string, string>
-  | string
+export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }

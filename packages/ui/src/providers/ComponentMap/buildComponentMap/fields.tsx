@@ -2,27 +2,17 @@ import type { I18n } from '@payloadcms/translations'
 import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
-  DescriptionComponent,
-  DescriptionFunction,
   Field,
-  FieldBase,
   FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
   Option,
-  RowLabelComponent,
   SanitizedConfig,
   WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import {
-  isPlainFunction,
-  isReactClientComponent,
-  isReactComponent,
-  isReactServerComponent,
-} from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -129,11 +119,17 @@ export const mapFields = (args: {
             )) ||
           null
 
+        let label = undefined
+        if ('label' in field) {
+          if (typeof field.label === 'string' || typeof field.label === 'object') {
+            label = field.label
+          } else if (typeof field.label === 'function') {
+            label = field.label({ t })
+          }
+        }
+
         const labelProps: LabelProps = {
-          label:
-            'label' in field && !isPlainFunction(field.label) && !isReactComponent(field.label)
-              ? field.label
-              : undefined,
+          label,
           required: 'required' in field ? field.required : undefined,
         }
 
@@ -144,31 +140,38 @@ export const mapFields = (args: {
             field.admin.components?.Label) ||
           undefined
 
+        // If we return undefined here (so if no CUSTOM label component is set), the field client component is responsible for falling back to the default label
         const CustomLabel =
           CustomLabelComponent !== undefined ? (
             <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
           ) : undefined
 
-        const descriptionProps: FieldDescriptionProps = {
-          description:
-            (field.admin &&
-              'description' in field.admin &&
-              (((typeof field.admin?.description === 'string' ||
-                typeof field.admin?.description === 'object') &&
-                field.admin.description) ||
-                (typeof field.admin?.description === 'function' &&
-                  isPlainFunction<DescriptionFunction>(field.admin?.description) &&
-                  field.admin?.description({ t })))) ||
-            undefined,
+        let description = undefined
+        if (field.admin && 'description' in field.admin) {
+          if (
+            typeof field.admin?.description === 'string' ||
+            typeof field.admin?.description === 'object'
+          ) {
+            description = field.admin.description
+          } else if (typeof field.admin?.description === 'function') {
+            description = field.admin?.description({ t })
+          }
         }
 
-        const CustomDescriptionComponent =
-          (field.admin &&
-            'description' in field.admin &&
-            ((isReactComponent<DescriptionComponent>(field.admin.description) &&
-              field.admin.description) ||
-              (field.admin.description && FieldDescription))) ||
-          undefined
+        const descriptionProps: FieldDescriptionProps = {
+          description,
+        }
+
+        let CustomDescriptionComponent = undefined
+        if (
+          field.admin?.components &&
+          'Description' in field.admin.components &&
+          field.admin.components?.Description
+        ) {
+          CustomDescriptionComponent = field.admin.components.Description
+        } else if (description) {
+          CustomDescriptionComponent = FieldDescription
+        }
 
         const CustomDescription =
           CustomDescriptionComponent !== undefined ? (
@@ -194,6 +197,7 @@ export const mapFields = (args: {
             <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
           ) : undefined
 
+        // These fields are shared across all field types even if they are not used in the default field, as the custom field component can use them
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
@@ -204,7 +208,7 @@ export const mapFields = (args: {
           descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
           errorProps,
-          labelProps,
+          label: labelProps?.label,
           path,
           required: 'required' in field ? field.required : undefined,
         }
@@ -217,7 +221,7 @@ export const mapFields = (args: {
           fieldOptions = field.options.map((option) => {
             if (typeof option === 'object' && typeof option.label === 'function') {
               return {
-                label: option.label({ t: i18n.t }),
+                label: option.label({ t }),
                 value: option.value,
               }
             }
@@ -230,10 +234,7 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
           isFieldAffectingData,
-          label:
-            'label' in field && field.label && typeof field.label !== 'function'
-              ? field.label
-              : undefined,
+          label: labelProps?.label || undefined,
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
@@ -247,11 +248,12 @@ export const mapFields = (args: {
               'admin' in field &&
               field.admin.components &&
               'RowLabel' in field.admin.components &&
-              field.admin.components.RowLabel &&
-              isReactComponent<RowLabelComponent>(field.admin.components.RowLabel)
+              field.admin.components.RowLabel
             ) {
               const CustomRowLabelComponent = field.admin.components.RowLabel
-              CustomRowLabel = <WithServerSideProps Component={CustomRowLabelComponent} />
+              CustomRowLabel = (
+                <WithServerSideProps Component={CustomRowLabelComponent} {...(labelProps || {})} />
+              )
             }
 
             const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
@@ -270,7 +272,6 @@ export const mapFields = (args: {
                 readOnly: readOnlyOverride,
               }),
               isSortable: field.admin?.isSortable,
-              label: field?.label,
               labels: field.labels,
               maxRows: field.maxRows,
               minRows: field.minRows,
@@ -314,7 +315,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               isSortable: field.admin?.isSortable,
-              label: field?.label,
               labels: field.labels,
               maxRows: field.maxRows,
               minRows: field.minRows,
@@ -339,7 +339,6 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -356,7 +355,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               editorOptions: field.admin?.editorOptions,
-              label: field.label,
               language: field.admin?.language,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -369,11 +367,17 @@ export const mapFields = (args: {
           }
           case 'collapsible': {
             let CustomCollapsibleLabel: React.ReactNode
-
-            if (isReactComponent(field.label) || isPlainFunction(field.label)) {
-              const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
+            if (
+              field?.admin?.components &&
+              'RowLabel' in field.admin.components &&
+              field?.admin?.components?.RowLabel
+            ) {
+              const CustomCollapsibleLabelComponent = field.admin.components.RowLabel
               CustomCollapsibleLabel = (
-                <WithServerSideProps Component={CustomCollapsibleLabelComponent} />
+                <WithServerSideProps
+                  Component={CustomCollapsibleLabelComponent}
+                  {...(labelProps || {})}
+                />
               )
             }
 
@@ -393,7 +397,6 @@ export const mapFields = (args: {
                 readOnly: readOnlyOverride,
               }),
               initCollapsed: field.admin?.initCollapsed,
-              label: !CustomCollapsibleLabel ? (field.label as FieldBase['label']) : undefined,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -410,7 +413,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               date: field.admin?.date,
               disabled: field.admin?.disabled,
-              label: field.label,
               placeholder: field.admin?.placeholder,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -428,7 +430,6 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field.label,
               placeholder: field.admin?.placeholder,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -455,7 +456,6 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
-              label: field.label,
               readOnly: field.admin?.readOnly,
               style: field.admin?.style,
               width: field.admin?.width,
@@ -472,7 +472,6 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               editorOptions: field.admin?.editorOptions,
               jsonSchema: field.jsonSchema,
-              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -489,7 +488,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
-              label: field.label,
               max: field.max,
               maxRows: field.maxRows,
               min: field.min,
@@ -509,7 +507,6 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -527,7 +524,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
-              label: field.label,
               readOnly: field.admin?.readOnly,
               relationTo: field.relationTo,
               required: field.required,
@@ -546,7 +542,6 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field.label,
               options: fieldOptions,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -564,7 +559,6 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -671,7 +665,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
-              label: field.label,
               maxLength: field.maxLength,
               minLength: field.minLength,
               placeholder: field.admin?.placeholder,
@@ -690,7 +683,6 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field.label,
               maxLength: field.maxLength,
               minLength: field.minLength,
               placeholder: field.admin?.placeholder,
@@ -715,7 +707,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               filterOptions: field.filterOptions,
-              label: field.label,
               readOnly: field.admin?.readOnly,
               relationTo: field.relationTo,
               required: field.required,
@@ -735,7 +726,6 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
               isClearable: field.admin?.isClearable,
-              label: field.label,
               options: fieldOptions,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -798,9 +788,6 @@ export const mapFields = (args: {
       fieldComponentProps: {
         name: 'id',
         label: 'ID',
-        labelProps: {
-          label: 'ID',
-        },
       },
       fieldIsPresentational: false,
       isFieldAffectingData: true,
