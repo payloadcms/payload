@@ -490,3 +490,18 @@ jobs:
           yarn install
           yarn build
           yarn generate:types
+
+  all-green:
+    name: All Green
+    if: always()
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+      - tests-unit
+      - tests-int
+      - tests-e2e
+
+    steps:
+      - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        run: exit 1
