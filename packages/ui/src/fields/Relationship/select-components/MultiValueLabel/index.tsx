@@ -61,6 +61,11 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
             onClick={() => setShowTooltip(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.stopPropagation()
+              }
+            }}
             onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -69,7 +74,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
               {t('general:editLabel', { label: '' })}
             </Tooltip>
-            <Edit />
+            <Edit className={`${baseClass}__icon`} />
           </DocumentDrawerToggler>
           <DocumentDrawer onSave={/* onSave */ null} />
         </Fragment>

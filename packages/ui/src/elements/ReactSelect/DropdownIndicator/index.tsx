@@ -1,17 +1,16 @@
-import type { ClearIndicatorProps } from 'react-select'
+import type { DropdownIndicatorProps } from 'react-select'
 
+import { Chevron } from '@payloadcms/ui/icons/Chevron'
 import React from 'react'
 
 import type { Option as OptionType } from '../types.js'
 
-import { X } from '../../../icons/X/index.js'
 import './index.scss'
 
-const baseClass = 'clear-indicator'
+const baseClass = 'dropdown-indicator'
 
-export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (props) => {
+export const DropdownIndicator: React.FC<DropdownIndicatorProps<OptionType, true>> = (props) => {
   const {
-    clearValue,
     innerProps: { ref, ...restInnerProps },
   } = props
 
@@ -22,14 +21,14 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
       {...restInnerProps}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
-          clearValue()
-          e.stopPropagation()
+          // trigger the menu to open
+          return (e.key = ' ')
         }
       }}
       role="button"
       tabIndex={0}
     >
-      <X className={`${baseClass}__icon`} />
+      <Chevron className={`${baseClass}__icon`} />
     </div>
   )
 }

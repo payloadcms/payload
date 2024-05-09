@@ -50,6 +50,11 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 aria-label={t('general:editLabel', { label })}
                 className={`${baseClass}__drawer-toggler`}
                 onClick={() => setShowTooltip(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation()
+                  }
+                }}
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}

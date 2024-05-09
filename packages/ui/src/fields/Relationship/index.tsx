@@ -492,7 +492,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               onSave,
               setDrawerIsOpen,
             }}
-            disabled={readOnly || formProcessing}
+            disabled={readOnly || formProcessing || drawerIsOpen}
             filterOption={enableWordBoundarySearch ? filterOption : undefined}
             isLoading={isLoading}
             isMulti={hasMany}

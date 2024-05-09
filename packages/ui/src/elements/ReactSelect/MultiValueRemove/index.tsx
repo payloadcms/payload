@@ -31,6 +31,12 @@ export const MultiValueRemove: React.FC<
         setShowTooltip(false)
         onClick(e)
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation()
+        }
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
       onTouchEnd={onTouchEnd}

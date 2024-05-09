@@ -13,4 +13,8 @@
     overflow: hidden;
     white-space: nowrap;
   }
+
+  &:focus-visible {
+    outline: var(--accessibility-outline);
+  }
 }
