@@ -5,13 +5,13 @@ import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import { hero } from '../fields/hero.js'
-import { ssrPostsSlug, tenantsSlug } from '../shared.js'
+import { ssrPagesSlug, tenantsSlug } from '../shared.js'
 
-export const PostsSSR: CollectionConfig = {
-  slug: ssrPostsSlug,
+export const SSR: CollectionConfig = {
+  slug: ssrPagesSlug,
   labels: {
-    singular: 'SSR Post',
-    plural: 'SSR Posts',
+    singular: 'SSR Page',
+    plural: 'SSR Pages',
   },
   access: {
     read: () => true,
@@ -22,7 +22,7 @@ export const PostsSSR: CollectionConfig = {
   versions: {
     drafts: {
       autosave: {
-        interval: 10,
+        interval: 375,
       },
     },
   },
@@ -66,19 +66,6 @@ export const PostsSSR: CollectionConfig = {
               name: 'layout',
               type: 'blocks',
               blocks: [CallToAction, Content, MediaBlock, Archive],
-            },
-            {
-              name: 'relatedPosts',
-              type: 'relationship',
-              relationTo: 'posts',
-              hasMany: true,
-              filterOptions: ({ id }) => {
-                return {
-                  id: {
-                    not_in: [id],
-                  },
-                }
-              },
             },
           ],
         },
