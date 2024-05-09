@@ -245,6 +245,8 @@ export const clientTranslationKeys = [
   'upload:setFocalPoint',
   'upload:sizesFor',
   'upload:width',
+  'upload:fileName',
+  'upload:fileSize',
 
   'validation:emailAddress',
   'validation:fieldHasNo',
