@@ -1,5 +1,7 @@
 import type { Page } from '../payload-types.js'
 
+import { postsSlug } from '../shared.js'
+
 export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   slug: 'home',
   title: 'Home',
@@ -31,15 +33,15 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       populateBy: 'selection',
       selectedDocs: [
         {
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: '{{POST_1_ID}}',
         },
         {
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: '{{POST_2_ID}}',
         },
         {
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: '{{POST_3_ID}}',
         },
       ],
@@ -102,7 +104,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
           text: ' ',
         },
       ],
-      relationTo: 'posts',
+      relationTo: postsSlug,
       type: 'relationship',
       value: {
         id: '{{POST_1_ID}}',
@@ -140,7 +142,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
           format: '',
           type: 'relationship',
           version: 1,
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: {
             id: '{{POST_1_ID}}',
           },
@@ -181,7 +183,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
               text: ' ',
             },
           ],
-          relationTo: 'posts',
+          relationTo: postsSlug,
           type: 'relationship',
           value: {
             id: '{{POST_1_ID}}',
