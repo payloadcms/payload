@@ -366,7 +366,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-result-${{ matrix.suite }}
+          name: all-blob-reports
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -428,6 +428,7 @@ jobs:
         with:
           pattern: test-result-*
           path: playwright-blob-reports
+          name: all-blob-reports
 
       - name: Merge blob reports
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results.json npx playwright merge-reports --reporter html,json ./playwright-blob-reports
