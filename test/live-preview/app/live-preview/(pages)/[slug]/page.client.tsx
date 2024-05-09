@@ -22,9 +22,6 @@ export const PageClient: React.FC<{
 
   return (
     <React.Fragment>
-      <Gutter>
-        <div id={renderedPageTitleID}>{data.title}</div>
-      </Gutter>
       <Hero {...data?.hero} />
       <Blocks
         blocks={[
@@ -39,6 +36,9 @@ export const PageClient: React.FC<{
           !data?.hero || data?.hero?.type === 'none' || data?.hero?.type === 'lowImpact'
         }
       />
+      <Gutter>
+        <div id={renderedPageTitleID}>{`For Testing: ${data.title}`}</div>
+      </Gutter>
     </React.Fragment>
   )
 }

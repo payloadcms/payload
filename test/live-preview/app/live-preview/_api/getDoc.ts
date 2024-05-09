@@ -3,7 +3,7 @@ import type { Where } from 'payload/types'
 import config from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 
-export const fetchDoc = async <T>(args: {
+export const getDoc = async <T>(args: {
   collection: string
   depth?: number
   draft?: boolean
@@ -30,8 +30,8 @@ export const fetchDoc = async <T>(args: {
 
     if (docs[0]) return docs[0] as T
   } catch (err) {
-    console.log('Error fetching doc', err)
+    console.log('Error getting doc', err)
   }
 
-  throw new Error('Error fetching doc')
+  throw new Error('Error getting doc')
 }

@@ -3,7 +3,7 @@ import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 
 import type { Header } from '../../../payload-types.js'
 
-export async function fetchHeader(): Promise<Header> {
+export async function getHeader(): Promise<Header> {
   const payload = await getPayloadHMR({ config })
 
   try {
@@ -16,5 +16,5 @@ export async function fetchHeader(): Promise<Header> {
     console.error(err)
   }
 
-  throw new Error('Error fetching header.')
+  throw new Error('Error getting header.')
 }

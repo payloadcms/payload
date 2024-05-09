@@ -16,7 +16,7 @@ Server-side Live Preview works by making a roundtrip to the server every time yo
   It is recommended that you enable [Autosave](../versions/autosave) alongside Live Preview to make the experience feel more responsive.
 </Banner>
 
-If your front-end application is built with [React](#react), you can use the `RefreshRouteOnChange` function that Payload provides and give it your own router refresh function. In the future, all other major frameworks like Vue and Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own router refresh component](#building-your-own-router-refresh-component) for more information.
+If your front-end application is built with [React](#react), you can use the `RefreshRouteOnChange` function that Payload provides. In the future, all other major frameworks like Vue and Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own router refresh component](#building-your-own-router-refresh-component) for more information.
 
 ### React
 
@@ -39,6 +39,7 @@ import config from '../payload.config'
 
 export default async function Page() {
   const payload = await getPayloadHMR({ config })
+
   const page = await payload.find({
     collection: 'pages',
     draft: true
@@ -47,7 +48,7 @@ export default async function Page() {
   return (
     <Fragment>
       <RefreshRouteOnSave />
-      <h1>Hello, world!</h1>
+      <h1>{page.title}</h1>
     </Fragment>
   )
 }
@@ -166,7 +167,7 @@ If you are noticing that updates feel less snappy than client-side Live Preview 
    versions: {
     drafts: {
       autosave: {
-        interval: 10,
+        interval: 375,
       },
     },
   },
