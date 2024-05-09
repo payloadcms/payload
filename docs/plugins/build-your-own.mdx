@@ -235,22 +235,6 @@ If you wish to add to the `onInit`, you must include the async/await. We don&apo
 
 In the template, we have stubbed out a basic `onInitExtension` file that you can use, if not needed feel free to delete it.
 
-## Webpack
-
-If any of your files use server only packages such as fs, stripe, nodemailer, etc, they will need to be removed from the browser bundle. To do that, you can [alias the file imports with webpack](https://payloadcms.com/docs/admin/webpack#aliasing-server-only-modules).
-
-When files are bundled for the browser, the import paths are essentially crawled to determine what files to include in the bundle. To prevent the server only files from making it into the bundle, we can alias their import paths to a file that can be included in the browser. This will short-circuit the import path crawling and ensure browser only code is bundled.
-
-Webpack is another part of the Payload config that can be a little more tricky to extend. To help here, the template includes a helper function `extendWebpackConfig()` which takes care of spreading the existing webpack, so you can just add your new stuff:
-
-```
-config.admin = {
-  ...(config.admin || {}),
-  // Add your aliases to the helper function below
-  webpack: extendWebpackConfig(incomingConfig)
-}
-```
-
 ## Types
 
 If your plugin has options, you should define and provide types for these options in a separate file which gets exported from the main `index.ts`.
@@ -274,7 +258,7 @@ In addition to the setup covered above, here are other best practices to follow:
 
 ### Providing an enable / disable option
 
-For a better user experience, provide a way to disable the plugin without uninstalling it. This is especially important if your plugin adds additional webpack aliases, this will allow you to still let the webpack run to prevent errors.
+For a better user experience, provide a way to disable the plugin without uninstalling it.
 
 ### Include tests in your GitHub CI workflow
 

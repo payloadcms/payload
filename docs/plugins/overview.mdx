@@ -39,12 +39,7 @@ import passwordProtect from 'payload-password-protect'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
-import { viteBundler } from '@payloadcms/bundler-vite'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-
-
 const config = buildConfig({
-  bundler: webpackBundler() // or viteBundler(),
   collections: [
     {
       slug: 'pages',

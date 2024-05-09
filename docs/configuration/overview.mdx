@@ -13,7 +13,7 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  This file is included in the Payload admin bundle, so make sure you do not embed any sensitive
+  The serializable portions of this config are included in the Payload Admin bundle, so make sure you do not embed any sensitive
   information.
 </Banner>
 
@@ -21,7 +21,7 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 
 | Option                | Description                                                                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `admin` \*            | Base Payload admin configuration. Specify bundler\*, custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#admin-options). Required. |
+| `admin` \*            | Base Payload admin configuration. Specify, custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#admin-options). Required. |
 | `editor` \*           | Rich Text Editor which will be used by richText fields. Required.                                                                                                                  |
 | `db` \*               | Database Adapter which will be used by Payload. Read more [here](/docs/database/overview). Required.                                                                               |
 | `serverURL`           | A string used to define the absolute URL of your app including the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port      |
@@ -56,16 +56,10 @@ import { buildConfig } from 'payload/config'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres' // beta
 
-import { viteBundler } from '@payloadcms/bundler-vite'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-
 import { lexicalEditor } from '@payloadcms/richtext-lexical' // beta
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export default buildConfig({
-  admin: {
-    bundler: webpackBundler(), // or viteBundler()
-  },
   db: mongooseAdapter({}) // or postgresAdapter({}),
   editor: lexicalEditor({}) // or slateEditor({})
   collections: [
@@ -139,7 +133,7 @@ project-name
   <br />
   If you use an environment variable to configure any properties that are required for the Admin
   panel to function (ex. serverURL or any routes), you need to make sure that your Admin panel code
-  can access it. [Click here](/docs/admin/webpack#admin-environment-vars) for more info.
+  can access it. [Click here](/docs/admin/environment-vars) for more info.
 </Banner>
 
 ## Customizing & Automating Config Location Detection
