@@ -4,12 +4,12 @@ import type { GraphQLInfo } from 'payload/config'
 import type { SanitizedConfig } from 'payload/types'
 
 import * as GraphQL from 'graphql'
+
 import {
   createComplexityRule,
   fieldExtensionsEstimator,
   simpleEstimator,
-} from 'graphql-query-complexity'
-
+} from './packages/graphql-query-complexity/index.js'
 import accessResolver from './resolvers/auth/access.js'
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType.js'
 import buildLocaleInputType from './schema/buildLocaleInputType.js'
@@ -18,10 +18,10 @@ import initCollections from './schema/initCollections.js'
 import initGlobals from './schema/initGlobals.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
-export async function configToSchema(config: SanitizedConfig): Promise<{
+export function configToSchema(config: SanitizedConfig): {
   schema: GraphQL.GraphQLSchema
   validationRules: (args: OperationArgs<any>) => GraphQL.ValidationRule[]
-}> {
+} {
   const collections = config.collections.reduce((acc, collection) => {
     acc[collection.slug] = {
       config: collection,

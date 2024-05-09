@@ -15,6 +15,11 @@ export interface Args {
   options: StorageOptions
 }
 
+/**
+ * @deprecated Use [`@payloadcms/storage-gcs`](https://www.npmjs.com/package/@payloadcms/storage-gcs) instead.
+ *
+ * This adapter has been superceded by `@payloadcms/storage-gcs` and will be removed in Payload 3.0.
+ */
 export const gcsAdapter =
   ({ acl, bucket, options }: Args): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
@@ -43,6 +48,7 @@ export const gcsAdapter =
     }
 
     return {
+      name: 'gcs',
       generateURL: getGenerateURL({ bucket, getStorageClient }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

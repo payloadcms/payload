@@ -1,3 +1,4 @@
+import { textFieldsSlug } from '../../slugs.js'
 import { loremIpsum } from './loremIpsum.js'
 
 export function generateLexicalRichText() {
@@ -90,8 +91,8 @@ export function generateLexicalRichText() {
               fields: {
                 url: 'https://',
                 doc: {
-                  value: '{{ARRAY_DOC_ID}}',
-                  relationTo: 'array-fields',
+                  value: '{{TEXT_DOC_ID}}',
+                  relationTo: textFieldsSlug,
                 },
                 newTab: false,
                 linkType: 'internal',
@@ -116,10 +117,8 @@ export function generateLexicalRichText() {
         {
           format: '',
           type: 'relationship',
-          version: 1,
-          value: {
-            id: '{{TEXT_DOC_ID}}',
-          },
+          version: 2,
+          value: '{{TEXT_DOC_ID}}',
           relationTo: 'text-fields',
         },
         {
@@ -230,11 +229,9 @@ export function generateLexicalRichText() {
         {
           format: '',
           type: 'upload',
-          version: 1,
+          version: 2,
           relationTo: 'uploads',
-          value: {
-            id: '{{UPLOAD_DOC_ID}}',
-          },
+          value: '{{UPLOAD_DOC_ID}}',
           fields: {
             caption: {
               root: {

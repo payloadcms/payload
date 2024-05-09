@@ -1,13 +1,13 @@
 import merge from 'deepmerge'
 
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import baseAccountLockFields from '../../auth/baseFields/accountLock.js'
 import baseAPIKeyFields from '../../auth/baseFields/apiKey.js'
 import baseAuthFields from '../../auth/baseFields/auth.js'
 import baseVerificationFields from '../../auth/baseFields/verification.js'
-import TimestampsRequired from '../../errors/TimestampsRequired.js'
+import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
@@ -17,10 +17,15 @@ import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { authDefaults, defaults } from './defaults.js'
 
-const sanitizeCollection = (
+export const sanitizeCollection = async (
   config: Config,
   collection: CollectionConfig,
-): SanitizedCollectionConfig => {
+  /**
+   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
+   * so that you can sanitize them together, after the config has been sanitized.
+   */
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+): Promise<SanitizedCollectionConfig> => {
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
@@ -151,13 +156,12 @@ const sanitizeCollection = (
   // /////////////////////////////////
 
   const validRelationships = config.collections.map((c) => c.slug) || []
-  sanitized.fields = sanitizeFields({
+  sanitized.fields = await sanitizeFields({
     config,
     fields: sanitized.fields,
+    richTextSanitizationPromises,
     validRelationships,
   })
 
   return sanitized as SanitizedCollectionConfig
 }
-
-export default sanitizeCollection

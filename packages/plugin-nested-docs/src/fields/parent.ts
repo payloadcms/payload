@@ -20,5 +20,3 @@ export const createParentField = (
   relationTo,
   ...(overrides || {}),
 })
-
-export default createParentField

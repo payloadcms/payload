@@ -1,16 +1,10 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { sanitizeFields } from 'payload/config'
-
 import type { ResolvedServerFeatureMap } from './field/features/types.js'
-
-import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>
   ({ config, i18n, schemaMap, schemaPath }) => {
-    const validRelationships = config.collections.map((c) => c.slug) || []
-
     for (const [featureKey, resolvedFeature] of args.resolvedFeatureMap.entries()) {
       if (
         !('generateSchemaMap' in resolvedFeature) ||
@@ -26,17 +20,10 @@ export const getGenerateSchemaMap =
         schemaPath,
       })
 
-      for (const schemaKey in schemas) {
-        const fields = schemas[schemaKey]
-
-        const sanitizedFields = sanitizeFields({
-          config,
-          fields: cloneDeep(fields),
-          requireFieldLevelRichTextEditor: true,
-          validRelationships,
-        })
-
-        schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, sanitizedFields)
+      if (schemas) {
+        for (const [schemaKey, fields] of schemas.entries()) {
+          schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, fields)
+        }
       }
     }
 

@@ -60,6 +60,7 @@ export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, sear
           config={payload.config}
           hideTabs
           i18n={i18n}
+          permissions={permissions}
         />
         <HydrateClientUser permissions={permissions} user={user} />
         <FormQueryParamsProvider

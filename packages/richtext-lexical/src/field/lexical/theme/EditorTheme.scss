@@ -16,9 +16,7 @@
   }
 
   &__quote {
-    margin: 0;
-    margin-left: 20px;
-    margin-bottom: 10px;
+    margin: 0 0 10px 20px;
     font-size: 15px;
     color: rgb(101, 103, 107);
     border-left-color: rgb(206, 208, 212);
@@ -115,9 +113,7 @@
     padding: 8px 8px 8px 52px;
     line-height: 1.53;
     font-size: 13px;
-    margin: 0;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin: 8px 0;
     tab-size: 2;
     /* white-space: pre; */
     overflow-x: auto;
@@ -292,8 +288,7 @@
 
   &__ol1 {
     padding: 0;
-    margin: 0;
-    list-style-position: inside;
+    list-style-position: outside;
     margin: 0 0 1.5em;
   }
 
@@ -301,38 +296,42 @@
     padding: 0;
     margin: 0;
     list-style-type: upper-alpha;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ol3 {
     padding: 0;
     margin: 0;
     list-style-type: lower-alpha;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ol4 {
     padding: 0;
     margin: 0;
     list-style-type: upper-roman;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ol5 {
     padding: 0;
     margin: 0;
     list-style-type: lower-roman;
-    list-style-position: inside;
+    list-style-position: outside;
   }
 
   &__ul {
     padding: 0;
     margin: 0 0 1.5em;
-    list-style-position: inside;
+    list-style-position: outside;
+  }
+
+  &__ul ul {
+    margin: 0;
   }
 
   &__listItem {
-    margin: 0 0px 0.4em 16px;
+    margin: 0 0 0.4em 16px;
   }
 
   &__listItemChecked,

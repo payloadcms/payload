@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -10,7 +10,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Args = {
   collection: Collection
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: string
 }
 

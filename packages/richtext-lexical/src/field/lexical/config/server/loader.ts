@@ -1,3 +1,5 @@
+import type { Config, SanitizedConfig } from 'payload/config'
+
 import type {
   FeatureProviderServer,
   ResolvedServerFeatureMap,
@@ -103,11 +105,15 @@ export function sortFeaturesForOptimalLoading(
   return topologicallySortFeatures(featureProviders)
 }
 
-export function loadFeatures({
+export async function loadFeatures({
+  config,
+  isRoot,
   unSanitizedEditorConfig,
 }: {
+  config: SanitizedConfig
+  isRoot?: boolean
   unSanitizedEditorConfig: ServerEditorConfig
-}): ResolvedServerFeatureMap {
+}): Promise<ResolvedServerFeatureMap> {
   // First remove all duplicate features. The LAST feature with a given key wins.
   unSanitizedEditorConfig.features = unSanitizedEditorConfig.features
     .reverse()
@@ -167,8 +173,10 @@ export function loadFeatures({
       }
     }
 
-    const feature = featureProvider.feature({
+    const feature = await featureProvider.feature({
+      config,
       featureProviderMap,
+      isRoot,
       resolvedFeatures,
       unSanitizedEditorConfig,
     })

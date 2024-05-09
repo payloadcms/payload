@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from 'payload/database'
-import type { PayloadRequest, Where } from 'payload/types'
+import type { PayloadRequestWithData, Where } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { findOperation } from 'payload/operations'
@@ -20,12 +20,12 @@ export type Resolver = (
     where?: Where
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>
 
-export default function findResolver(collection: Collection): Resolver {
+export function findResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
@@ -34,6 +34,17 @@ export default function findResolver(collection: Collection): Resolver {
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    if (!req.query) req.query = {}
+
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+          ? true
+          : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
       collection,

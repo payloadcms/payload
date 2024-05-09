@@ -1,1 +1,1 @@
-export { cloudStorage } from './plugin.js'
+export { cloudStoragePlugin } from './plugin.js'

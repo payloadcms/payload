@@ -39,6 +39,7 @@ const globalSchema = joi
           ),
         }),
       }),
+      custom: joi.object().pattern(joi.string(), joi.any()),
       description: joi.alternatives().try(joi.string(), componentSchema),
       group: joi
         .alternatives()

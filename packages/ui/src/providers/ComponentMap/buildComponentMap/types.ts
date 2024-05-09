@@ -35,6 +35,7 @@ export type MappedTab = {
 }
 
 export type ReducedBlock = {
+  custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string
   imageURL?: string
@@ -68,6 +69,7 @@ export type MappedField = {
   CustomCell?: React.ReactNode
   CustomField?: React.ReactNode
   cellComponentProps: CellComponentProps
+  custom?: Record<any, string>
   disableBulkEdit?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps

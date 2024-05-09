@@ -15,7 +15,7 @@ import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
 // Optionally, the adapter can specify any Webpack config overrides if they are necessary.
 
-export const cloudStorage =
+export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
     const { collections: allCollectionOptions, enabled } = pluginOptions
@@ -76,6 +76,7 @@ export const cloudStorage =
             },
             upload: {
               ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+              adapter: adapter.name,
               disableLocalStorage:
                 typeof options.disableLocalStorage === 'boolean'
                   ? options.disableLocalStorage

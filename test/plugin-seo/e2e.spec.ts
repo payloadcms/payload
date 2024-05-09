@@ -3,13 +3,15 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { Page as PayloadPage } from './payload-types.js'
+import type { Config, Page as PayloadPage } from './payload-types.js'
 
 import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -22,8 +24,9 @@ let page: Page
 let id: string
 
 describe('SEO Plugin', () => {
-  beforeAll(async ({ browser }) => {
-    const { serverURL, payload } = await initPayloadE2E({ dirname })
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    const { serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -149,13 +152,17 @@ describe('SEO Plugin', () => {
 
       // Change language to Spanish
       await languageField.click()
+      await wait(200)
       await options.locator('text=Español').click()
       await expect(languageField).toContainText('Español')
+      await wait(600)
 
       // Navigate back to the page
       await page.goto(url.edit(id))
+      await wait(600)
 
       await secondTab.click()
+      await wait(600)
 
       await expect(autoGenButton).toContainText('Auto-génerar')
     })

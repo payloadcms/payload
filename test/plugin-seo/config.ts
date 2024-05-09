@@ -1,4 +1,4 @@
-import { seo } from '@payloadcms/plugin-seo'
+import { seoPlugin } from '@payloadcms/plugin-seo'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
 
@@ -41,11 +41,7 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    seo({
-      collections: ['users'],
-      tabbedUI: true,
-    }),
-    seo({
+    seoPlugin({
       collections: ['pages'],
       fieldOverrides: {
         title: {

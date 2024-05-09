@@ -25,7 +25,9 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
-          custom: { description: 'The title of this page' },
+          custom: {
+            description: 'The title of this page',
+          },
         },
         {
           name: 'myBlocks',
@@ -43,13 +45,19 @@ export default buildConfigWithDefaults({
                   type: 'text',
                 },
               ],
-              custom: { description: 'The blockOne of this page' },
+              custom: {
+                description: 'The blockOne of this page',
+              },
             },
           ],
-          custom: { description: 'The blocks of this page' },
+          custom: {
+            description: 'The blocks of this page',
+          },
         },
       ],
-      custom: { externalLink: 'https://foo.bar' },
+      custom: {
+        externalLink: 'https://foo.bar',
+      },
     },
   ],
   globals: [
@@ -70,7 +78,9 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
-          custom: { description: 'The title of my global' },
+          custom: {
+            description: 'The title of my global',
+          },
         },
       ],
       custom: { foo: 'bar' },

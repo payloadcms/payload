@@ -1,5 +1,5 @@
 import type { FindArgs } from 'payload/database'
-import type { Field, PayloadRequest, TypeWithID } from 'payload/types'
+import type { Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { inArray, sql } from 'drizzle-orm'
 
@@ -25,7 +25,7 @@ export const findMany = async function find({
   locale,
   page = 1,
   pagination,
-  req = {} as PayloadRequest,
+  req = {} as PayloadRequestWithData,
   skip,
   sort,
   tableName,
@@ -120,7 +120,7 @@ export const findMany = async function find({
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
-  if (pagination !== false && (orderedIDs ? orderedIDs?.length >= limit : true)) {
+  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
     const selectCountMethods: ChainedMethods = []
 
     joinAliases.forEach(({ condition, table }) => {

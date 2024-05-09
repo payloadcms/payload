@@ -8,6 +8,7 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { count } from './count.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -43,19 +44,18 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 export { sql } from 'drizzle-orm'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
+  const postgresIDType = args.idType || 'serial'
+  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
-    const idType = args.idType || 'serial'
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
-
-      // Postgres-specific
-      blockTableNames: {},
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
-      idType,
+      idType: postgresIDType,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       pgSchema: undefined,
@@ -67,6 +67,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       schema: {},
       schemaName: args.schemaName,
       sessions: {},
+      tableNameMap: new Map<string, string>(),
       tables: {},
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -74,15 +75,13 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       beginTransaction,
       commitTransaction,
       connect,
+      count,
       create,
       createGlobal,
       createGlobalVersion,
       createMigration,
       createVersion,
-      /**
-       * This represents how a default ID is treated in Payload as were a field type
-       */
-      defaultIDType: idType === 'serial' ? 'number' : 'text',
+      defaultIDType: payloadIDType,
       deleteMany,
       deleteOne,
       deleteVersions,
@@ -111,7 +110,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 
   return {
-    defaultIDType: 'number',
+    defaultIDType: payloadIDType,
     init: adapter,
   }
 }

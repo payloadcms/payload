@@ -41,13 +41,12 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-/* eslint-disable no-use-before-define */
-import { GraphQLJSON } from 'graphql-type-json'
 import { tabHasName } from 'payload/types'
-import { toWords } from 'payload/utilities'
+import { createDataloaderCacheKey, toWords } from 'payload/utilities'
 
 import type { Context } from '../resolvers/types.js'
 
+import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import formatOptions from '../utilities/formatOptions.js'
@@ -301,7 +300,7 @@ function buildObjectType({
             value: {
               type: new GraphQLUnionType({
                 name: relationshipName,
-                async resolveType(data, { req }) {
+                resolveType(data, { req }) {
                   return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
@@ -321,12 +320,23 @@ function buildObjectType({
       type = type || newlyCreatedBlockType
 
       const relationshipArgs: {
+        draft?: unknown
         fallbackLocale?: unknown
         limit?: unknown
         locale?: unknown
         page?: unknown
         where?: unknown
       } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => graphqlResult.collections[relation].config.versions?.drafts,
+      )
+
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (config.localization) {
         relationshipArgs.locale = {
@@ -351,6 +361,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           let relatedCollectionSlug = field.relationTo
+          const draft = args.draft ?? context.req.query?.draft
 
           if (hasManyValues) {
             const results = []
@@ -366,17 +377,18 @@ function buildObjectType({
               }
 
               const result = await context.req.payloadDataLoader.load(
-                JSON.stringify([
-                  context.req.transactionID,
-                  collectionSlug,
-                  id,
-                  0,
-                  0,
-                  locale,
+                createDataloaderCacheKey({
+                  collectionSlug: collectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
                   fallbackLocale,
-                  false,
-                  false,
-                ]),
+                  locale,
+                  overrideAccess: false,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
               )
 
               if (result) {
@@ -412,17 +424,18 @@ function buildObjectType({
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
-              JSON.stringify([
-                context.req.transactionID,
-                relatedCollectionSlug,
-                id,
-                0,
-                0,
-                locale,
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug as string,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
                 fallbackLocale,
-                false,
-                false,
-              ]),
+                locale,
+                overrideAccess: false,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
             )
 
             if (relatedDocument) {
@@ -463,6 +476,10 @@ function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          if (typeof field?.editor === 'function') {
+            throw new Error('Attempted to access unsanitized rich text editor.')
+          }
+
           const editor: RichTextAdapter = field?.editor
 
           // RichText fields have their own depth argument in GraphQL.
@@ -470,19 +487,28 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.populationPromise) {
-            await editor?.populationPromise({
+          if (editor?.populationPromises) {
+            const fieldPromises = []
+            const populationPromises = []
+            const populateDepth =
+              field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
+            editor?.populationPromises({
               context,
-              depth,
+              depth: populateDepth,
+              draft: args.draft,
               field,
+              fieldPromises,
               findMany: false,
               flattenLocales: false,
               overrideAccess: false,
-              populationPromises: [],
+              populationPromises,
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
             })
+            await Promise.all(fieldPromises)
+            await Promise.all(populationPromises)
           }
 
           return parent[field.name]
@@ -607,17 +633,18 @@ function buildObjectType({
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
-              JSON.stringify([
-                context.req.transactionID,
-                relatedCollectionSlug,
-                id,
-                0,
-                0,
-                locale,
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft: false,
                 fallbackLocale,
-                false,
-                false,
-              ]),
+                locale,
+                overrideAccess: false,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
             )
 
             return relatedDocument || null

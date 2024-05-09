@@ -21,7 +21,7 @@ import { RenderTitle } from '../RenderTitle/index.js'
 import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
-  id,
+  id: existingDocID,
   Header,
   collectionSlug,
   drawerSlug,
@@ -39,7 +39,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
   const { t } = useTranslation()
-  const [createdID, setCreatedID] = useState()
+  const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
@@ -48,10 +48,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { componentMap } = useComponentMap()
 
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
-  const isEditing = Boolean(id)
-  const apiURL = id ? `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}` : null
+  const isEditing = Boolean(docID)
+  const apiURL = docID
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}?locale=${locale.code}`
+    : null
   const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${id}` : ''
+    isEditing ? `/${docID}` : ''
   }?${formattedQueryParams}`
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      setCreatedID(args.doc.id)
+      setDocID(args.doc.id)
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -115,7 +117,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
       hasSavePermission={null}
       // isLoading,
-      id={id || createdID}
+      id={docID}
       isEditing={isEditing}
       onLoadError={onLoadError}
       onSave={onSave}

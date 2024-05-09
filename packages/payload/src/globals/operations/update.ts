@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -22,7 +22,7 @@ type Args<T extends { [field: number | string | symbol]: unknown }> = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
   slug: string
 }
@@ -96,6 +96,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       context: req.context,
       depth: 0,
       doc: globalJSON,
+      draft: draftArg,
       fallbackLocale,
       global: globalConfig,
       locale,
@@ -219,6 +220,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       context: req.context,
       depth,
       doc: result,
+      draft: draftArg,
       fallbackLocale: null,
       global: globalConfig,
       locale,

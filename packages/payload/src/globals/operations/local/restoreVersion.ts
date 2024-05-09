@@ -1,5 +1,5 @@
 import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
-import type { Document, PayloadRequest } from '../../../types/index.js'
+import type { Document, PayloadRequestWithData } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -8,11 +8,11 @@ import { restoreVersionOperation } from '../restoreVersion.js'
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   id: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   slug: string
   user?: Document

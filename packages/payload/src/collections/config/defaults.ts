@@ -10,6 +10,7 @@ export const defaults = {
   },
   admin: {
     components: {},
+    custom: {},
     enableRichTextLink: true,
     enableRichTextRelationship: true,
     pagination: {

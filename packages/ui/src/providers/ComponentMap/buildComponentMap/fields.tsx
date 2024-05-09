@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { CustomComponent } from 'packages/payload/src/config/types.js'
+import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -200,6 +200,7 @@ export const mapFields = (args: {
           CustomDescription,
           CustomError,
           CustomLabel,
+          custom: 'admin' in field && 'custom' in field.admin ? field.admin?.custom : undefined,
           descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
           errorProps,
@@ -268,6 +269,7 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
+              isSortable: field.admin?.isSortable,
               label: field?.label,
               labels: field.labels,
               maxRows: field.maxRows,
@@ -295,6 +297,7 @@ export const mapFields = (args: {
 
               const reducedBlock: ReducedBlock = {
                 slug: block.slug,
+                custom: block.admin?.custom,
                 fieldMap: blockFieldMap,
                 imageAltText: block.imageAltText,
                 imageURL: block.imageURL,
@@ -310,6 +313,7 @@ export const mapFields = (args: {
               blocks,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              isSortable: field.admin?.isSortable,
               label: field?.label,
               labels: field.labels,
               maxRows: field.maxRows,
@@ -467,6 +471,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               editorOptions: field.admin?.editorOptions,
+              jsonSchema: field.jsonSchema,
               label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -564,6 +569,9 @@ export const mapFields = (args: {
               required: field.required,
               style: field.admin?.style,
               width: field.admin?.width,
+            }
+            if (typeof field?.editor === 'function') {
+              throw new Error('Attempted to access unsanitized rich text editor.')
             }
 
             const RichTextFieldComponent = field.editor.FieldComponent
@@ -754,6 +762,7 @@ export const mapFields = (args: {
             <WithServerSideProps Component={CustomFieldComponent} {...fieldComponentProps} />
           ) : undefined,
           cellComponentProps,
+          custom: field?.admin?.custom,
           disableBulkEdit:
             'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
           fieldComponentProps,

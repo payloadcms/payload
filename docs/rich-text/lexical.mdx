@@ -196,7 +196,8 @@ const Pages: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          // The HTMLConverter Feature is the feature which manages the HTML serializers. If you do not pass any arguments to it, it will use the default serializers.
+          // The HTMLConverter Feature is the feature which manages the HTML serializers.
+          // If you do not pass any arguments to it, it will use the default serializers.
           HTMLConverterFeature({}),
         ],
       }),
@@ -234,6 +235,19 @@ async function lexicalToHTML(
 This method employs `convertLexicalToHTML` from `@payloadcms/richtext-lexical`, which converts the serialized editor state into HTML.
 
 Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
+
+#### CSS
+
+Payload's lexical HTML converter does not generate CSS for you, but it does add classes to the generated HTML. You can use these classes to style the HTML in your frontend.
+
+Here is some "base" CSS you can use to ensure that nested lists render correctly:
+
+```css
+/* Base CSS for Lexical HTML */
+.nestedListItem, .list-check {
+  list-style-type: none;
+}
+```
 
 #### Creating your own HTML Converter
 

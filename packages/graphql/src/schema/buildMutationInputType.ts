@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
 import type { GraphQLInfo } from 'payload/config'
 import type {
@@ -37,11 +36,11 @@ import {
   GraphQLNonNull,
   GraphQLString,
 } from 'graphql'
-import { GraphQLJSON } from 'graphql-type-json'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
 import { flattenTopLevelFields } from 'payload/utilities'
 
+import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'

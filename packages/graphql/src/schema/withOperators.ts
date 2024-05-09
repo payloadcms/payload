@@ -11,9 +11,9 @@ import {
   GraphQLString,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { GraphQLJSON } from 'graphql-type-json'
 import { optionIsObject } from 'payload/types'
 
+import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import operators from './operators.js'

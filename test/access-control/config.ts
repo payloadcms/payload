@@ -6,8 +6,13 @@ import { TestButton } from './TestButton.js'
 import {
   docLevelAccessSlug,
   firstArrayText,
+  hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  noAdminAccessEmail,
+  nonAdminUserEmail,
+  nonAdminUserSlug,
+  readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
@@ -33,14 +38,15 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
   return false
 }
 
-export const requestHeaders = { authorization: 'Bearer testBearerToken' }
+export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
-  return !!headers && headers.authorization === requestHeaders.authorization
+  return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
 
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    autoLogin: false,
   },
   globals: [
     {
@@ -70,18 +76,36 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    {
+      slug: readOnlyGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+    },
   ],
   collections: [
     {
       slug: 'users',
       auth: true,
       access: {
-        // admin: () => true,
-        admin: async () =>
-          new Promise((resolve) => {
+        // admin:  () => true,
+        admin: async ({ req }) => {
+          if (req.user?.email === noAdminAccessEmail) {
+            return false
+          }
+
+          return new Promise((resolve) => {
             // Simulate a request to an external service to determine access, i.e. another instance of Payload
             setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
-          }),
+          })
+        },
       },
       fields: [
         {
@@ -99,6 +123,11 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+    },
+    {
+      slug: nonAdminUserSlug,
+      auth: true,
+      fields: [],
     },
     {
       slug,
@@ -421,6 +450,32 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: hiddenAccessCountSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          }
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -428,6 +483,22 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await payload.create({
+      collection: nonAdminUserSlug,
+      data: {
+        email: nonAdminUserEmail,
+        password: 'test',
       },
     })
 

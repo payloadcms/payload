@@ -1,12 +1,9 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalImport from 'lexical'
-const { $getNodeByKey, COMMAND_PRIORITY_EDITOR } = lexicalImport
-
 import type { LexicalEditor } from 'lexical'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useListDrawer } from '@payloadcms/ui/elements/ListDrawer'
+import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { $createRelationshipNode } from '../nodes/RelationshipNode.js'
@@ -15,28 +12,26 @@ import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCond
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './commands.js'
 
 const insertRelationship = ({
-  id,
   editor,
   relationTo,
   replaceNodeKey,
+  value,
 }: {
   editor: LexicalEditor
-  id: string
   relationTo: string
   replaceNodeKey: null | string
+  value: number | string
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_RELATIONSHIP_COMMAND, {
       relationTo,
-      value: {
-        id,
-      },
+      value,
     })
   } else {
     editor.update(() => {
       const node = $getNodeByKey(replaceNodeKey)
       if (node) {
-        node.replace($createRelationshipNode({ relationTo, value: { id } }))
+        node.replace($createRelationshipNode({ relationTo, value }))
       }
     })
   }
@@ -75,10 +70,10 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
   const onSelect = useCallback(
     ({ collectionSlug, docID }) => {
       insertRelationship({
-        id: docID,
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
+        value: docID,
       })
       closeDrawer()
     },

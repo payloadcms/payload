@@ -1,13 +1,11 @@
 'use client'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import lexicalHeadlessImport from '@lexical/headless'
-const { createHeadlessEditor } = lexicalHeadlessImport
-import lexicalImport from 'lexical'
-const { $getRoot } = lexicalImport
+import { createHeadlessEditor } from '@lexical/headless'
 import { useTableCell } from '@payloadcms/ui/elements/Table'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
+import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../field/features/types.js'

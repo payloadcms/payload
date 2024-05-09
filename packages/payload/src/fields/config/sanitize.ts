@@ -1,7 +1,7 @@
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
-import MissingEditorProp from '../../errors/MissingEditorProp.js'
+import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import {
   DuplicateFieldName,
   InvalidFieldName,
@@ -26,38 +26,36 @@ type Args = {
    */
   requireFieldLevelRichTextEditor?: boolean
   /**
+   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
+   * so that you can sanitize them together, after the config has been sanitized.
+   */
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
+
+  /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
    */
   validRelationships: null | string[]
 }
 
-export const sanitizeFields = ({
+export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
   requireFieldLevelRichTextEditor = false,
+  richTextSanitizationPromises,
   validRelationships,
-}: Args): Field[] => {
+}: Args): Promise<Field[]> => {
   if (!fields) return []
 
-  return fields.map((unsanitizedField) => {
-    const field: Field = { ...unsanitizedField }
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
 
     if (!field.type) throw new MissingFieldType(field)
 
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData(field) && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name)
-    }
-
-    // Make sure that the richText field has an editor
-    if (field.type === 'richText' && !field.editor) {
-      if (config.editor && !requireFieldLevelRichTextEditor) {
-        field.editor = config.editor
-      } else {
-        throw new MissingEditorProp(field)
-      }
     }
 
     // Auto-label
@@ -150,54 +148,100 @@ export const sanitizeFields = ({
       field.admin = {}
     }
 
+    // Make sure that the richText field has an editor
+    if (field.type === 'richText') {
+      const sanitizeRichText = async (_config: SanitizedConfig) => {
+        if (!field.editor) {
+          if (_config.editor && !requireFieldLevelRichTextEditor) {
+            // config.editor should be sanitized at this point
+            field.editor = _config.editor
+          } else {
+            throw new MissingEditorProp(field)
+          }
+        }
+
+        if (typeof field.editor === 'function') {
+          field.editor = await field.editor({
+            config: _config,
+            isRoot: requireFieldLevelRichTextEditor,
+          })
+        }
+
+        // Add editor adapter hooks to field hooks
+        if (!field.hooks) field.hooks = {}
+
+        const mergeHooks = (hookName: keyof typeof field.editor.hooks) => {
+          if (typeof field.editor === 'function') return
+
+          if (field.editor?.hooks?.[hookName]?.length) {
+            field.hooks[hookName] = field.hooks[hookName]
+              ? field.hooks[hookName].concat(field.editor.hooks[hookName])
+              : [...field.editor.hooks[hookName]]
+          }
+        }
+
+        mergeHooks('afterRead')
+        mergeHooks('afterChange')
+        mergeHooks('beforeChange')
+        mergeHooks('beforeValidate')
+        mergeHooks('beforeDuplicate')
+      }
+      if (richTextSanitizationPromises) {
+        richTextSanitizationPromises.push(sanitizeRichText)
+      } else {
+        await sanitizeRichText(config as unknown as SanitizedConfig)
+      }
+    }
+
     if ('fields' in field && field.fields) {
-      field.fields = sanitizeFields({
+      field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
         requireFieldLevelRichTextEditor,
+        richTextSanitizationPromises,
         validRelationships,
       })
     }
 
     if (field.type === 'tabs') {
-      field.tabs = field.tabs.map((tab) => {
-        const unsanitizedTab = { ...tab }
+      for (let j = 0; j < field.tabs.length; j++) {
+        const tab = field.tabs[j]
         if (tabHasName(tab) && typeof tab.label === 'undefined') {
-          unsanitizedTab.label = toWords(tab.name)
+          tab.label = toWords(tab.name)
         }
 
-        unsanitizedTab.fields = sanitizeFields({
+        tab.fields = await sanitizeFields({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
           requireFieldLevelRichTextEditor,
+          richTextSanitizationPromises,
           validRelationships,
         })
-
-        return unsanitizedTab
-      })
+        field.tabs[j] = tab
+      }
     }
 
     if ('blocks' in field && field.blocks) {
-      field.blocks = field.blocks.map((block) => {
-        const unsanitizedBlock = { ...block }
-        unsanitizedBlock.labels = !unsanitizedBlock.labels
-          ? formatLabels(unsanitizedBlock.slug)
-          : unsanitizedBlock.labels
+      for (let j = 0; j < field.blocks.length; j++) {
+        const block = field.blocks[j]
+        block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
-        unsanitizedBlock.fields = sanitizeFields({
+        block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
           requireFieldLevelRichTextEditor,
+          richTextSanitizationPromises,
           validRelationships,
         })
-
-        return unsanitizedBlock
-      })
+        field.blocks[j] = block
+      }
     }
 
-    return field
-  })
+    fields[i] = field
+  }
+
+  return fields
 }

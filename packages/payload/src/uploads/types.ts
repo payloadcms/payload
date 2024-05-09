@@ -2,7 +2,7 @@ import type express from 'express'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
 
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 export type FileSize = {
   filename: null | string
@@ -71,6 +71,10 @@ export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => fals
 
 export type UploadConfig = {
   /**
+   * The adapter to use for uploads.
+   */
+  adapter?: string
+  /**
    * Represents an admin thumbnail, which can be either a React component or a string.
    * - If a string, it should be one of the image size names.
    * - If a React component, register a function that generates the thumbnail URL using the `useAdminThumbnail` hook.
@@ -78,12 +82,18 @@ export type UploadConfig = {
   adminThumbnail?: GetAdminThumbnail | string
   crop?: boolean
   disableLocalStorage?: boolean
+  /**
+   * Accepts existing headers and can filter/modify them.
+   *
+   * Useful for adding custom headers to fetch from external providers.
+   */
+  externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   filesRequiredOnCreate?: boolean
   focalPoint?: boolean
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
   handlers?: ((
-    req: PayloadRequest,
+    req: PayloadRequestWithData,
     args: { params: { collection: string; filename: string } },
   ) => Promise<Response> | Response)[]
   imageSizes?: ImageSize[]

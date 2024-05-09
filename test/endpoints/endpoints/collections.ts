@@ -27,7 +27,17 @@ export const collectionEndpoints: CollectionConfig['endpoints'] = [
   {
     path: '/whoami',
     method: 'post',
-    handler: (req) => {
+    handler: async (req) => {
+      let data
+
+      try {
+        data = await req.json()
+      } catch (error) {
+        data = {}
+      }
+
+      if (data) req.data = data
+
       return Response.json({
         name: req.data.name,
         age: req.data.age,

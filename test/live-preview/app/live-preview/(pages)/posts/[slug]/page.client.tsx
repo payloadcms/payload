@@ -1,10 +1,12 @@
 'use client'
 
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import React from 'react'
 
 import type { Post as PostType } from '../../../../../payload-types.js'
 
+import { renderedPageTitleID } from '../../../../../shared.js'
 import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { PostHero } from '../../../_heros/PostHero/index.js'
@@ -20,6 +22,9 @@ export const PostClient: React.FC<{
 
   return (
     <React.Fragment>
+      <Gutter>
+        <div id={renderedPageTitleID}>{data.title}</div>
+      </Gutter>
       <PostHero post={data} />
       <Blocks blocks={data?.layout} />
       <Blocks

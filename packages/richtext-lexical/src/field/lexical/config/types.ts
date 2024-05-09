@@ -1,4 +1,4 @@
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import type {
   FeatureProviderClient,

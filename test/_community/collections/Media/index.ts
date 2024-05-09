@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { getPayload } from 'payload'
-
 export const mediaSlug = 'media'
 
 export const MediaCollection: CollectionConfig = {

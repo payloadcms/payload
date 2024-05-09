@@ -1,6 +1,7 @@
 import type { Config } from 'payload/config'
 import type { Field, GroupField, TabsField, TextField } from 'payload/types'
 
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
@@ -9,7 +10,7 @@ import type {
   GenerateImage,
   GenerateTitle,
   GenerateURL,
-  PluginConfig,
+  SEOPluginConfig,
 } from './types.js'
 
 import { MetaDescription } from './fields/MetaDescription.js'
@@ -19,8 +20,8 @@ import { translations } from './translations/index.js'
 import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
 
-const seo =
-  (pluginConfig: PluginConfig) =>
+export const seoPlugin =
+  (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
     const seoFields: GroupField[] = [
       {
@@ -45,7 +46,7 @@ const seo =
                 Field: (props) => (
                   <MetaTitle
                     {...props}
-                    hasGenerateTitleFn={typeof pluginConfig.generateTitle === 'function'}
+                    hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
                   />
                 ),
               },
@@ -62,7 +63,7 @@ const seo =
                   <MetaDescription
                     {...props}
                     hasGenerateDescriptionFn={
-                      typeof pluginConfig.generateDescription === 'function'
+                      typeof pluginConfig?.generateDescription === 'function'
                     }
                   />
                 ),
@@ -82,7 +83,7 @@ const seo =
                       Field: (props) => (
                         <MetaImage
                           {...props}
-                          hasGenerateImageFn={typeof pluginConfig.generateImage === 'function'}
+                          hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
                         />
                       ),
                     },
@@ -105,7 +106,7 @@ const seo =
                 Field: (props) => (
                   <Preview
                     {...props}
-                    hasGenerateURLFn={typeof pluginConfig.generateURL === 'function'}
+                    hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}
                   />
                 ),
               },
@@ -194,11 +195,13 @@ const seo =
           return collection
         }) || [],
       endpoints: [
+        ...(config.endpoints ?? []),
         {
           handler: async (req) => {
+            const reqWithData = await addDataAndFileToRequest({ request: req })
             const args: Parameters<GenerateTitle>[0] =
-              req.data as unknown as Parameters<GenerateTitle>[0]
-            const result = await pluginConfig.generateTitle(args)
+              reqWithData.data as unknown as Parameters<GenerateTitle>[0]
+            const result = pluginConfig.generateTitle ? await pluginConfig.generateTitle(args) : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -206,9 +209,12 @@ const seo =
         },
         {
           handler: async (req) => {
+            const reqWithData = await addDataAndFileToRequest({ request: req })
             const args: Parameters<GenerateDescription>[0] =
-              req.data as unknown as Parameters<GenerateDescription>[0]
-            const result = await pluginConfig.generateDescription(args)
+              reqWithData.data as unknown as Parameters<GenerateDescription>[0]
+            const result = pluginConfig.generateDescription
+              ? await pluginConfig.generateDescription(args)
+              : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -216,9 +222,10 @@ const seo =
         },
         {
           handler: async (req) => {
+            const reqWithData = await addDataAndFileToRequest({ request: req })
             const args: Parameters<GenerateURL>[0] =
-              req.data as unknown as Parameters<GenerateURL>[0]
-            const result = await pluginConfig.generateURL(args)
+              reqWithData.data as unknown as Parameters<GenerateURL>[0]
+            const result = pluginConfig.generateURL ? await pluginConfig.generateURL(args) : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -226,9 +233,10 @@ const seo =
         },
         {
           handler: async (req) => {
+            const reqWithData = await addDataAndFileToRequest({ request: req })
             const args: Parameters<GenerateImage>[0] =
-              req.data as unknown as Parameters<GenerateImage>[0]
-            const result = await pluginConfig.generateImage(args)
+              reqWithData.data as unknown as Parameters<GenerateImage>[0]
+            const result = pluginConfig.generateImage ? await pluginConfig.generateImage(args) : ''
             return new Response(result, { status: 200 })
           },
           method: 'post',
@@ -289,5 +297,3 @@ const seo =
       },
     }
   }
-
-export { seo }

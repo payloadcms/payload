@@ -1,19 +1,17 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalUtilsImport from '@lexical/utils'
-const { $insertNodeToNearestRoot, mergeRegister } = lexicalUtilsImport
-import lexicalImport from 'lexical'
-const {
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
+import {
   $getPreviousSelection,
   $getSelection,
   $isParagraphNode,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
-} = lexicalImport
-
+} from 'lexical'
 import React, { useEffect } from 'react'
 
+import type { PluginComponent } from '../../types.js'
+import type { BlocksFeatureClientProps } from '../feature.client.js'
 import type { BlockFields } from '../nodes/BlocksNode.js'
 
 import { BlocksDrawerComponent } from '../drawer/index.js'
@@ -22,7 +20,7 @@ import { INSERT_BLOCK_COMMAND } from './commands.js'
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
-export function BlocksPlugin(): React.ReactNode {
+export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {

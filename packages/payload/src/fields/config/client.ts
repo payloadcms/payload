@@ -8,7 +8,7 @@ export type ServerOnlyFieldProperties =
   | 'editor' // This is a `richText` only property
   | 'filterOptions' // This is a `relationship` and `upload` only property
   | 'label'
-  | keyof Pick<FieldBase, 'access' | 'defaultValue' | 'hooks' | 'validate'>
+  | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks' | 'validate'>
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<
   FieldBase['admin'],
@@ -32,6 +32,7 @@ export const createClientFieldConfig = ({
     'label',
     'filterOptions', // This is a `relationship` and `upload` only property
     'editor', // This is a `richText` only property
+    'custom',
     // `fields`
     // `blocks`
     // `tabs`

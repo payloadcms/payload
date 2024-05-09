@@ -1,4 +1,3 @@
-import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 import type { Editor } from 'slate'
@@ -35,16 +34,15 @@ export const wrapLink = (editor: Editor): void => {
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
+    | ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[])
     | Field[],
   config: SanitizedConfig,
-  i18n: I18n,
 ): Field[] {
   const baseFields: Field[] = getBaseFields(config)
 
   const fields =
     typeof customFieldSchema === 'function'
-      ? customFieldSchema({ config, defaultFields: baseFields, i18n })
+      ? customFieldSchema({ config, defaultFields: baseFields })
       : baseFields
 
   // Wrap fields which are not part of the base schema in a group named 'fields' - otherwise they will be rendered but not saved
@@ -65,7 +63,7 @@ export function transformExtraFields(
     }
   }
 
-  if (Array.isArray(customFieldSchema) || fields.length > 0) {
+  if ((Array.isArray(customFieldSchema) && customFieldSchema?.length) || extraFields?.length) {
     fields.push({
       name: 'fields',
       type: 'group',

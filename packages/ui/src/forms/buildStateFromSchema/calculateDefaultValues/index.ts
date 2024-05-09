@@ -1,4 +1,4 @@
-import type { Data, Field as FieldSchema, PayloadRequest } from 'payload/types'
+import type { Data, Field as FieldSchema, PayloadRequestWithData } from 'payload/types'
 
 import { iterateFields } from './iterateFields.js'
 
@@ -6,7 +6,7 @@ type Args = {
   data: Data
   fields: FieldSchema[]
   id?: number | string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   siblingData: Data
 }
 

@@ -17,7 +17,7 @@ import type {
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
@@ -61,10 +61,6 @@ export type DrizzleTransaction = PgTransaction<
 >
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
-  /**
-   * Used internally to map the block name to the table name
-   */
-  blockTableNames: Record<string, string>
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
   /**
@@ -90,6 +86,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
       resolve: () => Promise<void>
     }
   }
+  tableNameMap: Map<string, string>
   tables: Record<string, GenericTable | PgTableWithColumns<any>>
   versionsSuffix?: string
 }
@@ -98,8 +95,8 @@ export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequest> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequest> }
+export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
+export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
 
 declare module 'payload' {
   export interface DatabaseAdapter

@@ -1,8 +1,7 @@
 import type { ElementTransformer } from '@lexical/markdown'
 import type { HeadingTagType } from '@lexical/rich-text'
 
-import lexicalRichTextImport from '@lexical/rich-text'
-const { $createHeadingNode, $isHeadingNode, HeadingNode } = lexicalRichTextImport
+import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
 
 import { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'
 

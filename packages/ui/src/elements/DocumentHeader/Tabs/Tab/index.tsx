@@ -20,6 +20,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     isActive: tabIsActive,
     label,
     newTab,
+    permissions,
   } = props
 
   const { routes } = config
@@ -43,7 +44,8 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
   }
 
   const meetsCondition =
-    !condition || (condition && Boolean(condition({ collectionConfig, config, globalConfig })))
+    !condition ||
+    (condition && Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
 
   if (meetsCondition) {
     const labelToRender =

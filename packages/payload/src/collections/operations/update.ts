@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { BulkOperationResult, Collection } from '../config/types.js'
 import type { CreateUpdateType } from './create.js'
 
@@ -36,7 +36,7 @@ export type Arguments<T extends CreateUpdateType> = {
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
   where: Where
 }
@@ -129,6 +129,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
       const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
         collection: collectionConfig.slug,
         locale,
+        pagination: false,
         req,
         where: versionsWhere,
       })
@@ -175,6 +176,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
           context: req.context,
           depth: 0,
           doc,
+          draft: draftArg,
           fallbackLocale,
           global: null,
           locale,
@@ -266,14 +268,15 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
           global: null,
           operation: 'update',
           req,
-          skipValidation: shouldSaveDraft || data._status === 'draft',
+          skipValidation:
+            Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
         })
 
         // /////////////////////////////////////
         // Update
         // /////////////////////////////////////
 
-        if (!shouldSaveDraft) {
+        if (!shouldSaveDraft || data._status === 'published') {
           result = await req.payload.db.updateOne({
             id,
             collection: collectionConfig.slug,
@@ -295,7 +298,6 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })
@@ -310,6 +312,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
           context: req.context,
           depth,
           doc: result,
+          draft: draftArg,
           fallbackLocale: null,
           global: null,
           locale,

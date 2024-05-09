@@ -23,9 +23,11 @@ type DateFNSKeys =
   | 'pt'
   | 'ro'
   | 'ru'
+  | 'sk'
   | 'sv'
   | 'th'
   | 'tr'
+  | 'uk'
   | 'vi'
   | 'zh-CN'
   | 'zh-TW'
@@ -61,7 +63,7 @@ export type I18n = {
 }
 
 export type I18nOptions = {
-  fallbackLanguage?: string
+  fallbackLanguage?: AcceptedLanguages
   supportedLanguages?: SupportedLanguages
   translations?: Partial<{
     [key in AcceptedLanguages]?: Language['translations']
@@ -80,7 +82,7 @@ export type InitTFunction = (args: {
 export type InitI18n = (args: {
   config: I18nOptions
   context: 'api' | 'client'
-  language?: AcceptedLanguages
+  language: AcceptedLanguages
 }) => Promise<I18n>
 
 export type LanguagePreference = {

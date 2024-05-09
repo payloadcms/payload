@@ -53,8 +53,9 @@ const typescriptRules = {
   '@typescript-eslint/consistent-type-imports': 'warn',
   '@typescript-eslint/no-explicit-any': 'warn',
   // Type-aware any rules end
-  // ts-expect should always be preferred over ts-ignore
-  '@typescript-eslint/prefer-ts-expect-error': 'warn',
+
+  // ts-expect preferred over ts-ignore. It will error if the expected error is no longer present.
+  '@typescript-eslint/prefer-ts-expect-error': 'error',
   // By default, it errors for unused variables. This is annoying, warnings are enough.
   '@typescript-eslint/no-unused-vars': [
     'warn',

@@ -6,7 +6,7 @@ import type { PluginOptions } from './types.js'
 import { captureException } from './captureException.js'
 import { startSentry } from './startSentry.js'
 
-export const sentry =
+export const sentryPlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
     const config = { ...incomingConfig }
