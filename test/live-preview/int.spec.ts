@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
@@ -7,9 +8,6 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import { handleMessage } from '../../packages/live-preview/src/handleMessage.js'
-import { mergeData } from '../../packages/live-preview/src/mergeData.js'
-import { traverseRichText } from '../../packages/live-preview/src/traverseRichText.js'
 import { Pages } from './collections/Pages.js'
 import configPromise from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
