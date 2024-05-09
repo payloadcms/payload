@@ -364,16 +364,25 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 }
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
-  admin?: Admin & {
-    components?: {
-      RowLabel?: RowLabelComponent
-    } & Admin['components']
-    initCollapsed?: boolean
-  }
   fields: Field[]
-  label: Required<FieldBase['label']>
   type: 'collapsible'
-}
+} & (
+    | {
+        admin: Admin & {
+          components: {
+            RowLabel: RowLabelComponent
+          } & Admin['components']
+          initCollapsed?: boolean
+        }
+        label?: Required<FieldBase['label']>
+      }
+    | {
+        admin?: Admin & {
+          initCollapsed?: boolean
+        }
+        label: Required<FieldBase['label']>
+      }
+  )
 
 export type TabsAdmin = Omit<Admin, 'description'>
 

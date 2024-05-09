@@ -274,15 +274,23 @@ export const collapsible = baseField.keys({
     .keys({
       components: baseAdminComponentFields
         .keys({
-          RowLabel: componentSchema,
+          RowLabel: componentSchema.optional(),
         })
         .default({}),
     })
     .default({}),
   fields: joi.array().items(joi.link('#field')),
-  label: joi
-    .alternatives()
-    .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function()),
+  label: joi.alternatives().conditional('admin.components.RowLabel', {
+    is: joi.exist(),
+    otherwise: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function())
+      .required(),
+    then: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function())
+      .optional(),
+  }),
 })
 
 const tab = baseField.keys({
