@@ -11,7 +11,7 @@ export interface Config {
     users: User;
     pages: Page;
     posts: Post;
-    'posts-ssr': PostsSsr;
+    ssr: Ssr;
     tenants: Tenant;
     categories: Category;
     media: Media;
@@ -416,9 +416,8 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-ssr".
- */
-export interface PostsSsr {
+ * via the `definition` "ssr".
+export interface Ssr {
   id: string;
   slug: string;
   tenant?: (string | null) | Tenant;
@@ -537,7 +536,6 @@ export interface PostsSsr {
           }
       )[]
     | null;
-  relatedPosts?: (string | Post)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
