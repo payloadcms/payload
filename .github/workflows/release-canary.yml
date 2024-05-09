@@ -1,4 +1,4 @@
-name: pr-title
+name: release-canary
 
 on:
   workflow_dispatch:
@@ -8,4 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo
-        run: echo "Register pr-title workflow"
+        run: echo "Register release-canary workflow"
