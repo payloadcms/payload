@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 

@@ -7,7 +7,6 @@ import { getDoc } from '../../_api/getDoc.js'
 import { getDocs } from '../../_api/getDocs.js'
 import { PageClient } from './page.client.js'
 
-// eslint-disable-next-line no-restricted-exports
 export default async function Page({ params: { slug = 'home' } }) {
   let page: Page | null = null
 
@@ -17,7 +16,7 @@ export default async function Page({ params: { slug = 'home' } }) {
       collection: 'pages',
     })
   } catch (error) {
-    console.error(error)
+    console.error(error) // eslint-disable-line no-console
   }
 
   if (!page) {

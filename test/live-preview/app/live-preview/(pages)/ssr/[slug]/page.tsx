@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
