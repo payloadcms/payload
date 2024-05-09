@@ -39,6 +39,11 @@ type PublishResult = {
   details?: string
 }
 
+type PublishOpts = {
+  dryRun?: boolean
+  tag?: 'beta' | 'canary' | 'latest'
+}
+
 type Workspace = {
   version: () => Promise<string>
   tag: string
@@ -46,8 +51,8 @@ type Workspace = {
   showVersions: () => Promise<void>
   bumpVersion: (type: PackageReleaseType) => Promise<void>
   build: () => Promise<void>
-  publish: () => Promise<void>
-  publishSync: () => Promise<void>
+  publish: (opts: PublishOpts) => Promise<void>
+  publishSync: (opts: PublishOpts) => Promise<void>
 }
 
 export const getWorkspace = async () => {
@@ -63,10 +68,11 @@ export const getWorkspace = async () => {
   }
 
   // Publish one package at a time
-  const publishSync = async () => {
+  const publishSync: Workspace['publishSync'] = async ({ dryRun, tag = 'canary' }) => {
     const packageDetails = await getPackageDetails(packageWhitelist)
     const results: PublishResult[] = []
     for (const pkg of packageDetails) {
+      // TODO: Remove hard-coded dry-run
       const res = await publishSinglePackage(pkg, { dryRun: true, tag: 'canary' })
       results.push(res)
     }
@@ -180,7 +186,7 @@ export const getWorkspace = async () => {
 
 /** Publish with promise concurrency throttling */
 async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
-  const { dryRun = false } = opts ?? {}
+  const { dryRun = true } = opts ?? {}
   return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
 }
 
