@@ -3,7 +3,7 @@ import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 
 import type { Footer } from '../../../payload-types.js'
 
-export async function fetchFooter(): Promise<Footer> {
+export async function getFooter(): Promise<Footer> {
   const payload = await getPayloadHMR({ config })
 
   try {
@@ -16,5 +16,5 @@ export async function fetchFooter(): Promise<Footer> {
     console.error(err)
   }
 
-  throw new Error('Error fetching footer.')
+  throw new Error('Error getting footer.')
 }

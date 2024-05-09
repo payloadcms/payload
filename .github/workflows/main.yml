@@ -93,10 +93,10 @@ jobs:
             pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm install
-      - name: List changed files
-        run: git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}
       - name: Lint staged
-        run: npx lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
+        run: |
+          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
+          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
 
   build:
     needs: changes
@@ -490,3 +490,18 @@ jobs:
           yarn install
           yarn build
           yarn generate:types
+
+  all-green:
+    name: All Green
+    if: always()
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+      - tests-unit
+      - tests-int
+      - tests-e2e
+
+    steps:
+      - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        run: exit 1
