@@ -37,5 +37,6 @@ export const DynamicFieldSelector: React.FC<TextField> = (props) => {
 
   // TODO: label from config is Record<string, string> | false | string
   //  but the FormFieldBase type has only label?: string, changing FormFieldBase breaks other ui components
+  // @ts-expect-error
   return <Select {...props} options={options} />
 }
