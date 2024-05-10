@@ -120,8 +120,7 @@ export const traverseFields = ({
         (field.localized || forceLocalized) &&
         field.type !== 'array' &&
         field.type !== 'blocks' &&
-        'hasMany' in field &&
-        field.hasMany !== true
+        (('hasMany' in field && field.hasMany !== true) || !('hasMany' in field))
       ) {
         hasLocalizedField = true
         targetTable = localesColumns
@@ -748,9 +747,9 @@ export const traverseFields = ({
           }
         }
 
-        if (field.localized && adapter.payload.config.localization) {
-          hasLocalizedRelationshipField = true
-        }
+        // if (field.localized && adapter.payload.config.localization) {
+        //   hasLocalizedRelationshipField = true
+        // }
 
         break
 
