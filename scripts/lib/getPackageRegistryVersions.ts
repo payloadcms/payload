@@ -14,16 +14,19 @@ export const getPackageRegistryVersions = async (): Promise<void> => {
       npmRequestLimit(async () => {
         // Get published version from npm
         const json = await fetch(`https://registry.npmjs.org/${pkg.name}`).then((res) => res.json())
-        const { latest = 'N/A', beta = 'N/A', alpha = 'N/A' } = json['dist-tags'] ?? {}
-        const msg = `${chalk.bold(pkg.name.padEnd(32))} latest: ${latest?.padEnd(
-          16,
-        )} beta: ${beta?.padEnd(16)} alpha: ${alpha}`
+        const { latest = 'N/A', beta = 'N/A', canary = 'N/A' } = json['dist-tags'] ?? {}
+        const msg = `${pkg.name.padEnd(36)}${latest?.padEnd(16)}${beta?.padEnd(16)}${canary}`
         return msg
       }),
     ),
   )
 
-  console.log(results.join('\n'))
+  const header = chalk.bold.green(
+    'Package Versions'.padEnd(36) + 'Latest'.padEnd(16) + 'Beta'.padEnd(16) + 'Canary',
+  )
+  console.log(header)
+  console.log()
+  console.log(results.sort().join('\n'))
 }
 
 if (import.meta.url === new URL(import.meta.url).href) {
