@@ -29,6 +29,17 @@ export default buildConfigWithDefaults({
     })
   },
   plugins: [
+    // uploadthingStorage({
+    //   collections: {
+    //     [mediaSlug]: true,
+    //     [mediaWithPrefixSlug]: {
+    //       prefix,
+    //     },
+    //   },
+    //   options: {
+    //     apiKey: process.env.UPLOADTHING_SECRET,
+    //   },
+    // }),
     uploadthingStorage({
       collections: {
         [mediaSlug]: true,
@@ -38,6 +49,7 @@ export default buildConfigWithDefaults({
       },
       options: {
         apiKey: process.env.UPLOADTHING_SECRET,
+        acl: 'public-read',
       },
     }),
   ],

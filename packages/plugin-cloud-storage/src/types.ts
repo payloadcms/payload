@@ -1,4 +1,4 @@
-import type { FileData, ImageSize } from 'payload/types'
+import type { Field, FileData, ImageSize } from 'payload/types'
 import type { TypeWithID } from 'payload/types'
 import type { CollectionConfig, PayloadRequestWithData } from 'payload/types'
 
@@ -37,10 +37,14 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequestWithData,
-  args: { params: { collection: string; filename: string } },
+  args: { doc: TypeWithID; params: { collection: string; filename: string } },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  /**
+   * Additional fields to be injected into the base collection and image sizes
+   */
+  fields?: Field[]
   /**
    * Generates the public URL for a file
    */

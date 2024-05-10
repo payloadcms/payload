@@ -129,12 +129,15 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       ...url,
       hooks: {
         afterRead: [
-          ({ data }) =>
-            generateURL({
+          ({ data, value }) => {
+            if (value) return value
+
+            return generateURL({
               collectionSlug: collection.slug,
               config,
               filename: data?.filename,
-            }),
+            })
+          },
         ],
       },
     },
@@ -169,7 +172,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...url,
               hooks: {
                 afterRead: [
-                  ({ data }) => {
+                  ({ data, value }) => {
+                    if (value) return value
+
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {

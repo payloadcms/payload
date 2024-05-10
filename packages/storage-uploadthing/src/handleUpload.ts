@@ -2,6 +2,7 @@ import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
 import type { UTApi } from 'uploadthing/server'
 
 import { APIError } from 'payload/errors'
+import { UploadThingError } from 'uploadthing/server'
 import { UTFile } from 'uploadthing/server'
 
 import type { ACL } from './index.js'
@@ -41,12 +42,13 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
       )
 
       if (foundSize) {
-        data.sizes[foundSize].filename = res.data?.key
+        data.sizes[foundSize]._key = res.data?.key
         if (acl === 'public-read') {
           data.sizes[foundSize].url = res.data?.url
         }
       } else {
-        data.filename = res.data?.key
+        data._key = res.data?.key
+        data.filename = res.data?.name
         if (acl === 'public-read') {
           data.url = res.data?.url
         }
@@ -54,6 +56,10 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
 
       return data
     } catch (error: unknown) {
+      // TODO: Surface appropriate errors
+      if (error instanceof UploadThingError) {
+        throw new APIError(`Error uploading file: ${error.code}`)
+      }
       throw new APIError(
         `Error uploading file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       )

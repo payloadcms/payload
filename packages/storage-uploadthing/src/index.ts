@@ -2,9 +2,11 @@ import type {
   Adapter,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
+  GenerateURL,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin } from 'payload/config'
+import type { Field } from 'payload/types'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -55,7 +57,7 @@ export const uploadthingStorage: UploadthingPlugin =
       uploadthingStorageOptions.options.acl = 'public-read'
     }
 
-    const adapter = uploadthingInternal(uploadthingStorageOptions)
+    const adapter = uploadthingInternal(uploadthingStorageOptions, incomingConfig)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -67,9 +69,9 @@ export const uploadthingStorage: UploadthingPlugin =
           ...(collOptions === true ? {} : collOptions),
 
           // Disable payload access control if the ACL is public-read or not set
-          ...(uploadthingStorageOptions.options.acl === 'public-read'
-            ? { disablePayloadAccessControl: true }
-            : {}),
+          // ...(uploadthingStorageOptions.options.acl === 'public-read'
+          //   ? { disablePayloadAccessControl: true }
+          //   : {}),
 
           adapter,
         },
@@ -100,7 +102,24 @@ export const uploadthingStorage: UploadthingPlugin =
     })(config)
   }
 
-function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
+function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig: Config): Adapter {
+  const fields: Field[] = [
+    {
+      name: '_key',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+  ]
+
+  const generateURL: GenerateURL = ({ collection, data, filename, prefix }) => {
+    if (filename) {
+      return `${incomingConfig.serverURL || ''}${incomingConfig.routes?.api || ''}/${collection.slug}/file/${filename}`
+    }
+    return undefined
+  }
+
   return (): GeneratedAdapter => {
     const {
       options: { acl = 'public-read', ...utOptions },
@@ -110,6 +129,8 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
 
     return {
       name: 'uploadthing',
+      fields,
+      generateURL,
       // No generateURL func, public urls are handled by uploadthing
       handleDelete: getHandleDelete({ utApi }),
       handleUpload: getHandleUpload({ acl, utApi }),

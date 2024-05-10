@@ -1,17 +1,38 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
+import type { TypeWithID } from 'payload/types'
 import type { UTApi } from 'uploadthing/server'
 
 interface Args {
   utApi: UTApi
 }
 
-export const getHandler = ({ utApi }: Args): StaticHandler => {
-  return async (req, { params: { filename } }) => {
-    try {
-      const fileUrl = (await utApi.getFileUrls(filename))?.data?.[0].url
+const getKeyFromFilename = (doc: TypeWithID, filename: string) => {
+  if ('filename' in doc && doc.filename === filename && '_key' in doc) {
+    return doc._key
+  }
+  if ('sizes' in doc) {
+    const sizes = doc.sizes
+    if (typeof sizes === 'object' && sizes !== null) {
+      for (const size of Object.values(sizes)) {
+        if (size?.filename === filename && '_key' in size) {
+          return size._key
+        }
+      }
+    }
+  }
+}
 
-      // Get buffer from file url
-      const response = await fetch(fileUrl)
+export const getHandler = ({ utApi }: Args): StaticHandler => {
+  return async (req, { doc, params: { filename } }) => {
+    try {
+      const key = getKeyFromFilename(doc, filename)
+      const { url: signedURL } = await utApi.getSignedURL(key)
+
+      if (!signedURL) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
+      const response = await fetch(signedURL)
 
       if (!response.ok) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
