@@ -6,7 +6,7 @@ desc: Fully customize your Admin Panel by swapping in your own React components.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-While designing the Payload Admin panel, we determined it should be as minimal and straightforward as possible to allow easy customization and control. There are many times where you may want to completely control how a whole view or a field works. You might even want to add in new views entirely. In order for Payload to support this level of customization without introducing versioning / future-proofing issues, Payload provides for a pattern to supply your own React components via your Payload config.
+The [Payload Admin](./overview) panel is designed to be as minimal and straightforward as possible to allow easy customization and control. In order for Payload to support this level of customization without introducing versioning and future-proofing issues, Payload provides for a pattern to supply your own React components via your Payload config.
 
 To swap in your own React component, first, consult the list of available component overrides below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
 
@@ -80,7 +80,7 @@ You can easily swap entire views with your own by using the `admin.components.vi
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
 | **`Account`**   | The Account view is used to show the currently logged in user's Account page. |
-| **`Dashboard`** | The main landing page of the Admin panel.                                     |
+| **`Dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
 
 To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. For example:
 
@@ -113,7 +113,7 @@ _\* An asterisk denotes that a property is required._
 
 ### Adding new views
 
-To add a _new_ view to the Admin Panel, simply add another key to the `views` object with at least a `path` and `Component` property. For example:
+To add a _new_ view to the [Admin Panel](./overview), simply add another key to the `views` object with at least a `path` and `Component` property. For example:
 
 ```ts
 // payload.config.ts
@@ -452,7 +452,7 @@ Your custom view components will be given all the props that a React Router `<Ro
 | Prop                    | Description                                                                  |
 | ----------------------- | ---------------------------------------------------------------------------- |
 | **`user`**              | The currently logged in user. Will be `null` if no user is logged in.        |
-| **`canAccessAdmin`** \* | If the currently logged in user is allowed to access the admin panel or not. |
+| **`canAccessAdmin`** \* | If the currently logged in user is allowed to access the [Admin Panel](./overview) or not. |
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -662,7 +662,7 @@ export default titleField
 
 ## Custom providers
 
-As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
+As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the [Admin Panel](./overview). Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
 
 <Banner type="warning">
   <strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider

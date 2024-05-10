@@ -6,9 +6,40 @@ desc: Manage and customize internationalization support in your CMS editor exper
 keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Not only does Payload support managing localized content, it also has internationalization support so that admin users can work in their preferred language. It comes included by default and can be extended in your config.
+Not only does Payload support managing localized content, it also has internationalization support so that users in the [Admin Panel](../admin/overview) can work in their preferred language. Payload's i18n comes by default without any additional setup, and you can extend the default settings to customize the language settings to your needs.
 
-While Payload's built-in features come translated, you may want to also translate parts of your project's configuration too. This is possible in places like collections and globals labels and groups, field labels, descriptions and input placeholder text. The admin UI will display all the correct translations you provide based on the user's language.
+### Configuration Options
+
+In your Payload config, you can add translations and customize the settings in `i18n`. Payload will use your custom options and merge it with the default, allowing you to override the settings Payload provides.
+
+**Example Payload config extending i18n:**
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  //...
+  i18n: {
+    fallbackLng: 'en', // default
+    debug: false, // default
+    resources: {
+      en: {
+        custom: {
+          // namespace can be anything you want
+          key1: 'Translation with {{variable}}', // translation
+        },
+        // override existing translation keys
+        general: {
+          dashboard: 'Home',
+        },
+      },
+    },
+  },
+  //...
+})
+```
+
+While Payload's built-in features come translated, you may want to also translate parts of your project's configuration too. This is possible in places like Collections and Globals labels and groups, field labels, descriptions and input placeholder text. The admin UI will display all the correct translations you provide based on the user's language.
 
 Here is an example of a simple collection supporting both English and Spanish editors:
 
@@ -58,7 +89,7 @@ export const Articles: CollectionConfig = {
 
 ## Admin UI
 
-The Payload admin panel reads the language settings of a user's browser and display all text in that language, or will fall back to English if the user's language is not yet supported.
+The [Admin Panel](../admin/overview) reads the language settings of a user's browser and display all text in that language, or will fall back to English if the user's language is not yet supported.
 After a user logs in, they can change their language selection in the `/account` view.
 
 <Banner>
@@ -72,6 +103,7 @@ After a user logs in, they can change their language selection in the `/account`
 
 Payload's backend uses express middleware to set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
+<<<<<<< HEAD
 Anywhere in your Payload app that you have access to the `req` object, you can access payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
 ## Configuration Options
@@ -164,3 +196,8 @@ const field: Field = {
 }
 ```
 
+=======
+Anywhere in your Payload app that you have access to the `req` object, you can access i18next's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
+
+Read the i18next [API documentation](https://www.i18next.com/overview/api) to learn more.
+>>>>>>> bce4876e8 (docs(admin): updates admin overview doc)
