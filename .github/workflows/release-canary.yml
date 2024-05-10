@@ -13,6 +13,8 @@ env:
 
 jobs:
   release:
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,3 +33,4 @@ jobs:
         run: pnpm tsx ./scripts/publish-canary.ts
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
