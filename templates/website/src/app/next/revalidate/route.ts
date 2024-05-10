@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function GET(request: NextRequest): Promise<Response> {
   const collection = request.nextUrl.searchParams.get('collection')
   const slug = request.nextUrl.searchParams.get('slug')

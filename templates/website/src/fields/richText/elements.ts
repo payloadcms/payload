@@ -1,4 +1,4 @@
-import type { RichTextElement } from '@payloadcms/richtext-slate/dist/types'
+import type { RichTextElement } from '@payloadcms/richtext-slate'
 
 import label from './label'
 import largeBody from './largeBody'

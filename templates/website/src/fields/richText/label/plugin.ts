@@ -1,9 +1,10 @@
-import type { RichTextCustomElement } from '@payloadcms/richtext-slate/dist/types'
+import type { RichTextCustomElement } from '@payloadcms/richtext-slate'
 import type { BaseEditor } from 'slate'
 
 type RichTextPlugin = Exclude<RichTextCustomElement['plugins'], undefined>[0]
 
-const withLabel: RichTextPlugin = (incomingEditor) => {
+// @ts-expect-error
+const withLabel: RichTextPlugin = (incomingEditor: BaseEditor) => {
   const editor: BaseEditor & {
     shouldBreakOutOnEnter?: (element: any) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
   } = incomingEditor

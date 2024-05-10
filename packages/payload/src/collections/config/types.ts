@@ -54,7 +54,10 @@ export type BeforeOperationHook = (args: {
   req: PayloadRequestWithData
 }) => any
 
-export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
+export type BeforeValidateHook<
+  T extends TypeWithID = any,
+  TData = Record<string, unknown>,
+> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
@@ -69,10 +72,10 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
 }) => any
 
-export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
+export type BeforeChangeHook<T extends TypeWithID = any, TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
@@ -87,10 +90,10 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
 }) => any
 
-export type AfterChangeHook<T extends TypeWithID = any> = (args: {
+export type AfterChangeHook<T extends TypeWithID = any, TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
@@ -100,26 +103,26 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
 }) => any
 
-export type BeforeReadHook<T extends TypeWithID = any> = (args: {
+export type BeforeReadHook<T extends TypeWithID = any, TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   query: { [key: string]: any }
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
 }) => any
 
-export type AfterReadHook<T extends TypeWithID = any> = (args: {
+export type AfterReadHook<T extends TypeWithID = any, TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   findMany?: boolean
   query?: { [key: string]: any }
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
 }) => any
 
 export type BeforeDeleteHook = (args: {
@@ -151,44 +154,44 @@ export type AfterErrorHook = (
   collection: SanitizedCollectionConfig | null,
 ) => { response: any; status: number } | void
 
-export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
+export type BeforeLoginHook<T extends TypeWithID = any, TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
   user: T
 }) => any
 
-export type AfterLoginHook<T extends TypeWithID = any> = (args: {
+export type AfterLoginHook<T extends TypeWithID = any, TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
   token: string
   user: T
 }) => any
 
-export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
+export type AfterLogoutHook<TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
 }) => any
 
-export type AfterMeHook<T extends TypeWithID = any> = (args: {
+export type AfterMeHook<TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
   response: unknown
 }) => any
 
-export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
+export type AfterRefreshHook<TData = Record<string, unknown>> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   exp: number
-  req: PayloadRequestWithData
+  req: PayloadRequestWithData<TData>
   token: string
 }) => any
 

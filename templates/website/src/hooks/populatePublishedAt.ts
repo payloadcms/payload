@@ -1,4 +1,4 @@
-import type { BeforeChangeHook } from 'payload/dist/collections/config/types'
+import type { BeforeChangeHook } from 'payload/types'
 
 export const populatePublishedAt: BeforeChangeHook = ({ data, operation, req }) => {
   if (operation === 'create' || operation === 'update') {

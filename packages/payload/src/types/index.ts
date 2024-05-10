@@ -66,9 +66,9 @@ export type CustomPayloadRequestProperties<U = unknown> = {
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
 >
-export type PayloadRequestData = {
+export type PayloadRequestData<TData = Record<string, unknown>> = {
   /** Data from the request body */
-  data?: Record<string, unknown>
+  data?: TData
   /** The locale that should be used for a field when it is not translated to the requested locale */
   file?: {
     data: Buffer
@@ -81,7 +81,8 @@ export type PayloadRequestData = {
 export type PayloadRequest<U = unknown> = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
   CustomPayloadRequestProperties<U>
-export type PayloadRequestWithData<U = unknown> = PayloadRequest<U> & PayloadRequestData
+export type PayloadRequestWithData<U = unknown, D = unknown> = PayloadRequest<U> &
+  PayloadRequestData<D>
 export interface RequestContext {
   [key: string]: unknown
 }

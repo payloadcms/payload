@@ -10,7 +10,7 @@ type Props = {
   label: string
   name: string
   placeholder?: string
-  register: UseFormRegister<FieldValues & any>
+  register: UseFormRegister<FieldValues>
   required?: boolean
   type?: 'email' | 'number' | 'password' | 'text' | 'textarea'
   validate?: (value: string) => boolean | string

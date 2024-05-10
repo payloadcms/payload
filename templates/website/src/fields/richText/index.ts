@@ -4,7 +4,7 @@ import type { RichTextField } from 'payload/types'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import deepMerge from '../../utilities/deepMerge'
-import link from '../link'
+import { link } from '../link'
 import elements from './elements'
 import leaves from './leaves'
 

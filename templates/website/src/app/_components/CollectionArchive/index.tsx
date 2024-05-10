@@ -3,7 +3,7 @@
 import qs from 'qs'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import type { Post, Project } from '../../../payload-types'
+import type { Post } from '../../../payload-types'
 import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
 
 import { Card } from '../Card'
@@ -13,7 +13,7 @@ import { Pagination } from '../Pagination'
 import classes from './index.module.scss'
 
 type Result = {
-  docs: (Post | Project | string)[]
+  docs: (Post | string)[]
   hasNextPage: boolean
   hasPrevPage: boolean
   nextPage: number
@@ -137,7 +137,7 @@ export const CollectionArchive: React.FC<Props> = (props) => {
           const json = await req.json()
           clearTimeout(timer)
 
-          const { docs } = json as { docs: (Post | Project)[] }
+          const { docs } = json as { docs: Post[] }
 
           if (docs && Array.isArray(docs)) {
             setResults(json)
