@@ -1,6 +1,6 @@
 # Uploadthing Storage for Payload (beta)
 
-This package provides a way to use Uploadthing with [Payload](https://uploadthing.com).
+This package provides a way to use [uploadthing](https://uploadthing.com) with Payload.
 
 ## Installation
 
