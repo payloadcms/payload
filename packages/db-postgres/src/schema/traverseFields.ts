@@ -24,8 +24,7 @@ import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
-import type { BaseExtraConfig } from './build.js'
-import type { RelationMap } from './build.js'
+import type { BaseExtraConfig, RelationMap } from './build.js'
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { buildTable } from './build.js'
@@ -116,7 +115,12 @@ export const traverseFields = ({
 
       // If field is localized,
       // add the column to the locale table instead of main table
-      if (adapter.payload.config.localization && (field.localized || forceLocalized)) {
+      if (
+        adapter.payload.config.localization &&
+        (field.localized || forceLocalized) &&
+        field.type !== 'array' &&
+        field.type !== 'blocks'
+      ) {
         hasLocalizedField = true
         targetTable = localesColumns
         targetIndexes = localesIndexes
@@ -375,7 +379,8 @@ export const traverseFields = ({
 
         relationsToBuild.set(fieldName, {
           type: 'many',
-          localized: adapter.payload.config.localization && field.localized,
+          // arrays have their own localized table, independent of the base table.
+          localized: false,
           target: arrayTableName,
         })
 
@@ -482,15 +487,15 @@ export const traverseFields = ({
                 hasManyNumberField = subHasManyNumberField
             }
 
-            const blockTableRelations = relations(
+            adapter.relations[`relations_${blockTableName}`] = relations(
               adapter.tables[blockTableName],
               ({ many, one }) => {
-                const result: Record<string, Relation<string>> = {
-                  _parentID: one(adapter.tables[rootTableName], {
-                    fields: [adapter.tables[blockTableName]._parentID],
-                    references: [adapter.tables[rootTableName].id],
-                  }),
-                }
+                const result: Record<string, Relation<string>> = {}
+
+                result._parentID = one(adapter.tables[rootTableName], {
+                  fields: [adapter.tables[blockTableName]._parentID],
+                  references: [adapter.tables[rootTableName].id],
+                })
 
                 if (hasLocalesTable(block.fields)) {
                   result._locales = many(
@@ -498,15 +503,25 @@ export const traverseFields = ({
                   )
                 }
 
-                subRelationsToBuild.forEach(({ target }, key) => {
-                  result[key] = many(adapter.tables[target])
+                subRelationsToBuild.forEach(({ type, localized, target }, key) => {
+                  if (type === 'one') {
+                    const arrayWithLocalized = localized
+                      ? `${blockTableName}${adapter.localesSuffix}`
+                      : blockTableName
+                    result[key] = one(adapter.tables[target], {
+                      fields: [adapter.tables[arrayWithLocalized][key]],
+                      references: [adapter.tables[target].id],
+                      relationName: key,
+                    })
+                  }
+                  if (type === 'many') {
+                    result[key] = many(adapter.tables[target])
+                  }
                 })
 
                 return result
               },
             )
-
-            adapter.relations[`relations_${blockTableName}`] = blockTableRelations
           } else if (process.env.NODE_ENV !== 'production' && !versions) {
             validateExistingBlockIsIdentical({
               block,
@@ -518,7 +533,8 @@ export const traverseFields = ({
           }
           rootRelationsToBuild.set(`_blocks_${block.slug}`, {
             type: 'many',
-            localized: adapter.payload.config.localization && field.localized,
+            // blocks are not localized on the parent table
+            localized: false,
             target: blockTableName,
           })
         })

@@ -27,8 +27,8 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'categories',
       type: 'relationship',
-      hasMany: true,
-      localized: true,
+      // hasMany: true,
+      // localized: true,
       relationTo: 'categories',
     },
     {
@@ -54,13 +54,14 @@ export const PostsCollection: CollectionConfig = {
             {
               name: 'category',
               type: 'relationship',
-              localized: true,
+              // localized: true,
               relationTo: 'categories',
               required: true,
             },
           ],
         },
       ],
+      localized: true,
     },
     {
       name: 'associatedMedia',

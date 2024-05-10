@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import type { DBQueryConfig } from 'drizzle-orm'
 import type { Field } from 'payload/types'
 
 import { fieldAffectsData, tabHasName } from 'payload/types'

@@ -65,13 +65,13 @@ export default buildConfigWithDefaults({
       file: imageFile,
     })
 
-    const post = await payload.create({
-      collection: postsSlug,
-      data: {
-        associatedMedia: media.id,
-        text: 'example post',
-      },
-    })
+    // const post = await payload.create({
+    //   collection: postsSlug,
+    //   data: {
+    //     associatedMedia: media.id,
+    //     text: 'example post',
+    //   },
+    // })
     // console.log(post.associatedMedia.id)
   },
 })
