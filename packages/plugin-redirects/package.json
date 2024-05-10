@@ -56,11 +56,6 @@
     "payload": "workspace:*"
   },
   "publishConfig": {
-    "./*": {
-      "import": "./dist/exports/*.js",
-      "require": "./dist/exports/*.js",
-      "types": "./dist/exports/*.d.ts"
-    },
     "exports": {
       ".": {
         "import": "./dist/index.js",
