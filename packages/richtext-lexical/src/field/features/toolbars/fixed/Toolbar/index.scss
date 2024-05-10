@@ -1,6 +1,5 @@
 @import '../../../../../scss/styles';
 
-
 html[data-theme='dark'] {
   .fixed-toolbar {
     &__dropdown-items {
@@ -9,7 +8,8 @@ html[data-theme='dark'] {
       .toolbar-popup__dropdown-item {
         color: var(--theme-elevation-900);
 
-        &:hover:not([disabled]), &.active {
+        &:hover:not([disabled]),
+        &.active {
           background-color: var(--theme-elevation-100);
         }
 
@@ -21,7 +21,8 @@ html[data-theme='dark'] {
 
     .toolbar-popup {
       &__button {
-        &.active, &:hover:not([disabled]) {
+        &.active,
+        &:hover:not([disabled]) {
           background-color: var(--theme-elevation-100);
         }
       }
@@ -43,20 +44,17 @@ html[data-theme='dark'] {
   }
 }
 
-
 .fixed-toolbar {
   @include blur-bg(var(--theme-elevation-0));
   display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  padding: 0 3.72px 0 6.25px;
+  align-items: center;
+  padding: calc(var(--base) / 4);
   vertical-align: middle;
   position: sticky;
   z-index: 2;
   top: var(--doc-controls-height);
-  margin-bottom: $baseline;
   border: $style-stroke-width-s solid var(--theme-elevation-150);
-
+  transform: translateY(1px); // aligns with top bar pixel line when stuck
 
   &__group {
     display: flex;
@@ -78,4 +76,16 @@ html[data-theme='dark'] {
     }
   }
 
+  .toolbar-popup {
+    &__dropdown,
+    &__button {
+      border-radius: 0;
+    }
+  }
+
+  + .editor-scroller {
+    .ContentEditable__root {
+      padding-top: calc(var(--base) * 1.25);
+    }
+  }
 }
