@@ -36,6 +36,7 @@
     "@payloadcms/storage-azure": "workspace:*",
     "@payloadcms/storage-gcs": "workspace:*",
     "@payloadcms/storage-s3": "workspace:*",
+    "@payloadcms/storage-uploadthing": "workspace:*",
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -49,6 +50,7 @@
     "payload": "workspace:*",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "uploadthing": "^6.10.1"
   }
 }
