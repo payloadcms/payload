@@ -26,6 +26,7 @@ export const packagePublishList = [
   'storage-azure',
   'storage-gcs',
   'storage-vercel-blob',
+  'storage-uploadthing',
 
   // Plugins
   'plugin-cloud',
