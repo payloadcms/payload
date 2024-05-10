@@ -1,5 +1,9 @@
-// Update this list with any packages to publish
-export const packageWhitelist = [
+/**
+ * Packages that should be published to NPM
+ *
+ * Note that this does not include all packages in the monorepo
+ */
+export const packagePublishList = [
   'payload',
   'translations',
   'ui',
@@ -32,5 +36,11 @@ export const packageWhitelist = [
   'plugin-search',
   'plugin-seo',
   'plugin-stripe',
-  // 'plugin-sentry',
+
+  // Unpublished
+  // 'plugin-sentry'
+  // 'storage-uploadthing',
+  // 'eslint-config-payload',
+  // 'eslint-plugin-payload',
+  // 'live-preview-vue',
 ]
