@@ -214,25 +214,6 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  payload.logger.info(`— Seeding comments...`)
-
-  await Promise.all(
-    posts.map(
-      async (post, index) =>
-        await payload.create({
-          collection: 'comments',
-          data: {
-            _status: 'published',
-            comment: `This is a comment on post ${
-              index + 1
-            }. It has been approved by an admin and is now visible to the public. You can leave your own comment on this post using the form below.`,
-            doc: post.id,
-            user: demoUserID,
-          },
-        }),
-    ),
-  )
-
   payload.logger.info(`— Seeding posts page...`)
 
   const postsPageDoc = await payload.create({

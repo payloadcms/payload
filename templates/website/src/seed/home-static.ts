@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Page } from '../payload-types'
 
 export const staticHome: Page = {

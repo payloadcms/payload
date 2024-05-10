@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Post } from '../payload-types'
 
 export const post3: Partial<Post> = {

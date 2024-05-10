@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Post } from '../payload-types'
 export const post1: Partial<Post> = {
   slug: 'post-1',
