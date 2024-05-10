@@ -106,7 +106,7 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
 }
 
 export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props?: ClientComponentProps<ClientFeatureProps>,
+  props: ClientComponentProps<ClientFeatureProps>,
 ) => FeatureProviderClient<ClientFeatureProps>
 
 /**
@@ -217,10 +217,15 @@ export type ClientFeature<ClientFeatureProps> = {
   }
 }
 
-export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
-  featureKey: string
-  order: number
-}
+export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extends undefined
+  ? {
+      featureKey: string
+      order: number
+    }
+  : {
+      featureKey: string
+      order: number
+    } & ClientFeatureProps
 
 export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   context: RequestContext
@@ -261,12 +266,8 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
 }
 
-export type ServerFeature<ServerProps, ClientFeatureProps> = {
+type BaseServerFeatureType<ServerProps, ClientFeatureProps> = {
   ClientComponent?: React.FC<ClientComponentProps<ClientFeatureProps>>
-  /**
-   * This determines what props will be available on the Client.
-   */
-  clientFeatureProps?: ClientFeatureProps
   generateComponentMap?: (args: {
     config: SanitizedConfig
     i18n: I18n
@@ -311,6 +312,17 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerProps
 }
+
+export type ServerFeature<ServerProps, ClientFeatureProps> = ClientFeatureProps extends undefined
+  ? {
+      clientFeatureProps?: never
+    } & BaseServerFeatureType<ServerProps, ClientFeatureProps>
+  : {
+      /**
+       * This determines what props will be available on the Client.
+       */
+      clientFeatureProps: ClientFeatureProps
+    } & BaseServerFeatureType<ServerProps, ClientFeatureProps>
 
 export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = ServerFeature<
   ServerProps,
