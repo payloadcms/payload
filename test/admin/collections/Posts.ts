@@ -119,7 +119,9 @@ export const Posts: CollectionConfig = {
       name: 'descriptionAsComponent',
       type: 'text',
       admin: {
-        description: FieldDescriptionComponent,
+        components: {
+          Description: FieldDescriptionComponent,
+        },
       },
     },
   ],

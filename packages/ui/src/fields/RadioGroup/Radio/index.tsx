@@ -2,6 +2,7 @@
 import type { OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import React from 'react'
 
 import type { OnChange } from '../index.js'
@@ -22,7 +23,9 @@ export const Radio: React.FC<{
   const { isSelected, onChange, option, path, uuid } = props
   const { i18n } = useTranslation()
 
-  const id = `field-${path}-${option.value}${uuid ? `-${uuid}` : ''}`
+  const editDepth = useEditDepth()
+
+  const id = `field-${path}-${option.value}${editDepth > 1 ? `-${editDepth}` : ''}${uuid ? `-${uuid}` : ''}`
 
   return (
     <label htmlFor={id}>

@@ -31,6 +31,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     errorProps,
     hasMany,
     inputRef,
+    label,
     labelProps,
     localized,
     maxLength,
@@ -127,6 +128,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
       errorProps={errorProps}
       hasMany={hasMany}
       inputRef={inputRef}
+      label={label}
       labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}

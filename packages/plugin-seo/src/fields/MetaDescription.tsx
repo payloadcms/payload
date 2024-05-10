@@ -27,7 +27,7 @@ type MetaDescriptionProps = FormFieldBase & {
 }
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { CustomLabel, hasGenerateDescriptionFn, labelProps, path, required } = props
+  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, path, required } = props
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation()
@@ -76,7 +76,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
           {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
