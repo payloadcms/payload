@@ -1421,6 +1421,19 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/storage-uploadthing:
+    dependencies:
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+      uploadthing:
+        specifier: ^6.10.1
+        version: 6.10.1(next@14.3.0-canary.7)
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/storage-vercel-blob:
     dependencies:
       '@payloadcms/plugin-cloud-storage':
@@ -1662,6 +1675,9 @@ importers:
       '@payloadcms/storage-s3':
         specifier: workspace:*
         version: link:../packages/storage-s3
+      '@payloadcms/storage-uploadthing':
+        specifier: workspace:*
+        version: link:../packages/storage-uploadthing
       '@payloadcms/storage-vercel-blob':
         specifier: workspace:*
         version: link:../packages/storage-vercel-blob
@@ -1704,6 +1720,9 @@ importers:
       typescript:
         specifier: 5.4.5
         version: 5.4.5
+      uploadthing:
+        specifier: ^6.10.1
+        version: 6.10.1(next@14.3.0-canary.7)
 
 packages:
 
@@ -3322,6 +3341,15 @@ packages:
     resolution: {integrity: sha512-c5Hkm7MmQC2n5qAsKShjQrHoqlfGslB8+qWzsGGZ+2dHMRTNG60UuzalF0h0rvBax5uzPXuGkYLGaQ+TUX3yMw==}
     dependencies:
       superjson: 2.2.1
+
+  /@effect/schema@0.66.14(effect@3.1.2)(fast-check@3.18.0):
+    resolution: {integrity: sha512-2Yc6gnXpcMmwQnbU2JUwDl0ckeOJmFZzteXn2jjVWuNi9PGv+jp2yK7jxv0pALcieuYwdR5tKkCRI7STuhEwfg==}
+    peerDependencies:
+      effect: ^3.1.2
+      fast-check: ^3.13.2
+    dependencies:
+      effect: 3.1.2
+      fast-check: 3.18.0
 
   /@emotion/babel-plugin@11.11.0:
     resolution: {integrity: sha512-m4HEDZleaaCH+XgDDsPF15Ht6wTLsgDTeR3WYj9Q/k76JtWhrJjcP4+/XlG8LGT/Rol9qUfOIztXeA84ATpqPQ==}
@@ -6470,6 +6498,23 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
+  /@uploadthing/mime-types@0.2.9:
+    resolution: {integrity: sha512-7Ap2evP+niXNSXoOck4DUZUAKYrMRRpJ85n+ZxCuRsnr3iziOgv/Rt6es5SnMVgE/aOObxddOxbrxyOhISQWHQ==}
+
+  /@uploadthing/shared@6.7.1(@uploadthing/mime-types@0.2.9):
+    resolution: {integrity: sha512-4Imk46n+rwFaobfDuDSclYcH/OcpJA048Ww0il6nqT7EoXQ7Pa9NJfGkoNkS8+K8rT71IVljdaiaLEapgRxj0Q==}
+    peerDependencies:
+      '@uploadthing/mime-types': 0.2.9
+    peerDependenciesMeta:
+      '@uploadthing/mime-types':
+        optional: true
+    dependencies:
+      '@effect/schema': 0.66.14(effect@3.1.2)(fast-check@3.18.0)
+      '@uploadthing/mime-types': 0.2.9
+      effect: 3.1.2
+      fast-check: 3.18.0
+      std-env: 3.7.0
+
   /@vercel/blob@0.22.3:
     resolution: {integrity: sha512-l0t2KhbOO/I8ZNOl9zypYf1NE0837aO4/CPQNGR/RAxtj8FpdYKjhyUADUXj2gERLQmnhun+teaVs/G7vZJ/TQ==}
     engines: {node: '>=16.14'}
@@ -7847,7 +7892,6 @@ packages:
   /consola@3.2.3:
     resolution: {integrity: sha512-I5qxpzLv+sJhTVEoLYNcTW+bThDCPsit0vLNKShZx6rLtpilNpmmeTPaeqJb9ZE9dV3DGaeby6Vuhrw38WjeyQ==}
     engines: {node: ^14.18.0 || >=16.10.0}
-    dev: true
 
   /console-table-printer@2.11.2:
     resolution: {integrity: sha512-uuUHie0sfPP542TKGzPFal0W1wo1beuKAqIZdaavcONx8OoqdnJRKjkinbRTOta4FaCa1RcIL+7mMJWX3pQGVg==}
@@ -8782,6 +8826,9 @@ packages:
   /ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
+  /effect@3.1.2:
+    resolution: {integrity: sha512-XakSWck6w6ROqKyEys0tKE9K6Gx2p8W/09u2ZTEZZrneO5Z3QEdPhXzWTyC73kD5zUvfJinZLVIas8I1xoHaTg==}
+
   /electron-to-chromium@1.4.730:
     resolution: {integrity: sha512-oJRPo82XEqtQAobHpJIR3zW5YO3sSRRkPz2an4yxi1UvqhsGm54vR/wzTFV74a3soDOJ8CKW7ajOOX5ESzddwg==}
 
@@ -9612,6 +9659,12 @@ packages:
   /fast-base64-decode@1.0.0:
     resolution: {integrity: sha512-qwaScUgUGBYeDNRnbc/KyllVU88Jk1pRHPStuF/lO7B0/RTRLj7U0lkdTAutlBblY08rwZDff6tNU9cjv6j//Q==}
     dev: false
+
+  /fast-check@3.18.0:
+    resolution: {integrity: sha512-/951xaT0kA40w0GXRsZXEwSTE7LugjZtSA/8vPgFkiPQ8wNp8tRvqWuNDHBgLxJYXtsK11e/7Q4ObkKW5BdTFQ==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      pure-rand: 6.1.0
 
   /fast-copy@3.0.2:
     resolution: {integrity: sha512-dl0O9Vhju8IrcLndv2eU4ldt1ftXMqqfgN4H1cpmGV7P6jeB9FwpN9a2c8DPGE1Ys88rNUJVYDHq73CGAGOPfQ==}
@@ -15050,7 +15103,6 @@ packages:
 
   /std-env@3.7.0:
     resolution: {integrity: sha512-JPbdCEQLj1w5GilpiHAx3qJvFndqybBysA3qUOnznweH4QbNYUsW/ea8QzSrnh0vNsezMMw5bcVool8lM0gwzg==}
-    dev: true
 
   /stop-iteration-iterator@1.0.0:
     resolution: {integrity: sha512-iCGQj+0l0HOdZ2AEeBADlsRC+vsnDsZsbdSiH1yNSjcfKM7fdpCMfqAL/dwF5BLiw/XhRft/Wax6zQbhq2BcjQ==}
@@ -15981,6 +16033,36 @@ packages:
       browserslist: 4.23.0
       escalade: 3.1.2
       picocolors: 1.0.0
+
+  /uploadthing@6.10.1(next@14.3.0-canary.7):
+    resolution: {integrity: sha512-xqgEauaDYLlQ6NEsQWF+fpsUOuniWazd8ytSK2bCxcKFGakCkXO32GkFolW4iZZgkl7ATnHwN+JXG95FPdo74w==}
+    engines: {node: '>=18.13.0'}
+    peerDependencies:
+      express: '*'
+      fastify: '*'
+      h3: '*'
+      next: '*'
+      tailwindcss: '*'
+    peerDependenciesMeta:
+      express:
+        optional: true
+      fastify:
+        optional: true
+      h3:
+        optional: true
+      next:
+        optional: true
+      tailwindcss:
+        optional: true
+    dependencies:
+      '@effect/schema': 0.66.14(effect@3.1.2)(fast-check@3.18.0)
+      '@uploadthing/mime-types': 0.2.9
+      '@uploadthing/shared': 6.7.1(@uploadthing/mime-types@0.2.9)
+      consola: 3.2.3
+      effect: 3.1.2
+      fast-check: 3.18.0
+      next: 14.3.0-canary.7(@babel/core@7.24.4)(@playwright/test@1.43.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.74.1)
+      std-env: 3.7.0
 
   /uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}

@@ -1,0 +1,58 @@
+{
+  "name": "@payloadcms/storage-uploadthing",
+  "version": "3.0.0-beta.25",
+  "description": "Payload storage adapter for uploadthing",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/storage-uploadthing"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "dependencies": {
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "uploadthing": "^6.10.1"
+  },
+  "devDependencies": {
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18.20.2"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
+}
