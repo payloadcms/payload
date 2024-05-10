@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -9,53 +10,50 @@ import RichText from 'src/app/_components/RichTextLexical'
 
 import type { Post } from '../../../../../payload-types'
 
-import { Blocks } from '../../../../_components/Blocks'
 import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
-import { PremiumContent } from '../../../../_components/PremiumContent'
 import { PostHero } from '../../../../_heros/PostHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
 
-const getCachedGetPostBySlug = async ({
-  slug,
-  draft,
-}: {
-  draft: boolean
-  slug: string
-}): Promise<Post | null> => {
-  const payload = await getPayload({ config: configPromise })
+// Could abstract this, keeping it explicit for example sake
+const getCachedGetPostBySlug = ({ slug, draft }: { draft: boolean; slug: string }) =>
+  unstable_cache<() => Promise<Post>>(
+    async () => {
+      const payload = await getPayload({ config: configPromise })
+      const result = await payload.find({
+        collection: 'posts',
+        draft,
+        limit: 1,
+        where: {
+          slug: {
+            equals: slug,
+          },
+        },
+      })
 
-  const pages = await payload.find({
-    collection: 'posts',
-    draft,
-    limit: 1,
-    where: {
-      slug: {
-        equals: slug,
-      },
+      return result.docs?.[0] || null
     },
-  })
+    [slug, String(draft)],
+    {
+      tags: [`posts_${slug}_${draft}`],
+    },
+  )
 
-  return pages.docs?.[0] || null
-}
-
+// eslint-disable-next-line no-restricted-exports
 export default async function Post({ params: { slug } }) {
   const url = '/posts/' + slug
   const { isEnabled: draft } = draftMode()
 
-  const payload = await getPayload({ config: configPromise })
-  const post = await getCachedGetPostBySlug({ slug, draft })
+  const post = await getCachedGetPostBySlug({ slug, draft })()
 
   if (!post) {
     notFound()
   }
 
-  const { content, relatedPosts } = post
-
   return (
     <React.Fragment>
       <PayloadRedirects url={url} />
       <PostHero post={post} />
-      <RichText content={content} />
+      <RichText content={post.content} />
     </React.Fragment>
   )
 }
@@ -72,7 +70,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
   const { isEnabled: draft } = draftMode()
-  const post = await getCachedGetPostBySlug({ slug, draft })
+  const post = await getCachedGetPostBySlug({ slug, draft })()
 
   return generateMeta({ doc: post })
 }

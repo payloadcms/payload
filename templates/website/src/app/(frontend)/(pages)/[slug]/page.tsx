@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -13,36 +14,38 @@ import { Hero } from '../../../_components/Hero'
 import { PayloadRedirects } from '../../../_components/PayloadRedirects'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
-const getCachedGetPageBySlug = async ({
-  slug,
-  draft,
-}: {
-  draft: boolean
-  slug: string
-}): Promise<Page | null> => {
-  const payload = await getPayload({ config: configPromise })
+// Could abstract this, keeping it explicit for example sake
+const getCachedGetPageBySlug = ({ slug, draft }: { draft: boolean; slug: string }) =>
+  unstable_cache<() => Promise<Page>>(
+    async () => {
+      const payload = await getPayload({ config: configPromise })
+      const result = await payload.find({
+        collection: 'pages',
+        draft,
+        limit: 1,
+        where: {
+          slug: {
+            equals: slug,
+          },
+        },
+      })
 
-  const pages = await payload.find({
-    collection: 'pages',
-    draft,
-    limit: 1,
-    where: {
-      slug: {
-        equals: slug,
-      },
+      return result.docs?.[0] || null
     },
-  })
+    [slug, String(draft)],
+    {
+      tags: [`pages_${slug}_${draft}`],
+    },
+  )
 
-  return pages.docs?.[0] || null
-}
-
+// eslint-disable-next-line no-restricted-exports
 export default async function Page({ params: { slug = 'home' } }) {
   const url = '/' + slug
   const { isEnabled: isDraftMode } = draftMode()
   const page = await getCachedGetPageBySlug({
     slug,
     draft: isDraftMode,
-  })
+  })()
 
   if (!page) {
     return notFound()
@@ -77,7 +80,7 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
   const page = await getCachedGetPageBySlug({
     slug,
     draft: isDraftMode,
-  })
+  })()
 
   return generateMeta({ doc: page })
 }
