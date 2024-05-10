@@ -21,6 +21,8 @@ export const baseAdminFields = joi.object().keys({
     .alternatives()
     .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function()),
   disableBulkEdit: joi.boolean().default(false),
+  disableListColumn: joi.boolean().default(false),
+  disableListFilter: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   initCollapsed: joi.boolean().default(false),

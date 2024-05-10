@@ -755,6 +755,10 @@ export const mapFields = (args: {
           custom: field?.admin?.custom,
           disableBulkEdit:
             'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
+          disableListColumn:
+            'admin' in field && 'disableListColumn' in field.admin && field.admin.disableListColumn,
+          disableListFilter:
+            'admin' in field && 'disableListFilter' in field.admin && field.admin.disableListFilter,
           fieldComponentProps,
           fieldIsPresentational,
           isFieldAffectingData,

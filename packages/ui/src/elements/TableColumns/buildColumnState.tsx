@@ -134,6 +134,10 @@ export const buildColumnState = (args: Args): Column[] => {
         Label,
         accessor: name,
         active,
+        admin: {
+          disableListColumn: field.disableListColumn,
+          disableListFilter: field.disableListFilter,
+        },
         cellProps: {
           ...field.cellComponentProps,
           ...cellProps?.[index],

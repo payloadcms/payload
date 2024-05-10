@@ -698,6 +698,8 @@ export interface TextField {
   localizedHasMany?: string[] | null;
   withMinRows?: string[] | null;
   withMaxRows?: string[] | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1411,6 +1413,6 @@ export interface LexicalBlocksRadioButtonsBlock {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

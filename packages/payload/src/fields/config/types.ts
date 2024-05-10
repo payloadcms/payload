@@ -132,6 +132,16 @@ type Admin = {
   custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view column selector.
+   * @type boolean
+   */
+  disableListColumn?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view filter options.
+   * @type boolean
+   */
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -443,6 +453,16 @@ export type UIField = {
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     disableBulkEdit?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view column selector.
+     * @type boolean
+     */
+    disableListColumn?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view filter options.
+     * @type boolean
+     */
+    disableListFilter?: boolean
     position?: string
     width?: string
   }
