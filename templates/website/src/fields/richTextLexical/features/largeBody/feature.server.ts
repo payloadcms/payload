@@ -10,7 +10,7 @@ export const LargeBodyFeature: FeatureProviderProviderServer<undefined, undefine
     feature: () => {
       return {
         ClientComponent: LargeBodyFeatureClientComponent,
-        clientFeatureProps: null,
+        clientFeatureProps: props,
         nodes: [
           createNode({
             converters: {

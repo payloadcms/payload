@@ -2,12 +2,12 @@
 
 import type { FeatureProviderProviderClient } from '@payloadcms/richtext-lexical'
 
-import { createClientComponent } from '@payloadcms/richtext-lexical'
+import { createClientComponent } from '@payloadcms/richtext-lexical/components'
 import { $isNodeSelection } from 'lexical'
 
-import Icon from './Icon'
+import { Icon } from './Icon'
 import { $isLargeBodyNode, INSERT_LARGE_BODY_COMMAND, LargeBodyNode } from './nodes/LargeBodyNode'
-import { LargeBodyPlugin } from './plugin'
+import { LargeBodyPlugin } from './plugin/index'
 
 const LargeBodyFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
