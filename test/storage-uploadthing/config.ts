@@ -8,11 +8,12 @@ import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { mediaSlug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// Load config to work with emulated services
+// Load test env creds
 dotenv.config({
   path: path.resolve(dirname, './.env'),
 })
@@ -29,23 +30,9 @@ export default buildConfigWithDefaults({
     })
   },
   plugins: [
-    // uploadthingStorage({
-    //   collections: {
-    //     [mediaSlug]: true,
-    //     [mediaWithPrefixSlug]: {
-    //       prefix,
-    //     },
-    //   },
-    //   options: {
-    //     apiKey: process.env.UPLOADTHING_SECRET,
-    //   },
-    // }),
     uploadthingStorage({
       collections: {
         [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
       },
       options: {
         apiKey: process.env.UPLOADTHING_SECRET,

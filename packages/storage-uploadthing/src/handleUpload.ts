@@ -2,7 +2,6 @@ import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
 import type { UTApi } from 'uploadthing/server'
 
 import { APIError } from 'payload/errors'
-import { UploadThingError } from 'uploadthing/server'
 import { UTFile } from 'uploadthing/server'
 
 import type { ACL } from './index.js'
@@ -16,7 +15,6 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
   return async ({ data, file }) => {
     try {
       const { buffer, filename, mimeType } = file
-      // const fileKey = path.posix.join(data.prefix || prefix, filename)
 
       const blob = new Blob([buffer], { type: mimeType })
       const res = await utApi.uploadFiles(new UTFile([blob], filename), { acl })
@@ -25,18 +23,7 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
         throw new APIError(`Error uploading file: ${res.error.code} - ${res.error.message}`)
       }
 
-      /**
-       * {
-          key: "26afa85a-85fc-458c-981f-f6d2fe7b2d67-1nq2cb.png",
-          url: "https://utfs.io/f/26afa85a-85fc-458c-981f-f6d2fe7b2d67-1nq2cb.png",
-          name: "image.png",
-          size: 89728,
-          type: "image/png",
-          customId: null,
-        }
-       */
-
-      // Find matching data.sizes entry and set filename
+      // Find matching data.sizes entry
       const foundSize = Object.keys(data.sizes || {}).find(
         (key) => data.sizes?.[key]?.filename === filename,
       )
@@ -50,13 +37,21 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
 
       return data
     } catch (error: unknown) {
-      // TODO: Surface appropriate errors
-      if (error instanceof UploadThingError) {
-        throw new APIError(`Error uploading file: ${error.code}`)
+      if (error instanceof Error) {
+        // Interrogate uploadthing error which returns FiberFailure
+        if ('toJSON' in error && typeof error.toJSON === 'function') {
+          const json = error.toJSON() as {
+            cause?: { defect?: { _id?: string; data?: { error?: string }; error?: string } }
+          }
+          if (json.cause?.defect?.error && json.cause.defect.data?.error) {
+            throw new APIError(
+              `Error uploading file with uploadthing: ${json.cause.defect.error} - ${json.cause.defect.data.error}`,
+            )
+          }
+        } else {
+          throw new APIError(`Error uploading file with uploadthing: ${error.message}`)
+        }
       }
-      throw new APIError(
-        `Error uploading file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
     }
   }
 }

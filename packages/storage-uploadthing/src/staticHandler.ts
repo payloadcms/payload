@@ -4,7 +4,7 @@ import type { UTApi } from 'uploadthing/server'
 
 import { getKeyFromFilename } from './utilities.js'
 
-interface Args {
+type Args = {
   utApi: UTApi
 }
 
@@ -47,6 +47,9 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
       }
 
       const key = getKeyFromFilename(retrievedDoc, filename)
+      if (!key) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
 
       const { url: signedURL } = await utApi.getSignedURL(key)
 
