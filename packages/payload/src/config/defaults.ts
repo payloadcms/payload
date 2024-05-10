@@ -28,6 +28,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     maxComplexity: 1000,
   },
   hooks: {},
+  i18n: {},
   localization: false,
   maxDepth: 10,
   routes: {

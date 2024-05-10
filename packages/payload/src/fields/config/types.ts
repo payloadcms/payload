@@ -11,9 +11,11 @@ import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichT
 import type {
   ConditionalDateProps,
   Description,
+  DescriptionComponent,
   ErrorProps,
   LabelProps,
   RowLabel,
+  RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
@@ -117,6 +119,7 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
+    Description?: DescriptionComponent
     Field?: CustomComponent
     Filter?: React.ComponentType<any>
   }
@@ -361,13 +364,25 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 }
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
-  admin?: Admin & {
-    initCollapsed?: boolean
-  }
   fields: Field[]
-  label: RowLabel
   type: 'collapsible'
-}
+} & (
+    | {
+        admin: Admin & {
+          components: {
+            RowLabel: RowLabelComponent
+          } & Admin['components']
+          initCollapsed?: boolean
+        }
+        label?: Required<FieldBase['label']>
+      }
+    | {
+        admin?: Admin & {
+          initCollapsed?: boolean
+        }
+        label: Required<FieldBase['label']>
+      }
+  )
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -446,6 +461,11 @@ export type UploadField = FieldBase & {
     }
   }
   filterOptions?: FilterOptions
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
   relationTo: string
   type: 'upload'
@@ -506,6 +526,11 @@ export type SelectField = FieldBase & {
 type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
   hasMany?: boolean
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
   type: 'relationship'
 } & (
@@ -588,25 +613,25 @@ export type RichTextField<
   editor?:
     | RichTextAdapter<Value, AdapterProps, AdapterProps>
     | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
-
-export type RichTextFieldRequiredEditor<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
-> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor:
-    | RichTextAdapter<Value, AdapterProps, AdapterProps>
-    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
-}
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
-      RowLabel?: RowLabel
+      RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   /**
    * Customize the SQL table name
@@ -678,6 +703,10 @@ export type Block = {
 export type BlockField = FieldBase & {
   admin?: Admin & {
     initCollapsed?: boolean
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown
@@ -713,10 +742,6 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
-
-export type FieldWithRichTextRequiredEditor =
-  | Exclude<Field, RichTextField>
-  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField

@@ -7,11 +7,11 @@ html[data-theme='light'] {
 }
 
 .link-editor {
-  z-index: 10;
+  z-index: 1;
   display: flex;
   align-items: center;
   background: var(--color-base-0);
-  padding: 0px 3.72px 0px 6.25px;
+  padding: 0 3.72px 0 6.25px;
   vertical-align: middle;
   position: absolute;
   top: 0;

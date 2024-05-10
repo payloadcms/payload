@@ -10,7 +10,6 @@ import type { Context } from '../types.js'
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
   args: {
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
@@ -20,7 +19,7 @@ export type Resolver<T extends TypeWithID = any> = (
   },
 ) => Promise<TypeWithVersion<T>>
 
-export default function findVersionByIDResolver(collection: Collection): Resolver {
+export function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
@@ -29,13 +28,13 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+
     context.req = req
 
     const options = {
       id: args.id,
       collection,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
     }
 

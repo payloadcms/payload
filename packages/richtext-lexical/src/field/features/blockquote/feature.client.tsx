@@ -40,7 +40,7 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
+const BlockquoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
     feature: () => ({
@@ -80,4 +80,4 @@ const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
   }
 }
 
-export const BlockQuoteFeatureClientComponent = createClientComponent(BlockQuoteFeatureClient)
+export const BlockquoteFeatureClientComponent = createClientComponent(BlockquoteFeatureClient)

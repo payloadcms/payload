@@ -9,7 +9,6 @@ import 'react-image-crop/dist/ReactCrop.css'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
 import { Plus } from '../../icons/Plus/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
@@ -27,40 +26,60 @@ const Input: React.FC<{ name: string; onChange: (value: string) => void; value: 
   </div>
 )
 
+type FocalPosition = {
+  x: number
+  y: number
+}
+
 export type EditUploadProps = {
   doc?: Data
   fileName: string
   fileSrc: string
   imageCacheTag?: string
+  initialCrop?: CropType
+  initialFocalPoint?: FocalPosition
+  onSave?: ({ crop, pointPosition }: { crop: CropType; pointPosition: FocalPosition }) => void
   showCrop?: boolean
   showFocalPoint?: boolean
+}
+
+const defaultCrop: CropType = {
+  height: 100,
+  unit: '%',
+  width: 100,
+  x: 0,
+  y: 0,
+}
+
+const defaultPointPosition: FocalPosition = {
+  x: 50,
+  y: 50,
 }
 
 export const EditUpload: React.FC<EditUploadProps> = ({
   fileName,
   fileSrc,
   imageCacheTag,
+  initialCrop,
+  initialFocalPoint,
+  onSave,
   showCrop,
   showFocalPoint,
 }) => {
-  const { Modal, useModal } = facelessUIImport
+  const { useModal } = facelessUIImport
 
   const { closeModal } = useModal()
   const { t } = useTranslation()
-  const { dispatchFormQueryParams, formQueryParams } = useFormQueryParams()
-  const { uploadEdits } = formQueryParams || {}
-  const [crop, setCrop] = useState<CropType>({
-    height: uploadEdits?.crop?.height || 100,
-    unit: '%',
-    width: uploadEdits?.crop?.width || 100,
-    x: uploadEdits?.crop?.x || 0,
-    y: uploadEdits?.crop?.y || 0,
-  })
 
-  const [pointPosition, setPointPosition] = useState<{ x: number; y: number }>({
-    x: uploadEdits?.focalPoint?.x || 50,
-    y: uploadEdits?.focalPoint?.y || 50,
-  })
+  const [crop, setCrop] = useState<CropType>(() => ({
+    ...defaultCrop,
+    ...initialCrop,
+  }))
+
+  const [pointPosition, setPointPosition] = useState<FocalPosition>(() => ({
+    ...defaultPointPosition,
+    ...initialFocalPoint,
+  }))
   const [checkBounds, setCheckBounds] = useState<boolean>(false)
   const [originalHeight, setOriginalHeight] = useState<number>(0)
   const [originalWidth, setOriginalWidth] = useState<number>(0)
@@ -92,18 +111,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   }
 
   const saveEdits = () => {
-    dispatchFormQueryParams({
-      type: 'SET',
-      params: {
-        uploadEdits:
-          crop || pointPosition
-            ? {
-                crop: crop || null,
-                focalPoint: pointPosition ? pointPosition : null,
-              }
-            : null,
-      },
-    })
+    if (typeof onSave === 'function')
+      onSave({
+        crop,
+        pointPosition,
+      })
     closeModal(editDrawerSlug)
   }
 
@@ -145,7 +157,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
             aria-label={t('general:applyChanges')}
             buttonStyle="primary"
             className={`${baseClass}__save`}
-            onClick={() => saveEdits()}
+            onClick={saveEdits}
           >
             {t('general:applyChanges')}
           </Button>

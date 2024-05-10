@@ -12,6 +12,7 @@ export const uploadPopulationPromiseHOC = (
     context,
     currentDepth,
     depth,
+    draft,
     editorPopulationPromises,
     field,
     fieldPromises,
@@ -30,13 +31,17 @@ export const uploadPopulationPromiseHOC = (
         // @ts-expect-error
         const id = node?.value?.id || node?.value // for backwards-compatibility
 
+        const populateDepth =
+          props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
+
         populationPromises.push(
           populate({
             id,
             collection,
             currentDepth,
             data: node,
-            depth,
+            depth: populateDepth,
+            draft,
             field,
             key: 'value',
             overrideAccess,
@@ -54,6 +59,7 @@ export const uploadPopulationPromiseHOC = (
           currentDepth,
           data: node.fields || {},
           depth,
+          draft,
           editorPopulationPromises,
           fieldPromises,
           fields: props?.collections?.[node?.relationTo]?.fields,

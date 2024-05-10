@@ -141,6 +141,7 @@ export const findByIDOperation = async <T extends TypeWithID>(
       currentDepth,
       depth,
       doc: result,
+      draft: draftEnabled,
       fallbackLocale,
       global: null,
       locale,

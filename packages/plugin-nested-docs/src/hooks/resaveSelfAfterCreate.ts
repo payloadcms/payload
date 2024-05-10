@@ -1,12 +1,12 @@
 import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
-import type { PluginConfig } from '../types.js'
+import type { NestedDocsPluginConfig } from '../types.js'
 
 // This hook automatically re-saves a document after it is created
 // so that we can build its breadcrumbs with the newly created document's ID.
 
 export const resaveSelfAfterCreate =
-  (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
+  (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, operation, req }) => {
     const { locale, payload } = req
     const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
