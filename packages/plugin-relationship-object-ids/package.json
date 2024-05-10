@@ -1,0 +1,56 @@
+{
+  "name": "@payloadcms/plugin-relationship-object-ids",
+  "version": "3.0.0-beta.18",
+  "homepage:": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-relationship-object-ids"
+  },
+  "description": "A Payload plugin to store all relationship IDs as ObjectIDs",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "author": "dev@payloadcms.com",
+  "license": "MIT",
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "mongoose": "6.12.3"
+  },
+  "files": [
+    "dist",
+    "*.js",
+    "*.d.ts",
+    "!.prettierrc.js"
+  ],
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  }
+}

@@ -1075,6 +1075,19 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/plugin-relationship-object-ids:
+    dependencies:
+      mongoose:
+        specifier: 6.12.3
+        version: 6.12.3
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/plugin-search:
     dependencies:
       '@payloadcms/ui':
@@ -1619,6 +1632,9 @@ importers:
       '@payloadcms/plugin-redirects':
         specifier: workspace:*
         version: link:../packages/plugin-redirects
+      '@payloadcms/plugin-relationship-object-ids':
+        specifier: workspace:*
+        version: link:../packages/plugin-relationship-object-ids
       '@payloadcms/plugin-search':
         specifier: workspace:*
         version: link:../packages/plugin-search
