@@ -1,15 +1,12 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
   EditViewProps,
-  EntityDescriptionComponent,
-  EntityDescriptionFunction,
   SanitizedConfig,
   SanitizedGlobalConfig,
   WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
-import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
 import type { GlobalComponentMap } from './types.js'
@@ -17,14 +14,7 @@ import type { GlobalComponentMap } from './types.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
-export const mapGlobals = ({
-  DefaultEditView,
-  WithServerSideProps,
-  config,
-  globals,
-  i18n,
-  readOnly: readOnlyOverride,
-}: {
+export const mapGlobals = (args: {
   DefaultEditView: React.FC<EditViewProps>
   WithServerSideProps: WithServerSidePropsType
   config: SanitizedConfig
@@ -33,8 +23,18 @@ export const mapGlobals = ({
   readOnly?: boolean
 }): {
   [key: SanitizedGlobalConfig['slug']]: GlobalComponentMap
-} =>
-  globals.reduce((acc, globalConfig) => {
+} => {
+  const {
+    DefaultEditView,
+    WithServerSideProps,
+    config,
+    globals,
+    i18n,
+    i18n: { t },
+    readOnly: readOnlyOverride,
+  } = args
+
+  return globals.reduce((acc, globalConfig) => {
     const { slug, fields } = globalConfig
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
@@ -76,26 +76,24 @@ export const mapGlobals = ({
 
     const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
 
-    const descriptionProps: ViewDescriptionProps = {
-      description:
-        (globalConfig.admin &&
-          'description' in globalConfig.admin &&
-          (((typeof globalConfig.admin?.description === 'string' ||
-            typeof globalConfig.admin?.description === 'object') &&
-            globalConfig.admin.description) ||
-            (typeof globalConfig.admin?.description === 'function' &&
-              isPlainFunction<EntityDescriptionFunction>(globalConfig.admin?.description) &&
-              globalConfig.admin?.description()))) ||
-        undefined,
+    let description = undefined
+    if (globalConfig.admin && 'description' in globalConfig.admin) {
+      if (
+        typeof globalConfig.admin?.description === 'string' ||
+        typeof globalConfig.admin?.description === 'object'
+      ) {
+        description = globalConfig.admin.description
+      } else if (typeof globalConfig.admin?.description === 'function') {
+        description = globalConfig.admin?.description({ t })
+      }
     }
 
+    const descriptionProps: ViewDescriptionProps = {
+      description,
+    }
     const DescriptionComponent =
-      (globalConfig.admin &&
-        'description' in globalConfig.admin &&
-        ((isReactComponent<EntityDescriptionComponent>(globalConfig.admin.description) &&
-          globalConfig.admin.description) ||
-          (globalConfig.admin.description && ViewDescription))) ||
-      undefined
+      globalConfig.admin?.components?.elements?.Description ||
+      (description ? ViewDescription : undefined)
 
     const Description =
       DescriptionComponent !== undefined ? (
@@ -128,3 +126,4 @@ export const mapGlobals = ({
       [slug]: componentMap,
     }
   }, {})
+}

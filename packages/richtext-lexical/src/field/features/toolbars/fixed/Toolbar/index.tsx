@@ -7,6 +7,7 @@ import * as React from 'react'
 
 import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
+import type { PluginComponentWithAnchor } from '../../../types.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
@@ -184,11 +185,7 @@ const checkParentEditor = (editorFocus: EditorFocusContextType): boolean => {
   return false
 }
 
-export function FixedToolbarPlugin({
-  anchorElem = document.body,
-}: {
-  anchorElem?: HTMLElement
-}): React.ReactElement | null {
+export const FixedToolbarPlugin: PluginComponentWithAnchor<undefined> = ({ anchorElem }) => {
   const [currentEditor] = useLexicalComposerContext()
   const { editorConfig: currentEditorConfig, uuid } = useEditorConfigContext()
 

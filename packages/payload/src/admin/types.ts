@@ -22,7 +22,7 @@ export type {
   FieldDescriptionProps,
 } from './forms/FieldDescription.js'
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
-export type { LabelProps } from './forms/Label.js'
+export type { LabelProps, SanitizedLabelProps } from './forms/Label.js'
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
 export type {

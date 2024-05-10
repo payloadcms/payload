@@ -1,13 +1,19 @@
 import type React from 'react'
 
-import { isValidElement } from 'react'
-
 import { isPlainObject } from './isPlainObject.js'
 
-export function isReactServerComponent<T extends any>(
+export function isReactServerComponentOrFunction<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  return typeof component === 'function' && isValidElement(component)
+  const isClassComponent =
+    typeof component === 'function' &&
+    component.prototype &&
+    typeof component.prototype.render === 'function'
+
+  const isFunctionalComponent =
+    typeof component === 'function' && (!component.prototype || !component.prototype.render)
+
+  return isClassComponent || isFunctionalComponent
 }
 
 export function isReactClientComponent<T extends any>(
@@ -17,12 +23,8 @@ export function isReactClientComponent<T extends any>(
   return typeof component === 'object' && !isPlainObject(component)
 }
 
-export function isReactComponent<T extends any>(
+export function isReactComponentOrFunction<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  return isReactServerComponent(component) || isReactClientComponent(component)
-}
-
-export function isPlainFunction<T extends Function>(fn: any): fn is T {
-  return typeof fn === 'function' && !isReactComponent(fn)
+  return isReactServerComponentOrFunction(component) || isReactClientComponent(component)
 }

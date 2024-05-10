@@ -14,25 +14,24 @@ type GetRequestLanguageArgs = {
 export const getRequestLanguage = ({
   config,
   cookies,
-  defaultLanguage = 'en',
   headers,
 }: GetRequestLanguageArgs): AcceptedLanguages => {
+  const supportedLanguageKeys = <AcceptedLanguages[]>Object.keys(config.i18n.supportedLanguages)
   const langCookie = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
-  const languageFromCookie = typeof langCookie === 'string' ? langCookie : langCookie?.value
+  const languageFromCookie: AcceptedLanguages = (
+    typeof langCookie === 'string' ? langCookie : langCookie?.value
+  ) as AcceptedLanguages
   const languageFromHeader = headers.get('Accept-Language')
     ? extractHeaderLanguage(headers.get('Accept-Language'))
     : undefined
-  const fallbackLang = config?.i18n?.fallbackLanguage || defaultLanguage
-
-  const supportedLanguageKeys = Object.keys(config?.i18n?.supportedLanguages || {})
 
   if (languageFromCookie && supportedLanguageKeys.includes(languageFromCookie)) {
-    return languageFromCookie as AcceptedLanguages
+    return languageFromCookie
   }
 
   if (languageFromHeader && supportedLanguageKeys.includes(languageFromHeader)) {
     return languageFromHeader
   }
 
-  return supportedLanguageKeys.includes(fallbackLang) ? (fallbackLang as AcceptedLanguages) : 'en'
+  return config.i18n.fallbackLanguage
 }
