@@ -20,7 +20,7 @@ If your front-end application is built with [React](#react), you can use the `Re
 
 ## React
 
-If your front-end application is built with [React](https://react.dev) or [Next.js](https://nextjs.org), you can use the `RefreshRouteOnSave` component that Payload provides.
+If your front-end application is built with server-side [React](https://react.dev) like [Next.js App Router](https://nextjs.org/docs/app), you can use the `RefreshRouteOnSave` component that Payload provides.
 
 First, install the `@payloadcms/live-preview-react` package:
 
@@ -28,7 +28,7 @@ First, install the `@payloadcms/live-preview-react` package:
 npm install @payloadcms/live-preview-react
 ```
 
-Then, render `RefreshRouteOnSave` anywhere in your `page.tsx`. Here's an example:
+Then, render the `RefreshRouteOnSave` component anywhere in your `page.tsx`. Here's an example:
 
 `page.tsx`:
 
@@ -64,7 +64,13 @@ import React from 'react'
 
 export const RefreshRouteOnSave: React.FC = () => {
   const router = useRouter()
-  return <PayloadLivePreview refresh={router.refresh} serverURL={process.env.PAYLOAD_SERVER_URL} />
+
+  return (
+    <PayloadLivePreview
+      refresh={() => router.refresh()}
+      serverURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
+    />
+  )
 }
 ```
 
@@ -153,13 +159,15 @@ export const RefreshRouteOnSave: React.FC<{
 
 ## Example
 
-{/* TODO: add example once beta has been release and an example can be created */}
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload). There you will find a fully working example of how to implement Live Preview in your Next.js App Router application.
 
 ## Troubleshooting
 
 ### Updates do not appear as fast as client-side Live Preview
 
-If you are noticing that updates feel less snappy than client-side Live Preview (i.e. the `useLivePreview` hook), this is because of how the two differ in how they work—instead of emitting events against form state as you type, server-side Live Preview refreshes the route after a new document is saved. You can use autosave to mimic this effect. Try decreasing the value of `versions.autoSave.interval` to make the experience feel more responsive:
+If you are noticing that updates feel less snappy than client-side Live Preview (i.e. the `useLivePreview` hook), this is because of how the two differ in how they work—instead of emitting events against _form state_, server-side Live Preview refreshes the route after a new document is _saved_.
+
+Use [Autosave](../versions/autosave) to mimic this effect server-side. Try decreasing the value of `versions.autoSave.interval` to make the experience feel more responsive:
 
 ```ts
 // collection.ts
