@@ -266,8 +266,12 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
 }
 
-type BaseServerFeatureType<ServerProps, ClientFeatureProps> = {
+export type ServerFeature<ServerProps, ClientFeatureProps> = {
   ClientComponent?: React.FC<ClientComponentProps<ClientFeatureProps>>
+  /**
+   * This determines what props will be available on the Client.
+   */
+  clientFeatureProps?: ClientFeatureProps
   generateComponentMap?: (args: {
     config: SanitizedConfig
     i18n: I18n
@@ -312,17 +316,6 @@ type BaseServerFeatureType<ServerProps, ClientFeatureProps> = {
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerProps
 }
-
-export type ServerFeature<ServerProps, ClientFeatureProps> = ClientFeatureProps extends undefined
-  ? {
-      clientFeatureProps?: never
-    } & BaseServerFeatureType<ServerProps, ClientFeatureProps>
-  : {
-      /**
-       * This determines what props will be available on the Client.
-       */
-      clientFeatureProps: ClientFeatureProps
-    } & BaseServerFeatureType<ServerProps, ClientFeatureProps>
 
 export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = ServerFeature<
   ServerProps,
