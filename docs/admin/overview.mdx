@@ -8,7 +8,7 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, fully functional Admin Panel to manage your users and data. The Payload Admin Panel is highly performant, even with 100+ fields, and is written fully in TypeScript. It is built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app) and fully supports [React Server Components](https://react.dev/reference/rsc/server-components) which enables the use of the [Local API](/docs/local-api/overview) on the front-end.
 
-You can endlessly customize and extend the Admin UI by swapping out your own [Custom Components](./components) for everything from field labels to entire views. You can also modify built-in views, build your own fields, [swap out Payload branding for your own](https://payloadcms.com/blog/white-label-admin-ui), and so much more.
+You can endlessly customize and extend the Admin UI by swapping your own in [Custom Components](./components) for everything from field labels to entire views. You can also modify built-in views, build your own fields, [swap out Payload branding for your own](https://payloadcms.com/blog/white-label-admin-ui), and so much more.
 
 <Banner type="success">
   The Admin Panel is meant to be simple enough to give you a starting point but not bring too much
@@ -38,7 +38,7 @@ All high-level options for the Admin Panel are defined in your Payload config un
 | `autoLogin`       | Used to automate admin log-in for dev and demonstration convenience. [More](/docs/authentication/config).                                                                                                                                                                   |
 | `livePreview`     | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                                                                                                    |
 | `components`      | Component overrides that affect the entirety of the Admin Panel. [More](/docs/admin/components)                                                                                                                                                                             |
-| `routes`          | Replace built-in Admin Panel routes with your own custom routes. I.e. `{ logout: '/custom-logout', inactivity: 'custom-inactivity' }`                                                                                                                                       |
+| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More](#custom-admin-panel-routes)                                                                                                                                                                         |
 
 ### The Admin User Collection
 
@@ -85,7 +85,7 @@ It is also possible to allow _multiple admin user types_ into the Admin Panel wi
 
 ### I18n
 
-The Payload Admin Panel is translated in over 30 languages and counting. The language is automatically detected based on the user's browser and all text displays in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily change their language by adjusting their user preferences through their account page. See [I18n](../configuration/i18n) for more information.
+The Payload Admin Panel is translated in over 30 languages and counting. Languages are automatically detected based on the user's browser and all text displays in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
 
 <Banner>
   <strong>Note:</strong>
