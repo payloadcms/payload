@@ -15,8 +15,10 @@ import { PayloadRedirects } from '../../../_components/PayloadRedirects'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
 // Could abstract this, keeping it explicit for example sake
-const getCachedGetPageBySlug = ({ slug, draft }: { draft: boolean; slug: string }) =>
-  unstable_cache<() => Promise<Page>>(
+const getCachedGetPageBySlug = ({ slug }: { slug: string }) => {
+  const { isEnabled: draft } = draftMode()
+
+  return unstable_cache<() => Promise<Page>>(
     async () => {
       const payload = await getPayload({ config: configPromise })
       const result = await payload.find({
@@ -32,19 +34,18 @@ const getCachedGetPageBySlug = ({ slug, draft }: { draft: boolean; slug: string 
 
       return result.docs?.[0] || null
     },
-    [slug, String(draft)],
+    [`pages_${slug}_${draft}`],
     {
-      tags: [`pages_${slug}_${draft}`],
+      tags: [`pages_${slug}`],
     },
   )
+}
 
 // eslint-disable-next-line no-restricted-exports
-export default async function Page({ params: { slug = 'home' } }) {
+export default async function Page({ params: { slug = '' } }) {
   const url = '/' + slug
-  const { isEnabled: isDraftMode } = draftMode()
   const page = await getCachedGetPageBySlug({
     slug,
-    draft: isDraftMode,
   })()
 
   if (!page) {
@@ -76,10 +77,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
-  const { isEnabled: isDraftMode } = draftMode()
   const page = await getCachedGetPageBySlug({
     slug,
-    draft: isDraftMode,
   })()
 
   return generateMeta({ doc: page })

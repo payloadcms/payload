@@ -15,8 +15,10 @@ import { PostHero } from '../../../../_heros/PostHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
 
 // Could abstract this, keeping it explicit for example sake
-const getCachedGetPostBySlug = ({ slug, draft }: { draft: boolean; slug: string }) =>
-  unstable_cache<() => Promise<Post>>(
+const getCachedGetPostBySlug = ({ slug }: { slug: string }) => {
+  const { isEnabled: draft } = draftMode()
+
+  return unstable_cache<() => Promise<Post>>(
     async () => {
       const payload = await getPayload({ config: configPromise })
       const result = await payload.find({
@@ -32,18 +34,17 @@ const getCachedGetPostBySlug = ({ slug, draft }: { draft: boolean; slug: string 
 
       return result.docs?.[0] || null
     },
-    [slug, String(draft)],
+    [`posts_${slug}_${draft}`],
     {
-      tags: [`posts_${slug}_${draft}`],
+      tags: [`pages_${slug}`],
     },
   )
+}
 
 // eslint-disable-next-line no-restricted-exports
-export default async function Post({ params: { slug } }) {
+export default async function Post({ params: { slug = '' } }) {
   const url = '/posts/' + slug
-  const { isEnabled: draft } = draftMode()
-
-  const post = await getCachedGetPostBySlug({ slug, draft })()
+  const post = await getCachedGetPostBySlug({ slug })()
 
   if (!post) {
     notFound()
@@ -69,8 +70,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
-  const { isEnabled: draft } = draftMode()
-  const post = await getCachedGetPostBySlug({ slug, draft })()
+  const post = await getCachedGetPostBySlug({ slug })()
 
   return generateMeta({ doc: post })
 }
