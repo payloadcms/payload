@@ -21,7 +21,6 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   if (typeof collection === 'string' && typeof slug === 'string') {
-    console.log('revalidating tag', `${collection}_${slug}`)
     revalidateTag(`${collection}_${slug}`)
     return NextResponse.json({ now: Date.now(), revalidated: true })
   }
