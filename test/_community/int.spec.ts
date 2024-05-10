@@ -49,6 +49,22 @@ describe('_Community Tests', () => {
   // You can run tests against the local API or the REST API
   // use the tests below as a guide
   // --__--__--__--__--__--__--__--__--__
+  it('test', async () => {
+    const arrayDoc = await payload.create({
+      collection: 'array-fields',
+      depth: 0,
+      overrideAccess: true,
+      data: {
+        localized: [
+          {
+            text: 'first row',
+          },
+        ],
+        title: 'array doc 1',
+      },
+    })
+    expect(arrayDoc).toBeDefined()
+  })
 
   it('local API example', async () => {
     const category = await payload.create({

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { ArrayFields } from './collections/Array.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
@@ -22,6 +23,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    ArrayFields,
     PostsCollection,
     MediaCollection,
   ],
