@@ -43,15 +43,9 @@ export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload 
 
       if (foundSize) {
         data.sizes[foundSize]._key = res.data?.key
-        if (acl === 'public-read') {
-          data.sizes[foundSize].url = res.data?.url
-        }
       } else {
         data._key = res.data?.key
         data.filename = res.data?.name
-        if (acl === 'public-read') {
-          data.url = res.data?.url
-        }
       }
 
       return data

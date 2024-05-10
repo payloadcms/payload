@@ -1,31 +1,53 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { TypeWithID } from 'payload/types'
+import type { Where } from 'payload/types'
 import type { UTApi } from 'uploadthing/server'
+
+import { getKeyFromFilename } from './utilities.js'
 
 interface Args {
   utApi: UTApi
 }
 
-const getKeyFromFilename = (doc: TypeWithID, filename: string) => {
-  if ('filename' in doc && doc.filename === filename && '_key' in doc) {
-    return doc._key
-  }
-  if ('sizes' in doc) {
-    const sizes = doc.sizes
-    if (typeof sizes === 'object' && sizes !== null) {
-      for (const size of Object.values(sizes)) {
-        if (size?.filename === filename && '_key' in size) {
-          return size._key
-        }
-      }
-    }
-  }
-}
-
 export const getHandler = ({ utApi }: Args): StaticHandler => {
-  return async (req, { doc, params: { filename } }) => {
+  return async (req, { doc, params: { collection, filename } }) => {
     try {
-      const key = getKeyFromFilename(doc, filename)
+      const collectionConfig = req.payload.collections[collection]?.config
+      let retrievedDoc = doc
+
+      if (!retrievedDoc) {
+        const or: Where[] = [
+          {
+            filename: {
+              equals: filename,
+            },
+          },
+        ]
+
+        if (collectionConfig.upload.imageSizes) {
+          collectionConfig.upload.imageSizes.forEach(({ name }) => {
+            or.push({
+              [`sizes.${name}.filename`]: {
+                equals: filename,
+              },
+            })
+          })
+        }
+
+        const result = await req.payload.db.findOne({
+          collection,
+          req,
+          where: { or },
+        })
+
+        if (result) retrievedDoc = result
+      }
+
+      if (!retrievedDoc) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
+      const key = getKeyFromFilename(retrievedDoc, filename)
+
       const { url: signedURL } = await utApi.getSignedURL(key)
 
       if (!signedURL) {

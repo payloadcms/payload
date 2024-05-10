@@ -17,7 +17,7 @@ export const getAfterReadHook =
     const prefix = data?.prefix
     let url = value
 
-    if (disablePayloadAccessControl && filename && adapter.generateURL) {
+    if (disablePayloadAccessControl && filename) {
       url = await adapter.generateURL({
         collection,
         data,

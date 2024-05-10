@@ -2,7 +2,6 @@ import type {
   Adapter,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GenerateURL,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin } from 'payload/config'
@@ -12,6 +11,7 @@ import type { UTApiOptions } from 'uploadthing/types'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { UTApi } from 'uploadthing/server'
 
+import { generateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
@@ -113,13 +113,6 @@ function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig:
     },
   ]
 
-  const generateURL: GenerateURL = ({ collection, data, filename, prefix }) => {
-    if (filename) {
-      return `${incomingConfig.serverURL || ''}${incomingConfig.routes?.api || ''}/${collection.slug}/file/${filename}`
-    }
-    return undefined
-  }
-
   return (): GeneratedAdapter => {
     const {
       options: { acl = 'public-read', ...utOptions },
@@ -131,7 +124,6 @@ function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig:
       name: 'uploadthing',
       fields,
       generateURL,
-      // No generateURL func, public urls are handled by uploadthing
       handleDelete: getHandleDelete({ utApi }),
       handleUpload: getHandleUpload({ acl, utApi }),
       staticHandler: getHandler({ utApi }),
