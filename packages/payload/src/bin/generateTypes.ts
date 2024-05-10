@@ -15,7 +15,7 @@ export async function generateTypes(config: SanitizedConfig): Promise<void> {
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
-  const declareWithTSIgnoreError = `declare module 'payload' {\n // @ts-ignore \n export interface GeneratedTypes extends Config {}\n}`
+  const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
 
   let compiled = await compile(jsonSchema, 'Config', {
     bannerComment:

@@ -104,6 +104,6 @@ export interface PayloadMigration {
 
 
 declare module 'payload' {
- // @ts-ignore 
- export interface GeneratedTypes extends Config {}
+  // @ts-ignore 
+  export interface GeneratedTypes extends Config {}
 }

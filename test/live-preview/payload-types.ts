@@ -417,6 +417,7 @@ export interface Category {
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr".
+ */
 export interface Ssr {
   id: string;
   slug: string;
@@ -642,6 +643,6 @@ export interface Footer {
 
 
 declare module 'payload' {
- // @ts-ignore 
- export interface GeneratedTypes extends Config {}
+  // @ts-ignore 
+  export interface GeneratedTypes extends Config {}
 }
