@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@payloadcms/live-preview-react": "latest",
+    "@payloadcms/live-preview-react": "3.0.0-beta.28",
     "@types/escape-html": "^1.0.2",
     "escape-html": "^1.0.3",
     "next": "^13.5.1",

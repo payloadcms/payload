@@ -1,6 +1,6 @@
 import type { User } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field, FieldWithRichTextRequiredEditor, RadioField, TextField } from 'payload/types'
+import type { Field, RadioField, TextField } from 'payload/types'
 
 import { validateUrl } from '../../../lexical/utils/url.js'
 
@@ -9,7 +9,7 @@ export const getBaseFields = (
   enabledCollections: false | string[],
   disabledCollections: false | string[],
   maxDepth?: number,
-): FieldWithRichTextRequiredEditor[] => {
+): Field[] => {
   let enabledRelations: string[]
 
   /**
@@ -110,5 +110,5 @@ export const getBaseFields = (
     label: ({ t }) => t('fields:openInNewTab'),
   })
 
-  return baseFields as FieldWithRichTextRequiredEditor[]
+  return baseFields
 }

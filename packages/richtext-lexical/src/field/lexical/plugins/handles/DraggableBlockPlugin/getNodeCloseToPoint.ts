@@ -15,7 +15,7 @@ const Indeterminate = 0
 
 type Props = {
   anchorElem: HTMLElement
-  cache_treshold?: number
+  cache_threshold?: number
   editor: LexicalEditor
   /** fuzzy makes the search not exact. If no exact match found, find the closes node instead of returning null */
   fuzzy?: boolean
@@ -51,7 +51,7 @@ function isPointClose(previous: Point, current: Point, threshold: number = 20): 
 export function getNodeCloseToPoint(props: Props): Output {
   const {
     anchorElem,
-    cache_treshold = 20,
+    cache_threshold = 20,
     editor,
     fuzzy = false,
     horizontalOffset = 0,
@@ -63,13 +63,13 @@ export function getNodeCloseToPoint(props: Props): Output {
 
   // Use cache
   if (
-    cache_treshold > 0 &&
+    cache_threshold > 0 &&
     cache.props &&
     cache.result &&
     cache.props.fuzzy === props.fuzzy &&
     cache.props.horizontalOffset === props.horizontalOffset &&
     cache.props.useEdgeAsDefault === props.useEdgeAsDefault &&
-    isPointClose(cache.props.point, props.point, cache_treshold)
+    isPointClose(cache.props.point, props.point, cache_threshold)
   ) {
     if (verbose) {
       //console.log('Returning cached result')

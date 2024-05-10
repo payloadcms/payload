@@ -7,11 +7,7 @@ export type DescriptionFunction = LabelFunction
 
 export type DescriptionComponent = CustomComponent<FieldDescriptionProps>
 
-export type Description =
-  | DescriptionComponent
-  | DescriptionFunction
-  | Record<string, string>
-  | string
+export type Description = DescriptionFunction | Record<string, string> | string
 
 export type FieldDescriptionProps = {
   CustomDescription?: React.ReactNode

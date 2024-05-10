@@ -1,5 +1,7 @@
 'use client'
 
+import type { LexicalNode } from 'lexical'
+
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
@@ -34,22 +36,35 @@ const toolbarGroups: ToolbarGroup[] = [
         }
         return false
       },
+      isEnabled: ({ selection }) => {
+        return !!($isRangeSelection(selection) && $getSelection()?.getTextContent()?.length)
+      },
       key: 'link',
       label: `Link`,
       onSelect: ({ editor, isActive }) => {
         if (!isActive) {
-          let selectedText = null
+          let selectedText: string = null
+          let selectedNodes: LexicalNode[] = []
           editor.getEditorState().read(() => {
-            selectedText = $getSelection().getTextContent()
+            selectedText = $getSelection()?.getTextContent()
+            // We need to selected nodes here before the drawer opens, as clicking around in the drawer may change the original selection
+            selectedNodes = $getSelection()?.getNodes() ?? []
           })
+
+          if (!selectedText?.length) {
+            return
+          }
+
           const linkFields: LinkFields = {
             doc: null,
             linkType: 'custom',
             newTab: false,
             url: 'https://',
           }
+
           editor.dispatchCommand(TOGGLE_LINK_WITH_MODAL_COMMAND, {
             fields: linkFields,
+            selectedNodes,
             text: selectedText,
           })
         } else {

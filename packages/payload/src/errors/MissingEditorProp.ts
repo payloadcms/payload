@@ -6,7 +6,7 @@ import { APIError } from './APIError.js'
 export class MissingEditorProp extends APIError {
   constructor(field: Field) {
     super(
-      `RichText field${fieldAffectsData(field) ? ` "${field.name}"` : ''} is missing the editor prop`,
+      `RichText field${fieldAffectsData(field) ? ` "${field.name}"` : ''} is missing the editor prop. For sub-richText fields, the editor props is required, as it would otherwise create infinite recursion.`,
     )
   }
 }

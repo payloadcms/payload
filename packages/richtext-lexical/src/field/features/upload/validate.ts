@@ -28,6 +28,10 @@ export const uploadValidation = (
       return t('validation:validUploadID')
     }
 
+    if (!props?.collections) {
+      return true
+    }
+
     if (Object.keys(props?.collections).length === 0) {
       return true
     }

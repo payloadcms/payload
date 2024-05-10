@@ -14,6 +14,8 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
+import type { PluginComponentWithAnchor } from '../../types.js'
+import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadData } from '../nodes/UploadNode.js'
 
 import { UploadDrawer } from '../drawer/index.js'
@@ -24,7 +26,9 @@ export type InsertUploadPayload = Readonly<UploadData>
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export function UploadPlugin(): JSX.Element | null {
+export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> = ({
+  clientProps,
+}) => {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 

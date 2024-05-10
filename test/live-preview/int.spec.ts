@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
@@ -7,13 +8,9 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import { handleMessage } from '../../packages/live-preview/src/handleMessage.js'
-import { mergeData } from '../../packages/live-preview/src/mergeData.js'
-import { traverseRichText } from '../../packages/live-preview/src/traverseRichText.js'
 import { Pages } from './collections/Pages.js'
-import { postsSlug } from './collections/Posts.js'
 import configPromise from './config.js'
-import { tenantsSlug } from './shared.js'
+import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -650,7 +647,7 @@ describe('Collections - Live Preview', () => {
                 text: ' ',
               },
             ],
-            relationTo: 'posts',
+            relationTo: postsSlug,
             type: 'relationship',
             value: {
               id: testPost.id,
@@ -705,7 +702,7 @@ describe('Collections - Live Preview', () => {
                 text: ' ',
               },
             ],
-            relationTo: 'posts',
+            relationTo: postsSlug,
             type: 'relationship',
             value: {
               id: testPost.id,
@@ -779,7 +776,7 @@ describe('Collections - Live Preview', () => {
                 format: '',
                 type: 'relationship',
                 version: 1,
-                relationTo: 'posts',
+                relationTo: postsSlug,
                 value: {
                   id: testPost.id,
                 },
@@ -838,7 +835,7 @@ describe('Collections - Live Preview', () => {
                 format: '',
                 type: 'relationship',
                 version: 1,
-                relationTo: 'posts',
+                relationTo: postsSlug,
                 value: {
                   id: testPost.id,
                 },
@@ -901,7 +898,7 @@ describe('Collections - Live Preview', () => {
         {
           type: 'reference',
           reference: {
-            relationTo: 'posts',
+            relationTo: postsSlug,
             value: testPost,
           },
         },
@@ -922,7 +919,7 @@ describe('Collections - Live Preview', () => {
           {
             type: 'reference',
             reference: {
-              relationTo: 'posts',
+              relationTo: postsSlug,
               value: testPost.id,
             },
           },
@@ -950,7 +947,7 @@ describe('Collections - Live Preview', () => {
             label: 'Link 1',
             type: 'reference',
             reference: {
-              relationTo: 'posts',
+              relationTo: postsSlug,
               value: shallow ? testPost?.id : testPost,
             },
           },
