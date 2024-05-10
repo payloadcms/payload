@@ -119,7 +119,9 @@ export const traverseFields = ({
         adapter.payload.config.localization &&
         (field.localized || forceLocalized) &&
         field.type !== 'array' &&
-        field.type !== 'blocks'
+        field.type !== 'blocks' &&
+        'hasMany' in field &&
+        field.hasMany !== true
       ) {
         hasLocalizedField = true
         targetTable = localesColumns
@@ -264,7 +266,7 @@ export const traverseFields = ({
                 name: `${selectTableName}_parent_fk`,
                 columns: [cols.parent],
                 foreignColumns: [adapter.tables[parentTableName].id],
-              }),
+              }).onDelete('cascade'),
             parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
           }
 
@@ -285,17 +287,19 @@ export const traverseFields = ({
             disableNotNull,
             disableUnique,
             fields: [],
+            rootTableName,
             tableName: selectTableName,
             versions,
           })
 
           relationsToBuild.set(fieldName, {
             type: 'many',
-            localized: adapter.payload.config.localization && field.localized,
+            // selects have their own localized table, independent of the base table.
+            localized: false,
             target: selectTableName,
           })
 
-          adapter.relations[`relation_${selectTableName}`] = relations(
+          adapter.relations[`relations_${selectTableName}`] = relations(
             adapter.tables[selectTableName],
             ({ one }) => ({
               parent: one(adapter.tables[parentTableName], {
