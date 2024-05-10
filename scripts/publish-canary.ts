@@ -49,7 +49,7 @@ async function main() {
   const workspace = await getWorkspace()
   await workspace.bumpVersion('canary')
   await workspace.build()
-  await workspace.publishSync({ dryRun: true, tag: 'canary' })
+  await workspace.publishSync({ dryRun: false, tag: 'canary' })
 
   header('🎉 Done!')
 }

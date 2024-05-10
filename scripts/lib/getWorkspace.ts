@@ -72,8 +72,7 @@ export const getWorkspace = async () => {
     const packageDetails = await getPackageDetails(packagePublishList)
     const results: PublishResult[] = []
     for (const pkg of packageDetails) {
-      // TODO: Remove hard-coded dry-run
-      const res = await publishSinglePackage(pkg, { dryRun: true, tag })
+      const res = await publishSinglePackage(pkg, { dryRun, tag })
       results.push(res)
     }
 
@@ -190,25 +189,16 @@ async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: bo
   return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
 }
 
-async function publishSinglePackage(
-  pkg: PackageDetails,
-  opts: { dryRun?: boolean; tag?: 'beta' | 'canary' | 'latest' },
-) {
-  // const { dryRun = false } = opts ?? {}
+async function publishSinglePackage(pkg: PackageDetails, opts: PublishOpts) {
   console.log(`🚀 ${pkg.name} publishing...`)
 
-  const { dryRun = true, tag = 'canary' } = opts
+  const { dryRun, tag = 'canary' } = opts
 
   try {
-    const cmdArgs = [
-      'publish',
-      '-C',
-      pkg.packagePath,
-      '--no-git-checks',
-      '--tag',
-      tag,
-      '--dry-run', // TODO: hardcode dry-run for now
-    ]
+    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
+    if (dryRun) {
+      cmdArgs.push('--dry-run')
+    }
     const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
       cwd,
       // stdio: ['ignore', 'ignore', 'pipe'],
