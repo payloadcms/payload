@@ -1,4 +1,6 @@
 import Ajv from 'ajv'
+import ObjectID from 'bson-objectid'
+
 import type { RichTextAdapter } from '../exports/types'
 import type {
   ArrayField,
@@ -159,7 +161,7 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
     return true
   }
 
-  const fetchSchema = ({ uri, schema }) => {
+  const fetchSchema = ({ schema, uri }) => {
     if (uri && schema) return schema
     return fetch(uri)
       .then((response) => {
@@ -344,8 +346,12 @@ const validateFilterOptions: Validate = async (
           const valueIDs: (number | string)[] = []
 
           values.forEach((val) => {
-            if (typeof val === 'object' && val?.value) {
-              valueIDs.push(val.value)
+            if (typeof val === 'object') {
+              if (val?.value) {
+                valueIDs.push(val.value)
+              } else if (ObjectID.isValid(val)) {
+                valueIDs.push(new ObjectID(val).toHexString())
+              }
             }
 
             if (typeof val === 'string' || typeof val === 'number') {
@@ -396,6 +402,10 @@ const validateFilterOptions: Validate = async (
 
         if (typeof val === 'string' || typeof val === 'number') {
           requestedID = val
+        }
+
+        if (typeof val === 'object' && ObjectID.isValid(val)) {
+          requestedID = new ObjectID(val).toHexString()
         }
       }
 
