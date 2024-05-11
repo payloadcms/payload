@@ -20,6 +20,13 @@
       }
     },
     {
+      "command": "pnpm run dev collections-graphql",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev GraphQL",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",

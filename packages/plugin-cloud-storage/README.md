@@ -188,7 +188,7 @@ If this does not apply to you (your upload collection has `read: () => true` or 
 
 ## Local development
 
-For instructions regarding how to develop with this plugin locally, [click here](https://github.com/payloadcms/plugin-cloud-storage/blob/master/docs/local-dev.md).
+For instructions regarding how to develop with this plugin locally, [click here](https://github.com/payloadcms/payload/blob/main/packages/plugin-cloud-storage/docs/local-dev.md).
 
 ## Questions
 

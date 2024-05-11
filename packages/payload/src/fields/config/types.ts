@@ -113,6 +113,8 @@ type Admin = {
   condition?: Condition
   description?: Description
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -387,6 +389,8 @@ export type UIField = {
     }
     condition?: Condition
     disableBulkEdit?: boolean
+    disableListColumn?: boolean
+    disableListFilter?: boolean
     position?: string
     width?: string
   }
@@ -436,6 +440,7 @@ type JSONAdmin = Admin & {
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: JSONAdmin
+  jsonSchema?: Record<string, unknown>
   type: 'json'
 }
 
@@ -546,6 +551,10 @@ export type RichTextField<
     }
   }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
 
@@ -555,6 +564,10 @@ export type ArrayField = FieldBase & {
       RowLabel?: RowLabel
     } & Admin['components']
     initCollapsed?: boolean | false
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   /**
    * Customize the SQL table name
@@ -622,6 +635,10 @@ export type Block = {
 export type BlockField = FieldBase & {
   admin?: Admin & {
     initCollapsed?: boolean | false
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown

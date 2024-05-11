@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-form-builder",
   "description": "Form builder plugin for Payload CMS",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "homepage:": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -37,7 +37,6 @@
     "cross-env": "^7.0.3",
     "nodemon": "3.0.3",
     "payload": "workspace:*",
-    "react": "^18.0.0",
     "ts-node": "10.9.1"
   },
   "files": [

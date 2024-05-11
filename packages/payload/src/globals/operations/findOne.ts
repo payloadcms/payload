@@ -100,6 +100,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       context: req.context,
       depth,
       doc,
+      draft: draftEnabled,
       fallbackLocale,
       global: globalConfig,
       locale,

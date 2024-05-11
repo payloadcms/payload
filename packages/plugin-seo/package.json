@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "2.3.0",
+  "version": "2.3.2",
   "homepage:": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -33,14 +33,13 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "^2.7.0",
-    "react": "^18.0.0"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "4.17.17",
     "@types/react": "18.2.15",
-    "payload": "workspace:*",
-    "react": "^18.0.0"
+    "payload": "workspace:*"
   },
   "exports": {
     ".": {

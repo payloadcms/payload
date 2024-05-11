@@ -2,12 +2,10 @@ import type { UpdateOne } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { ChainedMethods } from './find/chainMethods'
 import type { PostgresAdapter } from './types'
 
 import buildQuery from './queries/buildQuery'
 import { selectDistinct } from './queries/selectDistinct'
-import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -16,10 +14,7 @@ export const updateOne: UpdateOne = async function updateOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = getTableName({
-    adapter: this,
-    config: collection,
-  })
+  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   const whereToUse = whereArg || { id: { equals: id } }
   let idToUpdate = id
 

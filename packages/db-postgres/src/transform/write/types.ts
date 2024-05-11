@@ -34,7 +34,6 @@ export type RowToInsert = {
   locales: {
     [locale: string]: Record<string, unknown>
   }
-  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -42,4 +41,5 @@ export type RowToInsert = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  texts: Record<string, unknown>[]
 }

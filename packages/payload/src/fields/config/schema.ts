@@ -19,6 +19,8 @@ export const baseAdminFields = joi.object().keys({
     .alternatives()
     .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), componentSchema),
   disableBulkEdit: joi.boolean().default(false),
+  disableListColumn: joi.boolean().default(false),
+  disableListFilter: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   initCollapsed: joi.boolean().default(false),
@@ -187,6 +189,7 @@ export const json = baseField.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
+  jsonSchema: joi.object().unknown(),
 })
 
 export const select = baseField.keys({
@@ -310,6 +313,7 @@ export const array = baseField.keys({
           RowLabel: componentSchema,
         })
         .default({}),
+      isSortable: joi.boolean(),
     })
     .default({}),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
@@ -407,6 +411,11 @@ export const relationship = baseField.keys({
 export const blocks = baseField.keys({
   name: joi.string().required(),
   type: joi.string().valid('blocks').required(),
+  admin: baseAdminFields
+    .keys({
+      isSortable: joi.boolean(),
+    })
+    .default({}),
   blocks: joi
     .array()
     .items(
@@ -468,6 +477,7 @@ export const richText = baseField.keys({
       validate: joi.func().required(),
     })
     .unknown(),
+  maxDepth: joi.number(),
 })
 
 export const date = baseField.keys({
