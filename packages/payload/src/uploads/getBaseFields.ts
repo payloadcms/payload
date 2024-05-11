@@ -197,7 +197,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           ],
           label: size.name,
         })),
-        label: ({ t }) => t('upload:Sizes'),
+        label: ({ t }) => t('upload:sizes'),
       },
     ])
   }
