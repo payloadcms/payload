@@ -105,6 +105,11 @@ level and stores the following fields.
 | `label` | The label of the breadcrumb. This field is automatically set to either the `collection.admin.useAsTitle` (if defined) or is set to the `ID` of the document. You can also dynamically define the `label` by passing a function to the options property of [`generateLabel`](#generateLabel). |
 | `url`   | The URL of the breadcrumb. By default, this field is undefined. You can manually define this field by passing a property called function to the plugin options property of [`generateURL`](#generateURL).                                                                                    |
 
+#### Path
+
+The `path` field is a string which dynamically populated from the last breadcrumb's `url`. It's also cross-collection
+unique, so that you can query for documents solely by their path.
+
 ### Options
 
 #### `collections`
@@ -169,6 +174,24 @@ own `breadcrumbs` field to each collection manually. Set this property to the `n
   If you opt out of automatically being provided a `parent` or `breadcrumbs` field, you need to make
   sure that both fields are placed at the top-level of your document. They cannot exist within any
   nested data structures like a `group`, `array`, or `blocks`.
+</Banner>
+
+
+#### `pathFieldSlug`
+
+When defined, the `path` field will not be provided for you, and instead, expects you to add your
+own `path` field to each collection manually. Set this property to the `name` of your custom field.
+
+#### `uniquePathCollections`
+
+If you want the `path` field to be unique across other collections then in your `collections` array or just non, you can add the slug
+of the collection slugs you want the `path` field to be unique across. If not supplied, the path field will be unique across
+the collections that the plugin is added to. Add an empty array to disable this behavior.
+
+<Banner type="info">
+  <strong>Note:</strong>
+  <br />
+  If `pathFieldSlug` is set to `false` the `uniquePathCollections` option will be ignored.
 </Banner>
 
 ## Overrides
