@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { home } from './home'
 import { image1 } from './image-1'
@@ -10,8 +11,10 @@ import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
 import { postsPage } from './posts-page'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-const collections = ['categories', 'media', 'pages', 'posts', 'comments']
+const collections = ['categories', 'media', 'pages', 'posts']
 const globals = ['header', 'settings', 'footer']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
@@ -28,7 +31,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Clearing media...`)
 
-  const mediaDir = path.resolve(__dirname, '../../media')
+  const mediaDir = path.resolve(dirname, '../../public/media')
   if (fs.existsSync(mediaDir)) {
     fs.rmdirSync(mediaDir, { recursive: true })
   }
@@ -96,12 +99,12 @@ export const seed = async (payload: Payload): Promise<void> => {
     await payload.create({
       collection: 'media',
       data: image1,
-      filePath: path.resolve(__dirname, 'image-1.jpg'),
+      filePath: path.resolve(dirname, 'image-1.jpg'),
     }),
     await payload.create({
       collection: 'media',
       data: image2,
-      filePath: path.resolve(__dirname, 'image-2.jpg'),
+      filePath: path.resolve(dirname, 'image-2.jpg'),
     }),
   ])
 
@@ -220,8 +223,6 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'pages',
     data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, image1ID)),
   })
-
-  payload.logger.info(`— Seeding projects page...`)
 
   let postsPageID = postsPageDoc.id
 
