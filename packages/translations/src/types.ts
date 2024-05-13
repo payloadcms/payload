@@ -154,3 +154,8 @@ export type LanguagePreference = {
   language: AcceptedLanguages
   quality?: number
 }
+
+export type I18nClient = I18n<
+  ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
+  ClientTranslationKeys
+>

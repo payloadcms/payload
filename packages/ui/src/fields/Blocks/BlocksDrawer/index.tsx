@@ -1,4 +1,5 @@
 'use client'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Labels } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
@@ -6,7 +7,6 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 
 import type { ReducedBlock } from '../../../providers/ComponentMap/buildComponentMap/types.js'
-import type { I18nClient } from '../../../providers/Translation/index.js'
 
 import { Drawer } from '../../../elements/Drawer/index.js'
 import { ThumbnailCard } from '../../../elements/ThumbnailCard/index.js'

@@ -272,6 +272,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:aboutToUnpublishSelection',
   'version:autosave',
   'version:autosavedSuccessfully',
+  'version:autosavedVersion',
   'version:changed',
   'version:confirmRevertToSaved',
   'version:compareVersion',

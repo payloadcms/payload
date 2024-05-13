@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/ui/providers/Translation'
+import type { I18nClient } from '@payloadcms/translations'
 import type { LabelProps } from 'payload/types'
 import type React from 'react'
 

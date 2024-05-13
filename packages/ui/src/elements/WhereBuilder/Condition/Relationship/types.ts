@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/ui/providers/Translation'
+import type { I18nClient } from '@payloadcms/translations'
 import type { PaginatedDocs } from 'payload/database'
 import type { ClientCollectionConfig, RelationshipField } from 'payload/types'
 

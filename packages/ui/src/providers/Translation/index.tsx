@@ -1,6 +1,6 @@
 'use client'
-import type { ClientTranslationKeys } from '@payloadcms/translations'
-import type { I18n, Language, ReconstructObjectFromTranslationKeys } from '@payloadcms/translations'
+import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
+import type { Language } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
 import type { ClientConfig } from 'payload/types'
 
@@ -15,11 +15,6 @@ export type LanguageOptions = {
   label: string
   value: string
 }[]
-
-export type I18nClient = I18n<
-  ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
-  ClientTranslationKeys
->
 
 type ContextType = {
   i18n: I18nClient
@@ -52,7 +47,7 @@ type Props = {
   language: string
   languageOptions: LanguageOptions
   switchLanguageServerAction: (lang: string) => Promise<void>
-  translations: Language['translations']
+  translations: I18nClient['translations']
 }
 
 export const TranslationProvider: React.FC<Props> = ({

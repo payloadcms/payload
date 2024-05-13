@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/ui/providers/Translation'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Permissions } from 'payload/auth'
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 

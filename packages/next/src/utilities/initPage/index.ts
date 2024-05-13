@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/ui/providers/Translation'
+import type { I18nClient } from '@payloadcms/translations'
 import type { InitPageResult, PayloadRequestWithData, VisibleEntities } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
