@@ -316,5 +316,3 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:viewingVersions',
   'version:viewingVersionsGlobal',
 ])
-export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
-  TExtraProps

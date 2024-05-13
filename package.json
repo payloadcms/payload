@@ -54,7 +54,6 @@
     "docker:start": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml up -d",
     "docker:stop": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml down",
     "fix": "eslint \"packages/**/*.ts\" --fix",
-    "generate:types": "PAYLOAD_CONFIG_PATH=./test/_community/config.ts node --no-deprecation ./packages/payload/bin.js generate:types",
     "lint": "eslint \"packages/**/*.ts\"",
     "lint-staged": "lint-staged",
     "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",

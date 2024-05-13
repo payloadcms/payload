@@ -1,6 +1,6 @@
 import type { Locale } from 'date-fns'
 
-import type { ClientTranslationKeys } from './clientKeys.js'
+import type { clientTranslationKeys } from './clientKeys.js'
 import type { enTranslations } from './languages/en.js'
 import type { acceptedLanguages } from './utilities/languages.js'
 
@@ -99,6 +99,11 @@ export type DefaultTranslationKeysUnSanitized = NestedKeysUnSanitized<DefaultTra
  */
 export type DefaultTranslationKeys = NestedKeysStripped<DefaultTranslationsObject>
 
+export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
+  TExtraProps
+
+export type ClientTranslationsObject = ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
+
 export type TFunction<TTranslationKeys = DefaultTranslationKeys> = (
   key: TTranslationKeys,
   options?: Record<string, any>,
@@ -142,12 +147,10 @@ export type InitTFunction<
 
 export type InitI18n =
   | ((args: {
-      config: I18nOptions<ReconstructObjectFromTranslationKeys<ClientTranslationKeys>>
+      config: I18nOptions<ClientTranslationsObject>
       context: 'client'
       language: AcceptedLanguages
-    }) => Promise<
-      I18n<ReconstructObjectFromTranslationKeys<ClientTranslationKeys>, ClientTranslationKeys>
-    >)
+    }) => Promise<I18n<ClientTranslationsObject, ClientTranslationKeys>>)
   | ((args: { config: I18nOptions; context: 'api'; language: AcceptedLanguages }) => Promise<I18n>)
 
 export type LanguagePreference = {
@@ -157,8 +160,8 @@ export type LanguagePreference = {
 
 export type I18nClient<TAdditionalTranslations = {}, TAdditionalKeys extends string = never> = I18n<
   TAdditionalTranslations extends object
-    ? ReconstructObjectFromTranslationKeys<ClientTranslationKeys> & TAdditionalTranslations
-    : ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
+    ? ClientTranslationsObject & TAdditionalTranslations
+    : ClientTranslationsObject,
   [TAdditionalKeys] extends [never]
     ? ClientTranslationKeys
     : ClientTranslationKeys | TAdditionalKeys

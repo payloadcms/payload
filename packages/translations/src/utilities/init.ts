@@ -1,13 +1,9 @@
-import type { ClientTranslationKeys } from '../clientKeys.js'
-import type { enTranslations } from '../languages/en.js'
 import type {
-  DefaultTranslationKeysUnSanitized,
   DefaultTranslationsObject,
   I18n,
   InitI18n,
   InitTFunction,
   Language,
-  NestedKeysStripped,
 } from '../types.js'
 import type { DefaultTranslationKeys } from '../types.js'
 

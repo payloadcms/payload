@@ -1,11 +1,11 @@
 'use client'
+import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
 import type {
   AcceptedLanguages,
+  ClientTranslationsObject,
   Language,
-  ReconstructObjectFromTranslationKeys,
   TFunction,
 } from '@payloadcms/translations'
-import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
 import type { ClientConfig } from 'payload/types'
 
@@ -29,10 +29,7 @@ type ContextType<
     ? I18nClient
     : TAdditionalTranslations extends object
       ? I18nClient<TAdditionalTranslations, TAdditionalClientTranslationKeys>
-      : I18nClient<
-          ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
-          TAdditionalClientTranslationKeys
-        >
+      : I18nClient<ClientTranslationsObject, TAdditionalClientTranslationKeys>
   languageOptions: LanguageOptions
   switchLanguage?: (lang: AcceptedLanguages) => Promise<void>
   t: TFunction<ClientTranslationKeys | Extract<TAdditionalClientTranslationKeys, string>>
