@@ -173,7 +173,7 @@ function createURL(url: string) {
 
 export const API: React.FC<EditViewProps> = (props) => {
   const { apiURL } = props
-  const { i18n, t } = useTranslation(['authentication', 'general', 'version'])
+  const { i18n, t } = useTranslation()
   const {
     localization,
     routes: { api },
