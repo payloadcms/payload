@@ -36,10 +36,6 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@swc-node/core": "^1.13.0",
-    "@swc-node/sourcemap-support": "^0.5.0",
-    "find-up": "4.1.0",
-    "get-tsconfig": "^4.7.2",
     "graphql-scalars": "1.22.2",
     "pluralize": "8.0.0",
     "ts-essentials": "7.0.3"
