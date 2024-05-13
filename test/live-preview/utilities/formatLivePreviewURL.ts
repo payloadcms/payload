@@ -1,7 +1,5 @@
 import type { LivePreviewConfig } from 'payload/config'
 
-import type { Tenant } from '../payload-types.js'
-
 export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   data,
   collectionConfig,
@@ -13,7 +11,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   // For example, multi-tenant apps may need to lookup additional data
   if (data.tenant) {
     try {
-      const fullTenant = (await payload
+      const fullTenant = await payload
         .find({
           collection: 'tenants',
           where: {
@@ -24,7 +22,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
           limit: 1,
           depth: 0,
         })
-        .then((res) => res?.docs?.[0])) as Tenant
+        .then((res) => res?.docs?.[0])
 
       if (fullTenant?.clientURL) {
         baseURL = `${fullTenant.clientURL}/live-preview`
