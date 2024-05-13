@@ -1,5 +1,6 @@
 'use client'
-import type { I18n, Language } from '@payloadcms/translations'
+import type { ClientTranslationKeys } from '@payloadcms/translations'
+import type { I18n, Language, ReconstructObjectFromTranslationKeys } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
 import type { ClientConfig } from 'payload/types'
 
@@ -15,23 +16,33 @@ export type LanguageOptions = {
   value: string
 }[]
 
-const Context = createContext<{
-  i18n: I18n
+export type I18nClient = I18n<
+  ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
+  ClientTranslationKeys
+>
+
+type ContextType = {
+  i18n: I18nClient
   languageOptions: LanguageOptions
   switchLanguage?: (lang: string) => Promise<void>
-  t: (key: string, vars?: Record<string, any>) => string
-}>({
+  t: <TranslationKeys = ClientTranslationKeys>(
+    key: TranslationKeys,
+    vars?: Record<string, any>,
+  ) => string
+}
+
+const Context = createContext<ContextType>({
   i18n: {
     dateFNS: enUS,
     dateFNSKey: 'en-US',
     fallbackLanguage: 'en',
     language: 'en',
     t: (key) => key,
-    translations: {},
+    translations: {} as any,
   },
   languageOptions: undefined,
   switchLanguage: undefined,
-  t: (key) => key,
+  t: (key) => undefined,
 })
 
 type Props = {
@@ -56,7 +67,7 @@ export const TranslationProvider: React.FC<Props> = ({
   const { clearRouteCache } = useRouteCache()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
-  const nextT = (key: string, vars?: Record<string, unknown>): string =>
+  const nextT: ContextType['t'] = (key, vars): string =>
     t({
       key,
       translations,

@@ -1,4 +1,15 @@
-import type { I18n, InitI18n, InitTFunction, Language } from '../types.js'
+import type { ClientTranslationKeys } from '../clientKeys.js'
+import type { enTranslations } from '../languages/en.js'
+import type {
+  DefaultTranslationKeysUnSanitized,
+  DefaultTranslationsObject,
+  I18n,
+  InitI18n,
+  InitTFunction,
+  Language,
+  NestedKeysStripped,
+} from '../types.js'
+import type { DefaultTranslationKeys } from '../types.js'
 
 import { importDateFNSLocale } from '../importDateFNSLocale.js'
 import { deepMerge } from './deepMerge.js'
@@ -11,16 +22,19 @@ import { getTranslationsByContext } from './getTranslationsByContext.js'
  *
  * @returns string
  */
-export const getTranslationString = ({
+export const getTranslationString = <
+  TTranslations = DefaultTranslationsObject,
+  TTranslationKeys = DefaultTranslationKeys,
+>({
   count,
   key,
   translations,
 }: {
   count?: number
-  key: string
-  translations: Language['translations']
-}) => {
-  const keys = key.split(':')
+  key: TTranslationKeys
+  translations: Language<TTranslations>['translations']
+}): string => {
+  const keys = (key as DefaultTranslationKeys).split(':')
   let keySuffix = ''
 
   const translation: string = keys.reduce((acc: any, key, index) => {
@@ -54,10 +68,10 @@ export const getTranslationString = ({
   }, translations)
 
   if (!translation) {
-    console.log('key not found: ', key)
+    console.log('key not found:', key)
   }
 
-  return translation || key
+  return translation || (key as string)
 }
 
 /**
@@ -99,17 +113,18 @@ const replaceVars = ({
  *
  * @returns string
  */
-type TFunctionConstructor = ({
+export function t<
+  TTranslations = DefaultTranslationsObject,
+  TTranslationKeys = DefaultTranslationKeys,
+>({
   key,
   translations,
   vars,
 }: {
-  key: string
-  translations?: Language['translations']
+  key: TTranslationKeys
+  translations?: Language<TTranslations>['translations']
   vars?: Record<string, any>
-}) => string
-
-export const t: TFunctionConstructor = ({ key, translations, vars }) => {
+}): string {
   let translationString = getTranslationString({
     count: typeof vars?.count === 'number' ? vars.count : undefined,
     key,
@@ -124,7 +139,7 @@ export const t: TFunctionConstructor = ({ key, translations, vars }) => {
   }
 
   if (!translationString) {
-    translationString = key
+    translationString = key as string
   }
 
   return translationString
@@ -146,7 +161,14 @@ const initTFunction: InitTFunction = (args) => {
   }
 }
 
-function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
+function memoize(
+  fn: (args: Parameters<InitI18n>[0]) => Promise<I18n>,
+  keys: string[],
+): (
+  args: Parameters<InitI18n>[0] & {
+    context: 'api' | 'client'
+  },
+) => Promise<I18n> {
   const cacheMap = new Map()
 
   const memoized = async (args) => {
@@ -163,14 +185,14 @@ function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
   return memoized
 }
 
-export const initI18n: InitI18n = memoize(
-  async ({ config, context, language = config.fallbackLanguage }: Parameters<InitI18n>[0]) => {
+export const initI18n = memoize(
+  async ({ config, context, language = config.fallbackLanguage }) => {
     const translations = getTranslationsByContext(config.supportedLanguages[language], context)
 
     const { t, translations: mergedTranslations } = initTFunction({
-      config,
+      config: config as any,
       language: language || config.fallbackLanguage,
-      translations,
+      translations: translations as any,
     })
 
     const dateFNSKey = config.supportedLanguages[language]?.dateFNSKey || 'en-US'

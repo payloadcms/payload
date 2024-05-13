@@ -15,6 +15,13 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'text2',
+      type: 'text',
+      hasMany: true,
+      maxRows: 3,
+      maxLength: 5,
+    },
+    {
       name: 'richText',
       type: 'richText',
     },

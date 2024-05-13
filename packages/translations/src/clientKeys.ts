@@ -1,4 +1,10 @@
-export const clientTranslationKeys = [
+import type { DefaultTranslationKeys } from './types.js'
+
+function createClientTranslationKeys<T extends DefaultTranslationKeys[]>(keys: T) {
+  return keys
+}
+
+export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:account',
   'authentication:accountOfCurrentUser',
   'authentication:alreadyActivated',
@@ -22,6 +28,7 @@ export const clientTranslationKeys = [
   'authentication:forgotPasswordQuestion',
   'authentication:generate',
   'authentication:generateNewAPIKey',
+  'authentication:generatingNewAPIKeyWillInvalidate',
   'authentication:logBackIn',
   'authentication:loggedOutInactivity',
   'authentication:loggedOutSuccessfully',
@@ -137,7 +144,6 @@ export const clientTranslationKeys = [
   'general:delete',
   'general:deletedCountSuccessfully',
   'general:deleting',
-  'general:depth',
   'general:descending',
   'general:deselectAllRows',
   'general:document',
@@ -205,7 +211,6 @@ export const clientTranslationKeys = [
   'general:submit',
   'general:success',
   'general:successfullyCreated',
-  'general:successfullyDeleted',
   'general:thisLanguage',
   'general:titleDeleted',
   'general:true',
@@ -304,4 +309,6 @@ export const clientTranslationKeys = [
   'version:viewingVersionGlobal',
   'version:viewingVersions',
   'version:viewingVersionsGlobal',
-]
+])
+export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
+  TExtraProps
