@@ -8,11 +8,11 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, fully functional Admin Panel to manage your users and data. The Payload Admin Panel is highly performant, even with 100+ fields, and is written fully in TypeScript. It is built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app) and fully supports [React Server Components](https://react.dev/reference/rsc/server-components) which enables the use of the [Local API](/docs/local-api/overview) on the front-end.
 
-You can endlessly customize and extend the Admin UI by swapping your own in [Custom Components](./components) for everything from field labels to entire views. You can also modify built-in views, build your own fields, [swap out Payload branding for your own](https://payloadcms.com/blog/white-label-admin-ui), and so much more.
+You can endlessly customize and extend the Admin UI by swapping your own in [Custom Components](./components). This includes everything from field labels to entire views, but you can also modify built-in views, build your own fields, [swap out Payload branding for your own](https://payloadcms.com/blog/white-label-admin-ui), and so much more.
 
 <Banner type="success">
   The Admin Panel is meant to be simple enough to give you a starting point but not bring too much
-  complexity, so that you can easily customizex it to suit the needs of your application and your
+  complexity, so that you can easily customize it to suit the needs of your application and your
   editors.
 </Banner>
 
@@ -22,6 +22,62 @@ You can endlessly customize and extend the Admin UI by swapping your own in [Cus
   alt="Admin Panel with collapsible sidebar"
   caption="Redesigned Admin Panel with a collapsible sidebar that's open by default, providing greater extensibility and enhanced horizontal real estate."
 />
+
+## Overview
+
+To get started using the Admin Panel, visit the [Installation](/docs/installation) page and follow the steps to get up and running. Once finished, the following packages will be installed in your project:
+
+- `next` — The React framework used by the Admin Panel
+- `@payloadcms/next` — Source code for the Admin Panel views, routes, etc.
+- `@payloadcms/ui` — Payload's React library for building views, components, etc.
+
+You will also find the following structure in your project, notice how Payload is nested within _your_ project:
+
+```plaintext
+your-repo
+├─ next.config.ts
+├─ src/
+├── app/
+├─── (your-app)/
+├─── (payload)/
+├───── admin/
+├────── [[...segments]]
+├──────── not-found.tsx
+├──────── page.tsx
+├───── api/
+├────── [...slug]
+├──────── route.ts
+├──── custom.scss
+├──── layout.tsx
+├── payload.config.ts
+```
+
+<Banner type="info">
+  When you use Payload, you plug it into **_your_** server. This is a fundamental difference between Payload and other application frameworks. When you use Payload, you're technically adding Payload to your app, and not building a "Payload app".
+</Banner>
+
+### Adding to an existing app
+
+Adding Payload to either a new or existing Next.js is super straightforward.
+
+#### Using NPX
+
+To easiest way to install into an existing app is to run `npx create-payload-app` and it will automatically detect your existing app and safely install Payload into it.
+
+#### Manually
+
+You could also install Payload into your existing app by hand. First, locate your `next.config.js` file and wrap it with the `withPayload` function from the `@payloadcms/next` package:
+
+```ts
+import { withPayload } from '@payloadcms/next/withPayload'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Your Next.js config here
+}
+
+export default withPayload(nextConfig)
+```
 
 ## Admin Options
 

@@ -26,27 +26,15 @@ To quickly scaffold a new Payload app in the fastest way possible, you can use [
 npx create-payload-app@latest
 ```
 
-Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside.
+Then just follow the prompts! Payload will automatically detect if you are installing into an existing Next.js project. If you prefer, you can also [install Payload into an existing Next.js project](../admin/overview) yourself. Once finished, all necessary packages will be installed to use Payload's Local API, along with an HTTP layer to serve the REST and GraphQL APIs.
 
-## Adding to an existing app
+## Manual Installation
 
-Adding Payload to either a new or existing TypeScript + Next.js app is super straightforward. To add to an existing app, just run `npm install --save --legacy-peer-deps payload`.
+### Database
 
-From there, the first step is writing a baseline config. Create a new `payload.config.ts` in your project's `/src` directory (or whatever your root TS dir is). The simplest config contains the following:
+### Admin Panel
 
-```js
-import { buildConfig } from 'payload/config'
-
-export default buildConfig({
-  // By default, Payload will boot up normally
-  // and you will be provided with a base `User` collection.
-  // But, here is where you define how you'd like Payload to work!
-})
-```
-
-Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, including how to provide your own user config, jump to the [Authentication](/docs/authentication/config) section.
-
-Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
+### Rich Text Editor
 
 ### Server
 
