@@ -1,13 +1,8 @@
-import type {
-  Field,
-  FieldWithRichTextRequiredEditor,
-  FileData,
-  FileSize,
-  Payload,
-  TypeWithID,
-} from 'payload/types'
+import type { Config } from 'payload/config'
+import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
+import { sanitizeFields } from 'payload/config'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
@@ -19,11 +14,18 @@ import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
-  collections: {
+  collections?: {
     [collection: string]: {
-      fields: FieldWithRichTextRequiredEditor[]
+      fields: Field[]
     }
   }
+  /**
+   * Sets a maximum population depth for this upload (not the fields for this upload), regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
 }
 
 /**
@@ -41,7 +43,9 @@ export const UploadFeature: FeatureProviderProviderServer<
     props = { collections: {} }
   }
 
-  const clientProps: UploadFeaturePropsClient = { collections: {} }
+  const clientProps: UploadFeaturePropsClient = {
+    collections: {},
+  }
   if (props.collections) {
     for (const collection in props.collections) {
       clientProps.collections[collection] = {
@@ -51,7 +55,20 @@ export const UploadFeature: FeatureProviderProviderServer<
   }
 
   return {
-    feature: () => {
+    feature: async ({ config: _config, isRoot }) => {
+      const validRelationships = _config.collections.map((c) => c.slug) || []
+
+      for (const collection in props.collections) {
+        if (props.collections[collection].fields?.length) {
+          props.collections[collection].fields = await sanitizeFields({
+            config: _config as unknown as Config,
+            fields: props.collections[collection].fields,
+            requireFieldLevelRichTextEditor: isRoot,
+            validRelationships,
+          })
+        }
+      }
+
       return {
         ClientComponent: UploadFeatureClientComponent,
         clientFeatureProps: clientProps,
@@ -160,7 +177,7 @@ export const UploadFeature: FeatureProviderProviderServer<
             },
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
-            validations: [uploadValidation()],
+            validations: [uploadValidation(props)],
           }),
         ],
         serverFeatureProps: props,

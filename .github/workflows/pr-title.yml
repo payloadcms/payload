@@ -66,7 +66,7 @@ jobs:
             translations
             ui
             templates
-            examples
+            examples(\/(\w|-)+)?
             deps
 
           # Disallow uppercase letters at the beginning of the subject

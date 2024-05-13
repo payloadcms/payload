@@ -214,6 +214,7 @@ export const tr: Language = {
       error: 'Hata',
       errors: 'Hatalar',
       fallbackToDefaultLocale: 'Varsayılan yerel ayara geri dönme',
+      false: 'Yanlış',
       filter: 'Filtrele',
       filterWhere: '{{label}} filtrele:',
       filters: 'Filtreler',
@@ -270,6 +271,7 @@ export const tr: Language = {
       successfullyDuplicated: '{{label}} başarıyla kopyalandı.',
       thisLanguage: 'Türkçe',
       titleDeleted: '{{label}} {{title}} başarıyla silindi.',
+      true: 'Doğru',
       unauthorized: 'Yetkisiz',
       unsavedChangesDuplicate:
         'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',

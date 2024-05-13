@@ -9,6 +9,7 @@ import * as React from 'react'
 
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
+import { EditorFocusProvider } from './EditorFocusProvider.js'
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import { EditorConfigProvider } from './config/client/EditorConfigProvider.js'
 import { getEnabledNodes } from './nodes/index.js'
@@ -77,11 +78,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
   return (
     <LexicalComposer initialConfig={initialConfig} key={path}>
-      <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
-        <div className="editor-shell">
-          <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />
-        </div>
-      </EditorConfigProvider>
+      <EditorFocusProvider>
+        <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
+          <div className="editor-shell">
+            <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />
+          </div>
+        </EditorConfigProvider>
+      </EditorFocusProvider>
     </LexicalComposer>
   )
 }

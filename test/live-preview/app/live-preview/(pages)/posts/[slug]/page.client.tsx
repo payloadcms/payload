@@ -1,10 +1,12 @@
 'use client'
 
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import React from 'react'
 
 import type { Post as PostType } from '../../../../../payload-types.js'
 
+import { postsSlug, renderedPageTitleID } from '../../../../../shared.js'
 import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { PostHero } from '../../../_heros/PostHero/index.js'
@@ -58,11 +60,14 @@ export const PostClient: React.FC<{
                 ],
               },
             ],
-            relationTo: 'posts',
+            relationTo: postsSlug,
           },
         ]}
         disableTopPadding
       />
+      <Gutter>
+        <div id={renderedPageTitleID}>{`For Testing: ${data.title}`}</div>
+      </Gutter>
     </React.Fragment>
   )
 }

@@ -195,6 +195,9 @@ export function fieldsToJSONSchema(
           }
 
           case 'richText': {
+            if (typeof field.editor === 'function') {
+              throw new Error('Attempted to access unsanitized rich text editor.')
+            }
             if (field.editor.outputSchema) {
               fieldSchema = field.editor.outputSchema({
                 collectionIDFieldTypes,

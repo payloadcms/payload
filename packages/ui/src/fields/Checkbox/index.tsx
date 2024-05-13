@@ -4,6 +4,7 @@ import type { ClientValidate } from 'payload/types'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import React, { useCallback } from 'react'
 
 import type { CheckboxFieldProps } from './types.js'
@@ -48,6 +49,8 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const { uuid } = useForm()
 
+  const editDepth = useEditDepth()
+
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
@@ -75,7 +78,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const checked = checkedFromProps || Boolean(value)
 
-  const fieldID = id || generateFieldID(path, uuid)
+  const fieldID = id || generateFieldID(path, editDepth, uuid)
 
   return (
     <div

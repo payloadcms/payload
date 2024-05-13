@@ -960,7 +960,118 @@ describe('collections-graphql', () => {
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
       })
+
+      it('should query relationships with locale', async () => {
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            title: {
+              en: 'English title',
+              es: 'Spanish title',
+            },
+          },
+          locale: '*',
+        })
+
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          data: {
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `query {
+          CyclicalRelationships(locale: es) {
+            docs {
+              title
+              relationToSelf {
+                title
+              }
+            }
+          }
+        }`
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
     })
+  })
+
+  it('should query correctly with draft argument', async () => {
+    const publishValue = '1'
+    const draftValue = '2'
+
+    // publish doc
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      draft: false,
+      data: {
+        title: publishValue,
+      },
+    })
+
+    // create cyclical relationship
+    await payload.update({
+      collection: 'cyclical-relationship',
+      id: newDoc.id,
+      data: {
+        relationToSelf: newDoc.id,
+      },
+    })
+
+    // save new version
+    await payload.update({
+      collection: 'cyclical-relationship',
+      id: newDoc.id,
+      draft: true,
+      data: {
+        title: draftValue,
+      },
+    })
+
+    const draftParentPublishedChild = `{
+      CyclicalRelationships(draft: true) {
+        docs {
+          title
+          relationToSelf(draft: false) {
+            title
+          }
+        }
+      }
+    }`
+    const res1 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query: draftParentPublishedChild }),
+      })
+      .then((res) => res.json())
+
+    const queriedDoc = res1.data.CyclicalRelationships.docs[0]
+    expect(queriedDoc.title).toEqual(draftValue)
+    expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
+
+    const publishedParentDraftChild = `{
+      CyclicalRelationships(draft: false) {
+        docs {
+          title
+          relationToSelf(draft: true) {
+            title
+          }
+        }
+      }
+    }`
+    const res2 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query: publishedParentDraftChild }),
+      })
+      .then((res) => res.json())
+
+    const queriedDoc2 = res2.data.CyclicalRelationships.docs[0]
+    expect(queriedDoc2.title).toEqual(publishValue)
+    expect(queriedDoc2.relationToSelf.title).toEqual(draftValue)
   })
 
   describe('Error Handler', () => {

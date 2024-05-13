@@ -101,6 +101,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       context: req.context,
       depth,
       doc,
+      draft: draftEnabled,
       fallbackLocale,
       global: globalConfig,
       locale,

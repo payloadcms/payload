@@ -3,21 +3,20 @@ import React from 'react'
 
 import type { Page } from '../../../../payload-types.js'
 
-import { fetchDoc } from '../../_api/fetchDoc.js'
-import { fetchDocs } from '../../_api/fetchDocs.js'
+import { getDoc } from '../../_api/getDoc.js'
+import { getDocs } from '../../_api/getDocs.js'
 import { PageClient } from './page.client.js'
 
-// eslint-disable-next-line no-restricted-exports
 export default async function Page({ params: { slug = 'home' } }) {
   let page: Page | null = null
 
   try {
-    page = await fetchDoc<Page>({
+    page = await getDoc<Page>({
       slug,
       collection: 'pages',
     })
   } catch (error) {
-    console.error(error)
+    console.error(error) // eslint-disable-line no-console
   }
 
   if (!page) {
@@ -30,7 +29,7 @@ export default async function Page({ params: { slug = 'home' } }) {
 export async function generateStaticParams() {
   process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
-    const pages = await fetchDocs<Page>('pages')
+    const pages = await getDocs<Page>('pages')
     return pages?.map(({ slug }) => slug)
   } catch (error) {
     return []

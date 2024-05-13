@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { spawn } from 'node:child_process'
 import path from 'path'
 import { generateTypes } from 'payload/node'
 
@@ -6,36 +7,67 @@ import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 
+import type { SanitizedConfig } from 'payload/types'
+
 import { fileURLToPath } from 'url'
 
 import { load } from './loader/load.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const loadConfig = async (configPath: string) => {
-  const configPromise = await load(configPath)
-  return configPromise.default
+let testDir: string
+
+async function run() {
+  if (testConfigDir) {
+    testDir = path.resolve(dirname, testConfigDir)
+
+    const pathWithConfig = path.resolve(testDir, 'config.ts')
+    console.log('Generating types for config:', pathWithConfig)
+
+    const config: SanitizedConfig = (await load(pathWithConfig)) as unknown as SanitizedConfig
+
+    setTestEnvPaths(testDir)
+    await generateTypes(config)
+  } else {
+    // Search through every folder in dirname, and if it has a config.ts file, generate types for it
+    const foundDirs: string[] = []
+
+    fs.readdirSync(dirname, { withFileTypes: true })
+      .filter((f) => f.isDirectory())
+      .forEach((dir) => {
+        const suiteDir = path.resolve(dirname, dir.name)
+        const configFound = fs.existsSync(path.resolve(suiteDir, 'config.ts'))
+        if (configFound) {
+          foundDirs.push(dir.name)
+        }
+      })
+
+    let i = 0
+    for (const suiteDir of foundDirs) {
+      i++
+      const pathWithConfig = path.resolve(suiteDir, 'config.ts')
+      console.log(`Generating types for config ${i} / ${foundDirs.length}:`, pathWithConfig)
+
+      // start a new node process which runs test/generateTypes with pathWithConfig as argument. Can't run it in this process, as there could otherwise be
+      // breakage between tests, as node can cache things in between runs.
+      // Make sure to wait until the process is done before starting the next one.
+      const child = spawn('tsx', ['test/generateTypes.ts', suiteDir])
+
+      child.stdout.setEncoding('utf8')
+      child.stdout.on('data', function (data) {
+        console.log(suiteDir + ' stdout: ' + data)
+      })
+
+      child.stderr.setEncoding('utf8')
+      child.stderr.on('data', function (data) {
+        console.log(suiteDir + ' stderr: ' + data)
+      })
+
+      child.on('close', function (code) {
+        console.log(suiteDir + ' closing code: ' + code)
+      })
+    }
+  }
 }
 
-let testDir
-if (testConfigDir) {
-  testDir = path.resolve(dirname, testConfigDir)
-
-  const config = await loadConfig(path.resolve(testDir, 'config.ts'))
-
-  setTestEnvPaths(testDir)
-  generateTypes(config)
-} else {
-  // Generate types for entire directory
-  testDir = dirname
-
-  const config = await loadConfig(path.resolve(testDir, 'config.ts'))
-
-  fs.readdirSync(dirname, { withFileTypes: true })
-    .filter((f) => f.isDirectory())
-    .forEach((dir) => {
-      const suiteDir = path.resolve(testDir, dir.name)
-      const configFound = setTestEnvPaths(suiteDir)
-      if (configFound) generateTypes(config)
-    })
-}
+void run()

@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'url'
 
 import { CLIENT_EXTENSIONS } from './clientExtensions.js'
 import { compile } from './compile.js'
+import { resolveOriginalPath } from './resolveOriginalPath.js'
 
 interface ResolveContext {
   conditions: string[]
@@ -115,7 +116,7 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
     return {
       format: resolvedIsTS ? 'ts' : undefined,
       shortCircuit: true,
-      url: pathToFileURL(resolvedModule.resolvedFileName).href,
+      url: pathToFileURL(await resolveOriginalPath(resolvedModule.resolvedFileName)).href, // The typescript module resolver does not resolve to the original path, but to the symlinked path, if present. This can cause issues
     }
   }
 

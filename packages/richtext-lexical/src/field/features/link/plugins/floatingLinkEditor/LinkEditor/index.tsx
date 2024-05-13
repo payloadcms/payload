@@ -23,6 +23,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../nodes/LinkNode.js'
+import type { LinkFields } from '../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
@@ -40,8 +41,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
-  const [linkUrl, setLinkUrl] = useState('')
-  const [linkLabel, setLinkLabel] = useState('')
+  const [linkUrl, setLinkUrl] = useState(null)
+  const [linkLabel, setLinkLabel] = useState(null)
 
   const { uuid } = useEditorConfigContext()
 
@@ -49,7 +50,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { i18n, t } = useTranslation()
 
-  const [stateData, setStateData] = useState<LinkPayload>(null)
+  const [stateData, setStateData] = useState<{} | (LinkFields & { text: string })>({})
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
@@ -63,78 +64,100 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     depth: editDepth,
   })
 
+  const setNotLink = useCallback(() => {
+    setIsLink(false)
+    if (editorRef && editorRef.current) {
+      editorRef.current.style.opacity = '0'
+      editorRef.current.style.transform = 'translate(-10000px, -10000px)'
+    }
+    setIsAutoLink(false)
+    setLinkUrl(null)
+    setLinkLabel(null)
+    setSelectedNodes([])
+    setStateData({})
+  }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
+
   const updateLinkEditor = useCallback(() => {
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined = null
 
+    if (!$isRangeSelection(selection) || !selection) {
+      setNotLink()
+      return
+    }
+
     // Handle the data displayed in the floating link editor & drawer when you click on a link node
-    if ($isRangeSelection(selection)) {
-      const focusNode = getSelectedNode(selection)
-      selectedNodeDomRect = editor.getElementByKey(focusNode.getKey())?.getBoundingClientRect()
-      const focusLinkParent: LinkNode = $findMatchingParent(focusNode, $isLinkNode)
 
-      // Prevent link modal from showing if selection spans further than the link: https://github.com/facebook/lexical/issues/4064
-      const badNode = selection
-        .getNodes()
-        .filter((node) => !$isLineBreakNode(node))
-        .find((node) => {
-          const linkNode = $findMatchingParent(node, $isLinkNode)
-          return (
-            (focusLinkParent && !focusLinkParent.is(linkNode)) ||
-            (linkNode && !linkNode.is(focusLinkParent))
-          )
-        })
+    const focusNode = getSelectedNode(selection)
+    selectedNodeDomRect = editor.getElementByKey(focusNode.getKey())?.getBoundingClientRect()
+    const focusLinkParent: LinkNode = $findMatchingParent(focusNode, $isLinkNode)
 
-      if (focusLinkParent == null || badNode) {
-        setIsLink(false)
-        setIsAutoLink(false)
-        setLinkUrl('')
-        setLinkLabel('')
-        setSelectedNodes([])
-        return
-      }
+    // Prevent link modal from showing if selection spans further than the link: https://github.com/facebook/lexical/issues/4064
+    const badNode = selection
+      .getNodes()
+      .filter((node) => !$isLineBreakNode(node))
+      .find((node) => {
+        const linkNode = $findMatchingParent(node, $isLinkNode)
+        return (
+          (focusLinkParent && !focusLinkParent.is(linkNode)) ||
+          (linkNode && !linkNode.is(focusLinkParent))
+        )
+      })
 
-      // Initial state:
-      const data: LinkPayload = {
-        fields: {
-          doc: undefined,
-          linkType: undefined,
-          newTab: undefined,
-          url: '',
-          ...focusLinkParent.getFields(),
-        },
-        text: focusLinkParent.getTextContent(),
-      }
+    if (focusLinkParent == null || badNode) {
+      setNotLink()
+      return
+    }
 
-      if (focusLinkParent.getFields()?.linkType === 'custom') {
-        setLinkUrl(focusLinkParent.getFields()?.url ?? '')
-        setLinkLabel('')
-      } else {
-        // internal link
+    // Initial state:
+    const data: LinkFields & { text: string } = {
+      doc: undefined,
+      linkType: undefined,
+      newTab: undefined,
+      url: '',
+      ...focusLinkParent.getFields(),
+      text: focusLinkParent.getTextContent(),
+    }
+
+    if (focusLinkParent.getFields()?.linkType === 'custom') {
+      setLinkUrl(focusLinkParent.getFields()?.url ?? null)
+      setLinkLabel(null)
+    } else {
+      // internal link
+      setLinkUrl(
+        `/admin/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
+          focusLinkParent.getFields()?.doc?.value
+        }`,
+      )
+
+      const relatedField = config.collections.find(
+        (coll) => coll.slug === focusLinkParent.getFields()?.doc?.relationTo,
+      )
+      if (!relatedField) {
+        // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
+        // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.
+        setLinkLabel(
+          focusLinkParent.getFields()?.label ? String(focusLinkParent.getFields()?.label) : null,
+        )
         setLinkUrl(
-          `/admin/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
-            focusLinkParent.getFields()?.doc?.value
-          }`,
+          focusLinkParent.getFields()?.url ? String(focusLinkParent.getFields()?.url) : null,
         )
-
-        const relatedField = config.collections.find(
-          (coll) => coll.slug === focusLinkParent.getFields()?.doc?.relationTo,
-        )
+      } else {
         const label = t('fields:linkedTo', {
           label: getTranslation(relatedField.labels.singular, i18n),
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(label)
       }
+    }
 
-      setStateData(data)
-      setIsLink(true)
-      setSelectedNodes(selection ? selection?.getNodes() : [])
+    setStateData(data)
+    setIsLink(true)
+    setSelectedNodes(selection ? selection?.getNodes() : [])
 
-      if ($isAutoLinkNode(focusLinkParent)) {
-        setIsAutoLink(true)
-      } else {
-        setIsAutoLink(false)
-      }
+    if ($isAutoLinkNode(focusLinkParent)) {
+      setIsAutoLink(true)
+    } else {
+      setIsAutoLink(false)
     }
 
     const editorElem = editorRef.current
@@ -148,7 +171,6 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     const rootElement = editor.getRootElement()
 
     if (
-      selection !== null &&
       nativeSelection !== null &&
       rootElement !== null &&
       rootElement.contains(nativeSelection.anchorNode)
@@ -167,12 +189,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       if (rootElement !== null) {
         setFloatingElemPositionForLinkEditor(null, editorElem, anchorElem)
       }
-      setLinkUrl('')
-      setLinkLabel('')
+      setLinkUrl(null)
+      setLinkLabel(null)
     }
 
     return true
-  }, [anchorElem, editor, config, t, i18n])
+  }, [editor, setNotLink, config.collections, t, i18n, anchorElem])
 
   useEffect(() => {
     return mergeRegister(
@@ -191,13 +213,6 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       ),
     )
   }, [editor, updateLinkEditor, toggleModal, drawerSlug])
-
-  useEffect(() => {
-    if (!isLink && editorRef) {
-      editorRef.current.style.opacity = '0'
-      editorRef.current.style.transform = 'translate(-10000px, -10000px)'
-    }
-  }, [isLink])
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
@@ -243,8 +258,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         KEY_ESCAPE_COMMAND,
         () => {
           if (isLink) {
-            setIsLink(false)
-            setIsAutoLink(false)
+            setNotLink()
+
             return true
           }
           return false
@@ -252,7 +267,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         COMMAND_PRIORITY_HIGH,
       ),
     )
-  }, [editor, updateLinkEditor, setIsLink, isLink])
+  }, [editor, updateLinkEditor, isLink, setNotLink])
 
   useEffect(() => {
     editor.getEditorState().read(() => {
@@ -264,9 +279,14 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     <React.Fragment>
       <div className="link-editor" ref={editorRef}>
         <div className="link-input">
-          <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-            {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
-          </a>
+          {linkUrl && linkUrl.length > 0 ? (
+            <a href={linkUrl} rel="noopener noreferrer" target="_blank">
+              {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
+            </a>
+          ) : linkLabel != null && linkLabel.length > 0 ? (
+            <span className="link-input__label-pure">{linkLabel}</span>
+          ) : null}
+
           {editor.isEditable() && (
             <React.Fragment>
               <button
@@ -304,9 +324,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         handleModalSubmit={(fields: FormState, data: Data) => {
           closeModal(drawerSlug)
 
-          const newLinkPayload: LinkPayload = data as LinkPayload
+          const newLinkPayload = data as LinkFields & { text: string }
 
-          newLinkPayload.selectedNodes = selectedNodes
+          const bareLinkFields: LinkFields = {
+            ...newLinkPayload,
+          }
+          delete bareLinkFields.text
 
           // See: https://github.com/facebook/lexical/pull/5536. This updates autolink nodes to link nodes whenever a change was made (which is good!).
           editor.update(() => {
@@ -322,7 +345,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
             if (linkParent && $isAutoLinkNode(linkParent)) {
               const linkNode = $createLinkNode({
-                fields: newLinkPayload.fields,
+                fields: bareLinkFields,
               })
               linkParent.replace(linkNode, true)
             }
@@ -330,7 +353,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
           // Needs to happen AFTER a potential auto link => link node conversion, as otherwise, the updated text to display may be lost due to
           // it being applied to the auto link node instead of the link node.
-          editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)
+          editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
+            fields: bareLinkFields,
+            selectedNodes,
+            text: newLinkPayload.text,
+          })
         }}
         stateData={stateData}
       />

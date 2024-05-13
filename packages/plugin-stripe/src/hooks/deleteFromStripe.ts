@@ -3,9 +3,10 @@ import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripePluginConfig } from '../types.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+// api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
 type HookArgsWithCustomCollection = Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'> & {
@@ -15,14 +16,14 @@ type HookArgsWithCustomCollection = Omit<Parameters<CollectionAfterDeleteHook>[0
 export type CollectionAfterDeleteHookWithArgs = (
   args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
-    stripeConfig?: StripeConfig
+    pluginConfig?: StripePluginConfig
   },
 ) => void
 
 export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) => {
-  const { collection, doc, req, stripeConfig } = args
+  const { collection, doc, pluginConfig, req } = args
 
-  const { logs, sync } = stripeConfig || {}
+  const { logs, sync } = pluginConfig || {}
 
   const { payload } = req
   const { slug: collectionSlug } = collection || {}

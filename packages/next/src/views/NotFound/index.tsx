@@ -7,7 +7,7 @@ import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { initPage } from '../../utilities/initPage.js'
+import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generatePageMetadata = async ({
@@ -46,10 +46,13 @@ export const NotFoundPage = async ({
     [key: string]: string | string[]
   }
 }) => {
+  const config = await configPromise
+  const { routes: { admin: adminRoute } = {} } = config
+
   const initPageResult = await initPage({
-    config: configPromise,
+    config,
     redirectUnauthenticatedUser: true,
-    route: '/not-found',
+    route: `${adminRoute}/not-found`,
     searchParams,
   })
 

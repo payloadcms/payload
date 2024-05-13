@@ -212,6 +212,7 @@ export const az: Language = {
       error: 'Xəta',
       errors: 'Xətalar',
       fallbackToDefaultLocale: 'Standart lokalə keçid',
+      false: 'Yalan',
       filter: 'Filter',
       filterWhere: '{{label}} filtrlə',
       filters: 'Filtərlər',
@@ -268,6 +269,7 @@ export const az: Language = {
       successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
       thisLanguage: 'Azərbaycan dili',
       titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
+      true: 'Doğru',
       unauthorized: 'İcazəsiz',
       unsavedChangesDuplicate:
         'Saxlanılmamış dəyişiklikləriniz var. Dublikatla davam etmək istəyirsiniz?',

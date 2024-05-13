@@ -1,12 +1,15 @@
 import type { PayloadRequestWithData } from 'payload/types'
 import type { Collection, Field, RichTextField } from 'payload/types'
 
+import { createDataloaderCacheKey } from 'payload/utilities'
+
 import type { AdapterArguments } from '../types.js'
 
 type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
+  draft: boolean
   field: RichTextField<any[], AdapterArguments, AdapterArguments>
   key: number | string
   overrideAccess?: boolean
@@ -20,6 +23,7 @@ export const populate = async ({
   currentDepth,
   data,
   depth,
+  draft,
   key,
   overrideAccess,
   req,
@@ -32,17 +36,18 @@ export const populate = async ({
   const dataRef = data as Record<string, unknown>
 
   const doc = await req.payloadDataLoader.load(
-    JSON.stringify([
-      req.transactionID,
-      collection.config.slug,
-      id,
+    createDataloaderCacheKey({
+      collectionSlug: collection.config.slug,
+      currentDepth: currentDepth + 1,
       depth,
-      currentDepth + 1,
-      req.locale,
-      req.fallbackLocale,
-      typeof overrideAccess === 'undefined' ? false : overrideAccess,
+      docID: id,
+      draft,
+      fallbackLocale: req.locale,
+      locale: req.fallbackLocale,
+      overrideAccess: typeof overrideAccess === 'undefined' ? false : overrideAccess,
       showHiddenFields,
-    ]),
+      transactionID: req.transactionID,
+    }),
   )
 
   if (doc) {

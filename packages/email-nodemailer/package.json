@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "3.0.0-beta.20",
+  "version": "3.0.0-beta.30",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -9,7 +9,7 @@
     "directory": "packages/email-nodemailer"
   },
   "license": "MIT",
-  "author": "Payload CMS, Inc.",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
