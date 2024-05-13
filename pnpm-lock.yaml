@@ -328,6 +328,9 @@ importers:
       '@types/node':
         specifier: 20.12.5
         version: 20.12.5
+      temp-dir:
+        specifier: 2.0.0
+        version: 2.0.0
 
   packages/db-mongodb:
     dependencies:

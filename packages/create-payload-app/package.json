@@ -55,6 +55,7 @@
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
-    "@types/node": "20.12.5"
+    "@types/node": "20.12.5",
+    "temp-dir": "2.0.0"
   }
 }
