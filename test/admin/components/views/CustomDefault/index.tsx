@@ -3,9 +3,9 @@ import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../../../../../packages/payload/types.js'
-
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+import type { AdminViewProps } from 'payload/types'
 
 import { Button } from '@payloadcms/ui/elements/Button'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'

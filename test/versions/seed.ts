@@ -1,16 +1,18 @@
 import { type Payload } from 'payload'
 
+import type { DraftPost } from './payload-types.js'
+
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { titleToDelete } from './shared.js'
 import { draftCollectionSlug } from './slugs.js'
 
 export async function seed(_payload: Payload, parallel: boolean = false) {
-  const blocksField = [
+  const blocksField: DraftPost['blocksField'] = [
     {
       blockType: 'block',
-      localized: 'text',
-      text: 'text',
+      localized: null,
+      text: 'Hello World',
     },
   ]
 
