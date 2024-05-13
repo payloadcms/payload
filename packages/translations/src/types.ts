@@ -155,7 +155,10 @@ export type LanguagePreference = {
   quality?: number
 }
 
-export type I18nClient = I18n<
-  ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
-  ClientTranslationKeys
+export type I18nClient<
+  AdditionalTranslations = {}, // Default to an empty object if no additional translations are provided
+  AdditionalKeys = {}, // Default to an empty object if no additional keys are provided
+> = I18n<
+  AdditionalTranslations & ReconstructObjectFromTranslationKeys<ClientTranslationKeys>, // Merge default keys with additional keys
+  AdditionalKeys & ClientTranslationKeys // Union of default and additional keys
 >
