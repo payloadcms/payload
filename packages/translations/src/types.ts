@@ -155,10 +155,20 @@ export type LanguagePreference = {
   quality?: number
 }
 
-export type I18nClient<
-  AdditionalTranslations = {}, // Default to an empty object if no additional translations are provided
-  AdditionalKeys = {}, // Default to an empty object if no additional keys are provided
-> = I18n<
-  AdditionalTranslations & ReconstructObjectFromTranslationKeys<ClientTranslationKeys>, // Merge default keys with additional keys
-  AdditionalKeys & ClientTranslationKeys // Union of default and additional keys
+export type I18nClient<AdditionalTranslations = {}, AdditionalKeys = ''> = I18n<
+  AdditionalTranslations extends object
+    ? ReconstructObjectFromTranslationKeys<ClientTranslationKeys> & AdditionalTranslations
+    : ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
+  AdditionalKeys extends number | string | symbol
+    ? AdditionalKeys | ClientTranslationKeys
+    : ClientTranslationKeys
+>
+
+export type I18nServer<AdditionalTranslations = {}, AdditionalKeys = ''> = I18n<
+  AdditionalTranslations extends object
+    ? DefaultTranslationsObject & AdditionalTranslations
+    : DefaultTranslationsObject,
+  AdditionalKeys extends number | string | symbol
+    ? AdditionalKeys | DefaultTranslationKeys
+    : DefaultTranslationKeys
 >
