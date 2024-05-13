@@ -12,7 +12,8 @@ on:
       - beta
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref_protected && github.sha || ''}}
   cancel-in-progress: true
 
 env:
