@@ -479,7 +479,7 @@ export const getTableColumnFromPath = ({
           if (typeof field.relationTo === 'string') {
             const relationshipConfig = adapter.payload.collections[field.relationTo].config
 
-             newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
+            newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
 
             // parent to relationship join table
             relationshipFields = relationshipConfig.fields
@@ -500,14 +500,12 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
-            const tableColumnsNames = field.relationTo.map(
-              (relationTo) =>{
-                const relationTableName =
-                  adapter.tableNameMap.get(
-                  toSnakeCase(adapter.payload.collections[relationTo].config.slug),
-                )
+            const tableColumnsNames = field.relationTo.map((relationTo) => {
+              const relationTableName = adapter.tableNameMap.get(
+                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+              )
 
-            return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+              return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
             })
             return {
               constraints,
@@ -576,10 +574,10 @@ export const getTableColumnFromPath = ({
               table: newAliasTable,
             })
           } else {
-            joins[newTableName] = eq(
-              adapter.tables[tableName][columnName],
-              adapter.tables[newTableName].id,
-            )
+            joinAliases.push({
+              condition: and(eq(newAliasTable.id, adapter.tables[tableName][columnName])),
+              table: newAliasTable,
+            })
           }
 
           return getTableColumnFromPath({
@@ -597,6 +595,14 @@ export const getTableColumnFromPath = ({
             tableName: newTableName,
             value,
           })
+        } else {
+          // simple relationship on id
+          return {
+            columnName: `${columnPrefix}${field.name}`,
+            constraints,
+            field,
+            table: adapter.tables[tableName],
+          }
         }
         break
       }
