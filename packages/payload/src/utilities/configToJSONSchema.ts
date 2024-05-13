@@ -466,7 +466,13 @@ export function fieldsToJSONSchema(
                   additionalProperties: false,
                   ...childSchema,
                 })
-                requiredFieldNames.add(tab.name)
+
+                // If the named tab has any required fields then we mark this as required otherwise it should be optional
+                const hasRequiredFields = tab.fields.some((subField) => fieldIsRequired(subField))
+
+                if (hasRequiredFields) {
+                  requiredFieldNames.add(tab.name)
+                }
               } else {
                 Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
                   fieldSchemas.set(propName, propSchema)
