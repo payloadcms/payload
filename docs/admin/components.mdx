@@ -565,10 +565,11 @@ These are the props that will be passed to your custom Label.
 #### Example
 
 ```tsx
+'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
-import { getTranslation } from 'payload/utilities/getTranslation'
 
 type Props = {
   htmlFor?: string
