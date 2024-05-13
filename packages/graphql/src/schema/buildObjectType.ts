@@ -490,9 +490,12 @@ function buildObjectType({
           if (editor?.populationPromises) {
             const fieldPromises = []
             const populationPromises = []
+            const populateDepth =
+              field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
             editor?.populationPromises({
               context,
-              depth,
+              depth: populateDepth,
               draft: args.draft,
               field,
               fieldPromises,

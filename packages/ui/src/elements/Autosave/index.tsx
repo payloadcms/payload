@@ -2,6 +2,7 @@
 // TODO: abstract the `next/navigation` dependency out from this component
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
+import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useAllFormFields, useFormModified } from '../../forms/Form/context.js'
@@ -34,6 +35,7 @@ export const Autosave: React.FC<Props> = ({
     serverURL,
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
+  const { reportUpdate } = useDocumentEvents()
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()
@@ -74,14 +76,17 @@ export const Autosave: React.FC<Props> = ({
 
         let url: string
         let method: string
+        let entitySlug: string
 
         if (collection && id) {
-          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+          entitySlug = collection.slug
+          url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
           method = 'PATCH'
         }
 
         if (globalDoc) {
-          url = `${serverURL}${api}/globals/${globalDoc.slug}?draft=true&autosave=true&locale=${localeRef.current}`
+          entitySlug = globalDoc.slug
+          url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
           method = 'POST'
         }
 
@@ -103,7 +108,13 @@ export const Autosave: React.FC<Props> = ({
               })
 
               if (res.status === 200) {
-                setLastSaved(new Date().getTime())
+                const newDate = new Date()
+                setLastSaved(newDate.getTime())
+                reportUpdate({
+                  id,
+                  entitySlug,
+                  updatedAt: newDate.toISOString(),
+                })
                 void getVersions()
               }
             }
@@ -115,7 +126,18 @@ export const Autosave: React.FC<Props> = ({
     }
 
     void autosave()
-  }, [i18n, debouncedFields, modified, serverURL, api, collection, globalDoc, id, getVersions])
+  }, [
+    i18n,
+    debouncedFields,
+    modified,
+    serverURL,
+    api,
+    collection,
+    globalDoc,
+    reportUpdate,
+    id,
+    getVersions,
+  ])
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

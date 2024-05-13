@@ -9,7 +9,6 @@ export const InlineToolbarFeature: FeatureProviderProviderServer<undefined, unde
     feature: () => {
       return {
         ClientComponent: InlineToolbarFeatureClientComponent,
-        clientFeatureProps: null,
         serverFeatureProps: props,
       }
     },

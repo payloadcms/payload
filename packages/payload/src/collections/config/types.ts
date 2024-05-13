@@ -14,6 +14,7 @@ import type {
   EditConfig,
   Endpoint,
   EntityDescription,
+  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
@@ -215,6 +216,8 @@ export type CollectionAdminOptions = {
      * Components within the edit view
      */
     edit?: {
+      Description?: EntityDescriptionComponent
+
       /**
        * Replaces the "Preview" button
        */

@@ -98,8 +98,8 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
   if (writeChangelog) {
     const changelogPath = 'CHANGELOG.md'
-    const changelog = await fse.readFile(changelogPath, 'utf8')
-    const newChangelog = changelog + '\n\n' + changelog
+    const existingChangelog = await fse.readFile(changelogPath, 'utf8')
+    const newChangelog = changelog + '\n\n' + existingChangelog
     await fse.writeFile(changelogPath, newChangelog)
     console.log(`Changelog updated at ${changelogPath}`)
   }
@@ -195,11 +195,17 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
   if (isBreaking && includeBreakingNotes) {
     // Parse breaking change notes from commit body
     const [rawNotes, _] = commit.body.split('\n\n')
-    const notes = rawNotes
+    let notes = rawNotes
       .split('\n')
       .map((l) => `> ${l}`)
       .join('\n')
       .trim()
+
+    // Remove random trailing quotes that sometimes appear
+    if (notes.endsWith('"')) {
+      notes = notes.slice(0, -1)
+    }
+
     formatted += `\n\n${notes}\n\n`
   }
 

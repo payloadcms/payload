@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "3.0.0-beta.24",
+  "version": "3.0.0-beta.30",
   "description": "Search plugin for Payload",
   "keywords": [
     "payload",
@@ -17,7 +17,7 @@
     "directory": "packages/plugin-search"
   },
   "license": "MIT",
-  "author": "dev@trbl.design",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
@@ -63,6 +63,11 @@
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
     },
     "main": "./dist/index.js",

@@ -8,7 +8,6 @@ export type RelationshipFieldProps = FormFieldBase & {
   allowCreate?: RelationshipField['admin']['allowCreate']
   hasMany?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   name: string
   relationTo?: RelationshipField['relationTo']
   sortOptions?: RelationshipField['admin']['sortOptions']

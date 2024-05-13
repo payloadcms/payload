@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase, Option, OptionObject } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
@@ -22,7 +22,6 @@ export type SelectFieldProps = FormFieldBase & {
   hasMany?: boolean
   isClearable?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   name?: string
   onChange?: (e: string) => void
   options?: Option[]

@@ -20,8 +20,7 @@ export const stripePlugin =
     // set config defaults here
     const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingStripeConfig,
-      // TODO: in the next major version, default this to `false`
-      rest: incomingStripeConfig?.rest ?? true,
+      rest: incomingStripeConfig?.rest ?? false,
       sync: incomingStripeConfig?.sync || [],
     }
 

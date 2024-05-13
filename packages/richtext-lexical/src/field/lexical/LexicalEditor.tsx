@@ -58,7 +58,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
         COMMAND_PRIORITY_LOW,
       ),
     )
-  }, [editor, editorConfig, editorFocus])
+  }, [editor, editorConfig, editorConfigContext, editorFocus])
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
 
@@ -84,7 +84,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'top') {
-          return <EditorPlugin key={plugin.key} plugin={plugin} />
+          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
       <RichTextPlugin
@@ -127,7 +127,12 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
               !(plugin.desktopOnly === true && isSmallWidthViewport)
             ) {
               return (
-                <EditorPlugin anchorElem={floatingAnchorElem} key={plugin.key} plugin={plugin} />
+                <EditorPlugin
+                  anchorElem={floatingAnchorElem}
+                  clientProps={plugin.clientProps}
+                  key={plugin.key}
+                  plugin={plugin}
+                />
               )
             }
           })}
@@ -148,12 +153,12 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
-          return <EditorPlugin key={plugin.key} plugin={plugin} />
+          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'bottom') {
-          return <EditorPlugin key={plugin.key} plugin={plugin} />
+          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
     </React.Fragment>

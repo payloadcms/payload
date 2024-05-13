@@ -23,7 +23,7 @@ type MetaImageProps = UploadInputProps & {
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { CustomLabel, hasGenerateImageFn, labelProps, relationTo, required } = props || {}
+  const { CustomLabel, hasGenerateImageFn, label, labelProps, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 
@@ -77,7 +77,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

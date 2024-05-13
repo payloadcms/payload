@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/config'
+import type { Payload } from 'payload'
 
 import React from 'react'
 
@@ -33,9 +33,9 @@ const PayloadLogo: React.FC = () => (
 )
 
 export const Logo: React.FC<{
-  config: SanitizedConfig
+  payload: Payload
 }> = (props) => {
-  const { config } = props
+  const { payload } = props
 
   const {
     admin: {
@@ -45,7 +45,13 @@ export const Logo: React.FC<{
         },
       } = {},
     } = {},
-  } = config
+  } = payload.config
 
-  return <RenderCustomComponent CustomComponent={CustomLogo} DefaultComponent={PayloadLogo} />
+  return (
+    <RenderCustomComponent
+      CustomComponent={CustomLogo}
+      DefaultComponent={PayloadLogo}
+      payload={payload}
+    />
+  )
 }

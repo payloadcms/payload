@@ -128,8 +128,10 @@ const Component: React.FC<ElementProps> = (props) => {
         if (event.shiftKey) {
           setSelected(!isSelected)
         } else {
-          clearSelection()
-          setSelected(true)
+          if (!isSelected) {
+            clearSelection()
+            setSelected(true)
+          }
         }
         return true
       }
@@ -163,7 +165,16 @@ const Component: React.FC<ElementProps> = (props) => {
         <div className={`${baseClass}__topRow`}>
           {/* TODO: migrate to use @payloadcms/ui/elements/Thumbnail component */}
           <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <File />}
+            {thumbnailSRC ? (
+              <img
+                alt={data?.filename}
+                data-lexical-upload-id={value}
+                data-lexical-upload-relation-to={relationTo}
+                src={thumbnailSRC}
+              />
+            ) : (
+              <File />
+            )}
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>

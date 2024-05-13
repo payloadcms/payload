@@ -22,7 +22,6 @@ import './index.scss'
 
 export type NumberFieldProps = FormFieldBase & {
   hasMany?: boolean
-  label?: FieldBase['label']
   max?: number
   maxRows?: number
   min?: number

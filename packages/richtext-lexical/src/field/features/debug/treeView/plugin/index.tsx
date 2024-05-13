@@ -3,9 +3,11 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { TreeView } from '@lexical/react/LexicalTreeView.js'
 import * as React from 'react'
 
+import type { PluginComponent } from '../../../types.js'
+
 import './index.scss'
 
-export function TreeViewPlugin(): React.ReactNode {
+export const TreeViewPlugin: PluginComponent<undefined> = () => {
   const [editor] = useLexicalComposerContext()
   return (
     <TreeView

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
+import type { PluginComponentWithAnchor } from '../../../types.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -179,7 +180,7 @@ function InlineToolbar({
         floatingToolbarRef.current.style.pointerEvents = 'auto'
       }
     }
-  }, [floatingToolbarRef])
+  }, [])
 
   useEffect(() => {
     document.addEventListener('mousemove', mouseMoveListener)
@@ -200,6 +201,12 @@ function InlineToolbar({
       return
     }
 
+    const possibleLinkEditor = anchorElem.querySelector(':scope > .link-editor')
+    const isLinkEditorVisible =
+      possibleLinkEditor !== null &&
+      'style' in possibleLinkEditor &&
+      possibleLinkEditor?.style?.['opacity'] === '1'
+
     const rootElement = editor.getRootElement()
     if (
       selection !== null &&
@@ -211,28 +218,31 @@ function InlineToolbar({
       const rangeRect = getDOMRangeRect(nativeSelection, rootElement)
 
       // Position floating toolbar
-      const offsetIfFlipped = setFloatingElemPosition(
-        rangeRect, // selection to position around
-        floatingToolbarRef.current, // what to position
-        anchorElem, // anchor elem
-        'center',
-      )
+      const offsetIfFlipped = setFloatingElemPosition({
+        alwaysDisplayOnTop: isLinkEditorVisible,
+        anchorElem,
+        floatingElem: floatingToolbarRef.current,
+        horizontalPosition: 'center',
+        targetRect: rangeRect,
+      })
 
       // Position caret
       if (caretRef.current) {
-        setFloatingElemPosition(
-          rangeRect, // selection to position around
-          caretRef.current, // what to position
-          floatingToolbarRef.current, // anchor elem
-          'center',
-          10,
-          5,
-          true,
-          offsetIfFlipped,
-        )
+        setFloatingElemPosition({
+          anchorElem: floatingToolbarRef.current,
+          anchorFlippedOffset: offsetIfFlipped,
+          floatingElem: caretRef.current,
+          horizontalOffset: 5,
+          horizontalPosition: 'center',
+          specialHandlingForCaret: true,
+          targetRect: rangeRect,
+          verticalGap: 10,
+        })
       }
+    } else {
+      closeFloatingToolbar()
     }
-  }, [editor, anchorElem])
+  }, [editor, closeFloatingToolbar, anchorElem])
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
@@ -385,11 +395,7 @@ function useInlineToolbar(
   return createPortal(<InlineToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
 }
 
-export function InlineToolbarPlugin({
-  anchorElem = document.body,
-}: {
-  anchorElem?: HTMLElement
-}): React.ReactElement | null {
+export const InlineToolbarPlugin: PluginComponentWithAnchor<undefined> = ({ anchorElem }) => {
   const [editor] = useLexicalComposerContext()
 
   return useInlineToolbar(editor, anchorElem)

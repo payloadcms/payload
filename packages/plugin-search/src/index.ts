@@ -1,18 +1,18 @@
 import type { Config } from 'payload/config'
 
-import type { PluginConfig } from './types.js'
+import type { SearchPluginConfig } from './types.js'
 
 import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
 import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
 
 export const searchPlugin =
-  (incomingPluginConfig: PluginConfig) =>
+  (incomingPluginConfig: SearchPluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     if (collections) {
-      const pluginConfig: PluginConfig = {
+      const pluginConfig: SearchPluginConfig = {
         ...incomingPluginConfig,
         deleteDrafts: true,
         syncDrafts: false,
