@@ -113,6 +113,8 @@ type Admin = {
   condition?: Condition
   description?: Description
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -387,6 +389,8 @@ export type UIField = {
     }
     condition?: Condition
     disableBulkEdit?: boolean
+    disableListColumn?: boolean
+    disableListFilter?: boolean
     position?: string
     width?: string
   }
@@ -547,16 +551,12 @@ export type RichTextField<
     }
   }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
-
-export type RichTextFieldRequiredEditor<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
-> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor: RichTextAdapter<Value, AdapterProps, ExtraProperties>
-}
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
@@ -564,6 +564,10 @@ export type ArrayField = FieldBase & {
       RowLabel?: RowLabel
     } & Admin['components']
     initCollapsed?: boolean | false
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   /**
    * Customize the SQL table name
@@ -631,6 +635,10 @@ export type Block = {
 export type BlockField = FieldBase & {
   admin?: Admin & {
     initCollapsed?: boolean | false
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown
@@ -666,10 +674,6 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
-
-export type FieldWithRichTextRequiredEditor =
-  | Exclude<Field, RichTextField>
-  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField

@@ -55,6 +55,7 @@ const RadioGroup: React.FC<Props> = (props) => {
       onChange={readOnly ? undefined : setValue}
       options={options}
       path={path}
+      readOnly={readOnly}
       required={required}
       showError={showError}
       style={style}

@@ -45,6 +45,7 @@ export function LinkEditor({
   disabledCollections,
   enabledCollections,
   fields: customFieldSchema,
+  maxDepth,
 }: { anchorElem: HTMLElement } & LinkFeatureProps): JSX.Element {
   const [editor] = useLexicalComposerContext()
 
@@ -71,6 +72,7 @@ export function LinkEditor({
       i18n,
       enabledCollections,
       disabledCollections,
+      maxDepth,
     )
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []

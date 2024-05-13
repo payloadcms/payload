@@ -1,3 +1,53 @@
+## [2.16.1](https://github.com/payloadcms/payload/compare/v2.16.0...v2.16.1) (2024-05-07)
+
+
+### Features
+
+* **richtext-lexical:** add maxDepth property to various lexical features ([#6250](https://github.com/payloadcms/payload/issues/6250)) ([857b9a4](https://github.com/payloadcms/payload/commit/857b9a4ac3236c740458750f156a3a4274eda210)), closes [#6242](https://github.com/payloadcms/payload/issues/6242)
+
+
+### Bug Fixes
+
+* **richtext-lexical:** export missing HorizontalRuleFeature ([#6236](https://github.com/payloadcms/payload/issues/6236)) ([f829b08](https://github.com/payloadcms/payload/commit/f829b084ba9649ef596cce4a7bf6ae8c7ccf57e3))
+
+## [2.16.0](https://github.com/payloadcms/payload/compare/v2.15.0...v2.16.0) (2024-05-06)
+
+
+### Features
+
+* adds disableListColumn, disableListFilter to fields admin props ([#6188](https://github.com/payloadcms/payload/issues/6188)) ([db4aace](https://github.com/payloadcms/payload/commit/db4aacebb801f1cc11ef8732f9f3b78475256641))
+
+
+### Bug Fixes
+
+* graphql upload relations returning null ([#6233](https://github.com/payloadcms/payload/issues/6233)) ([cac52da](https://github.com/payloadcms/payload/commit/cac52da638a0df4356120a2f61c6aaf25641a5ad))
+* hide drag handles when `admin.isSortable: false` ([#6225](https://github.com/payloadcms/payload/issues/6225)) ([622cdb0](https://github.com/payloadcms/payload/commit/622cdb044002b2c3182c3b0432b51befbfb9b979))
+* **plugin-form-builder:** hook overrides not working as intended ([#6203](https://github.com/payloadcms/payload/issues/6203)) ([b735d6a](https://github.com/payloadcms/payload/commit/b735d6aa169acca8cb638859d2c8ba43e315f02c))
+
+## [2.15.0](https://github.com/payloadcms/payload/compare/v2.14.2...v2.15.0) (2024-05-03)
+
+
+### Features
+
+* add isSortable to arrays and blocks ([#5962](https://github.com/payloadcms/payload/issues/5962)) ([5c58bd3](https://github.com/payloadcms/payload/commit/5c58bd322da966fe610959df13dfd49add35a2ef))
+* use filterOptions in list relationship filter ([#6156](https://github.com/payloadcms/payload/issues/6156)) ([23f3eb1](https://github.com/payloadcms/payload/commit/23f3eb1cf0b75a4044319d7cd3e5000d5b4e42c4))
+
+
+### Bug Fixes
+
+* bulk publish from collection list ([#6063](https://github.com/payloadcms/payload/issues/6063)) ([84570e6](https://github.com/payloadcms/payload/commit/84570e6e3bbb81fcae80da92b01bc56d09906072))
+* cascade draft arg in nested GraphQL relationship queries ([#6141](https://github.com/payloadcms/payload/issues/6141)) ([a8ac8b4](https://github.com/payloadcms/payload/commit/a8ac8b463349664f3188ae77217f037da72f796b))
+* GraphQL nested relationships not respecting req locale ([#6117](https://github.com/payloadcms/payload/issues/6117)) ([3fccd34](https://github.com/payloadcms/payload/commit/3fccd34abe5a332f88f5e950b755cd1d21441fb6))
+* hide unusable fields from collection filter select ([#6135](https://github.com/payloadcms/payload/issues/6135)) ([2be5ad0](https://github.com/payloadcms/payload/commit/2be5ad0ebafd1d3c1c0567e2085ccfd593f18271))
+* incorrect `localesNotSaved` translation ([#5996](https://github.com/payloadcms/payload/issues/5996)) ([af67749](https://github.com/payloadcms/payload/commit/af67749e49db92e675b63b52190e562468894706))
+* **plugin-cloud:** purge cache for all sizes ([#5301](https://github.com/payloadcms/payload/issues/5301)) ([831f1ff](https://github.com/payloadcms/payload/commit/831f1ff5bed7e083cc076e9eb5ff9a2b2f1ed710))
+* properly adds `readonly` styles to disabled `radio` fields ([#6176](https://github.com/payloadcms/payload/issues/6176)) ([9b7e62d](https://github.com/payloadcms/payload/commit/9b7e62dc20dca7402c6c68dfb8a5995c211993af))
+* resets filter state when param state change within route ([#6169](https://github.com/payloadcms/payload/issues/6169)) ([6e38cc2](https://github.com/payloadcms/payload/commit/6e38cc2bcfb08b608abcb6aac4b4c1f6eea63428))
+* **richtext-lexical:** drag and add block handles disappear too quickly for smaller screen sizes. ([#6145](https://github.com/payloadcms/payload/issues/6145)) ([24f6972](https://github.com/payloadcms/payload/commit/24f697219b5071d91a5c37aafb50e2d823b68d4c))
+* **richtext-lexical:** floating toolbar caret positioned incorrectly for some line heights ([#6151](https://github.com/payloadcms/payload/issues/6151)) ([36b1f5a](https://github.com/payloadcms/payload/commit/36b1f5a763f782c140e62aa062b4077d6efd0738))
+* sanitizes fields in default edit view for drawer content ([#6175](https://github.com/payloadcms/payload/issues/6175)) ([43dab5c](https://github.com/payloadcms/payload/commit/43dab5c7053831a0c71f3a6860113f653cab674f))
+* version restoration ([#6039](https://github.com/payloadcms/payload/issues/6039)) ([91bac9c](https://github.com/payloadcms/payload/commit/91bac9c0aa1ff3da052b9c2ad83fa5ac23a16d1d))
+
 ## [2.14.2](https://github.com/payloadcms/payload/compare/v2.14.1...v2.14.2) (2024-04-26)
 
 

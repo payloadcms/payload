@@ -353,6 +353,30 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'cyclical-relationship',
         },
+        {
+          name: 'relationToSelfPoly',
+          type: 'relationship',
+          relationTo: ['cyclical-relationship'],
+        },
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: 'media',
+        },
+      ],
+      versions: {
+        drafts: true,
+      },
+    },
+    {
+      slug: 'media',
+      access: openAccess,
+      upload: true,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
       ],
     },
   ],
