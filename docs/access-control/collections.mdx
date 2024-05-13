@@ -3,7 +3,7 @@ title: Collection Access Control
 label: Collections
 order: 20
 desc: With Collection-level Access Control you can define which users can create, read, update or delete Collections.
-keywords: collections, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: collections, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 You can define Collection-level Access Control within each Collection's `access` property. All Access Control functions accept one `args` argument.
@@ -51,10 +51,10 @@ Returns a boolean which allows/denies access to the `create` request.
 
 **Available argument properties:**
 
-| Option     | Description                                                                |
-| ---------- | -------------------------------------------------------------------------- |
-| **`req`**  | The Express `request` object containing the currently authenticated `user` |
-| **`data`** | The data passed to create the document with.                               |
+| Option     | Description                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`data`** | The data passed to create the document with.                                                                                 |
 
 **Example:**
 
@@ -80,7 +80,7 @@ Read access functions can return a boolean result or optionally return a [query 
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`id`**  | `id` of document requested, if within `findByID`                           |
 
 **Example:**
@@ -111,7 +111,7 @@ Update access functions can return a boolean result or optionally return a [quer
 
 | Option     | Description                                                                |
 | ---------- | -------------------------------------------------------------------------- |
-| **`req`**  | The Express `request` object containing the currently authenticated `user` |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`id`**   | `id` of document requested to update                                       |
 | **`data`** | The data passed to update the document with                                |
 
@@ -138,7 +138,7 @@ Similarly to the Update function, returns a boolean or a [query constraint](/doc
 
 | Option    | Description                                                                                         |
 | --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user |
 | **`id`**  | `id` of document requested to delete                                                                |
 
 **Example:**
@@ -173,7 +173,7 @@ If the Collection is [used to access the Payload Admin panel](/docs/admin/overvi
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 
 ### Unlock
 
@@ -183,4 +183,4 @@ Determines which users can [unlock](/docs/authentication/operations#unlock) othe
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
