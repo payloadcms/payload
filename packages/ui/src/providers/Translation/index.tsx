@@ -1,6 +1,11 @@
 'use client'
+import type {
+  AcceptedLanguages,
+  Language,
+  ReconstructObjectFromTranslationKeys,
+  TFunction,
+} from '@payloadcms/translations'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
-import type { Language } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
 import type { ClientConfig } from 'payload/types'
 
@@ -16,17 +21,20 @@ export type LanguageOptions = {
   value: string
 }[]
 
-type ContextType = {
-  i18n: I18nClient
+type ContextType<TAdditionalClientTranslationKeys extends string = never> = {
+  i18n: TAdditionalClientTranslationKeys extends never
+    ? I18nClient
+    : I18nClient<
+        ReconstructObjectFromTranslationKeys<TAdditionalClientTranslationKeys>,
+        TAdditionalClientTranslationKeys
+      >
   languageOptions: LanguageOptions
-  switchLanguage?: (lang: string) => Promise<void>
-  t: <TranslationKeys = ClientTranslationKeys>(
-    key: TranslationKeys,
-    vars?: Record<string, any>,
-  ) => string
+  switchLanguage?: (lang: AcceptedLanguages) => Promise<void>
+  t: TFunction<ClientTranslationKeys | Extract<TAdditionalClientTranslationKeys, string>>
 }
 
-const Context = createContext<ContextType>({
+const Context = createContext<ContextType<any>>({
+  // Use `any` here to be replaced later with a more specific type when used
   i18n: {
     dateFNS: enUS,
     dateFNSKey: 'en-US',
@@ -113,4 +121,5 @@ export const TranslationProvider: React.FC<Props> = ({
   )
 }
 
-export const useTranslation = () => useContext(Context)
+export const useTranslation = <TAdditionalClientTranslationKeys extends string = never>() =>
+  useContext<ContextType<TAdditionalClientTranslationKeys>>(Context)
