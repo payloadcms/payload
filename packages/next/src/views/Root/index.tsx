@@ -87,7 +87,10 @@ export const RootPage = async ({
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
-        <DefaultTemplate config={config} visibleEntities={initPageResult.visibleEntities}>
+        <DefaultTemplate
+          payload={initPageResult?.req.payload}
+          visibleEntities={initPageResult.visibleEntities}
+        >
           {RenderedView}
         </DefaultTemplate>
       )}

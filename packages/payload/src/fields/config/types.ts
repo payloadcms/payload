@@ -121,6 +121,9 @@ type Admin = {
     Cell?: CustomComponent
     Description?: DescriptionComponent
     Field?: CustomComponent
+    /**
+     * The Filter component has to be a client component
+     */
     Filter?: React.ComponentType<any>
   }
   /**
@@ -447,6 +450,9 @@ export type UIField = {
     components?: {
       Cell?: CustomComponent
       Field: CustomComponent
+      /**
+       * The Filter component has to be a client component
+       */
       Filter?: React.ComponentType<any>
     }
     condition?: Condition

@@ -18,6 +18,7 @@ export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params 
 
   const {
     payload: { config },
+    payload,
   } = req
 
   const {
@@ -42,7 +43,7 @@ export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params 
   return (
     <React.Fragment>
       <div className={`${verifyBaseClass}__brand`}>
-        <Logo config={config} />
+        <Logo payload={payload} />
       </div>
       <h2>{textToRender}</h2>
     </React.Fragment>
