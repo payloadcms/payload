@@ -54,7 +54,9 @@ export const init: Init = function init(this: PostgresAdapter) {
     })
 
     if (collection.versions) {
-      const versionsTableName = this.tableNameMap.get(`_${tableName}${this.versionsSuffix}`)
+      const versionsTableName = this.tableNameMap.get(
+        `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
+      )
       const versionFields = buildVersionCollectionFields(collection)
 
       buildTable({
