@@ -200,6 +200,7 @@ export const enTranslations = {
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'Deleted successfully.',
     deleting: 'Deleting...',
+    depth: 'Depth',
     descending: 'Descending',
     deselectAllRows: 'Deselect all rows',
     document: 'Document',
