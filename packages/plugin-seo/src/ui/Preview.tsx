@@ -8,15 +8,15 @@ import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useEffect, useState } from 'react'
 
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 import type { GenerateURL } from '../types.js'
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type PreviewProps = UIField & {
   hasGenerateURLFn: boolean
 }
 
 export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
