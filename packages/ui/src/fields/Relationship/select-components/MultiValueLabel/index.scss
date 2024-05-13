@@ -34,5 +34,9 @@
     &:hover {
       background-color: var(--theme-elevation-100);
     }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
   }
 }

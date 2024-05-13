@@ -2,8 +2,15 @@
 
 .dropdown-indicator {
   cursor: pointer;
+  @include btn-reset;
 
   &:focus-visible {
     outline: var(--accessibility-outline);
+  }
+
+  &__icon {
+    .stroke {
+      stroke-width: 1px;
+    }
   }
 }
