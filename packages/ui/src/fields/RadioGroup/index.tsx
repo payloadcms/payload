@@ -138,6 +138,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
                 }}
                 option={optionIsObject(option) ? option : { label: option, value: option }}
                 path={path}
+                readOnly={readOnly}
                 uuid={uuid}
               />
             </li>

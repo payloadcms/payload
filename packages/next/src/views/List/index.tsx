@@ -142,6 +142,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
                 CustomComponent={CustomListView}
                 DefaultComponent={DefaultListView}
                 componentProps={viewComponentProps}
+                payload={payload}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

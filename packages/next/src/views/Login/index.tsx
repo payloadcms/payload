@@ -48,7 +48,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, searchPara
   return (
     <Fragment>
       <div className={`${loginBaseClass}__brand`}>
-        <Logo config={config} />
+        <Logo payload={payload} />
       </div>
       {Array.isArray(BeforeLogins) && BeforeLogins.map((Component) => Component)}
       {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
