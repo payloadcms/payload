@@ -21,19 +21,24 @@ export type LanguageOptions = {
   value: string
 }[]
 
-type ContextType<TAdditionalClientTranslationKeys extends string = never> = {
+type ContextType<
+  TAdditionalTranslations = {},
+  TAdditionalClientTranslationKeys extends string = never,
+> = {
   i18n: TAdditionalClientTranslationKeys extends never
     ? I18nClient
-    : I18nClient<
-        ReconstructObjectFromTranslationKeys<TAdditionalClientTranslationKeys>,
-        TAdditionalClientTranslationKeys
-      >
+    : TAdditionalTranslations extends object
+      ? I18nClient<TAdditionalTranslations, TAdditionalClientTranslationKeys>
+      : I18nClient<
+          ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
+          TAdditionalClientTranslationKeys
+        >
   languageOptions: LanguageOptions
   switchLanguage?: (lang: AcceptedLanguages) => Promise<void>
   t: TFunction<ClientTranslationKeys | Extract<TAdditionalClientTranslationKeys, string>>
 }
 
-const Context = createContext<ContextType<any>>({
+const Context = createContext<ContextType<any, any>>({
   // Use `any` here to be replaced later with a more specific type when used
   i18n: {
     dateFNS: enUS,
@@ -121,5 +126,7 @@ export const TranslationProvider: React.FC<Props> = ({
   )
 }
 
-export const useTranslation = <TAdditionalClientTranslationKeys extends string = never>() =>
-  useContext<ContextType<TAdditionalClientTranslationKeys>>(Context)
+export const useTranslation = <
+  TAdditionalTranslations = {},
+  TAdditionalClientTranslationKeys extends string = never,
+>() => useContext<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)

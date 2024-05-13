@@ -155,16 +155,19 @@ export type LanguagePreference = {
   quality?: number
 }
 
-export type I18nClient<AdditionalTranslations = {}, AdditionalKeys extends string = never> = I18n<
-  AdditionalTranslations extends object
-    ? ReconstructObjectFromTranslationKeys<ClientTranslationKeys> & AdditionalTranslations
+export type I18nClient<TAdditionalTranslations = {}, TAdditionalKeys extends string = never> = I18n<
+  TAdditionalTranslations extends object
+    ? ReconstructObjectFromTranslationKeys<ClientTranslationKeys> & TAdditionalTranslations
     : ReconstructObjectFromTranslationKeys<ClientTranslationKeys>,
-  AdditionalKeys extends never ? ClientTranslationKeys : AdditionalKeys | ClientTranslationKeys
+  [TAdditionalKeys] extends [never]
+    ? ClientTranslationKeys
+    : ClientTranslationKeys | TAdditionalKeys
 >
-
-export type I18nServer<AdditionalTranslations = {}, AdditionalKeys extends string = never> = I18n<
-  AdditionalTranslations extends object
-    ? DefaultTranslationsObject & AdditionalTranslations
+export type I18nServer<TAdditionalTranslations = {}, TAdditionalKeys extends string = never> = I18n<
+  TAdditionalTranslations extends object
+    ? DefaultTranslationsObject & TAdditionalTranslations
     : DefaultTranslationsObject,
-  AdditionalKeys extends never ? DefaultTranslationKeys : AdditionalKeys | DefaultTranslationKeys
+  [TAdditionalKeys] extends [never]
+    ? DefaultTranslationKeys
+    : DefaultTranslationKeys | TAdditionalKeys
 >
