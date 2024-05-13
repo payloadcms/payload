@@ -10,11 +10,10 @@ export const generateNotFoundMeta = ({
 }: {
   config: SanitizedConfig
   i18n: I18n
-}): Promise<Metadata> => {
-  return meta({
+}): Promise<Metadata> =>
+  meta({
     config,
     description: i18n.t('general:pageNotFound'),
     keywords: `404 ${i18n.t('general:notFound')}`,
     title: i18n.t('general:notFound'),
   })
-}
