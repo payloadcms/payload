@@ -1,3 +1,5 @@
+import type { Readable } from 'stream'
+
 import Busboy from 'busboy'
 import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
@@ -39,6 +41,12 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     headersObject[name] = value
   })
 
+  function abortAndDestroyFile(file: Readable, err: APIError) {
+    file.removeAllListeners('data')
+    file.resume()
+    return file.destroy(err)
+  }
+
   const busboy = Busboy({ ...options, headers: headersObject })
 
   // Build multipart req.body fields
@@ -67,13 +75,15 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       : getWritePromise()
 
     const uploadTimer = createUploadTimer(options.uploadTimeout, () => {
-      file.removeAllListeners('data')
-      file.resume()
-      const err = new Error(`Upload timeout for ${field}->${filename}, bytes:${getFileSize()}`)
-      return file.destroy(err)
+      return abortAndDestroyFile(
+        file,
+        new APIError(`Upload timeout for ${field}->${filename}, bytes:${getFileSize()}`),
+      )
     })
 
     file.on('limit', () => {
+      fileCount -= 1
+
       debugLog(options, `Size limit reached for ${field}->${filename}, bytes:${getFileSize()}`)
       uploadTimer.clear()
 
@@ -83,12 +93,14 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
 
       // Return error and cleanup files if abortOnLimit set.
       if (options.abortOnLimit) {
-        debugLog(options, `Aborting upload because of size limit ${field}->${filename}.`)
+        debugLog(options, `Upload file size limit reached ${field}->${filename}.`)
         cleanup()
-        parsingRequest = false
-        throw new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
-          size: getFileSize(),
-        })
+        return abortAndDestroyFile(
+          file,
+          new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+            size: getFileSize(),
+          }),
+        )
       }
     })
 
@@ -103,6 +115,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       uploadTimer.clear()
 
       if (!name && size === 0) {
+        fileCount -= 1
         if (options.useTempFiles) {
           cleanup()
           debugLog(options, `Removing the empty file ${field}->${filename}`)
@@ -172,10 +185,10 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     return result
   })
 
-  busboy.on('error', (err) => {
+  busboy.on('error', (err: APIError) => {
     debugLog(options, `Busboy error`)
     parsingRequest = false
-    throw new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
+    throw err || new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
   })
 
   const reader = request.body.getReader()
