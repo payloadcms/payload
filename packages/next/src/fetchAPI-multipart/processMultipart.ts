@@ -44,7 +44,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   function abortAndDestroyFile(file: Readable, err: APIError) {
     file.removeAllListeners('data')
     file.resume()
-    return file.destroy(err)
+    file.destroy(err)
+    failedResolvingFiles(err)
   }
 
   const busboy = Busboy({ ...options, headers: headersObject })
@@ -82,8 +83,6 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     })
 
     file.on('limit', () => {
-      fileCount -= 1
-
       debugLog(options, `Size limit reached for ${field}->${filename}, bytes:${getFileSize()}`)
       uploadTimer.clear()
 
@@ -206,7 +205,10 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     }
   }
 
-  if (fileCount !== 0) await allFilesComplete
+  if (fileCount !== 0)
+    await allFilesComplete.catch((e) => {
+      throw e
+    })
 
   return result
 }
