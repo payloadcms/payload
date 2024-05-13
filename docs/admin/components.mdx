@@ -680,21 +680,21 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 
 ### Getting the current language
 
-When developing custom components you can support multiple languages to be consistent with Payload's i18n support. The best way to do this is to add your translation resources to the [i18n configuration](https://payloadcms.com/docs/configuration/i18n) and import `useTranslation` from `react-i18next` in your components.
+When developing custom components you can support multiple languages to be consistent with Payload's i18n support. The best way to do this is to add your translation resources to the [i18n configuration](https://payloadcms.com/docs/configuration/i18n) and import `useTranslation` from `@payloadcms/ui/providers/Translation` in your components.
 
 For example:
 
 ```tsx
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
 const CustomComponent: React.FC = () => {
   // highlight-start
-  const { t, i18n } = useTranslation('namespace1')
+  const { t, i18n } = useTranslation()
   // highlight-end
 
   return (
     <ul>
-      <li>{t('key', { variable: 'value' })}</li>
+      <li>{t('namespace1key', { variable: 'value' })}</li>
       <li>{t('namespace2:key', { variable: 'value' })}</li>
       <li>{i18n.language}</li>
     </ul>
