@@ -3,7 +3,7 @@ title: The Payload Config
 label: Overview
 order: 10
 desc: The Payload config is central to everything that Payload does, from adding custom React components, to modifying collections, controlling localization and much more.
-keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Payload is a _config-based_, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more.
@@ -38,7 +38,6 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 | `upload`              | Base Payload upload configuration. [More](/docs/upload/overview#payload-wide-upload-options).                                                                                      |
 | `routes`              | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`.                                                            |
 | `email`               | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#configuration)                         |
-| `express`             | Express-specific middleware options such as compression and JSON parsing. [More](/docs/configuration/express)                                                                      |
 | `debug`               | Enable to expose more detailed error information.                                                                                                                                  |
 | `telemetry`           | Disable Payload telemetry by passing `false`. [More](/docs/configuration/overview#telemetry)                                                                                       |
 | `rateLimit`           | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more](/docs/production/preventing-abuse#rate-limiting-requests).                       |
