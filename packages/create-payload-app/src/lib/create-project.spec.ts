@@ -2,25 +2,22 @@ import fse from 'fs-extra'
 import path from 'path'
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { createProject } from './create-project.js'
-import { fileURLToPath } from 'node:url'
 import { dbReplacements } from './packages.js'
 import { getValidTemplates } from './templates.js'
 import globby from 'globby'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import tempDirectory from 'temp-dir'
 
-const projectDir = path.resolve(dirname, './tmp')
 describe('createProject', () => {
+  let projectDir: string
   beforeAll(() => {
     console.log = jest.fn()
   })
 
   beforeEach(() => {
-    if (fse.existsSync(projectDir)) {
-      fse.rmdirSync(projectDir, { recursive: true })
-    }
+    projectDir = `${tempDirectory}/${Math.random().toString(36).substring(7)}`
   })
+
   afterEach(() => {
     if (fse.existsSync(projectDir)) {
       fse.rmSync(projectDir, { recursive: true })
@@ -99,6 +96,9 @@ describe('createProject', () => {
 
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
+
+        // Verify git was initialized
+        expect(fse.existsSync(path.resolve(projectDir, '.git'))).toBe(true)
 
         // Should only have one db adapter
         expect(
