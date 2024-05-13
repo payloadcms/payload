@@ -3,7 +3,7 @@ title: I18n
 label: I18n
 order: 40
 desc: Manage and customize internationalization support in your CMS editor experience
-keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Not only does Payload support managing localized content, it also has internationalization support so that users in the [Admin Panel](../admin/overview) can work in their preferred language. Payload's i18n comes by default without any additional setup, and you can extend the default settings to customize the language settings to your needs.
@@ -99,11 +99,10 @@ After a user logs in, they can change their language selection in the `/account`
   [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 </Banner>
 
-## Node Express
+## Node
 
-Payload's backend uses express middleware to set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
+Payload's backend sets the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
-<<<<<<< HEAD
 Anywhere in your Payload app that you have access to the `req` object, you can access payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
 ## Configuration Options
@@ -196,8 +195,3 @@ const field: Field = {
 }
 ```
 
-=======
-Anywhere in your Payload app that you have access to the `req` object, you can access i18next's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
-
-Read the i18next [API documentation](https://www.i18next.com/overview/api) to learn more.
->>>>>>> bce4876e8 (docs(admin): updates admin overview doc)

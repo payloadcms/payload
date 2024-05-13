@@ -3,7 +3,7 @@ title: Authentication Operations
 label: Operations
 order: 30
 desc: Enabling Authentication automatically makes key operations available such as Login, Logout, Verify, Unlock, Reset Password and more.
-keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Enabling Authentication on a Collection automatically exposes additional auth-based operations in the Local, REST, and GraphQL APIs.
@@ -107,7 +107,7 @@ query {
 
 ## Login
 
-Accepts an `email` and `password`. On success, it will return the logged in user as well as a token that can be used to authenticate. In the GraphQL and REST APIs, this operation also automatically sets an HTTP-only cookie including the user's token. If you pass an Express `res` to the Local API operation, Payload will set a cookie there as well.
+Accepts an `email` and `password`. On success, it will return the logged in user as well as a token that can be used to authenticate. In the GraphQL and REST APIs, this operation also automatically sets an HTTP-only cookie including the user's token. If you pass a `res` to the Local API operation, Payload will set a cookie there as well.
 
 **Example REST API login**:
 
