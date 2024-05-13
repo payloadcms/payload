@@ -25,7 +25,7 @@ type ContextType<
   TAdditionalTranslations = {},
   TAdditionalClientTranslationKeys extends string = never,
 > = {
-  i18n: TAdditionalClientTranslationKeys extends never
+  i18n: [TAdditionalClientTranslationKeys] extends [never]
     ? I18nClient
     : TAdditionalTranslations extends object
       ? I18nClient<TAdditionalTranslations, TAdditionalClientTranslationKeys>
