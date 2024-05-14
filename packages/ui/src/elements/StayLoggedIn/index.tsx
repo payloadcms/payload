@@ -22,7 +22,9 @@ export const StayLoggedInModal: React.FC = () => {
   const config = useConfig()
 
   const {
-    admin: { logoutRoute },
+    admin: {
+      routes: { logout: logoutRoute },
+    },
     routes: { admin },
   } = config
   const { toggleModal } = useModal()

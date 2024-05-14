@@ -47,7 +47,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const config = useConfig()
 
   const {
-    admin: { autoLogin, inactivityRoute: logoutInactivityRoute, user: userSlug },
+    admin: {
+      autoLogin,
+      routes: { inactivity: logoutInactivityRoute },
+      user: userSlug,
+    },
     routes: { admin, api },
     serverURL,
   } = config

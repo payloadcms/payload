@@ -75,6 +75,10 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    routes: {
+      logout: '/custom-logout',
+      inactivity: '/custom-inactivity',
+    },
     meta: {
       icons: [
         {

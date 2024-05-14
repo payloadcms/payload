@@ -14,6 +14,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  login,
   openDocControls,
   openDocDrawer,
   openNav,
@@ -127,6 +128,20 @@ describe('admin', () => {
       await expect(favicons.nth(2)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
       await expect(favicons.nth(3)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
       await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+    })
+  })
+
+  describe('routing', () => {
+    test('should use custom logout route', async () => {
+      await page.goto(`${serverURL}/admin/custom-logout`)
+      await page.waitForURL(`${serverURL}/admin/custom-logout`)
+
+      await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Log back in
+      await login({ page, serverURL })
     })
   })
 
