@@ -1,3 +1,5 @@
+import type { NestedKeysStripped } from '@payloadcms/translations'
+
 export const translations = {
   en: {
     $schema: './translation-schema.json',
@@ -162,13 +164,20 @@ export const translations = {
       checksPassing: '{{current}}/{{max}} перевірок пройдено',
       good: 'Чудово',
       imageAutoGenerationTip: 'Автоматична генерація використає зображення з головного блоку',
-      lengthTipDescription: 'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метаописи — перегляньте ',
-      lengthTipTitle: 'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метазаголовки — перегляньте ',
+      lengthTipDescription:
+        'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метаописи — перегляньте ',
+      lengthTipTitle:
+        'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метазаголовки — перегляньте ',
       noImage: 'Немає зображення',
       preview: 'Попередній перегляд',
-      previewDescription: 'Реальне відображення може відрізнятися в залежності від вмісту та релевантності пошуку.',
+      previewDescription:
+        'Реальне відображення може відрізнятися в залежності від вмісту та релевантності пошуку.',
       tooLong: 'Задовгий',
       tooShort: 'Закороткий',
     },
   },
 }
+
+export type PluginSEOTranslations = typeof translations.en
+
+export type PluginSEOTranslationKeys = NestedKeysStripped<PluginSEOTranslations>

@@ -8,7 +8,7 @@ import type { FieldSchemaMap } from './types.js'
 type Args = {
   config: SanitizedConfig
   fields: Field[]
-  i18n: I18n
+  i18n: I18n<any, any>
   schemaMap: FieldSchemaMap
   schemaPath: string
   validRelationships: string[]

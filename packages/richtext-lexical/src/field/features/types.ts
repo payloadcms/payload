@@ -1,5 +1,5 @@
 import type { Transformer } from '@lexical/markdown'
-import type { I18n } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
@@ -274,7 +274,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   clientFeatureProps?: ClientFeatureProps
   generateComponentMap?: (args: {
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     props: ServerProps
     schemaPath: string
   }) => {
@@ -282,7 +282,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     props: ServerProps
     schemaMap: Map<string, Field[]>
     schemaPath: string

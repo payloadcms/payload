@@ -1,4 +1,4 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { ClientTranslationKeys, TFunction } from '@payloadcms/translations'
 
 import * as React from 'react'
 
@@ -36,7 +36,7 @@ const RecursiveTranslation: React.FC<{
 
 export type TranslationProps = {
   elements?: Record<string, React.FC<{ children: React.ReactNode }>>
-  i18nKey: string
+  i18nKey: ClientTranslationKeys
   t: TFunction
   variables?: Record<string, unknown>
 }

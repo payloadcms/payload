@@ -40,7 +40,7 @@ export const Status: React.FC = () => {
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
 
-  let statusToRender
+  let statusToRender: 'changed' | 'draft' | 'published'
 
   if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
     statusToRender = 'changed'

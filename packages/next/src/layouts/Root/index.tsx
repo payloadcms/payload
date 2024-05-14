@@ -1,4 +1,4 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
 import { rtlLanguages } from '@payloadcms/translations'
@@ -50,7 +50,11 @@ export const RootLayout = async ({
   })
 
   const payload = await getPayloadHMR({ config })
-  const i18n = await initI18n({ config: config.i18n, context: 'client', language: languageCode })
+  const i18n: I18nClient = await initI18n({
+    config: config.i18n,
+    context: 'client',
+    language: languageCode,
+  })
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
