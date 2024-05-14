@@ -4,8 +4,11 @@ import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { LinkFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
+import { UnderlineFeature } from '@payloadcms/richtext-lexical'
+import { ItalicFeature } from '@payloadcms/richtext-lexical'
+import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
@@ -46,7 +49,19 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  editor: lexicalEditor({}), // editor-config
+  // This config helps us configure global or default features that the other editors can inherit
+  editor: lexicalEditor({
+    features: () => {
+      return [
+        UnderlineFeature(),
+        BoldFeature(),
+        ItalicFeature(),
+        LinkFeature({
+          enabledCollections: ['pages', 'posts'],
+        }),
+      ]
+    },
+  }), // editor-config
   // database-adapter-config-start
   db: mongooseAdapter({
     url: process.env.DATABASE_URI,

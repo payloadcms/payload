@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { richText } from 'src/fields/richText'
 
 import type { Post } from '../../payload-types'
@@ -57,11 +58,6 @@ export const Posts: CollectionConfig = {
         {
           fields: [
             {
-              name: 'title',
-              type: 'text',
-              required: true,
-            },
-            {
               name: 'relatedPosts',
               type: 'relationship',
               admin: {
@@ -90,6 +86,14 @@ export const Posts: CollectionConfig = {
           label: 'Meta',
         },
       ],
+    },
+    {
+      name: 'title',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+      },
+      required: true,
     },
     {
       name: 'publishedAt',

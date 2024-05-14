@@ -4,11 +4,6 @@ export const Code: Block = {
   slug: 'code',
   fields: [
     {
-      name: 'code',
-      type: 'code',
-      required: true,
-    },
-    {
       name: 'language',
       type: 'select',
       defaultValue: 'typescript',
@@ -26,6 +21,12 @@ export const Code: Block = {
           value: 'css',
         },
       ],
+    },
+    {
+      name: 'code',
+      type: 'code',
+      label: false,
+      required: true,
     },
   ],
 }
