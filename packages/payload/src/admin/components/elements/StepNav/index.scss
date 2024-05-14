@@ -2,6 +2,7 @@
 
 .step-nav {
   display: flex;
+  align-items: center;
   gap: calc(var(--base) / 2);
 
   &::after {
@@ -56,8 +57,6 @@
   }
 
   span {
-    display: flex;
-    align-items: center;
     max-width: base(8);
     text-overflow: ellipsis;
     overflow: hidden;
