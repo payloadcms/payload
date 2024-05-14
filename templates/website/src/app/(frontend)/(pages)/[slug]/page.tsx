@@ -13,26 +13,16 @@ import { Hero } from '../../../_components/Hero'
 import { PayloadRedirects } from '../../../_components/PayloadRedirects'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
-const queryPageBySlug = async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = draftMode()
-
+export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  const user = draft ? await payload.auth({ headers: headers() }) : undefined
-
-  const result = await payload.find({
+  const pages = await payload.find({
     collection: 'pages',
-    draft,
-    limit: 1,
+    draft: false,
+    limit: 1000,
     overrideAccess: false,
-    user,
-    where: {
-      slug: {
-        equals: slug,
-      },
-    },
   })
 
-  return result.docs?.[0] || null
+  return pages.docs?.map(({ slug }) => slug)
 }
 
 export default async function Page({ params: { slug = '' } }) {
@@ -60,22 +50,32 @@ export default async function Page({ params: { slug = '' } }) {
   )
 }
 
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-  })
-
-  return pages.docs?.map(({ slug }) => slug)
-}
-
 export async function generateMetadata({ params: { slug = '' } }): Promise<Metadata> {
   const page = await queryPageBySlug({
     slug,
   })
 
   return generateMeta({ doc: page })
+}
+
+const queryPageBySlug = async ({ slug }: { slug: string }) => {
+  const { isEnabled: draft } = draftMode()
+
+  const payload = await getPayload({ config: configPromise })
+  const user = draft ? await payload.auth({ headers: headers() }) : undefined
+
+  const result = await payload.find({
+    collection: 'pages',
+    draft,
+    limit: 1,
+    overrideAccess: false,
+    user,
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  })
+
+  return result.docs?.[0] || null
 }

@@ -13,6 +13,41 @@ import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
 import { PostHero } from '../../../../_heros/PostHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
 
+export async function generateStaticParams() {
+  const payload = await getPayload({ config: configPromise })
+  const posts = await payload.find({
+    collection: 'posts',
+    draft: false,
+    limit: 1000,
+    overrideAccess: false,
+  })
+
+  return posts.docs?.map(({ slug }) => slug)
+}
+
+export default async function Post({ params: { slug = '' } }) {
+  const url = '/posts/' + slug
+  const post = await queryPostBySlug({ slug })
+
+  if (!post) {
+    notFound()
+  }
+
+  return (
+    <React.Fragment>
+      <PayloadRedirects url={url} />
+      <PostHero post={post} />
+      <RichText content={post.content} />
+    </React.Fragment>
+  )
+}
+
+export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
+  const post = await queryPostBySlug({ slug })
+
+  return generateMeta({ doc: post })
+}
+
 const queryPostBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
@@ -33,39 +68,4 @@ const queryPostBySlug = async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
-}
-
-export default async function Post({ params: { slug = '' } }) {
-  const url = '/posts/' + slug
-  const post = await queryPostBySlug({ slug })
-
-  if (!post) {
-    notFound()
-  }
-
-  return (
-    <React.Fragment>
-      <PayloadRedirects url={url} />
-      <PostHero post={post} />
-      <RichText content={post.content} />
-    </React.Fragment>
-  )
-}
-
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const posts = await payload.find({
-    collection: 'posts',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-  })
-
-  return posts.docs?.map(({ slug }) => slug)
-}
-
-export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
-  const post = await queryPostBySlug({ slug })
-
-  return generateMeta({ doc: post })
 }
