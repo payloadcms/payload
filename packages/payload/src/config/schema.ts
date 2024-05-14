@@ -116,6 +116,7 @@ export default joi.object({
     maxComplexity: joi.number(),
     mutations: joi.function(),
     queries: joi.function(),
+    schemaOutputFile: joi.string(),
   }),
   hooks: joi.object().keys({
     afterError: joi.func(),
