@@ -89,7 +89,6 @@ export const RootLayout = async ({
     DefaultEditView,
     DefaultListView,
     children,
-    config,
     i18n,
     payload,
   })

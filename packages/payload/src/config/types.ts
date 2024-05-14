@@ -1,4 +1,9 @@
-import type { DefaultTranslationsObject, I18nOptions, TFunction } from '@payloadcms/translations'
+import type {
+  DefaultTranslationsObject,
+  I18nClient,
+  I18nOptions,
+  TFunction,
+} from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { Metadata as NextMetadata } from 'next'
@@ -10,6 +15,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
+import type { Permissions } from '../auth/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -19,7 +25,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js'
+import type { GeneratedTypes, Payload } from '../index.js'
 import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -248,10 +254,24 @@ export type EditViewConfig =
 export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
+  i18n: I18nClient
+  locale?: Locale
+  params?: { [key: string]: string | string[] | undefined }
   payload: Payload
+  permissions?: Permissions
+  searchParams?: { [key: string]: string | string[] | undefined }
+  user?: GeneratedTypes['user']
 }
 
-export const serverProps: (keyof ServerProps)[] = ['payload']
+export const serverProps: (keyof ServerProps)[] = [
+  'payload',
+  'i18n',
+  'locale',
+  'params',
+  'permissions',
+  'searchParams',
+  'permissions',
+]
 
 export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
   TAdditionalProps & ServerProps

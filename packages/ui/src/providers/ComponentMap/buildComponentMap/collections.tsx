@@ -1,25 +1,25 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
 import type {
   AdminViewProps,
   EditViewProps,
   SanitizedCollectionConfig,
   SanitizedConfig,
-  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
-import { ViewDescription } from '@payloadcms/ui/elements/ViewDescription'
 import React from 'react'
 
+import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
+import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { CollectionComponentMap } from './types.js'
 
+import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
 export const mapCollections = (args: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
-  WithServerSideProps: WithServerSidePropsType
+  WithServerSideProps: WithServerSidePropsPrePopulated
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
   i18n: I18nClient

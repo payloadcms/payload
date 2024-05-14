@@ -1,17 +1,21 @@
-import type { WithServerSideProps as WithServerSidePropsType } from 'payload/types'
+import type { WithServerSidePropsComponent } from 'payload/types'
 
 import { isReactServerComponentOrFunction } from 'payload/utilities'
 import React from 'react'
 
-export const WithServerSideProps: WithServerSidePropsType = ({ Component, payload, ...rest }) => {
+export const WithServerSideProps: WithServerSidePropsComponent = ({
+  Component,
+  serverOnlyProps,
+  ...rest
+}) => {
   if (Component) {
     const WithServerSideProps: React.FC = (passedProps) => {
-      const propsWithPayload = {
+      const propsWithServerOnlyProps = {
         ...passedProps,
-        ...(isReactServerComponentOrFunction(Component) ? { payload } : {}),
+        ...(isReactServerComponentOrFunction(Component) ? serverOnlyProps ?? {} : {}),
       }
 
-      return <Component {...propsWithPayload} />
+      return <Component {...propsWithServerOnlyProps} />
     }
 
     return <WithServerSideProps {...rest} />

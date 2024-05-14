@@ -8,7 +8,6 @@ import type {
   LabelProps,
   Option,
   SanitizedConfig,
-  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
@@ -36,6 +35,7 @@ import type { TextFieldProps } from '../../../fields/Text/types.js'
 import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../../fields/Upload/types.js'
 import type { FormFieldBase } from '../../../fields/shared/index.js'
+import type { WithServerSidePropsPrePopulated } from './index.js'
 import type {
   FieldComponentProps,
   FieldMap,
@@ -47,7 +47,7 @@ import type {
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
 
 export const mapFields = (args: {
-  WithServerSideProps: WithServerSidePropsType
+  WithServerSideProps: WithServerSidePropsPrePopulated
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field

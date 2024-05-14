@@ -18,11 +18,17 @@ import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
 
-export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
+export const ListView: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     collectionConfig,
+    locale: fullLocale,
     permissions,
     req: {
+      i18n,
       locale,
       payload,
       payload: { config },
@@ -142,7 +148,15 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
                 CustomComponent={CustomListView}
                 DefaultComponent={DefaultListView}
                 componentProps={viewComponentProps}
-                payload={payload}
+                serverOnlyProps={{
+                  i18n,
+                  locale: fullLocale,
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                }}
               />
             </TableColumnsProvider>
           </ListQueryProvider>
