@@ -5,6 +5,7 @@ const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
   'createFirstUser',
   'forgot',
   'login',
+  'logout',
   'forgot',
   'inactivity',
   'unauthorized',

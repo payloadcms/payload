@@ -90,11 +90,11 @@ export const getViewFromConfig = ({
       let viewToRender: keyof typeof oneSegmentViews
 
       if (config.admin.routes) {
-        const matchedRoute = Object.entries(config.admin.routes).find(([, customRoute]) => {
+        const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: `${adminRoute}${customRoute}`,
+            path: `${adminRoute}${route}`,
           })
         })
 
