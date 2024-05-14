@@ -19,7 +19,6 @@ import './index.scss'
 
 export type EmailFieldProps = FormFieldBase & {
   autoComplete?: string
-  label?: FieldBase['label']
   name?: string
   path?: string
   placeholder?: EmailFieldType['admin']['placeholder']

@@ -103,7 +103,8 @@ export const buildColumnState = (args: Args): Column[] => {
     const Label = (
       <FieldLabel
         CustomLabel={CustomLabelToRender}
-        {...field.fieldComponentProps?.labelProps}
+        label={field.fieldComponentProps?.label}
+        {...(field.fieldComponentProps?.labelProps || {})}
         unstyled
       />
     )
@@ -133,6 +134,10 @@ export const buildColumnState = (args: Args): Column[] => {
         Label,
         accessor: name,
         active,
+        admin: {
+          disableListColumn: field.disableListColumn,
+          disableListFilter: field.disableListFilter,
+        },
         cellProps: {
           ...field.cellComponentProps,
           ...cellProps?.[index],

@@ -1,11 +1,13 @@
+import type { AdminViewProps } from 'payload/types'
+
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../../../../../packages/payload/types.js'
-
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+import type { AdminViewProps } from 'payload/types'
 
 import { Button } from '@payloadcms/ui/elements/Button'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
@@ -18,15 +20,15 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
   const {
     permissions,
     req: {
-      i18n,
+      payload,
       payload: {
-        config,
         config: {
           routes: { admin: adminRoute },
         },
       },
       user,
     },
+    visibleEntities,
   } = initPageResult
 
   // If an unauthorized user tries to navigate straight to this page,
@@ -36,7 +38,7 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
   }
 
   return (
-    <DefaultTemplate config={config} i18n={i18n} permissions={permissions} user={user}>
+    <DefaultTemplate payload={payload} visibleEntities={visibleEntities}>
       <SetStepNav
         nav={[
           {

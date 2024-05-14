@@ -4,10 +4,10 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
   AlignFeature,
-  BlockQuoteFeature,
+  BlockquoteFeature,
   BlocksFeature,
   BoldFeature,
-  CheckListFeature,
+  ChecklistFeature,
   HeadingFeature,
   IndentFeature,
   InlineCodeFeature,
@@ -82,18 +82,19 @@ export async function buildConfigWithDefaults(
         ParagraphFeature(),
         RelationshipFeature(),
         LinkFeature({
-          fields: [
+          fields: ({ defaultFields }) => [
+            ...defaultFields,
             {
               name: 'description',
               type: 'text',
             },
           ],
         }),
-        CheckListFeature(),
+        ChecklistFeature(),
         UnorderedListFeature(),
         OrderedListFeature(),
         AlignFeature(),
-        BlockQuoteFeature(),
+        BlockquoteFeature(),
         BoldFeature(),
         ItalicFeature(),
         UploadFeature({
@@ -160,7 +161,9 @@ export async function buildConfigWithDefaults(
     sharp,
     telemetry: false,
     typescript: {
-      declare: false,
+      declare: {
+        ignoreTSError: true,
+      },
     },
     ...testConfig,
     i18n: {
@@ -189,5 +192,5 @@ export async function buildConfigWithDefaults(
     config.admin.disable = true
   }
 
-  return buildConfig(config)
+  return await buildConfig(config)
 }

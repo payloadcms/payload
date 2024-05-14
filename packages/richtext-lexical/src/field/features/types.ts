@@ -17,9 +17,9 @@ import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
-import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
+import type { ToolbarGroup } from './toolbars/types.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -40,6 +40,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context: RequestContext
   currentDepth: number
   depth: number
+  draft: boolean
   /**
    * This maps all population promises to the node type
    */
@@ -84,21 +85,28 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
   /** Keys of soft-dependencies needed for this feature. The FeatureProviders dependencies are optional, but are considered as last-priority in the loading process */
   dependenciesSoft?: string[]
 
+  /**
+   * This is being called during the payload sanitization process
+   */
   feature: (props: {
+    config: SanitizedConfig
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ServerFeatureProviderMap
+    isRoot?: boolean
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedServerFeatureMap
     // unSanitized EditorConfig,
     unSanitizedEditorConfig: ServerEditorConfig
-  }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>
+  }) =>
+    | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
+    | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerFeatureProps
 }
 
 export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props?: ClientComponentProps<ClientFeatureProps>,
+  props: ClientComponentProps<ClientFeatureProps>,
 ) => FeatureProviderClient<ClientFeatureProps>
 
 /**
@@ -120,15 +128,19 @@ export type FeatureProviderClient<ClientFeatureProps> = {
   }) => ClientFeature<ClientFeatureProps>
 }
 
+export type PluginComponent<ClientFeatureProps = any> = React.FC<{
+  clientProps: ClientFeatureProps
+}>
+export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
+  anchorElem: HTMLElement
+  clientProps: ClientFeatureProps
+}>
+
 export type ClientFeature<ClientFeatureProps> = {
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
   clientFeatureProps: ClientComponentProps<ClientFeatureProps>
-
-  floatingSelectToolbar?: {
-    sections: FloatingToolbarSection[]
-  }
   hooks?: {
     load?: ({
       incomingEditorState,
@@ -143,44 +155,77 @@ export type ClientFeature<ClientFeatureProps> = {
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+  /**
+   * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   */
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'bottom' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'normal' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
+        Component: PluginComponentWithAnchor<ClientFeatureProps>
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
   >
   slashMenu?: {
-    dynamicOptions?: ({
+    /**
+     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
+     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
+     *
+     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
+     */
+    dynamicGroups?: ({
       editor,
       queryString,
     }: {
       editor: LexicalEditor
       queryString: string
     }) => SlashMenuGroup[]
-    options?: SlashMenuGroup[]
+    /**
+     * Static array of groups together with the items in them. These will always be present.
+     * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
+     */
+    groups?: SlashMenuGroup[]
+  }
+  /**
+   * An opt-in, classic fixed toolbar which stays at the top of the editor
+   */
+  toolbarFixed?: {
+    groups: ToolbarGroup[]
+  }
+  /**
+   * The default, floating toolbar which appears when you select text.
+   */
+  toolbarInline?: {
+    /**
+     * Array of toolbar groups / sections. Each section can contain multiple toolbar items.
+     */
+    groups: ToolbarGroup[]
   }
 }
 
-export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
-  featureKey: string
-  order: number
-}
+export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extends undefined
+  ? {
+      featureKey: string
+      order: number
+    }
+  : {
+      featureKey: string
+      order: number
+    } & ClientFeatureProps
 
 export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   context: RequestContext
@@ -296,28 +341,35 @@ export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown>>
 export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown>>
 
+/**
+ * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+ */
 export type SanitizedPlugin =
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC<{ anchorElem: HTMLElement }>
+      Component: PluginComponentWithAnchor
+      clientProps: any
       desktopOnly?: boolean
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.
@@ -375,13 +427,13 @@ export type SanitizedServerFeatures = Required<
 }
 
 export type SanitizedClientFeatures = Required<
-  Pick<ResolvedClientFeature<unknown>, 'markdownTransformers' | 'nodes'>
+  Pick<
+    ResolvedClientFeature<unknown>,
+    'markdownTransformers' | 'nodes' | 'toolbarFixed' | 'toolbarInline'
+  >
 > & {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  floatingSelectToolbar: {
-    sections: FloatingToolbarSection[]
-  }
   hooks: {
     load: Array<
       ({
@@ -398,11 +450,24 @@ export type SanitizedClientFeatures = Required<
       }) => SerializedEditorState
     >
   }
+  /**
+   * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   */
   plugins?: Array<SanitizedPlugin>
   slashMenu: {
-    dynamicOptions: Array<
+    /**
+     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
+     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
+     *
+     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
+     */
+    dynamicGroups: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
     >
-    groupsWithOptions: SlashMenuGroup[]
+    /**
+     * Static array of groups together with the items in them. These will always be present.
+     * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
+     */
+    groups: SlashMenuGroup[]
   }
 }

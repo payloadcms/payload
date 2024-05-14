@@ -1,16 +1,16 @@
-import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types'
+import type { SanitizedStripePluginConfig, StripeWebhookHandler } from '../types.js'
 
 type HandleDeleted = (
   args: Parameters<StripeWebhookHandler>[0] & {
     resourceType: string
-    syncConfig: SanitizedStripeConfig['sync'][0]
+    syncConfig: SanitizedStripePluginConfig['sync'][0]
   },
 ) => void
 
 export const handleDeleted: HandleDeleted = async (args) => {
-  const { event, payload, resourceType, stripeConfig, syncConfig } = args
+  const { event, payload, pluginConfig, resourceType, syncConfig } = args
 
-  const { logs } = stripeConfig || {}
+  const { logs } = pluginConfig || {}
 
   const collectionSlug = syncConfig?.collection
 
@@ -58,6 +58,7 @@ export const handleDeleted: HandleDeleted = async (args) => {
         if (logs) payload.logger.info(`- Deleting Payload document with ID: '${foundDoc.id}'...`)
 
         try {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           payload.delete({
             id: foundDoc.id,
             collection: collectionSlug,

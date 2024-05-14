@@ -12,6 +12,7 @@ export interface Args extends arg.Spec {
   '--local-template': StringConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
+  '--no-git': BooleanConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
   '--template-branch': StringConstructor

@@ -10,7 +10,7 @@ import type {
   GenerateImage,
   GenerateTitle,
   GenerateURL,
-  PluginConfig,
+  SEOPluginConfig,
 } from './types.js'
 
 import { MetaDescription } from './fields/MetaDescription.js'
@@ -20,8 +20,8 @@ import { translations } from './translations/index.js'
 import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
 
-const seo =
-  (pluginConfig: PluginConfig) =>
+export const seoPlugin =
+  (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
     const seoFields: GroupField[] = [
       {
@@ -43,7 +43,7 @@ const seo =
             type: 'text',
             admin: {
               components: {
-                Field: (props) => (
+                Field: ({ payload: _payload, ...props }) => (
                   <MetaTitle
                     {...props}
                     hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
@@ -59,7 +59,7 @@ const seo =
             type: 'textarea',
             admin: {
               components: {
-                Field: (props) => (
+                Field: ({ payload: _payload, ...props }) => (
                   <MetaDescription
                     {...props}
                     hasGenerateDescriptionFn={
@@ -80,7 +80,7 @@ const seo =
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: (props) => (
+                      Field: ({ payload: _payload, ...props }) => (
                         <MetaImage
                           {...props}
                           hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
@@ -103,7 +103,7 @@ const seo =
             type: 'ui',
             admin: {
               components: {
-                Field: (props) => (
+                Field: ({ payload: _payload, ...props }) => (
                   <Preview
                     {...props}
                     hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}
@@ -297,5 +297,3 @@ const seo =
       },
     }
   }
-
-export { seo }

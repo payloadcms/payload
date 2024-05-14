@@ -7,11 +7,11 @@ html[data-theme='light'] {
 }
 
 .link-editor {
-  z-index: 10;
+  z-index: 1;
   display: flex;
   align-items: center;
   background: var(--color-base-0);
-  padding: 0px 3.72px 0px 6.25px;
+  padding: 0 3.72px 0 6.25px;
   vertical-align: middle;
   position: absolute;
   top: 0;
@@ -36,12 +36,20 @@ html[data-theme='light'] {
     position: relative;
     font-family: var(--font-body);
 
+    &__label-pure {
+      color: var(--color-base-1000);
+      margin-right: 15px;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
     a {
       text-decoration: none;
       display: block;
       white-space: nowrap;
       overflow: hidden;
-      margin-right: 30px;
+      margin-right: 15px;
       text-overflow: ellipsis;
       color: var(--color-blue-600);
       border-bottom: 1px dotted;

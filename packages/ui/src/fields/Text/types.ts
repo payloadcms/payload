@@ -1,4 +1,4 @@
-import type { FieldBase, TextField } from 'payload/types'
+import type { TextField } from 'payload/types'
 import type { ChangeEvent } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
@@ -7,7 +7,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type TextFieldProps = FormFieldBase & {
   hasMany?: boolean
   inputRef?: React.MutableRefObject<HTMLInputElement>
-  label?: FieldBase['label']
   maxLength?: number
   maxRows?: number
   minLength?: number

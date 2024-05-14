@@ -110,6 +110,7 @@ export default joi.object({
     maxComplexity: joi.number(),
     mutations: joi.function(),
     queries: joi.function(),
+    schemaOutputFile: joi.string(),
   }),
   hooks: joi.object().keys({
     afterError: joi.func(),
@@ -178,7 +179,7 @@ export default joi.object({
   sharp: joi.any(),
   telemetry: joi.boolean(),
   typescript: joi.object({
-    declare: joi.boolean(),
+    declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
     outputFile: joi.string(),
   }),
   upload: joi.object(),

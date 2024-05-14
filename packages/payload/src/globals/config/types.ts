@@ -7,12 +7,12 @@ import type {
   CustomSaveButton,
   CustomSaveDraftButton,
 } from '../../admin/types.js'
-import type { User } from '../../auth/types.js'
 import type {
   Access,
   EditConfig,
   Endpoint,
   EntityDescription,
+  EntityDescriptionComponent,
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types.js'
@@ -77,6 +77,7 @@ export type GlobalAdminOptions = {
    */
   components?: {
     elements?: {
+      Description?: EntityDescriptionComponent
       /**
        * Replaces the "Preview" button
        */

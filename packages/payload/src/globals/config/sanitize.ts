@@ -1,4 +1,4 @@
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from './types.js'
 
 import defaultAccess from '../../auth/defaultAccess.js'
@@ -8,60 +8,66 @@ import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 
-const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
+export const sanitizeGlobals = async (
+  config: Config,
+  /**
+   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
+   * so that you can sanitize them together, after the config has been sanitized.
+   */
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+): Promise<SanitizedGlobalConfig[]> => {
   const { collections, globals } = config
 
-  const sanitizedGlobals = globals.map((global) => {
-    const sanitizedGlobal = { ...global }
-
-    sanitizedGlobal.label = sanitizedGlobal.label || toWords(sanitizedGlobal.slug)
+  for (let i = 0; i < globals.length; i++) {
+    const global = globals[i]
+    global.label = global.label || toWords(global.slug)
 
     // /////////////////////////////////
     // Ensure that collection has required object structure
     // /////////////////////////////////
 
-    sanitizedGlobal.endpoints = sanitizedGlobal.endpoints ?? []
-    if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {}
-    if (!sanitizedGlobal.access) sanitizedGlobal.access = {}
-    if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {}
+    global.endpoints = global.endpoints ?? []
+    if (!global.hooks) global.hooks = {}
+    if (!global.access) global.access = {}
+    if (!global.admin) global.admin = {}
 
-    if (!sanitizedGlobal.access.read) sanitizedGlobal.access.read = defaultAccess
-    if (!sanitizedGlobal.access.update) sanitizedGlobal.access.update = defaultAccess
+    if (!global.access.read) global.access.read = defaultAccess
+    if (!global.access.update) global.access.update = defaultAccess
 
-    if (!sanitizedGlobal.hooks.beforeValidate) sanitizedGlobal.hooks.beforeValidate = []
-    if (!sanitizedGlobal.hooks.beforeChange) sanitizedGlobal.hooks.beforeChange = []
-    if (!sanitizedGlobal.hooks.afterChange) sanitizedGlobal.hooks.afterChange = []
-    if (!sanitizedGlobal.hooks.beforeRead) sanitizedGlobal.hooks.beforeRead = []
-    if (!sanitizedGlobal.hooks.afterRead) sanitizedGlobal.hooks.afterRead = []
+    if (!global.hooks.beforeValidate) global.hooks.beforeValidate = []
+    if (!global.hooks.beforeChange) global.hooks.beforeChange = []
+    if (!global.hooks.afterChange) global.hooks.afterChange = []
+    if (!global.hooks.beforeRead) global.hooks.beforeRead = []
+    if (!global.hooks.afterRead) global.hooks.afterRead = []
 
-    if (sanitizedGlobal.versions) {
-      if (sanitizedGlobal.versions === true) sanitizedGlobal.versions = { drafts: false }
+    if (global.versions) {
+      if (global.versions === true) global.versions = { drafts: false }
 
-      if (sanitizedGlobal.versions.drafts) {
-        if (sanitizedGlobal.versions.drafts === true) {
-          sanitizedGlobal.versions.drafts = {
+      if (global.versions.drafts) {
+        if (global.versions.drafts === true) {
+          global.versions.drafts = {
             autosave: false,
           }
         }
 
-        if (sanitizedGlobal.versions.drafts.autosave === true) {
-          sanitizedGlobal.versions.drafts.autosave = {
+        if (global.versions.drafts.autosave === true) {
+          global.versions.drafts.autosave = {
             interval: 2000,
           }
         }
 
-        sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields)
+        global.fields = mergeBaseFields(global.fields, baseVersionFields)
       }
     }
 
-    if (!sanitizedGlobal.custom) sanitizedGlobal.custom = {}
+    if (!global.custom) global.custom = {}
 
     // /////////////////////////////////
     // Sanitize fields
     // /////////////////////////////////
     let hasUpdatedAt = null
     let hasCreatedAt = null
-    sanitizedGlobal.fields.some((field) => {
+    global.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') hasUpdatedAt = true
         if (field.name === 'createdAt') hasCreatedAt = true
@@ -69,7 +75,7 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
       return hasCreatedAt && hasUpdatedAt
     })
     if (!hasUpdatedAt) {
-      sanitizedGlobal.fields.push({
+      global.fields.push({
         name: 'updatedAt',
         type: 'date',
         admin: {
@@ -80,7 +86,7 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
       })
     }
     if (!hasCreatedAt) {
-      sanitizedGlobal.fields.push({
+      global.fields.push({
         name: 'createdAt',
         type: 'date',
         admin: {
@@ -92,16 +98,15 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
     }
 
     const validRelationships = collections.map((c) => c.slug) || []
-    sanitizedGlobal.fields = sanitizeFields({
+    global.fields = await sanitizeFields({
       config,
-      fields: sanitizedGlobal.fields,
+      fields: global.fields,
+      richTextSanitizationPromises,
       validRelationships,
     })
 
-    return sanitizedGlobal as SanitizedGlobalConfig
-  })
+    globals[i] = global
+  }
 
-  return sanitizedGlobals
+  return globals as SanitizedGlobalConfig[]
 }
-
-export default sanitizeGlobals

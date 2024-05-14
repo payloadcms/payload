@@ -82,7 +82,8 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     )
   }
 
-  const DefaultCellComponent: React.FC<DefaultCellComponentProps> = cellComponents[fieldType]
+  const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
+    typeof cellData !== 'undefined' && cellComponents[fieldType]
 
   let CellComponent: React.ReactNode =
     cellData &&

@@ -4,14 +4,14 @@ import type { FeatureProviderProviderServer } from '../types.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
-import { BlockQuoteFeatureClientComponent } from './feature.client.js'
+import { BlockquoteFeatureClientComponent } from './feature.client.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
-export const BlockQuoteFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
+export const BlockquoteFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {
     feature: () => {
       return {
-        ClientComponent: BlockQuoteFeatureClientComponent,
+        ClientComponent: BlockquoteFeatureClientComponent,
         clientFeatureProps: null,
         markdownTransformers: [MarkdownTransformer],
         nodes: [

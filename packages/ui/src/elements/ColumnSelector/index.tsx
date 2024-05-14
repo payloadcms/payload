@@ -3,6 +3,8 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import React, { useId } from 'react'
 
+import type { Column } from '../Table/index.js'
+
 import { Plus } from '../../icons/Plus/index.js'
 import { X } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -17,6 +19,12 @@ export type Props = {
   collectionSlug: SanitizedCollectionConfig['slug']
 }
 
+const filterColumnFields = (fields: Column[]): Column[] => {
+  return fields.filter((field) => {
+    return !field.admin?.disableListColumn
+  })
+}
+
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
@@ -27,10 +35,12 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
     return null
   }
 
+  const filteredColumns = filterColumnFields(columns)
+
   return (
     <DraggableSortable
       className={baseClass}
-      ids={columns.map((col) => col?.accessor)}
+      ids={filteredColumns.map((col) => col?.accessor)}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         moveColumn({
           fromIndex: moveFromIndex,
@@ -38,7 +48,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
         })
       }}
     >
-      {columns.map((col, i) => {
+      {filteredColumns.map((col, i) => {
         if (!col) return null
 
         const { Label, accessor, active } = col
