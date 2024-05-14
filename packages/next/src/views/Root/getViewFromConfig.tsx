@@ -103,8 +103,6 @@ export const getViewFromConfig = ({
         }
       }
 
-      console.log('viewToRender', viewToRender)
-
       if (oneSegmentViews[viewToRender]) {
         // --> /account
         // --> /create-first-user
