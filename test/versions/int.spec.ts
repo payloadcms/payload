@@ -920,7 +920,7 @@ describe('Versions', () => {
           and: [
             {
               id: {
-                not_in: '1',
+                not_in: [1],
               },
             },
             {
