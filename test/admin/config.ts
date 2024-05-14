@@ -25,6 +25,8 @@ import { CustomMinimalView } from './components/views/CustomMinimal/index.js'
 import { CustomView } from './components/views/CustomView/index.js'
 import { CustomNestedView } from './components/views/CustomViewNested/index.js'
 import { CustomViewWithParam } from './components/views/CustomViewWithParam/index.js'
+import { default as customFaviconDark } from './custom-favicon-dark.png'
+import { default as customFaviconLight } from './custom-favicon-light.png'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -34,7 +36,6 @@ import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { seed } from './seed.js'
 import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
-
 export default buildConfigWithDefaults({
   admin: {
     components: {
@@ -73,6 +74,21 @@ export default buildConfigWithDefaults({
           path: customParamViewPath,
         },
       },
+    },
+    meta: {
+      icons: [
+        {
+          type: 'image/png',
+          rel: 'icon',
+          url: customFaviconDark.src,
+        },
+        {
+          type: 'image/png',
+          media: '(prefers-color-scheme: dark)',
+          rel: 'icon',
+          url: customFaviconLight.src,
+        },
+      ],
     },
   },
   collections: [

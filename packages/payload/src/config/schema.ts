@@ -68,7 +68,13 @@ export default joi.object({
     }),
     logoutRoute: joi.string(),
     meta: joi.object().keys({
-      favicon: joi.string(),
+      icons: joi
+        .alternatives()
+        .try(
+          joi.array().items(joi.alternatives().try(joi.string(), joi.object())),
+          joi.object(),
+          joi.string().allow(null),
+        ),
       ogImage: joi.string(),
       titleSuffix: joi.string(),
     }),
