@@ -5,7 +5,7 @@ import { LinkFeature } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { richText } from '../fields/richTextLexical'
+import { richText } from '../fields/richText'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

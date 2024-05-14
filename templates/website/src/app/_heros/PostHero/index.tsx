@@ -5,7 +5,7 @@ import type { Post } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
-import RichText from '../../_components/RichTextLexical'
+import RichText from '../../_components/RichText'
 import { formatDateTime } from '../../_utilities/formatDateTime'
 import classes from './index.module.scss'
 
@@ -93,7 +93,11 @@ export const PostHero: React.FC<{
             )}
           </div>
           {metaImage && typeof metaImage !== 'string' && metaImage?.caption && (
-            <RichText className={classes.caption} content={metaImage.caption} />
+            <RichText
+              className={classes.caption}
+              content={metaImage.caption}
+              enableGutter={false}
+            />
           )}
         </div>
       </Gutter>

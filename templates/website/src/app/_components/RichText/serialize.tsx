@@ -1,110 +1,206 @@
-import escapeHTML from 'escape-html'
-import Link from 'next/link'
+import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
+import type { SerializedHeadingNode } from '@lexical/rich-text'
+import type { LinkFields, SerializedLinkNode } from '@payloadcms/richtext-lexical'
+import type { SerializedElementNode, SerializedLexicalNode, SerializedTextNode } from 'lexical'
+
 import React, { Fragment } from 'react'
-import { Text } from 'slate'
+import { ArchiveBlock } from 'src/app/_blocks/ArchiveBlock'
+import { BannerBlock } from 'src/app/_blocks/Banner'
+import { CallToActionBlock } from 'src/app/_blocks/CallToAction'
+import { CodeBlock } from 'src/app/_blocks/Code'
+import { ContentBlock } from 'src/app/_blocks/Content'
+import { MediaBlock } from 'src/app/_blocks/MediaBlock'
+import { CMSLink } from 'src/app/_components/Link'
 
-import { Label } from '../Label'
-import { LargeBody } from '../LargeBody'
-import { CMSLink } from '../Link'
+import {
+  IS_BOLD,
+  IS_CODE,
+  IS_ITALIC,
+  IS_STRIKETHROUGH,
+  IS_SUBSCRIPT,
+  IS_SUPERSCRIPT,
+  IS_UNDERLINE,
+} from './nodeFormat'
 
-// eslint-disable-next-line no-use-before-define
-type Children = Leaf[]
-
-type Leaf = {
-  [key: string]: unknown
-  children?: Children
-  type: string
-  url?: string
-  value?: {
-    alt: string
-    url: string
-  }
+interface Props {
+  nodes: SerializedLexicalNode[]
 }
 
-const serialize = (children?: Children): React.ReactNode[] =>
-  children?.map((node, i) => {
-    if (Text.isText(node)) {
-      let text = <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />
+export function serializeLexical({ nodes }: Props): JSX.Element {
+  return (
+    <Fragment>
+      {nodes?.map((_node, index): JSX.Element | null => {
+        if (_node.type === 'text') {
+          const node = _node as SerializedTextNode
+          let text = <React.Fragment key={index}>{node.text}</React.Fragment>
+          if (node.format & IS_BOLD) {
+            text = <strong key={index}>{text}</strong>
+          }
+          if (node.format & IS_ITALIC) {
+            text = <em key={index}>{text}</em>
+          }
+          if (node.format & IS_STRIKETHROUGH) {
+            text = (
+              <span key={index} style={{ textDecoration: 'line-through' }}>
+                {text}
+              </span>
+            )
+          }
+          if (node.format & IS_UNDERLINE) {
+            text = (
+              <span key={index} style={{ textDecoration: 'underline' }}>
+                {text}
+              </span>
+            )
+          }
+          if (node.format & IS_CODE) {
+            text = <code key={index}>{node.text}</code>
+          }
+          if (node.format & IS_SUBSCRIPT) {
+            text = <sub key={index}>{text}</sub>
+          }
+          if (node.format & IS_SUPERSCRIPT) {
+            text = <sup key={index}>{text}</sup>
+          }
 
-      if (node.bold) {
-        text = <strong key={i}>{text}</strong>
-      }
+          return text
+        }
 
-      if (node.code) {
-        text = <code key={i}>{text}</code>
-      }
+        if (_node == null) {
+          return null
+        }
 
-      if (node.italic) {
-        text = <em key={i}>{text}</em>
-      }
+        // NOTE: Hacky fix for
+        // https://github.com/facebook/lexical/blob/d10c4e6e55261b2fdd7d1845aed46151d0f06a8c/packages/lexical-list/src/LexicalListItemNode.ts#L133
+        // which does not return checked: false (only true - i.e. there is no prop for false)
+        const serializedChildrenFn = (node: SerializedElementNode): JSX.Element | null => {
+          if (node.children == null) {
+            return null
+          } else {
+            if (node?.type === 'list' && (node as SerializedListNode)?.listType === 'check') {
+              for (const item of node.children) {
+                if ('checked' in item) {
+                  if (!item?.checked) {
+                    item.checked = false
+                  }
+                }
+              }
+              return serializeLexical({ nodes: node.children })
+            } else {
+              return serializeLexical({ nodes: node.children })
+            }
+          }
+        }
 
-      if (node.underline) {
-        text = (
-          <span key={i} style={{ textDecoration: 'underline' }}>
-            {text}
-          </span>
-        )
-      }
+        const serializedChildren =
+          'children' in _node ? serializedChildrenFn(_node as SerializedElementNode) : ''
 
-      if (node.strikethrough) {
-        text = (
-          <span key={i} style={{ textDecoration: 'line-through' }}>
-            {text}
-          </span>
-        )
-      }
+        switch (_node.type) {
+          case 'linebreak': {
+            return <br key={index} />
+          }
+          case 'paragraph': {
+            return <p key={index}>{serializedChildren}</p>
+          }
+          case 'heading': {
+            const node = _node as SerializedHeadingNode
 
-      return <Fragment key={i}>{text}</Fragment>
-    }
+            type Heading = Extract<keyof JSX.IntrinsicElements, 'h1' | 'h2' | 'h3' | 'h4' | 'h5'>
+            const Tag = node?.tag as Heading
+            return <Tag key={index}>{serializedChildren}</Tag>
+          }
+          case 'list': {
+            const node = _node as SerializedListNode
 
-    if (!node) {
-      return null
-    }
+            type List = Extract<keyof JSX.IntrinsicElements, 'ol' | 'ul'>
+            const Tag = node?.tag as List
+            return (
+              <Tag className="list" key={index}>
+                {serializedChildren}
+              </Tag>
+            )
+          }
+          case 'listitem': {
+            const node = _node as SerializedListItemNode
 
-    switch (node.type) {
-      case 'h1':
-        return <h1 key={i}>{serialize(node?.children)}</h1>
-      case 'h2':
-        return <h2 key={i}>{serialize(node?.children)}</h2>
-      case 'h3':
-        return <h3 key={i}>{serialize(node?.children)}</h3>
-      case 'h4':
-        return <h4 key={i}>{serialize(node?.children)}</h4>
-      case 'h5':
-        return <h5 key={i}>{serialize(node?.children)}</h5>
-      case 'h6':
-        return <h6 key={i}>{serialize(node?.children)}</h6>
-      case 'quote':
-        return <blockquote key={i}>{serialize(node?.children)}</blockquote>
-      case 'ul':
-        return <ul key={i}>{serialize(node?.children)}</ul>
-      case 'ol':
-        return <ol key={i}>{serialize(node.children)}</ol>
-      case 'li':
-        return <li key={i}>{serialize(node.children)}</li>
-      case 'link':
-        return (
-          <CMSLink
-            key={i}
-            newTab={Boolean(node?.newTab)}
-            reference={node.doc as any}
-            type={node.linkType === 'internal' ? 'reference' : 'custom'}
-            url={node.url}
-          >
-            {serialize(node?.children)}
-          </CMSLink>
-        )
+            if (node?.checked != null) {
+              return (
+                <li
+                  aria-checked={node.checked ? 'true' : 'false'}
+                  className={` ${node.checked ? '' : ''}`}
+                  key={index}
+                  // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
+                  role="checkbox"
+                  tabIndex={-1}
+                  value={node?.value}
+                >
+                  {serializedChildren}
+                </li>
+              )
+            } else {
+              return (
+                <li key={index} value={node?.value}>
+                  {serializedChildren}
+                </li>
+              )
+            }
+          }
+          case 'quote': {
+            return <blockquote key={index}>{serializedChildren}</blockquote>
+          }
+          case 'link': {
+            const node = _node as SerializedLinkNode
 
-      case 'label':
-        return <Label key={i}>{serialize(node?.children)}</Label>
+            const fields: LinkFields = node.fields
 
-      case 'large-body': {
-        return <LargeBody key={i}>{serialize(node?.children)}</LargeBody>
-      }
+            return (
+              <CMSLink
+                key={index}
+                newTab={Boolean(fields?.newTab)}
+                reference={fields.doc as any}
+                type={fields.linkType === 'internal' ? 'reference' : 'custom'}
+                url={fields.url}
+              >
+                {serializedChildren}
+              </CMSLink>
+            )
+          }
 
-      default:
-        return <p key={i}>{serialize(node?.children)}</p>
-    }
-  }) || []
+          case 'block': {
+            // todo: fix types
 
-export default serialize
+            //@ts-expect-error
+            const block = _node.fields
+
+            //@ts-expect-error
+            const blockType = _node.fields?.blockType
+
+            if (!block || !blockType) {
+              return null
+            }
+
+            switch (blockType) {
+              case 'content':
+                return <ContentBlock {...block} />
+              case 'cta':
+                return <CallToActionBlock {...block} />
+              case 'archive':
+                return <ArchiveBlock {...block} />
+              case 'mediaBlock':
+                return <MediaBlock {...block} />
+              case 'banner':
+                return <BannerBlock {...block} />
+              case 'code':
+                return <CodeBlock {...block} />
+              default:
+                return null
+            }
+          }
+
+          default:
+            return null
+        }
+      })}
+    </Fragment>
+  )
+}

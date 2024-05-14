@@ -75,6 +75,7 @@ export default buildConfig({
     seoPlugin({
       collections: ['pages', 'posts'],
       generateTitle,
+      tabbedUI: true,
       uploadsCollection: 'media',
     }),
     payloadCloudPlugin(),

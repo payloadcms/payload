@@ -1,5 +1,5 @@
 import React from 'react'
-import RichText from 'src/app/_components/RichTextLexical'
+import RichText from 'src/app/_components/RichText'
 
 import type { Page } from '../../../payload-types'
 

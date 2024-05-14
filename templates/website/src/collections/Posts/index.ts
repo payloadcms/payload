@@ -1,20 +1,12 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import { richText } from 'src/fields/richTextLexical'
+import { richText } from 'src/fields/richText'
 
 import { admins } from '../../access/admins'
 import { adminsOrPublished } from '../../access/adminsOrPublished'
-import { Archive } from '../../blocks/ArchiveBlock'
-import { CallToAction } from '../../blocks/CallToAction'
-import { Content } from '../../blocks/Content'
-import { MediaBlock } from '../../blocks/MediaBlock'
-import { hero } from '../../fields/hero'
+import { Banner } from '../../blocks/Banner'
+import { Code } from '../../blocks/Code'
 import { slugField } from '../../fields/slug'
-import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
-import { populatePublishedAt } from '../../hooks/populatePublishedAt'
-import { populateAuthors } from './hooks/populateAuthors'
-import { revalidatePost } from './hooks/revalidatePost'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -40,22 +32,11 @@ export const Posts: CollectionConfig = {
       tabs: [
         {
           fields: [
-            {
-              name: 'title',
-              type: 'text',
-              required: true,
-            },
-            hero,
-          ],
-          label: 'Hero',
-        },
-        {
-          fields: [
             richText(
-              { name: 'content', required: true },
+              { name: 'content', label: false, required: true },
               {
                 features: {
-                  blocks: [CallToAction, Archive, MediaBlock, Content],
+                  blocks: [Banner, Code],
                   link: {
                     enabledCollections: ['pages', 'posts'],
                   },
@@ -65,32 +46,42 @@ export const Posts: CollectionConfig = {
           ],
           label: 'Content',
         },
+        {
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'relatedPosts',
+              type: 'relationship',
+              admin: {
+                position: 'sidebar',
+              },
+              filterOptions: ({ id }) => {
+                return {
+                  id: {
+                    not_in: [id],
+                  },
+                }
+              },
+              hasMany: true,
+              relationTo: 'posts',
+            },
+            {
+              name: 'categories',
+              type: 'relationship',
+              admin: {
+                position: 'sidebar',
+              },
+              hasMany: true,
+              relationTo: 'categories',
+            },
+          ],
+          label: 'Meta',
+        },
       ],
-    },
-    {
-      name: 'relatedPosts',
-      type: 'relationship',
-      admin: {
-        position: 'sidebar',
-      },
-      filterOptions: ({ id }) => {
-        return {
-          id: {
-            not_in: [id],
-          },
-        }
-      },
-      hasMany: true,
-      relationTo: 'posts',
-    },
-    {
-      name: 'categories',
-      type: 'relationship',
-      admin: {
-        position: 'sidebar',
-      },
-      hasMany: true,
-      relationTo: 'categories',
     },
     {
       name: 'publishedAt',

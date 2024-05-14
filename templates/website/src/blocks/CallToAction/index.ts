@@ -2,7 +2,7 @@ import type { Block } from 'payload/types'
 
 import { invertBackground } from '../../fields/invertBackground'
 import { linkGroup } from '../../fields/linkGroup'
-import { richText } from '../../fields/richTextLexical'
+import { richText } from '../../fields/richText'
 
 export const CallToAction: Block = {
   slug: 'cta',
