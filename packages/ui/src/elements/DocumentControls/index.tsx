@@ -73,12 +73,6 @@ export const DocumentControls: React.FC<{
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
   )
 
-  const collectionLabel = () => {
-    const label = collectionConfig?.labels?.singular
-    if (!label) return i18n.t('general:document')
-    return typeof label === 'string' ? label : getTranslation(label, i18n)
-  }
-
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -88,7 +82,10 @@ export const DocumentControls: React.FC<{
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
                   {i18n.t('general:creatingNewLabel', {
-                    label: collectionLabel(),
+                    label: getTranslation(
+                      collectionConfig?.labels?.singular ?? i18n.t('general:document'),
+                      i18n,
+                    ),
                   })}
                 </p>
               </li>
