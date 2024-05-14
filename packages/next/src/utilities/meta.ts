@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { SanitizedConfig } from 'payload/types'
 
 import { payloadFaviconDark, payloadFaviconLight, payloadOgImage } from '@payloadcms/ui/assets'
@@ -13,38 +14,35 @@ export const meta = async (args: {
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
 
-  const customFavicon = config.admin.meta?.favicon
-  const customFaviconFiletype = customFavicon?.split('.').pop()
-  const customFaviconMediaType = `image/${customFaviconFiletype}`
-
-  const favicon = customFavicon ?? payloadFaviconLight?.src
   const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
+
+  const customIcons = config.admin.meta.icons as Metadata['icons']
+
+  let icons = customIcons ?? []
+
+  const payloadIcons: Icon[] = [
+    {
+      type: 'image/png',
+      rel: 'icon',
+      sizes: '32x32',
+      url: payloadFaviconDark?.src,
+    },
+    {
+      type: 'image/png',
+      media: '(prefers-color-scheme: dark)',
+      rel: 'icon',
+      sizes: '32x32',
+      url: payloadFaviconLight?.src,
+    },
+  ]
+
+  if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
+    icons = payloadIcons.concat(customIcons)
+  }
 
   return Promise.resolve({
     description,
-    icons: [
-      ...(customFavicon
-        ? [
-            {
-              type: customFaviconMediaType,
-              rel: 'icon',
-              url: favicon,
-            },
-          ]
-        : [
-            {
-              type: 'image/png',
-              rel: 'icon',
-              url: payloadFaviconDark?.src,
-            },
-            {
-              type: 'image/png',
-              media: '(prefers-color-scheme: dark)',
-              rel: 'icon',
-              url: payloadFaviconLight?.src,
-            },
-          ]),
-    ],
+    icons,
     keywords,
     metadataBase: new URL(
       config?.serverURL ||

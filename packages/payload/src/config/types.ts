@@ -1,6 +1,7 @@
 import type { I18nOptions, TFunction } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
+import type { Metadata as NextMetadata } from 'next'
 import type { DestinationStream, LoggerOptions, P } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
@@ -460,14 +461,15 @@ export type Config = {
     }
     /** The route for the logout page. */
     logoutRoute?: string
-    /** Base meta data to use for the Admin panel. Included properties are titleSuffix, ogImage, and favicon. */
+    /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: {
       /**
-       * Public path to an icon
+       * An array of Next.js metadata objects that represent icons to be used by devices and browsers.
        *
-       * This image may be displayed in the browser next to the title of the page
+       * For example browser tabs, phone home screens, and search engine results.
+       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
        */
-      favicon?: string
+      icons?: NextMetadata['icons']
       /**
        * Public path to an image
        *
