@@ -453,14 +453,10 @@ export type Config = {
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
-    /** The route the user will be redirected to after being inactive for too long. */
-    inactivityRoute?: string
     livePreview?: LivePreviewConfig & {
       collections?: string[]
       globals?: string[]
     }
-    /** The route for the logout page. */
-    logoutRoute?: string
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: {
       /**
@@ -481,6 +477,22 @@ export type Config = {
        * @example `" - My Brand"`
        */
       titleSuffix?: string
+    }
+    routes?: {
+      /** The route for the account page. */
+      account?: string
+      /** The route for the create first user page. */
+      createFirstUser?: string
+      /** The route for the forgot password page. */
+      forgot?: string
+      /** The route the user will be redirected to after being inactive for too long. */
+      inactivity?: string
+      /** The route for the login page. */
+      login?: string
+      /** The route for the logout page. */
+      logout?: string
+      /** The route for the unauthorized page. */
+      unauthorized?: string
     }
     /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
     user?: string

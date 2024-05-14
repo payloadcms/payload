@@ -47,7 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const config = useConfig()
 
   const {
-    admin: { autoLogin, inactivityRoute: logoutInactivityRoute, user: userSlug },
+    admin: {
+      autoLogin,
+      routes: { inactivity: logoutInactivityRoute },
+      routes: { login: loginRoute },
+      user: userSlug,
+    },
     routes: { admin, api },
     serverURL,
   } = config
@@ -211,16 +216,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (autoLogin && autoLogin.prefillOnly !== true) {
           // auto log-in with the provided autoLogin credentials. This is used in dev mode
           // so you don't have to log in over and over again
-          const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
-            body: JSON.stringify({
-              email: autoLogin.email,
-              password: autoLogin.password,
-            }),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
+          const autoLoginResult = await requests.post(
+            `${serverURL}${api}/${userSlug}${loginRoute}`,
+            {
+              body: JSON.stringify({
+                email: autoLogin.email,
+                password: autoLogin.password,
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
             },
-          })
+          )
           if (autoLoginResult.status === 200) {
             const autoLoginJson = await autoLoginResult.json()
             setUser(autoLoginJson.user)
@@ -253,6 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     searchParams,
     admin,
     revokeTokenAndExpire,
+    loginRoute,
   ])
 
   // On mount, get user and set
