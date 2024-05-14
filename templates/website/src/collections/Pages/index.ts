@@ -22,6 +22,12 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    livePreview: {
+      url: ({ data }) => {
+        const isHomePage = data.slug === 'home'
+        return `${process.env.NEXT_PUBLIC_SERVER_URL}${!isHomePage ? `/${data.slug}` : ''}`
+      },
+    },
     preview: (doc) => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/${typeof doc.slug === 'string' && doc.slug !== 'home' ? doc.slug : ''}`,
@@ -70,6 +76,9 @@ export const Pages: CollectionConfig = {
     beforeChange: [populatePublishedAt],
   },
   versions: {
-    drafts: true,
+    drafts: {
+      autosave: true,
+    },
+    maxPerDoc: 30,
   },
 }
