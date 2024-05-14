@@ -4,17 +4,24 @@ import QueryString from 'qs'
 import { isAdminAuthRoute, isAdminRoute } from './shared.js'
 
 export const handleAuthRedirect = ({
-  adminRoute,
+  config,
   redirectUnauthenticatedUser,
   route,
   searchParams,
 }: {
-  adminRoute: string
+  config
   redirectUnauthenticatedUser: boolean | string
   route: string
   searchParams: { [key: string]: string | string[] }
 }) => {
-  if (!isAdminAuthRoute(route, adminRoute)) {
+  const {
+    admin: {
+      routes: { login: loginRouteFromConfig },
+    },
+    routes: { admin: adminRoute },
+  } = config
+
+  if (!isAdminAuthRoute(config, route, adminRoute)) {
     if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
     const redirectRoute = encodeURIComponent(
@@ -23,14 +30,14 @@ export const handleAuthRedirect = ({
         : undefined,
     )
 
-    const adminLoginRoute = `${adminRoute}/login`
+    const adminLoginRoute = `${adminRoute}${loginRouteFromConfig}`
 
     const customLoginRoute =
       typeof redirectUnauthenticatedUser === 'string' ? redirectUnauthenticatedUser : undefined
 
     const loginRoute = isAdminRoute(route, adminRoute)
       ? adminLoginRoute
-      : customLoginRoute || '/login'
+      : customLoginRoute || loginRouteFromConfig
 
     const parsedLoginRouteSearchParams = QueryString.parse(loginRoute.split('?')[1] ?? '')
 

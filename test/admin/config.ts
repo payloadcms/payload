@@ -1,4 +1,5 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -35,7 +36,12 @@ import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { seed } from './seed.js'
-import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
+import {
+  customAdminRoutes,
+  customNestedViewPath,
+  customParamViewPath,
+  customViewPath,
+} from './shared.js'
 export default buildConfigWithDefaults({
   admin: {
     components: {
@@ -75,6 +81,7 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    routes: customAdminRoutes,
     meta: {
       icons: [
         {

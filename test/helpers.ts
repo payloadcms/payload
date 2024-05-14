@@ -1,6 +1,8 @@
 import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
+import type { Config } from 'payload/config'
 
 import { expect } from '@playwright/test'
+import { defaults } from 'payload/config'
 import { wait } from 'payload/utilities'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
@@ -9,11 +11,15 @@ import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
 type FirstRegisterArgs = {
+  customAdminRoutes?: Config['admin']['routes']
+  customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }
 
 type LoginArgs = {
+  customAdminRoutes?: Config['admin']['routes']
+  customRoutes?: Config['routes']
   data?: {
     email: string
     password: string
@@ -49,20 +55,36 @@ const networkConditions = {
 export async function ensureAutoLoginAndCompilationIsDone({
   page,
   serverURL,
+  customAdminRoutes,
+  customRoutes,
 }: {
+  customAdminRoutes?: Config['admin']['routes']
+  customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }): Promise<void> {
-  const adminURL = `${serverURL}/admin`
+  const {
+    admin: {
+      routes: { login: loginRoute, createFirstUser: createFirstUserRoute },
+    },
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+
+  const adminURL = `${serverURL}${adminRoute}`
 
   await page.goto(adminURL)
   await page.waitForURL(adminURL)
-  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+
+  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
-  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
+
+  await expect(() =>
+    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
+  ).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
+
   // Check if hero is there
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
 }
@@ -98,34 +120,47 @@ export async function throttleTest({
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { page, serverURL } = args
+  const { page, serverURL, customAdminRoutes, customRoutes } = args
 
-  await page.goto(`${serverURL}/admin`)
+  const {
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+
+  await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
   await page.fill('#field-password', devUser.password)
   await page.fill('#field-confirm-password', devUser.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}/admin`)
+  await page.waitForURL(`${serverURL}${adminRoute}`)
 }
 
 export async function login(args: LoginArgs): Promise<void> {
-  const { page, serverURL, data = devUser } = args
+  const { page, serverURL, data = devUser, customAdminRoutes, customRoutes } = args
 
-  await page.goto(`${serverURL}/admin/login`)
-  await page.waitForURL(`${serverURL}/admin/login`)
+  const {
+    admin: {
+      routes: { login: loginRoute, createFirstUser: createFirstUserRoute },
+    },
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+
+  await page.goto(`${serverURL}${adminRoute}${loginRoute}`)
+  await page.waitForURL(`${serverURL}${adminRoute}${loginRoute}`)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}/admin`)
+  await page.waitForURL(`${serverURL}${adminRoute}`)
 
-  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
+  await expect(() =>
+    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
+  ).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 }
@@ -287,4 +322,43 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   console.log('Localstack is running. Running test suite.')
 
   return describe
+}
+
+type AdminRoutes = Config['admin']['routes']
+
+export function getAdminRoutes({
+  customRoutes,
+  customAdminRoutes,
+}: {
+  customAdminRoutes?: AdminRoutes
+  customRoutes?: Config['routes']
+}): {
+  admin: {
+    routes: AdminRoutes
+  }
+  routes: Config['routes']
+} {
+  let routes = defaults.routes
+  let adminRoutes = defaults.admin.routes
+
+  if (customAdminRoutes) {
+    adminRoutes = {
+      ...adminRoutes,
+      ...customAdminRoutes,
+    }
+  }
+
+  if (customRoutes) {
+    routes = {
+      ...routes,
+      ...customRoutes,
+    }
+  }
+
+  return {
+    admin: {
+      routes: adminRoutes,
+    },
+    routes,
+  }
 }

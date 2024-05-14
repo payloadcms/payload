@@ -19,7 +19,9 @@ export const UnauthorizedView: AdminViewComponent = ({ initPageResult }) => {
       i18n,
       payload: {
         config: {
-          admin: { logoutRoute },
+          admin: {
+            routes: { logout: logoutRoute },
+          },
         },
       },
     },

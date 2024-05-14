@@ -29,6 +29,9 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
   } = req
 
   const {
+    admin: {
+      routes: { account: accountRoute },
+    },
     routes: { admin },
   } = config
 
@@ -40,7 +43,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           <p>
             <Translation
               elements={{
-                '0': ({ children }) => <Link href={`${admin}/account`}>{children}</Link>,
+                '0': ({ children }) => <Link href={`${admin}${accountRoute}`}>{children}</Link>,
               }}
               i18nKey="authentication:loggedInChangePassword"
               t={i18n.t}
