@@ -9,7 +9,7 @@ import { usersOrPublished } from '../../access/usersOrPublished'
 import { Banner } from '../../blocks/Banner'
 import { Code } from '../../blocks/Code'
 import { slugField } from '../../fields/slug'
-import { preview } from '../../utilities/preview'
+import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidatePost } from './hooks/revalidatePost'
 
@@ -23,7 +23,15 @@ export const Posts: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: (doc: Post) => preview({ path: `/posts/${doc.slug}` }),
+    livePreview: {
+      url: ({ data }) => {
+        const path = generatePreviewPath({
+          path: `/posts/${typeof data?.slug === 'string' ? data.slug : ''}`,
+        })
+        return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+      },
+    },
+    preview: (doc: Post) => generatePreviewPath({ path: `/posts/${doc.slug}` }),
     useAsTitle: 'title',
   },
   fields: [

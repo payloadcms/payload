@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 
 import React from 'react'
 
+import { AdminBar } from '../_components/AdminBar'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
+import { LivePreviewListener } from '../_components/LivePreviewListener'
 import '../_css/app.scss'
 import { Providers } from '../_providers'
 import { InitTheme } from '../_providers/Theme/InitTheme'
@@ -20,7 +22,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Providers>
-          {/* <AdminBar /> */}
+          <AdminBar />
+          <LivePreviewListener />
 
           <Header />
           {children}

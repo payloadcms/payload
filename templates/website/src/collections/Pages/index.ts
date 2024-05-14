@@ -12,7 +12,7 @@ import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
-import { preview } from '../../utilities/preview'
+import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidatePage } from './hooks/revalidatePage'
 
 export const Pages: CollectionConfig = {
@@ -26,9 +26,15 @@ export const Pages: CollectionConfig = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) => `${process.env.NEXT_PUBLIC_SERVER_URL}${`/${data.slug}`}`,
+      url: ({ data }) => {
+        const path = generatePreviewPath({
+          path: `/${typeof data?.slug === 'string' ? data.slug : ''}`,
+        })
+        return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+      },
     },
-    preview: (doc: Page) => preview({ path: `/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
+    preview: (doc: Page) =>
+      generatePreviewPath({ path: `/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
     useAsTitle: 'title',
   },
   fields: [
