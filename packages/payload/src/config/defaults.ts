@@ -26,6 +26,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   graphQL: {
     disablePlaygroundInProduction: true,
     maxComplexity: 1000,
+    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
   },
   hooks: {},
   i18n: {},
