@@ -2,6 +2,7 @@
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React, { Fragment } from 'react'
 
@@ -81,10 +82,10 @@ export const DocumentControls: React.FC<{
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
                   {i18n.t('general:creatingNewLabel', {
-                    label:
-                      typeof collectionConfig?.labels?.singular === 'string'
-                        ? collectionConfig.labels.singular
-                        : i18n.t('general:document'),
+                    label: getTranslation(
+                      collectionConfig?.labels?.singular ?? i18n.t('general:document'),
+                      i18n,
+                    ),
                   })}
                 </p>
               </li>
