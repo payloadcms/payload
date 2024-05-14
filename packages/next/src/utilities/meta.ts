@@ -3,20 +3,8 @@ import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { SanitizedConfig } from 'payload/types'
 
 import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
+import { defaults } from 'payload/config'
 import QueryString from 'qs'
-
-const defaultOpenGraph: Metadata['openGraph'] = {
-  type: 'website',
-  description:
-    'Payload is a headless CMS and application framework built with TypeScript, Node.js, React and MongoDB',
-  images: [
-    {
-      url: `/api/og`,
-    },
-  ],
-  siteName: 'Payload App',
-  title: 'Payload App',
-}
 
 export const meta = (args: {
   config: SanitizedConfig
@@ -65,7 +53,7 @@ export const meta = (args: {
         `http://localhost:${process.env.PORT || 3000}`,
     ),
     openGraph: {
-      ...defaultOpenGraph,
+      ...defaults.admin.meta.openGraph,
       description,
       images: [
         {
