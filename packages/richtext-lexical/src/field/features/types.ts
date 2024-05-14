@@ -106,7 +106,7 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
 }
 
 export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props?: ClientComponentProps<ClientFeatureProps>,
+  props: ClientComponentProps<ClientFeatureProps>,
 ) => FeatureProviderClient<ClientFeatureProps>
 
 /**
@@ -217,10 +217,15 @@ export type ClientFeature<ClientFeatureProps> = {
   }
 }
 
-export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
-  featureKey: string
-  order: number
-}
+export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extends undefined
+  ? {
+      featureKey: string
+      order: number
+    }
+  : {
+      featureKey: string
+      order: number
+    } & ClientFeatureProps
 
 export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   context: RequestContext

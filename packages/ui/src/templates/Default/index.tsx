@@ -1,4 +1,4 @@
-import type { SanitizedConfig, VisibleEntities } from 'payload/types'
+import type { Payload, SanitizedConfig, VisibleEntities } from 'payload/types'
 
 import { EntityVisibilityProvider } from '@payloadcms/ui/providers/EntityVisibility'
 import React from 'react'
@@ -18,28 +18,26 @@ const baseClass = 'template-default'
 export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
-  config: Promise<SanitizedConfig> | SanitizedConfig
+  payload: Payload
   visibleEntities?: VisibleEntities
 }
 
-export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
+export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,
   className,
-  config: configPromise,
+  payload,
   visibleEntities,
 }) => {
-  const config = await configPromise
-
   const {
     admin: {
       components: { Nav: CustomNav } = {
         Nav: undefined,
       },
     } = {},
-  } = config || {}
+  } = payload.config || {}
 
   const navProps: NavProps = {
-    config,
+    payload,
   }
 
   return (
@@ -55,6 +53,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
             CustomComponent={CustomNav}
             DefaultComponent={DefaultNav}
             componentProps={navProps}
+            payload={payload}
           />
           <div className={`${baseClass}__wrap`}>
             <AppHeader />

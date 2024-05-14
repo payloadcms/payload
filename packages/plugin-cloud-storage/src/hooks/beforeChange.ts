@@ -54,7 +54,8 @@ export const getBeforeChangeHook =
       req.payload.logger.error(
         `There was an error while uploading files corresponding to the collection ${collection.slug} with filename ${data.filename}:`,
       )
-      req.payload.logger.error(err)
+      req.payload.logger.error({ err })
+      throw err
     }
     return data
   }

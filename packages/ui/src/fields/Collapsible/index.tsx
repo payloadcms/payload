@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, FieldBase } from 'payload/types'
+import type { DocumentPreferences } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -28,7 +28,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   initCollapsed?: boolean
-  label?: FieldBase['label']
   permissions: FieldPermissions
   width?: string
 }
@@ -41,7 +40,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     descriptionProps,
     fieldMap,
     initCollapsed = false,
-    labelProps,
+    label,
     path: pathFromProps,
     readOnly: readOnlyFromProps,
   } = props
@@ -139,12 +138,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel
-                RowLabelComponent={CustomLabel}
-                i18n={i18n}
-                path={path}
-                rowLabel={labelProps.label}
-              />
+              <RowLabel RowLabelComponent={CustomLabel} i18n={i18n} path={path} rowLabel={label} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }

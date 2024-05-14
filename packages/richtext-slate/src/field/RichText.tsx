@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { ClientValidate, FieldBase } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -50,7 +50,6 @@ declare module 'slate' {
 const RichTextField: React.FC<
   FormFieldBase & {
     elements: EnabledFeatures['elements']
-    label?: FieldBase['label']
     leaves: EnabledFeatures['leaves']
     name: string
     placeholder?: string

@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -21,7 +21,6 @@ import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import type { FormFieldBase } from '../shared/index.js'
 
 export type PointFieldProps = FormFieldBase & {
-  label?: FieldBase['label']
   name?: string
   path?: string
   placeholder?: string
@@ -40,6 +39,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -90,7 +90,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
 
   const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
-    const fieldLabel = labelProps && labelProps.label ? getTranslation(labelProps.label, i18n) : ''
+    const fieldLabel = label ? getTranslation(label, i18n) : ''
 
     return {
       ...labelProps,
