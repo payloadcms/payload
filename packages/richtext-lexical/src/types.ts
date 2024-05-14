@@ -11,8 +11,14 @@ export type LexicalEditorProps = {
   features?:
     | (({
         defaultFeatures,
+        rootFeatures,
       }: {
         defaultFeatures: FeatureProviderServer<any, any>[]
+        /**
+         * The features that are enabled in the root richText editor (the one defined in the payload.config.ts).
+         * If this is the root richText editor, or if the root richText editor is not a lexical editor, this will be an empty array.
+         */
+        rootFeatures: FeatureProviderServer<any, any>[]
       }) => FeatureProviderServer<any, any>[])
     | FeatureProviderServer<any, any>[]
   lexical?: LexicalEditorConfig
@@ -20,6 +26,7 @@ export type LexicalEditorProps = {
 
 export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
   editorConfig: SanitizedServerEditorConfig
+  features: FeatureProviderServer<any, any>[]
 }
 
 export type LexicalRichTextAdapterProvider =
