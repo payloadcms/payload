@@ -151,6 +151,9 @@ export const Posts: CollectionConfig = {
     afterRead: [populateAuthors],
   },
   versions: {
-    drafts: true,
+    drafts: {
+      autosave: true,
+    },
+    maxPerDoc: 50,
   },
 }
