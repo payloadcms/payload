@@ -64,9 +64,9 @@ const RecursivelyRenderObjectData = ({
   const objectKeys = Object.keys(object)
   const objectLength = objectKeys.length
   const [isOpen, setIsOpen] = React.useState<boolean>(true)
-
+  const isNestedAndEmpty = isEmpty && (parentType === 'object' || parentType === 'array')
   return (
-    <li>
+    <li className={isNestedAndEmpty ? `${baseClass}__row-line--nested` : ''}>
       <button
         aria-label="toggle"
         className={`${baseClass}__list-toggle ${isEmpty ? `${baseClass}__list-toggle--empty` : ''}`}
