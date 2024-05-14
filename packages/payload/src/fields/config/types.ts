@@ -7,13 +7,15 @@ import type { CSSProperties } from 'react'
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type React from 'react'
 
+import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ConditionalDateProps,
   Description,
+  DescriptionComponent,
   ErrorProps,
   LabelProps,
-  RichTextAdapter,
   RowLabel,
+  RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
@@ -117,7 +119,11 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
+    Description?: DescriptionComponent
     Field?: CustomComponent
+    /**
+     * The Filter component has to be a client component
+     */
     Filter?: React.ComponentType<any>
   }
   /**
@@ -129,6 +135,16 @@ type Admin = {
   custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view column selector.
+   * @type boolean
+   */
+  disableListColumn?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view filter options.
+   * @type boolean
+   */
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -361,13 +377,25 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 }
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
-  admin?: Admin & {
-    initCollapsed?: boolean
-  }
   fields: Field[]
-  label: RowLabel
   type: 'collapsible'
-}
+} & (
+    | {
+        admin: Admin & {
+          components: {
+            RowLabel: RowLabelComponent
+          } & Admin['components']
+          initCollapsed?: boolean
+        }
+        label?: Required<FieldBase['label']>
+      }
+    | {
+        admin?: Admin & {
+          initCollapsed?: boolean
+        }
+        label: Required<FieldBase['label']>
+      }
+  )
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -422,12 +450,25 @@ export type UIField = {
     components?: {
       Cell?: CustomComponent
       Field: CustomComponent
+      /**
+       * The Filter component has to be a client component
+       */
       Filter?: React.ComponentType<any>
     }
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     disableBulkEdit?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view column selector.
+     * @type boolean
+     */
+    disableListColumn?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view filter options.
+     * @type boolean
+     */
+    disableListFilter?: boolean
     position?: string
     width?: string
   }
@@ -446,6 +487,11 @@ export type UploadField = FieldBase & {
     }
   }
   filterOptions?: FilterOptions
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
   relationTo: string
   type: 'upload'
@@ -506,6 +552,11 @@ export type SelectField = FieldBase & {
 type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
   hasMany?: boolean
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
   type: 'relationship'
 } & (
@@ -585,24 +636,28 @@ export type RichTextField<
       Label?: CustomComponent<LabelProps>
     }
   }
-  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  editor?:
+    | RichTextAdapter<Value, AdapterProps, AdapterProps>
+    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
-
-export type RichTextFieldRequiredEditor<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
-> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor: RichTextAdapter<Value, AdapterProps, ExtraProperties>
-}
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
-      RowLabel?: RowLabel
+      RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   /**
    * Customize the SQL table name
@@ -674,6 +729,10 @@ export type Block = {
 export type BlockField = FieldBase & {
   admin?: Admin & {
     initCollapsed?: boolean
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown
@@ -709,10 +768,6 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
-
-export type FieldWithRichTextRequiredEditor =
-  | Exclude<Field, RichTextField>
-  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField

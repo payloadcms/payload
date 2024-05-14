@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/graphql",
-  "version": "3.0.0-beta.19",
+  "version": "3.0.0-beta.30",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -13,10 +13,18 @@
       "import": "./src/index.ts",
       "require": "./src/index.ts",
       "types": "./src/index.ts"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
+  "bin": {
+    "payload-graphql": "bin.js"
+  },
   "files": [
     "dist"
   ],
@@ -29,14 +37,14 @@
   },
   "dependencies": {
     "graphql-scalars": "1.22.2",
-    "pluralize": "8.0.0"
+    "pluralize": "8.0.0",
+    "ts-essentials": "7.0.3"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pluralize": "^0.0.33",
     "graphql-http": "^1.22.0",
-    "payload": "workspace:*",
-    "ts-essentials": "7.0.3"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
@@ -48,6 +56,11 @@
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
     },
     "main": "./dist/index.js",

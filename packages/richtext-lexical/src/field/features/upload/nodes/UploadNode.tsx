@@ -25,7 +25,25 @@ export type UploadData = {
   value: number | string
 }
 
-function convertUploadElement(domNode: Node): DOMConversionOutput | null {
+function convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput | null {
+  if (
+    domNode.hasAttribute('data-lexical-upload-relation-to') &&
+    domNode.hasAttribute('data-lexical-upload-id')
+  ) {
+    const id = domNode.getAttribute('data-lexical-upload-id')
+    const relationTo = domNode.getAttribute('data-lexical-upload-relation-to')
+
+    if (id != null && relationTo != null) {
+      const node = $createUploadNode({
+        data: {
+          fields: {},
+          relationTo,
+          value: id,
+        },
+      })
+      return { node }
+    }
+  }
   // TODO: Auto-upload functionality here!
   //}
   return null
@@ -63,7 +81,7 @@ export class UploadNode extends DecoratorBlockNode {
 
   static importDOM(): DOMConversionMap | null {
     return {
-      img: (node: Node) => ({
+      img: (node: HTMLImageElement) => ({
         conversion: convertUploadElement,
         priority: 0,
       }),
@@ -98,8 +116,9 @@ export class UploadNode extends DecoratorBlockNode {
 
   exportDOM(): DOMExportOutput {
     const element = document.createElement('img')
-    // element.setAttribute('src', this.__src);
-    // element.setAttribute('alt', this.__altText); //TODO
+    element.setAttribute('data-lexical-upload-id', String(this.__data?.value))
+    element.setAttribute('data-lexical-upload-relation-to', this.__data?.relationTo)
+
     return { element }
   }
 

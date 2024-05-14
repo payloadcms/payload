@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "sourceMaps": true,
+  "exclude": [
+    "/**/mocks",
+    "/**/*.spec.ts"
+  ],
+  "jsc": {
+    "target": "esnext",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "dts": true
+    }
+  },
+  "module": {
+    "type": "es6"
+  }
+}

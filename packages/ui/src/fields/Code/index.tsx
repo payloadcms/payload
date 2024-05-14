@@ -18,7 +18,6 @@ import './index.scss'
 
 export type CodeFieldProps = FormFieldBase & {
   editorOptions?: CodeFieldType['admin']['editorOptions']
-  label?: FieldBase['label']
   language?: CodeFieldType['admin']['language']
   name?: string
   path?: string

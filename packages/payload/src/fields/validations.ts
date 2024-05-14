@@ -1,4 +1,8 @@
 import Ajv from 'ajv'
+import ObjectIdImport from 'bson-objectid'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { Where } from '../types/index.js'
@@ -264,6 +268,10 @@ export const richText: Validate<object, unknown, unknown, RichTextField> = async
   value,
   options,
 ) => {
+  if (typeof options?.editor === 'function') {
+    throw new Error('Attempted to access unsanitized rich text editor.')
+  }
+
   const editor: RichTextAdapter = options?.editor
 
   return editor.validate(value, options)
@@ -385,8 +393,12 @@ const validateFilterOptions: Validate<
         const valueIDs: (number | string)[] = []
 
         values.forEach((val) => {
-          if (typeof val === 'object' && val?.value) {
-            valueIDs.push(val.value)
+          if (typeof val === 'object') {
+            if (val?.value) {
+              valueIDs.push(val.value)
+            } else if (ObjectId.isValid(val)) {
+              valueIDs.push(new ObjectId(val).toHexString())
+            }
           }
 
           if (typeof val === 'string' || typeof val === 'number') {
@@ -436,6 +448,10 @@ const validateFilterOptions: Validate<
 
         if (typeof val === 'string' || typeof val === 'number') {
           requestedID = val
+        }
+
+        if (typeof val === 'object' && ObjectId.isValid(val)) {
+          requestedID = new ObjectId(val).toHexString()
         }
       }
 

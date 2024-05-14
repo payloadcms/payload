@@ -61,11 +61,12 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    this.pool = new pg.Pool(this.poolOptions)
-    await connectWithReconnect({ adapter: this, payload: this.payload })
+    if (!this.pool) {
+      this.pool = new pg.Pool(this.poolOptions)
+      await connectWithReconnect({ adapter: this, payload: this.payload })
+    }
 
     const logger = this.logger || false
-
     this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
 
     if (!hotReload) {
@@ -82,16 +83,18 @@ export const connect: Connect = async function connect(
     }
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
     process.exit(1)
   }
 
   // Only push schema if not in production
   if (
-    process.env.NODE_ENV === 'production' ||
-    process.env.PAYLOAD_MIGRATING === 'true' ||
-    this.push === false
-  )
-    return
+    process.env.NODE_ENV !== 'production' &&
+    process.env.PAYLOAD_MIGRATING !== 'true' &&
+    this.push !== false
+  ) {
+    await pushDevSchema(this)
+  }
 
-  await pushDevSchema(this)
+  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
 }

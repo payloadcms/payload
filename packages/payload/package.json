@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.19",
+  "version": "3.0.0-beta.30",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -29,11 +29,7 @@
     "directory": "packages/payload"
   },
   "license": "MIT",
-  "author": {
-    "name": "Payload",
-    "email": "info@payloadcms.com",
-    "url": "https://payloadcms.com"
-  },
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
     {
       "name": "Payload",
@@ -115,6 +111,7 @@
     "sanitize-filename": "1.6.3",
     "scheduler": "0.23.0",
     "scmp": "2.1.0",
+    "ts-essentials": "7.0.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -158,8 +155,7 @@
     "passport-strategy": "1.0.0",
     "rimraf": "3.0.2",
     "serve-static": "1.15.0",
-    "sharp": "0.32.6",
-    "ts-essentials": "7.0.3"
+    "sharp": "0.32.6"
   },
   "peerDependencies": {
     "@swc/core": "^1.4.13",
@@ -171,10 +167,9 @@
     }
   },
   "engines": {
-    "node": ">=18.20.2"
+    "node": "^18.20.2 || >=20.6.0"
   },
   "publishConfig": {
-    "access": "public",
     "exports": {
       ".": {
         "import": "./dist/index.js",

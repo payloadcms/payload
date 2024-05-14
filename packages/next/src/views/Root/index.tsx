@@ -7,7 +7,7 @@ import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import { initPage } from '../../utilities/initPage.js'
+import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
 export { generatePageMetadata } from './meta.js'
@@ -87,7 +87,10 @@ export const RootPage = async ({
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
-        <DefaultTemplate config={config} visibleEntities={initPageResult.visibleEntities}>
+        <DefaultTemplate
+          payload={initPageResult?.req.payload}
+          visibleEntities={initPageResult.visibleEntities}
+        >
           {RenderedView}
         </DefaultTemplate>
       )}

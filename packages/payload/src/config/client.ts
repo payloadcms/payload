@@ -23,6 +23,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'editor'
   | 'email'
   | 'endpoints'
+  | 'graphQL'
   | 'hooks'
   | 'onInit'
   | 'plugins'
@@ -70,6 +71,7 @@ export const createClientConfig = async ({
     'csrf',
     'email',
     'custom',
+    'graphQL',
     // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 

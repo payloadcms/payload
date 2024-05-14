@@ -8,7 +8,7 @@ keywords: live preview, preview, live, iframe, iframe preview, visual editing, d
 
 **With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.**
 
-Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
+Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives. Live Preview works in both server-side as well as client-side environments. See [Front-End](./frontend) for more details.
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
 

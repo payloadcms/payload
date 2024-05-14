@@ -1,9 +1,9 @@
 'use client'
-import type { ClientCollectionConfig, FieldAffectingData, Where } from 'payload/types'
+import type { ClientCollectionConfig, Where } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
@@ -59,10 +59,21 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
+  const hasWhereParam = useRef(Boolean(searchParams?.where))
+
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
+
+  useEffect(() => {
+    if (hasWhereParam.current && !searchParams?.where) {
+      setVisibleDrawer(undefined)
+      hasWhereParam.current = false
+    } else if (searchParams?.where) {
+      hasWhereParam.current = true
+    }
+  }, [setVisibleDrawer, searchParams?.where])
 
   return (
     <div className={baseClass}>
@@ -156,6 +167,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
+          key={String(hasWhereParam.current && !searchParams?.where)}
         />
       </AnimateHeight>
       {enableSort && (

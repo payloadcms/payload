@@ -2,6 +2,8 @@
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin.js'
 import React from 'react'
 
-export function LexicalCheckListPlugin() {
+import type { PluginComponent } from '../../../types.js'
+
+export const LexicalCheckListPlugin: PluginComponent<undefined> = () => {
   return <CheckListPlugin />
 }

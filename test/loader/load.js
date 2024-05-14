@@ -1,16 +1,27 @@
-import { register } from 'node:module'
-import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const load = async (filePath) => {
-  const filename = fileURLToPath(import.meta.url)
-  const dirname = path.dirname(filename)
-  const url = pathToFileURL(dirname).toString() + '/'
+  const resolvedImportWithoutClientFilesPath = path.resolve(
+    dirname,
+    '../../packages/payload/dist/utilities/importWithoutClientFiles.js',
+  )
 
-  // Need to register loader from payload/dist for a true test of functionality
-  register('../../packages/payload/dist/bin/loader/index.js', url)
+  // First check if ../../packages/payload/dist/utilities/importWithoutClientFiles.js exist
+  // If it does not, throw a proper error
+  if (!fs.existsSync(resolvedImportWithoutClientFilesPath)) {
+    throw new Error(
+      'Looks like payload has not been built. Please run `pnpm build:core` in the monorepo root',
+    )
+  }
 
-  const result = await import(filePath)
+  const importConfigImport = await import(resolvedImportWithoutClientFilesPath)
+  const importConfig = importConfigImport.importConfig
+
+  const result = await importConfig(filePath)
 
   return result
 }

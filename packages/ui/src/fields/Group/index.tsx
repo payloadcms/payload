@@ -1,6 +1,5 @@
 'use client'
 import type { FieldPermissions } from 'payload/auth'
-import type { FieldBase } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
@@ -29,7 +28,6 @@ export type GroupFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   forceRender?: boolean
   hideGutter?: boolean
-  label?: FieldBase['label']
   name?: string
   permissions: FieldPermissions
   width?: string
@@ -43,7 +41,7 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
     descriptionProps,
     fieldMap,
     hideGutter,
-    labelProps,
+    label,
     readOnly: readOnlyFromProps,
     style,
     width,
@@ -89,14 +87,12 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
         <GroupProvider>
           <div className={`${baseClass}__wrap`}>
             <div className={`${baseClass}__header`}>
-              {(CustomLabel || CustomDescription || labelProps?.label) && (
+              {(CustomLabel || CustomDescription || label) && (
                 <header>
                   {CustomLabel !== undefined ? (
                     CustomLabel
-                  ) : labelProps?.label ? (
-                    <h3 className={`${baseClass}__title`}>
-                      {getTranslation(labelProps.label, i18n)}
-                    </h3>
+                  ) : label ? (
+                    <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                   ) : null}
                   {CustomDescription !== undefined ? (
                     CustomDescription

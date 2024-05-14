@@ -6,6 +6,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { User } from '../auth/types.js'
@@ -527,7 +528,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -563,6 +564,10 @@ export type Config = {
      * @see https://payloadcms.com/docs/graphql/extending
      */
     queries?: GraphQLExtension
+    /**
+     * Filepath to write the generated schema to
+     */
+    schemaOutputFile?: string
   }
   /**
    * Tap into Payload-wide hooks.
@@ -628,7 +633,18 @@ export type Config = {
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /** Disable declare block in generated types file */
-    declare?: false
+    declare?:
+      | {
+          /**
+           * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
+           *
+           * Adds a @ts-ignore flag above the GeneratedTypes interface declaration
+           *
+           * @default false
+           */
+          ignoreTSError?: boolean
+        }
+      | false
     /** Filename to write the generated types to */
     outputFile?: string
   }
@@ -640,9 +656,11 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 > & {
   collections: SanitizedCollectionConfig[]
+  /** Default richtext editor to use for richText fields */
+  editor: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
@@ -691,12 +709,8 @@ export type EditConfig =
 
 export type EntityDescriptionComponent = CustomComponent
 
-export type EntityDescriptionFunction = () => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 
-export type EntityDescription =
-  | EntityDescriptionComponent
-  | EntityDescriptionFunction
-  | Record<string, string>
-  | string
+export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }

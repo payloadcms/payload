@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "3.0.0-beta.19",
+  "version": "3.0.0-beta.30",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",
@@ -17,21 +17,24 @@
     "directory": "packages/plugin-seo"
   },
   "license": "MIT",
-  "author": "dev@payloadcms.com",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.tsx",
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
     }
   },
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
   "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
+    "dist"
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
@@ -63,6 +66,11 @@
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
     },
     "main": "./dist/index.js",

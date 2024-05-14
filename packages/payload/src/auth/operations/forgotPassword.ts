@@ -108,9 +108,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
           : `${protocol}//${req.headers.get('host')}`
 
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}/reset/${token}">
-     ${serverURL}${config.routes.admin}/reset/${token}
-    </a>
+    <a href="${serverURL}${config.routes.admin}/reset/${token}">${serverURL}${config.routes.admin}/reset/${token}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
