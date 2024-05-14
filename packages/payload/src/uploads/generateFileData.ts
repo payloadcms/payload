@@ -236,7 +236,7 @@ export const generateFileData = async <T>({
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {}
-      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
+      const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
         dimensions: !cropData
           ? dimensions
@@ -253,10 +253,12 @@ export const generateFileData = async <T>({
       })
 
       fileData.sizes = sizeData
+      fileData.focalX = focalPoint?.x
+      fileData.focalY = focalPoint?.y
       filesToSave.push(...sizesToSave)
     }
   } catch (err) {
-    console.error(err)
+    req.payload.logger.error({ err, msg: 'Error uploading file' })
     throw new FileUploadError(req.t)
   }
 

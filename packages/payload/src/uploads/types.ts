@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import type express from 'express'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
@@ -6,6 +5,8 @@ import type { ResizeOptions, Sharp } from 'sharp'
 export type FileSize = {
   filename: null | string
   filesize: null | number
+  focalX?: number
+  focalY?: number
   height: null | number
   mimeType: null | string
   width: null | number
@@ -18,6 +19,8 @@ export type FileSizes = {
 export type FileData = {
   filename: string
   filesize: number
+  focalX?: number
+  focalY?: number
   height: number
   mimeType: string
   sizes: FileSizes
