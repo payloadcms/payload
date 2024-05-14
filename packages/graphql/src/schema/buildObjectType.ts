@@ -361,7 +361,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           let relatedCollectionSlug = field.relationTo
-          const draft = args.draft ?? context.req.query?.draft
+          const draft = Boolean(args.draft ?? context.req.query?.draft)
 
           if (hasManyValues) {
             const results = []
@@ -630,6 +630,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           const id = value
+          const draft = Boolean(args.draft ?? context.req.query?.draft)
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
@@ -638,7 +639,7 @@ function buildObjectType({
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft: false,
+                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
