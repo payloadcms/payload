@@ -2,6 +2,7 @@ import joi from 'joi'
 
 import { adminViewSchema } from './shared/adminViewSchema.js'
 import { componentSchema, livePreviewSchema } from './shared/componentSchema.js'
+import { openGraphSchema } from './shared/openGraphSchema.js'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -73,7 +74,7 @@ export default joi.object({
           joi.object(),
           joi.string().allow(null),
         ),
-      ogImage: joi.string(),
+      openGraph: openGraphSchema,
       titleSuffix: joi.string(),
     }),
     routes: joi.object({

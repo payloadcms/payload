@@ -490,7 +490,7 @@ export type Config = {
        *
        * This image may be displayed as preview when the link is shared on social media
        */
-      ogImage?: string
+      openGraph?: NextMetadata['openGraph']
       /**
        * String to append to the <title> of admin pages
        * @example `" - My Brand"`
