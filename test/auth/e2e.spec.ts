@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { SanitizedConfig } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
@@ -12,6 +13,7 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureAutoLoginAndCompilationIsDone,
+  getAdminRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../helpers.js'
@@ -31,8 +33,28 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-const createFirstUser = async ({ page, serverURL }: { page: Page; serverURL: string }) => {
-  await page.goto(serverURL + '/admin/create-first-user')
+const createFirstUser = async ({
+  page,
+  serverURL,
+  customAdminRoutes,
+  customRoutes,
+}: {
+  customAdminRoutes?: SanitizedConfig['admin']['routes']
+  customRoutes?: SanitizedConfig['routes']
+  page: Page
+  serverURL: string
+}) => {
+  const {
+    admin: {
+      routes: { createFirstUser: createFirstUserRoute },
+    },
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({
+    customAdminRoutes,
+    customRoutes,
+  })
+
+  await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('#field-confirm-password').fill(devUser.password)

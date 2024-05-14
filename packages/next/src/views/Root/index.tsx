@@ -34,7 +34,10 @@ export const RootPage = async ({
   const config = await configPromise
 
   const {
-    admin: { user: userSlug },
+    admin: {
+      routes: { createFirstUser: createFirstUserRoute },
+      user: userSlug,
+    },
     routes: { admin: adminRoute },
   } = config
 
@@ -66,13 +69,13 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc)
 
-    const createFirstUserRoute = `${adminRoute}/create-first-user`
+    const routeWithAdmin = `${adminRoute}${createFirstUserRoute}`
 
-    if (!dbHasUser && currentRoute !== createFirstUserRoute) {
-      redirect(createFirstUserRoute)
+    if (!dbHasUser && currentRoute !== routeWithAdmin) {
+      redirect(routeWithAdmin)
     }
 
-    if (dbHasUser && currentRoute === createFirstUserRoute) {
+    if (dbHasUser && currentRoute === routeWithAdmin) {
       redirect(adminRoute)
     }
   }
