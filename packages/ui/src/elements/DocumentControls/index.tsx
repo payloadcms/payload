@@ -2,8 +2,8 @@
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { getTranslation } from 'packages/translations/src/utilities/getTranslation.js'
 import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
