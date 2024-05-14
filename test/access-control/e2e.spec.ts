@@ -14,6 +14,7 @@ import {
   closeNav,
   ensureAutoLoginAndCompilationIsDone,
   exactText,
+  getAdminRoutes,
   initPageConsoleErrorCatch,
   login,
   openDocControls,
@@ -58,6 +59,7 @@ describe('access control', () => {
   let restrictedVersionsUrl: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
+  let logoutURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -75,6 +77,15 @@ describe('access control', () => {
 
     await login({ page, serverURL })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    const {
+      admin: {
+        routes: { logout: logoutRoute },
+      },
+      routes: { admin: adminRoute },
+    } = getAdminRoutes({})
+
+    logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
 
   test('field without read access should not show', async () => {
@@ -352,8 +363,8 @@ describe('access control', () => {
 
     await expect(page.locator('.dashboard')).toBeVisible()
 
-    await page.goto(`${serverURL}/admin/logout`)
-    await page.waitForURL(`${serverURL}/admin/logout`)
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
 
     await login({
       page,
@@ -366,8 +377,8 @@ describe('access control', () => {
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
 
-    await page.goto(`${serverURL}/admin/logout`)
-    await page.waitForURL(`${serverURL}/admin/logout`)
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
 
     // Log back in for the next test
     await login({
@@ -387,8 +398,8 @@ describe('access control', () => {
 
     await expect(page.locator('.dashboard')).toBeVisible()
 
-    await page.goto(`${serverURL}/admin/logout`)
-    await page.waitForURL(`${serverURL}/admin/logout`)
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
 
     const nonAdminUser = await payload.login({
       collection: nonAdminUserSlug,
