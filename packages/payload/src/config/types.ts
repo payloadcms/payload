@@ -1,4 +1,4 @@
-import type { I18nOptions, TFunction } from '@payloadcms/translations'
+import type { DefaultTranslationsObject, I18nOptions, TFunction } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { Metadata as NextMetadata } from 'next'
@@ -580,7 +580,7 @@ export type Config = {
     afterError?: AfterErrorHook
   }
   /** i18n config settings */
-  i18n?: I18nOptions
+  i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**

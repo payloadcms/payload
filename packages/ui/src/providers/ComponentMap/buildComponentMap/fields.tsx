@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
@@ -55,7 +55,7 @@ export const mapFields = (args: {
   disableAddingID?: boolean
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
-  i18n: I18n
+  i18n: I18nClient
   parentPath?: string
   readOnly?: boolean
 }): FieldMap => {

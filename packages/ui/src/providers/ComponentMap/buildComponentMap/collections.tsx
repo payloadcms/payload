@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
 import type {
   AdminViewProps,
@@ -22,7 +22,7 @@ export const mapCollections = (args: {
   WithServerSideProps: WithServerSidePropsType
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
   readOnly?: boolean
 }): {
   [key: SanitizedCollectionConfig['slug']]: CollectionComponentMap

@@ -426,28 +426,41 @@ describe('relationship', () => {
 
     await page.goto(url.list)
     await page.waitForURL(url.list)
+    await wait(400)
 
     await page.locator('.list-controls__toggle-columns').click()
+    await wait(400)
+
     await page.locator('.list-controls__toggle-where').click()
     await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await wait(400)
+
     await page.locator('.where-builder__add-first-filter').click()
 
+    await wait(400)
     const conditionField = page.locator('.condition__field')
     await conditionField.click()
+    await wait(400)
 
     const dropdownFieldOptions = conditionField.locator('.rs__option')
     await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+    await wait(400)
 
     const operatorField = page.locator('.condition__operator')
     await operatorField.click()
+    await wait(400)
 
     const dropdownOperatorOptions = operatorField.locator('.rs__option')
     await dropdownOperatorOptions.locator('text=equals').click()
+    await wait(400)
 
     const valueField = page.locator('.condition__value')
     await valueField.click()
+    await wait(400)
+
     const dropdownValueOptions = valueField.locator('.rs__option')
     await dropdownValueOptions.locator('text=some text').click()
+    await wait(400)
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })

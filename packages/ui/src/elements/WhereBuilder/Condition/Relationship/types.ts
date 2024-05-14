@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { PaginatedDocs } from 'payload/database'
 import type { ClientCollectionConfig, RelationshipField } from 'payload/types'
 
@@ -16,7 +16,7 @@ export type Option = {
 }
 
 type CLEAR = {
-  i18n: I18n
+  i18n: I18nClient
   required: boolean
   type: 'CLEAR'
 }
@@ -25,7 +25,7 @@ type ADD = {
   collection: ClientCollectionConfig
   data: PaginatedDocs<any>
   hasMultipleRelations: boolean
-  i18n: I18n
+  i18n: I18nClient
   relation: string
   type: 'ADD'
 }

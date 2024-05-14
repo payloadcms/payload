@@ -65,11 +65,11 @@ export const text: Validate<string | string[], unknown, unknown, TextField> = (
     const length = stringValue?.length || 0
 
     if (typeof maxLength === 'number' && length > maxLength) {
-      return t('validation:shorterThanMax', { label: t('value'), maxLength, stringValue })
+      return t('validation:shorterThanMax', { label: t('general:value'), maxLength, stringValue })
     }
 
     if (typeof minLength === 'number' && length < minLength) {
-      return t('validation:longerThanMin', { label: t('value'), minLength, stringValue })
+      return t('validation:longerThanMin', { label: t('general:value'), minLength, stringValue })
     }
   }
 
