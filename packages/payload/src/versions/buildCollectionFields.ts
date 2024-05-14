@@ -8,6 +8,7 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
       type: 'relationship',
       index: true,
       relationTo: collection.slug,
+      idType: collection.fields.find((field) => 'name' in field && field.name === 'id')?.type,
     },
     {
       name: 'version',
