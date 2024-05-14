@@ -12,6 +12,7 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 
 type Args = {
   depth?: number
+  disableErrors?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   locale?: string
@@ -25,6 +26,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
   const {
     slug,
     depth,
+    disableErrors,
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
@@ -43,8 +45,11 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, globalConfig.access.read)
+      accessResult = await executeAccess({ disableErrors, req }, globalConfig.access.read)
     }
+
+    // If errors are disabled, and access returns false, return null
+    if (accessResult === false) return null
 
     // /////////////////////////////////////
     // Perform database operation
