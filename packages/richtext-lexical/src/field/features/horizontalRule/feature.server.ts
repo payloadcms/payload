@@ -12,7 +12,6 @@ export const HorizontalRuleFeature: FeatureProviderProviderServer<undefined, und
     feature: () => {
       return {
         ClientComponent: HorizontalRuleFeatureClientComponent,
-        clientFeatureProps: null,
         markdownTransformers: [MarkdownTransformer],
         nodes: [
           createNode({

@@ -40,6 +40,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context: RequestContext
   currentDepth: number
   depth: number
+  draft: boolean
   /**
    * This maps all population promises to the node type
    */
@@ -91,6 +92,7 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
     config: SanitizedConfig
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ServerFeatureProviderMap
+    isRoot?: boolean
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedServerFeatureMap
     // unSanitized EditorConfig,
@@ -104,7 +106,7 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
 }
 
 export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props?: ClientComponentProps<ClientFeatureProps>,
+  props: ClientComponentProps<ClientFeatureProps>,
 ) => FeatureProviderClient<ClientFeatureProps>
 
 /**
@@ -125,6 +127,14 @@ export type FeatureProviderClient<ClientFeatureProps> = {
     unSanitizedEditorConfig: ClientEditorConfig
   }) => ClientFeature<ClientFeatureProps>
 }
+
+export type PluginComponent<ClientFeatureProps = any> = React.FC<{
+  clientProps: ClientFeatureProps
+}>
+export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
+  anchorElem: HTMLElement
+  clientProps: ClientFeatureProps
+}>
 
 export type ClientFeature<ClientFeatureProps> = {
   /**
@@ -151,22 +161,22 @@ export type ClientFeature<ClientFeatureProps> = {
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'bottom' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'normal' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
+        Component: PluginComponentWithAnchor<ClientFeatureProps>
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
   >
@@ -207,10 +217,15 @@ export type ClientFeature<ClientFeatureProps> = {
   }
 }
 
-export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
-  featureKey: string
-  order: number
-}
+export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extends undefined
+  ? {
+      featureKey: string
+      order: number
+    }
+  : {
+      featureKey: string
+      order: number
+    } & ClientFeatureProps
 
 export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   context: RequestContext
@@ -332,25 +347,29 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown
 export type SanitizedPlugin =
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC<{ anchorElem: HTMLElement }>
+      Component: PluginComponentWithAnchor
+      clientProps: any
       desktopOnly?: boolean
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.

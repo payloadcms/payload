@@ -17,7 +17,6 @@ export type PasswordFieldProps = FormFieldBase & {
   className?: string
   description?: Description
   disabled?: boolean
-  label?: string
   name: string
   path?: string
   required?: boolean

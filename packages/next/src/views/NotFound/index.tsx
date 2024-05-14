@@ -60,7 +60,7 @@ export const NotFoundPage = async ({
     <Fragment>
       <HydrateClientUser permissions={initPageResult.permissions} user={initPageResult.req.user} />
       <DefaultTemplate
-        config={initPageResult.req.payload.config}
+        payload={initPageResult.req.payload}
         visibleEntities={initPageResult.visibleEntities}
       >
         <NotFoundClient />

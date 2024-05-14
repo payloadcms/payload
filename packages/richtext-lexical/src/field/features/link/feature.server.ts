@@ -1,5 +1,5 @@
 import type { Config, SanitizedConfig } from 'payload/config'
-import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
 import { sanitizeFields } from 'payload/config'
@@ -44,12 +44,14 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    * A function or array defining additional fields for the link feature. These will be
    * displayed in the link editor drawer.
    */
-  fields?:
-    | ((args: {
-        config: SanitizedConfig
-        defaultFields: FieldWithRichTextRequiredEditor[]
-      }) => FieldWithRichTextRequiredEditor[])
-    | FieldWithRichTextRequiredEditor[]
+  fields?: ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[]) | Field[]
+  /**
+   * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
 }
 
 export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, ClientProps> = (
@@ -59,7 +61,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
     props = {}
   }
   return {
-    feature: async ({ config: _config }) => {
+    feature: async ({ config: _config, isRoot }) => {
       const validRelationships = _config.collections.map((c) => c.slug) || []
 
       const _transformedFields = transformExtraFields(
@@ -67,14 +69,15 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
         _config,
         props.enabledCollections,
         props.disabledCollections,
+        props.maxDepth,
       )
 
-      const sanitizedFields = (await sanitizeFields({
+      const sanitizedFields = await sanitizeFields({
         config: _config as unknown as Config,
         fields: _transformedFields,
-        requireFieldLevelRichTextEditor: true,
+        requireFieldLevelRichTextEditor: isRoot,
         validRelationships,
-      })) as FieldWithRichTextRequiredEditor[]
+      })
       props.fields = sanitizedFields
 
       return {

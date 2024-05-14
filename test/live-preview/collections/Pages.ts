@@ -9,7 +9,7 @@ import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import CollectionLivePreviewButton from '../components/CollectionLivePreviewButton/index.js'
 import { hero } from '../fields/hero.js'
-import { pagesSlug, tenantsSlug } from '../shared.js'
+import { pagesSlug, postsSlug, tenantsSlug } from '../shared.js'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
@@ -94,23 +94,23 @@ export const Pages: CollectionConfig = {
             {
               name: 'relationshipMonoHasOne',
               type: 'relationship',
-              relationTo: 'posts',
+              relationTo: postsSlug,
             },
             {
               name: 'relationshipMonoHasMany',
               type: 'relationship',
-              relationTo: 'posts',
+              relationTo: postsSlug,
               hasMany: true,
             },
             {
               name: 'relationshipPolyHasOne',
               type: 'relationship',
-              relationTo: ['posts'],
+              relationTo: [postsSlug],
             },
             {
               name: 'relationshipPolyHasMany',
               type: 'relationship',
-              relationTo: ['posts'],
+              relationTo: [postsSlug],
               hasMany: true,
             },
             {
@@ -129,23 +129,23 @@ export const Pages: CollectionConfig = {
                 {
                   name: 'relationshipInArrayMonoHasOne',
                   type: 'relationship',
-                  relationTo: 'posts',
+                  relationTo: postsSlug,
                 },
                 {
                   name: 'relationshipInArrayMonoHasMany',
                   type: 'relationship',
-                  relationTo: 'posts',
+                  relationTo: postsSlug,
                   hasMany: true,
                 },
                 {
                   name: 'relationshipInArrayPolyHasOne',
                   type: 'relationship',
-                  relationTo: ['posts'],
+                  relationTo: [postsSlug],
                 },
                 {
                   name: 'relationshipInArrayPolyHasMany',
                   type: 'relationship',
-                  relationTo: ['posts'],
+                  relationTo: [postsSlug],
                   hasMany: true,
                 },
               ],
@@ -161,7 +161,7 @@ export const Pages: CollectionConfig = {
                     {
                       name: 'relationshipInTab',
                       type: 'relationship',
-                      relationTo: 'posts',
+                      relationTo: postsSlug,
                     },
                   ],
                 },

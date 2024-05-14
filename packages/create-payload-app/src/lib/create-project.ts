@@ -8,6 +8,7 @@ import path from 'path'
 
 import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types.js'
 
+import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 
@@ -107,6 +108,10 @@ export async function createProject(args: {
     }
   } else {
     spinner.stop('Dependency installation skipped')
+  }
+
+  if (!cliArgs['--no-git']) {
+    tryInitRepoAndCommit({ cwd: projectDir })
   }
 }
 

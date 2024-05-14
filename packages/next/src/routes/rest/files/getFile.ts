@@ -27,16 +27,19 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       )
     }
 
-    await checkFileAccess({
+    const accessResult = await checkFileAccess({
       collection,
       filename,
       req,
     })
 
+    if (accessResult instanceof Response) return accessResult
+
     let response: Response = null
     if (collection.config.upload.handlers?.length) {
       for (const handler of collection.config.upload.handlers) {
         response = await handler(req, {
+          doc: accessResult,
           params: {
             collection: collection.config.slug,
             filename,

@@ -29,6 +29,7 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     locale,
     localized,
@@ -82,6 +83,7 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
       className={className}
       descriptionProps={descriptionProps}
       errorProps={errorProps}
+      label={label}
       labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)

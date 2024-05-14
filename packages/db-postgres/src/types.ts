@@ -69,14 +69,17 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
    */
   fieldConstraints: Record<string, Record<string, string>>
   idType: Args['idType']
+  initializing: Promise<void>
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   pgSchema?: { table: PgTableFn } | PgSchema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
+  resolveInitializing: () => void
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
   sessions: {

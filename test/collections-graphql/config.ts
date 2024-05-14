@@ -352,6 +352,9 @@ export default buildConfigWithDefaults({
           relationTo: 'cyclical-relationship',
         },
       ],
+      versions: {
+        drafts: true,
+      },
     },
   ],
   graphQL: {

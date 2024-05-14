@@ -17,6 +17,11 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
     let transactionReady: () => void
 
+    // Await initialization here
+    // Prevent race conditions where the adapter may be
+    // re-initializing, and `this.drizzle` is potentially undefined
+    await this.initializing
+
     // Drizzle only exposes a transactions API that is sufficient if you
     // can directly pass around the `tx` argument. But our operations are spread
     // over many files and we don't want to pass the `tx` around like that,

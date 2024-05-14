@@ -11,7 +11,7 @@ import React from 'react'
 
 import type { ComponentMap } from './types.js'
 
-import { WithServerSideProps as WithServerSidePropsGeneric } from './WithServerSideProps.js'
+import { WithServerSideProps as WithServerSidePropsGeneric } from '../../../elements/WithServerSideProps/index.js'
 import { mapCollections } from './collections.js'
 import { mapGlobals } from './globals.js'
 

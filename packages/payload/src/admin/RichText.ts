@@ -58,6 +58,7 @@ type RichTextAdapterBase<
     context: RequestContext
     currentDepth?: number
     depth: number
+    draft: boolean
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     fieldPromises: Promise<void>[]
     findMany: boolean
@@ -91,8 +92,15 @@ export type RichTextAdapterProvider<
   ExtraFieldProperties = {},
 > = ({
   config,
+  isRoot,
 }: {
   config: SanitizedConfig
+  /**
+   * Whether or not this is the root richText editor, defined in the payload.config.ts.
+   *
+   * @default false
+   */
+  isRoot?: boolean
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
