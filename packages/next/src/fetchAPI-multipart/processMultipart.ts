@@ -42,9 +42,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   })
 
   function abortAndDestroyFile(file: Readable, err: APIError) {
-    file.removeAllListeners('data')
-    file.resume()
-    file.destroy(err)
+    file.destroy()
+    parsingRequest = false
     failedResolvingFiles(err)
   }
 
@@ -94,7 +93,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       if (options.abortOnLimit) {
         debugLog(options, `Upload file size limit reached ${field}->${filename}.`)
         cleanup()
-        return abortAndDestroyFile(
+        abortAndDestroyFile(
           file,
           new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
             size: getFileSize(),
@@ -208,10 +207,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     }
   }
 
-  if (fileCount !== 0)
+  if (fileCount !== 0) {
     await allFilesComplete.catch((e) => {
       throw e
     })
+  }
 
   return result
 }
