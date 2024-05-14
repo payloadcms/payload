@@ -19,20 +19,13 @@ This package is now best used for implementing custom storage solutions or third
 
 ## Usage
 
-Add this package into your dependencies executing this code in your command line:
-
-`yarn add @payloadcms/plugin-cloud-storage`
-
-Now install this plugin within your Payload as follows:
-
 ```ts
 import { buildConfig } from 'payload/config'
-import path from 'path'
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 export default buildConfig({
   plugins: [
-    cloudStorage({
+    cloudStoragePlugin({
       collections: {
         'my-collection-slug': {
           adapter: theAdapterToUse, // see docs for the adapter you want to use
@@ -49,7 +42,7 @@ export default buildConfig({
 The proper way to conditionally enable/disable this plugin is to use the `enabled` property.
 
 ```ts
-cloudStorage({
+cloudStoragePlugin({
   enabled: process.env.MY_CONDITION === 'true',
   collections: {
     'my-collection-slug': {
@@ -104,14 +97,6 @@ To preserve this feature, by default, this plugin _keeps all file URLs exactly t
 Instead, all uploads will still be reached from the default `/collectionSlug/staticURL/filename` path. This plugin will "pass through" all files that are hosted on your third-party cloud service—with the added benefit of keeping your existing access control in place.
 
 If this does not apply to you (your upload collection has `read: () => true` or similar) you can disable this functionality by setting `disablePayloadAccessControl` to `true`. When this setting is in place, this plugin will update your file URLs to point directly to your cloud host.
-
-## Local development
-
-For instructions regarding how to develop with this plugin locally, [click here](https://github.com/payloadcms/plugin-cloud-storage/blob/master/docs/local-dev.md).
-
-## Questions
-
-Please contact [Payload](mailto:dev@payloadcms.com) with any questions about using this plugin.
 
 ## Credit
 

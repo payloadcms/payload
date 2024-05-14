@@ -18,6 +18,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
     permissions,
     req: {
       payload: { config },
+      payload,
       user,
     },
     visibleEntities,
@@ -25,7 +26,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
-  const viewComponentProps: DashboardProps = {
+  const viewComponentProps: Omit<DashboardProps, 'payload'> = {
     Link,
     config,
     permissions,
@@ -41,6 +42,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
         }
         DefaultComponent={DefaultDashboard}
         componentProps={viewComponentProps}
+        payload={payload}
       />
     </Fragment>
   )

@@ -64,6 +64,7 @@ export const sanitizeFields = async ({
       field.name &&
       typeof field.label !== 'object' &&
       typeof field.label !== 'string' &&
+      typeof field.label !== 'function' &&
       field.label !== false
     ) {
       field.label = toWords(field.name)

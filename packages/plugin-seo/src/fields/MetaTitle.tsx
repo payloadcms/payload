@@ -28,7 +28,7 @@ type MetaTitleProps = FormFieldBase & {
 }
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { CustomLabel, hasGenerateTitleFn, labelProps, path, required } = props || {}
+  const { CustomLabel, hasGenerateTitleFn, label, labelProps, path, required } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation()
@@ -77,7 +77,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

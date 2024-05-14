@@ -28,7 +28,7 @@ export const APIViewClient: React.FC = () => {
   const { id, collectionSlug, globalSlug, initialData } = useDocumentInfo()
 
   const searchParams = useSearchParams()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { code } = useLocale()
 
   const { getComponentMap } = useComponentMap()
@@ -160,14 +160,14 @@ export const APIViewClient: React.FC = () => {
             <div className={`${baseClass}__filter-query-checkboxes`}>
               {draftsEnabled && (
                 <Checkbox
-                  label="Draft"
+                  label={t('version:draft')}
                   name="draft"
                   onChange={() => setDraft(!draft)}
                   path="draft"
                 />
               )}
               <Checkbox
-                label="Authenticated"
+                label={t('authentication:authenticated')}
                 name="authenticated"
                 onChange={() => setAuthenticated(!authenticated)}
                 path="authenticated"
@@ -175,7 +175,7 @@ export const APIViewClient: React.FC = () => {
             </div>
             {localeOptions && (
               <Select
-                label="Locale"
+                label={t('general:locale')}
                 name="locale"
                 onChange={(value) => setLocale(value)}
                 options={localeOptions}
@@ -183,7 +183,7 @@ export const APIViewClient: React.FC = () => {
               />
             )}
             <NumberInput
-              label="Depth"
+              label={t('general:depth')}
               max={10}
               min={0}
               name="depth"
