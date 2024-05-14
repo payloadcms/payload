@@ -200,4 +200,11 @@ dialog {
   z-index: var(--z-modal);
 }
 
+.script-language {
+  & > *,
+  & > * > * {
+    letter-spacing: 0 !important;
+  }
+}
+
 @import '~payload-user-css';
