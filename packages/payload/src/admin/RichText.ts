@@ -1,7 +1,7 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
-import type { Config, SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldBase, RichTextField, Validate } from '../fields/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../types/index.js'
 import type { WithServerSideProps } from './elements/WithServerSideProps.js'
@@ -22,12 +22,12 @@ type RichTextAdapterBase<
   generateComponentMap: (args: {
     WithServerSideProps: WithServerSideProps
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     schemaPath: string
   }) => Map<string, React.ReactNode>
   generateSchemaMap?: (args: {
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     schemaMap: Map<string, Field[]>
     schemaPath: string
   }) => Map<string, Field[]>

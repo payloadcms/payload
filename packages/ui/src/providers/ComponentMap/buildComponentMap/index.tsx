@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminViewProps,
   EditViewProps,
@@ -20,7 +20,7 @@ export const buildComponentMap = (args: {
   DefaultListView: React.FC<AdminViewProps>
   children: React.ReactNode
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
   payload: Payload
   readOnly?: boolean
 }): {
@@ -44,12 +44,14 @@ export const buildComponentMap = (args: {
   })
 
   const globals = mapGlobals({
-    DefaultEditView,
-    WithServerSideProps,
-    config,
-    globals: config.globals,
-    i18n,
-    readOnly,
+    args: {
+      DefaultEditView,
+      WithServerSideProps,
+      config,
+      globals: config.globals,
+      i18n,
+      readOnly,
+    },
   })
 
   const NestProviders = ({ children, providers }) => {
