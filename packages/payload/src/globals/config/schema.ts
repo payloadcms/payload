@@ -51,7 +51,9 @@ const globalSchema = joi
       hidden: joi.alternatives().try(joi.boolean(), joi.func()),
       hideAPIURL: joi.boolean(),
       livePreview: joi.object(livePreviewSchema),
-      openGraph: openGraphSchema,
+      meta: joi.object({
+        openGraph: openGraphSchema,
+      }),
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),

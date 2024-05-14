@@ -71,7 +71,9 @@ const collectionSchema = joi.object().keys({
     hideAPIURL: joi.bool(),
     listSearchableFields: joi.array().items(joi.string()),
     livePreview: joi.object(livePreviewSchema),
-    openGraph: openGraphSchema,
+    meta: joi.object({
+      openGraph: openGraphSchema,
+    }),
     pagination: joi.object({
       defaultLimit: joi.number(),
       limits: joi.array().items(joi.number()),

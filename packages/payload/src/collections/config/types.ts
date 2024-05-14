@@ -283,7 +283,9 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  openGraph?: NextMetadata['openGraph']
+  meta?: {
+    openGraph?: NextMetadata['openGraph']
+  }
   pagination?: {
     defaultLimit?: number
     limits?: number[]

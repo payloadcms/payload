@@ -130,7 +130,9 @@ export type GlobalAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  openGraph?: NextMetadata['openGraph']
+  meta?: {
+    openGraph?: NextMetadata['openGraph']
+  }
   /**
    * Function to generate custom preview URL
    */
