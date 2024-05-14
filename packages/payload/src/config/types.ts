@@ -274,7 +274,7 @@ export const serverProps: (keyof ServerProps)[] = [
 ]
 
 export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
-  TAdditionalProps & ServerProps
+  TAdditionalProps & Partial<ServerProps>
 >
 
 export type Locale = {
