@@ -1,6 +1,6 @@
-import { flattenFieldMap } from '@payloadcms/ui/utilities/flattenFieldMap'
-
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+
+import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 
 export const getTextFieldsToBeSearched = (
   listSearchableFields: string[],

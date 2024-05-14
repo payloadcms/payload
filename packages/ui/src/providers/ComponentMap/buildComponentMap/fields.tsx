@@ -10,7 +10,6 @@ import type {
   SanitizedConfig,
 } from 'payload/types'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React, { Fragment } from 'react'
 
@@ -45,6 +44,7 @@ import type {
 } from './types.js'
 
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
+import { FieldDescription } from '../../../forms/FieldDescription/index.js'
 
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated

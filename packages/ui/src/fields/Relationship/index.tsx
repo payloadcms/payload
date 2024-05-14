@@ -2,10 +2,6 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { wordBoundariesRegex } from 'payload/utilities'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
@@ -14,6 +10,10 @@ import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js
 import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormProcessing } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

@@ -1,7 +1,8 @@
 import type { ServerProps } from 'payload/config'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import React from 'react'
+
+import { WithServerSideProps } from '../WithServerSideProps/index.js'
 
 export type RenderCustomComponentProps = {
   CustomComponent?: React.ComponentType<any>

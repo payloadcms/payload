@@ -9,8 +9,7 @@ import './index.scss'
 
 const baseClass = 'nav'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
-
+import { WithServerSideProps } from '../WithServerSideProps/index.js'
 import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = ServerProps
