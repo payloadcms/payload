@@ -1,4 +1,5 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
+import type { Metadata as NextMetadata } from 'next'
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
@@ -282,6 +283,7 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
+  openGraph?: NextMetadata['openGraph']
   pagination?: {
     defaultLimit?: number
     limits?: number[]

@@ -479,7 +479,7 @@ export type Config = {
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: {
       /**
-       * An array of Next.js metadata objects that represent icons to be used by devices and browsers.
+       * Icons to be rendered by devices and browsers.
        *
        * For example browser tabs, phone home screens, and search engine results.
        * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons

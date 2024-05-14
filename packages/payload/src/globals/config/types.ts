@@ -1,4 +1,5 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
+import type { Metadata as NextMetadata } from 'next'
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
@@ -129,6 +130,7 @@ export type GlobalAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
+  openGraph?: NextMetadata['openGraph']
   /**
    * Function to generate custom preview URL
    */
