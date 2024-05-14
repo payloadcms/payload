@@ -312,6 +312,15 @@ describe('admin', () => {
       await expect(page.locator('#field-sidebarField')).toBeDisabled()
     })
 
+    test('collection — depth field should have value 0 when empty', async () => {
+      const { id } = await createPost()
+      await page.goto(`${postsUrl.edit(id)}/api`)
+
+      const depthField = page.locator('#field-depth')
+      await depthField.fill('')
+      await expect(depthField).toHaveValue('0')
+    })
+
     test('global — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
