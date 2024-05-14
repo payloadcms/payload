@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const ja: Language = {
@@ -9,6 +11,7 @@ export const ja: Language = {
       alreadyActivated: 'すでに有効です',
       alreadyLoggedIn: 'すでにログインしています',
       apiKey: 'API Key',
+      authenticated: '認証済み',
       backToLogin: 'ログイン画面へ戻る',
       beginCreateFirstUser: 'まずは、最初のユーザーを作成します。',
       changePassword: 'パスワードを変更',
@@ -82,6 +85,8 @@ export const ja: Language = {
       invalidFileType: '無効なファイル形式',
       invalidFileTypeValue: '無効なファイル形式: {{value}}',
       loadingDocument: 'IDが {{id}} のデータを読み込む際に問題が発生しました。',
+      localesNotSaved_one: '次のロケールを保存できませんでした：',
+      localesNotSaved_other: '次のロケールを保存できませんでした：',
       missingEmail: 'メールアドレスが不足しています。',
       missingIDOfDocument: '更新するデータのIDが不足しています。',
       missingIDOfVersion: 'バージョンIDが不足しています。',
@@ -189,8 +194,11 @@ export const ja: Language = {
       deletedCountSuccessfully: '{{count}}つの{{label}}を正常に削除しました。',
       deletedSuccessfully: '正常に削除されました。',
       deleting: '削除しています...',
+      depth: '深さ',
       descending: '降順',
       deselectAllRows: 'すべての行の選択を解除します',
+      document: 'ドキュメント',
+      documents: 'ドキュメント',
       duplicate: '複製',
       duplicateWithoutSaving: '変更を保存せずに複製',
       edit: '編集',
@@ -205,6 +213,7 @@ export const ja: Language = {
       error: 'エラー',
       errors: 'エラー',
       fallbackToDefaultLocale: 'デフォルトロケールへのフォールバック',
+      false: '偽',
       filter: '絞り込み',
       filterWhere: '{{label}} の絞り込み',
       filters: '絞り込み',
@@ -261,6 +270,7 @@ export const ja: Language = {
       successfullyDuplicated: '{{label}} が複製されました。',
       thisLanguage: 'Japanese',
       titleDeleted: '{{label}} "{{title}}" が削除されました。',
+      true: '真実',
       unauthorized: '未認証',
       unsavedChangesDuplicate: '未保存の変更があります。複製を続けますか？',
       untitled: 'Untitled',

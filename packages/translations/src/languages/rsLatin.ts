@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const rsLatin: Language = {
@@ -9,6 +11,7 @@ export const rsLatin: Language = {
       alreadyActivated: 'Već aktivirano',
       alreadyLoggedIn: 'Već prijavljen',
       apiKey: 'API ključ',
+      authenticated: 'Autentifikovan',
       backToLogin: 'Nazad na prijavu',
       beginCreateFirstUser: 'Na samom početku kreiraj svog prvog korisnika',
       changePassword: 'Promeni lozinku',
@@ -81,6 +84,8 @@ export const rsLatin: Language = {
       invalidFileType: 'Nevalidan tip datoteke',
       invalidFileTypeValue: 'Nevalidan tip datoteke: {{value}}',
       loadingDocument: 'Postoji problem pri učitavanju dokumenta čiji je ID {{id}}.',
+      localesNotSaved_one: 'Nije moglo da se sačuva sledeće lokalno podešavanje:',
+      localesNotSaved_other: 'Nisu mogla da se sačuvaju sledeća lokalna podešavanja:',
       missingEmail: 'Nedostaje adresa e-pošte.',
       missingIDOfDocument: 'Nedostaje ID dokumenta da bi se ažurirao.',
       missingIDOfVersion: 'Nedostaje ID verzije.',
@@ -188,8 +193,11 @@ export const rsLatin: Language = {
       deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
       deletedSuccessfully: 'Uspešno izbrisano.',
       deleting: 'Brisanje...',
+      depth: 'Dubina',
       descending: 'Opadajuće',
       deselectAllRows: 'Deselektujte sve redove',
+      document: 'Dokument',
+      documents: 'Dokumenti',
       duplicate: 'Duplikat',
       duplicateWithoutSaving: 'Ponovi bez čuvanja promena',
       edit: 'Uredi',
@@ -204,6 +212,7 @@ export const rsLatin: Language = {
       error: 'Greška',
       errors: 'Greške',
       fallbackToDefaultLocale: 'Vraćanje na zadati jezik',
+      false: 'Lažno',
       filter: 'Filter',
       filterWhere: 'Filter {{label}} gde',
       filters: 'Filteri',
@@ -260,6 +269,7 @@ export const rsLatin: Language = {
       successfullyDuplicated: '{{label}} uspešno duplicirano.',
       thisLanguage: 'Srpski (latinica)',
       titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
+      true: 'Istinito',
       unauthorized: 'Niste autorizovani',
       unsavedChangesDuplicate: 'Imate nesačuvane promene. Da li želite nastaviti sa dupliciranjem?',
       untitled: 'Bez naslova',

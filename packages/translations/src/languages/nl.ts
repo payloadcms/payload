@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const nl: Language = {
@@ -9,6 +11,7 @@ export const nl: Language = {
       alreadyActivated: 'Al geactiveerd',
       alreadyLoggedIn: 'Al ingelogd',
       apiKey: 'API-sleutel',
+      authenticated: 'Geverifieerd',
       backToLogin: 'Terug naar inloggen',
       beginCreateFirstUser: 'Om te beginnen maakt u uw eerste gebruiker aan.',
       changePassword: 'Wachtwoord wijzigen',
@@ -82,6 +85,8 @@ export const nl: Language = {
       invalidFileType: 'Ongeldig bestandstype',
       invalidFileTypeValue: 'Ongeldig bestandstype: {{value}}',
       loadingDocument: 'Er was een probleem met het laden van het document met ID {{id}}.',
+      localesNotSaved_one: 'De volgende taalinstelling kon niet worden opgeslagen:',
+      localesNotSaved_other: 'De volgende taalinstellingen konden niet worden opgeslagen:',
       missingEmail: 'E-mailadres ontbreekt.',
       missingIDOfDocument: 'ID ontbreekt van het aan te passen document.',
       missingIDOfVersion: 'ID van versie ontbreekt.',
@@ -191,8 +196,11 @@ export const nl: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
       deletedSuccessfully: 'Succesvol verwijderd.',
       deleting: 'Verwijderen...',
+      depth: 'Diepte',
       descending: 'Aflopend',
       deselectAllRows: 'Deselecteer alle rijen',
+      document: 'Document',
+      documents: 'Documenten',
       duplicate: 'Dupliceren',
       duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
       edit: 'Bewerk',
@@ -207,6 +215,7 @@ export const nl: Language = {
       error: 'Fout',
       errors: 'Fouten',
       fallbackToDefaultLocale: 'Terugval naar standaardtaal',
+      false: 'Onwaar',
       filter: 'Filter',
       filterWhere: 'Filter {{label}} waar',
       filters: 'Filters',
@@ -263,6 +272,7 @@ export const nl: Language = {
       successfullyDuplicated: '{{label}} succesvol gedupliceerd.',
       thisLanguage: 'Nederlands',
       titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
+      true: 'Waar',
       unauthorized: 'Onbevoegd',
       unsavedChangesDuplicate: 'U heeft onbewaarde wijzigingen. Wilt u doorgaan met dupliceren?',
       untitled: 'Zonder titel',

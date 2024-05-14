@@ -1,7 +1,7 @@
 import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
-  PayloadRequest,
+  PayloadRequestWithData,
 } from 'payload/types'
 
 interface Args {
@@ -45,7 +45,7 @@ type PurgeRequest = {
   doc: any
   endpoint: string
   operation: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 async function purge({ doc, endpoint, operation, req }: PurgeRequest) {

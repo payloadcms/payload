@@ -1,16 +1,17 @@
 'use client'
 import type { ClientValidate } from 'payload/types'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { CheckboxFieldProps } from './types.js'
 
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
@@ -48,6 +49,8 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const { uuid } = useForm()
 
+  const editDepth = useEditDepth()
+
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
@@ -75,7 +78,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const checked = checkedFromProps || Boolean(value)
 
-  const fieldID = id || generateFieldID(path, uuid)
+  const fieldID = id || generateFieldID(path, editDepth, uuid)
 
   return (
     <div

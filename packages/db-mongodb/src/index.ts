@@ -12,6 +12,7 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { CollectionModel, GlobalModel } from './types.js'
 
 import { connect } from './connect.js'
+import { count } from './count.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -112,6 +113,7 @@ export function mongooseAdapter({
       collections: {},
       connectOptions: connectOptions || {},
       connection: undefined,
+      count,
       disableIndexHints,
       globals: undefined,
       mongoMemoryServer,
@@ -119,7 +121,6 @@ export function mongooseAdapter({
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
       versions: {},
-
       // DatabaseAdapter
       beginTransaction: transactionOptions ? beginTransaction : undefined,
       commitTransaction,

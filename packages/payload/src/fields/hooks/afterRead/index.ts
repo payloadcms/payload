@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
@@ -11,13 +11,14 @@ type Args = {
   currentDepth?: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   findMany?: boolean
   flattenLocales?: boolean
   global: SanitizedGlobalConfig | null
   locale: string
   overrideAccess: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
 }
 
@@ -38,6 +39,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     currentDepth: incomingCurrentDepth,
     depth: incomingDepth,
     doc: incomingDoc,
+    draft,
     fallbackLocale,
     findMany,
     flattenLocales = true,
@@ -66,6 +68,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     currentDepth,
     depth,
     doc,
+    draft,
     fallbackLocale,
     fieldPromises,
     fields: collection?.fields || global?.fields,

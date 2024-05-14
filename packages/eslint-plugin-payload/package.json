@@ -2,18 +2,15 @@
   "name": "eslint-plugin-payload",
   "version": "1.0.0",
   "description": "Payload plugins for ESLint",
-  "license": "MIT",
+  "keywords": [],
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/eslint-plugin-payload"
   },
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -32,6 +29,5 @@
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-regexp": "2.3.0"
-  },
-  "keywords": []
+  }
 }

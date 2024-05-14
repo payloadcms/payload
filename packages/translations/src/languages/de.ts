@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const de: Language = {
@@ -9,6 +10,7 @@ export const de: Language = {
       alreadyActivated: 'Bereits aktiviert',
       alreadyLoggedIn: 'Bereits angemeldet',
       apiKey: 'API-Key',
+      authenticated: 'Authentifiziert',
       backToLogin: 'Zurück zur Anmeldung',
       beginCreateFirstUser: 'Erstelle deinen ersten Benutzer um zu beginnen',
       changePassword: 'Passwort ändern',
@@ -83,6 +85,8 @@ export const de: Language = {
       invalidFileType: 'Ungültiger Datei-Typ',
       invalidFileTypeValue: 'Ungültiger Datei-Typ: {{value}}',
       loadingDocument: 'Es gab ein Problem, das Dokument mit der ID {{id}} zu laden.',
+      localesNotSaved_one: 'Das folgende Gebietsschema konnte nicht gespeichert werden:',
+      localesNotSaved_other: 'Die folgenden Gebietsschemata konnten nicht gespeichert werden:',
       missingEmail: 'E-Mail-Adresse fehlt.',
       missingIDOfDocument: 'ID des zu speichernden Dokuments fehlt.',
       missingIDOfVersion: 'ID der Version fehlt.',
@@ -192,8 +196,11 @@ export const de: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
       deletedSuccessfully: 'Erfolgreich gelöscht.',
       deleting: 'Lösche...',
+      depth: 'Tiefe',
       descending: 'Absteigend',
       deselectAllRows: 'Alle Zeilen abwählen',
+      document: 'Dokument',
+      documents: 'Dokumente',
       duplicate: 'Duplizieren',
       duplicateWithoutSaving: 'Dupliziere ohne Änderungen zu speichern',
       edit: 'Bearbeiten',
@@ -208,6 +215,7 @@ export const de: Language = {
       error: 'Fehler',
       errors: 'Fehler',
       fallbackToDefaultLocale: 'Rückgriff auf das Standardgebietsschema',
+      false: 'Falsch',
       filter: 'Filter',
       filterWhere: 'Filter {{label}} wo',
       filters: 'Filter',
@@ -264,6 +272,7 @@ export const de: Language = {
       successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
       thisLanguage: 'Deutsch',
       titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
+      true: 'Wahr',
       unauthorized: 'Nicht autorisiert',
       unsavedChangesDuplicate:
         'Du hast ungespeicherte Änderungen, möchtest du mit dem Duplizieren fortfahren?',

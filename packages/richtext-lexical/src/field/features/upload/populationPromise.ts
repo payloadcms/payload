@@ -8,12 +8,14 @@ import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
 export const uploadPopulationPromiseHOC = (
   props?: UploadFeatureProps,
 ): PopulationPromise<SerializedUploadNode> => {
-  const uploadPopulationPromise: PopulationPromise<SerializedUploadNode> = ({
+  return ({
     context,
     currentDepth,
     depth,
+    draft,
     editorPopulationPromises,
     field,
+    fieldPromises,
     findMany,
     flattenLocales,
     node,
@@ -21,21 +23,25 @@ export const uploadPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
-    const promises: Promise<void>[] = []
-
-    if (node?.value?.id) {
+    if (node?.value) {
       const collection = req.payload.collections[node?.relationTo]
 
       if (collection) {
-        promises.push(
+        // @ts-expect-error
+        const id = node?.value?.id || node?.value // for backwards-compatibility
+
+        const populateDepth =
+          props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
+
+        populationPromises.push(
           populate({
-            id: node?.value?.id,
+            id,
             collection,
             currentDepth,
             data: node,
-            depth,
+            depth: populateDepth,
+            draft,
             field,
             key: 'value',
             overrideAccess,
@@ -45,27 +51,27 @@ export const uploadPopulationPromiseHOC = (
         )
       }
       if (Array.isArray(props?.collections?.[node?.relationTo]?.fields)) {
+        if (!props?.collections?.[node?.relationTo]?.fields?.length) {
+          return
+        }
         recurseNestedFields({
           context,
           currentDepth,
           data: node.fields || {},
           depth,
+          draft,
           editorPopulationPromises,
+          fieldPromises,
           fields: props?.collections?.[node?.relationTo]?.fields,
           findMany,
           flattenLocales,
           overrideAccess,
           populationPromises,
-          promises,
           req,
           showHiddenFields,
           siblingDoc: node.fields || {},
         })
       }
     }
-
-    return promises
   }
-
-  return uploadPopulationPromise
 }

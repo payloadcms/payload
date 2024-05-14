@@ -8,7 +8,7 @@ import type { FieldSchemaMap } from './types.js'
 type Args = {
   config: SanitizedConfig
   fields: Field[]
-  i18n: I18n
+  i18n: I18n<any, any>
   schemaMap: FieldSchemaMap
   schemaPath: string
   validRelationships: string[]
@@ -68,6 +68,10 @@ export const traverseFields = ({
         break
 
       case 'richText':
+        if (typeof field.editor === 'function') {
+          throw new Error('Attempted to access unsanitized rich text editor.')
+        }
+
         if (typeof field.editor.generateSchemaMap === 'function') {
           field.editor.generateSchemaMap({
             config,

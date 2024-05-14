@@ -1,7 +1,6 @@
 import type { ElementNode, LexicalNode, RangeSelection } from 'lexical'
 
-import lexicalImport from 'lexical'
-const { $applyNodeReplacement, $isElementNode } = lexicalImport
+import { $applyNodeReplacement, $isElementNode } from 'lexical'
 
 import type { LinkFields, SerializedAutoLinkNode } from './types.js'
 

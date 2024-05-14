@@ -19,7 +19,7 @@ type Result = {
 }
 
 export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
-  const testSuiteName = dirname.split('/').pop()
+  const testSuiteName = path.basename(dirname)
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
   await startMemoryDB()

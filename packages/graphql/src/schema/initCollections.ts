@@ -24,16 +24,17 @@ import refresh from '../resolvers/auth/refresh.js'
 import resetPassword from '../resolvers/auth/resetPassword.js'
 import unlock from '../resolvers/auth/unlock.js'
 import verifyEmail from '../resolvers/auth/verifyEmail.js'
+import { countResolver } from '../resolvers/collections/count.js'
 import createResolver from '../resolvers/collections/create.js'
-import getDeleteResolver from '../resolvers/collections/delete.js'
+import { getDeleteResolver } from '../resolvers/collections/delete.js'
 import { docAccessResolver } from '../resolvers/collections/docAccess.js'
 import duplicateResolver from '../resolvers/collections/duplicate.js'
-import findResolver from '../resolvers/collections/find.js'
-import findByIDResolver from '../resolvers/collections/findByID.js'
-import findVersionByIDResolver from '../resolvers/collections/findVersionByID.js'
-import findVersionsResolver from '../resolvers/collections/findVersions.js'
+import { findResolver } from '../resolvers/collections/find.js'
+import { findByIDResolver } from '../resolvers/collections/findByID.js'
+import { findVersionByIDResolver } from '../resolvers/collections/findVersionByID.js'
+import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
 import restoreVersionResolver from '../resolvers/collections/restoreVersion.js'
-import updateResolver from '../resolvers/collections/update.js'
+import { updateResolver } from '../resolvers/collections/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
 import buildObjectType from './buildObjectType.js'
@@ -181,6 +182,25 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
         sort: { type: GraphQLString },
       },
       resolve: findResolver(collection),
+    }
+
+    graphqlResult.Query.fields[`count${pluralName}`] = {
+      type: new GraphQLObjectType({
+        name: `count${pluralName}`,
+        fields: {
+          totalDocs: { type: GraphQLInt },
+        },
+      }),
+      args: {
+        draft: { type: GraphQLBoolean },
+        where: { type: collection.graphQL.whereInputType },
+        ...(config.localization
+          ? {
+              locale: { type: graphqlResult.types.localeInputType },
+            }
+          : {}),
+      },
+      resolve: countResolver(collection),
     }
 
     graphqlResult.Query.fields[`docAccess${singularName}`] = {

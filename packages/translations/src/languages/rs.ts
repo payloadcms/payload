@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const rs: Language = {
@@ -9,6 +11,7 @@ export const rs: Language = {
       alreadyActivated: 'Већ активирано',
       alreadyLoggedIn: 'Већ пријављен',
       apiKey: 'АПИ кључ',
+      authenticated: 'Autentifikovan',
       backToLogin: 'Назад на пријаву',
       beginCreateFirstUser: 'На самом почетку креирај свог првог корисника',
       changePassword: 'Промени лозинку',
@@ -81,6 +84,8 @@ export const rs: Language = {
       invalidFileType: 'Невалидан тип датотеке',
       invalidFileTypeValue: 'Невалидан тип датотеке: {{value}}',
       loadingDocument: 'Постоји проблем при учитавању документа чији је ИД {{id}}.',
+      localesNotSaved_one: 'Следеће локалне поставке није могло бити сачувано:',
+      localesNotSaved_other: 'Следеће локалне поставке нису могле бити сачуване:',
       missingEmail: 'Недостаје емаил.',
       missingIDOfDocument: 'Недостаје ИД документа да би се ажурирао.',
       missingIDOfVersion: 'Недостаје ИД верзије.',
@@ -188,8 +193,11 @@ export const rs: Language = {
       deletedCountSuccessfully: 'Успешно избрисано {{count}} {{label}}.',
       deletedSuccessfully: 'Успешно избрисано.',
       deleting: 'Брисање...',
+      depth: 'Dubina',
       descending: 'Опадајуће',
       deselectAllRows: 'Деселектујте све редове',
+      document: 'Dokument',
+      documents: 'Dokumenti',
       duplicate: 'Дупликат',
       duplicateWithoutSaving: 'Понови без чувања промена',
       edit: 'Уреди',
@@ -204,6 +212,7 @@ export const rs: Language = {
       error: 'Грешка',
       errors: 'Грешке',
       fallbackToDefaultLocale: 'Враћање на задати језик',
+      false: 'Lažno',
       filter: 'Филтер',
       filterWhere: 'Филтер {{label}} где',
       filters: 'Филтери',
@@ -260,6 +269,7 @@ export const rs: Language = {
       successfullyDuplicated: '{{label}} успешно дуплицирано.',
       thisLanguage: 'Српски (ћирилица)',
       titleDeleted: '{{label}} "{{title}}" успешно обрисано.',
+      true: 'Istinito',
       unauthorized: 'Нисте ауторизовани',
       unsavedChangesDuplicate: 'Имате несачуване промене. Да ли желите наставити са дуплицирањем?',
       untitled: 'Без наслова',

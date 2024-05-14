@@ -1,22 +1,31 @@
-import type { Field, FieldWithRichTextRequiredEditor, Payload } from 'payload/types'
+import type { Config } from 'payload/config'
+import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
+import { sanitizeFields } from 'payload/config'
 
-import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
+import { createNode } from '../typeUtilities.js'
 import { UploadFeatureClientComponent } from './feature.client.js'
-import { type SerializedUploadNode, UploadNode } from './nodes/UploadNode.js'
+import { UploadNode } from './nodes/UploadNode.js'
 import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
-  collections: {
+  collections?: {
     [collection: string]: {
-      fields: FieldWithRichTextRequiredEditor[]
+      fields: Field[]
     }
   }
+  /**
+   * Sets a maximum population depth for this upload (not the fields for this upload), regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
+  maxDepth?: number
 }
 
 /**
@@ -34,7 +43,9 @@ export const UploadFeature: FeatureProviderProviderServer<
     props = { collections: {} }
   }
 
-  const clientProps: UploadFeaturePropsClient = { collections: {} }
+  const clientProps: UploadFeaturePropsClient = {
+    collections: {},
+  }
   if (props.collections) {
     for (const collection in props.collections) {
       clientProps.collections[collection] = {
@@ -44,7 +55,20 @@ export const UploadFeature: FeatureProviderProviderServer<
   }
 
   return {
-    feature: () => {
+    feature: async ({ config: _config, isRoot }) => {
+      const validRelationships = _config.collections.map((c) => c.slug) || []
+
+      for (const collection in props.collections) {
+        if (props.collections[collection].fields?.length) {
+          props.collections[collection].fields = await sanitizeFields({
+            config: _config as unknown as Config,
+            fields: props.collections[collection].fields,
+            requireFieldLevelRichTextEditor: isRoot,
+            validRelationships,
+          })
+        }
+      }
+
       return {
         ClientComponent: UploadFeatureClientComponent,
         clientFeatureProps: clientProps,
@@ -71,17 +95,21 @@ export const UploadFeature: FeatureProviderProviderServer<
           return schemaMap
         },
         nodes: [
-          {
+          createNode({
             converters: {
               html: {
                 converter: async ({ node, payload }) => {
+                  // @ts-expect-error
+                  const id = node?.value?.id || node?.value // for backwards-compatibility
+
                   if (payload) {
-                    let uploadDocument: any
+                    let uploadDocument: TypeWithID & FileData
+
                     try {
-                      uploadDocument = await payload.findByID({
-                        id: node.value.id,
+                      uploadDocument = (await payload.findByID({
+                        id,
                         collection: node.relationTo,
-                      })
+                      })) as TypeWithID & FileData
                     } catch (ignored) {
                       // eslint-disable-next-line no-console
                       console.error(
@@ -93,12 +121,12 @@ export const UploadFeature: FeatureProviderProviderServer<
                       return `<img />`
                     }
 
-                    const url: string = getAbsoluteURL(uploadDocument?.url as string, payload)
+                    const url = getAbsoluteURL(uploadDocument?.url, payload)
 
                     /**
                      * If the upload is not an image, return a link to the upload
                      */
-                    if (!(uploadDocument?.mimeType as string)?.startsWith('image')) {
+                    if (!uploadDocument?.mimeType?.startsWith('image')) {
                       return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.filename}</a>`
                     }
 
@@ -116,7 +144,9 @@ export const UploadFeature: FeatureProviderProviderServer<
 
                     // Iterate through each size in the data.sizes object
                     for (const size in uploadDocument.sizes) {
-                      const imageSize = uploadDocument.sizes[size]
+                      const imageSize: FileSize & {
+                        url?: string
+                      } = uploadDocument.sizes[size]
 
                       // Skip if any property of the size object is null
                       if (
@@ -129,7 +159,7 @@ export const UploadFeature: FeatureProviderProviderServer<
                       ) {
                         continue
                       }
-                      const imageSizeURL: string = getAbsoluteURL(imageSize?.url as string, payload)
+                      const imageSizeURL = getAbsoluteURL(imageSize?.url, payload)
 
                       pictureHTML += `<source srcset="${imageSizeURL}" media="(max-width: ${imageSize.width}px)" type="${imageSize.mimeType}">`
                     }
@@ -139,16 +169,16 @@ export const UploadFeature: FeatureProviderProviderServer<
                     pictureHTML += '</picture>'
                     return pictureHTML
                   } else {
-                    return `<img src="${node.value.id}" />`
+                    return `<img src="${id}" />`
                   }
                 },
                 nodeTypes: [UploadNode.getType()],
-              } as HTMLConverter<SerializedUploadNode>,
+              },
             },
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
-            validations: [uploadValidation()],
-          },
+            validations: [uploadValidation(props)],
+          }),
         ],
         serverFeatureProps: props,
       }

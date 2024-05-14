@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const fa: Language = {
@@ -9,6 +11,7 @@ export const fa: Language = {
       alreadyActivated: 'قبلاً فعال شده است',
       alreadyLoggedIn: 'قبلاً وارد شده‌اید',
       apiKey: 'کلید اِی‌پی‌آی',
+      authenticated: 'احراز هویت شده',
       backToLogin: 'بازگشت به برگه ورود',
       beginCreateFirstUser: 'برای آغاز، نخستین کاربر خود را بسازید.',
       changePassword: 'تغییر گذرواژه',
@@ -81,6 +84,8 @@ export const fa: Language = {
       invalidFileType: 'نوع رسانه نامعتبر است',
       invalidFileTypeValue: 'نوع رسانه نامعتبر: {{value}}',
       loadingDocument: 'مشکلی در بارگیری رسانه با شناسه {{id}} پیش آمد.',
+      localesNotSaved_one: 'امکان ذخیره‌سازی تنظیمات محلی زیر وجود ندارد:',
+      localesNotSaved_other: 'امکان ذخیره‌سازی تنظیمات محلی زیر وجود ندارد:',
       missingEmail: 'رایانامه وارد نشده.',
       missingIDOfDocument: 'شناسه سند جهت بروزرسانی نامعتبر است.',
       missingIDOfVersion: 'شناسه نگارش وارد نشده.',
@@ -189,8 +194,11 @@ export const fa: Language = {
       deletedCountSuccessfully: 'تعداد {{count}} {{label}} با موفقیت پاک گردید.',
       deletedSuccessfully: 'با موفقیت حذف شد.',
       deleting: 'در حال حذف...',
+      depth: 'عمق',
       descending: 'رو به پایین',
       deselectAllRows: 'تمام سطرها را از انتخاب خارج کنید',
+      document: 'سند',
+      documents: 'اسناد',
       duplicate: 'تکراری',
       duplicateWithoutSaving: 'رونوشت بدون ذخیره کردن تغییرات',
       edit: 'نگارش',
@@ -205,6 +213,7 @@ export const fa: Language = {
       error: 'خطا',
       errors: 'خطاها',
       fallbackToDefaultLocale: 'بازگردان پیشفرض زبان',
+      false: 'غلط',
       filter: 'علامت‌گذاری',
       filterWhere: 'علامت گذاری کردن {{label}} جایی که',
       filters: 'علامت‌گذاری‌ها',
@@ -261,6 +270,7 @@ export const fa: Language = {
       successfullyDuplicated: '{{label}} با موفقیت رونوشت شد.',
       thisLanguage: 'فارسی',
       titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
+      true: 'درست',
       unauthorized: 'غیرمجاز',
       unsavedChangesDuplicate:
         'شما تغییرات ذخیره نشده دارید. مطمئنید میخواهید به رونوشت ادامه دهید؟',

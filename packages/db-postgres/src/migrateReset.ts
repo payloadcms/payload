@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import {
   commitTransaction,
@@ -27,7 +27,7 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
     return
   }
 
-  const req = { payload } as PayloadRequest
+  const req = { payload } as PayloadRequestWithData
 
   // Rollback all migrations in order
   for (const migration of existingMigrations) {

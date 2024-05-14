@@ -14,19 +14,17 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { DateField, FieldBase } from 'payload/types'
-
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import type { DateField } from 'payload/types'
 
 import type { FormFieldBase } from '../shared/index.js'
 
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
 export type DateFieldProps = FormFieldBase & {
   date?: DateField['admin']['date']
-  label?: FieldBase['label']
   name?: string
   path?: string
   placeholder?: DateField['admin']['placeholder'] | string

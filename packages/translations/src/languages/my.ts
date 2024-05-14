@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const my: Language = {
@@ -9,6 +11,7 @@ export const my: Language = {
       alreadyActivated: 'အတည်ပြုပြီး',
       alreadyLoggedIn: 'ဝင်ရောက်ပြီးသား',
       apiKey: 'API Key',
+      authenticated: 'အတည်ပြုပြီး',
       backToLogin: 'အကောင့်ထဲ ပြန်ဝင်မည်။',
       beginCreateFirstUser: 'စတင်နိုင်ရန် ပထမဦးစွာ အသုံးပြုသူအား ဖန်တီးပါ။',
       changePassword: 'စကားဝှက် ပြောင်းလဲမည်။',
@@ -81,6 +84,8 @@ export const my: Language = {
       invalidFileType: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား',
       invalidFileTypeValue: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား: {{value}}',
       loadingDocument: '{{id}} ID ဖြင့် ဖိုင်ကို ဖွင့်ရာတွင် ပြဿနာရှိနေသည်။',
+      localesNotSaved_one: 'အောက်ပါ ဒေသသတ်မှတ်ချက်ကို သိမ်းဆည်း၍ မရပါ။',
+      localesNotSaved_other: 'အောက်ပါ ဒေသသတ်မှတ်ချက်များကို သိမ်းဆည်း၍ မရပါ။',
       missingEmail: 'အီးမေးလ်ပျောက်ဆုံး',
       missingIDOfDocument: 'ပြင်ဆင်ရန် ဖိုင် ID ပျောက်နေပါသည်။',
       missingIDOfVersion: 'ပျောက်ဆုံး ဗားရှင်း ID',
@@ -191,8 +196,11 @@ export const my: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
       deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
       deleting: 'ဖျက်နေဆဲ ...',
+      depth: 'ထိုင်းအောက်မှု',
       descending: 'ဆင်းသက်လာသည်။',
       deselectAllRows: 'အားလုံးကို မရွေးနိုင်ပါ',
+      document: 'စာရွက်စာတမ်း',
+      documents: 'စာရွက်စာတမ်းများ',
       duplicate: 'ပုံတူပွားမည်။',
       duplicateWithoutSaving: 'သေချာပါပြီ။',
       edit: 'တည်းဖြတ်ပါ။',
@@ -207,6 +215,7 @@ export const my: Language = {
       error: 'အမှား',
       errors: 'အမှားများ',
       fallbackToDefaultLocale: 'မူရင်းဒေသသို့ ပြန်ပြောင်းပါ။',
+      false: 'မှား',
       filter: 'ဇကာ',
       filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',
       filters: 'စစ်ထုတ်မှုများ',
@@ -263,6 +272,7 @@ export const my: Language = {
       successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
       thisLanguage: 'မြန်မာစာ',
       titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
+      true: 'အမှန်',
       unauthorized: 'အခွင့်မရှိပါ။',
       unsavedChangesDuplicate:
         'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',

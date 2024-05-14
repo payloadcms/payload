@@ -1,44 +1,32 @@
 import chalk from 'chalk'
+import pLimit from 'p-limit'
 
 import { getPackageDetails } from './getPackageDetails.js'
+import { packagePublishList } from './publishList.js'
 
-const packages = [
-  'payload',
-  'translations',
-  'ui',
-  'next',
-  'graphql',
-  'db-mongodb',
-  'db-postgres',
-  'richtext-slate',
-  'richtext-lexical',
-
-  'create-payload-app',
-
-  // Plugins
-  'plugin-cloud',
-  'plugin-cloud-storage',
-  'plugin-form-builder',
-  'plugin-nested-docs',
-  'plugin-redirects',
-  'plugin-search',
-  'plugin-seo',
-  // 'plugin-stripe',
-  // 'plugin-sentry',
-]
+const npmRequestLimit = pLimit(40)
 
 export const getPackageRegistryVersions = async (): Promise<void> => {
-  const packageDetails = await getPackageDetails(packages)
+  const packageDetails = await getPackageDetails(packagePublishList)
 
-  await Promise.all(
-    packageDetails.map(async (pkg) => {
-      // Get published version from npm
-      const json = await fetch(`https://registry.npmjs.org/${pkg.name}`).then((res) => res.json())
-      const { latest, beta } = json['dist-tags']
-      const msg = `${chalk.bold(pkg.name.padEnd(32))} latest: ${latest?.padEnd(16)} beta: ${beta?.padEnd(16)}`
-      console.log(msg)
-    }),
+  const results = await Promise.all(
+    packageDetails.map(async (pkg) =>
+      npmRequestLimit(async () => {
+        // Get published version from npm
+        const json = await fetch(`https://registry.npmjs.org/${pkg.name}`).then((res) => res.json())
+        const { latest = 'N/A', beta = 'N/A', canary = 'N/A' } = json['dist-tags'] ?? {}
+        const msg = `${pkg.name.padEnd(36)}${latest?.padEnd(16)}${beta?.padEnd(16)}${canary}`
+        return msg
+      }),
+    ),
   )
+
+  const header = chalk.bold.green(
+    'Package Versions'.padEnd(36) + 'Latest'.padEnd(16) + 'Beta'.padEnd(16) + 'Canary',
+  )
+  console.log(header)
+  console.log()
+  console.log(results.sort().join('\n'))
 }
 
 if (import.meta.url === new URL(import.meta.url).href) {

@@ -1,5 +1,5 @@
 'use client'
-import type { Language } from '@payloadcms/translations'
+import type { I18nClient, Language } from '@payloadcms/translations'
 import type { ClientConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
@@ -13,6 +13,7 @@ import type { LanguageOptions } from '../Translation/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
+import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ActionsProvider } from '../Actions/index.js'
 import { AuthProvider } from '../Auth/index.js'
@@ -38,7 +39,7 @@ type Props = {
   languageCode: string
   languageOptions: LanguageOptions
   switchLanguageServerAction?: (lang: string) => Promise<void>
-  translations: Language['translations']
+  translations: I18nClient['translations']
 }
 
 export const RootProvider: React.FC<Props> = ({
@@ -104,6 +105,7 @@ export const RootProvider: React.FC<Props> = ({
                               </ThemeProvider>
                             </PreferencesProvider>
                             <ModalContainer />
+                            <StayLoggedInModal />
                           </AuthProvider>
                         </ModalProvider>
                       </SearchParamsProvider>

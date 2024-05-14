@@ -6,6 +6,7 @@ export const baseAdminComponentFields = joi
   .object()
   .keys({
     Cell: componentSchema,
+    Description: componentSchema,
     Field: componentSchema,
     Filter: componentSchema,
   })
@@ -15,10 +16,13 @@ export const baseAdminFields = joi.object().keys({
   className: joi.string(),
   components: baseAdminComponentFields,
   condition: joi.func(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
   description: joi
     .alternatives()
-    .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), componentSchema),
+    .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function()),
   disableBulkEdit: joi.boolean().default(false),
+  disableListColumn: joi.boolean().default(false),
+  disableListFilter: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   initCollapsed: joi.boolean().default(false),
@@ -193,6 +197,7 @@ export const json = baseField.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
+  jsonSchema: joi.object().unknown(),
 })
 
 export const select = baseField.keys({
@@ -267,9 +272,27 @@ export const row = baseField.keys({
 
 export const collapsible = baseField.keys({
   type: joi.string().valid('collapsible').required(),
-  admin: baseAdminFields.default(),
+  admin: baseAdminFields
+    .keys({
+      components: baseAdminComponentFields
+        .keys({
+          RowLabel: componentSchema.optional(),
+        })
+        .default({}),
+    })
+    .default({}),
   fields: joi.array().items(joi.link('#field')),
-  label: joi.alternatives().try(joi.string(), componentSchema),
+  label: joi.alternatives().conditional('admin.components.RowLabel', {
+    is: joi.exist(),
+    otherwise: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function())
+      .required(),
+    then: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), joi.function())
+      .optional(),
+  }),
 })
 
 const tab = baseField.keys({
@@ -316,6 +339,7 @@ export const array = baseField.keys({
           RowLabel: componentSchema,
         })
         .default({}),
+      isSortable: joi.boolean(),
     })
     .default({}),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
@@ -413,11 +437,19 @@ export const relationship = baseField.keys({
 export const blocks = baseField.keys({
   name: joi.string().required(),
   type: joi.string().valid('blocks').required(),
+  admin: baseAdminFields
+    .keys({
+      isSortable: joi.boolean(),
+    })
+    .default({}),
   blocks: joi
     .array()
     .items(
       joi.object({
         slug: joi.string().required(),
+        admin: joi.object().keys({
+          custom: joi.object().pattern(joi.string(), joi.any()),
+        }),
         custom: joi.object().pattern(joi.string(), joi.any()),
         dbName: joi.alternatives().try(joi.string(), joi.func()),
         fields: joi.array().items(joi.link('#field')),
@@ -472,6 +504,7 @@ export const richText = baseField.keys({
       validate: joi.func().required(),
     })
     .unknown(),
+  maxDepth: joi.number(),
 })
 
 export const date = baseField.keys({
@@ -515,6 +548,7 @@ export const ui = joi.object().keys({
         })
         .default({}),
       condition: joi.func(),
+      custom: joi.object().pattern(joi.string(), joi.any()),
       position: joi.string().valid('sidebar'),
       width: joi.string(),
     })

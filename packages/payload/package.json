@@ -1,14 +1,44 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.10",
-  "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "type": "module",
-  "bin": {
-    "payload": "bin.js"
+  "version": "3.0.0-beta.31",
+  "description": "Node, React, Headless CMS and Application Framework built on Next.js",
+  "keywords": [
+    "admin panel",
+    "api",
+    "cms",
+    "content management",
+    "dashboard",
+    "framework",
+    "graphQL",
+    "headless",
+    "javascript",
+    "next.js",
+    "node",
+    "payload",
+    "react",
+    "self hosted",
+    "typescript"
+  ],
+  "homepage": "https://payloadcms.com",
+  "bugs": {
+    "url": "https://github.com/payloadcms/payload"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -21,6 +51,20 @@
       "types": "./src/exports/*.ts"
     }
   },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "bin": {
+    "payload": "bin.js"
+  },
+  "files": [
+    "bin.js",
+    "dist",
+    "docs",
+    "*.js",
+    "*.d.ts",
+    "!jest.config.js",
+    "!jest.components.config.js"
+  ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -42,7 +86,9 @@
     "@swc-node/core": "^1.13.0",
     "@swc-node/sourcemap-support": "^0.5.0",
     "@types/probe-image-size": "^7.2.4",
+    "ajv": "^8.12.0",
     "bson-objectid": "2.0.4",
+    "ci-info": "^4.0.0",
     "conf": "10.2.0",
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
@@ -52,28 +98,21 @@
     "find-up": "4.1.0",
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
+    "image-size": "^1.1.1",
     "joi": "^17.12.1",
     "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",
     "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
-    "nodemailer": "6.9.10",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "pluralize": "8.0.0",
-    "probe-image-size": "^7.2.3",
     "sanitize-filename": "1.6.3",
     "scheduler": "0.23.0",
-    "scmp": "2.1.0"
-  },
-  "peerDependencies": {
-    "@swc/core": "^1.4.13"
-  },
-  "peerDependenciesMeta": {
-    "@swc/core": {
-      "optional": true
-    }
+    "scmp": "2.1.0",
+    "ts-essentials": "7.0.3",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@monaco-editor/react": "4.5.1",
@@ -108,53 +147,30 @@
     "file-loader": "6.2.0",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
-    "graphql": "16.8.1",
     "graphql-http": "^1.22.0",
     "mini-css-extract-plugin": "1.6.2",
+    "next": "^14.3.0-canary.7",
     "nodemon": "3.0.3",
     "object.assign": "4.1.4",
     "object.entries": "1.1.6",
     "passport-strategy": "1.0.0",
     "rimraf": "3.0.2",
     "serve-static": "1.15.0",
-    "sharp": "0.32.6",
-    "ts-essentials": "7.0.3"
+    "sharp": "0.32.6"
+  },
+  "peerDependencies": {
+    "@swc/core": "^1.4.13",
+    "graphql": "^16.8.1"
+  },
+  "peerDependenciesMeta": {
+    "@swc/core": {
+      "optional": true
+    }
   },
   "engines": {
-    "node": ">=18.20.2"
+    "node": "^18.20.2 || >=20.6.0"
   },
-  "files": [
-    "bin.js",
-    "dist",
-    "docs",
-    "*.js",
-    "*.d.ts",
-    "!jest.config.js",
-    "!jest.components.config.js"
-  ],
-  "keywords": [
-    "payload",
-    "cms",
-    "content management",
-    "framework",
-    "typescript",
-    "javascript",
-    "node",
-    "express",
-    "headless",
-    "graphQL",
-    "restful",
-    "access control",
-    "dashboard",
-    "admin panel",
-    "api",
-    "MongoDB",
-    "self hosted",
-    "react",
-    "auth"
-  ],
   "publishConfig": {
-    "access": "public",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -170,27 +186,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "homepage": "https://payloadcms.com",
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
-  "maintainers": [
-    {
-      "email": "info@payloadcms.com",
-      "name": "Payload",
-      "url": "https://payloadcms.com"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/payload"
-  },
-  "bugs": {
-    "url": "https://github.com/payloadcms/payload"
-  },
-  "sideEffects": false
+  }
 }

@@ -40,5 +40,6 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
-  }
+  },
+  "files.insertFinalNewline": true
 }

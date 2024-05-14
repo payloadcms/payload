@@ -12,17 +12,17 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { FieldBase, JSONField as JSONFieldType } from 'payload/types'
-
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import type { JSONField as JSONFieldType } from 'payload/types'
 
 import type { FormFieldBase } from '../shared/index.js'
 
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']
-  label?: FieldBase['label']
+  jsonSchema?: Record<string, unknown>
   name?: string
   path?: string
   width?: string
@@ -40,6 +40,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     descriptionProps,
     editorOptions,
     errorProps,
+    jsonSchema,
     label,
     labelProps,
     path: pathFromProps,
@@ -69,6 +70,25 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const handleMount = useCallback(
+    (editor, monaco) => {
+      if (!jsonSchema) return
+
+      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
+      const modelUri = monaco.Uri.parse(jsonSchema.uri)
+
+      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        enableSchemaRequest: true,
+        schemas: [...existingSchemas, jsonSchema],
+        validate: true,
+      })
+
+      editor.setModel(model)
+    },
+    [jsonSchema, value],
+  )
 
   const handleChange = useCallback(
     (val) => {
@@ -122,6 +142,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
+          onMount={handleMount}
           options={editorOptions}
           readOnly={readOnly}
           value={stringValue}

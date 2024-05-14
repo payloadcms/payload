@@ -43,6 +43,11 @@ const defaultUploadOptions: VercelBlobAdapterUploadOptions = {
   cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year
 }
 
+/**
+ * @deprecated Use [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob) instead.
+ *
+ * This adapter has been superceded by `@payloadcms/storage-vercel-blob` and will be removed in Payload 3.0.
+ */
 export const vercelBlobAdapter =
   ({ options = {}, token }: VercelBlobAdapterArgs): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
@@ -67,6 +72,7 @@ export const vercelBlobAdapter =
     const baseUrl = `https://${storeId}.${access}.blob.vercel-storage.com`
 
     return {
+      name: 'vercel-blob',
       generateURL: getGenerateUrl({ baseUrl, prefix }),
       handleDelete: getHandleDelete({ baseUrl, prefix, token }),
       handleUpload: getHandleUpload({

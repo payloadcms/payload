@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const nb: Language = {
@@ -9,6 +11,7 @@ export const nb: Language = {
       alreadyActivated: 'Allerede aktivert',
       alreadyLoggedIn: 'Allerede logget inn',
       apiKey: 'API-nøkkel',
+      authenticated: 'Autentisert',
       backToLogin: 'Tilbake til innlogging',
       beginCreateFirstUser: 'Opprett din første bruker for å fortsette.',
       changePassword: 'Endre passord',
@@ -81,6 +84,8 @@ export const nb: Language = {
       invalidFileType: 'Ugyldig filtype',
       invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
       loadingDocument: 'Det oppstod et problem under lasting av dokumentet med ID {{id}}.',
+      localesNotSaved_one: 'Følgende lokalisering kunne ikke lagres:',
+      localesNotSaved_other: 'Følgende lokaliseringer kunne ikke lagres:',
       missingEmail: 'Mangler e-postadresse.',
       missingIDOfDocument: 'Mangler ID for dokumentet som skal oppdateres.',
       missingIDOfVersion: 'Mangler ID for versjonen.',
@@ -189,8 +194,11 @@ export const nb: Language = {
       deletedCountSuccessfully: 'Slettet {{count}} {{label}}.',
       deletedSuccessfully: 'Slettet.',
       deleting: 'Sletter...',
+      depth: 'Dybde',
       descending: 'Synkende',
       deselectAllRows: 'Fjern markeringen fra alle rader',
+      document: 'Dokument',
+      documents: 'Dokumenter',
       duplicate: 'Dupliser',
       duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
       edit: 'Redigere',
@@ -205,6 +213,7 @@ export const nb: Language = {
       error: 'Feil',
       errors: 'Feil',
       fallbackToDefaultLocale: 'Tilbakestilling til standard lokalitet',
+      false: 'Falsk',
       filter: 'Filtrer',
       filterWhere: 'Filtrer {{label}} der',
       filters: 'Filter',
@@ -261,6 +270,7 @@ export const nb: Language = {
       successfullyDuplicated: '{{label}} ble duplisert.',
       thisLanguage: 'Norsk',
       titleDeleted: '{{label}} "{{title}}" ble slettet.',
+      true: 'Sann',
       unauthorized: 'Ikke autorisert',
       unsavedChangesDuplicate: 'Du har ulagrede endringer. Vil du fortsette å duplisere?',
       untitled: 'Uten tittel',

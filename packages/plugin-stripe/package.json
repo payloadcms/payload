@@ -1,24 +1,7 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "0.0.16",
-  "homepage:": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-stripe"
-  },
+  "version": "3.0.0-beta.31",
   "description": "Stripe plugin for Payload",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "type": "module",
-  "scripts": {
-    "build": "echo \"Build temporarily disabled.\" && exit 0",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "test": "echo 'No tests available.'",
-    "prepublishOnly": "pnpm clean && pnpm turbo run build && pnpm test"
-  },
   "keywords": [
     "payload",
     "stripe",
@@ -30,10 +13,40 @@
     "subscriptions",
     "licensing"
   ],
-  "author": "dev@payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-stripe"
+  },
   "license": "MIT",
-  "peerDependencies": {
-    "payload": "workspace:*"
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
@@ -43,36 +56,36 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/lodash.get": "^4.4.7",
     "@types/react": "18.2.74",
     "@types/uuid": "^9.0.0",
-    "payload": "workspace:*",
-    "prettier": "^2.7.1",
-    "react": "^18.0.0",
-    "webpack": "^5.78.0"
+    "payload": "workspace:*"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
+  "peerDependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
   },
   "publishConfig": {
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
-    }
+    },
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
   },
-  "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
-  ]
+  "homepage:": "https://payloadcms.com"
 }

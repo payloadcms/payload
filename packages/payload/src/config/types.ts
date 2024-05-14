@@ -1,16 +1,21 @@
-import type { I18nOptions, TFunction } from '@payloadcms/translations'
+import type {
+  DefaultTranslationsObject,
+  I18nClient,
+  I18nOptions,
+  TFunction,
+} from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { Transporter } from 'nodemailer'
-import type SMTPConnection from 'nodemailer/lib/smtp-connection'
+import type { Metadata as NextMetadata } from 'next'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
-import type { User } from '../auth/types.js'
+import type { Permissions } from '../auth/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -18,9 +23,10 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
+import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { GeneratedTypes, Payload } from '../index.js'
+import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
@@ -33,12 +39,6 @@ export type BinScript = (config: SanitizedConfig) => Promise<void> | void
 type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
-
-type Email = {
-  fromAddress: string
-  fromName: string
-  logMockCredentials?: boolean
-}
 
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config | Promise<Config>
@@ -76,7 +76,7 @@ export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url
 
 type GeneratePreviewURLOptions = {
   locale: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: null | string
 }
 
@@ -84,36 +84,6 @@ export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions,
 ) => Promise<null | string> | null | string
-
-export type EmailTransport = Email & {
-  transport: Transporter
-  transportOptions?: SMTPConnection.Options
-}
-
-export type EmailTransportOptions = Email & {
-  transport?: Transporter
-  transportOptions: SMTPConnection.Options
-}
-
-export type EmailOptions = Email | EmailTransport | EmailTransportOptions
-
-/**
- * type guard for EmailOptions
- * @param emailConfig
- */
-export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTransport {
-  return (emailConfig as EmailTransport).transport !== undefined
-}
-
-/**
- * type guard for EmailOptions
- * @param emailConfig
- */
-export function hasTransportOptions(
-  emailConfig: EmailOptions,
-): emailConfig is EmailTransportOptions {
-  return (emailConfig as EmailTransportOptions).transportOptions !== undefined
-}
 
 export type GraphQLInfo = {
   Mutation: {
@@ -163,13 +133,6 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   /**
-   * Configuration for Payload's email functionality
-   *
-   * @see https://payloadcms.com/docs/email/overview
-   */
-  email?: EmailOptions
-
-  /**
    * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
    * This allows you to bring your own logger instance and let payload use it
    */
@@ -204,19 +167,19 @@ export type InitOptions = {
  */
 export type AccessResult = Where | boolean
 
-export type AccessArgs<T = any, U = any> = {
+export type AccessArgs<TData = any> = {
   /**
    * The relevant resource that is being accessed.
    *
    * `data` is null when a list is requested
    */
-  data?: T
+  data?: TData
   /** ID of the resource being accessed */
   id?: number | string
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequest<U>
+  req: PayloadRequestWithData
 }
 
 /**
@@ -225,17 +188,15 @@ export type AccessArgs<T = any, U = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<T = any, U = any> = (
-  args: AccessArgs<T, U>,
-) => AccessResult | Promise<AccessResult>
+export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
 
-/** Web Request/Response model, but the the req has more payload specific properties added to it. */
+/** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
  */
-export type Endpoint<U = User> = {
+export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
 
@@ -293,12 +254,28 @@ export type EditViewConfig =
 export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
+  i18n: I18nClient
+  locale?: Locale
+  params?: { [key: string]: string | string[] | undefined }
   payload: Payload
+  permissions?: Permissions
+  searchParams?: { [key: string]: string | string[] | undefined }
+  user?: GeneratedTypes['user']
 }
 
-export const serverProps: (keyof ServerProps)[] = ['payload']
+export const serverProps: (keyof ServerProps)[] = [
+  'payload',
+  'i18n',
+  'locale',
+  'params',
+  'permissions',
+  'searchParams',
+  'permissions',
+]
 
-export type CustomComponent<T extends any = any> = React.ComponentType<T & ServerProps>
+export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
+  TAdditionalProps & Partial<ServerProps>
+>
 
 export type Locale = {
   /**
@@ -417,9 +394,9 @@ export type Config = {
           prefillOnly?: boolean
         }
       | false
-
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -489,26 +466,25 @@ export type Config = {
         Dashboard?: AdminView
       }
     }
+    /** Extension point to add your custom data. Available in server and client. */
+    custom?: Record<string, any>
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
-    /** The route the user will be redirected to after being inactive for too long. */
-    inactivityRoute?: string
     livePreview?: LivePreviewConfig & {
       collections?: string[]
       globals?: string[]
     }
-    /** The route for the logout page. */
-    logoutRoute?: string
-    /** Base meta data to use for the Admin panel. Included properties are titleSuffix, ogImage, and favicon. */
+    /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: {
       /**
-       * Public path to an icon
+       * An array of Next.js metadata objects that represent icons to be used by devices and browsers.
        *
-       * This image may be displayed in the browser next to the title of the page
+       * For example browser tabs, phone home screens, and search engine results.
+       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
        */
-      favicon?: string
+      icons?: NextMetadata['icons']
       /**
        * Public path to an image
        *
@@ -521,7 +497,23 @@ export type Config = {
        */
       titleSuffix?: string
     }
-    /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
+    routes?: {
+      /** The route for the account page. */
+      account?: string
+      /** The route for the create first user page. */
+      createFirstUser?: string
+      /** The route for the forgot password page. */
+      forgot?: string
+      /** The route the user will be redirected to after being inactive for too long. */
+      inactivity?: string
+      /** The route for the login page. */
+      login?: string
+      /** The route for the logout page. */
+      logout?: string
+      /** The route for the unauthorized page. */
+      unauthorized?: string
+    }
+    /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
   /** Custom Payload bin scripts can be injected via the config. */
@@ -547,7 +539,7 @@ export type Config = {
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
@@ -569,13 +561,13 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor: RichTextAdapterProvider<any, any, any>
   /**
-   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   * Email Adapter
    *
    * @see https://payloadcms.com/docs/email/overview
    */
-  email?: EmailOptions
+  email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
@@ -605,6 +597,10 @@ export type Config = {
      * @see https://payloadcms.com/docs/graphql/extending
      */
     queries?: GraphQLExtension
+    /**
+     * Filepath to write the generated schema to
+     */
+    schemaOutputFile?: string
   }
   /**
    * Tap into Payload-wide hooks.
@@ -615,7 +611,7 @@ export type Config = {
     afterError?: AfterErrorHook
   }
   /** i18n config settings */
-  i18n?: I18nOptions
+  i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**
@@ -670,7 +666,18 @@ export type Config = {
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /** Disable declare block in generated types file */
-    declare?: false
+    declare?:
+      | {
+          /**
+           * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
+           *
+           * Adds a @ts-ignore flag above the GeneratedTypes interface declaration
+           *
+           * @default false
+           */
+          ignoreTSError?: boolean
+        }
+      | false
     /** Filename to write the generated types to */
     outputFile?: string
   }
@@ -682,9 +689,11 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization'
+  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 > & {
   collections: SanitizedCollectionConfig[]
+  /** Default richtext editor to use for richText fields */
+  editor: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
@@ -693,6 +702,12 @@ export type SanitizedConfig = Omit<
     config: string
     configDir: string
     rawConfig: string
+  }
+  upload: ExpressFileUploadOptions & {
+    /**
+     * Deduped list of adapters used in the project
+     */
+    adapters: string[]
   }
 }
 
@@ -727,10 +742,8 @@ export type EditConfig =
 
 export type EntityDescriptionComponent = CustomComponent
 
-export type EntityDescriptionFunction = () => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 
-export type EntityDescription =
-  | EntityDescriptionComponent
-  | EntityDescriptionFunction
-  | Record<string, string>
-  | string
+export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
+
+export type { EmailAdapter, SendEmailOptions }

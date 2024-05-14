@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { FieldBase } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -50,7 +50,6 @@ declare module 'slate' {
 const RichTextField: React.FC<
   FormFieldBase & {
     elements: EnabledFeatures['elements']
-    label?: FieldBase['label']
     leaves: EnabledFeatures['leaves']
     name: string
     placeholder?: string
@@ -88,13 +87,19 @@ const RichTextField: React.FC<
   const drawerDepth = useEditDepth()
   const drawerIsOpen = drawerDepth > 1
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
-        return validate(value, { ...validationOptions, required })
+        return validate(value, {
+          ...validationOptions,
+          req: {
+            t: i18n.t,
+          },
+          required,
+        })
       }
     },
-    [validate, required],
+    [validate, required, i18n],
   )
 
   const { path: pathFromContext } = useFieldProps()

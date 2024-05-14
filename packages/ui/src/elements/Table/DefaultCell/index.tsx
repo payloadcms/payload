@@ -5,10 +5,10 @@ import React from 'react' // TODO: abstract this out to support all routers
 import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { TableCellProvider, useTableCell } from '@payloadcms/ui/elements/Table'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
+import { useConfig } from '../../../providers/Config/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { TableCellProvider, useTableCell } from '../TableCellProvider/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
 
@@ -82,7 +82,8 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     )
   }
 
-  const DefaultCellComponent: React.FC<DefaultCellComponentProps> = cellComponents[fieldType]
+  const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
+    typeof cellData !== 'undefined' && cellComponents[fieldType]
 
   let CellComponent: React.ReactNode =
     cellData &&

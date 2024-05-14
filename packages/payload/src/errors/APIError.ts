@@ -26,7 +26,7 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
  * Class representing an API error.
  * @extends ExtendableError
  */
-class APIError<
+export class APIError<
   TData extends null | object = { [key: string]: unknown } | null,
 > extends ExtendableError<TData> {
   /**
@@ -45,5 +45,3 @@ class APIError<
     super(message, status, data, isPublic)
   }
 }
-
-export default APIError

@@ -216,29 +216,32 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        custom: 'Hello, world!',
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    if (process.env.SKIP_ON_INIT !== 'true') {
+      await payload.create({
+        collection: 'users',
+        data: {
+          custom: 'Hello, world!',
+          email: devUser.email,
+          password: devUser.password,
+          roles: ['admin'],
+        },
+      })
 
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
+      await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey: uuid(),
+          enableAPIKey: true,
+        },
+      })
 
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
+      await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey: uuid(),
+          enableAPIKey: true,
+        },
+      })
+    }
   },
 })

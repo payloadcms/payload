@@ -18,6 +18,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../helpers/rest.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
@@ -44,7 +45,8 @@ describe('uploads', () => {
   let pngDoc: Media
   let audioDoc: Media
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
@@ -241,7 +243,19 @@ describe('uploads', () => {
     )
   })
 
+  test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
+    await expect(page.locator('.file-field__filename')).toHaveValue('2mb.jpg')
+
+    await page.click('#action-save', { delay: 100 })
+    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+      'File size limit has been reached',
+    )
+  })
+
   test('Should render adminThumbnail when using a function', async () => {
+    await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
 

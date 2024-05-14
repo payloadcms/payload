@@ -2,12 +2,9 @@
 import type { LexicalEditor } from 'lexical'
 import type { DragEvent as ReactDragEvent } from 'react'
 
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { eventFiles } from '@lexical/rich-text'
-import lexicalImport from 'lexical'
-const { $getNearestNodeFromDOMNode, $getNodeByKey } = lexicalImport
+import { $getNearestNodeFromDOMNode, $getNodeByKey } from 'lexical'
 import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -58,8 +55,11 @@ function hideTargetLine(
     targetLineElem.style.opacity = '0'
   }
   if (lastTargetBlockElem) {
-    lastTargetBlockElem.style.opacity = '1'
-    lastTargetBlockElem.style.transform = 'translate(0, 0)'
+    lastTargetBlockElem.style.opacity = ''
+    lastTargetBlockElem.style.transform = ''
+    // Delete marginBottom and marginTop values we set
+    lastTargetBlockElem.style.marginBottom = ''
+    lastTargetBlockElem.style.marginTop = ''
     //lastTargetBlockElem.style.border = 'none'
   }
 }
@@ -142,7 +142,7 @@ function useDraggableBlockMenu(
         isFoundNodeEmptyParagraph,
       } = getNodeCloseToPoint({
         anchorElem,
-        cache_treshold: 0,
+        cache_threshold: 0,
         editor,
         horizontalOffset: -distanceFromScrollerElem,
         point: new Point(event.x, event.y),

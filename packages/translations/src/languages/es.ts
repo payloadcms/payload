@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const es: Language = {
@@ -9,6 +10,7 @@ export const es: Language = {
       alreadyActivated: 'Ya Activado',
       alreadyLoggedIn: 'Sesión iniciada',
       apiKey: 'Clave API',
+      authenticated: 'Autenticado',
       backToLogin: 'Regresar al inicio de sesión',
       beginCreateFirstUser: 'Para empezar, crea tu primer usuario.',
       changePassword: 'Cambiar contraseña',
@@ -82,6 +84,8 @@ export const es: Language = {
       invalidFileType: 'Tipo de archivo inválido',
       invalidFileTypeValue: 'Tipo de archivo inválido: {{value}}',
       loadingDocument: 'Ocurrió un problema al cargar el documento con la ID {{id}}.',
+      localesNotSaved_one: 'No se pudo guardar la siguiente configuración regional:',
+      localesNotSaved_other: 'No se pudieron guardar las siguientes configuraciones regionales:',
       missingEmail: 'Falta el correo.',
       missingIDOfDocument: 'Falta la ID del documento a actualizar.',
       missingIDOfVersion: 'Falta la ID de la versión.',
@@ -191,8 +195,11 @@ export const es: Language = {
       deletedCountSuccessfully: 'Se eliminó {{count}} {{label}} con éxito.',
       deletedSuccessfully: 'Borrado exitosamente.',
       deleting: 'Eliminando...',
+      depth: 'Profundidad',
       descending: 'Descendente',
       deselectAllRows: 'Deselecciona todas las filas',
+      document: 'Documento',
+      documents: 'Documentos',
       duplicate: 'Duplicar',
       duplicateWithoutSaving: 'Duplicar sin guardar cambios',
       edit: 'Editar',
@@ -207,6 +214,7 @@ export const es: Language = {
       error: 'Error',
       errors: 'Errores',
       fallbackToDefaultLocale: 'Volver a la configuración regional por defecto',
+      false: 'Falso',
       filter: 'Filtro',
       filterWhere: 'Filtrar {{label}} donde',
       filters: 'Filtros',
@@ -263,6 +271,7 @@ export const es: Language = {
       successfullyDuplicated: '{{label}} duplicado correctamente.',
       thisLanguage: 'Español',
       titleDeleted: '{{label}} {{title}} eliminado correctamente.',
+      true: 'Verdadero',
       unauthorized: 'No autorizado',
       unsavedChangesDuplicate: 'Tienes cambios sin guardar. ¿Deseas continuar para duplicar?',
       untitled: 'Sin título',

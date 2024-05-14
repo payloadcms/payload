@@ -1,5 +1,7 @@
 import { slateEditor } from '@payloadcms/richtext-slate'
 
+import type { Post } from './payload-types.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -79,6 +81,6 @@ export default buildConfigWithDefaults({
   },
 })
 
-export const postDoc = {
+export const postDoc: Pick<Post, 'title'> = {
   title: 'test post',
 }

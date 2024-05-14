@@ -1,10 +1,10 @@
-import type { SupportedLanguages } from '@payloadcms/translations'
+import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Locale } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -42,8 +42,8 @@ export type InitPageResult = {
   globalConfig?: SanitizedGlobalConfig
   locale: Locale
   permissions: Permissions
-  req: PayloadRequest
-  translations: SupportedLanguages
+  req: PayloadRequestWithData
+  translations: ClientTranslationsObject
   visibleEntities: VisibleEntities
 }
 

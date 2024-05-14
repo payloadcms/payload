@@ -5,6 +5,7 @@ import type { LabelProps } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { useFieldProps } from '../FieldPropsProvider/index.js'
@@ -22,7 +23,8 @@ const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
 
   const { uuid } = useForm()
   const { path } = useFieldProps()
-  const htmlFor = htmlForFromProps || generateFieldID(path, uuid)
+  const editDepth = useEditDepth()
+  const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
 
   const { i18n } = useTranslation()
 

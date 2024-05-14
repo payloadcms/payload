@@ -1,4 +1,4 @@
-import { arraysHaveSameStrings } from '@payloadcms/ui/utilities/arraysHaveSameStrings'
+import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings.js'
 
 export const mergeErrorPaths = (
   existing?: string[],

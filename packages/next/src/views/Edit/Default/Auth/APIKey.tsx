@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { GenerateConfirmation } from '@payloadcms/ui/elements/GenerateConfirmation'
@@ -16,8 +16,11 @@ const path = 'apiKey'
 const baseClass = 'api-key'
 const fieldBaseClass = 'field-type'
 
-export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
-  const [initialAPIKey, setInitialAPIKey] = useState(null)
+export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
+  enabled,
+  readOnly,
+}) => {
+  const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
   const { t } = useTranslation()
   const config = useConfig()
@@ -31,12 +34,13 @@ export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
       data: {},
       maxLength: 48,
       minLength: 24,
+      preferences: { fields: {} },
       req: {
         payload: {
           config,
         },
         t,
-      } as PayloadRequest,
+      } as PayloadRequestWithData,
       siblingData: {},
     })
 
@@ -69,14 +73,13 @@ export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   const { setValue, value } = fieldType
 
   useEffect(() => {
-    setInitialAPIKey(uuidv4())
-  }, [])
-
-  useEffect(() => {
-    if (!apiKeyValue) {
+    if (!apiKeyValue && enabled) {
       setValue(initialAPIKey)
     }
-  }, [apiKeyValue, setValue, initialAPIKey])
+    if (!enabled) {
+      setValue(null)
+    }
+  }, [apiKeyValue, enabled, setValue, initialAPIKey])
 
   useEffect(() => {
     if (highlightedField) {
@@ -85,6 +88,10 @@ export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
       }, 10000)
     }
   }, [highlightedField])
+
+  if (!enabled) {
+    return null
+  }
 
   return (
     <React.Fragment>

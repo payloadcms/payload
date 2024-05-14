@@ -1,5 +1,5 @@
-import type { SendMailOptions } from 'nodemailer'
 import type { PaginatedDocs } from 'payload/database'
+import type { SendEmailOptions } from 'payload/types'
 
 import type {
   CreateArgs,
@@ -7,6 +7,7 @@ import type {
   FetchOptions,
   FindArgs,
   GeneratedTypes,
+  LoginArgs,
   UpdateArgs,
   UpdateGlobalArgs,
 } from './types.js'
@@ -70,7 +71,18 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     })
   }
 
-  sendEmail = async ({ jwt, ...args }: { jwt?: string } & SendMailOptions): Promise<unknown> => {
+  login = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: LoginArgs<TGeneratedTypes, T>) => {
+    return this.fetch<TGeneratedTypes['collections'][T]>({
+      operation: 'login',
+      args,
+      jwt,
+    })
+  }
+
+  sendEmail = async ({ jwt, ...args }: { jwt?: string } & SendEmailOptions): Promise<unknown> => {
     return this.fetch({
       operation: 'sendEmail',
       args,

@@ -1,4 +1,3 @@
-import type { HiddenInputFieldProps } from '@payloadcms/ui/fields/HiddenInput'
 import type { FieldTypes } from 'payload/config'
 import type {
   BlockField,
@@ -16,6 +15,7 @@ import type { CollapsibleFieldProps } from '../../../fields/Collapsible/index.js
 import type { DateFieldProps } from '../../../fields/DateTime/index.js'
 import type { EmailFieldProps } from '../../../fields/Email/index.js'
 import type { GroupFieldProps } from '../../../fields/Group/index.js'
+import type { HiddenInputFieldProps } from '../../../fields/HiddenInput/index.js'
 import type { JSONFieldProps } from '../../../fields/JSON/index.js'
 import type { NumberFieldProps } from '../../../fields/Number/index.js'
 import type { PointFieldProps } from '../../../fields/Point/index.js'
@@ -35,6 +35,7 @@ export type MappedTab = {
 }
 
 export type ReducedBlock = {
+  custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string
   imageURL?: string
@@ -68,7 +69,10 @@ export type MappedField = {
   CustomCell?: React.ReactNode
   CustomField?: React.ReactNode
   cellComponentProps: CellComponentProps
+  custom?: Record<any, string>
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps
   fieldIsPresentational: boolean

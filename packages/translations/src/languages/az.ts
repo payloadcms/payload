@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const az: Language = {
@@ -9,6 +10,7 @@ export const az: Language = {
       alreadyActivated: 'Artıq Aktivləşdirilib',
       alreadyLoggedIn: 'Artıq daxil olunub',
       apiKey: 'API Açarı',
+      authenticated: 'Doğrulandı',
       backToLogin: 'Girişə qayıt',
       beginCreateFirstUser: 'Başlamaq üçün ilk istifadəçinizi yaradın.',
       changePassword: 'Parolu dəyişdir',
@@ -82,6 +84,8 @@ export const az: Language = {
       invalidFileType: 'Yanlış fayl növü',
       invalidFileTypeValue: 'Yanlış fayl növü: {{value}}',
       loadingDocument: '{{id}} ID-li sənədin yüklənməsində problem baş verdi.',
+      localesNotSaved_one: 'Aşağıdakı yerləşdirmə saxlanıla bilmədi:',
+      localesNotSaved_other: 'Aşağıdakı yerləşdirmələr saxlanıla bilmədi:',
       missingEmail: 'E-poçt adresi çatışmır.',
       missingIDOfDocument: 'Yeniləmək üçün sənədin ID-si çatışmır.',
       missingIDOfVersion: 'Versiyanın ID-si çatışmır.',
@@ -190,8 +194,11 @@ export const az: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} uğurla silindi.',
       deletedSuccessfully: 'Uğurla silindi.',
       deleting: 'Silinir...',
+      depth: 'Dərinlik',
       descending: 'Azalan',
       deselectAllRows: 'Bütün sıraları seçimi ləğv edin',
+      document: 'Sənəd',
+      documents: 'Sənədlər',
       duplicate: 'Dublikat',
       duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
       edit: 'Redaktə et',
@@ -206,6 +213,7 @@ export const az: Language = {
       error: 'Xəta',
       errors: 'Xətalar',
       fallbackToDefaultLocale: 'Standart lokalə keçid',
+      false: 'Yalan',
       filter: 'Filter',
       filterWhere: '{{label}} filtrlə',
       filters: 'Filtərlər',
@@ -262,6 +270,7 @@ export const az: Language = {
       successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
       thisLanguage: 'Azərbaycan dili',
       titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
+      true: 'Doğru',
       unauthorized: 'İcazəsiz',
       unsavedChangesDuplicate:
         'Saxlanılmamış dəyişiklikləriniz var. Dublikatla davam etmək istəyirsiniz?',

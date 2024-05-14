@@ -13,7 +13,6 @@ import type { LexicalField, LexicalMigrateField, RichTextField } from './payload
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { arrayDoc } from './collections/Array/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
@@ -172,7 +171,7 @@ describe('Lexical', () => {
 
       const linkNode: SerializedLinkNode = (lexical.root.children[1] as SerializedParagraphNode)
         .children[3] as SerializedLinkNode
-      expect(linkNode.fields.doc.value.items[1].text).toStrictEqual(arrayDoc.items[1].text)
+      expect(linkNode.fields.doc.value.text).toStrictEqual(textDoc.text)
     })
 
     it('should populate relationship node', async () => {
@@ -416,9 +415,10 @@ describe('Lexical', () => {
       /**
        * Depth 1 population:
        */
-      expect(subEditorRelationshipNode.value.id).toStrictEqual(createdRichTextDocID)
+      expect(subEditorRelationshipNode.value).toStrictEqual(createdRichTextDocID)
       // But the value should not be populated and only have the id field:
-      expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
+
+      expect(typeof subEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async () => {
@@ -463,9 +463,9 @@ describe('Lexical', () => {
       /**
        * Depth 2 population:
        */
-      expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
+      expect(populatedDocEditorRelationshipNode.value).toStrictEqual(createdTextDocID)
       // But the value should not be populated and only have the id field - that's because it would require a depth of 2
-      expect(Object.keys(populatedDocEditorRelationshipNode.value)).toHaveLength(1)
+      expect(populatedDocEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {

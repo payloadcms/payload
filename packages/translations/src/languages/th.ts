@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const th: Language = {
@@ -9,6 +10,7 @@ export const th: Language = {
       alreadyActivated: 'เปิดใช้งานแล้ว',
       alreadyLoggedIn: 'ลงชื่อเข้าใช้แล้ว',
       apiKey: 'API Key',
+      authenticated: 'ได้รับการตรวจสอบแล้ว',
       backToLogin: 'กลับไปหน้าเข้าสู่ระบบ',
       beginCreateFirstUser: 'สร้างผู้ใช้แรกเพื่อเริ่มใช้งาน',
       changePassword: 'เปลี่ยนรหัสผ่าน',
@@ -79,6 +81,8 @@ export const th: Language = {
       invalidFileType: 'ประเภทของไฟล์ไม่ถูกต้อง',
       invalidFileTypeValue: 'ประเภทของไฟล์ไม่ถูกต้อง: {{value}}',
       loadingDocument: 'เกิดปัญหาระหว่างการโหลดเอกสารที่มี ID {{id}}',
+      localesNotSaved_one: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
+      localesNotSaved_other: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
       missingEmail: 'ไม่พบอีเมล',
       missingIDOfDocument: 'ไม่พบ ID ของเอกสารที่ต้องการแก้ไข',
       missingIDOfVersion: 'ไม่พบ ID ของเวอร์ชัน',
@@ -185,8 +189,11 @@ export const th: Language = {
       deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
       deletedSuccessfully: 'ลบสำเร็จ',
       deleting: 'กำลังลบ...',
+      depth: 'ความลึก',
       descending: 'มากไปน้อย',
       deselectAllRows: 'ยกเลิกการเลือกทุกแถว',
+      document: 'เอกสาร',
+      documents: 'เอกสาร',
       duplicate: 'สำเนา',
       duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',
       edit: 'แก้ไข',
@@ -201,6 +208,7 @@ export const th: Language = {
       error: 'ข้อผิดพลาด',
       errors: 'ข้อผิดพลาด',
       fallbackToDefaultLocale: 'สำรองไปยังตำแหน่งที่ตั้งเริ่มต้น',
+      false: 'เท็จ',
       filter: 'กรอง',
       filterWhere: 'กรอง {{label}} เฉพาะ',
       filters: 'กรอง',
@@ -257,6 +265,7 @@ export const th: Language = {
       successfullyDuplicated: 'สำเนา {{label}} สำเร็จ',
       thisLanguage: 'ไทย',
       titleDeleted: 'ลบ {{label}} "{{title}}" สำเร็จ',
+      true: 'จริง',
       unauthorized: 'ไม่ได้รับอนุญาต',
       unsavedChangesDuplicate: 'คุณมีการแก้ไขที่ยังไม่ถูกบันทึก คุณต้องการทำสำเนาต่อหรือไม่?',
       untitled: 'ไม่มีชื่อ',

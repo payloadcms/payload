@@ -1,52 +1,30 @@
 import type { ExecSyncOptions } from 'child_process'
 
 import chalk from 'chalk'
+import { loadChangelogConfig } from 'changelogen'
 import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
+import pLimit from 'p-limit'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
-import { simpleGit } from 'simple-git'
 
 import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
+import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
+import { packagePublishList } from './lib/publishList.js'
+import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
-// Update this list with any packages to publish
-const packageWhitelist = [
-  'payload',
-  'translations',
-  'ui',
-  'next',
-  'graphql',
-  'db-mongodb',
-  'db-postgres',
-  'richtext-slate',
-  'richtext-lexical',
-
-  'create-payload-app',
-
-  // Plugins
-  'plugin-cloud',
-  'plugin-cloud-storage',
-  'plugin-form-builder',
-  'plugin-nested-docs',
-  'plugin-redirects',
-  'plugin-search',
-  'plugin-seo',
-  // 'plugin-stripe',
-  // 'plugin-sentry',
-]
+const npmPublishLimit = pLimit(6)
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const cwd = path.resolve(dirname, '..')
-
-const git = simpleGit(cwd)
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const execaOpts: execa.Options = { stdio: 'inherit' }
@@ -58,6 +36,7 @@ const {
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
+  'git-commit': gitCommit = true, // Whether to run git commit operations
   tag = 'latest',
 } = args
 
@@ -84,18 +63,42 @@ const cmdRunnerAsync =
   }
 
 async function main() {
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error('GITHUB_TOKEN env var is required')
+  }
+
   if (dryRun) {
     console.log(chalk.bold.yellow(chalk.bold.magenta('\n  👀 Dry run mode enabled')))
   }
 
   console.log({ args })
 
-  const runCmd = cmdRunner(dryRun, gitTag)
-  const runCmdAsync = cmdRunnerAsync(dryRun)
+  const fromVersion = execSync('git describe --tags --abbrev=0').toString().trim()
+
+  const config = await loadChangelogConfig(process.cwd(), {
+    repo: 'payloadcms/payload',
+  })
 
   if (!semver.RELEASE_TYPES.includes(bump)) {
     abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
   }
+
+  const recommendedBump = (await getRecommendedBump(fromVersion, 'HEAD', config)) || 'patch'
+
+  if (bump !== recommendedBump) {
+    console.log(
+      chalk.bold.yellow(
+        `Recommended bump type is '${recommendedBump}' based on commits since last release`,
+      ),
+    )
+    const confirmBump = await confirm(`Do you want to continue with bump: '${bump}'?`)
+    if (!confirmBump) {
+      abort()
+    }
+  }
+
+  const runCmd = cmdRunner(dryRun, gitTag)
+  const runCmdAsync = cmdRunnerAsync(dryRun)
 
   if (bump.startsWith('pre') && tag === 'latest') {
     abort(`Prerelease bumps must have tag: beta or canary`)
@@ -106,8 +109,6 @@ async function main() {
   if (!monorepoVersion) {
     throw new Error('Could not find version in package.json')
   }
-
-  const lastTag = (await git.tags()).all.reverse().filter((t) => t.startsWith('v'))?.[0]
 
   // TODO: Re-enable this check once we start tagging releases again
   // if (monorepoVersion !== lastTag.replace('v', '')) {
@@ -123,7 +124,26 @@ async function main() {
     return // For TS type checking
   }
 
-  let packageDetails = await getPackageDetails(packageWhitelist)
+  // Preview/Update changelog
+  header(`${logPrefix}📝 Updating changelog...`)
+  const {
+    changelog: changelogContent,
+    releaseNotes,
+    releaseUrl,
+  } = await updateChangelog({
+    bump,
+    dryRun,
+    toVersion: 'HEAD',
+    fromVersion,
+    openReleaseUrl: true,
+    writeChangelog: changelog,
+  })
+
+  console.log(chalk.green('\nChangelog Preview:\n'))
+  console.log(chalk.gray(changelogContent) + '\n\n')
+  console.log(`Release URL: ${chalk.dim(releaseUrl)}`)
+
+  let packageDetails = await getPackageDetails(packagePublishList)
 
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
   console.log(chalk.bold.yellow(`  Bump: ${bump}`))
@@ -149,14 +169,6 @@ async function main() {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)
     abort('Build failed')
-  }
-
-  // Update changelog
-  if (changelog) {
-    header(`${logPrefix}📝 Updating changelog...`)
-    await updateChangelog({ dryRun, newVersion: nextReleaseVersion })
-  } else {
-    console.log(chalk.bold.yellow('📝 Skipping changelog update'))
   }
 
   // Increment all package versions
@@ -185,7 +197,13 @@ async function main() {
 
   // Commit all staged changes
   runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
-  runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
+
+  // Wait 500ms to avoid .git/index.lock errors
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  if (gitCommit) {
+    runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
+  }
 
   // Tag
   header(`🏷️  Tagging release v${nextReleaseVersion}`, { enable: gitTag })
@@ -195,19 +213,21 @@ async function main() {
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
   runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  const results: { name: string; success: boolean; details?: string }[] = []
-  // Sequential publish
-  for (const pkg of packageDetails) {
-    const result = await publishSinglePackage(pkg, { dryRun })
-    results.push(result)
-  }
+  const results = await Promise.allSettled(
+    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun })),
+  )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 
   // New results format
   console.log(
     results
-      .map(({ name, success, details }) => {
+      .map((result) => {
+        if (result.status === 'rejected') {
+          console.error(result.reason)
+          return `  ❌ ${String(result.reason)}`
+        }
+        const { name, success, details } = result.value
         let summary = `  ${success ? '✅' : '❌'} ${name}`
         if (details) {
           summary += `\n    ${details}\n`
@@ -225,6 +245,8 @@ async function main() {
   // }
 
   header('🎉 Done!')
+
+  console.log(chalk.bold.green(`\n\nRelease URL: ${releaseUrl}`))
 }
 
 main().catch((error) => {
@@ -232,26 +254,65 @@ main().catch((error) => {
   process.exit(1)
 })
 
+/** Publish with promise concurrency throttling */
+async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
+  const { dryRun = false } = opts ?? {}
+  return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
+}
+
 async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
   const { dryRun = false } = opts ?? {}
   console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
-  const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
-  if (dryRun) {
-    cmdArgs.push('--dry-run')
-  }
-  const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
-    cwd,
-    stdio: ['ignore', 'ignore', 'pipe'],
-    // stdio: 'inherit',
-  })
 
-  if (exitCode !== 0) {
-    console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
-    return { name: pkg.name, success: false, details: stderr }
-  }
+  try {
+    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
+    if (dryRun) {
+      cmdArgs.push('--dry-run')
+    }
+    const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
+      cwd,
+      stdio: ['ignore', 'ignore', 'pipe'],
+      // stdio: 'inherit',
+    })
 
-  console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
-  return { name: pkg.name, success: true }
+    if (exitCode !== 0) {
+      console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
+
+      // Retry publish
+      console.log(chalk.bold.yellow(`\nRetrying publish for ${pkg.name}...`))
+      const { exitCode: retryExitCode, stderr: retryStdError } = await execa('pnpm', cmdArgs, {
+        cwd,
+        stdio: 'inherit', // log full output
+      })
+
+      if (retryExitCode !== 0) {
+        console.error(
+          chalk.bold.red(
+            `\n\n❌ ${pkg.name} ERROR: pnpm publish failed on retry\n\n${retryStdError}`,
+          ),
+        )
+      }
+
+      return {
+        name: pkg.name,
+        success: false,
+        details: `Exit Code: ${retryExitCode}, stderr: ${retryStdError}`,
+      }
+    }
+
+    console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
+    return { name: pkg.name, success: true }
+  } catch (err: unknown) {
+    console.error(err)
+    return {
+      name: pkg.name,
+      success: false,
+      details:
+        err instanceof Error
+          ? `Error publishing ${pkg.name}: ${err.message}`
+          : `Unexpected error publishing ${pkg.name}: ${String(err)}`,
+    }
+  }
 }
 
 function abort(message = 'Abort', exitCode = 1) {

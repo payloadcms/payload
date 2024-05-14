@@ -2,7 +2,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -15,7 +15,7 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
     email: string
     password: string
   }
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export type Result<T> = {

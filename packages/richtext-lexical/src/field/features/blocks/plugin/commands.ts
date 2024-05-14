@@ -1,7 +1,6 @@
 import type { LexicalCommand } from 'lexical'
 
-import lexicalImport from 'lexical'
-const { createCommand } = lexicalImport
+import { createCommand } from 'lexical'
 
 import type { InsertBlockPayload } from './index.js'
 

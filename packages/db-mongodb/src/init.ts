@@ -28,6 +28,7 @@ export const init: Init = function init(this: MongooseAdapter) {
       const versionSchema = buildSchema(this.payload.config, versionCollectionFields, {
         disableUnique: true,
         draftsEnabled: true,
+        indexSortableFields: this.payload.config.indexSortableFields,
         options: {
           minimize: false,
           timestamps: false,

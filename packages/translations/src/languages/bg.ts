@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const bg: Language = {
@@ -9,6 +10,7 @@ export const bg: Language = {
       alreadyActivated: 'Вече активиран',
       alreadyLoggedIn: 'Вече влязъл',
       apiKey: 'API ключ',
+      authenticated: 'Ověřený',
       backToLogin: 'Обратно към влизане',
       beginCreateFirstUser: 'За да започнеш, създай първия си потребител',
       changePassword: 'Промяна на паролата',
@@ -81,6 +83,8 @@ export const bg: Language = {
       invalidFileType: 'Невалиден тип на файл',
       invalidFileTypeValue: 'Невалиден тип на файл: {{value}}',
       loadingDocument: 'Имаше проблем при зареждането на документа с идентификатор {{id}}.',
+      localesNotSaved_one: 'Следният локал не може да бъде запазен:',
+      localesNotSaved_other: 'Следните локали не може да бъдат запазени:',
       missingEmail: 'Липсващ имейл.',
       missingIDOfDocument: 'Липсващ идентификатор на документа за обновяване.',
       missingIDOfVersion: 'Липсващ идентификатор на версия.',
@@ -188,8 +192,11 @@ export const bg: Language = {
       deletedCountSuccessfully: 'Изтрити {{count}} {{label}} успешно.',
       deletedSuccessfully: 'Изтрито успешно.',
       deleting: 'Изтриване...',
+      depth: 'Hloubka',
       descending: 'Низходящо',
       deselectAllRows: 'Деселектирай всички редове',
+      document: 'Документ',
+      documents: 'Документи',
       duplicate: 'Дупликирай',
       duplicateWithoutSaving: 'Дупликирай без да запазваш промените',
       edit: 'Редактирай',
@@ -204,6 +211,7 @@ export const bg: Language = {
       error: 'Грешка',
       errors: 'Грешки',
       fallbackToDefaultLocale: 'Използвай локализация по подразбиране',
+      false: 'Ложно',
       filter: 'Филтрирай',
       filterWhere: 'Филтрирай {{label}} където',
       filters: 'Филтри',
@@ -260,6 +268,7 @@ export const bg: Language = {
       successfullyDuplicated: '{{label}} успешно дупликиран.',
       thisLanguage: 'Български',
       titleDeleted: '{{label}} "{{title}}" успешно изтрит.',
+      true: 'Истина',
       unauthorized: 'Неавторизиран',
       unsavedChangesDuplicate: 'Имаш незапазени промени. Искаш ли да продължиш да дупликираш?',
       untitled: 'Неозаглавен',

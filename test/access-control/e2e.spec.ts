@@ -1,27 +1,40 @@
-import type { Page } from '@playwright/test'
-import type { Payload, TypeWithID } from 'payload/types'
+import type { BrowserContext, Page } from '@playwright/test'
+import type { TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
+import { devUser } from 'credentials.js'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
+import type {
+  Config,
+  NonAdminUser,
+  ReadOnlyCollection,
+  RestrictedVersion,
+} from './payload-types.js'
 
 import {
   closeNav,
   ensureAutoLoginAndCompilationIsDone,
   exactText,
+  getAdminRoutes,
   initPageConsoleErrorCatch,
+  login,
   openDocControls,
   openNav,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
+  noAdminAccessEmail,
+  nonAdminUserEmail,
+  nonAdminUserSlug,
+  readOnlyGlobalSlug,
   readOnlySlug,
   restrictedSlug,
   restrictedVersionsSlug,
@@ -46,22 +59,38 @@ describe('access control', () => {
   let page: Page
   let url: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
-  let readOnlyUrl: AdminUrlUtil
+  let readOnlyCollectionUrl: AdminUrlUtil
+  let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let serverURL: string
+  let context: BrowserContext
+  let logoutURL: string
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)
-    readOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug)
+    readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
+    readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await login({ page, serverURL })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    const {
+      admin: {
+        routes: { logout: logoutRoute },
+      },
+      routes: { admin: adminRoute },
+    } = getAdminRoutes({})
+
+    logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
 
   test('field without read access should not show', async () => {
@@ -170,12 +199,12 @@ describe('access control', () => {
     })
 
     test('should have collection url', async () => {
-      await page.goto(readOnlyUrl.list)
-      await expect(page).toHaveURL(new RegExp(`${readOnlyUrl.list}.*`)) // will redirect to ?limit=10 at the end, so we have to use a wildcard at the end
+      await page.goto(readOnlyCollectionUrl.list)
+      await expect(page).toHaveURL(new RegExp(`${readOnlyCollectionUrl.list}.*`)) // will redirect to ?limit=10 at the end, so we have to use a wildcard at the end
     })
 
     test('should not have "Create New" button', async () => {
-      await page.goto(readOnlyUrl.create)
+      await page.goto(readOnlyCollectionUrl.create)
       await expect(page.locator('.collection-list__header a')).toHaveCount(0)
     })
 
@@ -185,17 +214,20 @@ describe('access control', () => {
     })
 
     test('edit view should not have actions buttons', async () => {
-      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('.collection-edit__collection-actions li')).toHaveCount(0)
     })
 
     test('fields should be read-only', async () => {
-      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
+      await expect(page.locator('#field-name')).toBeDisabled()
+
+      await page.goto(readOnlyGlobalUrl.global(readOnlyGlobalSlug))
       await expect(page.locator('#field-name')).toBeDisabled()
     })
 
     test('should not render dot menu popup when `create` and `delete` access control is set to false', async () => {
-      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('.collection-edit .doc-controls .doc-controls__popup')).toBeHidden()
     })
   })
@@ -328,6 +360,75 @@ describe('access control', () => {
     // ensure user is allowed to edit this document
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
   })
+
+  test('should block admin access to admin user', async () => {
+    const adminURL = `${serverURL}/admin`
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
+
+    await login({
+      page,
+      serverURL,
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await expect(page.locator('.next-error-h1')).toBeVisible()
+
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
+
+    // Log back in for the next test
+    await login({
+      page,
+      serverURL,
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+  })
+
+  test('should block admin access to non-admin user', async () => {
+    const adminURL = `${serverURL}/admin`
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
+
+    const nonAdminUser: NonAdminUser & {
+      token?: string
+    } = await payload.login({
+      collection: nonAdminUserSlug,
+      data: {
+        email: nonAdminUserEmail,
+        password: devUser.password,
+      },
+    })
+
+    await context.addCookies([
+      {
+        name: 'payload-token',
+        value: nonAdminUser.token,
+        url: serverURL,
+      },
+    ])
+
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.next-error-h1')).toBeVisible()
+  })
 })
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -335,5 +436,5 @@ async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown
   return payload.create({
     collection: slug,
     data,
-  })
+  }) as any as Promise<TypeWithID & Record<string, unknown>>
 }

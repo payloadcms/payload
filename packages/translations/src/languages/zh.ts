@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const zh: Language = {
@@ -9,6 +10,7 @@ export const zh: Language = {
       alreadyActivated: '已经激活了',
       alreadyLoggedIn: '已经登入了',
       apiKey: 'API密钥',
+      authenticated: '已验证',
       backToLogin: '回到登录页面',
       beginCreateFirstUser: '首先，请创建您的第一个用户。',
       changePassword: '更改密码',
@@ -77,6 +79,8 @@ export const zh: Language = {
       invalidFileType: '无效的文件类型',
       invalidFileTypeValue: '无效的文件类型： {{value}}',
       loadingDocument: '加载ID为{{id}}的文件时出现了问题。',
+      localesNotSaved_one: '无法保存以下区域设置：',
+      localesNotSaved_other: '无法保存以下区域设置：',
       missingEmail: '缺少电子邮件。',
       missingIDOfDocument: '缺少需要更新的文档的ID。',
       missingIDOfVersion: '缺少版本的ID。',
@@ -183,8 +187,11 @@ export const zh: Language = {
       deletedCountSuccessfully: '已成功删除 {{count}} {{label}}。',
       deletedSuccessfully: '已成功删除。',
       deleting: '删除中...',
+      depth: '深度',
       descending: '降序',
       deselectAllRows: '取消选择所有行',
+      document: '文件',
+      documents: '文件',
       duplicate: '重复',
       duplicateWithoutSaving: '重复而不保存更改。',
       edit: '编辑',
@@ -199,6 +206,7 @@ export const zh: Language = {
       error: '错误',
       errors: '错误',
       fallbackToDefaultLocale: '回退到默认语言环境',
+      false: '假的',
       filter: '过滤器',
       filterWhere: '过滤{{label}}',
       filters: '过滤器',
@@ -254,6 +262,7 @@ export const zh: Language = {
       successfullyDuplicated: '成功复制{{label}}',
       thisLanguage: '中文 (简体)',
       titleDeleted: '{{label}} "{{title}}"已被成功删除。',
+      true: '真实',
       unauthorized: '未经授权',
       unsavedChangesDuplicate: '您有未保存的修改。您确定要继续重复吗？',
       untitled: '无标题',

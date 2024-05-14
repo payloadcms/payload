@@ -1,18 +1,57 @@
 'use client'
-import lexicalListImport from '@lexical/list'
-const { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } = lexicalListImport
+import { $isListNode, INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { $isRangeSelection } from 'lexical'
 
+import type { ToolbarGroup } from '../../toolbars/types.js'
 import type { ClientFeature, FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist/index.js'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
+import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../plugin/index.js'
 import { CHECK_LIST } from './markdownTransformers.js'
 import { LexicalCheckListPlugin } from './plugin/index.js'
 
-const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
+const toolbarGroups: ToolbarGroup[] = [
+  toolbarTextDropdownGroupWithItems([
+    {
+      ChildComponent: ChecklistIcon,
+      isActive: ({ selection }) => {
+        if (!$isRangeSelection(selection)) {
+          return false
+        }
+        for (const node of selection.getNodes()) {
+          if ($isListNode(node) && node.getListType() === 'check') {
+            continue
+          }
+
+          const parent = node.getParent()
+
+          if ($isListNode(parent) && parent.getListType() === 'check') {
+            continue
+          }
+
+          const parentParent = parent?.getParent()
+          // Example scenario: Node = textNode, parent = listItemNode, parentParent = listNode
+          if ($isListNode(parentParent) && parentParent.getListType() === 'check') {
+            continue
+          }
+
+          return false
+        }
+        return true
+      },
+      key: 'checklist',
+      label: `Check List`,
+      onSelect: ({ editor }) => {
+        editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
+      },
+      order: 12,
+    },
+  ]),
+]
+
+const ChecklistFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
     feature: ({ featureProviderMap }) => {
@@ -23,7 +62,7 @@ const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props)
         },
       ]
 
-      if (!featureProviderMap.has('unorderedlist') && !featureProviderMap.has('orderedlist')) {
+      if (!featureProviderMap.has('unorderedList') && !featureProviderMap.has('orderedList')) {
         plugins.push({
           Component: LexicalListPlugin,
           position: 'normal',
@@ -32,49 +71,40 @@ const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props)
 
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            TextDropdownSectionWithEntries([
-              {
-                ChildComponent: ChecklistIcon,
-                isActive: () => false,
-                key: 'checkList',
-                label: `Check List`,
-                onClick: ({ editor }) => {
-                  editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
-                },
-                order: 12,
-              },
-            ]),
-          ],
-        },
         markdownTransformers: [CHECK_LIST],
         nodes:
-          featureProviderMap.has('unorderedlist') || featureProviderMap.has('orderedlist')
+          featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
             ? []
             : [ListNode, ListItemNode],
         plugins,
         slashMenu: {
-          options: [
+          groups: [
             {
-              displayName: 'Lists',
-              key: 'lists',
-              options: [
-                new SlashMenuOption('checklist', {
+              items: [
+                {
                   Icon: ChecklistIcon,
-                  displayName: 'Check List',
+                  key: 'checklist',
                   keywords: ['check list', 'check', 'checklist', 'cl'],
+                  label: 'Check List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                   },
-                }),
+                },
               ],
+              key: 'lists',
+              label: 'Lists',
             },
           ],
+        },
+        toolbarFixed: {
+          groups: toolbarGroups,
+        },
+        toolbarInline: {
+          groups: toolbarGroups,
         },
       }
     },
   }
 }
 
-export const CheckListFeatureClientComponent = createClientComponent(CheckListFeatureClient)
+export const ChecklistFeatureClientComponent = createClientComponent(ChecklistFeatureClient)

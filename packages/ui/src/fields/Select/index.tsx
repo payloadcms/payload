@@ -1,17 +1,17 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase, Option, OptionObject } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback, useState } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -22,7 +22,6 @@ export type SelectFieldProps = FormFieldBase & {
   hasMany?: boolean
   isClearable?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   name?: string
   onChange?: (e: string) => void
   options?: Option[]

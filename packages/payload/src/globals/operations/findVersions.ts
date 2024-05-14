@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -19,7 +19,7 @@ export type Arguments = {
   limit?: number
   overrideAccess?: boolean
   page?: number
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   sort?: string
   where?: Where
@@ -96,6 +96,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
               // Patch globalType onto version doc
               globalType: globalConfig.slug,
             },
+            draft: undefined,
             fallbackLocale,
             findMany: true,
             global: globalConfig,

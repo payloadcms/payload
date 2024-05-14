@@ -1,6 +1,6 @@
-import type { SanitizedConfig, VisibleEntities } from 'payload/types'
+import type { ServerProps } from 'payload/config'
+import type { VisibleEntities } from 'payload/types'
 
-import { EntityVisibilityProvider } from '@payloadcms/ui/providers/EntityVisibility'
 import React from 'react'
 
 import type { NavProps } from '../../elements/Nav/index.js'
@@ -9,37 +9,47 @@ import { AppHeader } from '../../elements/AppHeader/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 import './index.scss'
 
 const baseClass = 'template-default'
 
-export type DefaultTemplateProps = {
+export type DefaultTemplateProps = ServerProps & {
   children?: React.ReactNode
   className?: string
-  config: Promise<SanitizedConfig> | SanitizedConfig
-  visibleEntities?: VisibleEntities
+  visibleEntities: VisibleEntities
 }
 
-export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
+export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,
   className,
-  config: configPromise,
+  i18n,
+  locale,
+  params,
+  payload,
+  permissions,
+  searchParams,
+  user,
   visibleEntities,
 }) => {
-  const config = await configPromise
-
   const {
     admin: {
       components: { Nav: CustomNav } = {
         Nav: undefined,
       },
     } = {},
-  } = config || {}
+  } = payload.config || {}
 
   const navProps: NavProps = {
-    config,
+    i18n,
+    locale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    user,
   }
 
   return (
@@ -55,6 +65,15 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
             CustomComponent={CustomNav}
             DefaultComponent={DefaultNav}
             componentProps={navProps}
+            serverOnlyProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
           />
           <div className={`${baseClass}__wrap`}>
             <AppHeader />

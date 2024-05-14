@@ -1,16 +1,16 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { CodeField as CodeFieldType, FieldBase } from 'payload/types'
+import type { CodeField as CodeFieldType } from 'payload/types'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -18,7 +18,6 @@ import './index.scss'
 
 export type CodeFieldProps = FormFieldBase & {
   editorOptions?: CodeFieldType['admin']['editorOptions']
-  label?: FieldBase['label']
   language?: CodeFieldType['admin']['language']
   name?: string
   path?: string

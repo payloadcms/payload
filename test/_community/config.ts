@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -16,10 +17,11 @@ export default buildConfigWithDefaults({
     PostsCollection,
     // MediaCollection
   ],
-  // globals: [
-  //   MenuGlobal,
-  //   // ...add more globals here
-  // ],
+  globals: [
+    MenuGlobal,
+    // ...add more globals here
+  ],
+  cors: ['http://localhost:3000', 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

@@ -1,3 +1,9 @@
+import Ajv from 'ajv'
+import ObjectIdImport from 'bson-objectid'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+
 import type { RichTextAdapter } from '../admin/types.js'
 import type { Where } from '../types/index.js'
 import type {
@@ -59,11 +65,11 @@ export const text: Validate<string | string[], unknown, unknown, TextField> = (
     const length = stringValue?.length || 0
 
     if (typeof maxLength === 'number' && length > maxLength) {
-      return t('validation:shorterThanMax', { label: t('value'), maxLength, stringValue })
+      return t('validation:shorterThanMax', { label: t('general:value'), maxLength, stringValue })
     }
 
     if (typeof minLength === 'number' && length < minLength) {
-      return t('validation:longerThanMin', { label: t('value'), minLength, stringValue })
+      return t('validation:longerThanMin', { label: t('general:value'), minLength, stringValue })
     }
   }
 
@@ -161,10 +167,47 @@ export const code: Validate<string, unknown, unknown, CodeField> = (
   return true
 }
 
-export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = (
+export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = async (
   value,
-  { jsonError, req: { t }, required },
+  { jsonError, jsonSchema, req: { t }, required },
 ) => {
+  const isNotEmpty = (value) => {
+    if (value === undefined || value === null) {
+      return false
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return false
+    }
+
+    if (typeof value === 'object' && Object.keys(value).length === 0) {
+      return false
+    }
+
+    return true
+  }
+
+  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+    if (uri && schema) return schema
+    // @ts-expect-error
+    return fetch(uri)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        return response.json()
+      })
+      .then((json) => {
+        const jsonSchemaSanitizations = {
+          id: undefined,
+          $id: json.id,
+          $schema: 'http://json-schema.org/draft-07/schema#',
+        }
+
+        return Object.assign(json, jsonSchemaSanitizations)
+      })
+  }
+
   if (required && !value) {
     return t('validation:required')
   }
@@ -173,6 +216,20 @@ export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: 
     return t('validation:invalidInput')
   }
 
+  if (jsonSchema && isNotEmpty(value)) {
+    try {
+      jsonSchema.schema = await fetchSchema(jsonSchema)
+      const { schema } = jsonSchema
+      // @ts-expect-error
+      const ajv = new Ajv()
+
+      if (!ajv.validate(schema, value)) {
+        return t(ajv.errorsText())
+      }
+    } catch (error) {
+      return t(error.message)
+    }
+  }
   return true
 }
 
@@ -211,6 +268,10 @@ export const richText: Validate<object, unknown, unknown, RichTextField> = async
   value,
   options,
 ) => {
+  if (typeof options?.editor === 'function') {
+    throw new Error('Attempted to access unsanitized rich text editor.')
+  }
+
   const editor: RichTextAdapter = options?.editor
 
   return editor.validate(value, options)
@@ -332,8 +393,12 @@ const validateFilterOptions: Validate<
         const valueIDs: (number | string)[] = []
 
         values.forEach((val) => {
-          if (typeof val === 'object' && val?.value) {
-            valueIDs.push(val.value)
+          if (typeof val === 'object') {
+            if (val?.value) {
+              valueIDs.push(val.value)
+            } else if (ObjectId.isValid(val)) {
+              valueIDs.push(new ObjectId(val).toHexString())
+            }
           }
 
           if (typeof val === 'string' || typeof val === 'number') {
@@ -383,6 +448,10 @@ const validateFilterOptions: Validate<
 
         if (typeof val === 'string' || typeof val === 'number') {
           requestedID = val
+        }
+
+        if (typeof val === 'object' && ObjectId.isValid(val)) {
+          requestedID = new ObjectId(val).toHexString()
         }
       }
 

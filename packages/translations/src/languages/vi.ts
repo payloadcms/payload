@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const vi: Language = {
@@ -9,6 +10,7 @@ export const vi: Language = {
       alreadyActivated: 'Đã được kích hoạt',
       alreadyLoggedIn: 'Đã đăng nhập',
       apiKey: 'API Key',
+      authenticated: 'Đã xác thực',
       backToLogin: 'Quay lại đăng nhập.',
       beginCreateFirstUser: 'Để bắt đầu, hãy tạo người dùng đầu tiên.',
       changePassword: 'Đổi mật khẩu',
@@ -81,6 +83,8 @@ export const vi: Language = {
       invalidFileType: 'Lỗi - Định dạng tệp không hợp lệ.',
       invalidFileTypeValue: 'Lỗi - Định dạng tệp không hợp lệ: {{value}}.',
       loadingDocument: 'Lỗi - Đã xảy ra vấn để khi tải bản tài liệu với ID {{id}}.',
+      localesNotSaved_one: 'Không thể lưu trữ cài đặt vùng sau đây:',
+      localesNotSaved_other: 'Không thể lưu trữ các cài đặt vùng sau đây:',
       missingEmail: 'Lỗi - Thiếu email.',
       missingIDOfDocument: 'Lỗi - Thiếu ID của bản tài liệu cần cập nhật.',
       missingIDOfVersion: 'Lỗi - Thiếu ID của phiên bản.',
@@ -188,8 +192,11 @@ export const vi: Language = {
       deletedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',
       deletedSuccessfully: 'Đã xoá thành công.',
       deleting: 'Đang xóa...',
+      depth: 'Độ sâu',
       descending: 'Xếp theo thứ tự giảm dần',
       deselectAllRows: 'Bỏ chọn tất cả các hàng',
+      document: 'Tài liệu',
+      documents: 'Tài liệu',
       duplicate: 'Tạo bản sao',
       duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
       edit: 'Chỉnh sửa',
@@ -204,6 +211,7 @@ export const vi: Language = {
       error: 'Lỗi',
       errors: 'Lỗi',
       fallbackToDefaultLocale: 'Ngôn ngữ mặc định',
+      false: 'Sai',
       filter: 'Lọc',
       filterWhere: 'Lọc {{label}} với điều kiện:',
       filters: 'Bộ lọc',
@@ -260,6 +268,7 @@ export const vi: Language = {
       successfullyDuplicated: '{{label}} đã được sao chép thành công.',
       thisLanguage: 'Vietnamese (Tiếng Việt)',
       titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
+      true: 'Thật',
       unauthorized: 'Không có quyền truy cập.',
       unsavedChangesDuplicate: 'Bạn chưa lưu các thay đổi. Bạn có muốn tiếp tục tạo bản sao?',
       untitled: 'Chưa có tiêu đề',

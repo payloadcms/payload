@@ -1,21 +1,26 @@
 import type { SerializedBlockNode, SerializedLinkNode } from '@payloadcms/richtext-lexical'
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
 import { expect, test } from '@playwright/test'
 import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from 'helpers/reInit.js'
+import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { Config, LexicalField, Upload } from '../../payload-types.js'
 
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../../../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  throttleTest,
+} from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../slugs.js'
 import { lexicalDocData } from './data.js'
 
@@ -28,14 +33,21 @@ const { beforeAll, beforeEach, describe } = test
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
+let context: BrowserContext
 let serverURL: string
 
 /**
  * Client-side navigation to the lexical editor from list view
  */
-async function navigateToLexicalFields(navigateToListView: boolean = true) {
+async function navigateToLexicalFields(
+  navigateToListView: boolean = true,
+  localized: boolean = false,
+) {
   if (navigateToListView) {
-    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
+    const url: AdminUrlUtil = new AdminUrlUtil(
+      serverURL,
+      localized ? 'lexical-localized-fields' : 'lexical-fields',
+    )
     await page.goto(url.list)
   }
 
@@ -49,16 +61,28 @@ async function navigateToLexicalFields(navigateToListView: boolean = true) {
 }
 
 describe('lexical', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsLexicalTest',
+      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+    })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
+    /*await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    })*/
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsLexicalTest',
@@ -185,17 +209,13 @@ describe('lexical', () => {
     }
     // The following text should now be selected: Node
 
-    const floatingToolbar_formatSection = page.locator(
-      '.floating-select-toolbar-popup__section-format',
-    )
+    const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
 
     await expect(floatingToolbar_formatSection).toBeVisible()
 
-    await expect(page.locator('.floating-select-toolbar-popup__button').first()).toBeVisible()
+    await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
 
-    const boldButton = floatingToolbar_formatSection
-      .locator('.floating-select-toolbar-popup__button')
-      .first()
+    const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
     await expect(boldButton).toBeVisible()
     await boldButton.click()
@@ -417,17 +437,13 @@ describe('lexical', () => {
       }
       // The following text should now be selectedelationship node 1
 
-      const floatingToolbar_formatSection = page.locator(
-        '.floating-select-toolbar-popup__section-format',
-      )
+      const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
 
       await expect(floatingToolbar_formatSection).toBeVisible()
 
-      await expect(page.locator('.floating-select-toolbar-popup__button').first()).toBeVisible()
+      await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
 
-      const boldButton = floatingToolbar_formatSection
-        .locator('.floating-select-toolbar-popup__button')
-        .first()
+      const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
       await expect(boldButton).toBeVisible()
       await boldButton.click()
@@ -497,13 +513,11 @@ describe('lexical', () => {
       }
       // The following text should now be "Node"
 
-      const floatingToolbar = page.locator('.floating-select-toolbar-popup')
+      const floatingToolbar = page.locator('.inline-toolbar-popup')
 
       await expect(floatingToolbar).toBeVisible()
 
-      const linkButton = floatingToolbar
-        .locator('.floating-select-toolbar-popup__button-link')
-        .first()
+      const linkButton = floatingToolbar.locator('.toolbar-popup__button-link').first()
 
       await expect(linkButton).toBeVisible()
       await linkButton.click()
@@ -514,7 +528,7 @@ describe('lexical', () => {
       const drawerContent = page.locator('.drawer__content').first()
       await expect(drawerContent).toBeVisible()
 
-      const urlField = drawerContent.locator('input#field-fields__url').first()
+      const urlField = drawerContent.locator('input#field-url').first()
       await expect(urlField).toBeVisible()
       // Fill with https://www.payloadcms.com
       await urlField.fill('https://www.payloadcms.com')
@@ -1101,28 +1115,61 @@ describe('lexical', () => {
       )
     })
 
-    test.skip('should respect required error state in deeply nested text field', async () => {
+    test('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
+      await wait(300)
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await wait(300)
+
       await richTextField.scrollIntoViewIfNeeded()
+      await wait(300)
+
       await expect(richTextField).toBeVisible()
+      await wait(300)
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+      await wait(300)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
-      await expect(conditionalArrayBlock).toBeVisible()
+      await wait(300)
 
-      await conditionalArrayBlock.locator('.btn__label:has-text("Add Sub Array")').first().click()
+      await expect(conditionalArrayBlock).toBeVisible()
+      await wait(300)
+
+      const addSubArrayButton = conditionalArrayBlock.locator(
+        '.btn__label:has-text("Add Sub Array")',
+      )
+      await addSubArrayButton.scrollIntoViewIfNeeded()
+      await wait(300)
+
+      await expect(addSubArrayButton).toBeVisible()
+      await wait(300)
+
+      await addSubArrayButton.first().click()
+      await wait(300)
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
+      await wait(300)
 
+      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
+      await wait(300)
+
+      const requiredTooltip = conditionalArrayBlock
+        .locator('.tooltip-content:has-text("This field is required.")')
+        .first()
+      await wait(300)
+
+      await requiredTooltip.scrollIntoViewIfNeeded()
       // Check if error is shown next to field
-      await expect(
-        conditionalArrayBlock
-          .locator('.tooltip-content:has-text("This field is required.")')
-          .first(),
-      ).toBeVisible()
+      await wait(300)
+
+      await expect(requiredTooltip).toBeInViewport() // toBeVisible() doesn't work for some reason
+    })
+  })
+
+  describe('localization', () => {
+    test.skip('ensure simple localized lexical field works', async () => {
+      await navigateToLexicalFields(true, true)
     })
   })
 })

@@ -4,12 +4,20 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
     avatar: 'default',
     components: {},
+    custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
-    inactivityRoute: '/logout-inactivity',
-    logoutRoute: '/logout',
     meta: {
       titleSuffix: '- Payload',
+    },
+    routes: {
+      account: '/account',
+      createFirstUser: '/create-first-user',
+      forgot: '/forgot',
+      inactivity: '/logout-inactivity',
+      login: '/login',
+      logout: '/logout',
+      unauthorized: '/unauthorized',
     },
   },
   bin: [],
@@ -25,8 +33,10 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   graphQL: {
     disablePlaygroundInProduction: true,
     maxComplexity: 1000,
+    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
   },
   hooks: {},
+  i18n: {},
   localization: false,
   maxDepth: 10,
   routes: {

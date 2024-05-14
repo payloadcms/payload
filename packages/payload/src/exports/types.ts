@@ -5,6 +5,8 @@ export type * from '../uploads/types.js'
 export type { DocumentPermissions, FieldPermissions } from '../auth/index.js'
 export type { MeOperationResult } from '../auth/operations/me.js'
 
+export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from '../email/types.js'
+
 export type {
   CollapsedPreferences,
   DocumentPreferences,
@@ -37,7 +39,6 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './../collections/config/types.js'
-
 export type { ClientConfig } from './../config/client.js'
 export type {
   Access,
@@ -49,6 +50,7 @@ export type {
   SanitizedConfig,
 } from './../config/types.js'
 export type { ClientFieldConfig } from './../fields/config/client.js'
+
 export type {
   ArrayField,
   Block,
@@ -70,7 +72,6 @@ export type {
   FieldWithMany,
   FieldWithMaxDepth,
   FieldWithPath,
-  FieldWithRichTextRequiredEditor,
   FieldWithSubFields,
   FilterOptions,
   FilterOptionsProps,
@@ -89,7 +90,6 @@ export type {
   RelationshipField,
   RelationshipValue,
   RichTextField,
-  RichTextFieldRequiredEditor,
   RowAdmin,
   RowField,
   SelectField,
@@ -136,5 +136,4 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types.js'
-
 export { validOperators } from './../types/constants.js'

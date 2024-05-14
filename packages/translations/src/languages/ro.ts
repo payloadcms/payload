@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const ro: Language = {
@@ -9,6 +11,7 @@ export const ro: Language = {
       alreadyActivated: 'Deja activat',
       alreadyLoggedIn: 'Deja autorizat',
       apiKey: 'Cheia API',
+      authenticated: 'Autentificat',
       backToLogin: 'Înapoi la login',
       beginCreateFirstUser: 'Pentru a începe, creați primul utilizator.',
       changePassword: 'Schimbați parola',
@@ -83,6 +86,8 @@ export const ro: Language = {
       invalidFileType: 'Tip de fișier invalid',
       invalidFileTypeValue: 'Tip de fișier invalid: {{value}}',
       loadingDocument: 'A existat o problemă la încărcarea documentului cu ID-ul de {{id}}.',
+      localesNotSaved_one: 'Următoarea localizare nu a putut fi salvată:',
+      localesNotSaved_other: 'Următoarele localizări nu au putut fi salvate:',
       missingEmail: 'Lipsește emailul.',
       missingIDOfDocument: 'Lipsește ID-ul documentului care trebuie actualizat.',
       missingIDOfVersion: 'Lipsește ID-ul versiunii.',
@@ -192,8 +197,11 @@ export const ro: Language = {
       deletedCountSuccessfully: 'Șterse cu succes {{count}} {{label}}.',
       deletedSuccessfully: 'Șters cu succes.',
       deleting: 'Deleting...',
+      depth: 'Adâncime',
       descending: 'Descendentă',
       deselectAllRows: 'Deselectează toate rândurile',
+      document: 'Document',
+      documents: 'Documente',
       duplicate: 'Duplicați',
       duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',
       edit: 'Editează',
@@ -208,6 +216,7 @@ export const ro: Language = {
       error: 'Eroare',
       errors: 'Erori',
       fallbackToDefaultLocale: 'Revenire la locația implicită',
+      false: 'Fals',
       filter: 'Filtru',
       filterWhere: 'Filtrează {{label}} unde',
       filters: 'Filtre',
@@ -264,6 +273,7 @@ export const ro: Language = {
       successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
       thisLanguage: 'Română',
       titleDeleted: '{{label}} "{{title}}" șters cu succes.',
+      true: 'Adevărat',
       unauthorized: 'neautorizat(ă)',
       unsavedChangesDuplicate: 'Aveți modificări nesalvate. Doriți să continuați să duplicați?',
       untitled: 'Fără titlu',

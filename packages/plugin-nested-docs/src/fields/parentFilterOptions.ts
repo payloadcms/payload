@@ -12,5 +12,3 @@ export const parentFilterOptions: (breadcrumbsFieldSlug?: string) => FilterOptio
 
     return null
   }
-
-export default parentFilterOptions

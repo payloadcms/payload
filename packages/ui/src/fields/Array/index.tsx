@@ -1,14 +1,8 @@
 'use client'
 import type { FieldPermissions } from 'payload/auth'
-import type { FieldBase } from 'payload/types'
 import type { ArrayField as ArrayFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import React, { useCallback } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -19,9 +13,14 @@ import { Button } from '../../elements/Button/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -37,7 +36,7 @@ export type ArrayFieldProps = FormFieldBase & {
   CustomRowLabel?: React.ReactNode
   fieldMap: FieldMap
   forceRender?: boolean
-  label?: FieldBase['label']
+  isSortable?: boolean
   labels?: ArrayFieldType['labels']
   maxRows?: ArrayFieldType['maxRows']
   minRows?: ArrayFieldType['minRows']
@@ -58,6 +57,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     errorProps,
     fieldMap,
     forceRender = false,
+    isSortable = true,
     label,
     labelProps,
     localized,
@@ -91,9 +91,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps) => {
+  const getLabels = (p: ArrayFieldProps): ArrayFieldType['labels'] => {
     if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
+    if ('label' in p && p?.label) return { plural: undefined, singular: p?.label }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -261,7 +261,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               errorPath.startsWith(`${path}.${i}.`),
             ).length
             return (
-              <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+              <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -273,6 +273,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     indexPath={indexPath}
+                    isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
                     path={path}

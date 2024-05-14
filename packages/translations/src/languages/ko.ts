@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const ko: Language = {
@@ -9,6 +11,7 @@ export const ko: Language = {
       alreadyActivated: '이미 활성화됨',
       alreadyLoggedIn: '이미 로그인됨',
       apiKey: 'API 키',
+      authenticated: '인증됨',
       backToLogin: '로그인 화면으로 돌아가기',
       beginCreateFirstUser: '시작하려면 첫 번째 사용자를 생성하세요.',
       changePassword: '비밀번호 변경',
@@ -81,6 +84,8 @@ export const ko: Language = {
       invalidFileType: '잘못된 파일 형식',
       invalidFileTypeValue: '잘못된 파일 형식: {{value}}',
       loadingDocument: 'ID가 {{id}}인 문서를 불러오는 중에 문제가 발생했습니다.',
+      localesNotSaved_one: '다음 로케일을 저장할 수 없습니다:',
+      localesNotSaved_other: '다음 로케일들을 저장할 수 없습니다:',
       missingEmail: '이메일이 누락되었습니다.',
       missingIDOfDocument: '업데이트할 문서의 ID가 누락되었습니다.',
       missingIDOfVersion: '버전의 ID가 누락되었습니다.',
@@ -189,8 +194,11 @@ export const ko: Language = {
       deletedCountSuccessfully: '{{count}}개의 {{label}}를 삭제했습니다.',
       deletedSuccessfully: '삭제되었습니다.',
       deleting: '삭제 중...',
+      depth: '깊이',
       descending: '내림차순',
       deselectAllRows: '모든 행 선택 해제',
+      document: '문서',
+      documents: '문서들',
       duplicate: '복제',
       duplicateWithoutSaving: '변경 사항 저장 없이 복제',
       edit: '수정',
@@ -205,6 +213,7 @@ export const ko: Language = {
       error: '오류',
       errors: '오류',
       fallbackToDefaultLocale: '기본 locale로 대체',
+      false: '거짓',
       filter: '필터',
       filterWhere: '{{label}} 필터링 조건',
       filters: '필터',
@@ -261,6 +270,7 @@ export const ko: Language = {
       successfullyDuplicated: '{{label}}이(가) 복제되었습니다.',
       thisLanguage: '한국어',
       titleDeleted: '{{label}} "{{title}}"을(를) 삭제했습니다.',
+      true: '참',
       unauthorized: '권한 없음',
       unsavedChangesDuplicate: '저장되지 않은 변경 사항이 있습니다. 복제를 계속하시겠습니까?',
       untitled: '제목 없음',

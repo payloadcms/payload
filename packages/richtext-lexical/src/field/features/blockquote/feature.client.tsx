@@ -1,70 +1,83 @@
 'use client'
 
-import lexicalRichTextImport from '@lexical/rich-text'
-const { $createQuoteNode, QuoteNode } = lexicalRichTextImport
+import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
+import { $setBlocksType } from '@lexical/selection'
+import { $getSelection, $isRangeSelection } from 'lexical'
 
-import lexicalSelectionImport from '@lexical/selection'
-const { $setBlocksType } = lexicalSelectionImport
-
-import lexicalImport from 'lexical'
-const { $getSelection } = lexicalImport
-
+import type { ToolbarGroup } from '../toolbars/types.js'
 import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote/index.js'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
-const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
+const toolbarGroups: ToolbarGroup[] = [
+  toolbarTextDropdownGroupWithItems([
+    {
+      ChildComponent: BlockquoteIcon,
+      isActive: ({ selection }) => {
+        if (!$isRangeSelection(selection)) {
+          return false
+        }
+        for (const node of selection.getNodes()) {
+          if (!$isQuoteNode(node) && !$isQuoteNode(node.getParent())) {
+            return false
+          }
+        }
+        return true
+      },
+      key: 'blockquote',
+      label: `Blockquote`,
+      onSelect: ({ editor }) => {
+        editor.update(() => {
+          const selection = $getSelection()
+          $setBlocksType(selection, () => $createQuoteNode())
+        })
+      },
+      order: 20,
+    },
+  ]),
+]
+
+const BlockquoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
     feature: () => ({
       clientFeatureProps: props,
-      floatingSelectToolbar: {
-        sections: [
-          TextDropdownSectionWithEntries([
-            {
-              ChildComponent: BlockquoteIcon,
-              isActive: () => false,
-              key: 'blockquote',
-              label: `Blockquote`,
-              onClick: ({ editor }) => {
-                editor.update(() => {
-                  const selection = $getSelection()
-                  $setBlocksType(selection, () => $createQuoteNode())
-                })
-              },
-              order: 20,
-            },
-          ]),
-        ],
-      },
       markdownTransformers: [MarkdownTransformer],
-
       nodes: [QuoteNode],
+
       slashMenu: {
-        options: [
+        groups: [
           {
-            displayName: 'Basic',
-            key: 'basic',
-            options: [
-              new SlashMenuOption(`blockquote`, {
+            items: [
+              {
                 Icon: BlockquoteIcon,
-                displayName: `Blockquote`,
+                key: 'blockquote',
                 keywords: ['quote', 'blockquote'],
-                onSelect: () => {
-                  const selection = $getSelection()
-                  $setBlocksType(selection, () => $createQuoteNode())
+                label: 'Blockquote',
+                onSelect: ({ editor }) => {
+                  editor.update(() => {
+                    const selection = $getSelection()
+                    $setBlocksType(selection, () => $createQuoteNode())
+                  })
                 },
-              }),
+              },
             ],
+            key: 'basic',
+            label: 'Basic',
           },
         ],
+      },
+      toolbarFixed: {
+        groups: toolbarGroups,
+      },
+      toolbarInline: {
+        groups: toolbarGroups,
       },
     }),
   }
 }
 
-export const BlockQuoteFeatureClientComponent = createClientComponent(BlockQuoteFeatureClient)
+export const BlockquoteFeatureClientComponent = createClientComponent(BlockquoteFeatureClient)

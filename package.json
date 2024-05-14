@@ -1,23 +1,19 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.10",
+  "version": "3.0.0-beta.31",
   "private": true,
   "type": "module",
-  "workspaces:": [
-    "packages/*",
-    "test/*"
-  ],
   "scripts": {
     "build": "pnpm run build:core",
-    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "build:all": "turbo build",
-    "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
-    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
+    "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
+    "build:email-nodemailer": "turbo build --filter email-nodemailer",
+    "build:email-resend": "turbo build --filter email-resend",
     "build:eslint-config-payload": "turbo build --filter eslint-config-payload",
     "build:graphql": "turbo build --filter graphql",
     "build:live-preview": "turbo build --filter live-preview",
@@ -29,46 +25,63 @@
     "build:plugin-form-builder": "turbo build --filter plugin-form-builder",
     "build:plugin-nested-docs": "turbo build --filter plugin-nested-docs",
     "build:plugin-redirects": "turbo build --filter plugin-redirects",
+    "build:plugin-relationship-object-ids": "turbo build --filter plugin-relationship-object-ids",
     "build:plugin-search": "turbo build --filter plugin-search",
     "build:plugin-sentry": "turbo build --filter plugin-sentry",
     "build:plugin-seo": "turbo build --filter plugin-seo",
     "build:plugin-stripe": "turbo build --filter plugin-stripe",
+    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
     "build:richtext-lexical": "turbo build --filter richtext-lexical",
     "build:richtext-slate": "turbo build --filter richtext-slate",
-    "build:tests": "pnpm --filter test run typecheck",
+    "build:storage-azure": "turbo build --filter storage-azure",
+    "build:storage-gcs": "turbo build --filter storage-gcs",
+    "build:storage-s3": "turbo build --filter storage-s3",
+    "build:storage-uploadthing": "turbo build --filter storage-uploadthing",
+    "build:storage-vercel-blob": "turbo build --filter storage-vercel-blob",
+    "build:tests": "pnpm --filter payload-test-suite run typecheck",
     "build:translations": "turbo build --filter translations",
     "build:ui": "turbo build --filter ui",
     "clean": "turbo clean",
-    "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
-    "clean:build": "find . \\( -type d \\( -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -not -path '*/node_modules/*' -exec rm -rf {} +",
     "clean:all": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
+    "clean:build": "find . \\( -type d \\( -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -not -path '*/node_modules/*' -exec rm -rf {} +",
+    "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./test/dev.js",
-    "devsafe": "rimraf .next && pnpm dev",
     "dev:generate-graphql-schema": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateTypes.ts",
     "dev:postgres": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_DATABASE=postgres node ./test/dev.js",
+    "devsafe": "rimraf .next && pnpm dev",
     "docker:restart": "pnpm docker:stop --remove-orphans && pnpm docker:start",
     "docker:start": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml up -d",
     "docker:stop": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml down",
     "fix": "eslint \"packages/**/*.ts\" --fix",
-    "generate:types": "PAYLOAD_CONFIG_PATH=./test/_community/config.ts node --no-deprecation ./packages/payload/bin.js generate:types",
     "lint": "eslint \"packages/**/*.ts\"",
     "lint-staged": "lint-staged",
+    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "prepare": "husky install",
-    "pretest": "pnpm build",
     "reinstall": "pnpm clean:all && pnpm install",
-    "script:pack": "tsx scripts/pack-all-to-dest.ts",
     "release:alpha": "tsx ./scripts/release.ts --bump prerelease --tag alpha",
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
+    "script:list-published": "tsx scripts/lib/getPackageRegistryVersions.ts",
+    "script:pack": "tsx scripts/pack-all-to-dest.ts",
+    "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=--no-deprecation jest --config=jest.components.config.js",
     "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 tsx ./test/runE2E.ts",
     "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
-    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:unit": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
+  },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ],
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.525.0",
@@ -77,15 +90,12 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.43.0",
+    "@sentry/react": "^7.77.0",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
     "@testing-library/jest-dom": "6.4.2",
     "@testing-library/react": "14.2.1",
     "@types/concat-stream": "^2.0.1",
-    "@types/conventional-changelog": "^3.1.4",
-    "@types/conventional-changelog-core": "^4.2.5",
-    "@types/conventional-changelog-preset-loader": "^2.3.4",
-    "@types/conventional-changelog-writer": "^4.0.10",
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
@@ -97,13 +107,9 @@
     "@types/shelljs": "0.8.15",
     "add-stream": "^1.0.0",
     "chalk": "^4.1.2",
+    "changelogen": "^0.5.5",
     "comment-json": "^4.2.3",
     "concat-stream": "^2.0.0",
-    "conventional-changelog": "^5.1.0",
-    "conventional-changelog-conventionalcommits": "^7.0.2",
-    "conventional-changelog-core": "^7.0.0",
-    "conventional-changelog-preset-loader": "^4.1.0",
-    "conventional-changelog-writer": "^7.0.1",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "dotenv": "8.6.0",
@@ -121,13 +127,12 @@
     "husky": "^8.0.3",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "json5": "^2.2.3",
     "jwt-decode": "4.0.0",
-    "lexical": "0.13.1",
+    "lexical": "0.14.5",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "^14.2.0-canary.23",
+    "next": "^14.3.0-canary.7",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",
@@ -139,8 +144,8 @@
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "read-stream": "^2.1.1",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
@@ -149,13 +154,14 @@
     "simple-git": "^3.24.0",
     "slash": "3.0.0",
     "slate": "0.91.4",
+    "sort-package-json": "^2.10.0",
     "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempfile": "^3.0.0",
     "tempy": "^1.0.1",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
-    "turbo": "^1.13.2",
-    "typescript": "5.4.4",
+    "turbo": "^1.13.3",
+    "typescript": "5.4.5",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"
   },
@@ -164,20 +170,14 @@
   },
   "engines": {
     "node": ">=18.20.2",
-    "pnpm": ">=8"
-  },
-  "lint-staged": {
-    "*.{md,mdx,yml,json}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
-    ]
-  },
-  "dependencies": {
-    "@sentry/react": "^7.77.0",
-    "passport-strategy": "1.0.0"
+    "pnpm": "^8.15.7"
   },
   "pnpm": {
+    "allowedDeprecatedVersions": {
+      "abab": "2",
+      "domexception": "4",
+      "uuid": "3.4.0"
+    },
     "overrides": {
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
@@ -189,13 +189,12 @@
       "react-dom": "$react-dom",
       "typescript": "$typescript"
     },
-    "allowedDeprecatedVersions": {
-      "uuid": "3.4.0",
-      "abab": "2",
-      "domexception": "4"
-    },
     "patchedDependencies": {
       "playwright@1.43.0": "patches/playwright@1.43.0.patch"
     }
-  }
+  },
+  "workspaces:": [
+    "packages/*",
+    "test/*"
+  ]
 }

@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const pl: Language = {
@@ -9,6 +11,7 @@ export const pl: Language = {
       alreadyActivated: 'Już aktywowano',
       alreadyLoggedIn: 'Już zalogowano',
       apiKey: 'Klucz API',
+      authenticated: 'Uwierzytelniony',
       backToLogin: 'Powrót do logowania',
       beginCreateFirstUser: 'Aby rozpocząć, utwórz pierwszego użytkownika',
       changePassword: 'Zmień hasło',
@@ -81,6 +84,8 @@ export const pl: Language = {
       invalidFileType: 'Nieprawidłowy typ pliku',
       invalidFileTypeValue: 'Nieprawidłowy typ pliku: {{value}}',
       loadingDocument: 'Wystapił problem podczas ładowania dokumentu o ID {{id}}.',
+      localesNotSaved_one: 'Następującej lokalizacji nie można było zapisać:',
+      localesNotSaved_other: 'Następujących lokalizacji nie można było zapisać:',
       missingEmail: 'Brak adresu email.',
       missingIDOfDocument: 'Brak ID dokumentu do aktualizacji.',
       missingIDOfVersion: 'Brak ID wersji',
@@ -191,8 +196,11 @@ export const pl: Language = {
       deletedCountSuccessfully: 'Pomyślnie usunięto {{count}} {{label}}.',
       deletedSuccessfully: 'Pomyślnie usunięto.',
       deleting: 'Usuwanie...',
+      depth: 'Głębokość',
       descending: 'Malejąco',
       deselectAllRows: 'Odznacz wszystkie wiersze',
+      document: 'Dokument',
+      documents: 'Dokumenty',
       duplicate: 'Zduplikuj',
       duplicateWithoutSaving: 'Zduplikuj bez zapisywania zmian',
       edit: 'Edytuj',
@@ -207,6 +215,7 @@ export const pl: Language = {
       error: 'Błąd',
       errors: 'Błędy',
       fallbackToDefaultLocale: 'Powrót do domyślnych ustawień regionalnych',
+      false: 'Fałszywe',
       filter: 'Filtr',
       filterWhere: 'Filtruj gdzie',
       filters: 'Filtry',
@@ -263,6 +272,7 @@ export const pl: Language = {
       successfullyDuplicated: 'Pomyślnie zduplikowano {{label}}',
       thisLanguage: 'Polski',
       titleDeleted: 'Pomyślnie usunięto {{label}} {{title}}',
+      true: 'Prawda',
       unauthorized: 'Brak autoryzacji',
       unsavedChangesDuplicate: 'Masz niezapisane zmiany. Czy chcesz kontynuować duplikowanie?',
       untitled: 'Bez nazwy',

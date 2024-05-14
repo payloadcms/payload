@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const tr: Language = {
@@ -9,6 +10,7 @@ export const tr: Language = {
       alreadyActivated: 'Hesap zaten etkinleştirildi',
       alreadyLoggedIn: 'Hesaba zaten giriş yapıldı',
       apiKey: 'API Anahtarı',
+      authenticated: 'Doğrulandı',
       backToLogin: 'Giriş ekranına geri dön',
       beginCreateFirstUser: 'Başlamak için ilk kullanıcı hesabını oluşturun.',
       changePassword: 'Parolayı Değiştir',
@@ -82,6 +84,8 @@ export const tr: Language = {
       invalidFileType: 'Geçersiz dosya türü',
       invalidFileTypeValue: 'Geçersiz dosya türü: {{value}}',
       loadingDocument: "{{id}} ID'ye sahip döküman yüklenirken bir sorun oluştu.",
+      localesNotSaved_one: 'Aşağıdaki yerel ayar kaydedilemedi:',
+      localesNotSaved_other: 'Aşağıdaki yerel ayarlar kaydedilemedi:',
       missingEmail: 'E-posta adresi girilmedi.',
       missingIDOfDocument: "Güncellenecek döküman ID'si eksik.",
       missingIDOfVersion: "Versiyon ID'si geçersiz.",
@@ -192,8 +196,11 @@ export const tr: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} başarıyla silindi.',
       deletedSuccessfully: 'Başarıyla silindi.',
       deleting: 'Siliniyor...',
+      depth: 'Derinlik',
       descending: 'Azalan',
       deselectAllRows: 'Tüm satırların seçimini kaldır',
+      document: 'Belge',
+      documents: 'Belgeler',
       duplicate: 'Çoğalt',
       duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
       edit: 'Düzenle',
@@ -208,6 +215,7 @@ export const tr: Language = {
       error: 'Hata',
       errors: 'Hatalar',
       fallbackToDefaultLocale: 'Varsayılan yerel ayara geri dönme',
+      false: 'Yanlış',
       filter: 'Filtrele',
       filterWhere: '{{label}} filtrele:',
       filters: 'Filtreler',
@@ -264,6 +272,7 @@ export const tr: Language = {
       successfullyDuplicated: '{{label}} başarıyla kopyalandı.',
       thisLanguage: 'Türkçe',
       titleDeleted: '{{label}} {{title}} başarıyla silindi.',
+      true: 'Doğru',
       unauthorized: 'Yetkisiz',
       unsavedChangesDuplicate:
         'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',

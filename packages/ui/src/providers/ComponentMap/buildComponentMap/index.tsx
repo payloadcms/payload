@@ -1,36 +1,48 @@
-import type { I18n } from '@payloadcms/translations'
+import type { ServerProps } from 'payload/config'
 import type {
   AdminViewProps,
   EditViewProps,
   Payload,
-  SanitizedConfig,
-  WithServerSideProps as WithServerSidePropsType,
+  WithServerSidePropsComponentProps,
 } from 'payload/types'
 
 import React from 'react'
 
 import type { ComponentMap } from './types.js'
 
-import { WithServerSideProps as WithServerSidePropsGeneric } from './WithServerSideProps.js'
+import { WithServerSideProps as WithServerSidePropsGeneric } from '../../../elements/WithServerSideProps/index.js'
 import { mapCollections } from './collections.js'
 import { mapGlobals } from './globals.js'
+
+export type WithServerSidePropsPrePopulated = React.FC<
+  Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>
+>
 
 export const buildComponentMap = (args: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   children: React.ReactNode
-  config: SanitizedConfig
-  i18n: I18n
+  i18n: ServerProps['i18n']
   payload: Payload
   readOnly?: boolean
 }): {
   componentMap: ComponentMap
   wrappedChildren: React.ReactNode
 } => {
-  const { DefaultEditView, DefaultListView, children, config, i18n, payload, readOnly } = args
+  const { DefaultEditView, DefaultListView, children, i18n, payload, readOnly } = args
+  const config = payload.config
 
-  const WithServerSideProps: WithServerSidePropsType = ({ Component, ...rest }) => {
-    return <WithServerSidePropsGeneric Component={Component} payload={payload} {...rest} />
+  const WithServerSideProps: WithServerSidePropsPrePopulated = ({ Component, ...rest }) => {
+    return (
+      <WithServerSidePropsGeneric
+        Component={Component}
+        serverOnlyProps={{
+          i18n,
+          payload,
+        }}
+        {...rest}
+      />
+    )
   }
 
   const collections = mapCollections({
@@ -44,12 +56,14 @@ export const buildComponentMap = (args: {
   })
 
   const globals = mapGlobals({
-    DefaultEditView,
-    WithServerSideProps,
-    config,
-    globals: config.globals,
-    i18n,
-    readOnly,
+    args: {
+      DefaultEditView,
+      WithServerSideProps,
+      config,
+      globals: config.globals,
+      i18n,
+      readOnly,
+    },
   })
 
   const NestProviders = ({ children, providers }) => {

@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const hu: Language = {
@@ -9,6 +11,7 @@ export const hu: Language = {
       alreadyActivated: 'Már aktiválva van',
       alreadyLoggedIn: 'Már bejelentkezett',
       apiKey: 'API-kulcs',
+      authenticated: 'Hitelesített',
       backToLogin: 'Vissza a bejelentkezéshez',
       beginCreateFirstUser: 'Kezdésként hozza létre az első felhasználót.',
       changePassword: 'Jelszó módosítása',
@@ -83,6 +86,8 @@ export const hu: Language = {
       invalidFileType: 'Érvénytelen fájltípus',
       invalidFileTypeValue: 'Érvénytelen fájltípus: {{value}}',
       loadingDocument: 'Hiba történt a {{id}} azonosítójú dokumentum betöltésekor.',
+      localesNotSaved_one: 'Az alábbi helyi beállítást nem sikerült menteni:',
+      localesNotSaved_other: 'Az alábbi helyi beállításokat nem sikerült menteni:',
       missingEmail: 'Hiányzó e-mail.',
       missingIDOfDocument: 'Hiányzik a frissítendő dokumentum azonosítója.',
       missingIDOfVersion: 'A verzió azonosítója hiányzik.',
@@ -191,8 +196,11 @@ export const hu: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} sikeresen törölve.',
       deletedSuccessfully: 'Sikeresen törölve.',
       deleting: 'Törlés...',
+      depth: 'Mélység',
       descending: 'Csökkenő',
       deselectAllRows: 'Jelölje ki az összes sort',
+      document: 'Dokumentum',
+      documents: 'Dokumentumok',
       duplicate: 'Duplikálás',
       duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',
       edit: 'Szerkesztés',
@@ -207,6 +215,7 @@ export const hu: Language = {
       error: 'Hiba',
       errors: 'Hibák',
       fallbackToDefaultLocale: 'Visszatérés az alapértelmezett nyelvhez',
+      false: 'Hamis',
       filter: 'Szűrő',
       filterWhere: 'Szűrő {{label}} ahol',
       filters: 'Szűrők',
@@ -263,6 +272,7 @@ export const hu: Language = {
       successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
       thisLanguage: 'Magyar',
       titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
+      true: 'Igaz',
       unauthorized: 'Jogosulatlan',
       unsavedChangesDuplicate: 'Nem mentett módosításai vannak. Szeretné folytatni a duplikációt?',
       untitled: 'Névtelen',

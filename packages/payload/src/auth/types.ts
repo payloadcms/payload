@@ -1,7 +1,7 @@
 import type { DeepRequired } from 'ts-essentials'
 
 import type { Payload } from '../index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { PayloadRequestWithData, Where } from '../types/index.js'
 
 export type Permission = {
   permission: boolean
@@ -65,7 +65,7 @@ export type User = {
   [key: string]: any // This NEEDS to be an any, otherwise it breaks the Omit for ClientUser below
   collection: string
   email: string
-  id: string
+  id: number | string
 }
 
 /**
@@ -75,23 +75,23 @@ export type User = {
 export type ClientUser = Omit<User, 'collection'>
 
 type GenerateVerifyEmailHTML = (args: {
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: string
   user: any
 }) => Promise<string> | string
 type GenerateVerifyEmailSubject = (args: {
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: string
   user: any
 }) => Promise<string> | string
 
 type GenerateForgotPasswordEmailHTML = (args?: {
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   token?: string
   user?: unknown
 }) => Promise<string> | string
 type GenerateForgotPasswordEmailSubject = (args?: {
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   token?: string
   user?: any
 }) => Promise<string> | string

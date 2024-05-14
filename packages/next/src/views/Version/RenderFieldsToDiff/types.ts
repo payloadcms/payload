@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { FieldMap, MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { FieldPermissions } from 'payload/auth'
 import type { DiffMethod } from 'react-diff-viewer-continued'
@@ -10,7 +10,7 @@ export type Props = {
   diffComponents: DiffComponents
   fieldMap: FieldMap
   fieldPermissions: Record<string, FieldPermissions>
-  i18n: I18n
+  i18n: I18nClient
   locales: string[]
   version: Record<string, any>
 }

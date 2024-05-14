@@ -2,7 +2,7 @@
 import type { RichTextAdapter } from '../../../admin/types.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -16,8 +16,12 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
+  /**
+   * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
+   */
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
@@ -25,7 +29,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
   triggerAccessControl?: boolean
@@ -46,6 +50,7 @@ export const promise = async ({
   currentDepth,
   depth,
   doc,
+  draft,
   fallbackLocale,
   field,
   fieldPromises,
@@ -138,14 +143,23 @@ export const promise = async ({
     }
 
     case 'richText': {
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
-      if (editor?.populationPromise) {
-        const populationPromise = editor.populationPromise({
+      if (editor?.populationPromises) {
+        const populateDepth =
+          field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
+        editor.populationPromises({
           context,
           currentDepth,
-          depth,
+          depth: populateDepth,
+          draft,
           field,
+          fieldPromises,
           findMany,
           flattenLocales,
           overrideAccess,
@@ -154,23 +168,6 @@ export const promise = async ({
           showHiddenFields,
           siblingDoc,
         })
-
-        if (populationPromise) {
-          populationPromises.push(populationPromise)
-        }
-      }
-
-      // This is only run here, independent of depth
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor?.afterReadPromise({
-          field,
-          incomingEditorState: siblingDoc[field.name] as object,
-          siblingDoc,
-        })
-
-        if (afterReadPromise) {
-          populationPromises.push(afterReadPromise)
-        }
       }
 
       break
@@ -236,6 +233,7 @@ export const promise = async ({
             global,
             operation: 'read',
             originalDoc: doc,
+            overrideAccess,
             req,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
@@ -287,6 +285,7 @@ export const promise = async ({
         relationshipPopulationPromise({
           currentDepth,
           depth,
+          draft,
           fallbackLocale,
           field,
           locale,
@@ -310,6 +309,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.fields,
@@ -340,6 +340,7 @@ export const promise = async ({
             currentDepth,
             depth,
             doc,
+            draft,
             fallbackLocale,
             fieldPromises,
             fields: field.fields,
@@ -366,6 +367,7 @@ export const promise = async ({
                 currentDepth,
                 depth,
                 doc,
+                draft,
                 fallbackLocale,
                 fieldPromises,
                 fields: field.fields,
@@ -404,6 +406,7 @@ export const promise = async ({
               currentDepth,
               depth,
               doc,
+              draft,
               fallbackLocale,
               fieldPromises,
               fields: block.fields,
@@ -434,6 +437,7 @@ export const promise = async ({
                   currentDepth,
                   depth,
                   doc,
+                  draft,
                   fallbackLocale,
                   fieldPromises,
                   fields: block.fields,
@@ -468,6 +472,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.fields,
@@ -500,6 +505,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.fields,
@@ -526,6 +532,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),

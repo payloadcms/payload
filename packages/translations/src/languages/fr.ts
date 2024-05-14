@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const fr: Language = {
@@ -9,6 +11,7 @@ export const fr: Language = {
       alreadyActivated: 'Déjà activé',
       alreadyLoggedIn: 'Déjà connecté',
       apiKey: 'Clé API',
+      authenticated: 'Authentifié',
       backToLogin: 'Retour à la connexion',
       beginCreateFirstUser: 'Pour commencer, créez votre premier utilisateur.',
       changePassword: 'Changer le mot de passe',
@@ -84,6 +87,8 @@ export const fr: Language = {
       invalidFileTypeValue: 'Type de fichier invalide : {{value}}',
       loadingDocument:
         'Un problème est survenu lors du chargement du document qui a pour identifiant {{id}}.',
+      localesNotSaved_one: "Le paramètre régional suivant n'a pas pu être enregistré :",
+      localesNotSaved_other: "Les paramètres régionaux suivants n'ont pas pu être enregistrés :",
       missingEmail: 'E-mail manquant.',
       missingIDOfDocument: "Il manque l'identifiant du document à mettre à jour.",
       missingIDOfVersion: "Il manque l'identifiant de la version.",
@@ -195,8 +200,11 @@ export const fr: Language = {
       deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
       deletedSuccessfully: 'Supprimé(e) avec succès.',
       deleting: 'Suppression en cours...',
+      depth: 'Profondeur',
       descending: 'Descendant(e)',
       deselectAllRows: 'Désélectionner toutes les lignes',
+      document: 'Document',
+      documents: 'Documents',
       duplicate: 'Dupliquer',
       duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
       edit: 'Éditer',
@@ -211,6 +219,7 @@ export const fr: Language = {
       error: 'Erreur',
       errors: 'Erreurs',
       fallbackToDefaultLocale: 'Retour à la locale par défaut',
+      false: 'Faux',
       filter: 'Filtrer',
       filterWhere: 'Filtrer {{label}} où',
       filters: 'Filtres',
@@ -267,6 +276,7 @@ export const fr: Language = {
       successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
       thisLanguage: 'Français',
       titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
+      true: 'Vrai',
       unauthorized: 'Non autorisé',
       unsavedChangesDuplicate:
         'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',

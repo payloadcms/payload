@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const sv: Language = {
@@ -9,6 +10,7 @@ export const sv: Language = {
       alreadyActivated: 'Redan aktiverad',
       alreadyLoggedIn: 'Redan inloggad',
       apiKey: 'API Nyckel',
+      authenticated: 'Autentiserad',
       backToLogin: 'Tillbaka till inloggningen',
       beginCreateFirstUser: 'För att börja, skapa din första användare.',
       changePassword: 'Byt Lösenord',
@@ -82,6 +84,8 @@ export const sv: Language = {
       invalidFileType: 'Ogiltig filtyp',
       invalidFileTypeValue: 'Ogiltig filtyp: {{value}}',
       loadingDocument: 'Det gick inte att läsa in dokumentet med ID {{id}}.',
+      localesNotSaved_one: 'Följande lokal kunde inte sparas:',
+      localesNotSaved_other: 'Följande lokaler kunde inte sparas:',
       missingEmail: 'E-postadress saknas.',
       missingIDOfDocument: 'Saknar ID för dokumentet som ska uppdateras.',
       missingIDOfVersion: 'ID för versionen saknas.',
@@ -190,8 +194,11 @@ export const sv: Language = {
       deletedCountSuccessfully: 'Raderade {{count}} {{label}} framgångsrikt.',
       deletedSuccessfully: 'Togs bort framgångsrikt.',
       deleting: 'Tar bort...',
+      depth: 'Djup',
       descending: 'Fallande',
       deselectAllRows: 'Avmarkera alla rader',
+      document: 'Dokument',
+      documents: 'Dokument',
       duplicate: 'Duplicera',
       duplicateWithoutSaving: 'Duplicera utan att spara ändringar',
       edit: 'Redigera',
@@ -206,6 +213,7 @@ export const sv: Language = {
       error: 'Fel',
       errors: 'Fel',
       fallbackToDefaultLocale: 'Återgång till standardlokalspråk',
+      false: 'Falskt',
       filter: 'Filter',
       filterWhere: 'Filtrera {{label}} där',
       filters: 'Filter',
@@ -262,6 +270,7 @@ export const sv: Language = {
       successfullyDuplicated: '{{label}} duplicerades framgångsrikt.',
       thisLanguage: 'Svenska',
       titleDeleted: '{{label}} "{{title}}" togs bort framgångsrikt.',
+      true: 'Sann',
       unauthorized: 'Obehörig',
       unsavedChangesDuplicate: 'Du har osparade ändringar. Vill du fortsätta att duplicera?',
       untitled: 'Namnlös',

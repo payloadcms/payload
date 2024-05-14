@@ -25,21 +25,21 @@ import './index.scss'
 const baseClass = 'blocks-field'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { BlockField, FieldBase } from 'payload/types'
-
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { withCondition } from '@payloadcms/ui/forms/withCondition'
+import type { BlockField } from 'payload/types'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
+
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
   forceRender?: boolean
-  label?: FieldBase['label']
+  isSortable?: boolean
   labels?: BlockField['labels']
   maxRows?: number
   minRows?: number
@@ -62,6 +62,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     forceRender = false,
+    isSortable = true,
     label,
     labelProps,
     labels: labelsFromProps,
@@ -277,7 +278,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                 errorPath.startsWith(`${path}.${i}`),
               ).length
               return (
-                <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
@@ -289,6 +290,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
+                      isSortable={isSortable}
                       labels={labels}
                       moveRow={moveRow}
                       path={path}

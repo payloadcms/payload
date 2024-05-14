@@ -1,5 +1,7 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { getFileByPath } from 'payload/uploads'
 import { mapAsync } from 'payload/utilities'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -114,6 +116,20 @@ describe('collections-graphql', () => {
       const { docs } = data.Posts
 
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
+    })
+
+    it('should count', async () => {
+      const query = `query {
+        countPosts {
+          totalDocs
+        }
+      }`
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { totalDocs } = data.countPosts
+
+      expect(typeof totalDocs).toBe('number')
     })
 
     it('should read using multiple queries', async () => {
@@ -848,6 +864,21 @@ describe('collections-graphql', () => {
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
       })
 
+      it('should query on relationships with custom IDs - count', async () => {
+        const query = `query {
+          countPosts(where: { title: { equals: "has custom ID relation" }}) {
+            totalDocs
+          }
+        }`
+
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { totalDocs } = data.countPosts
+
+        expect(totalDocs).toStrictEqual(1)
+      })
+
       it('should query a document with a deleted relationship', async () => {
         const relation = await payload.create({
           collection: relationSlug,
@@ -931,7 +962,155 @@ describe('collections-graphql', () => {
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
       })
+
+      it('should query relationships with locale', async () => {
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            title: {
+              en: 'English title',
+              es: 'Spanish title',
+            },
+          },
+          locale: '*',
+        })
+
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          data: {
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `query {
+          CyclicalRelationships(locale: es) {
+            docs {
+              title
+              relationToSelf {
+                title
+              }
+            }
+          }
+        }`
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
     })
+  })
+
+  it('should query correctly with draft argument', async () => {
+    const publishValue = '1'
+    const draftValue = '2'
+
+    // publish doc
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      draft: false,
+      data: {
+        title: publishValue,
+      },
+    })
+
+    // create cyclical relationship
+    await payload.update({
+      collection: 'cyclical-relationship',
+      id: newDoc.id,
+      data: {
+        relationToSelf: newDoc.id,
+      },
+    })
+
+    // save new version
+    await payload.update({
+      collection: 'cyclical-relationship',
+      id: newDoc.id,
+      draft: true,
+      data: {
+        title: draftValue,
+      },
+    })
+
+    const draftParentPublishedChild = `{
+      CyclicalRelationships(draft: true) {
+        docs {
+          title
+          relationToSelf(draft: false) {
+            title
+          }
+        }
+      }
+    }`
+    const res1 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query: draftParentPublishedChild }),
+      })
+      .then((res) => res.json())
+
+    const queriedDoc = res1.data.CyclicalRelationships.docs[0]
+    expect(queriedDoc.title).toEqual(draftValue)
+    expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
+
+    const publishedParentDraftChild = `{
+      CyclicalRelationships(draft: false) {
+        docs {
+          title
+          relationToSelf(draft: true) {
+            title
+          }
+        }
+      }
+    }`
+    const res2 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query: publishedParentDraftChild }),
+      })
+      .then((res) => res.json())
+
+    const queriedDoc2 = res2.data.CyclicalRelationships.docs[0]
+    expect(queriedDoc2.title).toEqual(publishValue)
+    expect(queriedDoc2.relationToSelf.title).toEqual(draftValue)
+  })
+
+  it('should query upload enabled docs', async () => {
+    const file = await getFileByPath(path.resolve(__dirname, '../uploads/test-image.jpg'))
+
+    const mediaDoc = await payload.create({
+      collection: 'media',
+      file,
+      data: {
+        title: 'example',
+      },
+    })
+
+    // doc with upload relation
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      data: {
+        media: mediaDoc.id,
+      },
+    })
+
+    const query = `{
+      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+        media {
+          id
+          title
+        }
+      }
+    }`
+    const res = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query }),
+      })
+      .then((res) => res.json())
+    const queriedDoc = res.data.CyclicalRelationship
+    expect(queriedDoc.media.id).toEqual(mediaDoc.id)
+    expect(queriedDoc.media.title).toEqual('example')
   })
 
   describe('Error Handler', () => {

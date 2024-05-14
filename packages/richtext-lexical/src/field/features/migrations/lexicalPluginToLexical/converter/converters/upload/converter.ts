@@ -16,10 +16,8 @@ export const _UploadConverter: LexicalPluginNodeConverter = {
       fields,
       format: (lexicalPluginNode as any)?.format || '',
       relationTo: (lexicalPluginNode as any)?.rawImagePayload?.relationTo,
-      value: {
-        id: (lexicalPluginNode as any)?.rawImagePayload?.value?.id || '',
-      },
-      version: 1,
+      value: (lexicalPluginNode as any)?.rawImagePayload?.value?.id || '',
+      version: 2,
     } as const as SerializedUploadNode
   },
   nodeTypes: ['upload'],

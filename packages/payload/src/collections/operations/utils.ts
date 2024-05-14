@@ -1,8 +1,9 @@
 import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword.js'
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types.js'
+import type { countOperation } from './count.js'
 import type { createOperation } from './create.js'
 import type { deleteOperation } from './delete.js'
 import type { deleteByIDOperation } from './deleteByID.js'
@@ -12,6 +13,7 @@ import type { updateOperation } from './update.js'
 import type { updateByIDOperation } from './updateByID.js'
 
 export type AfterOperationMap<T extends TypeWithID> = {
+  count: typeof countOperation
   create: typeof createOperation // todo: pass correct generic
   delete: typeof deleteOperation // todo: pass correct generic
   deleteByID: typeof deleteByIDOperation // todo: pass correct generic
@@ -26,8 +28,13 @@ export type AfterOperationMap<T extends TypeWithID> = {
 export type AfterOperationArg<T extends TypeWithID> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
-  req: PayloadRequest
+  req: PayloadRequestWithData
 } & (
+  | {
+      args: Parameters<AfterOperationMap<T>['count']>[0]
+      operation: 'count'
+      result: Awaited<ReturnType<AfterOperationMap<T>['count']>>
+    }
   | {
       args: Parameters<AfterOperationMap<T>['create']>[0]
       operation: 'create'

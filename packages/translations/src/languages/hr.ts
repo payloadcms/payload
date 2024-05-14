@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const hr: Language = {
@@ -9,6 +11,7 @@ export const hr: Language = {
       alreadyActivated: 'Već aktivirano',
       alreadyLoggedIn: 'Već prijavljen',
       apiKey: 'API ključ',
+      authenticated: 'Autenticiran',
       backToLogin: 'Nazad na prijavu',
       beginCreateFirstUser: 'Za početak, kreiraj svog prvog korisnika.',
       changePassword: 'Promjeni lozinku',
@@ -82,6 +85,8 @@ export const hr: Language = {
       invalidFileType: 'Nevaljan tip datoteke',
       invalidFileTypeValue: 'Nevaljan tip datoteke: {{value}}',
       loadingDocument: 'Pojavio se problem pri učitavanju dokumenta čiji je ID {{id}}.',
+      localesNotSaved_one: 'Sljedeću lokalnu postavku nije bilo moguće spremiti:',
+      localesNotSaved_other: 'Sljedeće lokalne postavke nije bilo moguće spremiti:',
       missingEmail: 'Nedostaje email.',
       missingIDOfDocument: 'Nedostaje ID dokumenta da bi se ažurirao.',
       missingIDOfVersion: 'Nedostaje ID verzije.',
@@ -189,8 +194,11 @@ export const hr: Language = {
       deletedCountSuccessfully: 'Uspješno izbrisano {{count}} {{label}}.',
       deletedSuccessfully: 'Uspješno obrisano.',
       deleting: 'Brisanje...',
+      depth: 'Dubina',
       descending: 'Silazno',
       deselectAllRows: 'Odznači sve redove',
+      document: 'Dokument',
+      documents: 'Dokumenti',
       duplicate: 'Duplikat',
       duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',
       edit: 'Uredi',
@@ -205,6 +213,7 @@ export const hr: Language = {
       error: 'Greška',
       errors: 'Greške',
       fallbackToDefaultLocale: 'Vraćanje na zadani jezik',
+      false: 'Netočno',
       filter: 'Filter',
       filterWhere: 'Filter {{label}} gdje',
       filters: 'Filteri',
@@ -261,6 +270,7 @@ export const hr: Language = {
       successfullyDuplicated: '{{label}} uspješno duplicirano.',
       thisLanguage: 'Hrvatski',
       titleDeleted: '{{label}} "{{title}}" uspješno obrisano.',
+      true: 'Istinito',
       unauthorized: 'Neovlašteno',
       unsavedChangesDuplicate: 'Imate nespremljene promjene. Želite li nastaviti s dupliciranjem?',
       untitled: 'Bez naslova',

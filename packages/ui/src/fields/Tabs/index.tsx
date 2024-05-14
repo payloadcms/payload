@@ -3,7 +3,6 @@ import type { FieldPermissions } from 'payload/auth'
 import type { DocumentPreferences } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -11,6 +10,7 @@ import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/t
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

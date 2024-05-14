@@ -1,7 +1,6 @@
-import lexicalSelectionImport from '@lexical/selection'
-const { $isAtNodeEnd } = lexicalSelectionImport
-
 import type { ElementNode, RangeSelection, TextNode } from 'lexical'
+
+import { $isAtNodeEnd } from '@lexical/selection'
 
 export function getSelectedNode(selection: RangeSelection): ElementNode | TextNode {
   const { anchor } = selection

@@ -1,3 +1,7 @@
+/**
+ * Disallows imports from .jsx extensions. Auto-fixes to .js.
+ */
+
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
   meta: {

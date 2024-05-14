@@ -56,7 +56,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
     setSubmitted(true)
     await requests
       .patch(
-        `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}`,
+        `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}&draft=true`,
         {
           body: JSON.stringify({
             _status: 'published',

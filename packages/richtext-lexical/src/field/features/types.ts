@@ -1,19 +1,25 @@
 import type { Transformer } from '@lexical/markdown'
-import type { I18n } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field, PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
+import type {
+  Field,
+  PayloadRequestWithData,
+  ReplaceAny,
+  RichTextField,
+  ValidateOptions,
+} from 'payload/types'
 import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
-import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
+import type { ToolbarGroup } from './toolbars/types.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -21,6 +27,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   depth,
   editorPopulationPromises,
   field,
+  fieldPromises,
   findMany,
   flattenLocales,
   node,
@@ -33,20 +40,25 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context: RequestContext
   currentDepth: number
   depth: number
+  draft: boolean
   /**
    * This maps all population promises to the node type
    */
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
   field: RichTextField<SerializedEditorState, AdapterProps>
+  /**
+   * fieldPromises are used for things like field hooks. They will be awaited before awaiting populationPromises
+   */
+  fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
   node: T
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
-}) => Promise<void>[]
+}) => void
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   node,
@@ -73,21 +85,28 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
   /** Keys of soft-dependencies needed for this feature. The FeatureProviders dependencies are optional, but are considered as last-priority in the loading process */
   dependenciesSoft?: string[]
 
+  /**
+   * This is being called during the payload sanitization process
+   */
   feature: (props: {
+    config: SanitizedConfig
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ServerFeatureProviderMap
+    isRoot?: boolean
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedServerFeatureMap
     // unSanitized EditorConfig,
     unSanitizedEditorConfig: ServerEditorConfig
-  }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>
+  }) =>
+    | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
+    | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerFeatureProps
 }
 
 export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props?: ClientComponentProps<ClientFeatureProps>,
+  props: ClientComponentProps<ClientFeatureProps>,
 ) => FeatureProviderClient<ClientFeatureProps>
 
 /**
@@ -109,15 +128,19 @@ export type FeatureProviderClient<ClientFeatureProps> = {
   }) => ClientFeature<ClientFeatureProps>
 }
 
+export type PluginComponent<ClientFeatureProps = any> = React.FC<{
+  clientProps: ClientFeatureProps
+}>
+export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
+  anchorElem: HTMLElement
+  clientProps: ClientFeatureProps
+}>
+
 export type ClientFeature<ClientFeatureProps> = {
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
   clientFeatureProps: ClientComponentProps<ClientFeatureProps>
-
-  floatingSelectToolbar?: {
-    sections: FloatingToolbarSection[]
-  }
   hooks?: {
     load?: ({
       incomingEditorState,
@@ -132,43 +155,115 @@ export type ClientFeature<ClientFeatureProps> = {
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+  /**
+   * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   */
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'bottom' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'normal' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: PluginComponent<ClientFeatureProps>
         position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
+        Component: PluginComponentWithAnchor<ClientFeatureProps>
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
   >
   slashMenu?: {
-    dynamicOptions?: ({
+    /**
+     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
+     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
+     *
+     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
+     */
+    dynamicGroups?: ({
       editor,
       queryString,
     }: {
       editor: LexicalEditor
       queryString: string
     }) => SlashMenuGroup[]
-    options?: SlashMenuGroup[]
+    /**
+     * Static array of groups together with the items in them. These will always be present.
+     * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
+     */
+    groups?: SlashMenuGroup[]
+  }
+  /**
+   * An opt-in, classic fixed toolbar which stays at the top of the editor
+   */
+  toolbarFixed?: {
+    groups: ToolbarGroup[]
+  }
+  /**
+   * The default, floating toolbar which appears when you select text.
+   */
+  toolbarInline?: {
+    /**
+     * Array of toolbar groups / sections. Each section can contain multiple toolbar items.
+     */
+    groups: ToolbarGroup[]
   }
 }
 
-export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
-  featureKey: string
-  order: number
+export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extends undefined
+  ? {
+      featureKey: string
+      order: number
+    }
+  : {
+      featureKey: string
+      order: number
+    } & ClientFeatureProps
+
+export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
+  context: RequestContext
+  /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
+  findMany?: boolean
+  /** The value of the field. */
+  node?: T
+  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
+  operation?: 'create' | 'delete' | 'read' | 'update'
+  overrideAccess?: boolean
+  /** The Express request object. It is mocked for Local API operations. */
+  req: PayloadRequestWithData
+}
+
+export type FieldNodeHook<T extends SerializedLexicalNode> = (
+  args: FieldNodeHookArgs<T>,
+) => Promise<T> | T
+
+// Define the node with hooks that use the node's exportJSON return type
+export type NodeWithHooks<T extends LexicalNode = any> = {
+  converters?: {
+    html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+  }
+  hooks?: {
+    afterChange?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    afterRead?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    beforeChange?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    /**
+     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
+     */
+    beforeDuplicate?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    beforeValidate?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+  }
+  node: Klass<T> | LexicalNodeReplacement
+  populationPromises?: Array<
+    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+  >
+  validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
@@ -179,7 +274,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   clientFeatureProps?: ClientFeatureProps
   generateComponentMap?: (args: {
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     props: ServerProps
     schemaPath: string
   }) => {
@@ -187,7 +282,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     props: ServerProps
     schemaMap: Map<string, Field[]>
     schemaPath: string
@@ -215,26 +310,8 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
-  hooks?: {
-    afterReadPromise?: ({
-      field,
-      incomingEditorState,
-      siblingDoc,
-    }: {
-      field: RichTextField<SerializedEditorState, AdapterProps>
-      incomingEditorState: SerializedEditorState
-      siblingDoc: Record<string, unknown>
-    }) => Promise<void> | null
-  }
   markdownTransformers?: Transformer[]
-  nodes?: Array<{
-    converters?: {
-      html?: HTMLConverter
-    }
-    node: Klass<LexicalNode> | LexicalNodeReplacement
-    populationPromises?: Array<PopulationPromise>
-    validations?: Array<NodeValidation>
-  }>
+  nodes?: Array<NodeWithHooks>
 
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerProps
@@ -264,28 +341,35 @@ export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown>>
 export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown>>
 
+/**
+ * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+ */
 export type SanitizedPlugin =
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC
+      Component: PluginComponent
+      clientProps: any
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: React.FC<{ anchorElem: HTMLElement }>
+      Component: PluginComponentWithAnchor
+      clientProps: any
       desktopOnly?: boolean
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.
@@ -325,33 +409,31 @@ export type SanitizedServerFeatures = Required<
       }) => JSONSchema4
     >
   }
-  hooks: {
-    afterReadPromises: Array<
-      ({
-        field,
-        incomingEditorState,
-        siblingDoc,
-      }: {
-        field: RichTextField<SerializedEditorState, AdapterProps>
-        incomingEditorState: SerializedEditorState
-        siblingDoc: Record<string, unknown>
-      }) => Promise<void> | null
-    >
-  }
-  /**  The node types mapped to their populationPromises */
+  /**  The node types mapped to their hooks */
+
+  hooks?: {
+    afterChange?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    afterRead?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    beforeChange?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    /**
+     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
+     */
+    beforeDuplicate?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    beforeValidate?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+  } /**  The node types mapped to their populationPromises */
   populationPromises: Map<string, Array<PopulationPromise>>
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
 }
 
 export type SanitizedClientFeatures = Required<
-  Pick<ResolvedClientFeature<unknown>, 'markdownTransformers' | 'nodes'>
+  Pick<
+    ResolvedClientFeature<unknown>,
+    'markdownTransformers' | 'nodes' | 'toolbarFixed' | 'toolbarInline'
+  >
 > & {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  floatingSelectToolbar: {
-    sections: FloatingToolbarSection[]
-  }
   hooks: {
     load: Array<
       ({
@@ -368,11 +450,24 @@ export type SanitizedClientFeatures = Required<
       }) => SerializedEditorState
     >
   }
+  /**
+   * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
+   */
   plugins?: Array<SanitizedPlugin>
   slashMenu: {
-    dynamicOptions: Array<
+    /**
+     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
+     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
+     *
+     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
+     */
+    dynamicGroups: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
     >
-    groupsWithOptions: SlashMenuGroup[]
+    /**
+     * Static array of groups together with the items in them. These will always be present.
+     * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
+     */
+    groups: SlashMenuGroup[]
   }
 }

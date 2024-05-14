@@ -44,6 +44,5 @@ export const LogoutClient: React.FC<{
     )
   }
 
-  // TODO(i18n): needs translation in all languages
-  return <Fragment>Logging Out...</Fragment>
+  return <Fragment>{t('authentication:loggingOut')}</Fragment>
 }

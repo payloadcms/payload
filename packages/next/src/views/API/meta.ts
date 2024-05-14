@@ -1,4 +1,4 @@
-import { getTranslation } from 'packages/translations/src/utilities/getTranslation.js'
+import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
@@ -22,11 +22,13 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     leader = entityLabel
   }
 
-  return meta({
-    config,
-    description: 'API',
-    keywords: 'API',
-    leader,
-    title: 'API',
-  })
+  return Promise.resolve(
+    meta({
+      config,
+      description: 'API',
+      keywords: 'API',
+      leader,
+      title: 'API',
+    }),
+  )
 }

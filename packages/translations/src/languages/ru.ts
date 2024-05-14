@@ -1,3 +1,5 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
+
 import type { Language } from '../types.js'
 
 export const ru: Language = {
@@ -9,6 +11,7 @@ export const ru: Language = {
       alreadyActivated: 'Уже активирован',
       alreadyLoggedIn: 'Уже вошли в систему',
       apiKey: 'API ключ',
+      authenticated: 'Аутентифицирован',
       backToLogin: 'Вернуться к входу',
       beginCreateFirstUser: 'Чтобы начать - создайте первого пользователя.',
       changePassword: 'Сменить пароль',
@@ -82,6 +85,8 @@ export const ru: Language = {
       invalidFileType: 'Недопустимый тип файла',
       invalidFileTypeValue: 'Недопустимый тип файла: {{value}}',
       loadingDocument: 'Возникла проблема при загрузке документа с ID {{id}}.',
+      localesNotSaved_one: 'Следующую локализацию не удалось сохранить:',
+      localesNotSaved_other: 'Следующие локализации не удалось сохранить:',
       missingEmail: 'Отсутствует email.',
       missingIDOfDocument: 'Отсутствующий ID документа для обновления.',
       missingIDOfVersion: 'Отсутствует ID версии.',
@@ -191,8 +196,11 @@ export const ru: Language = {
       deletedCountSuccessfully: 'Удалено {{count}} {{label}} успешно.',
       deletedSuccessfully: 'Удален успешно.',
       deleting: 'Удаление...',
+      depth: 'Глубина',
       descending: 'Уменьшение',
       deselectAllRows: 'Снять выделение со всех строк',
+      document: 'Документ',
+      documents: 'Документы',
       duplicate: 'Дублировать',
       duplicateWithoutSaving: 'Дублирование без сохранения изменений',
       edit: 'Редактировать',
@@ -207,6 +215,7 @@ export const ru: Language = {
       error: 'Ошибка',
       errors: 'Ошибки',
       fallbackToDefaultLocale: 'Возврат к локали по умолчанию',
+      false: 'Ложь',
       filter: 'Фильтр',
       filterWhere: 'Где фильтровать',
       filters: 'Фильтры',
@@ -263,6 +272,7 @@ export const ru: Language = {
       successfullyDuplicated: '{{label}} успешно продублирован.',
       thisLanguage: 'Русский',
       titleDeleted: '{{label}} {{title}} успешно удалено.',
+      true: 'Правда',
       unauthorized: 'Нет доступа',
       unsavedChangesDuplicate:
         'У вас есть несохраненные изменения. Вы хотите продолжить дублирование?',

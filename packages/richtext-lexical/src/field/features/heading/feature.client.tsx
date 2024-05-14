@@ -2,27 +2,23 @@
 
 import type { HeadingTagType } from '@lexical/rich-text'
 
-import lexicalRichTextImport from '@lexical/rich-text'
-const { $createHeadingNode, HeadingNode } = lexicalRichTextImport
+import { $isHeadingNode } from '@lexical/rich-text'
+import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
+import { $setBlocksType } from '@lexical/selection'
+import { $getSelection, $isRangeSelection } from 'lexical'
 
-import lexicalSelectionImport from '@lexical/selection'
-const { $setBlocksType } = lexicalSelectionImport
-
-import lexicalImport from 'lexical'
-const { $getSelection } = lexicalImport
-
+import type { ToolbarGroup } from '../toolbars/types.js'
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { HeadingFeatureProps } from './feature.server.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
 import { H1Icon } from '../../lexical/ui/icons/H1/index.js'
 import { H2Icon } from '../../lexical/ui/icons/H2/index.js'
 import { H3Icon } from '../../lexical/ui/icons/H3/index.js'
 import { H4Icon } from '../../lexical/ui/icons/H4/index.js'
 import { H5Icon } from '../../lexical/ui/icons/H5/index.js'
 import { H6Icon } from '../../lexical/ui/icons/H6/index.js'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
 const setHeading = (headingSize: HeadingTagType) => {
@@ -40,54 +36,79 @@ const iconImports = {
 }
 
 const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> = (props) => {
-  const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
-
   return {
     clientFeatureProps: props,
     feature: () => {
+      const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
+
+      const toolbarGroups: ToolbarGroup[] = [
+        toolbarTextDropdownGroupWithItems(
+          enabledHeadingSizes.map((headingSize, i) => {
+            return {
+              ChildComponent: iconImports[headingSize],
+              isActive: ({ selection }) => {
+                if (!$isRangeSelection(selection)) {
+                  return false
+                }
+                for (const node of selection.getNodes()) {
+                  if ($isHeadingNode(node) && node.getTag() === headingSize) {
+                    continue
+                  }
+
+                  const parent = node.getParent()
+                  if ($isHeadingNode(parent) && parent.getTag() === headingSize) {
+                    continue
+                  }
+
+                  return false
+                }
+                return true
+              },
+              key: headingSize,
+              label: `Heading ${headingSize.charAt(1)}`,
+              onSelect: ({ editor }) => {
+                editor.update(() => {
+                  setHeading(headingSize)
+                })
+              },
+              order: i + 2,
+            }
+          }),
+        ),
+      ]
+
       return {
         clientFeatureProps: props,
-        floatingSelectToolbar: {
-          sections: [
-            ...enabledHeadingSizes.map((headingSize, i) =>
-              TextDropdownSectionWithEntries([
-                {
-                  ChildComponent: iconImports[headingSize],
-                  isActive: () => false,
-                  key: headingSize,
-                  label: `Heading ${headingSize.charAt(1)}`,
-                  onClick: ({ editor }) => {
-                    editor.update(() => {
-                      setHeading(headingSize)
-                    })
-                  },
-                  order: i + 2,
-                },
-              ]),
-            ),
-          ],
-        },
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
         nodes: [HeadingNode],
         slashMenu: {
-          options: [
-            ...enabledHeadingSizes.map((headingSize) => {
-              return {
-                displayName: 'Basic',
-                key: 'basic',
-                options: [
-                  new SlashMenuOption(`heading-${headingSize.charAt(1)}`, {
-                    Icon: iconImports[headingSize],
-                    displayName: `Heading ${headingSize.charAt(1)}`,
-                    keywords: ['heading', headingSize],
-                    onSelect: () => {
-                      setHeading(headingSize)
-                    },
+          groups: enabledHeadingSizes?.length
+            ? [
+                {
+                  items: enabledHeadingSizes.map((headingSize) => {
+                    return {
+                      Icon: iconImports[headingSize],
+                      key: `heading-${headingSize.charAt(1)}`,
+                      keywords: ['heading', headingSize],
+                      label: `Heading ${headingSize.charAt(1)}`,
+                      onSelect: ({ editor }) => {
+                        editor.update(() => {
+                          setHeading(headingSize)
+                        })
+                      },
+                    }
                   }),
-                ],
-              }
-            }),
-          ],
+                  key: 'basic',
+                  label: 'Basic',
+                },
+              ]
+            : [],
+        },
+        toolbarFixed: {
+          groups: enabledHeadingSizes?.length ? toolbarGroups : [],
+        },
+        toolbarInline: {
+          groups: enabledHeadingSizes?.length ? toolbarGroups : [],
         },
       }
     },

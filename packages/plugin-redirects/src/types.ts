@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-export interface PluginConfig {
+export type RedirectsPluginConfig = {
   collections?: string[]
   overrides?: Partial<CollectionConfig>
 }

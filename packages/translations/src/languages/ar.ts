@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const ar: Language = {
@@ -9,6 +10,7 @@ export const ar: Language = {
       alreadyActivated: 'تمّ التّفعيل بالفعل',
       alreadyLoggedIn: 'تمّ تسجيل الدّخول بالفعل',
       apiKey: 'مفتاح API',
+      authenticated: 'مصادق عليه',
       backToLogin: 'العودة لتسجيل الدخول',
       beginCreateFirstUser: 'للبدء, قم بإنشاء المستخدم الأوّل.',
       changePassword: 'تغيير كلمة المرور',
@@ -81,6 +83,8 @@ export const ar: Language = {
       invalidFileType: 'نوع ملف غير صالح',
       invalidFileTypeValue: 'نوع ملف غير صالح: {{value}}',
       loadingDocument: 'حدثت مشكلة أثناء تحميل المستند برقم التعريف {{id}}.',
+      localesNotSaved_one: 'لم يتم حفظ اللغة التالية:',
+      localesNotSaved_other: 'لم يتم حفظ اللغات التالية:',
       missingEmail: 'البريد الإلكتروني مفقود.',
       missingIDOfDocument: 'معرّف المستند المراد تحديثه مفقود.',
       missingIDOfVersion: 'معرّف النسخة مفقود.',
@@ -188,8 +192,11 @@ export const ar: Language = {
       deletedCountSuccessfully: 'تمّ حذف {{count}} {{label}} بنجاح.',
       deletedSuccessfully: 'تمّ الحذف بنجاح.',
       deleting: 'يتمّ الحذف...',
+      depth: 'عمق',
       descending: 'تنازلي',
       deselectAllRows: 'إلغاء تحديد جميع الصفوف',
+      document: 'وثيقة',
+      documents: 'وثائق',
       duplicate: 'استنساخ',
       duplicateWithoutSaving: 'استنساخ بدون حفظ التغييرات',
       edit: 'تعديل',
@@ -204,6 +211,7 @@ export const ar: Language = {
       error: 'خطأ',
       errors: 'أخطاء',
       fallbackToDefaultLocale: 'الرجوع إلى اللغة الافتراضية',
+      false: 'كاذب',
       filter: 'تصفية',
       filterWhere: 'تصفية {{label}} حيث',
       filters: 'عوامل التصفية',
@@ -260,6 +268,7 @@ export const ar: Language = {
       successfullyDuplicated: '{{label}} تم استنساخها بنجاح.',
       thisLanguage: 'العربية',
       titleDeleted: 'تم حذف {{label}} "{{title}}" بنجاح.',
+      true: 'صحيح',
       unauthorized: 'غير مصرح به',
       unsavedChangesDuplicate: 'لديك تغييرات لم يتم حفظها. هل تريد الاستمرار في الاستنساخ؟',
       untitled: 'بدون عنوان',

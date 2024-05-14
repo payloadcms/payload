@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { findByIDOperation } from 'payload/operations'
@@ -16,11 +16,11 @@ export type Resolver<T> = (
     locale?: string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<T>
 
-export default function findByIDResolver<T extends keyof GeneratedTypes['collections']>(
+export function findByIDResolver<T extends keyof GeneratedTypes['collections']>(
   collection: Collection,
 ): Resolver<GeneratedTypes['collections'][T]> {
   return async function resolver(_, args, context: Context) {
@@ -31,6 +31,17 @@ export default function findByIDResolver<T extends keyof GeneratedTypes['collect
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    if (!req.query) req.query = {}
+
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+          ? true
+          : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
       id: args.id,

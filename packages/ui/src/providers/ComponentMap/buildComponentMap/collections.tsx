@@ -1,44 +1,44 @@
-import type { I18n } from '@payloadcms/translations'
-import type { ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminViewProps,
   EditViewProps,
-  EntityDescriptionComponent,
-  EntityDescriptionFunction,
   SanitizedCollectionConfig,
   SanitizedConfig,
-  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
-import { ViewDescription } from '@payloadcms/ui/elements/ViewDescription'
-import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
+import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
+import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { CollectionComponentMap } from './types.js'
 
+import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
-export const mapCollections = ({
-  DefaultEditView,
-  DefaultListView,
-  WithServerSideProps,
-  collections,
-  config,
-  i18n,
-  readOnly: readOnlyOverride,
-}: {
+export const mapCollections = (args: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
-  WithServerSideProps: WithServerSidePropsType
+  WithServerSideProps: WithServerSidePropsPrePopulated
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
   readOnly?: boolean
 }): {
   [key: SanitizedCollectionConfig['slug']]: CollectionComponentMap
-} =>
-  collections.reduce((acc, collectionConfig) => {
+} => {
+  const {
+    DefaultEditView,
+    DefaultListView,
+    WithServerSideProps,
+    collections,
+    config,
+    i18n,
+    i18n: { t },
+    readOnly: readOnlyOverride,
+  } = args
+
+  return collections.reduce((acc, collectionConfig) => {
     const { slug, fields } = collectionConfig
 
     const internalCollections = ['payload-preferences', 'payload-migrations']
@@ -130,26 +130,25 @@ export const mapCollections = ({
         afterListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
+    let description = undefined
+    if (collectionConfig.admin && 'description' in collectionConfig.admin) {
+      if (
+        typeof collectionConfig.admin?.description === 'string' ||
+        typeof collectionConfig.admin?.description === 'object'
+      ) {
+        description = collectionConfig.admin.description
+      } else if (typeof collectionConfig.admin?.description === 'function') {
+        description = collectionConfig.admin?.description({ t })
+      }
+    }
+
     const descriptionProps: ViewDescriptionProps = {
-      description:
-        (collectionConfig.admin &&
-          'description' in collectionConfig.admin &&
-          (((typeof collectionConfig.admin?.description === 'string' ||
-            typeof collectionConfig.admin?.description === 'object') &&
-            collectionConfig.admin.description) ||
-            (typeof collectionConfig.admin?.description === 'function' &&
-              isPlainFunction<EntityDescriptionFunction>(collectionConfig.admin?.description) &&
-              collectionConfig.admin?.description()))) ||
-        undefined,
+      description,
     }
 
     const DescriptionComponent =
-      (collectionConfig.admin &&
-        'description' in collectionConfig.admin &&
-        ((isReactComponent<EntityDescriptionComponent>(collectionConfig.admin.description) &&
-          collectionConfig.admin.description) ||
-          (collectionConfig.admin.description && ViewDescription))) ||
-      undefined
+      collectionConfig.admin?.components?.edit?.Description ||
+      (description ? ViewDescription : undefined)
 
     const Description =
       DescriptionComponent !== undefined ? (
@@ -187,3 +186,4 @@ export const mapCollections = ({
       [slug]: componentMap,
     }
   }, {})
+}

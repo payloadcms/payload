@@ -18,10 +18,12 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'bin'
   | 'cors'
   | 'csrf'
+  | 'custom'
   | 'db'
   | 'editor'
   | 'email'
   | 'endpoints'
+  | 'graphQL'
   | 'hooks'
   | 'onInit'
   | 'plugins'
@@ -40,6 +42,7 @@ export type ClientConfig = Omit<
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   }
   collections: ClientCollectionConfig[]
+  custom?: Record<string, any>
   globals: ClientGlobalConfig[]
 }
 
@@ -49,6 +52,7 @@ export const createClientConfig = async ({
 }: {
   config: SanitizedConfig
   t: TFunction
+  // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<ClientConfig> => {
   const clientConfig: ClientConfig = { ...config }
 
@@ -66,6 +70,8 @@ export const createClientConfig = async ({
     'cors',
     'csrf',
     'email',
+    'custom',
+    'graphQL',
     // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 

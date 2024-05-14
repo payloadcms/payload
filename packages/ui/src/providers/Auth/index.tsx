@@ -8,6 +8,7 @@ import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
+import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -46,7 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const config = useConfig()
 
   const {
-    admin: { autoLogin, inactivityRoute: logoutInactivityRoute, user: userSlug },
+    admin: {
+      autoLogin,
+      routes: { inactivity: logoutInactivityRoute },
+      routes: { login: loginRoute },
+      user: userSlug,
+    },
     routes: { admin, api },
     serverURL,
   } = config
@@ -210,16 +216,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (autoLogin && autoLogin.prefillOnly !== true) {
           // auto log-in with the provided autoLogin credentials. This is used in dev mode
           // so you don't have to log in over and over again
-          const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
-            body: JSON.stringify({
-              email: autoLogin.email,
-              password: autoLogin.password,
-            }),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
+          const autoLoginResult = await requests.post(
+            `${serverURL}${api}/${userSlug}${loginRoute}`,
+            {
+              body: JSON.stringify({
+                email: autoLogin.email,
+                password: autoLogin.password,
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
             },
-          })
+          )
           if (autoLoginResult.status === 200) {
             const autoLoginJson = await autoLoginResult.json()
             setUser(autoLoginJson.user)
@@ -252,6 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     searchParams,
     admin,
     revokeTokenAndExpire,
+    loginRoute,
   ])
 
   // On mount, get user and set
@@ -278,7 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       reminder = setTimeout(
         () => {
-          openModal('stay-logged-in')
+          openModal(stayLoggedInModalSlug)
         },
         Math.max(Math.min((remainingTime - 60) * 1000, maxTimeoutTime)),
       )

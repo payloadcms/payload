@@ -1,6 +1,6 @@
-import type { FileData, ImageSize } from 'payload/types'
+import type { Field, FileData, ImageSize } from 'payload/types'
 import type { TypeWithID } from 'payload/types'
-import type { CollectionConfig, PayloadRequest } from 'payload/types'
+import type { CollectionConfig, PayloadRequestWithData } from 'payload/types'
 
 export interface File {
   buffer: Buffer
@@ -14,7 +14,7 @@ export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any
   file: File
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => Promise<void> | void
 
 export interface TypeWithPrefix {
@@ -25,24 +25,33 @@ export type HandleDelete = (args: {
   collection: CollectionConfig
   doc: TypeWithID & FileData & TypeWithPrefix
   filename: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
   collection: CollectionConfig
+  data: any
   filename: string
   prefix?: string
 }) => Promise<string> | string
 
 export type StaticHandler = (
-  req: PayloadRequest,
-  args: { params: { collection: string; filename: string } },
+  req: PayloadRequestWithData,
+  args: { doc?: TypeWithID; params: { collection: string; filename: string } },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
-  generateURL: GenerateURL
+  /**
+   * Additional fields to be injected into the base collection and image sizes
+   */
+  fields?: Field[]
+  /**
+   * Generates the public URL for a file
+   */
+  generateURL?: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload
+  name: string
   onInit?: () => void
   staticHandler: StaticHandler
 }

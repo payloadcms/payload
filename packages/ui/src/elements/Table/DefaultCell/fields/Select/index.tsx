@@ -2,9 +2,10 @@
 import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { optionsAreObjects } from 'payload/types'
 import React from 'react'
+
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface SelectCellProps extends DefaultCellComponentProps<any> {
   options: CellComponentProps['options']
