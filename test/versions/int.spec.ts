@@ -908,6 +908,29 @@ describe('Versions', () => {
 
       expect(byID.docs).toHaveLength(1)
     })
+
+    it('should be able to query by id AND any other field with draft=true', async () => {
+      const results = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          and: [
+            {
+              id: {
+                not_in: '1',
+              },
+            },
+            {
+              title: {
+                like: 'Published',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(results.docs).toHaveLength(1)
+    })
   })
 
   describe('Collections - GraphQL', () => {

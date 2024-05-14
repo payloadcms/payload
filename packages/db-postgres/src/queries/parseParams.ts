@@ -10,8 +10,8 @@ import type { GenericColumn, PostgresAdapter } from '../types'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
-import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
 import { createJSONQuery } from './createJSONQuery'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'
@@ -195,10 +195,10 @@ export async function parseParams({
                   operator === 'not_in'
                 ) {
                   constraints.push(
-                    sql`${notInArray(table[columnName], queryValue)} OR
+                    sql`(${notInArray(table[columnName], queryValue)} OR
                     ${table[columnName]}
                     IS
-                    NULL`,
+                    NULL)`,
                   )
 
                   break
