@@ -1,6 +1,5 @@
 'use client'
 import type { FieldPermissions } from 'payload/auth'
-import type { FieldBase } from 'payload/types'
 import type { ArrayField as ArrayFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -38,7 +37,6 @@ export type ArrayFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   forceRender?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   labels?: ArrayFieldType['labels']
   maxRows?: ArrayFieldType['maxRows']
   minRows?: ArrayFieldType['minRows']
@@ -93,9 +91,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps) => {
+  const getLabels = (p: ArrayFieldProps): ArrayFieldType['labels'] => {
     if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
+    if ('label' in p && p?.label) return { plural: undefined, singular: p?.label }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 

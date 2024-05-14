@@ -640,3 +640,9 @@ export interface Footer {
   updatedAt?: string | null;
   createdAt?: string | null;
 }
+
+
+declare module 'payload' {
+  // @ts-ignore 
+  export interface GeneratedTypes extends Config {}
+}

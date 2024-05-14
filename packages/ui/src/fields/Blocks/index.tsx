@@ -40,7 +40,6 @@ export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
   forceRender?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   labels?: BlockField['labels']
   maxRows?: number
   minRows?: number

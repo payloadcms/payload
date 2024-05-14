@@ -11,9 +11,11 @@ import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichT
 import type {
   ConditionalDateProps,
   Description,
+  DescriptionComponent,
   ErrorProps,
   LabelProps,
   RowLabel,
+  RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
@@ -117,7 +119,11 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
+    Description?: DescriptionComponent
     Field?: CustomComponent
+    /**
+     * The Filter component has to be a client component
+     */
     Filter?: React.ComponentType<any>
   }
   /**
@@ -129,6 +135,16 @@ type Admin = {
   custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view column selector.
+   * @type boolean
+   */
+  disableListColumn?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view filter options.
+   * @type boolean
+   */
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -361,13 +377,25 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 }
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
-  admin?: Admin & {
-    initCollapsed?: boolean
-  }
   fields: Field[]
-  label: RowLabel
   type: 'collapsible'
-}
+} & (
+    | {
+        admin: Admin & {
+          components: {
+            RowLabel: RowLabelComponent
+          } & Admin['components']
+          initCollapsed?: boolean
+        }
+        label?: Required<FieldBase['label']>
+      }
+    | {
+        admin?: Admin & {
+          initCollapsed?: boolean
+        }
+        label: Required<FieldBase['label']>
+      }
+  )
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -422,12 +450,25 @@ export type UIField = {
     components?: {
       Cell?: CustomComponent
       Field: CustomComponent
+      /**
+       * The Filter component has to be a client component
+       */
       Filter?: React.ComponentType<any>
     }
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     disableBulkEdit?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view column selector.
+     * @type boolean
+     */
+    disableListColumn?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view filter options.
+     * @type boolean
+     */
+    disableListFilter?: boolean
     position?: string
     width?: string
   }
@@ -610,7 +651,7 @@ export type RichTextField<
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
-      RowLabel?: RowLabel
+      RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
     /**

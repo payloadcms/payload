@@ -71,6 +71,8 @@ export type MappedField = {
   cellComponentProps: CellComponentProps
   custom?: Record<any, string>
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps
   fieldIsPresentational: boolean

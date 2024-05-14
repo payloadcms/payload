@@ -43,7 +43,7 @@ export const seoPlugin =
             type: 'text',
             admin: {
               components: {
-                Field: (props) => (
+                Field: ({ payload: _payload, ...props }) => (
                   <MetaTitle
                     {...props}
                     hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
@@ -59,7 +59,7 @@ export const seoPlugin =
             type: 'textarea',
             admin: {
               components: {
-                Field: (props) => (
+                Field: ({ payload: _payload, ...props }) => (
                   <MetaDescription
                     {...props}
                     hasGenerateDescriptionFn={
@@ -80,7 +80,7 @@ export const seoPlugin =
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: (props) => (
+                      Field: ({ payload: _payload, ...props }) => (
                         <MetaImage
                           {...props}
                           hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
@@ -103,7 +103,7 @@ export const seoPlugin =
             type: 'ui',
             admin: {
               components: {
-                Field: (props) => (
+                Field: ({ payload: _payload, ...props }) => (
                   <Preview
                     {...props}
                     hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}

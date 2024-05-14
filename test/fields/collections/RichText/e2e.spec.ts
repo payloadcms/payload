@@ -115,7 +115,7 @@ describe('Rich Text', () => {
 
       // Fill values and click Confirm
       await editLinkModal.locator('#field-text').fill('link text')
-      await editLinkModal.locator('label[for="field-linkType-custom"]').click()
+      await editLinkModal.locator('label[for="field-linkType-custom-2"]').click()
       await editLinkModal.locator('#field-url').fill('')
       await wait(200)
       await editLinkModal.locator('button[type="submit"]').click()
@@ -141,7 +141,7 @@ describe('Rich Text', () => {
       await wait(400)
       // Fill values and click Confirm
       await editLinkModal.locator('#field-text').fill('link text')
-      await editLinkModal.locator('label[for="field-linkType-custom"]').click()
+      await editLinkModal.locator('label[for="field-linkType-custom-2"]').click()
       await editLinkModal.locator('#field-url').fill('https://payloadcms.com')
       await editLinkModal.locator('button[type="submit"]').click()
       await expect(editLinkModal).toBeHidden()
@@ -170,7 +170,7 @@ describe('Rich Text', () => {
 
       // Fill values and click Confirm
       await editLinkModal.locator('#field-text').fill('link text')
-      await editLinkModal.locator('label[for="field-linkType-internal"]').click()
+      await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
       await editLinkModal.locator('#field-doc .rs__control').click()
       await page.keyboard.type('dev@')
       await editLinkModal
@@ -246,7 +246,7 @@ describe('Rich Text', () => {
       const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]')
       await expect(editLinkModal).toBeVisible()
 
-      await editLinkModal.locator('label[for="field-linkType-internal"]').click()
+      await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
       await editLinkModal.locator('.relationship__wrap .rs__control').click()
 
       const menu = page.locator('.relationship__wrap .rs__menu')

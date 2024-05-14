@@ -161,7 +161,9 @@ export async function buildConfigWithDefaults(
     sharp,
     telemetry: false,
     typescript: {
-      declare: false,
+      declare: {
+        ignoreTSError: true,
+      },
     },
     ...testConfig,
     i18n: {
