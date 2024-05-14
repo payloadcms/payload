@@ -91,7 +91,13 @@ export const RootPage = async ({
       )}
       {templateType === 'default' && (
         <DefaultTemplate
+          i18n={initPageResult?.req.i18n}
+          locale={initPageResult?.locale}
+          params={params}
           payload={initPageResult?.req.payload}
+          permissions={initPageResult?.permissions}
+          searchParams={searchParams}
+          user={initPageResult?.req.user}
           visibleEntities={initPageResult.visibleEntities}
         >
           {RenderedView}

@@ -36,6 +36,7 @@ export type GenerateViewMetadata = (args: {
 
 export const NotFoundPage = async ({
   config: configPromise,
+  params,
   searchParams,
 }: {
   config: Promise<SanitizedConfig>
@@ -60,7 +61,13 @@ export const NotFoundPage = async ({
     <Fragment>
       <HydrateClientUser permissions={initPageResult.permissions} user={initPageResult.req.user} />
       <DefaultTemplate
+        i18n={initPageResult.req.i18n}
+        locale={initPageResult.locale}
+        params={params}
         payload={initPageResult.req.payload}
+        permissions={initPageResult.permissions}
+        searchParams={searchParams}
+        user={initPageResult.req.user}
         visibleEntities={initPageResult.visibleEntities}
       >
         <NotFoundClient />

@@ -20,10 +20,10 @@ const baseClass = 'collapsible-field'
 
 import type { FieldPermissions } from 'payload/auth'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
+
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap

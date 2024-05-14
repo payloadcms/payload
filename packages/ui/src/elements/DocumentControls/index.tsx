@@ -3,9 +3,9 @@ import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React, { Fragment } from 'react'
 
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDate } from '../../utilities/formatDate.js'

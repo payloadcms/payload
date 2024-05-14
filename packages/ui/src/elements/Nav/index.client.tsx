@@ -1,7 +1,6 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -10,6 +9,7 @@ import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { EntityType, groupNavItems } from '../../utilities/groupNavItems.js'
 import { NavGroup } from '../NavGroup/index.js'

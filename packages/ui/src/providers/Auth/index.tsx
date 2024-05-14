@@ -3,12 +3,12 @@ import type { ClientUser, Permissions } from 'payload/auth'
 import type { MeOperationResult } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import { stayLoggedInModalSlug } from '@payloadcms/ui/elements/StayLoggedIn'
 import { usePathname, useRouter } from 'next/navigation.js'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
+import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'

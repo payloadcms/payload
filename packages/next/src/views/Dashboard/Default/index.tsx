@@ -1,5 +1,6 @@
 import type { Permissions } from 'payload/auth'
-import type { Payload, SanitizedConfig, VisibleEntities } from 'payload/types'
+import type { ServerProps } from 'payload/config'
+import type { VisibleEntities } from 'payload/types'
 
 import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
@@ -12,10 +13,9 @@ import './index.scss'
 
 const baseClass = 'dashboard'
 
-export type DashboardProps = {
+export type DashboardProps = ServerProps & {
   Link: React.ComponentType<any>
-  config: SanitizedConfig
-  payload: Payload
+
   permissions: Permissions
   visibleEntities: VisibleEntities
 }
@@ -23,25 +23,56 @@ export type DashboardProps = {
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {
     Link,
-    config: {
-      admin: {
-        components: { afterDashboard, beforeDashboard },
+    i18n,
+    locale,
+    params,
+    payload: {
+      config: {
+        admin: {
+          components: { afterDashboard, beforeDashboard },
+        },
       },
     },
     payload,
     permissions,
+    searchParams,
+    user,
     visibleEntities,
   } = props
 
   const BeforeDashboards = Array.isArray(beforeDashboard)
     ? beforeDashboard.map((Component, i) => (
-        <WithServerSideProps Component={Component} key={i} payload={payload} />
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
       ))
     : null
 
   const AfterDashboards = Array.isArray(afterDashboard)
     ? afterDashboard.map((Component, i) => (
-        <WithServerSideProps Component={Component} key={i} payload={payload} />
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
       ))
     : null
 

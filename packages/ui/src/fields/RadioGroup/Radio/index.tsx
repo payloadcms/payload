@@ -2,11 +2,11 @@
 import type { OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import React from 'react'
 
 import type { OnChange } from '../index.js'
 
+import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.scss'
 

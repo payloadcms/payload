@@ -65,7 +65,7 @@ export type User = {
   [key: string]: any // This NEEDS to be an any, otherwise it breaks the Omit for ClientUser below
   collection: string
   email: string
-  id: string
+  id: number | string
 }
 
 /**
