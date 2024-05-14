@@ -54,6 +54,8 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     if (!graphQL) return
 
+    const draftsEnabled = collection.config.versions?.drafts
+
     let singularName
     let pluralName
     const fromSlug = formatNames(collection.config.slug)
@@ -150,7 +152,11 @@ function initCollectionsGraphQL(payload: Payload): void {
       type: collection.graphQL.type,
       args: {
         id: { type: new GraphQLNonNull(idType) },
-        draft: { type: GraphQLBoolean },
+        ...(draftsEnabled
+          ? {
+              draft: { type: GraphQLBoolean },
+            }
+          : {}),
         ...(payload.config.localization
           ? {
               fallbackLocale: { type: payload.types.fallbackLocaleInputType },
@@ -164,7 +170,11 @@ function initCollectionsGraphQL(payload: Payload): void {
     payload.Query.fields[pluralName] = {
       type: buildPaginatedListType(pluralName, collection.graphQL.type),
       args: {
-        draft: { type: GraphQLBoolean },
+        ...(draftsEnabled
+          ? {
+              draft: { type: GraphQLBoolean },
+            }
+          : {}),
         where: { type: collection.graphQL.whereInputType },
         ...(payload.config.localization
           ? {
@@ -187,7 +197,11 @@ function initCollectionsGraphQL(payload: Payload): void {
         },
       }),
       args: {
-        draft: { type: GraphQLBoolean },
+        ...(draftsEnabled
+          ? {
+              draft: { type: GraphQLBoolean },
+            }
+          : {}),
         where: { type: collection.graphQL.whereInputType },
         ...(payload.config.localization
           ? {
@@ -217,7 +231,11 @@ function initCollectionsGraphQL(payload: Payload): void {
         ...(createMutationInputType
           ? { data: { type: collection.graphQL.mutationInputType } }
           : {}),
-        draft: { type: GraphQLBoolean },
+        ...(draftsEnabled
+          ? {
+              draft: { type: GraphQLBoolean },
+            }
+          : {}),
         ...(payload.config.localization
           ? {
               locale: { type: payload.types.localeInputType },
@@ -235,7 +253,11 @@ function initCollectionsGraphQL(payload: Payload): void {
         ...(updateMutationInputType
           ? { data: { type: collection.graphQL.updateMutationInputType } }
           : {}),
-        draft: { type: GraphQLBoolean },
+        ...(draftsEnabled
+          ? {
+              draft: { type: GraphQLBoolean },
+            }
+          : {}),
         ...(payload.config.localization
           ? {
               locale: { type: payload.types.localeInputType },

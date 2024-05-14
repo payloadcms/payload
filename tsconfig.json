@@ -42,6 +42,7 @@
     { "path": "./packages/plugin-form-builder" },
     { "path": "./packages/plugin-nested-docs" },
     { "path": "./packages/plugin-redirects" },
+    { "path": "./packages/plugin-relationship-object-ids" },
     { "path": "./packages/plugin-search" },
     { "path": "./packages/plugin-seo" },
     { "path": "./packages/plugin-stripe" },

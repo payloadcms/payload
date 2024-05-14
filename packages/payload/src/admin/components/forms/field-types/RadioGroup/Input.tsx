@@ -98,6 +98,7 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
                 onChange={readOnly ? undefined : onChange}
                 option={optionIsObject(option) ? option : { label: option, value: option }}
                 path={path}
+                readOnly={readOnly}
               />
             </li>
           )

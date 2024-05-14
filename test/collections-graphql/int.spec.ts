@@ -1,8 +1,10 @@
 import { GraphQLClient } from 'graphql-request'
+import path from 'path'
 
 import type { Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { idToString } from '../helpers/idToString'
@@ -906,6 +908,80 @@ describe('collections-graphql', () => {
 
         const queriedDoc = response.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
+
+      it('should query correctly with draft argument', async () => {
+        // publish doc
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          draft: false,
+          data: {
+            title: '1',
+          },
+        })
+
+        // save new version
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          draft: true,
+          data: {
+            title: '2',
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `{
+          CyclicalRelationships(draft: true) {
+            docs {
+              title
+              relationToSelf(draft: false) {
+                title
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+
+        const queriedDoc = response.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual('2')
+        expect(queriedDoc.relationToSelf.title).toEqual('1')
+      })
+
+      it('should query upload enabled docs', async () => {
+        const file = await getFileByPath(path.resolve(__dirname, '../uploads/test-image.jpg'))
+
+        const mediaDoc = await payload.create({
+          collection: 'media',
+          file,
+          data: {
+            title: 'example',
+          },
+        })
+
+        // doc with upload relation
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            media: mediaDoc.id,
+          },
+        })
+
+        const query = `{
+          CyclicalRelationship(id: ${
+            typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`
+          }) {
+            media {
+              id
+              title
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+
+        const queriedDoc = response.CyclicalRelationship
+        expect(queriedDoc.media.id).toEqual(mediaDoc.id)
+        expect(queriedDoc.media.title).toEqual('example')
       })
     })
   })

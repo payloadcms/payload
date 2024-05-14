@@ -108,6 +108,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       currentDepth,
       depth,
       doc: result.version,
+      draft: undefined,
       fallbackLocale,
       global: globalConfig,
       locale,

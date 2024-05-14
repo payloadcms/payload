@@ -8,6 +8,7 @@ type PopulateArgs = {
   data: Record<string, unknown>
   dataReference: Record<string, any>
   depth: number
+  draft: boolean
   fallbackLocale: null | string
   field: RelationshipField | UploadField
   index?: number
@@ -23,6 +24,7 @@ const populate = async ({
   data,
   dataReference,
   depth,
+  draft = false,
   fallbackLocale,
   field,
   index,
@@ -62,6 +64,7 @@ const populate = async ({
           fallbackLocale,
           overrideAccess,
           showHiddenFields,
+          draft,
         ]),
       )
     }
@@ -94,6 +97,7 @@ const populate = async ({
 type PromiseArgs = {
   currentDepth: number
   depth: number
+  draft: boolean
   fallbackLocale: null | string
   field: RelationshipField | UploadField
   locale: null | string
@@ -106,6 +110,7 @@ type PromiseArgs = {
 const relationshipPopulationPromise = async ({
   currentDepth,
   depth,
+  draft,
   fallbackLocale,
   field,
   locale,
@@ -133,6 +138,7 @@ const relationshipPopulationPromise = async ({
                 data: siblingDoc[field.name][key][index],
                 dataReference: resultingDoc,
                 depth: populateDepth,
+                draft,
                 fallbackLocale,
                 field,
                 index,
@@ -156,6 +162,7 @@ const relationshipPopulationPromise = async ({
               data: relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
+              draft,
               fallbackLocale,
               field,
               index,
@@ -182,6 +189,7 @@ const relationshipPopulationPromise = async ({
           data: siblingDoc[field.name][key],
           dataReference: resultingDoc,
           depth: populateDepth,
+          draft,
           fallbackLocale,
           field,
           key,
@@ -201,6 +209,7 @@ const relationshipPopulationPromise = async ({
       data: siblingDoc[field.name],
       dataReference: resultingDoc,
       depth: populateDepth,
+      draft,
       fallbackLocale,
       field,
       locale,

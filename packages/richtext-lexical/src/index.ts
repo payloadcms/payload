@@ -182,6 +182,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       context,
       currentDepth,
       depth,
+      draft,
       field,
       findMany,
       flattenLocales,
@@ -197,6 +198,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           context,
           currentDepth,
           depth,
+          draft,
           editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
           field,
           findMany,
@@ -218,7 +220,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
-export { BlocksFeature, type BlocksFeatureProps, type LexicalBlock } from './field/features/Blocks'
+export { BlocksFeature, type BlocksFeatureProps } from './field/features/Blocks'
 export {
   $createBlockNode,
   $isBlockNode,
@@ -247,6 +249,7 @@ export {
 
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
+
 export {
   $createRelationshipNode,
   $isRelationshipNode,
@@ -281,11 +284,11 @@ export { defaultHTMLConverters } from './field/features/converters/html/converte
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
 export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
-
 export { TestRecorderFeature } from './field/features/debug/TestRecorder'
-export { TreeViewFeature } from './field/features/debug/TreeView'
 
+export { TreeViewFeature } from './field/features/debug/TreeView'
 export { BoldTextFeature } from './field/features/format/Bold'
+
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
 export { ItalicTextFeature } from './field/features/format/Italic'
 export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection'
@@ -293,6 +296,7 @@ export { StrikethroughTextFeature } from './field/features/format/strikethrough'
 export { SubscriptTextFeature } from './field/features/format/subscript'
 export { SuperscriptTextFeature } from './field/features/format/superscript'
 export { UnderlineTextFeature } from './field/features/format/underline'
+export { HorizontalRuleFeature } from './field/features/horizontalrule'
 export { IndentFeature } from './field/features/indent'
 export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'

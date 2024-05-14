@@ -179,6 +179,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           context: req.context,
           depth,
           doc: result || doc,
+          draft: undefined,
           fallbackLocale,
           global: null,
           locale,
