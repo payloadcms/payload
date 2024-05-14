@@ -77,7 +77,7 @@ export const initPage = async ({
 
   if (redirectUnauthenticatedUser && !user) {
     handleAuthRedirect({
-      adminRoute,
+      config: payload.config,
       redirectUnauthenticatedUser,
       route,
       searchParams,

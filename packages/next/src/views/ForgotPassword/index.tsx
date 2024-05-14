@@ -35,7 +35,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
         <p>
           <Translation
             elements={{
-              '0': ({ children }) => <Link href={`${admin}/${accountRoute}`}>{children}</Link>,
+              '0': ({ children }) => <Link href={`${admin}${accountRoute}`}>{children}</Link>,
             }}
             i18nKey="authentication:loggedInChangePassword"
             t={i18n.t}
