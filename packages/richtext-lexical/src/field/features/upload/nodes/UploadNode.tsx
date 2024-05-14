@@ -1,12 +1,5 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { ElementFormatType, NodeKey } from 'lexical'
-
-import lexicalDecoratorBlockNodeImport from '@lexical/react/LexicalDecoratorBlockNode.js'
-const { DecoratorBlockNode } = lexicalDecoratorBlockNodeImport
-
-import lexicalImport from 'lexical'
-const { $applyNodeReplacement } = lexicalImport
-
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -15,6 +8,8 @@ import type {
   Spread,
 } from 'lexical'
 
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
 const RawUploadComponent = React.lazy(() =>
@@ -30,11 +25,25 @@ export type UploadData = {
   value: number | string
 }
 
-function convertUploadElement(domNode: Node): DOMConversionOutput | null {
-  //if (domNode instanceof HTMLImageElement) {
-  // const { alt: altText, src } = domNode;
-  // const node = $createImageNode({ altText, src });
-  // return { node };
+function convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput | null {
+  if (
+    domNode.hasAttribute('data-lexical-upload-relation-to') &&
+    domNode.hasAttribute('data-lexical-upload-id')
+  ) {
+    const id = domNode.getAttribute('data-lexical-upload-id')
+    const relationTo = domNode.getAttribute('data-lexical-upload-relation-to')
+
+    if (id != null && relationTo != null) {
+      const node = $createUploadNode({
+        data: {
+          fields: {},
+          relationTo,
+          value: id,
+        },
+      })
+      return { node }
+    }
+  }
   // TODO: Auto-upload functionality here!
   //}
   return null
@@ -72,7 +81,7 @@ export class UploadNode extends DecoratorBlockNode {
 
   static importDOM(): DOMConversionMap | null {
     return {
-      img: (node: Node) => ({
+      img: (node: HTMLImageElement) => ({
         conversion: convertUploadElement,
         priority: 0,
       }),
@@ -107,8 +116,9 @@ export class UploadNode extends DecoratorBlockNode {
 
   exportDOM(): DOMExportOutput {
     const element = document.createElement('img')
-    // element.setAttribute('src', this.__src);
-    // element.setAttribute('alt', this.__altText); //TODO
+    element.setAttribute('data-lexical-upload-id', String(this.__data?.value))
+    element.setAttribute('data-lexical-upload-relation-to', this.__data?.relationTo)
+
     return { element }
   }
 

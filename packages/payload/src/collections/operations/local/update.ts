@@ -1,7 +1,12 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes, Payload } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type {
+  Document,
+  PayloadRequestWithData,
+  RequestContext,
+  Where,
+} from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type { BulkOperationResult } from '../../config/types.js'
 
@@ -27,7 +32,7 @@ export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   user?: Document
 }

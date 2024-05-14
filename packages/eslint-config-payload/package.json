@@ -2,18 +2,15 @@
   "name": "@payloadcms/eslint-config",
   "version": "1.1.1",
   "description": "Payload styles for ESLint and Prettier",
-  "license": "MIT",
+  "keywords": [],
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/eslint-config-payload"
   },
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,11 +25,10 @@
     "eslint-plugin-jest-dom": "5.1.0",
     "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-payload": "workspace:*",
     "eslint-plugin-perfectionist": "2.7.0",
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-react-hooks": "4.6.0",
-    "eslint-plugin-regexp": "2.3.0",
-    "eslint-plugin-payload": "workspace:*"
-  },
-  "keywords": []
+    "eslint-plugin-regexp": "2.3.0"
+  }
 }

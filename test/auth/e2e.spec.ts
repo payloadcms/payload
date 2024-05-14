@@ -1,16 +1,23 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { devUser } from 'credentials.js'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
+import { v4 as uuid } from 'uuid'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -18,17 +25,26 @@ const dirname = path.dirname(filename)
 
 let payload: PayloadTestSDK<Config>
 
-/**
- * TODO: Auth
- *   create first user
- *   unlock
- *   log out
- */
-
 const { beforeAll, describe } = test
 
 const headers = {
   'Content-Type': 'application/json',
+}
+
+const createFirstUser = async ({ page, serverURL }: { page: Page; serverURL: string }) => {
+  await page.goto(serverURL + '/admin/create-first-user')
+  await page.locator('#field-email').fill(devUser.email)
+  await page.locator('#field-password').fill(devUser.password)
+  await page.locator('#field-confirm-password').fill(devUser.password)
+  await page.locator('#field-custom').fill('Hello, world!')
+
+  await wait(500)
+
+  await page.locator('.form-submit > button').click()
+
+  await expect
+    .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+    .not.toContain('create-first-user')
 }
 
 describe('auth', () => {
@@ -37,7 +53,11 @@ describe('auth', () => {
   let serverURL: string
   let apiURL: string
 
-  beforeAll(async ({ browser }) => {
+  // Allows for testing create-first-user
+  process.env.SKIP_ON_INIT = 'true'
+
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
@@ -46,12 +66,24 @@ describe('auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    //await delayNetwork({ context, page, delay: 'Slow 4G' })
+    await createFirstUser({ page, serverURL })
 
-    await login({
-      page,
-      serverURL,
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
     })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('authenticated users', () => {
@@ -95,6 +127,7 @@ describe('auth', () => {
       user = await payload.create({
         collection: apiKeysSlug,
         data: {
+          apiKey: uuid(),
           enableAPIKey: true,
         },
       })
@@ -140,7 +173,7 @@ describe('auth', () => {
         const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
           headers: {
             ...headers,
-            Authorization: `${slug} API-Key ${user.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${user.apiKey}`,
           },
         }).then((res) => res.json())
 

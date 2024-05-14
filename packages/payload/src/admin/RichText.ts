@@ -1,9 +1,9 @@
 import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
-import type { SanitizedConfig } from '../config/types.js'
+import type { Config, SanitizedConfig } from '../config/types.js'
 import type { Field, FieldBase, RichTextField, Validate } from '../fields/config/types.js'
-import type { PayloadRequest, RequestContext } from '../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../types/index.js'
 import type { WithServerSideProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<
@@ -58,13 +58,14 @@ type RichTextAdapterBase<
     context: RequestContext
     currentDepth?: number
     depth: number
+    draft: boolean
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     fieldPromises: Promise<void>[]
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
     populationPromises: Promise<void>[]
-    req: PayloadRequest
+    req: PayloadRequestWithData
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>
   }) => void
@@ -84,3 +85,22 @@ export type RichTextAdapter<
   CellComponent: React.FC<any>
   FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
 }
+
+export type RichTextAdapterProvider<
+  Value extends object = object,
+  AdapterProps = any,
+  ExtraFieldProperties = {},
+> = ({
+  config,
+  isRoot,
+}: {
+  config: SanitizedConfig
+  /**
+   * Whether or not this is the root richText editor, defined in the payload.config.ts.
+   *
+   * @default false
+   */
+  isRoot?: boolean
+}) =>
+  | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
+  | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

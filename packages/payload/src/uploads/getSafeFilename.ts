@@ -1,6 +1,6 @@
 import sanitize from 'sanitize-filename'
 
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 import docWithFilenameExists from './docWithFilenameExists.js'
 import fileExists from './fileExists.js'
@@ -25,7 +25,7 @@ const incrementName = (name: string) => {
 type Args = {
   collectionSlug: string
   desiredFilename: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   staticPath: string
 }
 

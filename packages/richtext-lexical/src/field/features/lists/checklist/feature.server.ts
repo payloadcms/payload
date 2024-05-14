@@ -1,21 +1,20 @@
-import lexicalListImport from '@lexical/list'
-const { ListItemNode, ListNode } = lexicalListImport
+import { ListItemNode, ListNode } from '@lexical/list'
 
 import type { FeatureProviderProviderServer } from '../../types.js'
 
 import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
-import { CheckListFeatureClientComponent } from './feature.client.js'
+import { ChecklistFeatureClientComponent } from './feature.client.js'
 import { CHECK_LIST } from './markdownTransformers.js'
 
-export const CheckListFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
+export const ChecklistFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {
     feature: ({ featureProviderMap }) => {
       return {
-        ClientComponent: CheckListFeatureClientComponent,
+        ClientComponent: ChecklistFeatureClientComponent,
         markdownTransformers: [CHECK_LIST],
         nodes:
-          featureProviderMap.has('unorderedlist') || featureProviderMap.has('orderedlist')
+          featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
             ? []
             : [
                 createNode({

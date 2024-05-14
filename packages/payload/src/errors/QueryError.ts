@@ -1,8 +1,8 @@
 import httpStatus from 'http-status'
 
-import APIError from './APIError.js'
+import { APIError } from './APIError.js'
 
-class QueryError extends APIError<{ path: string }[]> {
+export class QueryError extends APIError<{ path: string }[]> {
   constructor(results: { path: string }[]) {
     const message = `The following path${results.length === 1 ? '' : 's'} cannot be queried:`
 
@@ -13,5 +13,3 @@ class QueryError extends APIError<{ path: string }[]> {
     )
   }
 }
-
-export default QueryError

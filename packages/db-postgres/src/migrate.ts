@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { Payload } from 'payload'
 import type { Migration } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { createRequire } from 'module'
 import {
@@ -88,7 +88,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
   const { generateDrizzleJson } = require('drizzle-kit/payload')
 
   const start = Date.now()
-  const req = { payload } as PayloadRequest
+  const req = { payload } as PayloadRequestWithData
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 

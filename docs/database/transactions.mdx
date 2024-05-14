@@ -20,7 +20,8 @@ The initial request made to Payload will begin a new transaction and attach it t
 
 ```ts
 const afterChange: CollectionAfterChangeHook = async ({ req }) => {
-  // because req.transactionID is assigned from Payload and passed through, my-slug will only persist if the entire request is successful
+  // because req.transactionID is assigned from Payload and passed through,
+  // my-slug will only persist if the entire request is successful
   await req.payload.create({
     req,
     collection: 'my-slug',

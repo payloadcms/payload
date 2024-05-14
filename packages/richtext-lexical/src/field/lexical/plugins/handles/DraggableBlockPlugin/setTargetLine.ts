@@ -36,20 +36,39 @@ export function setTargetLine(
     lineTop += targetBlockElemHeight / 2
   }
 
-  const top = lineTop - anchorTop - TARGET_LINE_HALF_HEIGHT
+  const targetElemTranslate = 0
+  let targetElemTranslate2 = 0
+
+  if (!isFoundNodeEmptyParagraph) {
+    if (isBelow) {
+      targetElemTranslate2 = -TARGET_LINE_HALF_HEIGHT
+    } else {
+      targetElemTranslate2 = TARGET_LINE_HALF_HEIGHT
+    }
+  }
+
+  let top = lineTop - anchorTop + targetElemTranslate2
+  if (!isBelow) {
+    top -= TARGET_LINE_HALF_HEIGHT * 2
+  }
   const left = TEXT_BOX_HORIZONTAL_PADDING - SPACE
 
   targetLineElem.style.transform = `translate(${left}px, ${top}px)`
   targetLineElem.style.width = `${anchorWidth - (TEXT_BOX_HORIZONTAL_PADDING - SPACE) * 2}px`
   targetLineElem.style.opacity = '.4'
 
-  targetBlockElem.style.opacity = '0.4'
+  /**
+   * Move around element below or above the line (= the target / targetBlockElem)
+   */
+  //targetBlockElem.style.opacity = '0.4'
   if (!isFoundNodeEmptyParagraph) {
     // move lastTargetBlockElem down 50px to make space for targetLineElem (which is 50px height)
+    targetBlockElem.style.transform = `translate(0, ${targetElemTranslate}px)`
     if (isBelow) {
-      targetBlockElem.style.transform = `translate(0, ${-TARGET_LINE_HALF_HEIGHT / 1.9}px)`
+      // add to existing marginBottom plus the height of targetLineElem
+      targetBlockElem.style.marginBottom = TARGET_LINE_HALF_HEIGHT * 2 + 'px'
     } else {
-      targetBlockElem.style.transform = `translate(0, ${TARGET_LINE_HALF_HEIGHT / 1.9}px)`
+      targetBlockElem.style.marginTop = TARGET_LINE_HALF_HEIGHT * 2 + 'px'
     }
   }
 
@@ -59,8 +78,12 @@ export function setTargetLine(
   }
 
   if (lastTargetBlockElem && lastTargetBlockElem !== targetBlockElem) {
-    lastTargetBlockElem.style.opacity = '1'
-    lastTargetBlockElem.style.transform = 'translate(0, 0)'
+    lastTargetBlockElem.style.opacity = ''
+    lastTargetBlockElem.style.transform = ''
+
+    // Delete marginBottom and marginTop values we set
+    lastTargetBlockElem.style.marginBottom = ''
+    lastTargetBlockElem.style.marginTop = ''
     //lastTargetBlockElem.style.border = 'none'
   }
 }

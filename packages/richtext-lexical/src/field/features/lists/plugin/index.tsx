@@ -1,8 +1,9 @@
 'use client'
-import lexicalListPluginImport from '@lexical/react/LexicalListPlugin.js'
-const { ListPlugin } = lexicalListPluginImport
+import { ListPlugin } from '@lexical/react/LexicalListPlugin.js'
 import React from 'react'
 
-export function LexicalListPlugin() {
+import type { PluginComponent } from '../../types.js'
+
+export const LexicalListPlugin: PluginComponent<undefined> = () => {
   return <ListPlugin />
 }

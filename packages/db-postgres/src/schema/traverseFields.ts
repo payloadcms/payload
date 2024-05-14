@@ -29,7 +29,7 @@ import type { BaseExtraConfig } from './build.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
-import { getTableName } from './getTableName.js'
+import { createTableName } from './createTableName.js'
 import { idToUUID } from './idToUUID.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical.js'
@@ -223,7 +223,7 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = getTableName({
+        const enumName = createTableName({
           adapter,
           config: field,
           parentTableName: newTableName,
@@ -244,7 +244,7 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = getTableName({
+          const selectTableName = createTableName({
             adapter,
             config: field,
             parentTableName: newTableName,
@@ -317,12 +317,13 @@ export const traverseFields = ({
       case 'array': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        const arrayTableName = getTableName({
+        const arrayTableName = createTableName({
           adapter,
           config: field,
           parentTableName: newTableName,
           prefix: `${newTableName}_`,
           throwValidationError,
+          versionsCustomName: versions,
         })
 
         const baseColumns: Record<string, PgColumnBuilder> = {
@@ -405,12 +406,13 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
-          const blockTableName = getTableName({
+          const blockTableName = createTableName({
             adapter,
             config: block,
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
             throwValidationError,
+            versionsCustomName: versions,
           })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
@@ -500,7 +502,6 @@ export const traverseFields = ({
               tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
-          adapter.blockTableNames[`${rootTableName}.${toSnakeCase(block.slug)}`] = blockTableName
           rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 

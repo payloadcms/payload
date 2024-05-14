@@ -1,5 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -14,7 +14,7 @@ export type Arguments = {
   collection: Collection
   disableErrors?: boolean
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   where?: Where
 }
 

@@ -1,4 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
+import type { Permissions } from 'payload/auth'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -21,8 +22,10 @@ export const DocumentHeader: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   i18n: I18n
+  permissions: Permissions
 }> = (props) => {
-  const { collectionConfig, config, customHeader, globalConfig, hideTabs, i18n } = props
+  const { collectionConfig, config, customHeader, globalConfig, hideTabs, i18n, permissions } =
+    props
 
   return (
     <Gutter className={baseClass}>
@@ -36,6 +39,7 @@ export const DocumentHeader: React.FC<{
               config={config}
               globalConfig={globalConfig}
               i18n={i18n}
+              permissions={permissions}
             />
           )}
         </Fragment>

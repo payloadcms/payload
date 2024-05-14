@@ -5,7 +5,7 @@ import type {
   Field,
   FormField,
   FormState,
-  PayloadRequest,
+  PayloadRequestWithData,
 } from 'payload/types'
 
 import ObjectIdImport from 'bson-objectid'
@@ -53,7 +53,7 @@ export type AddFieldStatePromiseArgs = {
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
    */
-  req: PayloadRequest
+  req: PayloadRequestWithData
   /**
    * Whether to skip checking the field's condition. @default false
    */

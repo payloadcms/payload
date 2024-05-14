@@ -1,18 +1,18 @@
 import type { CollectionConfig, Field } from 'payload/types'
 
-import type { SanitizedStripeConfig } from '../types'
+import type { SanitizedStripePluginConfig } from '../types.js'
 
-import { LinkToDoc } from '../ui/LinkToDoc'
+import { LinkToDoc } from '../ui/LinkToDoc.js'
 
 interface Args {
   collection: CollectionConfig
-  stripeConfig: SanitizedStripeConfig
+  pluginConfig: SanitizedStripePluginConfig
   syncConfig: {
     stripeResourceType: string
   }
 }
 
-export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field[] => {
+export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field[] => {
   const stripeIDField: Field = {
     name: 'stripeID',
     type: 'text',
@@ -39,13 +39,12 @@ export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field
     type: 'ui',
     admin: {
       components: {
-        Field: (args) =>
-          LinkToDoc({
-            ...args,
-            isTestKey: stripeConfig.isTestKey,
-            nameOfIDField: 'stripeID',
-            stripeResourceType: syncConfig.stripeResourceType,
-          }),
+        Field: LinkToDoc,
+      },
+      custom: {
+        isTestKey: pluginConfig.isTestKey,
+        nameOfIDField: 'stripeID',
+        stripeResourceType: syncConfig.stripeResourceType,
       },
       position: 'sidebar',
     },

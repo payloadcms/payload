@@ -1,12 +1,12 @@
 import type { User } from '../auth/types.js'
 import type { Payload, RequestContext } from '../index.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 
 function getRequestContext(
-  req: PayloadRequest = { context: null } as PayloadRequest,
+  req: PayloadRequestWithData = { context: null } as PayloadRequestWithData,
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
@@ -21,12 +21,12 @@ function getRequestContext(
   }
 }
 
-const attachFakeURLProperties = (req: PayloadRequest) => {
+const attachFakeURLProperties = (req: PayloadRequestWithData) => {
   /**
    * *NOTE*
    * If no URL is provided, the local API was called directly outside
    * the context of a request. Therefore we create a fake URL object.
-   * `ts-ignore` is used below for properties that are 'read-only'
+   * `ts-expect-error` is used below for properties that are 'read-only'
    * since they do not exist yet we can safely ignore the error.
    */
   let urlObject
@@ -51,7 +51,7 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
   // @ts-expect-error
   if (!req.origin) req.origin = getURLObject().origin
   // @ts-expect-error
-  if (!req?.url) req.url = getURLObject().url
+  if (!req?.url) req.url = getURLObject().href
 }
 
 type CreateLocalReq = (
@@ -59,17 +59,15 @@ type CreateLocalReq = (
     context?: RequestContext
     fallbackLocale?: string
     locale?: string
-    req?: PayloadRequest
+    req?: PayloadRequestWithData
     user?: User
   },
   payload: Payload,
-) => Promise<PayloadRequest>
+) => Promise<PayloadRequestWithData>
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
+  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequestWithData, user },
   payload,
 ) => {
-  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config }))
-
   if (payload.config?.localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = payload.config.localization.defaultLocale
@@ -84,6 +82,12 @@ export const createLocalReq: CreateLocalReq = async (
     }
   }
 
+  const i18n =
+    req?.i18n ||
+    (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
+
+  // @ts-expect-error
+  if (!req.headers) req.headers = new Headers()
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload

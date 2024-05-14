@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -16,7 +16,7 @@ export type Args = {
     email: string
   }
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export const unlockOperation = async (args: Args): Promise<boolean> => {

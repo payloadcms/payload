@@ -1,7 +1,11 @@
 import type { Payload } from 'payload'
-import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from 'payload/types'
+import type {
+  CollectionAfterChangeHook,
+  CollectionConfig,
+  PayloadRequestWithData,
+} from 'payload/types'
 
-export interface DocToSync {
+export type DocToSync = {
   [key: string]: any
   doc: {
     relationTo: string
@@ -15,11 +19,11 @@ export type BeforeSync = (args: {
     [key: string]: any
   }
   payload: Payload
-  req: PayloadRequest
+  req: PayloadRequestWithData
   searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 
-export interface SearchConfig {
+export type SearchPluginConfig = {
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
@@ -35,5 +39,6 @@ export interface SearchConfig {
 export type SyncWithSearch = (
   Args: Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'> & {
     collection: string
+    pluginConfig: SearchPluginConfig
   },
 ) => ReturnType<CollectionAfterChangeHook>

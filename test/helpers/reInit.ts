@@ -1,12 +1,15 @@
-import type { Endpoint } from 'payload/config'
-import type { PayloadRequest } from 'payload/types'
+import type { Endpoint, PayloadHandler } from 'payload/config'
 
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
 
+import { path } from './reInitializeDB.js'
 import { seedDB } from './seed.js'
 
-const handler = async ({ data, payload }: PayloadRequest) => {
+const handler: PayloadHandler = async (req) => {
   process.env.SEED_IN_CONFIG_ONINIT = 'true'
+  const reqWithData = await addDataAndFileToRequest({ request: req })
+  const { data, payload } = reqWithData
 
   try {
     await seedDB({
@@ -33,31 +36,8 @@ const handler = async ({ data, payload }: PayloadRequest) => {
   }
 }
 
-const path = '/re-initialize'
-
 export const reInitEndpoint: Endpoint = {
   path,
   method: 'post',
   handler,
-}
-
-export const reInitializeDB = async ({
-  serverURL,
-  snapshotKey,
-  uploadsDir,
-}: {
-  serverURL: string
-  snapshotKey: string
-  uploadsDir?: string
-}) => {
-  await fetch(`${serverURL}/api${path}`, {
-    method: 'post',
-    body: JSON.stringify({
-      snapshotKey,
-      uploadsDir,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
 }

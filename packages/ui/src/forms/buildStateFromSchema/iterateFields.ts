@@ -3,7 +3,7 @@ import type {
   DocumentPreferences,
   Field as FieldSchema,
   FormState,
-  PayloadRequest,
+  PayloadRequestWithData,
 } from 'payload/types'
 
 import { fieldIsPresentationalOnly } from 'payload/types'
@@ -45,7 +45,7 @@ type Args = {
    */
   path?: string
   preferences?: DocumentPreferences
-  req: PayloadRequest
+  req: PayloadRequestWithData
   /**
    * Whether to skip checking the field's condition. @default false
    */

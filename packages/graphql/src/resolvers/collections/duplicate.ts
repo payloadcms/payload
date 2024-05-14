@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { duplicateOperation } from 'payload/operations'
@@ -16,7 +16,7 @@ export type Resolver<T> = (
     locale?: string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<T>
 
@@ -29,6 +29,7 @@ export default function duplicateResolver<T extends keyof GeneratedTypes['collec
     const fallbackLocale = req.fallbackLocale
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    context.req = req
 
     const options = {
       id: args.id,

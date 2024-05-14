@@ -7,7 +7,7 @@ import type {
 import type { Config, Plugin } from 'payload/config'
 
 import * as AWS from '@aws-sdk/client-s3'
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
@@ -97,7 +97,7 @@ export const s3Storage: S3StoragePlugin =
       }),
     }
 
-    return cloudStorage({
+    return cloudStoragePlugin({
       collections: collectionsWithAdapter,
     })(config)
   }
@@ -112,6 +112,7 @@ function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adap
     }
 
     return {
+      name: 's3',
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

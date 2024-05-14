@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -28,7 +28,7 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
 }
 
@@ -120,6 +120,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       context: req.context,
       depth: 0,
       doc: docWithLocales,
+      draft: draftArg,
       fallbackLocale: null,
       global: null,
       locale: req.locale,
@@ -247,6 +248,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       context: req.context,
       depth,
       doc: versionDoc,
+      draft: draftArg,
       fallbackLocale,
       global: null,
       locale: localeArg,

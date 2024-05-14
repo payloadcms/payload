@@ -81,12 +81,12 @@ export const DocumentInfoProvider: React.FC<
     }
   }
 
-  const isEditing = Boolean(id)
+  const operation = collectionSlug && !id ? 'create' : 'update'
+  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
-    const shouldFetchVersions = Boolean(versionsConfig)
     let unpublishedVersionJSON = null
     let versionJSON = null
     let shouldFetch = true
@@ -209,7 +209,7 @@ export const DocumentInfoProvider: React.FC<
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig])
+  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
@@ -286,7 +286,7 @@ export const DocumentInfoProvider: React.FC<
           docPreferences,
           globalSlug,
           locale,
-          operation: isEditing ? 'update' : 'create',
+          operation,
           schemaPath: collectionSlug || globalSlug,
         },
         serverURL,
@@ -301,7 +301,7 @@ export const DocumentInfoProvider: React.FC<
       getDocPreferences,
       globalSlug,
       id,
-      isEditing,
+      operation,
       locale,
       onSaveFromProps,
       serverURL,
@@ -323,7 +323,7 @@ export const DocumentInfoProvider: React.FC<
             collectionSlug,
             globalSlug,
             locale,
-            operation: isEditing ? 'update' : 'create',
+            operation,
             schemaPath: collectionSlug || globalSlug,
           },
           onError: onLoadError,
@@ -353,7 +353,7 @@ export const DocumentInfoProvider: React.FC<
     }
   }, [
     api,
-    isEditing,
+    operation,
     collectionSlug,
     serverURL,
     id,

@@ -1,6 +1,7 @@
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 import type { RelationshipField, UploadField } from '../../config/types.js'
 
+import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
 
 type PopulateArgs = {
@@ -8,13 +9,14 @@ type PopulateArgs = {
   data: Record<string, unknown>
   dataReference: Record<string, any>
   depth: number
+  draft: boolean
   fallbackLocale: null | string
   field: RelationshipField | UploadField
   index?: number
   key?: string
   locale: null | string
   overrideAccess: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
 }
 
@@ -23,6 +25,7 @@ const populate = async ({
   data,
   dataReference,
   depth,
+  draft,
   fallbackLocale,
   field,
   index,
@@ -52,17 +55,18 @@ const populate = async ({
 
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(
-        JSON.stringify([
-          req.transactionID,
-          relatedCollection.config.slug,
-          id,
+        createDataloaderCacheKey({
+          collectionSlug: relatedCollection.config.slug,
+          currentDepth: currentDepth + 1,
           depth,
-          currentDepth + 1,
-          locale,
+          docID: id as string,
+          draft,
           fallbackLocale,
+          locale,
           overrideAccess,
           showHiddenFields,
-        ]),
+          transactionID: req.transactionID,
+        }),
       )
     }
 
@@ -94,11 +98,12 @@ const populate = async ({
 type PromiseArgs = {
   currentDepth: number
   depth: number
+  draft: boolean
   fallbackLocale: null | string
   field: RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
 }
@@ -106,6 +111,7 @@ type PromiseArgs = {
 export const relationshipPopulationPromise = async ({
   currentDepth,
   depth,
+  draft,
   fallbackLocale,
   field,
   locale,
@@ -133,6 +139,7 @@ export const relationshipPopulationPromise = async ({
                 data: siblingDoc[field.name][key][index],
                 dataReference: resultingDoc,
                 depth: populateDepth,
+                draft,
                 fallbackLocale,
                 field,
                 index,
@@ -156,6 +163,7 @@ export const relationshipPopulationPromise = async ({
               data: relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
+              draft,
               fallbackLocale,
               field,
               index,
@@ -182,6 +190,7 @@ export const relationshipPopulationPromise = async ({
           data: siblingDoc[field.name][key],
           dataReference: resultingDoc,
           depth: populateDepth,
+          draft,
           fallbackLocale,
           field,
           key,
@@ -201,6 +210,7 @@ export const relationshipPopulationPromise = async ({
       data: siblingDoc[field.name],
       dataReference: resultingDoc,
       depth: populateDepth,
+      draft,
       fallbackLocale,
       field,
       locale,

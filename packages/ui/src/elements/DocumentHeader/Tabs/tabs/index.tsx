@@ -68,8 +68,13 @@ export const tabs: Record<
   },
   Versions: {
     Pill: VersionsPill,
-    condition: ({ collectionConfig, globalConfig }) =>
-      Boolean(collectionConfig?.versions || globalConfig?.versions),
+    condition: ({ collectionConfig, globalConfig, permissions }) =>
+      Boolean(
+        (collectionConfig?.versions &&
+          permissions?.collections?.[collectionConfig?.slug]?.readVersions?.permission) ||
+          (globalConfig?.versions &&
+            permissions?.globals?.[globalConfig?.slug]?.readVersions?.permission),
+      ),
     href: '/versions',
     label: ({ t }) => t('version:versions'),
     order: 200,

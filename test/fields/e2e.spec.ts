@@ -10,6 +10,7 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureAutoLoginAndCompilationIsDone,
+  exactText,
   initPageConsoleErrorCatch,
   navigateToListCellLink,
   openDocDrawer,
@@ -18,13 +19,20 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInit.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { textDoc } from './collections/Text/shared.js'
-import { collapsibleFieldsSlug, pointFieldsSlug, tabsFieldsSlug, textFieldsSlug } from './slugs.js'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  collapsibleFieldsSlug,
+  pointFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -37,7 +45,8 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({
       dirname,
@@ -47,6 +56,12 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -73,6 +88,60 @@ describe('fields', () => {
       await page.goto(url.list)
       const textCell = page.locator('.row-1 .cell-text')
       await expect(textCell).toHaveText(textDoc.text)
+    })
+
+    test('should hide field in column selector when admin.disableListColumn', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
+    })
+
+    test('should show field in filter when admin.disableListColumn is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-where').click()
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+
+      await expect(
+        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+      ).toBeVisible()
+    })
+
+    test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Filter Text" is present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Filter Text'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should hide field in filter when admin.disableListFilter is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-where').click()
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+
+      await expect(
+        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+      ).toBeHidden()
     })
 
     test('should display i18n label in cells when missing field data', async () => {
@@ -526,6 +595,44 @@ describe('fields', () => {
         `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
+    })
+  })
+
+  describe('sortable arrays', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, arrayFieldsSlug)
+    })
+
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .collapsible__drag')
+      expect(await field.count()).toEqual(0)
+    })
+  })
+
+  describe('sortable blocks', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, blockFieldsSlug)
+    })
+
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort .collapsible__drag')
+      expect(await field.count()).toEqual(0)
     })
   })
 

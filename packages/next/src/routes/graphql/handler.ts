@@ -5,6 +5,8 @@ import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
 
+import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
+import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 
@@ -61,11 +63,10 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
   }
 
   if (!cached.promise) {
-    // eslint-disable-next-line no-async-promise-executor
-    cached.promise = new Promise(async (resolve) => {
-      const resolvedConfig = await config
+    const resolvedConfig = await config
+    cached.promise = new Promise((resolve) => {
       const schema = configToSchema(resolvedConfig)
-      resolve(schema)
+      resolve(cached.graphql || schema)
     })
   }
 
@@ -82,20 +83,24 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
-    const req = await createPayloadRequest({
+    const basePayloadRequest = await createPayloadRequest({
       config,
       request,
     })
+
+    const reqWithData = await addDataAndFileToRequest({ request: basePayloadRequest })
+    const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+
     const { schema, validationRules } = await getGraphql(config)
 
-    const { payload } = req
+    const { payload } = payloadRequest
 
     const afterErrorHook =
       typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
 
     const headers = {}
     const apiResponse = await createHandler({
-      context: { headers, req },
+      context: { headers, req: payloadRequest },
       onOperation: async (request, args, result) => {
         const response =
           typeof payload.extensions === 'function'
@@ -122,7 +127,7 @@ export const POST =
 
     const resHeaders = headersWithCors({
       headers: new Headers(apiResponse.headers),
-      req,
+      req: payloadRequest,
     })
 
     for (const key in headers) {

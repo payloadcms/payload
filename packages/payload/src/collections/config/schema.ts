@@ -30,6 +30,7 @@ const collectionSchema = joi.object().keys({
       BeforeList: joi.array().items(componentSchema),
       BeforeListTable: joi.array().items(componentSchema),
       edit: joi.object({
+        Description: componentSchema,
         PreviewButton: componentSchema,
         PublishButton: componentSchema,
         SaveButton: componentSchema,
@@ -59,7 +60,9 @@ const collectionSchema = joi.object().keys({
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),
     defaultColumns: joi.array().items(joi.string()),
-    description: joi.alternatives().try(joi.string(), componentSchema),
+    description: joi
+      .alternatives()
+      .try(joi.func(), joi.object().pattern(joi.string(), [joi.string()]), joi.string()),
     enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
     group: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
@@ -152,6 +155,7 @@ const collectionSchema = joi.object().keys({
   }),
   upload: joi.alternatives().try(
     joi.object({
+      adapter: joi.string(),
       adminThumbnail: joi.alternatives().try(joi.string(), componentSchema),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),

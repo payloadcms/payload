@@ -1,6 +1,6 @@
 import type { Adapter } from '@payloadcms/plugin-cloud-storage/types'
 
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
 import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs'
 import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
@@ -122,7 +122,7 @@ export default buildConfigWithDefaults({
     )
   },
   plugins: [
-    cloudStorage({
+    cloudStoragePlugin({
       collections: {
         [mediaSlug]: {
           adapter,

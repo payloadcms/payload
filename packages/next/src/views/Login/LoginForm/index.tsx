@@ -6,7 +6,7 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequest } from 'payload/types'
+import type { FormState, PayloadRequestWithData } from 'payload/types'
 
 import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
 import { Email } from '@payloadcms/ui/fields/Email'
@@ -69,7 +69,7 @@ export const LoginForm: React.FC<{
               type: 'email',
               data: {},
               preferences: { fields: {} },
-              req: { t } as PayloadRequest,
+              req: { t } as PayloadRequestWithData,
               required: true,
               siblingData: {},
             })
@@ -91,7 +91,7 @@ export const LoginForm: React.FC<{
                   config,
                 },
                 t,
-              } as PayloadRequest,
+              } as PayloadRequestWithData,
               required: true,
               siblingData: {},
             })

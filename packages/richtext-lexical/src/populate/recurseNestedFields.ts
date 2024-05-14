@@ -1,5 +1,5 @@
 import type { RequestContext } from 'payload'
-import type { Field, PayloadRequest } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload/types'
 
 import { afterReadTraverseFields } from 'payload/utilities'
 
@@ -10,6 +10,7 @@ type NestedRichTextFieldsArgs = {
   currentDepth?: number
   data: unknown
   depth: number
+  draft: boolean
   /**
    * This maps all the population promises to the node types
    */
@@ -23,7 +24,7 @@ type NestedRichTextFieldsArgs = {
   flattenLocales: boolean
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }
@@ -33,6 +34,7 @@ export const recurseNestedFields = ({
   currentDepth = 0,
   data,
   depth,
+  draft,
   fieldPromises,
   fields,
   findMany,
@@ -49,6 +51,7 @@ export const recurseNestedFields = ({
     currentDepth,
     depth,
     doc: data as any, // Looks like it's only needed for hooks and access control, so doesn't matter what we pass here right now
+    draft,
     fallbackLocale: req.fallbackLocale,
     fieldPromises,
     fields,

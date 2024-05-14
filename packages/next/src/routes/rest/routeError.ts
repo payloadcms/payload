@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/types'
 
 import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
@@ -78,7 +78,7 @@ export const routeError = async ({
   collection?: Collection
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: Partial<PayloadRequest>
+  req: Partial<PayloadRequestWithData>
 }) => {
   let payload = req?.payload
 

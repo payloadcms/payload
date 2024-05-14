@@ -8,7 +8,7 @@ import type {
 import type { Config, Plugin } from 'payload/config'
 
 import { BlobServiceClient } from '@azure/storage-blob'
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
@@ -16,8 +16,18 @@ import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
 export type AzureStorageOptions = {
+  /**
+   * Whether or not to allow the container to be created if it does not exist
+   *
+   * @default false
+   */
   allowContainerCreate: boolean
+
+  /**
+   * Base URL for the Azure Blob storage account
+   */
   baseURL: string
+
   /**
    * Collection options to apply the Azure Blob adapter to.
    */
@@ -84,7 +94,7 @@ export const azureStorage: AzureStoragePlugin =
       }),
     }
 
-    return cloudStorage({
+    return cloudStoragePlugin({
       collections: collectionsWithAdapter,
     })(config)
   }
@@ -110,6 +120,7 @@ function azureStorageInternal({
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
+      name: 'azure',
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({

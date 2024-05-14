@@ -1,5 +1,5 @@
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { Document, Payload, PayloadRequestWithData, Where } from '../types/index.js'
 
 import { docHasTimestamps } from '../types/index.js'
 
@@ -7,7 +7,7 @@ type Args = {
   config: SanitizedGlobalConfig
   locale?: string
   payload: Payload
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   slug: string
   where: Where
 }

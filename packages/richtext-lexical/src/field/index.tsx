@@ -1,6 +1,6 @@
 'use client'
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'

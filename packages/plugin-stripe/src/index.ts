@@ -1,6 +1,6 @@
 import type { Config, Endpoint } from 'payload/config'
 
-import type { SanitizedStripeConfig, StripeConfig } from './types.js'
+import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { createNewInStripe } from './hooks/createNewInStripe.js'
@@ -9,16 +9,18 @@ import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
 import { stripeREST } from './routes/rest.js'
 import { stripeWebhooks } from './routes/webhooks.js'
 
-const stripePlugin =
-  (incomingStripeConfig: StripeConfig) =>
+export { LinkToDoc } from './ui/LinkToDoc.js'
+export { stripeProxy } from './utilities/stripeProxy.js'
+
+export const stripePlugin =
+  (incomingStripeConfig: StripePluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
-    const stripeConfig: SanitizedStripeConfig = {
+    const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingStripeConfig,
-      // TODO: in the next major version, default this to `false`
-      rest: incomingStripeConfig?.rest ?? true,
+      rest: incomingStripeConfig?.rest ?? false,
       sync: incomingStripeConfig?.sync || [],
     }
 
@@ -32,8 +34,8 @@ const stripePlugin =
         handler: async (req) => {
           const res = await stripeWebhooks({
             config,
+            pluginConfig,
             req,
-            stripeConfig,
           })
 
           return res
@@ -47,8 +49,8 @@ const stripePlugin =
       endpoints.push({
         handler: async (req) => {
           const res = await stripeREST({
+            pluginConfig,
             req,
-            stripeConfig,
           })
 
           return res
@@ -63,12 +65,12 @@ const stripePlugin =
       collections: collections?.map((collection) => {
         const { hooks: existingHooks } = collection
 
-        const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug)
+        const syncConfig = pluginConfig.sync?.find((sync) => sync.collection === collection.slug)
 
         if (syncConfig) {
           const fields = getFields({
             collection,
-            stripeConfig,
+            pluginConfig,
             syncConfig,
           })
           return {
@@ -82,7 +84,7 @@ const stripePlugin =
                   deleteFromStripe({
                     ...args,
                     collection,
-                    stripeConfig,
+                    pluginConfig,
                   }),
               ],
               beforeChange: [
@@ -91,7 +93,7 @@ const stripePlugin =
                   syncExistingWithStripe({
                     ...args,
                     collection,
-                    stripeConfig,
+                    pluginConfig,
                   }),
               ],
               beforeValidate: [
@@ -100,7 +102,7 @@ const stripePlugin =
                   createNewInStripe({
                     ...args,
                     collection,
-                    stripeConfig,
+                    pluginConfig,
                   }),
               ],
             },
@@ -112,5 +114,3 @@ const stripePlugin =
       endpoints,
     }
   }
-
-export default stripePlugin

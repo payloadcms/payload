@@ -1,23 +1,21 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalUtilsImport from '@lexical/utils'
-const { $insertNodeToNearestRoot, mergeRegister } = lexicalUtilsImport
-import lexicalImport from 'lexical'
-const {
+import type { LexicalCommand } from 'lexical'
+
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import {
   $getPreviousSelection,
   $getSelection,
   $isParagraphNode,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
-} = lexicalImport
-
-import type { LexicalCommand } from 'lexical'
-
-import { useConfig } from '@payloadcms/ui/providers/Config'
+} from 'lexical'
 import React, { useEffect } from 'react'
 
+import type { PluginComponentWithAnchor } from '../../types.js'
+import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadData } from '../nodes/UploadNode.js'
 
 import { UploadDrawer } from '../drawer/index.js'
@@ -28,7 +26,9 @@ export type InsertUploadPayload = Readonly<UploadData>
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export function UploadPlugin(): JSX.Element | null {
+export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> = ({
+  clientProps,
+}) => {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 

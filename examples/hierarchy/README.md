@@ -1,8 +1,10 @@
-# Payload Hierarchy Example
+# Payload Blank Template
 
-This example demonstrates how to achieve a virtual hierarchy between documents in your [Payload](https://github.com/payloadcms/payload) application.
+A blank template for [Payload](https://github.com/payloadcms/payload) to help you get up and running quickly. This repo may have been created by running `npx create-payload-app@latest` and selecting the "blank" template or by cloning this template on [Payload Cloud](https://payloadcms.com/new/clone/blank).
 
-## Quick Start
+See the official [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) for details on how to use Payload in a variety of different ways.
+
+## Development
 
 To spin up the project locally, follow these steps:
 
@@ -14,33 +16,15 @@ To spin up the project locally, follow these steps:
 
 That's it! Changes made in `./src` will be reflected in your app.
 
-## How it works
+### Docker
 
-This example achieves parent/child relationships between your documents through the use of virtual fields. When you query a document with the `?children=true` query param, an afterRead hook is used to populate the documents within its own tree.
+Alternatively, you can use [Docker](https://www.docker.com) to spin up this project locally. To do so, follow these steps:
 
-For more information on how virtual fields, see the [Official Virtual Fields Example](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields).
+1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
+1. Next run `docker-compose up`
+1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
 
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend any of this functionality.
-
-- #### Users
-
-  The `users` collection is a default payload users collection.
-
-- #### Entities
-
-  The `entities` collection can define a parent as any other entity.  It has a virtual field that will also populate children when it is called via the API using a query `children=true`. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work. 
-  
-  The virtual field retrieves __all__ children which includes other entities and people.
-
-- #### People
-
-  The `people` collection is a collection that can define an array of parent entities.  It also has an allocation field.  This is for demonstrating attaching data to a parent-child relationship.
-
-## Development
-
-To spin up this example locally, follow the [Quick Start](#quick-start).
+That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
 
 ## Production
 

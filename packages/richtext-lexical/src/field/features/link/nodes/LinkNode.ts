@@ -1,19 +1,4 @@
 import type { BaseSelection } from 'lexical'
-
-import lexicalUtilsImport from '@lexical/utils'
-const { addClassNamesToElement, isHTMLAnchorElement } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const {
-  $applyNodeReplacement,
-  $createTextNode,
-  $getSelection,
-  $isElementNode,
-  $isRangeSelection,
-  ElementNode,
-  createCommand,
-} = lexicalImport
-
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -23,6 +8,17 @@ import type {
   LexicalNode,
   NodeKey,
   RangeSelection,
+} from 'lexical'
+
+import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
+import {
+  $applyNodeReplacement,
+  $createTextNode,
+  $getSelection,
+  $isElementNode,
+  $isRangeSelection,
+  ElementNode,
+  createCommand,
 } from 'lexical'
 
 import type { LinkPayload } from '../plugins/floatingLinkEditor/types.js'

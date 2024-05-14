@@ -1,28 +1,21 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary.js'
-import lexicalHistoryPluginImport from '@lexical/react/LexicalHistoryPlugin.js'
-const { HistoryPlugin } = lexicalHistoryPluginImport
-
-import lexicalOnChangePluginImport from '@lexical/react/LexicalOnChangePlugin.js'
-const { OnChangePlugin } = lexicalOnChangePluginImport
-
-import lexicalRichTextPluginImport from '@lexical/react/LexicalRichTextPlugin.js'
-const { RichTextPlugin } = lexicalRichTextPluginImport
-
-import lexicalTabIndentationPluginImport from '@lexical/react/LexicalTabIndentationPlugin.js'
-const { TabIndentationPlugin } = lexicalTabIndentationPluginImport
-
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
+import { mergeRegister } from '@lexical/utils'
+import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
+import { useEditorFocus } from './EditorFocusProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
-import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar/index.js'
+import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
@@ -33,7 +26,9 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
   props,
 ) => {
   const { editorConfig, onChange } = props
+  const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
+  const editorFocus = useEditorFocus()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -42,11 +37,34 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     }
   }
 
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand<MouseEvent>(
+        FOCUS_COMMAND,
+        () => {
+          editorFocus.focusEditor(editor, editorConfigContext)
+          return true
+        },
+
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand<MouseEvent>(
+        BLUR_COMMAND,
+        () => {
+          editorFocus.blurEditor()
+          return true
+        },
+
+        COMMAND_PRIORITY_LOW,
+      ),
+    )
+  }, [editor, editorConfig, editorConfigContext, editorFocus])
+
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
 
   useEffect(() => {
     const updateViewPortWidth = () => {
-      const isNextSmallWidthViewport = window.matchMedia('(max-width: 1025px)').matches
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
 
       if (isNextSmallWidthViewport !== isSmallWidthViewport) {
         setIsSmallWidthViewport(isNextSmallWidthViewport)
@@ -66,7 +84,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'top') {
-          return <EditorPlugin key={plugin.key} plugin={plugin} />
+          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
       <RichTextPlugin
@@ -109,13 +127,17 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
               !(plugin.desktopOnly === true && isSmallWidthViewport)
             ) {
               return (
-                <EditorPlugin anchorElem={floatingAnchorElem} key={plugin.key} plugin={plugin} />
+                <EditorPlugin
+                  anchorElem={floatingAnchorElem}
+                  clientProps={plugin.clientProps}
+                  key={plugin.key}
+                  plugin={plugin}
+                />
               )
             }
           })}
           {editor.isEditable() && (
             <React.Fragment>
-              <FloatingSelectToolbarPlugin anchorElem={floatingAnchorElem} />
               <SlashMenuPlugin anchorElem={floatingAnchorElem} />
             </React.Fragment>
           )}
@@ -131,12 +153,12 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
-          return <EditorPlugin key={plugin.key} plugin={plugin} />
+          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'bottom') {
-          return <EditorPlugin key={plugin.key} plugin={plugin} />
+          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
     </React.Fragment>
