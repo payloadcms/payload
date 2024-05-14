@@ -93,6 +93,7 @@ export const getViewFromConfig = ({
         const matchedRoute = Object.entries(config.admin.routes).find(([, customRoute]) => {
           return isPathMatchingRoute({
             currentRoute,
+            exact: true,
             path: `${adminRoute}${customRoute}`,
           })
         })
@@ -101,6 +102,8 @@ export const getViewFromConfig = ({
           viewToRender = matchedRoute[0] as keyof typeof oneSegmentViews
         }
       }
+
+      console.log('viewToRender', viewToRender)
 
       if (oneSegmentViews[viewToRender]) {
         // --> /account
