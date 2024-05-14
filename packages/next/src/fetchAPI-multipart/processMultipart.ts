@@ -184,11 +184,14 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     return result
   })
 
-  busboy.on('error', (err: APIError) => {
-    debugLog(options, `Busboy error`)
-    parsingRequest = false
-    throw err || new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
-  })
+  busboy.on(
+    'error',
+    (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
+      debugLog(options, `Busboy error`)
+      parsingRequest = false
+      throw err
+    },
+  )
 
   const reader = request.body.getReader()
 
