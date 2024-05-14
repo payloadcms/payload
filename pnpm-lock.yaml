@@ -915,6 +915,9 @@ importers:
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.91.0)
+      next:
+        specifier: ^14.3.0-canary.7
+        version: 14.3.0-canary.7(@babel/core@7.24.4)(@playwright/test@1.43.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.74.1)
       nodemon:
         specifier: 3.0.3
         version: 3.0.3
