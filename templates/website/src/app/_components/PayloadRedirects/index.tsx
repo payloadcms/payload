@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const PayloadRedirects: React.FC<Props> = async ({ url }) => {
-  const slug = url.startsWith('/') ? url : `/${url}`
+  const slug = url.startsWith('/') ? url : `${url}`
 
   const cachedRedirect = getCachedRedirect(slug)
   const redirectItem = await cachedRedirect()

@@ -2,28 +2,28 @@ import type { CollectionConfig } from 'payload/types'
 
 import { richText } from 'src/fields/richText'
 
+import type { Post } from '../../payload-types'
+
 import { admins } from '../../access/admins'
-import { adminsOrPublished } from '../../access/adminsOrPublished'
+import { usersOrPublished } from '../../access/usersOrPublished'
 import { Banner } from '../../blocks/Banner'
 import { Code } from '../../blocks/Code'
 import { slugField } from '../../fields/slug'
+import { preview } from '../../utilities/preview'
+import { populateAuthors } from './hooks/populateAuthors'
+import { revalidatePost } from './hooks/revalidatePost'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
     create: admins,
     delete: admins,
-    read: adminsOrPublished,
+    read: usersOrPublished,
     update: admins,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: (doc) => {
-      const slug = (doc?.slug as string) ?? ''
-      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
-        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/posts/${slug}`,
-      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
-    },
+    preview: (doc: Post) => preview({ path: `/posts/${doc.slug}` }),
     useAsTitle: 'title',
   },
   fields: [
@@ -138,11 +138,10 @@ export const Posts: CollectionConfig = {
     },
     slugField(),
   ],
-  /* hooks: {
+  hooks: {
     afterChange: [revalidatePost],
-    afterRead: [populateArchiveBlock, populateAuthors],
-    beforeChange: [populatePublishedAt],
-  }, */
+    afterRead: [populateAuthors],
+  },
   versions: {
     drafts: true,
   },

@@ -76,7 +76,7 @@ type GeneratePreviewURLOptions = {
 }
 
 export type GeneratePreviewURL = (
-  doc: Record<string, unknown>,
+  doc: unknown,
   options: GeneratePreviewURLOptions,
 ) => Promise<null | string> | null | string
 

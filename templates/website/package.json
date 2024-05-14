@@ -7,6 +7,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "dev:prod": "rm -rf .next && pnpm build && pnpm serve",
     "generate:types": "payload generate:types",
     "ii": "pnpm --ignore-workspace install",
     "lint": "eslint src",
@@ -14,8 +15,7 @@
     "payload": "payload",
     "reinstall": "rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true next dev",
-    "serve": "next start",
-    "serve:server": "cross-env NODE_ENV=production node dist/server.js"
+    "serve": "next start"
   },
   "dependencies": {
     "@lexical/list": "^0.14.5",
@@ -38,6 +38,7 @@
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
     "graphql": "^16.8.1",
+    "jsonwebtoken": "9.0.1",
     "next": "14.3.0-canary.28",
     "payload": "3.0.0-beta.30",
     "payload-admin-bar": "^1.0.6",

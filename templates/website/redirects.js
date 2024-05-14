@@ -1,6 +1,3 @@
-import { getPayload } from 'payload'
-import { importConfig } from 'payload/node'
-
 const redirects = async () => {
   const internetExplorerRedirect = {
     destination: '/ie-incompatible.html',

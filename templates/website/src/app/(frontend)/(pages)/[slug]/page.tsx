@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 
 import configPromise from '@payload-config'
-import { unstable_cache } from 'next/cache'
-import { draftMode } from 'next/headers'
+import { draftMode, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import React from 'react'
@@ -14,39 +13,34 @@ import { Hero } from '../../../_components/Hero'
 import { PayloadRedirects } from '../../../_components/PayloadRedirects'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
-// Could abstract this, keeping it explicit for example sake
-const getCachedGetPageBySlug = ({ slug }: { slug: string }) => {
+const queryPageBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
-  return unstable_cache<() => Promise<Page>>(
-    async () => {
-      const payload = await getPayload({ config: configPromise })
-      const result = await payload.find({
-        collection: 'pages',
-        draft,
-        limit: 1,
-        where: {
-          slug: {
-            equals: slug,
-          },
-        },
-      })
+  const payload = await getPayload({ config: configPromise })
+  const user = draft ? await payload.auth({ headers: headers() }) : undefined
 
-      return result.docs?.[0] || null
+  const result = await payload.find({
+    collection: 'pages',
+    draft,
+    limit: 1,
+    overrideAccess: false,
+    user,
+    where: {
+      slug: {
+        equals: slug,
+      },
     },
-    [`pages_${slug}_${draft}`],
-    {
-      tags: [`pages_${slug}`],
-    },
-  )
+  })
+
+  return result.docs?.[0] || null
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function Page({ params: { slug = 'home' } }) {
+export default async function Page({ params: { slug = '' } }) {
   const url = '/' + slug
-  const page = await getCachedGetPageBySlug({
+
+  const page = await queryPageBySlug({
     slug,
-  })()
+  })
 
   if (!page) {
     return notFound()
@@ -70,16 +64,18 @@ export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
     collection: 'pages',
+    draft: false,
     limit: 1000,
+    overrideAccess: false,
   })
 
   return pages.docs?.map(({ slug }) => slug)
 }
 
-export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
-  const page = await getCachedGetPageBySlug({
+export async function generateMetadata({ params: { slug = '' } }): Promise<Metadata> {
+  const page = await queryPageBySlug({
     slug,
-  })()
+  })
 
   return generateMeta({ doc: page })
 }

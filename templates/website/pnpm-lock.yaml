@@ -65,6 +65,9 @@ dependencies:
   graphql:
     specifier: ^16.8.1
     version: 16.8.1
+  jsonwebtoken:
+    specifier: 9.0.1
+    version: 9.0.1
   next:
     specifier: 14.3.0-canary.28
     version: 14.3.0-canary.28(react-dom@18.3.1)(react@18.3.1)
@@ -3768,10 +3771,6 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /abbrev@1.1.1:
-    resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
-    dev: true
-
   /abbrev@2.0.0:
     resolution: {integrity: sha512-6/mh1E2u2YgEsCHdY0Yx5oW+61gZU+1vXaoiHHrpKeuRNNgFvS+/jrwHiQhB5apAf5oB7UB7E19ol2R2LKH8hQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -7243,7 +7242,7 @@ packages:
       semver: 5.7.2
       simple-update-notifier: 1.1.0
       supports-color: 5.5.0
-      touch: 3.1.0
+      touch: 3.1.1
       undefsafe: 2.0.5
     dev: true
 
@@ -7252,13 +7251,6 @@ packages:
     dependencies:
       inherits: 2.0.4
       readable-stream: 1.0.34
-    dev: true
-
-  /nopt@1.0.10:
-    resolution: {integrity: sha512-NWmpvLSqUrgrAC9HCuxEvb+PSloHpqVu+FqcO4eeF2h5qYRhA7ev6KvelyQAKtegUbC6RypJnlEOhd8vloNKYg==}
-    hasBin: true
-    dependencies:
-      abbrev: 1.1.1
     dev: true
 
   /nopt@7.2.1:
@@ -9027,11 +9019,9 @@ packages:
       ieee754: 1.2.1
     dev: false
 
-  /touch@3.1.0:
-    resolution: {integrity: sha512-WBx8Uy5TLtOSRtIq+M03/sKDrXCLHxwDcquSP2c43Le03/9serjQBIztjRz6FkJez9D/hleyAXTBGLwwZUw9lA==}
+  /touch@3.1.1:
+    resolution: {integrity: sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA==}
     hasBin: true
-    dependencies:
-      nopt: 1.0.10
     dev: true
 
   /tr46@0.0.3:

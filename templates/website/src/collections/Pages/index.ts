@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload/types'
 
+import type { Page } from '../../payload-types'
+
 import { admins } from '../../access/admins'
-import { adminsOrPublished } from '../../access/adminsOrPublished'
+import { usersOrPublished } from '../../access/usersOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock'
 import { CallToAction } from '../../blocks/CallToAction'
 import { Content } from '../../blocks/Content'
@@ -10,6 +12,7 @@ import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
+import { preview } from '../../utilities/preview'
 import { revalidatePage } from './hooks/revalidatePage'
 
 export const Pages: CollectionConfig = {
@@ -17,22 +20,15 @@ export const Pages: CollectionConfig = {
   access: {
     create: admins,
     delete: admins,
-    read: adminsOrPublished,
+    read: usersOrPublished,
     update: admins,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) => {
-        const isHomePage = data.slug === 'home'
-        return `${process.env.NEXT_PUBLIC_SERVER_URL}${!isHomePage ? `/${data.slug}` : ''}`
-      },
+      url: ({ data }) => `${process.env.NEXT_PUBLIC_SERVER_URL}${`/${data.slug}`}`,
     },
-    preview: (doc) => {
-      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
-        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/${typeof doc.slug === 'string' && doc.slug !== 'home' ? doc.slug : ''}`,
-      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
-    },
+    preview: (doc: Page) => preview({ path: `/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
     useAsTitle: 'title',
   },
   fields: [

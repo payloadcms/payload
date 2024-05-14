@@ -1,7 +1,7 @@
 import type { Page } from '../payload-types'
 
 export const home: Partial<Page> = {
-  slug: 'home',
+  slug: '',
   _status: 'published',
   hero: {
     type: 'highImpact',
