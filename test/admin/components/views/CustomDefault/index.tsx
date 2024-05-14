@@ -1,5 +1,3 @@
-import type { AdminViewProps } from 'payload/types'
-
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
@@ -16,7 +14,11 @@ import { customViewPath } from '../../../shared.js'
 import './index.scss'
 const baseClass = 'custom-default-view'
 
-export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const CustomDefaultView: React.FC<AdminViewProps> = ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     permissions,
     req: {
@@ -38,7 +40,16 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
   }
 
   return (
-    <DefaultTemplate payload={payload} visibleEntities={visibleEntities}>
+    <DefaultTemplate
+      i18n={initPageResult.req.i18n}
+      locale={initPageResult.locale}
+      params={params}
+      payload={payload}
+      permissions={permissions}
+      searchParams={searchParams}
+      user={user}
+      visibleEntities={visibleEntities}
+    >
       <SetStepNav
         nav={[
           {

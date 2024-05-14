@@ -1,8 +1,13 @@
-import type { DefaultTranslationsObject, I18nOptions, TFunction } from '@payloadcms/translations'
+import type {
+  DefaultTranslationsObject,
+  I18nClient,
+  I18nOptions,
+  TFunction,
+} from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { Metadata as NextMetadata } from 'next'
-import type { DestinationStream, LoggerOptions, P } from 'pino'
+import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -10,7 +15,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
-import type { User } from '../auth/types.js'
+import type { Permissions } from '../auth/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -20,7 +25,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js'
+import type { GeneratedTypes, Payload } from '../index.js'
 import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -162,19 +167,19 @@ export type InitOptions = {
  */
 export type AccessResult = Where | boolean
 
-export type AccessArgs<T = any, U = any> = {
+export type AccessArgs<TData = any> = {
   /**
    * The relevant resource that is being accessed.
    *
    * `data` is null when a list is requested
    */
-  data?: T
+  data?: TData
   /** ID of the resource being accessed */
   id?: number | string
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequestWithData<U>
+  req: PayloadRequestWithData
 }
 
 /**
@@ -183,17 +188,15 @@ export type AccessArgs<T = any, U = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<T = any, U = any> = (
-  args: AccessArgs<T, U>,
-) => AccessResult | Promise<AccessResult>
+export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
 
-/** Web Request/Response model, but the the req has more payload specific properties added to it. */
+/** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
  */
-export type Endpoint<U = User> = {
+export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
 
@@ -251,12 +254,28 @@ export type EditViewConfig =
 export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
+  i18n: I18nClient
+  locale?: Locale
+  params?: { [key: string]: string | string[] | undefined }
   payload: Payload
+  permissions?: Permissions
+  searchParams?: { [key: string]: string | string[] | undefined }
+  user?: GeneratedTypes['user']
 }
 
-export const serverProps: (keyof ServerProps)[] = ['payload']
+export const serverProps: (keyof ServerProps)[] = [
+  'payload',
+  'i18n',
+  'locale',
+  'params',
+  'permissions',
+  'searchParams',
+  'permissions',
+]
 
-export type CustomComponent<T extends any = any> = React.ComponentType<T & ServerProps>
+export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
+  TAdditionalProps & Partial<ServerProps>
+>
 
 export type Locale = {
   /**
@@ -494,7 +513,7 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
-    /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
+    /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
   /** Custom Payload bin scripts can be injected via the config. */

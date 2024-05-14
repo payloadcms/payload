@@ -1,4 +1,11 @@
-export type WithServerSideProps = (args: {
+import type React from 'react'
+
+import type { ServerProps } from '../../config/types.js'
+
+export type WithServerSidePropsComponentProps = {
   [key: string]: any
   Component: React.ComponentType<any>
-}) => React.ReactNode
+  serverOnlyProps: ServerProps
+}
+
+export type WithServerSidePropsComponent = React.FC<WithServerSidePropsComponentProps>

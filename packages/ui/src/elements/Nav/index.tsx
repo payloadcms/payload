@@ -1,4 +1,4 @@
-import type { Payload } from 'payload/types'
+import type { ServerProps } from 'payload/config'
 
 import React from 'react'
 
@@ -9,16 +9,13 @@ import './index.scss'
 
 const baseClass = 'nav'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
-
+import { WithServerSideProps } from '../WithServerSideProps/index.js'
 import { DefaultNavClient } from './index.client.js'
 
-export type NavProps = {
-  payload: Payload
-}
+export type NavProps = ServerProps
 
 export const DefaultNav: React.FC<NavProps> = (props) => {
-  const { payload } = props
+  const { i18n, locale, params, payload, permissions, searchParams, user } = props
 
   if (!payload?.config) {
     return null
@@ -32,13 +29,37 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
 
   const BeforeNavLinks = Array.isArray(beforeNavLinks)
     ? beforeNavLinks.map((Component, i) => (
-        <WithServerSideProps Component={Component} key={i} payload={payload} />
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
       ))
     : null
 
   const AfterNavLinks = Array.isArray(afterNavLinks)
     ? afterNavLinks.map((Component, i) => (
-        <WithServerSideProps Component={Component} key={i} payload={payload} />
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
       ))
     : null
 

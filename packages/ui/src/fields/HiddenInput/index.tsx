@@ -1,9 +1,9 @@
 'use client'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useEffect } from 'react'
 
 import type { FormFieldBase } from '../index.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 

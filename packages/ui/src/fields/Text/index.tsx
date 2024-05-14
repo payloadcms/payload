@@ -1,13 +1,12 @@
 'use client'
 import type { ClientValidate } from 'payload/types'
-import type {} from 'payload/types'
 
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextFieldProps, TextInputProps } from './types.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
