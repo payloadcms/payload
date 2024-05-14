@@ -8,7 +8,12 @@ import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
+import type {
+  Config,
+  NonAdminUser,
+  ReadOnlyCollection,
+  RestrictedVersion,
+} from './payload-types.js'
 
 import {
   closeNav,
@@ -401,7 +406,9 @@ describe('access control', () => {
     await page.goto(logoutURL)
     await page.waitForURL(logoutURL)
 
-    const nonAdminUser = await payload.login({
+    const nonAdminUser: NonAdminUser & {
+      token?: string
+    } = await payload.login({
       collection: nonAdminUserSlug,
       data: {
         email: nonAdminUserEmail,
@@ -409,7 +416,7 @@ describe('access control', () => {
       },
     })
 
-    context.addCookies([
+    await context.addCookies([
       {
         name: 'payload-token',
         value: nonAdminUser.token,
@@ -429,5 +436,5 @@ async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown
   return payload.create({
     collection: slug,
     data,
-  })
+  }) as any as Promise<TypeWithID & Record<string, unknown>>
 }
