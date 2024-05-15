@@ -40,6 +40,7 @@
     "@types/react": "18.2.74",
     "date-fns": "3.3.1",
     "dotenv": "8.6.0",
+    "prettier": "^3.0.3",
     "typescript": "5.4.5"
   },
   "publishConfig": {

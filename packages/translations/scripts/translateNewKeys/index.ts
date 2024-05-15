@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 import fs from 'fs'
 import path from 'path'
 import { format } from 'prettier'
@@ -63,14 +65,10 @@ export async function translateObject(props: {
   tsFileSuffix?: string
 }) {
   const {
-    // eslint-disable-next-line prefer-const
     allTranslationsObject,
-    // eslint-disable-next-line prefer-const
     fromTranslationsObject,
     languages = acceptedLanguages.filter((lang) => lang !== 'en'),
-    // eslint-disable-next-line prefer-const
     targetFolder = '',
-    // eslint-disable-next-line prefer-const
     tsFilePrefix = `import type { DefaultTranslationsObject, Language } from '../types.js'\n\nexport const {{locale}}Translations: DefaultTranslationsObject = `,
     tsFileSuffix = `\n\nexport const {{locale}}: Language = {
   dateFNSKey: {{dateFNSKey}},
@@ -86,7 +84,7 @@ export async function translateObject(props: {
   } = cloneDeep(allTranslationsObject)
   const allOnlyNewTranslatedTranslationsObject: GenericLanguages = {}
 
-  const translationPromises: Promise<any>[] = []
+  const translationPromises: Promise<void>[] = []
 
   for (const targetLang of languages) {
     const keysWhichDoNotExistInFromlang = findMissingKeys(
@@ -102,7 +100,11 @@ export async function translateObject(props: {
       const keys = key.split('.')
       let targetObj = allTranslatedTranslationsObject?.[targetLang].translations
       for (let i = 0; i < keys.length - 1; i += 1) {
-        targetObj = targetObj[keys[i]]
+        const nextObj = targetObj[keys[i]]
+        if (typeof nextObj !== 'object') {
+          throw new Error(`Key ${keys[i]} is not an object in ${targetLang} (1)`)
+        }
+        targetObj = nextObj
       }
       delete targetObj[keys[keys.length - 1]]
     }
@@ -122,7 +124,7 @@ export async function translateObject(props: {
       const sourceText = keys.reduce((acc, key) => acc[key], fromTranslationsObject)
       if (!sourceText || typeof sourceText !== 'string') {
         throw new Error(
-          `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}.`,
+          `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}. (2)`,
         )
       }
 
@@ -141,7 +143,11 @@ export async function translateObject(props: {
             if (!targetObj[keys[i]]) {
               targetObj[keys[i]] = {}
             }
-            targetObj = targetObj[keys[i]]
+            const nextObj = targetObj[keys[i]]
+            if (typeof nextObj !== 'object') {
+              throw new Error(`Key ${keys[i]} is not an object in ${targetLang} (3)`)
+            }
+            targetObj = nextObj
           }
           targetObj[keys[keys.length - 1]] = translated
 
@@ -178,7 +184,7 @@ export async function translateObject(props: {
     const filePath = path.resolve(dirname, targetFolder, `${sanitizedKey}.ts`)
 
     // prefix & translations
-    let fileContent = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
+    let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
 
     // suffix
     fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key].dateFNSKey}'`)}\n`
