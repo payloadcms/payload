@@ -110,7 +110,7 @@ export type DefaultTranslationKeys = NestedKeysStripped<DefaultTranslationsObjec
 export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
   TExtraProps
 
-export type ClientTranslationsObject = ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
+export type ClientTranslationsObject = GenericTranslationsObject //ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
 
 export type TFunction<TTranslationKeys = DefaultTranslationKeys> = (
   key: TTranslationKeys,
