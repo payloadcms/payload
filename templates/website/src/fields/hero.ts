@@ -1,7 +1,13 @@
 import type { Field } from 'payload/types'
 
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+
 import { linkGroup } from './linkGroup'
-import { richText } from './richText'
 
 export const hero: Field = {
   name: 'hero',
@@ -32,7 +38,21 @@ export const hero: Field = {
       ],
       required: true,
     },
-    richText({ label: false }),
+    {
+      name: 'richText',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+          ]
+        },
+      }),
+      label: false,
+    },
     linkGroup({
       overrides: {
         maxRows: 2,

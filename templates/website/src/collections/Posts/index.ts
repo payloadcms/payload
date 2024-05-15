@@ -1,7 +1,12 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { richText } from 'src/fields/richText'
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+import { BlocksFeature } from '@payloadcms/richtext-lexical'
 
 import type { Post } from '../../payload-types'
 
@@ -41,17 +46,23 @@ export const Posts: CollectionConfig = {
       tabs: [
         {
           fields: [
-            richText(
-              { name: 'content', label: false, required: true },
-              {
-                features: {
-                  blocks: [Banner, Code],
-                  link: {
-                    enabledCollections: ['pages', 'posts'],
-                  },
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    BlocksFeature({ blocks: [Banner, Code] }),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                  ]
                 },
-              },
-            ),
+              }),
+              label: false,
+              required: true,
+            },
           ],
           label: 'Content',
         },

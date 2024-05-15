@@ -1,20 +1,24 @@
 import type { Block } from 'payload/types'
 
-import { richText } from '../../fields/richText'
+import {
+  FixedToolbarFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
 export const Banner: Block = {
   slug: 'banner',
   fields: [
-    richText(
-      { name: 'content', label: false },
-      {
-        features: {
-          blocks: [],
-          heading: [],
-          link: false,
-          upload: false,
+    {
+      name: 'content',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
-      },
-    ),
+      }),
+      label: false,
+      required: true,
+    },
   ],
 }

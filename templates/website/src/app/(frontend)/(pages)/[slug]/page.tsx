@@ -25,7 +25,7 @@ export async function generateStaticParams() {
   return pages.docs?.map(({ slug }) => slug)
 }
 
-export default async function Page({ params: { slug = '' } }) {
+export default async function Page({ params: { slug = 'home' } }) {
   const url = '/' + slug
 
   const page = await queryPageBySlug({
@@ -50,7 +50,7 @@ export default async function Page({ params: { slug = '' } }) {
   )
 }
 
-export async function generateMetadata({ params: { slug = '' } }): Promise<Metadata> {
+export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
   const page = await queryPageBySlug({
     slug,
   })

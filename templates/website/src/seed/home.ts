@@ -25,7 +25,7 @@ export const home: Partial<Page> = {
         type: 'root',
         children: [
           {
-            type: 'paragraph',
+            type: 'heading',
             children: [
               {
                 type: 'text',
@@ -40,26 +40,7 @@ export const home: Partial<Page> = {
             direction: 'ltr',
             format: '',
             indent: 0,
-            textFormat: 0,
-            version: 1,
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Welcome to your website!',
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            textFormat: 0,
+            tag: 'h1',
             version: 1,
           },
           {
