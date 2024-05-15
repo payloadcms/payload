@@ -1305,6 +1305,9 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
     devDependencies:
+      '@lexical/eslint-plugin':
+        specifier: 0.15.0
+        version: 0.15.0(eslint@8.57.0)
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
@@ -4342,6 +4345,14 @@ packages:
     dependencies:
       lexical: 0.15.0
     dev: false
+
+  /@lexical/eslint-plugin@0.15.0(eslint@8.57.0):
+    resolution: {integrity: sha512-M7e+XX62AtRkq7CACN1v9JTGc/neAYIG4BtrzvESioW2JQ0qE18zli4cDzVbIMizDXsnqvjWV+iodlDaAU2xiA==}
+    peerDependencies:
+      eslint: '>=7.31.0 || ^8.0.0'
+    dependencies:
+      eslint: 8.57.0
+    dev: true
 
   /@lexical/hashtag@0.15.0:
     resolution: {integrity: sha512-EP6KKvS6BY/8Vh1MLQYeOcYaxnvrLsUkvXXr+Fg8N477Us54Ju69pPO563mbWt7/bpnL9Sh0fbk82JtxqPWpSg==}

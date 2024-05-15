@@ -158,7 +158,7 @@ function extractMatchingNodes(
   return [matchingOffset, unmodifiedBeforeNodes, matchingNodes, unmodifiedAfterNodes]
 }
 
-function createAutoLinkNode(
+function $createAutoLinkNode_(
   nodes: TextNode[],
   startIndex: number,
   endIndex: number,
@@ -234,7 +234,7 @@ function createAutoLinkNode(
   return undefined
 }
 
-function handleLinkCreation(
+function $handleLinkCreation(
   nodes: TextNode[],
   matchers: LinkMatcher[],
   onChange: ChangeHandler,
@@ -266,7 +266,7 @@ function handleLinkCreation(
 
       const actualMatchStart = invalidMatchEnd + matchStart - matchingOffset
       const actualMatchEnd = invalidMatchEnd + matchEnd - matchingOffset
-      const remainingTextNode = createAutoLinkNode(
+      const remainingTextNode = $createAutoLinkNode_(
         matchingNodes,
         actualMatchStart,
         actualMatchEnd,
@@ -405,7 +405,7 @@ function useAutoLink(
             (startsWithSeparator(textNode.getTextContent()) || !$isAutoLinkNode(previous))
           ) {
             const textNodesToMatch = getTextNodesToMatch(textNode)
-            handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
+            $handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
           }
 
           handleBadNeighbors(textNode, matchers, onChangeWrapped)
