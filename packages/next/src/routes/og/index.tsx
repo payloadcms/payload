@@ -15,8 +15,6 @@ const roboto = Roboto({
   weight: ['400', '900'],
 })
 
-console.log(roboto) // eslint-disable-line no-console
-
 export const runtime = 'edge'
 
 export const OG_GET =

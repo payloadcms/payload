@@ -11,17 +11,21 @@ export const meta = (args: {
   description?: string
   keywords?: string
   leader?: string
+  openGraph?: Metadata['openGraph']
   title: string
 }): Metadata => {
-  const { config, description, keywords = 'CMS, Admin, Dashboard', leader, title } = args
+  const {
+    config,
+    description,
+    keywords = 'CMS, Admin, Dashboard',
+    leader,
+    openGraph: openGraphFromProps,
+    title,
+  } = args
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
 
-  // const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
-
   const customIcons = config.admin.meta.icons as Metadata['icons']
-
-  let icons = customIcons ?? []
 
   const payloadIcons: Icon[] = [
     {
@@ -39,8 +43,35 @@ export const meta = (args: {
     },
   ]
 
+  let icons = customIcons ?? payloadIcons
+
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
     icons = payloadIcons.concat(customIcons)
+  }
+
+  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
+
+  const openGraph: Metadata['openGraph'] = {
+    ...(defaults.admin.meta.openGraph || {}),
+    description,
+    images: [
+      {
+        alt: ogTitle,
+        height: 630,
+        url: `/api/og${QueryString.stringify(
+          {
+            leader,
+            title: ogTitle,
+          },
+          {
+            addQueryPrefix: true,
+          },
+        )}`,
+        width: 1200,
+      },
+    ],
+    title: ogTitle,
+    ...(openGraphFromProps || {}),
   }
 
   return {
@@ -52,22 +83,7 @@ export const meta = (args: {
         process.env.PAYLOAD_PUBLIC_SERVER_URL ||
         `http://localhost:${process.env.PORT || 3000}`,
     ),
-    openGraph: {
-      ...defaults.admin.meta.openGraph,
-      description,
-      images: [
-        {
-          alt: `${title} ${titleSuffix}`,
-          height: 630,
-          url: `/api/og${QueryString.stringify({
-            leader,
-            title: `${title} ${titleSuffix}`,
-          })}`,
-          width: 1200,
-        },
-      ],
-      title: `${title} ${titleSuffix}`,
-    },
+    openGraph,
     title: `${title} ${titleSuffix}`,
   }
 }
