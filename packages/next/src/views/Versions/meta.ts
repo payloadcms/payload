@@ -42,9 +42,12 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   }
 
   return meta({
-    config,
+    ...(config.admin.meta || {}),
     description,
     keywords,
+    serverURL: config.serverURL,
     title,
+    ...(collectionConfig?.admin.meta || {}),
+    ...(globalConfig?.admin.meta || {}),
   })
 }

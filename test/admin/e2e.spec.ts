@@ -134,7 +134,7 @@ describe('admin', () => {
       )
     })
 
-    test('should render custom page descriptions from root config', async () => {
+    test('should render custom meta description from root config', async () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
         'content',
@@ -142,7 +142,7 @@ describe('admin', () => {
       )
     })
 
-    test('should render custom page descriptions from collection config', async () => {
+    test('should render custom meta description from collection config', async () => {
       await page.goto(postsUrl.collection(postsCollectionSlug))
       await page.locator('.collection-list .table a').first().click()
 

@@ -9,8 +9,9 @@ export const generateResetPasswordMetadata: GenerateViewMetadata = async ({
   i18n: { t },
 }): Promise<Metadata> =>
   meta({
-    config,
     description: t('authentication:resetPassword'),
     keywords: t('authentication:resetPassword'),
+    serverURL: config.serverURL,
     title: t('authentication:resetPassword'),
+    ...(config.admin.meta || {}),
   })

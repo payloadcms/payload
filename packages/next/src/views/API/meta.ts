@@ -21,10 +21,13 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 
   return Promise.resolve(
     meta({
-      config,
+      ...(config.admin.meta || {}),
       description,
       keywords: 'API',
+      serverURL: config.serverURL,
       title: metaTitle,
+      ...(collectionConfig?.admin.meta || {}),
+      ...(globalConfig?.admin.meta || {}),
     }),
   )
 }

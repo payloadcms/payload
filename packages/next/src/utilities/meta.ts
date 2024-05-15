@@ -1,25 +1,21 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { MetaConfig, SanitizedConfig } from 'payload/config'
+import type { MetaConfig } from 'payload/config'
 
 import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
 import { defaults } from 'payload/config'
 import QueryString from 'qs'
 
-export const meta = async (
-  args: MetaConfig & { config: SanitizedConfig; serverURL?: string },
-): Promise<any> => {
-  const mergedMeta = {
-    ...args,
-    ...args.config.admin.meta,
-  }
-
-  const { description, icons: customIcons, keywords, serverURL, title, titleSuffix } = mergedMeta
-
-  const openGraph = {
-    ...(args.config.admin.meta.openGraph || {}),
-    ...(args.openGraph || {}),
-  }
+export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
+  const {
+    description,
+    icons: customIcons,
+    keywords,
+    openGraph,
+    serverURL,
+    title,
+    titleSuffix,
+  } = args
 
   const payloadIcons: Icon[] = [
     {
@@ -37,10 +33,10 @@ export const meta = async (
     },
   ]
 
-  let icons = (customIcons as Metadata['icons']) ?? payloadIcons // TODO: fix this type assertion
+  let icons = customIcons ?? payloadIcons // TODO: fix this type assertion
 
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = payloadIcons.concat(customIcons as Icon[]) // TODO: fix this type assertion
+    icons = payloadIcons.concat(customIcons) // TODO: fix this type assertion
   }
 
   const metaTitle = `${title} ${titleSuffix}`

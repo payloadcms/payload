@@ -87,6 +87,20 @@ export type OpenGraphConfig = {
   title?: string
 }
 
+export type IconConfig = {
+  color?: string
+  /**
+   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
+   */
+  fetchPriority?: 'auto' | 'high' | 'low'
+  media?: string
+  /** defaults to rel="icon" */
+  rel?: string
+  sizes?: string
+  type?: string
+  url: string
+}
+
 export type MetaConfig = {
   /**
    * Overrides the auto-generated <meta name="description"> of admin pages
@@ -97,9 +111,8 @@ export type MetaConfig = {
    * Icons to be rendered by devices and browsers.
    *
    * For example browser tabs, phone home screens, and search engine results.
-   * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
    */
-  icons?: NextMetadata['icons']
+  icons?: IconConfig
   /**
    * Overrides the auto-generated <meta name="keywords"> of admin pages
    * @example `"CMS, Payload, Custom"`

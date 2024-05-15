@@ -25,11 +25,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 
   const ogTitle = `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`
 
-  const description = collectionConfig
-    ? collectionConfig.admin?.meta?.description
-    : globalConfig
-      ? globalConfig.admin?.meta?.description
-      : `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+  const description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
 
   const keywords = `${entityLabel}, Payload, CMS`
 
@@ -42,7 +38,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       : {}
 
   return meta({
-    config,
+    ...(config.admin.meta || {}),
     description,
     keywords,
     openGraph: {
@@ -51,6 +47,9 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       ...baseOGOverrides,
       ...entityOGOverrides,
     },
+    ...(collectionConfig?.admin.meta || {}),
+    ...(globalConfig?.admin.meta || {}),
+    serverURL: config.serverURL,
     title: metaTitle,
   })
 }
