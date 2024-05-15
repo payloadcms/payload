@@ -8,12 +8,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
     meta: {
-      openGraph: {
-        description:
-          'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
-        siteName: 'Payload App',
-        title: 'Payload App',
-      },
       titleSuffix: '- Payload',
     },
     routes: {

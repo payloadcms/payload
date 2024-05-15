@@ -3,8 +3,14 @@ import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload/config'
 
 import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
-import { defaults } from 'payload/config'
 import QueryString from 'qs'
+
+const defaultOpenGraph = {
+  description:
+    'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
+  siteName: 'Payload App',
+  title: 'Payload App',
+}
 
 export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
   const {
@@ -44,7 +50,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
   const ogTitle = `${typeof openGraph?.title === 'string' ? openGraph.title : title} ${titleSuffix}`
 
   const mergedOpenGraph: Metadata['openGraph'] = {
-    ...(defaults.admin.meta.openGraph || {}),
+    ...(defaultOpenGraph || {}),
     description,
     images: [
       {

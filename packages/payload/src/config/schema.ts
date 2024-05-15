@@ -68,13 +68,7 @@ export default joi.object({
     }),
     meta: joi.object().keys({
       description: joi.string(),
-      icons: joi
-        .alternatives()
-        .try(
-          joi.array().items(joi.alternatives().try(joi.string(), joi.object())),
-          joi.object(),
-          joi.string().allow(null),
-        ),
+      icons: joi.array().items(joi.object()),
       openGraph: openGraphSchema,
       titleSuffix: joi.string(),
     }),

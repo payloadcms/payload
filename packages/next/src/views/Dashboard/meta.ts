@@ -9,4 +9,8 @@ export const generateDashboardMetadata: GenerateViewMetadata = async ({ config, 
     serverURL: config.serverURL,
     title: t('general:dashboard'),
     ...(config.admin.meta || {}),
+    openGraph: {
+      title: t('general:dashboard'),
+      ...(config.admin.meta?.openGraph || {}),
+    },
   })
