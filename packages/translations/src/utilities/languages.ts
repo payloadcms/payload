@@ -24,7 +24,7 @@ export const acceptedLanguages = [
   'pt',
   'ro',
   'rs',
-  'rsLatin',
+  'rs-latin',
   'ru',
   'sk',
   'sv',
