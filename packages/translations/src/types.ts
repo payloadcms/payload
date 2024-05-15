@@ -39,6 +39,14 @@ export type Language<TDefaultTranslations = DefaultTranslationsObject> = {
   translations: TDefaultTranslations
 }
 
+export type GenericTranslationsObject = {
+  [key: string]: GenericTranslationsObject | string
+}
+
+export type GenericLanguages = {
+  [key in AcceptedLanguages]?: GenericTranslationsObject
+}
+
 export type AcceptedLanguages = (typeof acceptedLanguages)[number]
 
 export type SupportedLanguages<TDefaultTranslations = DefaultTranslationsObject> = {
