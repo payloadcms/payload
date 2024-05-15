@@ -216,8 +216,14 @@ export async function translateObject(props: {
     console.log('Missing keys for lang', targetLang, ':', missingKeys)
 
     for (const missingKey of missingKeys) {
-      const keys = missingKey.split('.')
+      const keys: string[] = missingKey.split('.')
       const sourceText = keys.reduce((acc, key) => acc[key], fromTranslationsObject)
+      if (!sourceText || typeof sourceText !== 'string') {
+        throw new Error(
+          `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}.`,
+        )
+      }
+
       if (translationPromises.length >= 12) {
         // Wait for one of the promises to resolve before adding a new one
         await Promise.race(translationPromises)
