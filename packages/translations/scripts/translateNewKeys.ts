@@ -248,10 +248,10 @@ export async function translateObject(props: {
     }
   }
 
-  await Promise.all(translationPromises)
-  /*for (const promise of translationPromises) {
+  //await Promise.all(translationPromises)
+  for (const promise of translationPromises) {
     await promise
-  }*/
+  }
 
   // merge with existing translations
   console.log('Merged object:', allTranslatedTranslationsObject)
@@ -262,7 +262,11 @@ export async function translateObject(props: {
 
   for (const key of languages) {
     // e.g. sanitize rs-latin to rsLatin
-    const sanitizedKey = key.replace(/-([a-z])/gi, (match, group1) => group1.toUpperCase())
+    const sanitizedKey = key.replace(
+      /-(\w)(\w*)/g,
+      (_, firstLetter, remainingLetters) =>
+        firstLetter.toUpperCase() + remainingLetters.toLowerCase(),
+    )
     const filePath = path.resolve(dirname, targetFolder, `${sanitizedKey}.ts`)
 
     // prefix & translations
@@ -306,6 +310,6 @@ for (const key of Object.keys(translations)) {
 void translateObject({
   allTranslationsObject: allTranslations,
   fromTranslationsObject: enTranslations,
-  languages: ['de'],
+  //languages: ['de'],
   targetFolder: '../src/languages',
 })
