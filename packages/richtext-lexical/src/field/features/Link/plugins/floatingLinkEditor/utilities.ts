@@ -15,8 +15,14 @@ export function transformExtraFields(
   i18n: i18n,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
+  maxDepth?: number,
 ): Field[] {
-  const baseFields: Field[] = getBaseFields(config, enabledCollections, disabledCollections)
+  const baseFields: Field[] = getBaseFields(
+    config,
+    enabledCollections,
+    disabledCollections,
+    maxDepth,
+  )
 
   const fields =
     typeof customFieldSchema === 'function'

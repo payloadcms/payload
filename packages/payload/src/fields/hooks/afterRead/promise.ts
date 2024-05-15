@@ -143,10 +143,13 @@ export const promise = async ({
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
       if (editor?.populationPromise) {
+        const populateDepth =
+          field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
         const populationPromise = editor.populationPromise({
           context,
           currentDepth,
-          depth,
+          depth: populateDepth,
           draft,
           field,
           findMany,
