@@ -70,7 +70,7 @@ async function translateText(text: string, targetLang: string) {
     console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
     return data.choices[0].message.content.trim()
   } catch (e) {
-    console.error('Error translating:', text, 'to', targetLang, '. Error:', e)
+    console.error('Error translating:', text, 'to', targetLang, 'response', response, '. Error:', e)
     throw e
   }
 }
@@ -248,35 +248,33 @@ export async function translateObject(props: {
     }
   }
 
-  //await Promise.(translationPromises)
-  for (const promise of translationPromises) {
+  await Promise.all(translationPromises)
+  /*for (const promise of translationPromises) {
     await promise
-  }
+  }*/
 
   // merge with existing translations
   console.log('Merged object:', allTranslatedTranslationsObject)
 
   console.log('New translations:', allOnlyNewTranslatedTranslationsObject)
 
-  // save to translation.json (create if not exists
+  // save
 
   for (const key of languages) {
     // e.g. sanitize rs-latin to rsLatin
-    const sanitizedKey = key.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+    const sanitizedKey = key.replace(/-([a-z])/gi, (match, group1) => group1.toUpperCase())
     const filePath = path.resolve(dirname, targetFolder, `${sanitizedKey}.ts`)
+
+    // prefix & translations
     let fileContent = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
 
+    // suffix
     fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key].dateFNSKey}'`)}\n`
-    /*
-    export const ${sanitizedKey}: Language = {
-  dateFNSKey: allTranslatedTranslationsObject[key].dateFNSKey,
-  translations: enTranslations,
-}
 
-     */
-    fileContent = await applyEslintFixes(fileContent, filePath) // Apply ESLint fixes
+    // eslint
+    fileContent = await applyEslintFixes(fileContent, filePath)
 
-    // run prettier on fileContent
+    // prettier
     fileContent = await format(fileContent, {
       parser: 'typescript',
       printWidth: 100,
