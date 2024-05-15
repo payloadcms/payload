@@ -72,6 +72,7 @@ const collectionSchema = joi.object().keys({
     listSearchableFields: joi.array().items(joi.string()),
     livePreview: joi.object(livePreviewSchema),
     meta: joi.object({
+      description: joi.string(),
       openGraph: openGraphSchema,
     }),
     pagination: joi.object({

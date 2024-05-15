@@ -138,7 +138,7 @@ describe('admin', () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
         'content',
-        /This is a custom description/,
+        /This is a custom meta description/,
       )
     })
 
@@ -148,7 +148,7 @@ describe('admin', () => {
 
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
         'content',
-        /This is a custom description for posts/,
+        /This is a custom meta description for posts/,
       )
     })
 
@@ -184,6 +184,16 @@ describe('admin', () => {
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
         'content',
         /This is a custom OG title for posts/,
+      )
+    })
+
+    test('should render custom og:description from collection config', async () => {
+      await page.goto(postsUrl.collection(postsCollectionSlug))
+      await page.locator('.collection-list .table a').first().click()
+
+      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+        'content',
+        /This is a custom OG description for posts/,
       )
     })
 

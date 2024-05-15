@@ -284,6 +284,7 @@ export type CollectionAdminOptions = {
    */
   livePreview?: LivePreviewConfig
   meta?: {
+    description?: string
     openGraph?: OpenGraphConfig
   }
   pagination?: {

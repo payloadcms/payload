@@ -22,8 +22,15 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       : ''
 
   const metaTitle = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+
   const ogTitle = `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`
-  const description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+
+  const description = collectionConfig
+    ? collectionConfig.admin?.meta?.description
+    : globalConfig
+      ? globalConfig.admin?.meta?.description
+      : `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+
   const keywords = `${entityLabel}, Payload, CMS`
 
   const baseOGOverrides = config.admin.meta.openGraph || {}

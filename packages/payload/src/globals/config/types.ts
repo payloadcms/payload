@@ -131,6 +131,7 @@ export type GlobalAdminOptions = {
    */
   livePreview?: LivePreviewConfig
   meta?: {
+    description?: string
     openGraph?: OpenGraphConfig
   }
   /**

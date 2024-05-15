@@ -52,6 +52,7 @@ const globalSchema = joi
       hideAPIURL: joi.boolean(),
       livePreview: joi.object(livePreviewSchema),
       meta: joi.object({
+        description: joi.string(),
         openGraph: openGraphSchema,
       }),
       preview: joi.func(),

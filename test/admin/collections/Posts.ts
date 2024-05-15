@@ -19,6 +19,7 @@ export const Posts: CollectionConfig = {
     preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
     meta: {
+      description: 'This is a custom meta description for posts',
       openGraph: {
         title: 'This is a custom OG title for posts',
         description: 'This is a custom OG description for posts',
