@@ -27,7 +27,7 @@ export type RelationshipData = {
 
 export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode>
 
-function relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput | null {
+function $relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
   const relationTo = domNode.getAttribute('data-lexical-relationship-relationTo')
 
@@ -79,7 +79,7 @@ export class RelationshipNode extends DecoratorBlockNode {
           return null
         }
         return {
-          conversion: relationshipElementToNode,
+          conversion: $relationshipElementToNode,
           priority: 2,
         }
       },

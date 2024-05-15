@@ -11,11 +11,24 @@ const baseClass = 'clear-indicator'
 
 export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (props) => {
   const {
+    clearValue,
     innerProps: { ref, ...restInnerProps },
   } = props
 
   return (
-    <div className={baseClass} ref={ref} {...restInnerProps}>
+    <div
+      className={baseClass}
+      ref={ref}
+      {...restInnerProps}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          clearValue()
+          e.stopPropagation()
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       <X className={`${baseClass}__icon`} />
     </div>
   )

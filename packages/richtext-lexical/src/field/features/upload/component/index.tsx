@@ -105,7 +105,7 @@ const Component: React.FC<ElementProps> = (props) => {
     [setParams, cacheBust, closeDrawer],
   )
 
-  const onDelete = useCallback(
+  const $onDelete = useCallback(
     (payload: KeyboardEvent) => {
       if (isSelected && $isNodeSelection($getSelection())) {
         const event: KeyboardEvent = payload
@@ -145,10 +145,10 @@ const Component: React.FC<ElementProps> = (props) => {
     return mergeRegister(
       editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
 
-      editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
     )
-  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected, onClick])
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
