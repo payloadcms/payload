@@ -232,7 +232,8 @@ export default async function resizeAndTransformImageSizes({
   savedFilename,
   staticPath,
 }: ResizeArgs): Promise<ImageSizesResult> {
-  const { imageSizes } = config.upload
+  const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
+
   // Noting to resize here so return as early as possible
   if (!imageSizes) return { sizeData: {}, sizesToSave: [] }
 
@@ -363,6 +364,6 @@ export default async function resizeAndTransformImageSizes({
       acc.sizesToSave.push(...result.sizesToSave)
       return acc
     },
-    { focalPoint, sizeData: {}, sizesToSave: [] },
+    { ...(focalPointEnabled && { focalPoint }), sizeData: {}, sizesToSave: [] },
   )
 }
