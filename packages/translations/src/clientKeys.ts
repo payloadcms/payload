@@ -254,6 +254,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:selectFile',
   'upload:setCropArea',
   'upload:setFocalPoint',
+  'upload:sizes',
   'upload:sizesFor',
   'upload:sizes',
   'upload:width',

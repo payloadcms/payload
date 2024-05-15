@@ -36,6 +36,19 @@ export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) =
 
   try {
     const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
+
+    if (!reqData) {
+      return Response.json(
+        {
+          message: 'No options provided',
+        },
+        {
+          headers,
+          status: httpStatus.BAD_REQUEST,
+        },
+      )
+    }
+
     const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 
     const incomingUserSlug = req.user?.collection
