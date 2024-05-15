@@ -182,6 +182,7 @@ function $createAutoLinkNode_(
     const textNode = $createTextNode(match.text)
     textNode.setFormat(linkTextNode.getFormat())
     textNode.setDetail(linkTextNode.getDetail())
+    textNode.setStyle(linkTextNode.getStyle())
     linkNode.append(textNode)
     linkTextNode.replace(linkNode)
     return remainingTextNode
@@ -218,6 +219,7 @@ function $createAutoLinkNode_(
     const textNode = $createTextNode(firstLinkTextNode.getTextContent())
     textNode.setFormat(firstLinkTextNode.getFormat())
     textNode.setDetail(firstLinkTextNode.getDetail())
+    textNode.setStyle(firstLinkTextNode.getStyle())
     linkNode.append(textNode, ...linkNodes)
     // it does not preserve caret position if caret was at the first text node
     // so we need to restore caret position
