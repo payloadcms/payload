@@ -1,10 +1,11 @@
 'use client'
 import type { DefaultCellComponentProps } from 'payload/types'
 
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import React from 'react'
+
+import { useConfig } from '../../../../../providers/Config/index.js'
+import { useTranslation } from '../../../../../providers/Translation/index.js'
+import { formatDate } from '../../../../../utilities/formatDate.js'
 
 export const DateCell: React.FC<DefaultCellComponentProps<Date | number | string>> = ({
   cellData,

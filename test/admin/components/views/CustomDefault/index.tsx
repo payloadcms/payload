@@ -14,19 +14,23 @@ import { customViewPath } from '../../../shared.js'
 import './index.scss'
 const baseClass = 'custom-default-view'
 
-export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const CustomDefaultView: React.FC<AdminViewProps> = ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     permissions,
     req: {
-      i18n,
+      payload,
       payload: {
-        config,
         config: {
           routes: { admin: adminRoute },
         },
       },
       user,
     },
+    visibleEntities,
   } = initPageResult
 
   // If an unauthorized user tries to navigate straight to this page,
@@ -36,7 +40,16 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
   }
 
   return (
-    <DefaultTemplate config={config} i18n={i18n} permissions={permissions} user={user}>
+    <DefaultTemplate
+      i18n={initPageResult.req.i18n}
+      locale={initPageResult.locale}
+      params={params}
+      payload={payload}
+      permissions={permissions}
+      searchParams={searchParams}
+      user={user}
+      visibleEntities={visibleEntities}
+    >
       <SetStepNav
         nav={[
           {

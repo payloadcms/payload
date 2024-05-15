@@ -6,6 +6,8 @@ import { useAllFormFields, useForm } from '@payloadcms/ui/forms/Form'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
+
 import { defaults } from '../defaults.js'
 
 const {
@@ -26,7 +28,7 @@ export const Overview: React.FC = () => {
       'meta.title': { value: metaTitle } = {} as FormField,
     },
   ] = useAllFormFields()
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>()
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>()

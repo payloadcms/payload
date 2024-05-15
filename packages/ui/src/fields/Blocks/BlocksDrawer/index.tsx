@@ -1,5 +1,5 @@
 'use client'
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Labels } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
@@ -25,7 +25,7 @@ export type Props = {
 
 const baseClass = 'blocks-drawer'
 
-const getBlockLabel = (block: ReducedBlock, i18n: I18n) => {
+const getBlockLabel = (block: ReducedBlock, i18n: I18nClient) => {
   if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()

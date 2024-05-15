@@ -15,20 +15,27 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
+  account: 'account',
   forgot: forgotPasswordBaseClass,
   login: loginBaseClass,
   reset: resetPasswordBaseClass,
   verify: verifyBaseClass,
 }
 
-const oneSegmentViews = {
-  'create-first-user': CreateFirstUserView,
+type OneSegmentViews = {
+  [K in keyof SanitizedConfig['admin']['routes']]: AdminViewComponent
+}
+
+const oneSegmentViews: OneSegmentViews = {
+  account: Account,
+  createFirstUser: CreateFirstUserView,
   forgot: ForgotPasswordView,
+  inactivity: LogoutInactivity,
   login: LoginView,
   logout: LogoutView,
-  'logout-inactivity': LogoutInactivity,
   unauthorized: UnauthorizedView,
 }
 
@@ -78,22 +85,41 @@ export const getViewFromConfig = ({
       break
     }
     case 1: {
-      if (oneSegmentViews[segmentOne] && segmentOne !== 'account') {
+      // users can override the default routes via `admin.routes` config
+      // i.e.{ admin: { routes: { logout: '/sign-out', inactivity: '/idle' }}}
+      let viewToRender: keyof typeof oneSegmentViews
+
+      if (config.admin.routes) {
+        const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
+          return isPathMatchingRoute({
+            currentRoute,
+            exact: true,
+            path: `${adminRoute}${route}`,
+          })
+        })
+
+        if (matchedRoute) {
+          viewToRender = matchedRoute[0] as keyof typeof oneSegmentViews
+        }
+      }
+
+      if (oneSegmentViews[viewToRender]) {
+        // --> /account
         // --> /create-first-user
         // --> /forgot
         // --> /login
         // --> /logout
         // --> /logout-inactivity
         // --> /unauthorized
-        ViewToRender = oneSegmentViews[segmentOne]
-        templateClassName = baseClasses[segmentOne]
+
+        ViewToRender = oneSegmentViews[viewToRender]
+        templateClassName = baseClasses[viewToRender]
         templateType = 'minimal'
-      } else if (segmentOne === 'account') {
-        // --> /account
-        initPageOptions.redirectUnauthenticatedUser = true
-        ViewToRender = Account
-        templateClassName = 'account'
-        templateType = 'default'
+
+        if (viewToRender === 'account') {
+          initPageOptions.redirectUnauthenticatedUser = true
+          templateType = 'default'
+        }
       }
       break
     }

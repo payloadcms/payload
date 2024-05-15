@@ -144,17 +144,9 @@ type LoadFn = (...args: Required<LoadArgs>) => Promise<LoadResult>
 
 const swcOptions = {
   ...tsconfig,
-  baseUrl: path.resolve(''),
+  baseUrl: undefined,
   paths: undefined,
 }
-
-if (tsconfig.paths) {
-  swcOptions.paths = tsconfig.paths
-  if (tsconfig.baseUrl) {
-    swcOptions.baseUrl = path.resolve(tsconfig.baseUrl)
-  }
-}
-
 export const load: LoadFn = async (url, context, nextLoad) => {
   if (context.format === 'client') {
     const rawSource = 'export default {}'

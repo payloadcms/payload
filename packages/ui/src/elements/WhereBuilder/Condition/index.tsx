@@ -36,8 +36,6 @@ export type Props = {
   }) => void
 }
 
-import type { RelationshipFieldProps } from '@payloadcms/ui/fields/Relationship'
-
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'

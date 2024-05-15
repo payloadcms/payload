@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.30",
+  "version": "3.0.0-beta.32",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -78,8 +78,7 @@
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "pretest": "pnpm build",
-    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
+    "pretest": "pnpm build"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
@@ -149,6 +148,7 @@
     "get-port": "5.1.1",
     "graphql-http": "^1.22.0",
     "mini-css-extract-plugin": "1.6.2",
+    "next": "^14.3.0-canary.7",
     "nodemon": "3.0.3",
     "object.assign": "4.1.4",
     "object.entries": "1.1.6",

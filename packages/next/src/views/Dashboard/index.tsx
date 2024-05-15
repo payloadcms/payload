@@ -13,11 +13,14 @@ export { generateDashboardMetadata } from './meta.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
   const {
+    locale,
     permissions,
     req: {
+      i18n,
       payload: { config },
+      payload,
       user,
     },
     visibleEntities,
@@ -27,8 +30,13 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
 
   const viewComponentProps: DashboardProps = {
     Link,
-    config,
+    i18n,
+    locale,
+    params,
+    payload,
     permissions,
+    searchParams,
+    user,
     visibleEntities,
   }
 
@@ -41,6 +49,15 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
         }
         DefaultComponent={DefaultDashboard}
         componentProps={viewComponentProps}
+        serverOnlyProps={{
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        }}
       />
     </Fragment>
   )

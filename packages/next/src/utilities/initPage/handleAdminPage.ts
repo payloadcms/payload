@@ -46,7 +46,7 @@ export const handleAdminPage = ({
       }
     }
 
-    if (!permissions.canAccessAdmin && !isAdminAuthRoute(route, adminRoute)) {
+    if (!permissions.canAccessAdmin && !isAdminAuthRoute(config, route, adminRoute)) {
       notFound()
     }
 

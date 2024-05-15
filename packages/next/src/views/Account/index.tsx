@@ -77,6 +77,15 @@ export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, sear
             }
             DefaultComponent={EditView}
             componentProps={viewComponentProps}
+            serverOnlyProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
           />
         </FormQueryParamsProvider>
       </DocumentInfoProvider>

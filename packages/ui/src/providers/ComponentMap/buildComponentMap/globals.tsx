@@ -1,26 +1,27 @@
-import type { I18n } from '@payloadcms/translations'
-import type {
-  EditViewProps,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-  WithServerSideProps as WithServerSidePropsType,
-} from 'payload/types'
+import type { I18nClient } from '@payloadcms/translations'
+import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 
-import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
 import React from 'react'
 
+import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
+import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { GlobalComponentMap } from './types.js'
 
+import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
-export const mapGlobals = (args: {
-  DefaultEditView: React.FC<EditViewProps>
-  WithServerSideProps: WithServerSidePropsType
-  config: SanitizedConfig
-  globals: SanitizedGlobalConfig[]
-  i18n: I18n
-  readOnly?: boolean
+export const mapGlobals = ({
+  args,
+}: {
+  args: {
+    DefaultEditView: React.FC<EditViewProps>
+    WithServerSideProps: WithServerSidePropsPrePopulated
+    config: SanitizedConfig
+    globals: SanitizedGlobalConfig[]
+    i18n: I18nClient
+    readOnly?: boolean
+  }
 }): {
   [key: SanitizedGlobalConfig['slug']]: GlobalComponentMap
 } => {
