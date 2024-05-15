@@ -1,3 +1,23 @@
+## [2.17.0](https://github.com/payloadcms/payload/compare/v2.16.1...v2.17.0) (2024-05-15)
+
+
+### Features
+
+* adds misc translations to API view and react select ([#6138](https://github.com/payloadcms/payload/issues/6138)) ([30e535b](https://github.com/payloadcms/payload/commit/30e535b5b929dddead007d8a9adca62808595e2c))
+
+* **richtext-lexical:** remove LexicalBlock, RichTextFieldRequiredEditor and FieldWithRichTextRequiredEditor types ([#6279](https://github.com/payloadcms/payload/issues/6279)) ([9df5ab8](https://github.com/payloadcms/payload/commit/9df5ab8a10a35ad34615d7e4da024f59ff037e0e))
+
+### Bug Fixes
+
+* appends `editDepth` value to `radio` & `checkbox` IDs when inside drawer ([#6181](https://github.com/payloadcms/payload/issues/6181)) ([69c93d3](https://github.com/payloadcms/payload/commit/69c93d3c62394a5cf995a2eaec9a3ab30e0f77af))
+* collection labels with locales not working when creating new doc ([#5995](https://github.com/payloadcms/payload/issues/5995)) ([51efe4f](https://github.com/payloadcms/payload/commit/51efe4f39bcaadccb109a2a02a690ca65041ee57))
+* safely access cookie header for uploads ([#6367](https://github.com/payloadcms/payload/issues/6367)) ([de92c50](https://github.com/payloadcms/payload/commit/de92c50847640661f915455f8db0029873ddc7ab))
+* step-nav breadcrumbs ellipsis ([#6345](https://github.com/payloadcms/payload/issues/6345)) ([d02b1fb](https://github.com/payloadcms/payload/commit/d02b1fb084e636e49122ad55b25b9c49eb761f1c))
+*
+### ⚠ BREAKING CHANGES
+
+* **richtext-lexical:** remove LexicalBlock, RichTextFieldRequiredEditor and FieldWithRichTextRequiredEditor types (#6279)
+
 ## [2.16.1](https://github.com/payloadcms/payload/compare/v2.16.0...v2.16.1) (2024-05-07)
 
 
