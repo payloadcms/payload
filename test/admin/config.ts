@@ -84,6 +84,9 @@ export default buildConfigWithDefaults({
     routes: customAdminRoutes,
     meta: {
       titleSuffix: '- Custom CMS',
+      openGraph: {
+        title: 'Custom OG Title',
+      },
       icons: [
         {
           type: 'image/png',

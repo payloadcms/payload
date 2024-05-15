@@ -117,12 +117,20 @@ describe('admin', () => {
   })
 
   describe('metadata', () => {
-    test('can customize meta title suffix', async () => {
+    test('should render custom page title suffix', async () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
     })
 
-    test('should set Payload favicons', async () => {
+    test('should render custom og:title meta tag', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        'content',
+        /Custom OG Title/,
+      )
+    })
+
+    test('should render payload favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
@@ -135,7 +143,7 @@ describe('admin', () => {
       )
     })
 
-    test('should inject custom favicons', async () => {
+    test('should render custom favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)

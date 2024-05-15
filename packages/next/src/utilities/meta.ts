@@ -21,6 +21,8 @@ export const meta = (args: {
     title,
   } = args
 
+  const ogFromConfig = config.admin.meta.openGraph as Metadata['openGraph']
+
   const customIcons = config.admin.meta.icons as Metadata['icons']
 
   const payloadIcons: Icon[] = [
@@ -69,6 +71,7 @@ export const meta = (args: {
     ],
     title: ogTitle,
     ...(openGraphFromProps || {}),
+    ...(ogFromConfig || {}),
   }
 
   return {

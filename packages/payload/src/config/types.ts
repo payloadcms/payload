@@ -486,9 +486,10 @@ export type Config = {
        */
       icons?: NextMetadata['icons']
       /**
-       * Public path to an image
+       * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
        *
-       * This image may be displayed as preview when the link is shared on social media
+       * For example when sharing the Admin Panel on social media or through messaging services.
+       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
        */
       openGraph?: NextMetadata['openGraph']
       /**
