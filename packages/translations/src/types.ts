@@ -110,6 +110,10 @@ export type DefaultTranslationKeys = NestedKeysStripped<DefaultTranslationsObjec
 export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
   TExtraProps
 
+// Use GenericTranslationsObject instead of reconstructing the object from the client keys. This is because reconstructing the object is
+// A) Expensive on performance.
+// B) Not important to be typed specifically for the client translations. We really only care about the client translation keys to be typed.
+// C) Inaccurate. Client keys which previously had _many, _one or other suffixes have been removed and cannot be reconstructed
 export type ClientTranslationsObject = GenericTranslationsObject //ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
 
 export type TFunction<TTranslationKeys = DefaultTranslationKeys> = (
