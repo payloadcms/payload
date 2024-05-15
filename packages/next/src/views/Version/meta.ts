@@ -17,7 +17,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 
   let title: string = ''
   let description: string = ''
-  let leader: string = ''
   const keywords: string = ''
 
   const doc: any = {} // TODO: figure this out
@@ -29,7 +28,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   if (collectionConfig) {
     const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
     const entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
-    leader = entityLabel
     const titleFromData = doc?.[useAsTitle]
     title = `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`
     description = t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel })
@@ -37,7 +35,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 
   if (globalConfig) {
     const entityLabel = getTranslation(globalConfig.label, i18n)
-    leader = entityLabel
     title = `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`
     description = t('version:viewingVersionGlobal', { entityLabel })
   }
@@ -46,7 +43,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     config,
     description,
     keywords,
-    leader,
     title,
   })
 }

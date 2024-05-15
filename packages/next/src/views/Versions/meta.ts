@@ -41,12 +41,10 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     description = t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug })
   }
 
-  return Promise.resolve(
-    meta({
-      config,
-      description,
-      keywords,
-      title,
-    }),
-  )
+  return meta({
+    config,
+    description,
+    keywords,
+    title,
+  })
 }

@@ -18,6 +18,11 @@ export const Posts: CollectionConfig = {
     listSearchableFields: ['id', 'title', 'description', 'number'],
     preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
+    meta: {
+      openGraph: {
+        title: 'Custom Page OG Title',
+      },
+    },
   },
   fields: [
     {

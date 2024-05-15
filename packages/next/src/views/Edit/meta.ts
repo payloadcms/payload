@@ -26,16 +26,24 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   const description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
   const keywords = `${entityLabel}, Payload, CMS`
 
-  return Promise.resolve(
-    meta({
-      config,
-      description,
-      keywords,
-      openGraph: {
-        description: entityLabel,
-        title: ogTitle,
-      },
-      title: metaTitle,
-    }),
-  )
+  const baseOGOverrides = (config.admin.meta.openGraph as Metadata['openGraph']) || {}
+
+  const entityOGOverrides = collectionConfig
+    ? (collectionConfig.admin?.meta?.openGraph as Metadata['openGraph']) // TODO: fix this type assertion
+    : globalConfig
+      ? (globalConfig.admin?.meta?.openGraph as Metadata['openGraph']) // TODO: fix this type assertion
+      : {}
+
+  return meta({
+    config,
+    description,
+    keywords,
+    openGraph: {
+      description: entityLabel,
+      title: ogTitle,
+      ...baseOGOverrides,
+      ...entityOGOverrides,
+    },
+    title: metaTitle,
+  })
 }

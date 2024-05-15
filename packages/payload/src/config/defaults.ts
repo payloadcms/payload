@@ -10,12 +10,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     meta: {
       openGraph: {
         description:
-          'Payload is a headless CMS and application framework built with TypeScript, Node.js, React and MongoDB',
-        images: [
-          {
-            url: `/api/og`,
-          },
-        ],
+          'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
         siteName: 'Payload App',
         title: 'Payload App',
       },

@@ -72,6 +72,43 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type MetaConfig = {
+  /**
+   * Overrides the auto-generated <meta name="description"> of admin pages
+   * @example `"This is my custom CMS built with Payload."`
+   */
+  description?: string
+  /**
+   * Icons to be rendered by devices and browsers.
+   *
+   * For example browser tabs, phone home screens, and search engine results.
+   * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
+   */
+  icons?: NextMetadata['icons']
+  /**
+   * Overrides the auto-generated <meta name="keywords"> of admin pages
+   * @example `"CMS, Payload, Custom"`
+   */
+  keywords?: string
+  /**
+   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
+   *
+   * For example when sharing the Admin Panel on social media or through messaging services.
+   * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
+   */
+  openGraph?: NextMetadata['openGraph']
+  /**
+   * Overrides the auto-generated <title> of admin pages
+   * @example `"My Admin Panel"`
+   */
+  title?: string
+  /**
+   * String to append to the auto-generated <title> of admin pages
+   * @example `" - Custom CMS"`
+   */
+  titleSuffix?: string
+}
+
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
@@ -477,27 +514,7 @@ export type Config = {
       globals?: string[]
     }
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
-    meta?: {
-      /**
-       * Icons to be rendered by devices and browsers.
-       *
-       * For example browser tabs, phone home screens, and search engine results.
-       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
-       */
-      icons?: NextMetadata['icons']
-      /**
-       * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
-       *
-       * For example when sharing the Admin Panel on social media or through messaging services.
-       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
-       */
-      openGraph?: NextMetadata['openGraph']
-      /**
-       * String to append to the <title> of admin pages
-       * @example `" - My Brand"`
-       */
-      titleSuffix?: string
-    }
+    meta?: MetaConfig
     routes?: {
       /** The route for the account page. */
       account?: string

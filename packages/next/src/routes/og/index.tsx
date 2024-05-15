@@ -28,6 +28,7 @@ export const OG_GET =
       const titlePerWord = title?.trim()?.split(' ')
       const hasLeader = searchParams.has('leader')
       const leader = hasLeader ? searchParams.get('leader')?.slice(0, 100).replace('-', ' ') : ''
+      const description = searchParams.has('description') ? searchParams.get('description') : ''
       const Icon = config.admin?.components?.graphics?.Icon || PayloadIcon
 
       let fontData
@@ -63,13 +64,22 @@ export const OG_GET =
                 textTransform: 'capitalize',
               }}
             >
-              {leader && leader}
+              {leader && (
+                <div
+                  style={{
+                    fontSize: 30,
+                    marginBottom: 10,
+                  }}
+                >
+                  {leader}
+                </div>
+              )}
               <div
                 style={{
                   display: 'flex',
                   flexWrap: 'wrap',
                   fontSize: 90,
-                  lineHeight: 1,
+                  lineHeight: 0.8,
                   marginTop: '10px,',
                 }}
               >
@@ -78,7 +88,7 @@ export const OG_GET =
                     <span
                       key={i}
                       style={{
-                        color: '#B6FFE0',
+                        color: 'white',
                         display: 'flex',
                         paddingRight: '15px',
                         position: 'relative',
@@ -86,7 +96,7 @@ export const OG_GET =
                     >
                       <span
                         style={{
-                          backgroundColor: '#1B2622',
+                          backgroundColor: '#222222',
                           bottom: 0,
                           content: ' ',
                           left: -15,
@@ -100,6 +110,16 @@ export const OG_GET =
                   )
                 })}
               </div>
+              {description && (
+                <div
+                  style={{
+                    fontSize: 30,
+                    marginTop: 20,
+                  }}
+                >
+                  {description}
+                </div>
+              )}
             </div>
             <div
               style={{

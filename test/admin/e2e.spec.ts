@@ -15,7 +15,6 @@ import {
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
-  login,
   openDocControls,
   openDocDrawer,
   openNav,
@@ -117,20 +116,12 @@ describe('admin', () => {
   })
 
   describe('metadata', () => {
-    test('should render custom page title suffix', async () => {
+    test('title: should render custom page <title> suffix', async () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
     })
 
-    test('should render custom og:title meta tag', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /Custom OG Title/,
-      )
-    })
-
-    test('should render payload favicons', async () => {
+    test('icon: should render payload <link rel="icon" favicon>', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
@@ -143,13 +134,31 @@ describe('admin', () => {
       )
     })
 
-    test('should render custom favicons', async () => {
+    test('icon: should render custom <link rel="icon"> favicon', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
       await expect(favicons.nth(2)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
       await expect(favicons.nth(3)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
       await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+    })
+
+    test('og: should render custom <meta property="og:title"> from root config', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        'content',
+        /Custom OG Title/,
+      )
+    })
+
+    test('og: should render custom <meta property="og:title"> from collection config', async () => {
+      await page.goto(postsUrl.collection(postsCollectionSlug))
+      await page.locator('.collection-list .table a').first().click()
+
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        'content',
+        /Custom Page OG Title/,
+      )
     })
   })
 

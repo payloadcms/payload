@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
 
-import { getTranslation } from '@payloadcms/translations'
-
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata as generateDocumentMetadata } from '../Edit/meta.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
@@ -12,44 +10,11 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   globalConfig,
   i18n,
   isEditing,
-}): Promise<Metadata> => {
-  const { t } = i18n
-
-  let description: string = ''
-  let title: string = ''
-  let keywords: string = ''
-  let leader: string = ''
-
-  if (collectionConfig) {
-    const entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
-    leader = entityLabel
-
-    description = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
-      collectionConfig.labels.singular,
-      i18n,
-    )}`
-
-    title = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
-      collectionConfig.labels.singular,
-      i18n,
-    )}`
-
-    keywords = `${getTranslation(collectionConfig.labels.singular, i18n)}, Payload, CMS`
-  }
-
-  if (globalConfig) {
-    const entityLabel = getTranslation(globalConfig.label, i18n)
-    leader = entityLabel
-    description = getTranslation(globalConfig.label, i18n)
-    keywords = `${getTranslation(globalConfig.label, i18n)}, Payload, CMS`
-    title = getTranslation(globalConfig.label, i18n)
-  }
-
-  return meta({
+}): Promise<Metadata> =>
+  generateDocumentMetadata({
+    collectionConfig,
     config,
-    description,
-    keywords,
-    leader,
-    title,
+    globalConfig,
+    i18n,
+    isEditing,
   })
-}

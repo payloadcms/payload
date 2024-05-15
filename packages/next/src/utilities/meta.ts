@@ -1,29 +1,25 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { SanitizedConfig } from 'payload/types'
+import type { MetaConfig, SanitizedConfig } from 'payload/config'
 
 import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
 import { defaults } from 'payload/config'
 import QueryString from 'qs'
 
-export const meta = (args: {
-  config: SanitizedConfig
-  description?: string
-  keywords?: string
-  openGraph?: Metadata['openGraph']
-  title: string
-}): Metadata => {
-  const {
-    config,
-    description,
-    keywords = 'CMS, Admin, Dashboard',
-    openGraph: openGraphFromProps,
-    title,
-  } = args
+export const meta = async (
+  args: MetaConfig & { config: SanitizedConfig; serverURL?: string },
+): Promise<Metadata> => {
+  const mergedMeta = {
+    ...args.config.admin.meta,
+    ...args,
+  }
 
-  const ogFromConfig = config.admin.meta.openGraph as Metadata['openGraph']
+  const { description, icons: customIcons, keywords, serverURL, title, titleSuffix } = mergedMeta
 
-  const customIcons = config.admin.meta.icons as Metadata['icons']
+  const openGraph = {
+    ...(args.config.admin.meta.openGraph || {}),
+    ...(args.openGraph || {}),
+  }
 
   const payloadIcons: Icon[] = [
     {
@@ -41,17 +37,17 @@ export const meta = (args: {
     },
   ]
 
-  let icons = customIcons ?? payloadIcons
+  let icons = (customIcons as Metadata['icons']) ?? payloadIcons // TODO: fix this type assertion
 
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = payloadIcons.concat(customIcons)
+    icons = payloadIcons.concat(customIcons as Icon[]) // TODO: fix this type assertion
   }
 
-  const metaTitle = `${title} ${config.admin.meta?.titleSuffix}`
+  const metaTitle = `${title} ${titleSuffix}`
 
-  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${config.admin.meta.titleSuffix}`
+  const ogTitle = `${typeof openGraph?.title === 'string' ? openGraph.title : title} ${titleSuffix}`
 
-  const openGraph: Metadata['openGraph'] = {
+  const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaults.admin.meta.openGraph || {}),
     description,
     images: [
@@ -60,6 +56,7 @@ export const meta = (args: {
         height: 630,
         url: `/api/og${QueryString.stringify(
           {
+            description: openGraph?.description,
             title: ogTitle,
           },
           {
@@ -70,20 +67,19 @@ export const meta = (args: {
       },
     ],
     title: ogTitle,
-    ...(openGraphFromProps || {}),
-    ...(ogFromConfig || {}),
+    ...((openGraph as Metadata['openGraph']) || {}), // TODO: fix this type assertion
   }
 
-  return {
+  return Promise.resolve({
     description,
     icons,
     keywords,
     metadataBase: new URL(
-      config?.serverURL ||
+      serverURL ||
         process.env.PAYLOAD_PUBLIC_SERVER_URL ||
         `http://localhost:${process.env.PORT || 3000}`,
     ),
-    openGraph,
+    openGraph: mergedOpenGraph,
     title: metaTitle,
-  }
+  })
 }
