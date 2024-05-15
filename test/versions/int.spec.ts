@@ -910,6 +910,13 @@ describe('Versions', () => {
     })
 
     it('should be able to query by id AND any other field with draft=true', async () => {
+      const allDocs = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+      })
+
+      expect(allDocs.docs.length).toBeGreaterThan(1)
+
       const results = await payload.find({
         collection: 'draft-posts',
         draft: true,
@@ -917,7 +924,7 @@ describe('Versions', () => {
           and: [
             {
               id: {
-                not_in: [1],
+                not_in: allDocs.docs[0].id,
               },
             },
             {
