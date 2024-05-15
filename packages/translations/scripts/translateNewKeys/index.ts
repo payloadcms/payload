@@ -7,119 +7,21 @@ import type {
   AcceptedLanguages,
   GenericLanguages,
   GenericTranslationsObject,
-} from '../src/types.js'
+} from '../../src/types.js'
 
-import { translations } from '../src/exports/all.js'
-import { enTranslations } from '../src/languages/en.js'
-import { cloneDeep } from '../src/utilities/cloneDeep.js'
-import { deepMerge } from '../src/utilities/deepMerge.js'
-import { acceptedLanguages } from '../src/utilities/languages.js'
+import { translations } from '../../src/exports/all.js'
+import { enTranslations } from '../../src/languages/en.js'
+import { cloneDeep } from '../../src/utilities/cloneDeep.js'
+import { deepMerge } from '../../src/utilities/deepMerge.js'
+import { acceptedLanguages } from '../../src/utilities/languages.js'
+import { applyEslintFixes } from './applyEslintFixes.js'
+import { findMissingKeys } from './findMissingKeys.js'
+import { generateTsObjectLiteral } from './generateTsObjectLiteral.js'
+import { sortKeys } from './sortKeys.js'
+import { translateText } from './translateText.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-const OPENAI_API_KEY = 'sk-' // Remember to replace with your actual key
-
-import { ESLint } from 'eslint'
-
-async function applyEslintFixes(text: string, filePath: string): Promise<string> {
-  const eslint = new ESLint({ fix: true })
-  const results = await eslint.lintText(text, { filePath })
-  const result = results[0] || { output: text }
-  return result.output || text // Return the fixed content or the original if no fixes were made.
-}
-
-function generateTsObjectLiteral(obj: any): string {
-  const lines = []
-  const entries = Object.entries(obj)
-  for (const [key, value] of entries) {
-    const safeKey = /^[\w$]+$/.test(key) ? key : JSON.stringify(key)
-    const line =
-      typeof value === 'object' && value !== null
-        ? `${safeKey}: ${generateTsObjectLiteral(value)}`
-        : `${safeKey}: ${JSON.stringify(value)}`
-    lines.push(line)
-  }
-  return `{\n  ${lines.join(',\n  ')}\n}`
-}
-
-async function translateText(text: string, targetLang: string) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    body: JSON.stringify({
-      max_tokens: 150,
-      messages: [
-        {
-          content: `Only respond with the translation of the text you receive. The original language is English and the translation language is ${targetLang}. Only respond with the translation - do not say anything else. If you cannot translate the text, respond with "[SKIPPED]"`,
-          role: 'system',
-        },
-        {
-          content: text,
-          role: 'user',
-        },
-      ],
-      model: 'gpt-4',
-    }),
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-  })
-  try {
-    const data = await response.json()
-    console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
-    return data.choices[0].message.content.trim()
-  } catch (e) {
-    console.error('Error translating:', text, 'to', targetLang, 'response', response, '. Error:', e)
-    throw e
-  }
-}
-
-/**
- * Returns keys which are present in baseObj but not in targetObj
- */
-function findMissingKeys(
-  baseObj: GenericTranslationsObject,
-  targetObj: GenericTranslationsObject,
-  prefix = '',
-): string[] {
-  let missingKeys = []
-
-  for (const key in baseObj) {
-    const baseValue = baseObj[key]
-    const targetValue = targetObj[key]
-    if (typeof baseValue === 'object') {
-      missingKeys = missingKeys.concat(
-        findMissingKeys(
-          baseValue,
-          typeof targetValue === 'object' && targetValue ? targetValue : {},
-          `${prefix}${key}.`,
-        ),
-      )
-    } else if (!(key in targetObj)) {
-      missingKeys.push(`${prefix}${key}`)
-    }
-  }
-
-  return missingKeys
-}
-
-function sortKeys(obj: any): any {
-  if (typeof obj !== 'object' || obj === null) return obj
-
-  if (Array.isArray(obj)) {
-    return obj.map(sortKeys)
-  }
-
-  const sortedKeys = Object.keys(obj).sort()
-  const sortedObj: { [key: string]: any } = {}
-
-  for (const key of sortedKeys) {
-    sortedObj[key] = sortKeys(obj[key])
-  }
-
-  return sortedObj
-}
 
 /**
  *
