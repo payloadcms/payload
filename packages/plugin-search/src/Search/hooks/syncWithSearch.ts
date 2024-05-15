@@ -76,6 +76,9 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
             'doc.value': {
               equals: id,
             },
+            'doc.relationTo': {
+              equals: collection
+            },
           },
         })
 
