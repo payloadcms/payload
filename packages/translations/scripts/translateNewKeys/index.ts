@@ -219,5 +219,5 @@ void translateObject({
   allTranslationsObject: allTranslations,
   fromTranslationsObject: enTranslations,
   //languages: ['de'],
-  targetFolder: '../src/languages',
+  targetFolder: '../../src/languages',
 })
