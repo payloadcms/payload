@@ -78,8 +78,7 @@
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "pretest": "pnpm build",
-    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
+    "pretest": "pnpm build"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
