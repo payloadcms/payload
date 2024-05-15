@@ -88,7 +88,7 @@ const formatStep = (step: Step) => {
 }
 
 export function isSelectAll(event: KeyboardEvent): boolean {
-  return event.keyCode === 65 && (IS_APPLE ? event.metaKey : event.ctrlKey)
+  return event.code === 'KeyA' && (IS_APPLE ? event.metaKey : event.ctrlKey)
 }
 
 // stolen from LexicalSelection-test

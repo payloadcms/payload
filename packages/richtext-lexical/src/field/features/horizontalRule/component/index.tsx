@@ -27,7 +27,7 @@ export function HorizontalRuleComponent({ nodeKey }: { nodeKey: NodeKey }) {
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const onDelete = useCallback(
+  const $onDelete = useCallback(
     (event: KeyboardEvent) => {
       if (isSelected && $isNodeSelection($getSelection())) {
         event.preventDefault()
@@ -61,10 +61,10 @@ export function HorizontalRuleComponent({ nodeKey }: { nodeKey: NodeKey }) {
         },
         COMMAND_PRIORITY_LOW,
       ),
-      editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
     )
-  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected])
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected])
 
   useEffect(() => {
     const hrElem = editor.getElementByKey(nodeKey)

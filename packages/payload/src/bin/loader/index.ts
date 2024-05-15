@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { getTsconfig } from 'get-tsconfig'
-import path from 'path'
 import ts from 'typescript'
 import { fileURLToPath, pathToFileURL } from 'url'
 
@@ -61,12 +60,12 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   // and short circuit, so the load step
   // will return source code of empty object
   if (isClient) {
-    const nextResult = await nextResolve(specifier, context, nextResolve)
-
     return {
       format: 'client',
       shortCircuit: true,
-      url: nextResult.url,
+      // No need to resolve the URL using nextResolve. We ignore client files anyway.
+      // Additionally, nextResolve throws an error if the URL is a TS path, so we'd have to use TypeScript's resolveModuleName to resolve the URL, which is unnecessary
+      url: 'file:///',
     }
   }
 
