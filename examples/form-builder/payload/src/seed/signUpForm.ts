@@ -1,35 +1,110 @@
 export const signUpForm = {
   id: '63c086c36955e39c4208aa8f',
-  title: 'Sign Up Form',
+  confirmationMessage: {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'heading',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Your sign up submission was successful.',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          tag: 'h2',
+          version: 1,
+        },
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  },
+  confirmationType: 'message',
+  createdAt: '2023-01-12T22:16:35.480Z',
+  emails: [
+    {
+      id: '6644edb9cffd2c6c48a44730',
+      emailFrom: '"Payload" \u003Cdemo@payloadcms.com\u003E',
+      emailTo: '{{email}}',
+      message: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Your sign up submission was received successfully.',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      },
+      subject: "You've received a new message.",
+    },
+    {
+      id: '6644edb9cffd2c6c48a4472f',
+      subject: "You've received a new message.",
+    },
+  ],
   fields: [
     {
-      name: 'full-name',
-      label: 'Full Name',
-      width: 100,
-      required: true,
       id: '63c085ae69853127a889531e',
+      name: 'full-name',
       blockName: 'full-name',
       blockType: 'text',
+      label: 'Full Name',
+      required: true,
+      width: 100,
     },
     {
-      name: 'email',
-      label: 'Email',
-      width: 100,
-      required: true,
       id: '63c085df69853127a889531f',
+      name: 'email',
       blockName: 'email',
       blockType: 'email',
+      label: 'Email',
+      required: true,
+      width: 100,
     },
     {
-      name: 'password',
-      label: 'Password',
-      width: 100,
-      required: true,
       id: '63c0861869853127a8895321',
+      name: 'password',
       blockName: 'password',
       blockType: 'text',
+      label: 'Password',
+      required: true,
+      width: 100,
     },
     {
+      id: '63c0865769853127a8895324',
+      blockType: 'message',
       message: [
         {
           children: [
@@ -39,49 +114,18 @@ export const signUpForm = {
           ],
         },
       ],
-      id: '63c0865769853127a8895324',
-      blockType: 'message',
     },
     {
-      name: 'terms-and-conditions',
-      label: 'I agree to the terms and conditions',
-      required: true,
       id: '63c086a469853127a8895325',
+      name: 'terms-and-conditions',
       blockName: 'terms-and-conditions',
       blockType: 'checkbox',
+      label: 'I agree to the terms and conditions',
+      required: true,
     },
   ],
-  submitButtonLabel: 'Create Account',
-  confirmationType: 'message',
-  confirmationMessage: [
-    {
-      children: [
-        {
-          text: 'Your sign up submission was successful.',
-        },
-      ],
-      type: 'h2',
-    },
-  ],
-  emails: [
-    {
-      emailTo: '{{email}}',
-      emailFrom: 'demo@payloadcms.com',
-      emailFromName: 'Payload Team',
-      subject: "You've received a new message.",
-      message: [
-        {
-          children: [
-            {
-              text: 'Your sign up submission was received successfully.',
-            },
-          ],
-        },
-      ],
-      id: '63c0858f69853127a889531d',
-    },
-  ],
-  createdAt: '2023-01-12T22:16:35.480Z',
-  updatedAt: '2023-01-12T22:16:35.480Z',
   redirect: {},
+  submitButtonLabel: 'Create Account',
+  title: 'Sign Up Form',
+  updatedAt: '2023-01-12T22:16:35.480Z',
 }

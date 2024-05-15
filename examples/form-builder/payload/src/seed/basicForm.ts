@@ -1,103 +1,169 @@
 export const basicForm = {
   id: '63c0651b132c8e2783f8dcae',
-  updatedAt: '2023-01-12T21:25:41.113Z',
-  createdAt: '2022-12-28T20:48:53.181Z',
-  title: 'Basic Form',
-  fields: [
-    {
-      name: 'first-name',
-      label: 'First name',
-      width: 50,
-      required: true,
-      id: '63adaaba5236fe69ca8973f8',
-      blockName: 'first-name',
-      blockType: 'text',
-    },
-    {
-      name: 'last-name',
-      label: 'Last name',
-      width: 50,
-      required: true,
-      id: '63bf4b1fd69cef4f34272f9a',
-      blockName: 'last-name',
-      blockType: 'text',
-    },
-    {
-      name: 'email',
-      label: 'Email',
-      width: 100,
-      required: true,
-      id: '63c0953adc1cd2c2f6c2d30b',
-      blockName: 'email',
-      blockType: 'email',
-    },
-    {
-      name: 'coolest-project',
-      label: "What's the coolest project you've built with Payload so far?",
-      width: 100,
-      required: false,
-      id: '63adab96b65c28c168442316',
-      blockName: 'coolest-project',
-      blockType: 'textarea',
-    },
-    {
-      message: [
+  confirmationMessage: {
+    root: {
+      type: 'root',
+      children: [
         {
+          type: 'heading',
           children: [
             {
-              text: 'Have a great rest of your day!',
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'The basic form has been submitted successfully.',
+              version: 1,
             },
           ],
-        },
-        {
-          children: [
-            {
-              text: '',
-            },
-          ],
-        },
-        {
-          children: [
-            {
-              text: 'Sincerely, \n\nPayload Team.',
-            },
-          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          tag: 'h2',
+          version: 1,
         },
       ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  },
+  confirmationType: 'message',
+  createdAt: '2022-12-28T20:48:53.181Z',
+  emails: [
+    {
+      id: '6644edb9cffd2c6c48a44730',
+      emailFrom: '"Payload" \u003Cdemo@payloadcms.com\u003E',
+      emailTo: '{{email}}',
+      message: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Your basic form submission was successfully received.',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      },
+      subject: "You've received a new message.",
+    },
+  ],
+  fields: [
+    {
+      id: '63adaaba5236fe69ca8973f8',
+      name: 'first-name',
+      blockName: 'first-name',
+      blockType: 'text',
+      label: 'First name',
+      required: true,
+      width: 50,
+    },
+    {
+      id: '63bf4b1fd69cef4f34272f9a',
+      name: 'last-name',
+      blockName: 'last-name',
+      blockType: 'text',
+      label: 'Last name',
+      required: true,
+      width: 50,
+    },
+    {
+      id: '63c0953adc1cd2c2f6c2d30b',
+      name: 'email',
+      blockName: 'email',
+      blockType: 'email',
+      label: 'Email',
+      required: true,
+      width: 100,
+    },
+    {
+      id: '63adab96b65c28c168442316',
+      name: 'coolest-project',
+      blockName: 'coolest-project',
+      blockType: 'textarea',
+      label: "What's the coolest project you've built with Payload so far?",
+      required: false,
+      width: 100,
+    },
+    {
       id: '63adb90db65c28c168442322',
       blockName: 'farewell',
       blockType: 'message',
-    },
-  ],
-  submitButtonLabel: 'Submit',
-  confirmationType: 'message',
-  confirmationMessage: [
-    {
-      children: [
-        {
-          text: 'The basic form has been submitted successfully.',
-        },
-      ],
-      type: 'h2',
-    },
-  ],
-  emails: [
-    {
-      emailTo: '{{email}}',
-      emailFrom: 'demo@payloadcms.com',
-      emailFromName: 'Payload',
-      subject: "You've received a new message.",
-      message: [
-        {
+      message: {
+        root: {
+          type: 'root',
           children: [
             {
-              text: 'Your basic form submission was successfully received.',
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Have a great rest of your day!',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              version: 1,
+            },
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Sincerely, \n\nPayload Team.',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              version: 1,
             },
           ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
         },
-      ],
-      id: '63acab72433ea1822764c538',
+      },
     },
   ],
   redirect: {},
+  submitButtonLabel: 'Submit',
+  title: 'Basic Form',
+  updatedAt: '2023-01-12T21:25:41.113Z',
 }

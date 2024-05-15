@@ -1,39 +1,30 @@
-# Payload Form Builder Example
+# Payload Blank Template
 
-This example demonstrates how to implement the official [Form Builder Plugin](https://github.com/payloadcms/plugin-form-builder) into Payload.
+A blank template for [Payload](https://github.com/payloadcms/payload) to help you get up and running quickly. This repo may have been created by running `npx create-payload-app@latest` and selecting the "blank" template or by cloning this template on [Payload Cloud](https://payloadcms.com/new/clone/blank).
 
-There are various fully working front-ends made explicitly for this example, including:
-
-- [Next.js Pages Router](../next-pages)
-
-Follow the instructions in each respective README to get started. If you are setting up the Form Builder for another front-end, please consider contributing to this repo with your own example!
-
-## Quick Start
-
-To spin up this example locally, follow these steps:
-
-1. Clone this repo
-2. `cd` into this directory and run `yarn` or `npm install`
-3. `cp .env.example .env` to copy the example environment variables
-4. `yarn dev` or `npm run dev` to start the server and seed the database
-5. `open http://localhost:8000/admin` to access the admin panel
-6. Login with email `demo@payloadcms.com` and password `demo`
-
-That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
-
-## How it works
-
-The [Form Builder Plugin](https://github.com/payloadcms/plugin-form-builder) automatically adds the `forms` and `formSubmissions` collections to your config which your front-end can use to query forms and submit form data. You can embed forms into layout building blocks by referring a `forms` document in a relationship field.
-
-See the official [Form Builder Plugin](https://github.com/payloadcms/plugin-form-builder) for full details.
+See the official [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) for details on how to use Payload in a variety of different ways.
 
 ## Development
 
-To spin up this example locally, follow the [Quick Start](#quick-start).
+To spin up the project locally, follow these steps:
 
-### Seed
+1. First clone the repo
+1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
+1. Next `yarn && yarn dev` (or `docker-compose up`, see [Docker](#docker))
+1. Now `open http://localhost:3000/admin` to access the admin panel
+1. Create your first admin user using the form on the page
 
-On boot, a seed script is included to create a user, a home page, and some basic forms.
+That's it! Changes made in `./src` will be reflected in your app.
+
+### Docker
+
+Alternatively, you can use [Docker](https://www.docker.com) to spin up this project locally. To do so, follow these steps:
+
+1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
+1. Next run `docker-compose up`
+1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+
+That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
 
 ## Production
 
@@ -49,4 +40,3 @@ The easiest way to deploy your project is to use [Payload Cloud](https://payload
 ## Questions
 
 If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
-

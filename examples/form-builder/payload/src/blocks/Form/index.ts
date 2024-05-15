@@ -1,15 +1,9 @@
-import { Block } from 'payload/types'
-import richText from '../../fields/richText'
+import type { Block } from 'payload/types'
+
+import { HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const FormBlock: Block = {
   slug: 'formBlock',
-  labels: {
-    singular: 'Form Block',
-    plural: 'Form Blocks',
-  },
-  graphQL: {
-    singularName: 'FormBlock',
-  },
   fields: [
     {
       name: 'form',
@@ -19,15 +13,28 @@ export const FormBlock: Block = {
     },
     {
       name: 'enableIntro',
-      label: 'Enable Intro Content',
       type: 'checkbox',
+      label: 'Enable Intro Content',
     },
-    richText({
+    {
       name: 'introContent',
-      label: 'Intro Content',
+      type: 'richText',
       admin: {
         condition: (_, { enableIntro }) => Boolean(enableIntro),
       },
-    }),
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [...rootFeatures, HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3'] })]
+        },
+      }),
+      label: 'Intro Content',
+    },
   ],
+  graphQL: {
+    singularName: 'FormBlock',
+  },
+  labels: {
+    plural: 'Form Blocks',
+    singular: 'Form Block',
+  },
 }
