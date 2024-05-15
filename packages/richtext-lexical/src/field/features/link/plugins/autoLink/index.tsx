@@ -158,7 +158,7 @@ function extractMatchingNodes(
   return [matchingOffset, unmodifiedBeforeNodes, matchingNodes, unmodifiedAfterNodes]
 }
 
-function createAutoLinkNode(
+function $createAutoLinkNode_(
   nodes: TextNode[],
   startIndex: number,
   endIndex: number,
@@ -182,6 +182,7 @@ function createAutoLinkNode(
     const textNode = $createTextNode(match.text)
     textNode.setFormat(linkTextNode.getFormat())
     textNode.setDetail(linkTextNode.getDetail())
+    textNode.setStyle(linkTextNode.getStyle())
     linkNode.append(textNode)
     linkTextNode.replace(linkNode)
     return remainingTextNode
@@ -218,6 +219,7 @@ function createAutoLinkNode(
     const textNode = $createTextNode(firstLinkTextNode.getTextContent())
     textNode.setFormat(firstLinkTextNode.getFormat())
     textNode.setDetail(firstLinkTextNode.getDetail())
+    textNode.setStyle(firstLinkTextNode.getStyle())
     linkNode.append(textNode, ...linkNodes)
     // it does not preserve caret position if caret was at the first text node
     // so we need to restore caret position
@@ -234,7 +236,7 @@ function createAutoLinkNode(
   return undefined
 }
 
-function handleLinkCreation(
+function $handleLinkCreation(
   nodes: TextNode[],
   matchers: LinkMatcher[],
   onChange: ChangeHandler,
@@ -266,7 +268,7 @@ function handleLinkCreation(
 
       const actualMatchStart = invalidMatchEnd + matchStart - matchingOffset
       const actualMatchEnd = invalidMatchEnd + matchEnd - matchingOffset
-      const remainingTextNode = createAutoLinkNode(
+      const remainingTextNode = $createAutoLinkNode_(
         matchingNodes,
         actualMatchStart,
         actualMatchEnd,
@@ -405,7 +407,7 @@ function useAutoLink(
             (startsWithSeparator(textNode.getTextContent()) || !$isAutoLinkNode(previous))
           ) {
             const textNodesToMatch = getTextNodesToMatch(textNode)
-            handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
+            $handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
           }
 
           handleBadNeighbors(textNode, matchers, onChangeWrapped)

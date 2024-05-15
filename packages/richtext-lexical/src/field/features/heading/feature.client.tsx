@@ -21,7 +21,7 @@ import { createClientComponent } from '../createClientComponent.js'
 import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
-const setHeading = (headingSize: HeadingTagType) => {
+const $setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
   $setBlocksType(selection, () => $createHeadingNode(headingSize))
 }
@@ -68,7 +68,7 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
               label: `Heading ${headingSize.charAt(1)}`,
               onSelect: ({ editor }) => {
                 editor.update(() => {
-                  setHeading(headingSize)
+                  $setHeading(headingSize)
                 })
               },
               order: i + 2,
@@ -93,7 +93,7 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
                       label: `Heading ${headingSize.charAt(1)}`,
                       onSelect: ({ editor }) => {
                         editor.update(() => {
-                          setHeading(headingSize)
+                          $setHeading(headingSize)
                         })
                       },
                     }
