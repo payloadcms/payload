@@ -86,16 +86,6 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     unique: true,
   }
 
-  const focalPointFields: Field[] = ['focalX', 'focalY'].map((name) => {
-    return {
-      name,
-      type: 'number',
-      admin: {
-        hidden: true,
-      },
-    }
-  })
-
   let uploadFields: Field[] = [
     {
       ...url,
@@ -125,9 +115,26 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
+  // Add focal point fields if not disabled
+  if (
+    uploadOptions.focalPoint !== false &&
+    (uploadOptions.imageSizes || uploadOptions.resizeOptions)
+  ) {
+    uploadFields = uploadFields.concat(
+      ['focalX', 'focalY'].map((name) => {
+        return {
+          name,
+          type: 'number',
+          admin: {
+            hidden: true,
+          },
+        }
+      }),
+    )
+  }
+
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
-      ...focalPointFields,
       {
         name: 'sizes',
         type: 'group',
@@ -174,10 +181,6 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
         label: labels['upload:sizes'],
       },
     ])
-  }
-
-  if (uploadOptions.resizeOptions) {
-    uploadFields = uploadFields.concat(focalPointFields)
   }
 
   return uploadFields
