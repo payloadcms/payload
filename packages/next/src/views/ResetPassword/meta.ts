@@ -7,11 +7,10 @@ import { meta } from '../../utilities/meta.js'
 export const generateResetPasswordMetadata: GenerateViewMetadata = async ({
   config,
   i18n: { t },
-}): Promise<Metadata> => {
-  return meta({
+}): Promise<Metadata> =>
+  meta({
     config,
     description: t('authentication:resetPassword'),
     keywords: t('authentication:resetPassword'),
     title: t('authentication:resetPassword'),
   })
-}

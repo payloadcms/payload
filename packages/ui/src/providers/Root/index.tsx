@@ -1,11 +1,10 @@
 'use client'
-import type { Language } from '@payloadcms/translations'
+import type { I18nClient, Language } from '@payloadcms/translations'
 import type { ClientConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import * as facelessUIImport3 from '@faceless-ui/scroll-info'
 import * as facelessUIImport2 from '@faceless-ui/window-info'
-import { StayLoggedInModal } from '@payloadcms/ui/elements/StayLoggedIn'
 import React, { Fragment } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
@@ -14,6 +13,7 @@ import type { LanguageOptions } from '../Translation/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
+import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ActionsProvider } from '../Actions/index.js'
 import { AuthProvider } from '../Auth/index.js'
@@ -39,7 +39,7 @@ type Props = {
   languageCode: string
   languageOptions: LanguageOptions
   switchLanguageServerAction?: (lang: string) => Promise<void>
-  translations: Language['translations']
+  translations: I18nClient['translations']
 }
 
 export const RootProvider: React.FC<Props> = ({

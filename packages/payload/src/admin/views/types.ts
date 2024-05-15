@@ -1,4 +1,4 @@
-import type { SupportedLanguages } from '@payloadcms/translations'
+import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
@@ -43,7 +43,7 @@ export type InitPageResult = {
   locale: Locale
   permissions: Permissions
   req: PayloadRequestWithData
-  translations: SupportedLanguages
+  translations: ClientTranslationsObject
   visibleEntities: VisibleEntities
 }
 

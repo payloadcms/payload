@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
+import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { SanitizedConfig } from 'payload/types'
 
-import { payloadFavicon, payloadOgImage } from '@payloadcms/ui/assets'
+import { payloadFaviconDark, payloadFaviconLight, payloadOgImage } from '@payloadcms/ui/assets'
 
 export const meta = async (args: {
   config: SanitizedConfig
@@ -12,18 +13,36 @@ export const meta = async (args: {
   const { config, description = '', keywords = 'CMS, Admin, Dashboard', title } = args
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
-  const favicon = config?.admin?.meta?.favicon ?? payloadFavicon?.src
+
   const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
 
-  return {
+  const customIcons = config.admin.meta.icons as Metadata['icons']
+
+  let icons = customIcons ?? []
+
+  const payloadIcons: Icon[] = [
+    {
+      type: 'image/png',
+      rel: 'icon',
+      sizes: '32x32',
+      url: payloadFaviconDark?.src,
+    },
+    {
+      type: 'image/png',
+      media: '(prefers-color-scheme: dark)',
+      rel: 'icon',
+      sizes: '32x32',
+      url: payloadFaviconLight?.src,
+    },
+  ]
+
+  if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
+    icons = payloadIcons.concat(customIcons)
+  }
+
+  return Promise.resolve({
     description,
-    icons: [
-      {
-        type: 'image/svg',
-        rel: 'icon',
-        url: favicon,
-      },
-    ],
+    icons,
     keywords,
     metadataBase: new URL(
       config?.serverURL ||
@@ -44,5 +63,5 @@ export const meta = async (args: {
       title: `${title} ${titleSuffix}`,
     },
     title: `${title} ${titleSuffix}`,
-  }
+  })
 }

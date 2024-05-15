@@ -25,7 +25,11 @@ export const LoginForm: React.FC<{
   const config = useConfig()
 
   const {
-    admin: { autoLogin, user: userSlug },
+    admin: {
+      autoLogin,
+      routes: { forgot: forgotRoute },
+      user: userSlug,
+    },
     routes: { admin, api },
   } = config
 
@@ -98,7 +102,7 @@ export const LoginForm: React.FC<{
           }
         />
       </div>
-      <Link href={`${admin}/forgot`}>{t('authentication:forgotPasswordQuestion')}</Link>
+      <Link href={`${admin}${forgotRoute}`}>{t('authentication:forgotPasswordQuestion')}</Link>
       <FormSubmit>{t('authentication:login')}</FormSubmit>
     </Form>
   )

@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const sk: Language = {
@@ -9,7 +10,7 @@ export const sk: Language = {
       alreadyActivated: 'Už aktivované',
       alreadyLoggedIn: 'Už prihlásený',
       apiKey: 'API kľúč',
-      authenticated: "Overený",
+      authenticated: 'Overený',
       backToLogin: 'Späť na prihlásenie',
       beginCreateFirstUser: 'Začnite vytvorením prvého používateľa.',
       changePassword: 'Zmeniť heslo',
@@ -104,7 +105,8 @@ export const sk: Language = {
       unauthorized: 'Neautorizováno, pro zadání tohoto požadavku musíte být přihlášeni.',
       unknown: 'Došlo k neznámej chybe.',
       unspecific: 'Došlo k chybe.',
-      userLocked: 'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
+      userLocked:
+        'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
       valueMustBeUnique: 'Hodnota musí byť jedinečná',
       verificationTokenInvalid: 'Overovací token je neplatný.',
     },
@@ -192,7 +194,7 @@ export const sk: Language = {
       deletedCountSuccessfully: 'Úspešne zmazané {{count}} {{label}}.',
       deletedSuccessfully: 'Úspešne odstránené.',
       deleting: 'Odstraňovanie...',
-      depth: "Hĺbka",
+      depth: 'Hĺbka',
       descending: 'Zostupne',
       deselectAllRows: 'Zrušiť výber všetkých riadkov',
       document: 'Dokument',
@@ -231,7 +233,8 @@ export const sk: Language = {
       noFiltersSet: 'Nie sú nastavené žiadne filtre',
       noLabel: '<Žiadny {{label}}>',
       noOptions: 'Žiadne možnosti',
-      noResults: 'Neboli nájdené žiadne {{label}}. Buď neexistujú žiadne {{label}}, alebo žiadne nespĺňajú filtre, ktoré ste zadali vyššie.',
+      noResults:
+        'Neboli nájdené žiadne {{label}}. Buď neexistujú žiadne {{label}}, alebo žiadne nespĺňajú filtre, ktoré ste zadali vyššie.',
       noValue: 'Žiadna hodnota',
       none: 'Žiadny',
       notFound: 'Nenájdené',
@@ -295,14 +298,16 @@ export const sk: Language = {
     },
     upload: {
       crop: 'Orezať',
-      cropToolDescription: 'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
+      cropToolDescription:
+        'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
       dragAndDrop: 'Potiahnite a pusťte súbor',
       dragAndDropHere: 'alebo sem potiahnite a pusťte súbor',
       editImage: 'Upraviť obrázok',
       fileName: 'Názov súboru',
       fileSize: 'Veľkosť súboru',
       focalPoint: 'Stredobod',
-      focalPointDescription: 'Potiahnite bod stredobodu priamo na náhľad alebo upravte hodnoty nižšie.',
+      focalPointDescription:
+        'Potiahnite bod stredobodu priamo na náhľad alebo upravte hodnoty nižšie.',
       height: 'Výška',
       lessInfo: 'Menej informácií',
       moreInfo: 'Viac informácií',
@@ -338,11 +343,15 @@ export const sk: Language = {
     version: {
       type: 'Typ',
       aboutToPublishSelection: 'Chystáte sa publikovať všetky {{label}} vo výbere. Ste si istý?',
-      aboutToRestore: 'Chystáte sa obnoviť tento {{label}} dokument do stavu, v akom bol {{versionDate}}.',
-      aboutToRestoreGlobal: 'Chystáte sa obnoviť globálne {{label}} do stavu, v akom bol {{versionDate}}.',
-      aboutToRevertToPublished: 'Chystáte sa vrátiť zmeny tohto dokumentu do jeho publikovaného stavu. Ste si istý?',
+      aboutToRestore:
+        'Chystáte sa obnoviť tento {{label}} dokument do stavu, v akom bol {{versionDate}}.',
+      aboutToRestoreGlobal:
+        'Chystáte sa obnoviť globálne {{label}} do stavu, v akom bol {{versionDate}}.',
+      aboutToRevertToPublished:
+        'Chystáte sa vrátiť zmeny tohto dokumentu do jeho publikovaného stavu. Ste si istý?',
       aboutToUnpublish: 'Chystáte sa zrušiť publikovanie tohto dokumentu. Ste si istý?',
-      aboutToUnpublishSelection: 'Chystáte sa zrušiť publikovanie všetkých {{label}} vo výbere. Ste si istý?',
+      aboutToUnpublishSelection:
+        'Chystáte sa zrušiť publikovanie všetkých {{label}} vo výbere. Ste si istý?',
       autosave: 'Automatické uloženie',
       autosavedSuccessfully: 'Úspešne uložené automaticky.',
       autosavedVersion: 'Verzia automatického uloženia',

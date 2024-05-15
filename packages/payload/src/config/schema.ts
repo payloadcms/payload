@@ -60,17 +60,30 @@ export default joi.object({
     custom: joi.object().pattern(joi.string(), joi.any()),
     dateFormat: joi.string(),
     disable: joi.bool(),
-    inactivityRoute: joi.string(),
     livePreview: joi.object({
       ...livePreviewSchema,
       collections: joi.array().items(joi.string()),
       globals: joi.array().items(joi.string()),
     }),
-    logoutRoute: joi.string(),
     meta: joi.object().keys({
-      favicon: joi.string(),
+      icons: joi
+        .alternatives()
+        .try(
+          joi.array().items(joi.alternatives().try(joi.string(), joi.object())),
+          joi.object(),
+          joi.string().allow(null),
+        ),
       ogImage: joi.string(),
       titleSuffix: joi.string(),
+    }),
+    routes: joi.object({
+      account: joi.string(),
+      createFirstUser: joi.string(),
+      forgot: joi.string(),
+      inactivity: joi.string(),
+      login: joi.string(),
+      logout: joi.string(),
+      unauthorized: joi.string(),
     }),
     user: joi.string(),
   }),

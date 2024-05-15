@@ -301,6 +301,7 @@ jobs:
           - fields__collections__Lexical
           - live-preview
           - localization
+          - i18n
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-nested-docs

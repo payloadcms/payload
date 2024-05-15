@@ -2,7 +2,6 @@
 import type { FieldPermissions } from 'payload/auth'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import React, { Fragment } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -10,6 +9,7 @@ import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'

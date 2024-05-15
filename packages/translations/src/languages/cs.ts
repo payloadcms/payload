@@ -1,3 +1,4 @@
+// @ts-nocheck // TODO: Remove this and add missing translations
 import type { Language } from '../types.js'
 
 export const cs: Language = {
@@ -8,8 +9,8 @@ export const cs: Language = {
       accountOfCurrentUser: 'Účet současného uživatele',
       alreadyActivated: 'Již aktivováno',
       alreadyLoggedIn: 'Již přihlášen',
-      authenticated: 'Ověřený',
       apiKey: 'API klíč',
+      authenticated: 'Ověřený',
       backToLogin: 'Zpět na přihlášení',
       beginCreateFirstUser: 'Začněte vytvořením svého prvního uživatele.',
       changePassword: 'Změnit heslo',
@@ -306,7 +307,8 @@ export const cs: Language = {
       fileName: 'Název souboru',
       fileSize: 'Velikost souboru',
       focalPoint: 'Středobod',
-      focalPointDescription: 'Přetáhněte bod zaměření přímo na náhled nebo upravte níže uvedené hodnoty.',
+      focalPointDescription:
+        'Přetáhněte bod zaměření přímo na náhled nebo upravte níže uvedené hodnoty.',
       height: 'Výška',
       lessInfo: 'Méně informací',
       moreInfo: 'Více informací',

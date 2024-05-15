@@ -3,11 +3,11 @@
 import type { ClientValidate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { TextAreaInputProps, TextareaFieldProps } from './types.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'

@@ -13,6 +13,7 @@ import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback } from 'react'
 
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 import type { GenerateImage } from '../types.js'
 
 import { Pill } from '../ui/Pill.js'
@@ -27,7 +28,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
 
   const field: FieldType<string> = useField(props as Options)
 
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
