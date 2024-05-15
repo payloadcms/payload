@@ -117,6 +117,11 @@ describe('admin', () => {
   })
 
   describe('metadata', () => {
+    test('can customize meta title suffix', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
+    })
+
     test('should set Payload favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')

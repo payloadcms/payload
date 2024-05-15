@@ -83,6 +83,7 @@ export default buildConfigWithDefaults({
     },
     routes: customAdminRoutes,
     meta: {
+      titleSuffix: '- Custom CMS',
       icons: [
         {
           type: 'image/png',
