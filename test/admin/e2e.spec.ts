@@ -116,12 +116,12 @@ describe('admin', () => {
   })
 
   describe('metadata', () => {
-    test('title: should render custom page <title> suffix', async () => {
+    test('should render custom page title suffix', async () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
     })
 
-    test('icon: should render payload <link rel="icon" favicon>', async () => {
+    test('should render payload favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
@@ -134,7 +134,7 @@ describe('admin', () => {
       )
     })
 
-    test('icon: should render custom <link rel="icon"> favicon', async () => {
+    test('should render custom favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
@@ -143,7 +143,7 @@ describe('admin', () => {
       await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
     })
 
-    test('og: should render custom <meta property="og:title"> from root config', async () => {
+    test('should render custom og:title from root config', async () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
         'content',
@@ -151,13 +151,28 @@ describe('admin', () => {
       )
     })
 
-    test('og: should render custom <meta property="og:title"> from collection config', async () => {
+    test('should render custom og:title from collection config', async () => {
       await page.goto(postsUrl.collection(postsCollectionSlug))
       await page.locator('.collection-list .table a').first().click()
-
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
         'content',
         /Custom Page OG Title/,
+      )
+    })
+
+    test('should render og:image with proper URL', async () => {
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+        'content',
+        /\/api\/og\?description=.+&title=.+/,
+      )
+    })
+
+    test('should render twitter:image with proper URL', async () => {
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+        'content',
+        /\/api\/og\?description=.+&title=.+/,
       )
     })
   })
