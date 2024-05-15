@@ -51,7 +51,6 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
-    description,
     images: [
       {
         alt: ogTitle,
