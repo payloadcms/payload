@@ -23,8 +23,6 @@ export const meta = (args: {
     title,
   } = args
 
-  const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
-
   const customIcons = config.admin.meta.icons as Metadata['icons']
 
   const payloadIcons: Icon[] = [
@@ -49,7 +47,9 @@ export const meta = (args: {
     icons = payloadIcons.concat(customIcons)
   }
 
-  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
+  const metaTitle = `${title} ${config.admin.meta?.titleSuffix}`
+
+  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${config.admin.meta.titleSuffix}`
 
   const openGraph: Metadata['openGraph'] = {
     ...(defaults.admin.meta.openGraph || {}),
@@ -84,6 +84,6 @@ export const meta = (args: {
         `http://localhost:${process.env.PORT || 3000}`,
     ),
     openGraph,
-    title: `${title} ${titleSuffix}`,
+    title: metaTitle,
   }
 }

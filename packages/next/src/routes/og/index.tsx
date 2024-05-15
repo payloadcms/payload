@@ -2,20 +2,19 @@ import type { NextRequest } from 'next/server.js'
 import type { SanitizedConfig } from 'payload/types'
 
 import { PayloadIcon } from '@payloadcms/ui/graphics/Icon'
-import { Roboto } from 'next/font/google'
+import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
 import { NextResponse } from 'next/server.js'
+import path from 'path'
 import React from 'react'
+import { fileURLToPath } from 'url'
 
-const roboto = Roboto({
-  display: 'swap',
-  style: ['normal', 'italic'],
-  subsets: ['latin'],
-  variable: '--font-roboto',
-  weight: ['400', '900'],
-})
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
+
+export const contentType = 'image/png'
 
 export const OG_GET =
   (configPromise: Promise<SanitizedConfig>) =>
@@ -31,16 +30,25 @@ export const OG_GET =
       const leader = hasLeader ? searchParams.get('leader')?.slice(0, 100).replace('-', ' ') : ''
       const Icon = config.admin?.components?.graphics?.Icon || PayloadIcon
 
+      let fontData
+
+      try {
+        fontData = fs.readFile(path.join(dirname, 'roboto-regular.woff'))
+      } catch (e) {
+        console.error(`Error reading font file or not readable: ${e.message}`) // eslint-disable-line no-console
+      }
+
+      const fontFamily = 'Roboto, sans-serif'
+
       return new ImageResponse(
         (
           <div
-            className={roboto.variable}
             style={{
               backgroundColor: '#000',
               color: '#fff',
               display: 'flex',
               flexDirection: 'column',
-              fontFamily: 'var(--font-roboto)',
+              fontFamily,
               height: '100%',
               justifyContent: 'space-between',
               padding: '100px',
@@ -107,18 +115,24 @@ export const OG_GET =
           </div>
         ),
         {
-          fonts: [
-            {
-              name: 'Roboto',
-              data: roboto,
-            },
-          ],
+          ...(fontData
+            ? {
+                fonts: [
+                  {
+                    name: 'Roboto',
+                    data: await fontData,
+                    style: 'normal',
+                    weight: 400,
+                  },
+                ],
+              }
+            : {}),
           height: 630,
           width: 1200,
         },
       )
     } catch (e: any) {
       console.error(`${e.message}`) // eslint-disable-line no-console
-      return NextResponse.error()
+      return NextResponse.json({ error: `Internal Server Error: ${e.message}` }, { status: 500 })
     }
   }

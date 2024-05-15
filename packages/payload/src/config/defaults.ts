@@ -19,7 +19,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
         siteName: 'Payload App',
         title: 'Payload App',
       },
-      titleSuffix: '- Payload',
+      titleSuffix: '— Payload',
     },
     routes: {
       account: '/account',
