@@ -17,7 +17,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
     description,
     icons: customIcons,
     keywords,
-    openGraph,
+    openGraph: openGraphFromProps,
     serverURL,
     title,
     titleSuffix,
@@ -47,7 +47,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
 
   const metaTitle = `${title} ${titleSuffix}`
 
-  const ogTitle = `${typeof openGraph?.title === 'string' ? openGraph.title : title} ${titleSuffix}`
+  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
@@ -57,7 +57,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
         height: 630,
         url: `/api/og${QueryString.stringify(
           {
-            description: openGraph?.description,
+            description: defaultOpenGraph?.description || openGraphFromProps?.description,
             title: ogTitle,
           },
           {
@@ -68,7 +68,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
       },
     ],
     title: ogTitle,
-    ...(openGraph || {}),
+    ...(openGraphFromProps || {}),
   }
 
   return Promise.resolve({
