@@ -8,7 +8,7 @@ import QueryString from 'qs'
 
 export const meta = async (
   args: MetaConfig & { config: SanitizedConfig; serverURL?: string },
-): Promise<Metadata> => {
+): Promise<any> => {
   const mergedMeta = {
     ...args.config.admin.meta,
     ...args,
@@ -67,7 +67,7 @@ export const meta = async (
       },
     ],
     title: ogTitle,
-    ...((openGraph as Metadata['openGraph']) || {}), // TODO: fix this type assertion
+    ...(openGraph || {}),
   }
 
   return Promise.resolve({

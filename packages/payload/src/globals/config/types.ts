@@ -1,5 +1,4 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { Metadata as NextMetadata } from 'next'
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
@@ -16,6 +15,7 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LivePreviewConfig,
+  OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -131,7 +131,7 @@ export type GlobalAdminOptions = {
    */
   livePreview?: LivePreviewConfig
   meta?: {
-    openGraph?: NextMetadata['openGraph']
+    openGraph?: OpenGraphConfig
   }
   /**
    * Function to generate custom preview URL

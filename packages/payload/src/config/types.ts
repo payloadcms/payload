@@ -72,6 +72,21 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type OGImageConfig = {
+  alt?: string
+  height?: number | string
+  type?: string
+  url: string
+  width?: number | string
+}
+
+export type OpenGraphConfig = {
+  description?: string
+  images?: OGImageConfig | OGImageConfig[]
+  siteName?: string
+  title?: string
+}
+
 export type MetaConfig = {
   /**
    * Overrides the auto-generated <meta name="description"> of admin pages
@@ -94,9 +109,8 @@ export type MetaConfig = {
    * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
    *
    * For example when sharing the Admin Panel on social media or through messaging services.
-   * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
    */
-  openGraph?: NextMetadata['openGraph']
+  openGraph?: OpenGraphConfig
   /**
    * Overrides the auto-generated <title> of admin pages
    * @example `"My Admin Panel"`

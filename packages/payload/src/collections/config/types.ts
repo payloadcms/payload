@@ -1,5 +1,4 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { Metadata as NextMetadata } from 'next'
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
@@ -19,6 +18,7 @@ import type {
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
+  OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -284,7 +284,7 @@ export type CollectionAdminOptions = {
    */
   livePreview?: LivePreviewConfig
   meta?: {
-    openGraph?: NextMetadata['openGraph']
+    openGraph?: OpenGraphConfig
   }
   pagination?: {
     defaultLimit?: number
