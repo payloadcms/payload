@@ -20,7 +20,8 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     meta: {
       openGraph: {
-        title: 'Custom Page OG Title',
+        title: 'This is a custom OG title for posts',
+        description: 'This is a custom OG description for posts',
       },
     },
   },

@@ -10,8 +10,8 @@ export const meta = async (
   args: MetaConfig & { config: SanitizedConfig; serverURL?: string },
 ): Promise<any> => {
   const mergedMeta = {
-    ...args.config.admin.meta,
     ...args,
+    ...args.config.admin.meta,
   }
 
   const { description, icons: customIcons, keywords, serverURL, title, titleSuffix } = mergedMeta
