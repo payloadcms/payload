@@ -67,6 +67,7 @@ export default joi.object({
       globals: joi.array().items(joi.string()),
     }),
     meta: joi.object().keys({
+      description: joi.string(),
       icons: joi
         .alternatives()
         .try(
