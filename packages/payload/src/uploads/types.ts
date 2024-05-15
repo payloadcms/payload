@@ -125,3 +125,16 @@ export type FileToSave = {
   buffer: Buffer
   path: string
 }
+
+export type UploadEdits = {
+  crop?: {
+    height?: number
+    width?: number
+    x?: number
+    y?: number
+  }
+  focalPoint?: {
+    x?: number
+    y?: number
+  }
+}

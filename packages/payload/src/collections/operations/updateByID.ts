@@ -148,6 +148,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,

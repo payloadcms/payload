@@ -11,7 +11,7 @@ import sharp from 'sharp'
 import type { Collection } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
 import type { PayloadRequest } from '../express/types'
-import type { FileData, FileToSave, ProbedImageSize } from './types'
+import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types'
 
 import { FileUploadError, MissingFile } from '../errors'
 import FileRetrievalError from '../errors/FileRetrievalError'
@@ -31,6 +31,7 @@ type Args<T> = {
   overwriteExistingFiles?: boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
+  operation: 'create' | 'update'
 }
 
 type Result<T> = Promise<{
@@ -45,6 +46,7 @@ export const generateFileData = async <T>({
   overwriteExistingFiles,
   req,
   throwOnMissingFile,
+  operation,
 }: Args<T>): Result<T> => {
   if (!collectionConfig.upload) {
     return {
@@ -54,7 +56,8 @@ export const generateFileData = async <T>({
   }
 
   let file = req.files?.file || undefined
-  const { uploadEdits } = req.query || {}
+
+  const uploadEdits = parseUploadEditsFromReqOrIncomingData(req, data, operation)
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload
@@ -250,6 +253,7 @@ export const generateFileData = async <T>({
         req,
         savedFilename: fsSafeName || file.name,
         staticPath,
+        uploadEdits,
       })
 
       fileData.sizes = sizeData
@@ -271,4 +275,41 @@ export const generateFileData = async <T>({
     data: newData,
     files: filesToSave,
   }
+}
+
+/**
+ * Parse upload edits from req or incoming data
+ */
+function parseUploadEditsFromReqOrIncomingData(
+  req: PayloadRequest,
+  data: unknown,
+  operation: 'create' | 'update',
+): UploadEdits | undefined {
+  // Get intended focal point change from query string or incoming data
+  let {
+    uploadEdits = {},
+  }: {
+    uploadEdits?: UploadEdits
+  } = req.query || {}
+
+  if (uploadEdits.focalPoint) return uploadEdits
+
+  const incomingData = data as FileData
+
+  if (incomingData.focalX && incomingData.focalY) {
+    uploadEdits.focalPoint = {
+      x: incomingData.focalX,
+      y: incomingData.focalY,
+    }
+    return uploadEdits
+  }
+
+  // If no focal point is set, default to center
+  if (operation === 'create') {
+    uploadEdits.focalPoint = {
+      x: 50,
+      y: 50,
+    }
+  }
+  return uploadEdits
 }

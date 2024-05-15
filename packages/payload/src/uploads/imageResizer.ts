@@ -6,10 +6,16 @@ import fs from 'fs'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
 
-import type { UploadEdits } from '../admin/components/views/collections/Edit/types'
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { PayloadRequest } from '../express/types'
-import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'
+import type {
+  FileSize,
+  FileSizes,
+  FileToSave,
+  ImageSize,
+  ProbedImageSize,
+  UploadEdits,
+} from './types'
 
 import { isNumber } from '../utilities/isNumber'
 import fileExists from './fileExists'
@@ -19,21 +25,15 @@ type ResizeArgs = {
   dimensions: ProbedImageSize
   file: UploadedFile
   mimeType: string
-  req: PayloadRequest & {
-    query?: {
-      uploadEdits?: UploadEdits
-    }
-  }
+  req: PayloadRequest
   savedFilename: string
   staticPath: string
+  uploadEdits?: UploadEdits
 }
 
 /** Result from resizing and transforming the requested image sizes */
 type ImageSizesResult = {
-  focalPoint?: {
-    x: number
-    y: number
-  }
+  focalPoint?: UploadEdits['focalPoint']
   sizeData: FileSizes
   sizesToSave: FileToSave[]
 }
@@ -231,6 +231,7 @@ export default async function resizeAndTransformImageSizes({
   req,
   savedFilename,
   staticPath,
+  uploadEdits,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
@@ -240,14 +241,10 @@ export default async function resizeAndTransformImageSizes({
   const sharpBase = sharp(file.tempFilePath || file.data).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
 
   // Focal point adjustments
-  const focalPoint = req.query?.uploadEdits?.focalPoint
+  const incomingFocalPoint = uploadEdits.focalPoint
     ? {
-        x: isNumber(req.query.uploadEdits.focalPoint?.x)
-          ? Math.round(req.query.uploadEdits.focalPoint.x)
-          : 50,
-        y: isNumber(req.query.uploadEdits.focalPoint?.y)
-          ? Math.round(req.query.uploadEdits.focalPoint.y)
-          : 50,
+        x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
+        y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
       }
     : undefined
 
@@ -265,10 +262,7 @@ export default async function resizeAndTransformImageSizes({
       const imageToResize = sharpBase.clone()
       let resized = imageToResize
 
-      if (
-        req.query?.uploadEdits?.focalPoint &&
-        applyPayloadAdjustments(imageResizeConfig, dimensions)
-      ) {
+      if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
         const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
         const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
@@ -284,14 +278,14 @@ export default async function resizeAndTransformImageSizes({
         const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
         const maxOffsetX = scaledImageInfo.width - safeResizeWidth
         const leftFocalEdge = Math.round(
-          scaledImageInfo.width * (focalPoint.x / 100) - safeResizeWidth / 2,
+          scaledImageInfo.width * (incomingFocalPoint.x / 100) - safeResizeWidth / 2,
         )
         const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
 
         const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
         const maxOffsetY = scaledImageInfo.height - safeResizeHeight
         const topFocalEdge = Math.round(
-          scaledImageInfo.height * (focalPoint.y / 100) - safeResizeHeight / 2,
+          scaledImageInfo.height * (incomingFocalPoint.y / 100) - safeResizeHeight / 2,
         )
         const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
 
@@ -364,6 +358,10 @@ export default async function resizeAndTransformImageSizes({
       acc.sizesToSave.push(...result.sizesToSave)
       return acc
     },
-    { ...(focalPointEnabled && { focalPoint }), sizeData: {}, sizesToSave: [] },
+    {
+      ...(focalPointEnabled && incomingFocalPoint && { focalPoint: incomingFocalPoint }),
+      sizeData: {},
+      sizesToSave: [],
+    },
   )
 }
