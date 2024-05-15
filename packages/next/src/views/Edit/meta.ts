@@ -15,24 +15,16 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 }): Promise<Metadata> => {
   const { t } = i18n
 
-  let description: string = ''
-  let title: string = ''
-  let entityLabel: string = ''
-  let keywords: string = ''
+  const entityLabel = collectionConfig
+    ? getTranslation(collectionConfig.labels.singular, i18n)
+    : globalConfig
+      ? getTranslation(globalConfig.label, i18n)
+      : ''
 
-  if (collectionConfig) {
-    entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
-    description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
-    title = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
-    keywords = `${getTranslation(collectionConfig.labels.singular, i18n)}, Payload, CMS`
-  }
-
-  if (globalConfig) {
-    entityLabel = getTranslation(globalConfig.label, i18n)
-    description = getTranslation(globalConfig.label, i18n)
-    title = getTranslation(globalConfig.label, i18n)
-    keywords = `${getTranslation(globalConfig.label, i18n)}, Payload, CMS`
-  }
+  const metaTitle = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+  const ogTitle = `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`
+  const description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+  const keywords = `${entityLabel}, Payload, CMS`
 
   return Promise.resolve(
     meta({
@@ -41,9 +33,9 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       keywords,
       openGraph: {
         description: entityLabel,
-        title: entityLabel,
+        title: ogTitle,
       },
-      title,
+      title: metaTitle,
     }),
   )
 }

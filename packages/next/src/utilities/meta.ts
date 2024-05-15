@@ -10,7 +10,6 @@ export const meta = (args: {
   config: SanitizedConfig
   description?: string
   keywords?: string
-  leader?: string
   openGraph?: Metadata['openGraph']
   title: string
 }): Metadata => {
@@ -18,7 +17,6 @@ export const meta = (args: {
     config,
     description,
     keywords = 'CMS, Admin, Dashboard',
-    leader,
     openGraph: openGraphFromProps,
     title,
   } = args
@@ -60,7 +58,6 @@ export const meta = (args: {
         height: 630,
         url: `/api/og${QueryString.stringify(
           {
-            leader,
             title: ogTitle,
           },
           {

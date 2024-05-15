@@ -10,25 +10,21 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   globalConfig,
   i18n,
 }) => {
-  let leader: string = ''
+  const entityLabel = collectionConfig
+    ? getTranslation(collectionConfig.labels.singular, i18n)
+    : globalConfig
+      ? getTranslation(globalConfig.label, i18n)
+      : ''
 
-  if (collectionConfig) {
-    const entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
-    leader = entityLabel
-  }
-
-  if (globalConfig) {
-    const entityLabel = getTranslation(globalConfig.label, i18n)
-    leader = entityLabel
-  }
+  const metaTitle = `API - ${entityLabel}`
+  const description = `API - ${entityLabel}`
 
   return Promise.resolve(
     meta({
       config,
-      description: 'API',
+      description,
       keywords: 'API',
-      leader,
-      title: 'API',
+      title: metaTitle,
     }),
   )
 }
