@@ -1,4 +1,4 @@
-import type { Block, BlockField, FieldWithRichTextRequiredEditor } from 'payload/types'
+import type { Block, BlockField, Field } from 'payload/types'
 
 import { baseBlockFields, sanitizeFields } from 'payload/config'
 import { fieldsToJSONSchema, formatLabels, getTranslation } from 'payload/utilities'
@@ -12,12 +12,8 @@ import { INSERT_BLOCK_COMMAND } from './plugin/commands'
 import { blockPopulationPromiseHOC } from './populationPromise'
 import { blockValidationHOC } from './validate'
 
-export type LexicalBlock = Omit<Block, 'fields'> & {
-  fields: FieldWithRichTextRequiredEditor[]
-}
-
 export type BlocksFeatureProps = {
-  blocks: LexicalBlock[]
+  blocks: Block[]
 }
 
 export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
@@ -26,9 +22,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
     props.blocks = props.blocks.map((block) => {
       const blockCopy = cloneDeep(block)
 
-      blockCopy.fields = blockCopy.fields.concat(
-        baseBlockFields as FieldWithRichTextRequiredEditor[],
-      )
+      blockCopy.fields = blockCopy.fields.concat(baseBlockFields)
       blockCopy.labels = !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels
       return blockCopy
     })

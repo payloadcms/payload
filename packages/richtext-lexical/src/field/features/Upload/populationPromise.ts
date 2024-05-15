@@ -29,13 +29,16 @@ export const uploadPopulationPromiseHOC = (
       const collection = req.payload.collections[node?.relationTo]
 
       if (collection) {
+        const populateDepth =
+          props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
+
         promises.push(
           populate({
             id: node?.value?.id,
             collection,
             currentDepth,
             data: node,
-            depth,
+            depth: populateDepth,
             draft: false,
             field,
             key: 'value',

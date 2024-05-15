@@ -551,16 +551,12 @@ export type RichTextField<
     }
   }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  /**
+   * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
+   */
+  maxDepth?: number
   type: 'richText'
 } & ExtraProperties
-
-export type RichTextFieldRequiredEditor<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
-> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
-  editor: RichTextAdapter<Value, AdapterProps, ExtraProperties>
-}
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
@@ -678,10 +674,6 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
-
-export type FieldWithRichTextRequiredEditor =
-  | Exclude<Field, RichTextField>
-  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField
