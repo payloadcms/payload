@@ -114,7 +114,7 @@ export const OG_GET =
                 <div
                   style={{
                     fontSize: 30,
-                    marginTop: 20,
+                    marginTop: 40,
                   }}
                 >
                   {description}
