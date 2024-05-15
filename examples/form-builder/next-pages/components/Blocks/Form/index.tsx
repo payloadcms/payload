@@ -63,7 +63,7 @@ export const FormBlock: React.FC<
   const onSubmit = useCallback(
     (data: Data) => {
       let loadingTimerID: ReturnType<typeof setTimeout>
-      /* const submitForm = async () => {
+      const submitForm = async () => {
         setError(undefined)
 
         const dataToSend = Object.entries(data).map(([name, value]) => ({
@@ -78,14 +78,14 @@ export const FormBlock: React.FC<
 
         try {
           const req = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/form-submissions`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
               form: formID,
               submissionData: dataToSend,
             }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           })
 
           const res = await req.json()
@@ -95,8 +95,8 @@ export const FormBlock: React.FC<
           if (req.status >= 400) {
             setIsLoading(false)
             setError({
-              status: res.status,
               message: res.errors?.[0]?.message || 'Internal Server Error',
+              status: res.status,
             })
 
             return
@@ -110,7 +110,7 @@ export const FormBlock: React.FC<
 
             const redirectUrl = url
 
-            if (redirectUrl) router.push(redirectUrl)
+            if (redirectUrl) void router.push(redirectUrl)
           }
         } catch (err) {
           console.warn(err)
@@ -121,7 +121,7 @@ export const FormBlock: React.FC<
         }
       }
 
-      void submitForm() */
+      void submitForm()
     },
     [router, formID, redirect, confirmationType],
   )
