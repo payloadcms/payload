@@ -20,6 +20,9 @@ export const AppHeader: React.FC = () => {
   const { t } = useTranslation()
 
   const {
+    admin: {
+      routes: { account: accountRoute },
+    },
     localization,
     routes: { admin: adminRoute },
   } = useConfig()
@@ -86,7 +89,7 @@ export const AppHeader: React.FC = () => {
             <LinkElement
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
-              href={`${adminRoute}/account`}
+              href={`${adminRoute}${accountRoute}`}
               tabIndex={0}
             >
               <Account />

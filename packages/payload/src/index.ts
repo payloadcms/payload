@@ -13,7 +13,7 @@ import type { Options as UnlockOptions } from './auth/operations/local/unlock.js
 import type { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail.js'
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
-import type { AuthStrategy } from './auth/types.js'
+import type { AuthStrategy, User } from './auth/types.js'
 import type { BulkOperationResult, Collection, TypeWithID } from './collections/config/types.js'
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
@@ -496,7 +496,7 @@ type GeneratedTypes = {
     [slug: number | string | symbol]: GlobalTypeWithID & Record<string, unknown>
   }
   locale: null | string
-  user: TypeWithID & Record<string, unknown> & { collection: string }
+  user: User
 }
 
 type Payload = BasePayload<GeneratedTypes>

@@ -1,27 +1,40 @@
-import type { Payload } from 'payload'
+import type { ServerProps } from 'payload/config'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import React from 'react'
+
+import { WithServerSideProps } from '../WithServerSideProps/index.js'
 
 export type RenderCustomComponentProps = {
   CustomComponent?: React.ComponentType<any>
   DefaultComponent: React.ComponentType<any>
   componentProps?: Record<string, any>
   /**
-   * Payload automatically gets added to the component if it's an RSC
+   * Server-only props automatically get added to the component if it's an RSC
    */
-  payload?: Payload
+  serverOnlyProps?: ServerProps
 }
 
 export const RenderCustomComponent: React.FC<RenderCustomComponentProps> = (props) => {
-  const { CustomComponent, DefaultComponent, componentProps = {} } = props
+  const { CustomComponent, DefaultComponent, componentProps, serverOnlyProps } = props
 
   if (CustomComponent) {
-    return <WithServerSideProps Component={CustomComponent} payload={null} {...componentProps} />
+    return (
+      <WithServerSideProps
+        Component={CustomComponent}
+        serverOnlyProps={serverOnlyProps}
+        {...componentProps}
+      />
+    )
   }
 
   if (DefaultComponent) {
-    return <WithServerSideProps Component={DefaultComponent} payload={null} {...componentProps} />
+    return (
+      <WithServerSideProps
+        Component={DefaultComponent}
+        serverOnlyProps={serverOnlyProps}
+        {...componentProps}
+      />
+    )
   }
 
   return null

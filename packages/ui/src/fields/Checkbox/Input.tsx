@@ -1,9 +1,9 @@
 'use client'
 import type { LabelProps, SanitizedLabelProps } from 'payload/types'
 
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
 
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { Check } from '../../icons/Check/index.js'
 import { Line } from '../../icons/Line/index.js'
 

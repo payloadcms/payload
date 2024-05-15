@@ -220,7 +220,15 @@ export const Document: React.FC<AdminViewProps> = async ({
               CustomComponent={ViewOverride || CustomView}
               DefaultComponent={DefaultView}
               componentProps={viewComponentProps}
-              payload={payload}
+              serverOnlyProps={{
+                i18n,
+                locale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+              }}
             />
           )}
         </FormQueryParamsProvider>

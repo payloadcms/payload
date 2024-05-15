@@ -2,8 +2,8 @@ import type { Config } from 'payload/config'
 import type { Field, GroupField, TabsField, TextField } from 'payload/types'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { deepMerge } from 'payload/utilities'
-import React from 'react'
 
 import type {
   GenerateDescription,
@@ -43,12 +43,13 @@ export const seoPlugin =
             type: 'text',
             admin: {
               components: {
-                Field: ({ payload: _payload, ...props }) => (
-                  <MetaTitle
-                    {...props}
-                    hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: MetaTitle,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateTitleFn: typeof pluginConfig?.generateTitle === 'function',
+                  },
+                }),
               },
             },
             localized: true,
@@ -59,14 +60,14 @@ export const seoPlugin =
             type: 'textarea',
             admin: {
               components: {
-                Field: ({ payload: _payload, ...props }) => (
-                  <MetaDescription
-                    {...props}
-                    hasGenerateDescriptionFn={
-                      typeof pluginConfig?.generateDescription === 'function'
-                    }
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: MetaDescription,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateDescriptionFn:
+                      typeof pluginConfig?.generateDescription === 'function',
+                  },
+                }),
               },
             },
             localized: true,
@@ -80,12 +81,13 @@ export const seoPlugin =
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: ({ payload: _payload, ...props }) => (
-                        <MetaImage
-                          {...props}
-                          hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
-                        />
-                      ),
+                      Field: withMergedProps({
+                        Component: MetaImage,
+                        sanitizeServerOnlyProps: true,
+                        toMergeIntoProps: {
+                          hasGenerateImageFn: typeof pluginConfig?.generateImage === 'function',
+                        },
+                      }),
                     },
                     description:
                       'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
@@ -103,12 +105,13 @@ export const seoPlugin =
             type: 'ui',
             admin: {
               components: {
-                Field: ({ payload: _payload, ...props }) => (
-                  <Preview
-                    {...props}
-                    hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: Preview,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateURLFn: typeof pluginConfig?.generateURL === 'function',
+                  },
+                }),
               },
             },
             label: 'Preview',

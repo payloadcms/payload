@@ -13,7 +13,9 @@ import {
   checkPageTitle,
   ensureAutoLoginAndCompilationIsDone,
   exactText,
+  getAdminRoutes,
   initPageConsoleErrorCatch,
+  login,
   openDocControls,
   openDocDrawer,
   openNav,
@@ -23,6 +25,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import {
+  customAdminRoutes,
   customEditLabel,
   customNestedTabViewPath,
   customNestedTabViewTitle,
@@ -61,7 +64,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -72,6 +75,8 @@ describe('admin', () => {
   let customViewsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
+  let adminRoutes: ReturnType<typeof getAdminRoutes>
+  let loginURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = Boolean(process.env.CI)
@@ -95,7 +100,12 @@ describe('admin', () => {
       serverURL,
       snapshotKey: 'adminTests',
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+
+    adminRoutes = getAdminRoutes({ customAdminRoutes })
+
+    loginURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.login}`
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -103,7 +113,7 @@ describe('admin', () => {
       snapshotKey: 'adminTests',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
   })
 
   describe('metadata', () => {
@@ -127,6 +137,28 @@ describe('admin', () => {
       await expect(favicons.nth(2)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
       await expect(favicons.nth(3)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
       await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+    })
+  })
+
+  describe('routing', () => {
+    test('should use custom logout route', async () => {
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
+
+      await page.waitForURL(
+        `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`,
+      )
+
+      await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Ensure auto-login logged the user back in
+
+      await expect(() => expect(page.url()).toBe(`${serverURL}${adminRoutes.routes.admin}`)).toPass(
+        {
+          timeout: POLL_TOPASS_TIMEOUT,
+        },
+      )
     })
   })
 
@@ -206,7 +238,7 @@ describe('admin', () => {
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.step-nav a[href="/admin"]').click()
+      await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
       expect(page.url()).toContain(postsUrl.admin)
     })
 
@@ -214,7 +246,7 @@ describe('admin', () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="/admin/collections/${postsCollectionSlug}"]`,
+        `.step-nav a[href="${adminRoutes.routes.admin}/collections/${postsCollectionSlug}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
@@ -248,16 +280,16 @@ describe('admin', () => {
 
   describe('custom views', () => {
     test('root — should render custom view', async () => {
-      await page.goto(`${serverURL}/admin${customViewPath}`)
-      await page.waitForURL(`**/admin${customViewPath}`)
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${customViewPath}`)
+      await page.waitForURL(`**${adminRoutes.routes.admin}${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('root — should render custom nested view', async () => {
-      await page.goto(`${serverURL}/admin${customNestedViewPath}`)
+      await page.goto(`${serverURL}${adminRoutes.routes.admin}${customNestedViewPath}`)
       const pageURL = page.url()
       const pathname = new URL(pageURL).pathname
-      expect(pathname).toEqual(`/admin${customNestedViewPath}`)
+      expect(pathname).toEqual(`${adminRoutes.routes.admin}${customNestedViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
 
@@ -831,7 +863,10 @@ describe('admin', () => {
         const { id } = await createPost()
         await page.reload()
         const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
-        await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`)
+        await expect(linkCell).toHaveAttribute(
+          'href',
+          `${adminRoutes.routes.admin}/collections/posts/${id}`,
+        )
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
@@ -849,7 +884,10 @@ describe('admin', () => {
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
         // recheck that the 2nd cell is still a link
-        await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`)
+        await expect(linkCell).toHaveAttribute(
+          'href',
+          `${adminRoutes.routes.admin}/collections/posts/${id}`,
+        )
       })
 
       test('should filter rows', async () => {

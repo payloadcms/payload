@@ -9,10 +9,9 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useUseTitleField } from '@payloadcms/ui/hooks/useUseAsTitle'
-
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
+import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'

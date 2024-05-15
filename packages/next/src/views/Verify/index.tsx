@@ -10,15 +10,21 @@ export const verifyBaseClass = 'verify'
 
 export { generateVerifyMetadata } from './meta.js'
 
-export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params }) => {
+export const Verify: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   // /:collectionSlug/verify/:token
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [collectionSlug, verify, token] = params.segments
-  const { req } = initPageResult
+  const { locale, permissions, req } = initPageResult
 
   const {
+    i18n,
     payload: { config },
     payload,
+    user,
   } = req
 
   const {
@@ -43,7 +49,15 @@ export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params 
   return (
     <React.Fragment>
       <div className={`${verifyBaseClass}__brand`}>
-        <Logo payload={payload} />
+        <Logo
+          i18n={i18n}
+          locale={locale}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          user={user}
+        />
       </div>
       <h2>{textToRender}</h2>
     </React.Fragment>

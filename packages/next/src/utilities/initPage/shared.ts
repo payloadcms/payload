@@ -1,17 +1,26 @@
-export const authRoutes = [
-  '/login',
-  '/logout',
-  '/create-first-user',
-  '/forgot',
-  '/reset',
-  '/verify',
-  '/logout-inactivity',
+import type { SanitizedConfig } from 'payload/types'
+
+const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
+  'account',
+  'createFirstUser',
+  'forgot',
+  'login',
+  'logout',
+  'forgot',
+  'inactivity',
+  'unauthorized',
 ]
 
 export const isAdminRoute = (route: string, adminRoute: string) => {
   return route.startsWith(adminRoute)
 }
 
-export const isAdminAuthRoute = (route: string, adminRoute: string) => {
+export const isAdminAuthRoute = (config: SanitizedConfig, route: string, adminRoute: string) => {
+  const authRoutes = config.admin?.routes
+    ? Object.entries(config.admin.routes)
+        .filter(([key]) => authRouteKeys.includes(key as keyof SanitizedConfig['admin']['routes']))
+        .map(([_, value]) => value)
+    : []
+
   return authRoutes.some((r) => route.replace(adminRoute, '').startsWith(r))
 }
