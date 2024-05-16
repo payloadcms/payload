@@ -1,5 +1,4 @@
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
-import App, { AppContext, AppProps } from 'next/app'
 import React from 'react'
 
 import type { MainMenu } from '../payload-types'

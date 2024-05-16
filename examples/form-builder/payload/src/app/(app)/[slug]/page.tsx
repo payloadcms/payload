@@ -1,11 +1,7 @@
-import type { GetStaticPaths } from 'next'
-
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import React from 'react'
-
-import type { Page } from '../../../payload-types'
 
 import Blocks from '../../../components/Blocks'
 

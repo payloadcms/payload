@@ -160,37 +160,6 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
             )
           }
 
-          /* case 'block': {
-            // todo: fix types
-
-            //@ts-expect-error
-            const block = _node.fields
-
-            //@ts-expect-error
-            const blockType = _node.fields?.blockType
-
-            if (!block || !blockType) {
-              return null
-            }
-
-            switch (blockType) {
-              case 'content':
-                return <ContentBlock {...block} />
-              case 'cta':
-                return <CallToActionBlock {...block} />
-              case 'archive':
-                return <ArchiveBlock {...block} />
-              case 'mediaBlock':
-                return <MediaBlock {...block} />
-              case 'banner':
-                return <BannerBlock {...block} />
-              case 'code':
-                return <CodeBlock {...block} />
-              default:
-                return null
-            }
-          } */
-
           default:
             return null
         }

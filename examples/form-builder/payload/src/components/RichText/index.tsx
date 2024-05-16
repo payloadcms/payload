@@ -1,12 +1,10 @@
 import React from 'react'
 
-import styles from './index.module.scss'
 import { serializeLexical } from './serialize'
 
 const RichText: React.FC<{ className?: string; content: any; enableGutter?: boolean }> = ({
   className,
   content,
-  enableGutter = true,
 }) => {
   if (!content) {
     return null
