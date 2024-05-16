@@ -14,6 +14,13 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.0",
+    "@faceless-ui/css-grid": "^1.2.0",
+    "@faceless-ui/modal": "^2.0.2",
+    "@lexical/list": "^0.14.5",
+    "@lexical/react": "0.14.5",
+    "@lexical/rich-text": "^0.14.5",
+    "@lexical/utils": "0.14.5",
     "@payloadcms/db-mongodb": "beta",
     "@payloadcms/next": "beta",
     "@payloadcms/plugin-cloud": "beta",
@@ -25,6 +32,7 @@
     "payload": "beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.41.0",
     "sharp": "0.32.6"
   },
   "devDependencies": {

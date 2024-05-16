@@ -6,6 +6,12 @@ module.exports = {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
       files: ['*.js', '*.cjs', '*.json', '*.md', '*.yml', '*.yaml'],
     },
+    {
+      files: ['./src/**/*.ts', './src/**/*.tsx'],
+      rules: {
+        'no-restricted-exports': 'off',
+      },
+    },
   ],
   parserOptions: {
     project: ['./tsconfig.json'],

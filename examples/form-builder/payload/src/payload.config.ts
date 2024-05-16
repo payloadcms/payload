@@ -13,15 +13,15 @@ import path from 'path'
 import { buildConfig } from 'payload/config'
 import { fileURLToPath } from 'url'
 
-import { Pages } from './collections/Pages'
-import { Users } from './collections/Users'
-import { MainMenu } from './globals/MainMenu'
+import { Pages } from './_payload/collections/Pages'
+import { Users } from './_payload/collections/Users'
+import { MainMenu } from './_payload/globals/MainMenu'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { seed } from '@/seed'
+import { seed } from '@/_payload/seed'
 
-import BeforeLogin from './components/BeforeLogin'
+import BeforeLogin from './_payload/components/BeforeLogin'
 
 export default buildConfig({
   admin: {
