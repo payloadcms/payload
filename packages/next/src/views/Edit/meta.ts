@@ -42,7 +42,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     description,
     keywords,
     openGraph: {
-      description: entityLabel,
       title: ogTitle,
       ...baseOGOverrides,
       ...entityOGOverrides,
