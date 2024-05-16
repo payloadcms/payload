@@ -1,3 +1,4 @@
+import type { CollectionSlug } from 'payload'
 import type { Config } from 'payload/config'
 import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
@@ -15,7 +16,7 @@ import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
   collections?: {
-    [collection: string]: {
+    [collection: CollectionSlug]: {
       fields: Field[]
     }
   }

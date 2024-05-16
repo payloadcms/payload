@@ -1,7 +1,8 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData, Where } from '../../types/index.js'
-import type { Collection, TypeWithID } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -31,9 +32,9 @@ export type Arguments = {
   where?: Where
 }
 
-export const findOperation = async <T extends TypeWithID & Record<string, unknown>>(
+export const findOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
-): Promise<PaginatedDocs<T>> => {
+): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> => {
   let args = incomingArgs
 
   try {
@@ -108,7 +109,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
     const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
     const sanitizedPage = page || 1
 
-    let result: PaginatedDocs<T>
+    let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
     let fullWhere = combineQueries(where, accessResult)
 
@@ -123,7 +124,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
         where: fullWhere,
       })
 
-      result = await payload.db.queryDrafts<T>({
+      result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -141,7 +142,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
         where,
       })
 
-      result = await payload.db.find<T>({
+      result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -189,7 +190,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
       ...result,
       docs: await Promise.all(
         result.docs.map(async (doc) =>
-          afterRead<T>({
+          afterRead<DataFromCollectionSlug<TSlug>>({
             collection: collectionConfig,
             context: req.context,
             currentDepth,
@@ -241,7 +242,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<T>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'find',

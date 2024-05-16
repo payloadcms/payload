@@ -1,5 +1,5 @@
-import type { Payload, RequestContext } from '../../../index.js'
-import type { GeneratedTypes } from '../../../index.js'
+import type { DataFromCollectionSlug } from '../../../collections/config/types.js'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequestWithData } from '../../../types/index.js'
 import type { Result } from '../login.js'
 
@@ -7,7 +7,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { loginOperation } from '../login.js'
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: {
@@ -22,10 +22,10 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
 }
 
-async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
+async function localLogin<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
+): Promise<Result & { user: DataFromCollectionSlug<TSlug> }> {
   const {
     collection: collectionSlug,
     data,

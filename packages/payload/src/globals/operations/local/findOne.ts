@@ -1,11 +1,12 @@
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { GeneratedTypes, GlobalSlug, Payload, RequestContext } from '../../../index.js'
 import type { Document, PayloadRequestWithData } from '../../../types/index.js'
+import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation } from '../findOne.js'
 
-export type Options<T extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
@@ -14,14 +15,14 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
-  slug: T
+  slug: TSlug
   user?: Document
 }
 
-export default async function findOneLocal<T extends keyof GeneratedTypes['globals']>(
+export default async function findOneLocal<TSlug extends GlobalSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<GeneratedTypes['globals'][T]> {
+  options: Options<TSlug>,
+): Promise<DataFromGlobalSlug<TSlug>> {
   const {
     slug: globalSlug,
     depth,

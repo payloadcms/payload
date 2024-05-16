@@ -1,3 +1,4 @@
+import type { CollectionSlug } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
@@ -11,8 +12,8 @@ export function transformExtraFields(
     | ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[])
     | Field[],
   config: SanitizedConfig,
-  enabledCollections?: false | string[],
-  disabledCollections?: false | string[],
+  enabledCollections?: CollectionSlug[],
+  disabledCollections?: CollectionSlug[],
   maxDepth?: number,
 ): Field[] {
   const baseFields: Field[] = getBaseFields(

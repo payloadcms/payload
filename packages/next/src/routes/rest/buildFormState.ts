@@ -161,7 +161,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) =
     // to reduce the amount of fetches required
     if (!data) {
       const fetchData = async () => {
-        let resolvedData: TypeWithID
+        let resolvedData: Record<string, unknown> | TypeWithID
 
         if (collectionSlug && id) {
           resolvedData = await req.payload.findByID({

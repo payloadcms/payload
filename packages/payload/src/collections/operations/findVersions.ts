@@ -26,9 +26,9 @@ export type Arguments = {
   where?: Where
 }
 
-export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
+export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
-): Promise<PaginatedDocs<T>> => {
+): Promise<PaginatedDocs<TData>> => {
   const {
     collection: { config: collectionConfig },
     depth,
@@ -72,7 +72,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // Find
     // /////////////////////////////////////
 
-    const paginatedDocs = await payload.db.findVersions<T>({
+    const paginatedDocs = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: limit ?? 10,
       locale,
@@ -108,7 +108,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
           return docRef
         }),
       ),
-    } as PaginatedDocs<T>
+    } as PaginatedDocs<TData>
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -172,7 +172,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
     result = {
       ...result,
-      docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
+      docs: result.docs.map((doc) => sanitizeInternalFields<TData>(doc)),
     }
 
     if (shouldCommit) await commitTransaction(req)

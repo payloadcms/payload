@@ -1,3 +1,4 @@
+import type { I18nServer, NestedKeysStripped } from '@payloadcms/translations'
 import type { CollectionConfig } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'

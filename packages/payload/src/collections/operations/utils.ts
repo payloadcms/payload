@@ -1,8 +1,9 @@
 import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword.js'
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
-import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types.js'
+import type { AfterOperationHook, SanitizedCollectionConfig } from '../config/types.js'
 import type { countOperation } from './count.js'
 import type { createOperation } from './create.js'
 import type { deleteOperation } from './delete.js'
@@ -12,95 +13,99 @@ import type { findByIDOperation } from './findByID.js'
 import type { updateOperation } from './update.js'
 import type { updateByIDOperation } from './updateByID.js'
 
-export type AfterOperationMap<T extends TypeWithID> = {
-  count: typeof countOperation
-  create: typeof createOperation // todo: pass correct generic
-  delete: typeof deleteOperation // todo: pass correct generic
-  deleteByID: typeof deleteByIDOperation // todo: pass correct generic
-  find: typeof findOperation<T>
-  findByID: typeof findByIDOperation<T>
+export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
+  count: typeof countOperation<TOperationGeneric>
+  create: typeof createOperation<TOperationGeneric>
+  delete: typeof deleteOperation<TOperationGeneric>
+  deleteByID: typeof deleteByIDOperation<TOperationGeneric>
+  find: typeof findOperation<TOperationGeneric>
+  findByID: typeof findByIDOperation<TOperationGeneric>
   forgotPassword: typeof forgotPasswordOperation
-  login: typeof loginOperation
+  login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
-  update: typeof updateOperation // todo: pass correct generic
-  updateByID: typeof updateByIDOperation // todo: pass correct generic
+  update: typeof updateOperation<TOperationGeneric>
+  updateByID: typeof updateByIDOperation<TOperationGeneric>
 }
-export type AfterOperationArg<T extends TypeWithID> = {
+
+export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   req: PayloadRequestWithData
 } & (
   | {
-      args: Parameters<AfterOperationMap<T>['count']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['count']>[0]
       operation: 'count'
-      result: Awaited<ReturnType<AfterOperationMap<T>['count']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['count']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['create']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['create']>[0]
       operation: 'create'
-      result: Awaited<ReturnType<AfterOperationMap<T>['create']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['create']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['delete']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['delete']>[0]
       operation: 'delete'
-      result: Awaited<ReturnType<AfterOperationMap<T>['delete']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['delete']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['deleteByID']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['deleteByID']>[0]
       operation: 'deleteByID'
-      result: Awaited<ReturnType<AfterOperationMap<T>['deleteByID']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['deleteByID']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['find']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['find']>[0]
       operation: 'find'
-      result: Awaited<ReturnType<AfterOperationMap<T>['find']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['find']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['findByID']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['findByID']>[0]
       operation: 'findByID'
-      result: Awaited<ReturnType<AfterOperationMap<T>['findByID']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['findByID']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['forgotPassword']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['forgotPassword']>[0]
       operation: 'forgotPassword'
-      result: Awaited<ReturnType<AfterOperationMap<T>['forgotPassword']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['forgotPassword']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['login']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['login']>[0]
       operation: 'login'
-      result: Awaited<ReturnType<AfterOperationMap<T>['login']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['login']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['refresh']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['refresh']>[0]
       operation: 'refresh'
-      result: Awaited<ReturnType<AfterOperationMap<T>['refresh']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['refresh']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['update']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['update']>[0]
       operation: 'update'
-      result: Awaited<ReturnType<AfterOperationMap<T>['update']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['update']>>
     }
   | {
-      args: Parameters<AfterOperationMap<T>['updateByID']>[0]
+      args: Parameters<AfterOperationMap<TOperationGeneric>['updateByID']>[0]
       operation: 'updateByID'
-      result: Awaited<ReturnType<AfterOperationMap<T>['updateByID']>>
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['updateByID']>>
     }
 )
 
-// export type AfterOperationHook = typeof buildAfterOperation;
+type OperationResult<
+  TOperationGeneric extends CollectionSlug,
+  O extends keyof AfterOperationMap<TOperationGeneric>,
+> = Awaited<ReturnType<AfterOperationMap<TOperationGeneric>[O]>>
 
 export const buildAfterOperation = async <
-  T extends TypeWithID = any,
-  O extends keyof AfterOperationMap<T> = keyof AfterOperationMap<T>,
+  TOperationGeneric extends CollectionSlug,
+  O extends keyof AfterOperationMap<TOperationGeneric> = keyof AfterOperationMap<TOperationGeneric>,
 >(
-  operationArgs: Omit<AfterOperationArg<T>, 'req'> & { operation: O },
-): Promise<Awaited<ReturnType<AfterOperationMap<T>[O]>>> => {
+  operationArgs: Omit<AfterOperationArg<TOperationGeneric>, 'req'> & { operation: O },
+): Promise<OperationResult<TOperationGeneric, O> | any> => {
   const { args, collection, operation, result } = operationArgs
 
-  let newResult = result
+  let newResult = result as OperationResult<TOperationGeneric, O>
 
   await args.collection.config.hooks.afterOperation.reduce(
-    async (priorHook, hook: AfterOperationHook<T>) => {
+    async (priorHook, hook: AfterOperationHook<TOperationGeneric>) => {
       await priorHook
 
       const hookResult = await hook({
@@ -109,10 +114,10 @@ export const buildAfterOperation = async <
         operation,
         req: args.req,
         result: newResult,
-      } as AfterOperationArg<T>)
+      } as AfterOperationArg<TOperationGeneric>)
 
       if (hookResult !== undefined) {
-        newResult = hookResult
+        newResult = hookResult as OperationResult<TOperationGeneric, O>
       }
     },
     Promise.resolve(),

@@ -1,3 +1,4 @@
+import type { CollectionSlug } from 'payload'
 import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
@@ -23,7 +24,7 @@ export type ExclusiveLinkCollectionsProps =
        * The collections that should be disabled for internal linking. Overrides the `enableRichTextLink` property in the collection config.
        * When this property is set, `enabledCollections` will not be available.
        **/
-      disabledCollections?: string[]
+      disabledCollections?: CollectionSlug[]
 
       // Ensures that enabledCollections is not available when disabledCollections is set
       enabledCollections?: never
@@ -36,7 +37,7 @@ export type ExclusiveLinkCollectionsProps =
        * The collections that should be enabled for internal linking. Overrides the `enableRichTextLink` property in the collection config
        * When this property is set, `disabledCollections` will not be available.
        **/
-      enabledCollections?: string[]
+      enabledCollections?: CollectionSlug[]
     }
 
 export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {

@@ -1,13 +1,14 @@
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
 import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
+import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -24,10 +25,10 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   user?: Document
 }
 
-export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findVersionByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
+  options: Options<TSlug>,
+): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> {
   const {
     id,
     collection: collectionSlug,

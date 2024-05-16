@@ -1,3 +1,4 @@
+import type { CollectionSlug } from 'payload'
 import type { User } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, RadioField, TextField } from 'payload/types'
@@ -6,11 +7,11 @@ import { validateUrl } from '../../../lexical/utils/url.js'
 
 export const getBaseFields = (
   config: SanitizedConfig,
-  enabledCollections: false | string[],
-  disabledCollections: false | string[],
+  enabledCollections: CollectionSlug[],
+  disabledCollections: CollectionSlug[],
   maxDepth?: number,
 ): Field[] => {
-  let enabledRelations: string[]
+  let enabledRelations: CollectionSlug[]
 
   /**
    * Figure out which relations should be enabled (enabledRelations) based on a collection's admin.enableRichTextLink property,

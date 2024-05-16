@@ -5,6 +5,7 @@ const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 import type { RichTextAdapter } from '../admin/types.js'
+import type { CollectionSlug } from '../index.js'
 import type { Where } from '../types/index.js'
 import type {
   ArrayField,
@@ -369,8 +370,8 @@ const validateFilterOptions: Validate<
       [collection: string]: (number | string)[]
     } = {}
 
-    const falseCollections: string[] = []
-    const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
+    const falseCollections: CollectionSlug[] = []
+    const collections = !Array.isArray(relationTo) ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
     for (const collection of collections) {

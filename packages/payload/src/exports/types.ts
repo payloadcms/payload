@@ -35,6 +35,9 @@ export type {
   BeforeValidateHook as CollectionBeforeValidateHook,
   Collection,
   CollectionConfig,
+  DataFromCollectionSlug,
+  RequiredDataFromCollection,
+  RequiredDataFromCollectionSlug,
   SanitizedCollectionConfig,
   TypeWithID,
   TypeWithTimestamps,
@@ -133,6 +136,7 @@ export type {
   BeforeChangeHook as GlobalBeforeChangeHook,
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
+  DataFromGlobalSlug,
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types.js'

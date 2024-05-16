@@ -1,5 +1,5 @@
-import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { CollectionSlug } from 'payload'
+import type { DataFromCollectionSlug, PayloadRequestWithData } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { duplicateOperation } from 'payload/operations'
@@ -7,7 +7,7 @@ import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 
-export type Resolver<T> = (
+export type Resolver<TData> = (
   _: unknown,
   args: {
     draft: boolean
@@ -18,11 +18,11 @@ export type Resolver<T> = (
   context: {
     req: PayloadRequestWithData
   },
-) => Promise<T>
+) => Promise<TData>
 
-export default function duplicateResolver<T extends keyof GeneratedTypes['collections']>(
+export default function duplicateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
-): Resolver<GeneratedTypes['collections'][T]> {
+): Resolver<DataFromCollectionSlug<TSlug>> {
   return async function resolver(_, args, context: Context) {
     const { req } = context
     const locale = req.locale

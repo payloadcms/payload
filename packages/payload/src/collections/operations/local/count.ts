@@ -1,4 +1,4 @@
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
@@ -10,8 +10,8 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { countOperation } from '../count.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -25,9 +25,9 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   where?: Where
 }
 
-export default async function countLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
+  options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
   const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
 
@@ -39,7 +39,7 @@ export default async function countLocal<T extends keyof GeneratedTypes['collect
     )
   }
 
-  return countOperation({
+  return countOperation<TSlug>({
     collection,
     disableErrors,
     overrideAccess,

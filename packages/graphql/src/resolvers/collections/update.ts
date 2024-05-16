@@ -1,5 +1,5 @@
-import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { CollectionSlug } from 'payload'
+import type { DataFromCollectionSlug, PayloadRequestWithData } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { updateByIDOperation } from 'payload/operations'
@@ -7,11 +7,11 @@ import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 
-export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
+export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     autosave: boolean
-    data: GeneratedTypes['collections'][TSlug]
+    data: DataFromCollectionSlug<TSlug>
     draft: boolean
     fallbackLocale?: string
     id: number | string
@@ -20,9 +20,9 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   context: {
     req: PayloadRequestWithData
   },
-) => Promise<GeneratedTypes['collections'][TSlug]>
+) => Promise<DataFromCollectionSlug<TSlug>>
 
-export function updateResolver<TSlug extends keyof GeneratedTypes['collections']>(
+export function updateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

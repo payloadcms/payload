@@ -1,12 +1,13 @@
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
 import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -22,10 +23,10 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   user?: Document
 }
 
-export default async function restoreVersionLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<GeneratedTypes['collections'][T]> {
+  options: Options<TSlug>,
+): Promise<DataFromCollectionSlug<TSlug>> {
   const { id, collection: collectionSlug, depth, overrideAccess = true, showHiddenFields } = options
 
   const collection = payload.collections[collectionSlug]

@@ -14,7 +14,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { insertArrays } from './insertArrays.js'
 
-export const upsertRow = async <T extends TypeWithID>({
+export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>({
   id,
   adapter,
   data,
