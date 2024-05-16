@@ -57,7 +57,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const fieldSchema = useMemo(() => {
     const fieldSchemaUnSanitized = (
       editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
-    )?.collections?.[relatedCollection.slug].fields
+    )?.collections?.[relatedCollection.slug]?.fields
 
     const validRelationships = config.collections.map((c) => c.slug) || []
     // Sanitize custom fields here
