@@ -101,7 +101,6 @@ export type UploadConfig = {
   mimeTypes?: string[]
   resizeOptions?: ResizeOptions
   staticDir?: string
-  staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   trimOptions?: ImageUploadTrimOptions
 }
 

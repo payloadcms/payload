@@ -193,7 +193,6 @@ const collectionSchema = joi.object().keys({
         })
         .allow(null),
       staticDir: joi.string(),
-      staticOptions: joi.object(),
       tempFileDir: joi.string(),
       trimOptions: joi.alternatives().try(
         joi.object().keys({
