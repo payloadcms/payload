@@ -6,6 +6,7 @@ import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode
 import { expect, test } from '@playwright/test'
 import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import * as fs from 'node:fs'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
@@ -932,7 +933,7 @@ describe('lexical', () => {
 
         const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
         const richTextBlock: SerializedBlockNode = lexicalField.root
-          .children[12] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const subRichTextBlock: SerializedBlockNode = richTextBlock.fields.richTextField.root
           .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
