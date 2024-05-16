@@ -3,6 +3,7 @@ import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
 
+import { migratePostgresV2toV3 } from '@payloadcms/db-postgres/migration-utils'
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
@@ -411,6 +412,163 @@ describe('database', () => {
           }),
         ).rejects.toThrow('Not Found')
       })
+    })
+  })
+
+  describe('postgres v2 - v3 migration', () => {
+    it('should collect relations to migrate', async () => {
+      expect(payload.db).toBeDefined()
+
+      if (payload.db.name === 'postgres') {
+        const relationA1 = await payload.create({
+          collection: 'relation-a',
+          data: {
+            title: 'hello A 1',
+          },
+        })
+
+        const relationB1 = await payload.create({
+          collection: 'relation-b',
+          data: {
+            title: 'hello B 1',
+          },
+        })
+
+        const relationA2 = await payload.create({
+          collection: 'relation-a',
+          data: {
+            title: 'hello A 2',
+          },
+        })
+
+        const relationB2 = await payload.create({
+          collection: 'relation-b',
+          data: {
+            title: 'hello B 2',
+          },
+        })
+
+        const enDoc = {
+          relation1: relationA1.id,
+          myArray: [
+            {
+              relation2: relationB1.id,
+              mySubArray: [
+                {
+                  relation3: relationB1.id,
+                },
+                {
+                  relation3: relationB2.id,
+                },
+              ],
+            },
+            {
+              relation2: relationB2.id,
+              mySubArray: [
+                {
+                  relation3: relationB2.id,
+                },
+                {
+                  relation3: relationB1.id,
+                },
+              ],
+            },
+          ],
+          myGroup: {
+            relation4: relationB1.id,
+          },
+          myBlocks: [
+            {
+              blockType: 'myBlock',
+              relation5: relationA1.id,
+              relation6: relationB1.id,
+            },
+            {
+              blockType: 'myBlock',
+              relation5: relationA2.id,
+              relation6: relationB2.id,
+            },
+          ],
+        }
+
+        const esDoc = {
+          relation1: relationA2.id,
+          myArray: [
+            {
+              relation2: relationB2.id,
+              mySubArray: [
+                {
+                  relation3: relationB2.id,
+                },
+                {
+                  relation3: relationB1.id,
+                },
+              ],
+            },
+            {
+              relation2: relationB1.id,
+              mySubArray: [
+                {
+                  relation3: relationB1.id,
+                },
+                {
+                  relation3: relationB2.id,
+                },
+              ],
+            },
+          ],
+          myGroup: {
+            relation4: relationB2.id,
+          },
+          myBlocks: [
+            {
+              blockType: 'myBlock',
+              relation5: relationA2.id,
+              relation6: relationB2.id,
+            },
+            {
+              blockType: 'myBlock',
+              relation5: relationA1.id,
+              relation6: relationB1.id,
+            },
+          ],
+        }
+
+        const migrationDoc = await payload.create({
+          collection: 'pg-migrations',
+          data: enDoc,
+        })
+
+        const updated = await payload.update({
+          collection: 'pg-migrations',
+          id: migrationDoc.id,
+          data: esDoc,
+          locale: 'es',
+          fallbackLocale: null,
+        })
+
+        const { columnsToCreate } = await migratePostgresV2toV3({
+          payload,
+          debug: true,
+          // dryRun: true,
+        })
+
+        const myGroupRelation4 = columnsToCreate.find(
+          ({ columnName }) => columnName === 'my_group_relation4_id',
+        )
+
+        expect(myGroupRelation4.tableName).toStrictEqual('pg_migrations_locales')
+
+        const versionMyGroupRelation4 = columnsToCreate.find(
+          ({ columnName }) => columnName === 'version_my_group_relation4_id',
+        )
+
+        expect(versionMyGroupRelation4.tableName).toStrictEqual('_pg_migrations_v_locales')
+
+        const relation3 = columnsToCreate.find(({ columnName }) => columnName === 'relation3_id')
+
+        expect(relation3.tableName).toStrictEqual('pg_migrations_my_array_my_sub_array_locales')
+      }
     })
   })
 })

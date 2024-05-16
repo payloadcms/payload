@@ -87,6 +87,74 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'pg-migrations',
+      versions: true,
+      fields: [
+        {
+          name: 'relation1',
+          type: 'relationship',
+          relationTo: 'relation-a',
+        },
+        {
+          name: 'myArray',
+          type: 'array',
+          fields: [
+            {
+              name: 'relation2',
+              type: 'relationship',
+              relationTo: 'relation-b',
+            },
+            {
+              name: 'mySubArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'relation3',
+                  type: 'relationship',
+                  relationTo: 'relation-b',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'myGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'relation4',
+              type: 'relationship',
+              relationTo: 'relation-b',
+              localized: true,
+            },
+          ],
+        },
+        {
+          name: 'myBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'myBlock',
+              fields: [
+                {
+                  name: 'relation5',
+                  type: 'relationship',
+                  relationTo: 'relation-a',
+                },
+                {
+                  name: 'relation6',
+                  type: 'relationship',
+                  relationTo: 'relation-b',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       slug: 'custom-schema',
       dbName: 'customs',
       fields: [
