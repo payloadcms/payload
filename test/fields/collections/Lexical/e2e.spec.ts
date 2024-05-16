@@ -6,7 +6,6 @@ import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode
 import { expect, test } from '@playwright/test'
 import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
-import * as fs from 'node:fs'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
