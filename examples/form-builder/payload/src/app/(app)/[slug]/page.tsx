@@ -1,6 +1,8 @@
 import type { GetStaticPaths } from 'next'
 
+import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import type { Page } from '../../../payload-types'
@@ -22,32 +24,30 @@ export default async function Page({ params: { slug = 'home' } }) {
 }
 
 export const getPage = async (slug: string) => {
-  const pageQuery = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[slug][equals]=${slug}`,
-  ).then((res) => res.json())
-
-  return pageQuery.docs[0]
-}
-
-export const getStaticPaths: GetStaticPaths<{ slug: string }> = async () => {
-  const pagesQuery: { docs: Page[] } = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?limit=100`,
-  ).then((res) => res.json())
-
-  return {
-    fallback: 'blocking',
-    paths: pagesQuery.docs.map((page) => ({
-      params: {
-        slug: page.slug!,
+  const payload = await getPayload({ config: configPromise })
+  const pages = await payload.find({
+    collection: 'pages',
+    draft: false,
+    limit: 1,
+    overrideAccess: false,
+    where: {
+      slug: {
+        equals: slug,
       },
-    })),
-  }
+    },
+  })
+
+  return pages.docs[0]
 }
 
 export async function generateStaticParams() {
-  const pagesQuery: { docs: Page[] } = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?limit=100`,
-  ).then((res) => res.json())
+  const payload = await getPayload({ config: configPromise })
+  const pages = await payload.find({
+    collection: 'pages',
+    draft: false,
+    limit: 1000,
+    overrideAccess: false,
+  })
 
-  return pagesQuery.docs.map((doc) => doc.slug!)
+  return pages.docs.map((doc) => doc.slug!)
 }
