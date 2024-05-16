@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 export const afterOperationSlug = 'afterOperation'
 
-const AfterOperation2: CollectionConfig<'afterOperation'> = {
+export const AfterOperationCollection: CollectionConfig<'afterOperation'> = {
   slug: afterOperationSlug,
   hooks: {
     // beforeRead: [(operation) => operation.doc],
@@ -70,5 +70,3 @@ const AfterOperation2: CollectionConfig<'afterOperation'> = {
     },
   ],
 }
-
-export default AfterOperation2

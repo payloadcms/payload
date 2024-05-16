@@ -316,7 +316,7 @@ export type CollectionAdminOptions = {
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig<TSlug extends CollectionSlug = null> = {
+export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Access control
    */
