@@ -1,3 +1,10 @@
+## [2.18.1](https://github.com/payloadcms/payload/compare/v2.18.0...v2.18.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* add back explicit crop x and y values ([#6391](https://github.com/payloadcms/payload/issues/6391)) ([e76df32](https://github.com/payloadcms/payload/commit/e76df32f0987cc92dc8d9c693950e650c52576bf))
+
 ## [2.18.0](https://github.com/payloadcms/payload/compare/v2.17.0...v2.18.0) (2024-05-16)
 
 
