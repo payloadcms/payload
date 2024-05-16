@@ -79,7 +79,7 @@ export type NestedKeysStripped<T> = T extends object
   ? {
       [K in keyof T]-?: K extends string
         ? T[K] extends object
-          ? `${K}:${StripCountVariants<NestedKeysStripped<T[K]>>}` | null
+          ? `${K}:${NestedKeysStripped<T[K]>}`
           : `${StripCountVariants<K>}`
         : never
     }[keyof T]
