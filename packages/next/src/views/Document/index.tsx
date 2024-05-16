@@ -9,6 +9,7 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomCompo
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import { hasSavePermission as getHasSavePermission } from '@payloadcms/ui/utilities/hasSavePermission'
 import { notFound, redirect } from 'next/navigation.js'
 import { docAccessOperation } from 'payload/operations'
 import React from 'react'
@@ -83,9 +84,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
-    hasSavePermission =
-      (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
-      (!isEditing && permissions?.collections?.[collectionSlug]?.create?.permission)
+    hasSavePermission = getHasSavePermission({ id, collectionSlug, permissions })
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
@@ -118,7 +117,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
 
     docPermissions = permissions?.globals?.[globalSlug]
-    hasSavePermission = isEditing && docPermissions?.update?.permission
+    hasSavePermission = getHasSavePermission({ globalSlug, permissions })
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${

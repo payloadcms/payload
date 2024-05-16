@@ -12,6 +12,7 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
+import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
@@ -213,9 +214,11 @@ export const DocumentInfoProvider: React.FC<
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
+
     const params = {
       locale: locale || undefined,
     }
+
     if (pluralType === 'globals') {
       docAccessURL = `/globals/${slug}/access`
     } else if (pluralType === 'collections' && id) {
@@ -229,17 +232,31 @@ export const DocumentInfoProvider: React.FC<
           'Accept-Language': i18n.language,
         },
       })
-      const json = await res.json()
+
+      const json: DocumentPermissions = await res.json()
 
       setDocPermissions(json)
-      setHasSavePermission(json?.update?.permission)
+      setHasSavePermission(
+        getHasSavePermission({ id, collectionSlug, docPermissions: json, globalSlug }),
+      )
     } else {
       // fallback to permissions from the entity type
       // (i.e. create has no id)
       setDocPermissions(permissions?.[pluralType]?.[slug])
-      setHasSavePermission(permissions?.[pluralType]?.[slug]?.update?.permission)
+      setHasSavePermission(getHasSavePermission({ id, collectionSlug, globalSlug, permissions }))
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, locale])
+  }, [
+    serverURL,
+    api,
+    pluralType,
+    slug,
+    id,
+    permissions,
+    i18n.language,
+    locale,
+    collectionSlug,
+    globalSlug,
+  ])
 
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
