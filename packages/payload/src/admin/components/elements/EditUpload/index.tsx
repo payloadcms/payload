@@ -41,6 +41,8 @@ export const EditUpload: React.FC<{
     height: uploadEdits?.crop?.height || 100,
     unit: '%',
     width: uploadEdits?.crop?.width || 100,
+    x: uploadEdits?.crop?.x || 0,
+    y: uploadEdits?.crop?.y || 0,
   })
 
   const [focalPosition, setFocalPosition] = useState<{ x: number; y: number }>({
