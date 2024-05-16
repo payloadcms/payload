@@ -976,7 +976,7 @@ describe('lexical', () => {
 
         const lexicalField2: SerializedEditorState = lexicalDocDepth1.lexicalWithBlocks
         const richTextBlock2: SerializedBlockNode = lexicalField2.root
-          .children[12] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const subRichTextBlock2: SerializedBlockNode = richTextBlock2.fields.richTextField.root
           .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
