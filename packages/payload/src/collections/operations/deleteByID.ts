@@ -24,10 +24,6 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-type AA = typeof deleteByIDOperation<'hello'>
-
-const o: AA = null
-
 export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<DataFromCollectionSlug<TSlug>> => {
