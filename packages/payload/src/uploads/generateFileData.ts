@@ -28,10 +28,11 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  operation: 'create' | 'update'
+  originalDoc?: T
   overwriteExistingFiles?: boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
-  operation: 'create' | 'update'
 }
 
 type Result<T> = Promise<{
@@ -43,10 +44,11 @@ export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   config,
   data,
+  operation,
+  originalDoc,
   overwriteExistingFiles,
   req,
   throwOnMissingFile,
-  operation,
 }: Args<T>): Result<T> => {
   if (!collectionConfig.upload) {
     return {
@@ -57,7 +59,12 @@ export const generateFileData = async <T>({
 
   let file = req.files?.file || undefined
 
-  const uploadEdits = parseUploadEditsFromReqOrIncomingData(req, data, operation)
+  const uploadEdits = parseUploadEditsFromReqOrIncomingData({
+    data,
+    operation,
+    originalDoc,
+    req,
+  })
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload
@@ -280,13 +287,16 @@ export const generateFileData = async <T>({
 /**
  * Parse upload edits from req or incoming data
  */
-function parseUploadEditsFromReqOrIncomingData(
-  req: PayloadRequest,
-  data: unknown,
-  operation: 'create' | 'update',
-): UploadEdits | undefined {
+function parseUploadEditsFromReqOrIncomingData(args: {
+  data: unknown
+  operation: 'create' | 'update'
+  originalDoc: unknown
+  req: PayloadRequest
+}): UploadEdits {
+  const { data, operation, originalDoc, req } = args
+
   // Get intended focal point change from query string or incoming data
-  let {
+  const {
     uploadEdits = {},
   }: {
     uploadEdits?: UploadEdits
@@ -295,6 +305,13 @@ function parseUploadEditsFromReqOrIncomingData(
   if (uploadEdits.focalPoint) return uploadEdits
 
   const incomingData = data as FileData
+  const origDoc = originalDoc as FileData
+
+  // If no change in focal point, return undefined.
+  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+    return undefined
+  }
 
   if (incomingData.focalX && incomingData.focalY) {
     uploadEdits.focalPoint = {

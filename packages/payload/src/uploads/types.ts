@@ -5,8 +5,6 @@ import type { ResizeOptions, Sharp } from 'sharp'
 export type FileSize = {
   filename: null | string
   filesize: null | number
-  focalX?: number
-  focalY?: number
   height: null | number
   mimeType: null | string
   width: null | number
