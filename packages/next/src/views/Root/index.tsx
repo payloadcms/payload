@@ -86,6 +86,7 @@ export const RootPage = async ({
 
   return (
     <Fragment>
+      {!templateType && <Fragment>{RenderedView}</Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
