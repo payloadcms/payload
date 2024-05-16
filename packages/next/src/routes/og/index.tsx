@@ -20,8 +20,13 @@ export const OG_GET =
   (configPromise: Promise<SanitizedConfig>) =>
   async (req: NextRequest): Promise<ImageResponse> => {
     try {
-      const { searchParams } = new URL(req.url)
       const config = await configPromise
+
+      if (config.admin.meta.defaultOGImageType === 'off') {
+        return NextResponse.json({ error: `Open Graph images are disabled` }, { status: 400 })
+      }
+
+      const { searchParams } = new URL(req.url)
 
       const hasTitle = searchParams.has('title')
       const title = hasTitle ? searchParams.get('title')?.slice(0, 100) : ''

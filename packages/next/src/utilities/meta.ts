@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload/config'
 
+import { staticOGImage } from '@payloadcms/ui/assets'
 import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
 import QueryString from 'qs'
 
@@ -14,6 +15,7 @@ const defaultOpenGraph = {
 
 export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
   const {
+    defaultOGImageType,
     description,
     icons: customIcons,
     keywords,
@@ -51,22 +53,38 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
-    images: [
-      {
-        alt: ogTitle,
-        height: 630,
-        url: `/api/og${QueryString.stringify(
-          {
-            description: openGraphFromProps?.description || defaultOpenGraph.description,
-            title: ogTitle,
-          },
-          {
-            addQueryPrefix: true,
-          },
-        )}`,
-        width: 1200,
-      },
-    ],
+    ...(defaultOGImageType === 'dynamic'
+      ? {
+          images: [
+            {
+              alt: ogTitle,
+              height: 630,
+              url: `/api/og${QueryString.stringify(
+                {
+                  description: openGraphFromProps?.description || defaultOpenGraph.description,
+                  title: ogTitle,
+                },
+                {
+                  addQueryPrefix: true,
+                },
+              )}`,
+              width: 1200,
+            },
+          ],
+        }
+      : {}),
+    ...(defaultOGImageType === 'static'
+      ? {
+          images: [
+            {
+              alt: ogTitle,
+              height: 480,
+              url: staticOGImage.src,
+              width: 640,
+            },
+          ],
+        }
+      : {}),
     title: ogTitle,
     ...(openGraphFromProps || {}),
   }

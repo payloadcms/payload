@@ -103,6 +103,13 @@ export type IconConfig = {
 
 export type MetaConfig = {
   /**
+   * When `static`, a pre-made image will be used for all pages.
+   * When `dynamic`, a unique image will be generated for each page based on page content and given overrides.
+   * When `off`, no Open Graph images will be generated and the `/api/og` endpoint will be disabled. You can still provide custom images using the `openGraph.images` property.
+   * @default 'dynamic'
+   */
+  defaultOGImageType?: 'dynamic' | 'off' | 'static'
+  /**
    * Overrides the auto-generated <meta name="description"> of admin pages
    * @example `"This is my custom CMS built with Payload."`
    */

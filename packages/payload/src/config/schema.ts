@@ -67,6 +67,7 @@ export default joi.object({
       globals: joi.array().items(joi.string()),
     }),
     meta: joi.object().keys({
+      defaultOGImageType: joi.string().valid('off', 'dynamic', 'static'),
       description: joi.string(),
       icons: joi.array().items(joi.object()),
       openGraph: openGraphSchema,
