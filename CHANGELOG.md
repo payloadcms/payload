@@ -1,3 +1,16 @@
+## [2.18.0](https://github.com/payloadcms/payload/compare/v2.17.0...v2.18.0) (2024-05-16)
+
+
+### Features
+
+* store focal point on uploads ([#6364](https://github.com/payloadcms/payload/issues/6364)) ([82b88a3](https://github.com/payloadcms/payload/commit/82b88a315ff1d52f0b19a70224d5c600a3a97eb5))
+
+
+### Bug Fixes
+
+* **db-postgres:** filter with ID not_in AND queries - postgres ([#6358](https://github.com/payloadcms/payload/issues/6358)) ([cc94078](https://github.com/payloadcms/payload/commit/cc940786072c0065f10fdd2893050bddc4595a21)), closes [#5151](https://github.com/payloadcms/payload/issues/5151)
+* **richtext-lexical:** upload, relationship and block node insertion fails sometimes ([#6390](https://github.com/payloadcms/payload/issues/6390)) ([48a410e](https://github.com/payloadcms/payload/commit/48a410e294598af9c73577a04f86466248f93da0))
+
 ## [2.17.0](https://github.com/payloadcms/payload/compare/v2.16.1...v2.17.0) (2024-05-15)
 
 
