@@ -57,7 +57,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
         height: 630,
         url: `/api/og${QueryString.stringify(
           {
-            description: defaultOpenGraph?.description || openGraphFromProps?.description,
+            description: openGraphFromProps?.description || defaultOpenGraph.description,
             title: ogTitle,
           },
           {

@@ -25,7 +25,6 @@ export const OG_GET =
 
       const hasTitle = searchParams.has('title')
       const title = hasTitle ? searchParams.get('title')?.slice(0, 100) : ''
-      const titlePerWord = title?.trim()?.split(' ')
       const hasLeader = searchParams.has('leader')
       const leader = hasLeader ? searchParams.get('leader')?.slice(0, 100).replace('-', ' ') : ''
       const description = searchParams.has('description') ? searchParams.get('description') : ''
@@ -60,8 +59,10 @@ export const OG_GET =
               style={{
                 display: 'flex',
                 flexDirection: 'column',
+                flexGrow: 1,
                 fontSize: 50,
-                textTransform: 'capitalize',
+                height: '100%',
+                overflow: 'hidden',
               }}
             >
               {leader && (
@@ -74,57 +75,39 @@ export const OG_GET =
                   {leader}
                 </div>
               )}
-              <div
+              <p
                 style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: 2,
+                  display: '-webkit-box',
                   fontSize: 90,
-                  lineHeight: 0.8,
-                  marginTop: '10px,',
+                  lineHeight: 1,
+                  marginBottom: 0,
+                  marginTop: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                {titlePerWord?.map((word, i) => {
-                  return (
-                    <span
-                      key={i}
-                      style={{
-                        color: 'white',
-                        display: 'flex',
-                        paddingRight: '15px',
-                        position: 'relative',
-                      }}
-                    >
-                      <span
-                        style={{
-                          backgroundColor: '#222222',
-                          bottom: 0,
-                          content: ' ',
-                          left: -15,
-                          position: 'absolute',
-                          right: 0,
-                          top: 55,
-                        }}
-                      />
-                      {word}
-                    </span>
-                  )
-                })}
-              </div>
+                {title}
+              </p>
               {description && (
-                <div
+                <p
                   style={{
+                    flexGrow: 1,
                     fontSize: 30,
+                    marginBottom: 0,
                     marginTop: 40,
                   }}
                 >
                   {description}
-                </div>
+                </p>
               )}
             </div>
             <div
               style={{
                 alignItems: 'flex-end',
                 display: 'flex',
+                flexShrink: 0,
                 height: '38px',
                 justifyContent: 'center',
                 width: '38px',
