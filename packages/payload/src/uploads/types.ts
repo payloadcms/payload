@@ -1,5 +1,3 @@
-import type express from 'express'
-import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
