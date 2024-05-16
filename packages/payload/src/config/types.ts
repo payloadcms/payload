@@ -72,6 +72,77 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type OGImageConfig = {
+  alt?: string
+  height?: number | string
+  type?: string
+  url: string
+  width?: number | string
+}
+
+export type OpenGraphConfig = {
+  description?: string
+  images?: OGImageConfig | OGImageConfig[]
+  siteName?: string
+  title?: string
+}
+
+export type IconConfig = {
+  color?: string
+  /**
+   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
+   */
+  fetchPriority?: 'auto' | 'high' | 'low'
+  media?: string
+  /** defaults to rel="icon" */
+  rel?: string
+  sizes?: string
+  type?: string
+  url: string
+}
+
+export type MetaConfig = {
+  /**
+   * When `static`, a pre-made image will be used for all pages.
+   * When `dynamic`, a unique image will be generated for each page based on page content and given overrides.
+   * When `off`, no Open Graph images will be generated and the `/api/og` endpoint will be disabled. You can still provide custom images using the `openGraph.images` property.
+   * @default 'dynamic'
+   */
+  defaultOGImageType?: 'dynamic' | 'off' | 'static'
+  /**
+   * Overrides the auto-generated <meta name="description"> of admin pages
+   * @example `"This is my custom CMS built with Payload."`
+   */
+  description?: string
+  /**
+   * Icons to be rendered by devices and browsers.
+   *
+   * For example browser tabs, phone home screens, and search engine results.
+   */
+  icons?: IconConfig
+  /**
+   * Overrides the auto-generated <meta name="keywords"> of admin pages
+   * @example `"CMS, Payload, Custom"`
+   */
+  keywords?: string
+  /**
+   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
+   *
+   * For example when sharing the Admin Panel on social media or through messaging services.
+   */
+  openGraph?: OpenGraphConfig
+  /**
+   * Overrides the auto-generated <title> of admin pages
+   * @example `"My Admin Panel"`
+   */
+  title?: string
+  /**
+   * String to append to the auto-generated <title> of admin pages
+   * @example `" - Custom CMS"`
+   */
+  titleSuffix?: string
+}
+
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
@@ -477,26 +548,7 @@ export type Config = {
       globals?: string[]
     }
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
-    meta?: {
-      /**
-       * An array of Next.js metadata objects that represent icons to be used by devices and browsers.
-       *
-       * For example browser tabs, phone home screens, and search engine results.
-       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
-       */
-      icons?: NextMetadata['icons']
-      /**
-       * Public path to an image
-       *
-       * This image may be displayed as preview when the link is shared on social media
-       */
-      ogImage?: string
-      /**
-       * String to append to the <title> of admin pages
-       * @example `" - My Brand"`
-       */
-      titleSuffix?: string
-    }
+    meta?: MetaConfig
     routes?: {
       /** The route for the account page. */
       account?: string

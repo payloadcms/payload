@@ -6,6 +6,7 @@ import {
   customViewSchema,
   livePreviewSchema,
 } from '../../config/shared/componentSchema.js'
+import { openGraphSchema } from '../../config/shared/openGraphSchema.js'
 
 const strategyBaseSchema = joi.object().keys({
   logout: joi.boolean(),
@@ -70,6 +71,10 @@ const collectionSchema = joi.object().keys({
     hideAPIURL: joi.bool(),
     listSearchableFields: joi.array().items(joi.string()),
     livePreview: joi.object(livePreviewSchema),
+    meta: joi.object({
+      description: joi.string(),
+      openGraph: openGraphSchema,
+    }),
     pagination: joi.object({
       defaultLimit: joi.number(),
       limits: joi.array().items(joi.number()),
