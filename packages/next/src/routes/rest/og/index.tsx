@@ -18,9 +18,13 @@ export const runtime = 'nodejs'
 export const contentType = 'image/png'
 
 export const generateOGImage = async ({ req }: { req: PayloadRequestWithData }) => {
-  try {
-    const config = req.payload.config
+  const config = req.payload.config
 
+  if (config.admin.meta.defaultOGImageType === 'off') {
+    return NextResponse.json({ error: `Open Graph images are disabled` }, { status: 400 })
+  }
+
+  try {
     const { searchParams } = new URL(req.url)
 
     const hasTitle = searchParams.has('title')
