@@ -7,5 +7,3 @@ export {
   PATCH as REST_PATCH,
   POST as REST_POST,
 } from './rest/index.js'
-
-export { OG_GET } from './rest/og/index.jsx'
