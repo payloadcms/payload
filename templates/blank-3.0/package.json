@@ -20,7 +20,7 @@
     "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "14.3.0-canary.28",
+    "next": "14.3.0-canary.64",
     "payload": "beta",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
