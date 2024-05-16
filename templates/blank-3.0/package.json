@@ -20,14 +20,14 @@
     "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "14.3.0-canary.64",
+    "next": "14.3.0-canary.65",
     "payload": "beta",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sharp": "0.32.6"
   },
   "devDependencies": {
-    "@types/node": "^20.11.25",
+    "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "dotenv": "^16.4.5",
