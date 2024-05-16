@@ -35,7 +35,13 @@ import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { seed } from './seed.js'
-import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
+import {
+  customAdminRoutes,
+  customNestedViewPath,
+  customParamViewPath,
+  customViewPath,
+} from './shared.js'
+
 export default buildConfigWithDefaults({
   admin: {
     components: {
@@ -75,7 +81,14 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    routes: customAdminRoutes,
     meta: {
+      titleSuffix: '- Custom CMS',
+      description: 'This is a custom meta description',
+      openGraph: {
+        title: 'This is a custom OG title',
+        description: 'This is a custom OG description',
+      },
       icons: [
         {
           type: 'image/png',

@@ -1,5 +1,7 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { getFileByPath } from 'payload/uploads'
 import { mapAsync } from 'payload/utilities'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -1072,6 +1074,43 @@ describe('collections-graphql', () => {
     const queriedDoc2 = res2.data.CyclicalRelationships.docs[0]
     expect(queriedDoc2.title).toEqual(publishValue)
     expect(queriedDoc2.relationToSelf.title).toEqual(draftValue)
+  })
+
+  it('should query upload enabled docs', async () => {
+    const file = await getFileByPath(path.resolve(__dirname, '../uploads/test-image.jpg'))
+
+    const mediaDoc = await payload.create({
+      collection: 'media',
+      file,
+      data: {
+        title: 'example',
+      },
+    })
+
+    // doc with upload relation
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      data: {
+        media: mediaDoc.id,
+      },
+    })
+
+    const query = `{
+      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+        media {
+          id
+          title
+        }
+      }
+    }`
+    const res = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query }),
+      })
+      .then((res) => res.json())
+    const queriedDoc = res.data.CyclicalRelationship
+    expect(queriedDoc.media.id).toEqual(mediaDoc.id)
+    expect(queriedDoc.media.title).toEqual('example')
   })
 
   describe('Error Handler', () => {

@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { ServerProps } from 'payload/config'
 
 import React from 'react'
 
@@ -32,10 +32,8 @@ const PayloadLogo: React.FC = () => (
   </svg>
 )
 
-export const Logo: React.FC<{
-  payload: Payload
-}> = (props) => {
-  const { payload } = props
+export const Logo: React.FC<ServerProps> = (props) => {
+  const { i18n, locale, params, payload, permissions, searchParams, user } = props
 
   const {
     admin: {
@@ -51,7 +49,15 @@ export const Logo: React.FC<{
     <RenderCustomComponent
       CustomComponent={CustomLogo}
       DefaultComponent={PayloadLogo}
-      payload={payload}
+      serverOnlyProps={{
+        i18n,
+        locale,
+        params,
+        payload,
+        permissions,
+        searchParams,
+        user,
+      }}
     />
   )
 }

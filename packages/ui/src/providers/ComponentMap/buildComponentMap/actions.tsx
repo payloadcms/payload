@@ -1,15 +1,12 @@
-import type {
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-  WithServerSideProps as WithServerSidePropsType,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import React from 'react'
 
+import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { ActionMap } from './types.js'
 
 export const mapActions = (args: {
-  WithServerSideProps: WithServerSidePropsType
+  WithServerSideProps: WithServerSidePropsPrePopulated
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
 }): ActionMap => {

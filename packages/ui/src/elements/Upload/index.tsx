@@ -1,15 +1,15 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
 import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { fieldBaseClass } from '../../fields/shared/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { Button } from '../Button/index.js'

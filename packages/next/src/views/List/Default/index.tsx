@@ -22,6 +22,7 @@ import { useWindowInfo } from '@payloadcms/ui/elements/WindowInfo'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import { useListInfo } from '@payloadcms/ui/providers/ListInfo'
 import { useListQuery } from '@payloadcms/ui/providers/ListQuery'
 import { useSearchParams } from '@payloadcms/ui/providers/SearchParams'
@@ -65,6 +66,8 @@ export const DefaultListView: React.FC = () => {
 
   const { i18n } = useTranslation()
 
+  const drawerDepth = useEditDepth()
+
   const { setStepNav } = useStepNav()
 
   const {
@@ -83,12 +86,14 @@ export const DefaultListView: React.FC = () => {
   }
 
   useEffect(() => {
-    setStepNav([
-      {
-        label: labels?.plural,
-      },
-    ])
-  }, [setStepNav, labels])
+    if (drawerDepth <= 1) {
+      setStepNav([
+        {
+          label: labels?.plural,
+        },
+      ])
+    }
+  }, [setStepNav, labels, drawerDepth])
 
   return (
     <div className={baseClass}>

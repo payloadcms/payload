@@ -2,6 +2,7 @@ import joi from 'joi'
 
 import { adminViewSchema } from './shared/adminViewSchema.js'
 import { componentSchema, livePreviewSchema } from './shared/componentSchema.js'
+import { openGraphSchema } from './shared/openGraphSchema.js'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -60,23 +61,26 @@ export default joi.object({
     custom: joi.object().pattern(joi.string(), joi.any()),
     dateFormat: joi.string(),
     disable: joi.bool(),
-    inactivityRoute: joi.string(),
     livePreview: joi.object({
       ...livePreviewSchema,
       collections: joi.array().items(joi.string()),
       globals: joi.array().items(joi.string()),
     }),
-    logoutRoute: joi.string(),
     meta: joi.object().keys({
-      icons: joi
-        .alternatives()
-        .try(
-          joi.array().items(joi.alternatives().try(joi.string(), joi.object())),
-          joi.object(),
-          joi.string().allow(null),
-        ),
-      ogImage: joi.string(),
+      defaultOGImageType: joi.string().valid('off', 'dynamic', 'static'),
+      description: joi.string(),
+      icons: joi.array().items(joi.object()),
+      openGraph: openGraphSchema,
       titleSuffix: joi.string(),
+    }),
+    routes: joi.object({
+      account: joi.string(),
+      createFirstUser: joi.string(),
+      forgot: joi.string(),
+      inactivity: joi.string(),
+      login: joi.string(),
+      logout: joi.string(),
+      unauthorized: joi.string(),
     }),
     user: joi.string(),
   }),

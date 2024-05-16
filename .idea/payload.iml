@@ -47,6 +47,33 @@
       <excludeFolder url="file://$MODULE_DIR$/templates" />
       <excludeFolder url="file://$MODULE_DIR$/test/.swc" />
       <excludeFolder url="file://$MODULE_DIR$/versions" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/richtext-slate/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/richtext-slate/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/email-nodemailer/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/email-nodemailer/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/email-resend/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/email-resend/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/live-preview-vue/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/live-preview-vue/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/payload/.swc" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/plugin-form-builder/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/plugin-relationship-object-ids/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/plugin-relationship-object-ids/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/plugin-stripe/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-azure/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-azure/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-gcs/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-gcs/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-s3/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-s3/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-uploadthing/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-uploadthing/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-vercel-blob/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/storage-vercel-blob/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/translations/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/translations/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/ui/.swc" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/ui/.turbo" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

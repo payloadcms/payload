@@ -1,12 +1,13 @@
 'use client'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { withCondition } from '@payloadcms/ui/forms/withCondition'
+
 import React, { useCallback } from 'react'
 
 import type { UploadInputProps } from './Input.js'
 import type { UploadFieldProps } from './types.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { UploadInput } from './Input.js'
 import './index.scss'
