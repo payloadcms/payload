@@ -14,10 +14,6 @@
     position: relative;
   }
 
-  .editor .ContentEditable__root {
-    min-height: base(10);
-  }
-
   &--read-only {
     .editor-shell {
       .editor {

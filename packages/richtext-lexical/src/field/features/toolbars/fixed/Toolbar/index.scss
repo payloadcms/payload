@@ -83,9 +83,7 @@ html[data-theme='dark'] {
     }
   }
 
-  + .editor-scroller {
-    .ContentEditable__root {
+  + .editor-scroller > .editor > .ContentEditable__root {
       padding-top: calc(var(--base) * 1.25);
-    }
   }
 }
