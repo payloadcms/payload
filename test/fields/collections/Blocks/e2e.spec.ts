@@ -41,7 +41,7 @@ describe('Block fields', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'blockFieldsTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
@@ -49,7 +49,7 @@ describe('Block fields', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'blockFieldsTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
