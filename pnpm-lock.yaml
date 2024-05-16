@@ -650,8 +650,8 @@ importers:
         specifier: 3.2.6
         version: 3.2.6(react-dom@18.2.0)(react@18.2.0)
       react-toastify:
-        specifier: 8.2.0
-        version: 8.2.0(react-dom@18.2.0)(react@18.2.0)
+        specifier: 10.0.5
+        version: 10.0.5(react-dom@18.2.0)(react@18.2.0)
       sass:
         specifier: ^1.71.1
         version: 1.74.1
@@ -1549,8 +1549,8 @@ importers:
         specifier: 5.7.4
         version: 5.7.4(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)
       react-toastify:
-        specifier: 10.0.4
-        version: 10.0.4(react-dom@18.2.0)(react@18.2.0)
+        specifier: 10.0.5
+        version: 10.0.5(react-dom@18.2.0)(react@18.2.0)
       use-context-selector:
         specifier: 1.4.1
         version: 1.4.1(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)
@@ -7917,11 +7917,6 @@ packages:
     dependencies:
       mimic-response: 1.0.1
     dev: true
-
-  /clsx@1.2.1:
-    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
-    engines: {node: '>=6'}
-    dev: false
 
   /clsx@2.1.0:
     resolution: {integrity: sha512-m3iNNWpd9rl3jvvcBnu70ylMdrXt8Vlq4HYadnU5fwcOtvkSQWPmj7amUcDT2qYI7risszBjI5AUIUox9D16pg==}
@@ -14467,24 +14462,13 @@ packages:
       - '@types/react'
     dev: false
 
-  /react-toastify@10.0.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-etR3RgueY8pe88SA67wLm8rJmL1h+CLqUGHuAoNsseW35oTGJEri6eBTyaXnFKNQ80v/eO10hBYLgz036XRGgA==}
+  /react-toastify@10.0.5(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-mNKt2jBXJg4O7pSdbNUfDdTsK9FIdikfsIE/yUCxbAEXl4HMyJaivrVFcn3Elvt5xvCQYhUZm+hqTIu1UXM3Pw==}
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
     dependencies:
       clsx: 2.1.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /react-toastify@8.2.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Pg2Ju7NngAamarFvLwqrFomJ57u/Ay6i6zfLurt/qPynWkAkOthu6vxfqYpJCyNhHRhR4hu7+bySSeWWJu6PAg==}
-    peerDependencies:
-      react: ^18.0.0
-      react-dom: ^18.0.0
-    dependencies:
-      clsx: 1.2.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

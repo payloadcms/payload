@@ -111,7 +111,7 @@
     "react-datepicker": "6.2.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.7.4",
-    "react-toastify": "10.0.4",
+    "react-toastify": "10.0.5",
     "use-context-selector": "1.4.1",
     "uuid": "9.0.1"
   },
