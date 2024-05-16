@@ -68,8 +68,8 @@
     "@payloadcms/ui": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/node": "20.12.5",
-    "@types/react": "18.2.74",
-    "@types/react-dom": "18.2.24",
+    "@types/react": "18.3.2",
+    "@types/react-dom": "18.3.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
