@@ -4,9 +4,8 @@ import type { PayloadAdminBarProps } from 'payload-admin-bar'
 
 import { useSelectedLayoutSegments } from 'next/navigation'
 import { PayloadAdminBar } from 'payload-admin-bar'
-import React, { useEffect } from 'react'
+import React, { useState } from 'react'
 
-import { useAuth } from '../../_providers/Auth'
 import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
 
@@ -32,20 +31,12 @@ export const AdminBar: React.FC<{
 }> = (props) => {
   const { adminBarProps } = props || {}
   const segments = useSelectedLayoutSegments()
+  const [show, setShow] = useState(false)
   const collection = collectionLabels?.[segments?.[1]] ? segments?.[1] : 'pages'
-  const [show, setShow] = React.useState(false)
 
-  const { user } = useAuth()
-
-  useEffect(() => {
-    if (user) {
-      setShow(true)
-    }
-  }, [user])
-
-  const isAdmin = user?.roles?.includes('admin')
-
-  if (!isAdmin) return null
+  const onAuthChange = React.useCallback((user) => {
+    setShow(user?.id)
+  }, [])
 
   return (
     <div className={[classes.adminBar, show && classes.show].filter(Boolean).join(' ')}>
@@ -64,8 +55,8 @@ export const AdminBar: React.FC<{
             plural: collectionLabels[collection]?.plural || 'Pages',
             singular: collectionLabels[collection]?.singular || 'Page',
           }}
-          key={user?.id} // use key to get the admin bar to re-run its `me` request
           logo={<Title />}
+          onAuthChange={onAuthChange}
           style={{
             backgroundColor: 'transparent',
             padding: 0,

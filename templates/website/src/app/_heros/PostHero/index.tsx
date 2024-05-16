@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import type { Post } from '../../../payload/payload-types'
+import type { Post } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
@@ -93,7 +93,11 @@ export const PostHero: React.FC<{
             )}
           </div>
           {metaImage && typeof metaImage !== 'string' && metaImage?.caption && (
-            <RichText className={classes.caption} content={metaImage.caption} />
+            <RichText
+              className={classes.caption}
+              content={metaImage.caption}
+              enableGutter={false}
+            />
           )}
         </div>
       </Gutter>

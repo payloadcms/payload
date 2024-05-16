@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import type { Post, Project } from '../../../payload/payload-types'
+import type { Post } from '../../../payload-types'
 
 import { Media } from '../Media'
 import classes from './index.module.scss'
@@ -9,10 +9,10 @@ import classes from './index.module.scss'
 export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
-  doc?: Post | Project
+  doc?: Post
   hideImagesOnMobile?: boolean
   orientation?: 'horizontal' | 'vertical'
-  relationTo?: 'posts' | 'projects'
+  relationTo?: 'posts'
   showCategories?: boolean
   title?: string
 }> = (props) => {

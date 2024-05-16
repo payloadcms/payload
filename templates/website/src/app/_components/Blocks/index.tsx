@@ -1,11 +1,10 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../payload/payload-types.js'
+import type { Page } from '../../../payload-types.js'
 import type { VerticalPaddingOptions } from '../VerticalPadding'
 
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
-import { CommentsBlock, type CommentsBlockProps } from '../../_blocks/Comments/index'
 import { ContentBlock } from '../../_blocks/Content'
 import { MediaBlock } from '../../_blocks/MediaBlock'
 import { RelatedPosts, type RelatedPostsProps } from '../../_blocks/RelatedPosts'
@@ -15,7 +14,6 @@ import { VerticalPadding } from '../VerticalPadding'
 
 const blockComponents = {
   archive: ArchiveBlock,
-  comments: CommentsBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
   mediaBlock: MediaBlock,
@@ -23,7 +21,7 @@ const blockComponents = {
 }
 
 export const Blocks: React.FC<{
-  blocks: (CommentsBlockProps | Page['layout'][0] | RelatedPostsProps)[]
+  blocks: (Page['layout'][0] | RelatedPostsProps)[]
   disableTopPadding?: boolean
 }> = (props) => {
   const { blocks, disableTopPadding } = props

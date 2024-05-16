@@ -1,0 +1,18 @@
+@use '../../_css/queries.scss' as *;
+
+$spacer-h: calc(var(--block-padding) / 4);
+
+.container {
+  padding: $spacer-h;
+  position: relative;
+  background-color: var(--theme-elevation-50);
+  color: var(--theme-elevation-1000);
+}
+
+.pre {
+  margin: 0;
+}
+
+.code {
+  font-size: 0.75rem;
+}

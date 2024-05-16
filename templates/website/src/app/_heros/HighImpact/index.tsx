@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
@@ -12,7 +12,7 @@ export const HighImpactHero: React.FC<Page['hero']> = ({ links, media, richText 
   return (
     <Gutter className={classes.hero}>
       <div className={classes.content}>
-        <RichText content={richText} />
+        <RichText content={richText} enableGutter={false} />
         {Array.isArray(links) && links.length > 0 && (
           <ul className={classes.links}>
             {links.map(({ link }, i) => {

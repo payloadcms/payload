@@ -1,4 +1,4 @@
-import type { Footer, Header, Settings } from '../../payload/payload-types'
+import type { Footer, Header, Settings } from '../../payload-types'
 
 import { FOOTER_QUERY, HEADER_QUERY, SETTINGS_QUERY } from '../_graphql/globals'
 import { GRAPHQL_API_URL } from './shared'

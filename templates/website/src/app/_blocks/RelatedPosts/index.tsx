@@ -1,18 +1,18 @@
 import React from 'react'
+import RichText from 'src/app/_components/RichText'
 
-import type { Post, Project } from '../../../payload/payload-types'
+import type { Post } from '../../../payload-types'
 
 import { Card } from '../../_components/Card'
 import { Gutter } from '../../_components/Gutter'
-import RichText from '../../_components/RichText'
 import classes from './index.module.scss'
 
 export type RelatedPostsProps = {
   blockName: string
   blockType: 'relatedPosts'
-  docs?: (Post | Project | string)[]
+  docs?: (Post | string)[]
   introContent?: any
-  relationTo: 'posts' | 'projects'
+  relationTo: 'posts'
 }
 
 export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
@@ -22,7 +22,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
     <div className={classes.relatedPosts}>
       {introContent && (
         <Gutter className={classes.introContent}>
-          <RichText content={introContent} />
+          <RichText content={introContent} enableGutter={false} />
         </Gutter>
       )}
       <Gutter>
