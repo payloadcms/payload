@@ -37,6 +37,9 @@ export const generateOGImage = async ({ req }: { req: PayloadRequestWithData }) 
     let fontData
 
     try {
+      // TODO: replace with with `.woff2` file when supported
+      // See https://github.com/vercel/next.js/issues/63935
+      // Better yet, use a CDN like Google Fonts if ever supported
       fontData = fs.readFile(path.join(dirname, 'roboto-regular.woff'))
     } catch (e) {
       console.error(`Error reading font file or not readable: ${e.message}`) // eslint-disable-line no-console
