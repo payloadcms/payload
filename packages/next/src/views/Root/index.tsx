@@ -15,6 +15,7 @@ export { generatePageMetadata } from './meta.js'
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
   i18n: I18n
+  isEditing?: boolean
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>
 

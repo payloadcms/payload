@@ -2,6 +2,7 @@ import joi from 'joi'
 
 import { adminViewSchema } from './shared/adminViewSchema.js'
 import { componentSchema, livePreviewSchema } from './shared/componentSchema.js'
+import { openGraphSchema } from './shared/openGraphSchema.js'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -66,14 +67,10 @@ export default joi.object({
       globals: joi.array().items(joi.string()),
     }),
     meta: joi.object().keys({
-      icons: joi
-        .alternatives()
-        .try(
-          joi.array().items(joi.alternatives().try(joi.string(), joi.object())),
-          joi.object(),
-          joi.string().allow(null),
-        ),
-      ogImage: joi.string(),
+      defaultOGImageType: joi.string().valid('off', 'dynamic', 'static'),
+      description: joi.string(),
+      icons: joi.array().items(joi.object()),
+      openGraph: openGraphSchema,
       titleSuffix: joi.string(),
     }),
     routes: joi.object({
