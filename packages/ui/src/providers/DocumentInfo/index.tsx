@@ -249,7 +249,12 @@ export const DocumentInfoProvider: React.FC<
       setDocPermissions(newDocPermissions)
 
       setHasSavePermission(
-        getHasSavePermission({ collectionSlug, docPermissions, globalSlug, isEditing }),
+        getHasSavePermission({
+          collectionSlug,
+          docPermissions: newDocPermissions,
+          globalSlug,
+          isEditing,
+        }),
       )
     }
   }, [
@@ -261,7 +266,6 @@ export const DocumentInfoProvider: React.FC<
     locale,
     collectionSlug,
     globalSlug,
-    docPermissions,
     isEditing,
   ])
 
