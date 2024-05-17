@@ -134,7 +134,9 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
-      versions: true,
+      versions: {
+        drafts: true,
+      },
     },
   ],
   globals: [
