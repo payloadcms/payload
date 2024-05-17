@@ -12,6 +12,8 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
+import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
+import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
@@ -63,25 +65,23 @@ export const DocumentInfoProvider: React.FC<
 
   const baseURL = `${serverURL}${api}`
   let slug: string
-  let pluralType: 'collections' | 'globals'
   let preferencesKey: string
 
   if (globalSlug) {
     slug = globalSlug
-    pluralType = 'globals'
     preferencesKey = `global-${slug}`
   }
 
   if (collectionSlug) {
     slug = collectionSlug
-    pluralType = 'collections'
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`
     }
   }
 
-  const operation = collectionSlug && !id ? 'create' : 'update'
+  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
+  const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   const getVersions = useCallback(async () => {
@@ -212,34 +212,62 @@ export const DocumentInfoProvider: React.FC<
   }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
 
   const getDocPermissions = React.useCallback(async () => {
-    let docAccessURL: string
     const params = {
       locale: locale || undefined,
     }
-    if (pluralType === 'globals') {
-      docAccessURL = `/globals/${slug}/access`
-    } else if (pluralType === 'collections' && id) {
-      docAccessURL = `/${slug}/access/${id}`
-    }
 
-    if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      })
-      const json = await res.json()
+    if (isEditing) {
+      const docAccessURL = collectionSlug
+        ? `/${collectionSlug}/access/${id}`
+        : globalSlug
+          ? `/globals/${globalSlug}/access`
+          : null
 
-      setDocPermissions(json)
-      setHasSavePermission(json?.update?.permission)
+      if (docAccessURL) {
+        const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        })
+
+        const json: DocumentPermissions = await res.json()
+
+        setDocPermissions(json)
+
+        setHasSavePermission(
+          getHasSavePermission({ collectionSlug, docPermissions: json, globalSlug, isEditing }),
+        )
+      }
     } else {
-      // fallback to permissions from the entity type
-      // (i.e. create has no id)
-      setDocPermissions(permissions?.[pluralType]?.[slug])
-      setHasSavePermission(permissions?.[pluralType]?.[slug]?.update?.permission)
+      // when creating new documents, there is no permissions saved for this document yet
+      // use the generic entity permissions instead
+      const newDocPermissions = collectionSlug
+        ? permissions?.collections?.[collectionSlug]
+        : permissions?.globals?.[globalSlug]
+
+      setDocPermissions(newDocPermissions)
+
+      setHasSavePermission(
+        getHasSavePermission({
+          collectionSlug,
+          docPermissions: newDocPermissions,
+          globalSlug,
+          isEditing,
+        }),
+      )
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, locale])
+  }, [
+    serverURL,
+    api,
+    id,
+    permissions,
+    i18n.language,
+    locale,
+    collectionSlug,
+    globalSlug,
+    isEditing,
+  ])
 
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)

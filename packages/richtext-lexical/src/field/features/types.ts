@@ -162,6 +162,11 @@ export type ClientFeature<ClientFeatureProps> = {
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: PluginComponent<ClientFeatureProps>
+        position: 'aboveContainer' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: PluginComponent<ClientFeatureProps>
         position: 'bottom' // Determines at which position the Component will be added.
       }
     | {
@@ -178,6 +183,10 @@ export type ClientFeature<ClientFeatureProps> = {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: PluginComponentWithAnchor<ClientFeatureProps>
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+      }
+    | {
+        Component: PluginComponent<ClientFeatureProps>
+        position: 'belowContainer' // Determines at which position the Component will be added.
       }
   >
   slashMenu?: {
@@ -374,7 +383,18 @@ export type SanitizedPlugin =
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.
     }
-
+  | {
+      Component: PluginComponent
+      clientProps: any
+      key: string
+      position: 'aboveContainer'
+    }
+  | {
+      Component: PluginComponent
+      clientProps: any
+      key: string
+      position: 'belowContainer'
+    }
 export type SanitizedServerFeatures = Required<
   Pick<ResolvedServerFeature<unknown, unknown>, 'markdownTransformers' | 'nodes'>
 > & {

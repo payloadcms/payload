@@ -9,6 +9,8 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomCompo
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import { hasSavePermission as getHasSavePermission } from '@payloadcms/ui/utilities/hasSavePermission'
+import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
 import { notFound, redirect } from 'next/navigation.js'
 import { docAccessOperation } from 'payload/operations'
 import React from 'react'
@@ -52,7 +54,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   const collectionSlug = collectionConfig?.slug || undefined
   const globalSlug = globalConfig?.slug || undefined
 
-  const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
+  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
   let ViewOverride: EditViewComponent
   let CustomView: EditViewComponent
@@ -83,9 +85,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
-    hasSavePermission =
-      (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
-      (!isEditing && permissions?.collections?.[collectionSlug]?.create?.permission)
+    hasSavePermission = getHasSavePermission({ collectionSlug, docPermissions, isEditing })
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
@@ -118,7 +118,8 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
 
     docPermissions = permissions?.globals?.[globalSlug]
-    hasSavePermission = isEditing && docPermissions?.update?.permission
+    hasSavePermission = getHasSavePermission({ docPermissions, globalSlug, isEditing })
+
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${
