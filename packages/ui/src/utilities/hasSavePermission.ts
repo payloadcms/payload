@@ -1,51 +1,28 @@
-import type {
-  CollectionPermission,
-  DocumentPermissions,
-  GlobalPermission,
-  Permissions,
-} from 'payload/auth'
+import type { CollectionPermission, DocumentPermissions } from 'payload/auth'
 
 export const hasSavePermission = (args: {
   /*
    * Pass either `collectionSlug` or `globalSlug`
    */
   collectionSlug?: string
-  /*
-   * Pass either `docPermissions` or `permissions`
-   */
-  docPermissions?: DocumentPermissions
+  docPermissions: DocumentPermissions
   /*
    * Pass either `collectionSlug` or `globalSlug`
    */
   globalSlug?: string
-  /*
-   * Pass only when `collectionSlug` is passed
-   */
-  id?: number | string
-  /*
-   * Pass either `docPermissions` or `permissions`
-   */
-  permissions?: Permissions
+  isEditing: boolean
 }) => {
-  const { id, collectionSlug, docPermissions, globalSlug, permissions } = args
+  const { collectionSlug, docPermissions, globalSlug, isEditing } = args
 
   if (collectionSlug) {
-    const isEditing = id !== undefined
-
-    const permissionsToUse =
-      permissions?.collections?.[collectionSlug] || (docPermissions as CollectionPermission)
-
     return Boolean(
-      (isEditing && permissionsToUse?.update?.permission) ||
-        (!isEditing && permissionsToUse?.create?.permission),
+      (isEditing && docPermissions?.update?.permission) ||
+        (!isEditing && (docPermissions as CollectionPermission)?.create?.permission),
     )
   }
 
   if (globalSlug) {
-    const permissionsToUse =
-      permissions?.globals?.[globalSlug] || (docPermissions as GlobalPermission)
-
-    return Boolean(permissionsToUse?.update?.permission)
+    return Boolean(docPermissions?.[globalSlug]?.update?.permission)
   }
 
   return false
