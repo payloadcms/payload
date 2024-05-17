@@ -30,7 +30,7 @@ export function isReactServerComponentOrFunction<T extends any>(
     typeof component === 'function' && (!component.prototype || !component.prototype.render)
 
   // Anonymous functions are Client Components in Turbopack. RSCs should have a name
-  const isAnonymousFunction = component.name === ''
+  const isAnonymousFunction = typeof component === 'function' && component.name === ''
 
   return (isClassComponent || isFunctionalComponent) && !isAnonymousFunction
 }
