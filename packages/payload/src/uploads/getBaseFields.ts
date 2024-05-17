@@ -117,8 +117,9 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
 
   // Add focal point fields if not disabled
   if (
-    uploadOptions.focalPoint !== false &&
-    (uploadOptions.imageSizes || uploadOptions.resizeOptions)
+    uploadOptions.focalPoint !== false ||
+    uploadOptions.imageSizes ||
+    uploadOptions.resizeOptions
   ) {
     uploadFields = uploadFields.concat(
       ['focalX', 'focalY'].map((name) => {

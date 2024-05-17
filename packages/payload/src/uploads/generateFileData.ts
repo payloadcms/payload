@@ -66,8 +66,15 @@ export const generateFileData = async <T>({
     req,
   })
 
-  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
-    collectionConfig.upload
+  const {
+    disableLocalStorage,
+    focalPoint: focalPointEnabled,
+    formatOptions,
+    imageSizes,
+    resizeOptions,
+    staticDir,
+    trimOptions,
+  } = collectionConfig.upload
 
   let staticPath = staticDir
   if (staticDir.indexOf('/') !== 0) {
@@ -244,7 +251,7 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (Array.isArray(imageSizes) && fileSupportsResize) {
+    if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}
       const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,

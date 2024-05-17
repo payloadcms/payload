@@ -199,6 +199,17 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'focal-no-sizes',
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: true,
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './focal-no-sizes',
+        staticURL: '/focal-no-sizes',
+      },
+    },
+    {
       slug: mediaSlug,
       fields: [],
       upload: {
