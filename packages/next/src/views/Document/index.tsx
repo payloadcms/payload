@@ -119,6 +119,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     docPermissions = permissions?.globals?.[globalSlug]
     hasSavePermission = getHasSavePermission({ docPermissions, globalSlug, isEditing })
+
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${

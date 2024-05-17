@@ -1,4 +1,4 @@
-import type { CollectionPermission, DocumentPermissions } from 'payload/auth'
+import type { CollectionPermission, DocumentPermissions, GlobalPermission } from 'payload/auth'
 
 export const hasSavePermission = (args: {
   /*
@@ -22,7 +22,7 @@ export const hasSavePermission = (args: {
   }
 
   if (globalSlug) {
-    return Boolean(docPermissions?.[globalSlug]?.update?.permission)
+    return Boolean((docPermissions as GlobalPermission)?.update?.permission)
   }
 
   return false
