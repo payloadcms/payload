@@ -74,6 +74,27 @@ describe('database', () => {
 
       expect(updated.id).toStrictEqual(created.doc.id)
     })
+
+    it('should query LIKE by ID', async () => {
+      const relationA = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'find me buddy',
+        },
+      })
+
+      const findResult = await payload.find({
+        collection: 'relation-a',
+        where: {
+          id: {
+            like: relationA.id,
+          },
+        },
+      })
+
+      expect(findResult.docs).toHaveLength(1)
+      expect(findResult.docs[0].id).toStrictEqual(relationA.id)
+    })
   })
 
   describe('migrations', () => {
