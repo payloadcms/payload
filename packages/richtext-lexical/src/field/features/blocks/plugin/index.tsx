@@ -33,11 +33,13 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         INSERT_BLOCK_COMMAND,
         (payload: InsertBlockPayload) => {
           editor.update(() => {
-            const blockNode = $createBlockNode(payload)
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const blockNode = $createBlockNode(payload)
+              // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+              $insertNodeToNearestRoot(blockNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -53,8 +55,6 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(blockNode)
             }
           })
 

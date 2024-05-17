@@ -1,5 +1,4 @@
 'use client'
-import type { BaseSelection } from 'lexical'
 import type { ClientCollectionConfig } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
