@@ -8,125 +8,300 @@
 
 export interface Config {
   collections: {
-    users: User
-    categories: Category
-    posts: Post
-    'payload-preferences': PayloadPreference
-    'payload-migrations': PayloadMigration
-  }
-  globals: {}
-  locale: null
+    users: User;
+    categories: Category;
+    posts: Post;
+    'deep-nested': DeepNested;
+    'localized-posts': LocalizedPost;
+    'relationships-items-nested': RelationshipsItemsNested;
+    'relationships-items': RelationshipsItem;
+    relationships: Relationship;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
+  };
+  globals: {
+    someGlobal: SomeGlobal;
+  };
+  locale: 'en' | 'de';
   user: User & {
-    collection: 'users'
-  }
+    collection: 'users';
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string
-  updatedAt: string
-  createdAt: string
-  email: string
-  resetPasswordToken?: string | null
-  resetPasswordExpiration?: string | null
-  salt?: string | null
-  hash?: string | null
-  loginAttempts?: number | null
-  lockUntil?: string | null
-  password?: string | null
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string
-  title?: string | null
-  updatedAt: string
-  createdAt: string
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string
-  title?: string | null
+  id: string;
+  title?: string | null;
   array?:
     | {
-        title?: string | null
-        id?: string | null
+        title?: string | null;
+        id?: string | null;
       }[]
-    | null
+    | null;
   group?: {
-    title?: string | null
-  }
+    title?: string | null;
+  };
   groupMultiple?: {
-    titleFirst?: string | null
-    titleSecond?: string | null
-  }
+    titleFirst?: string | null;
+    titleSecond?: string | null;
+  };
   arrayMultiple?:
     | {
-        titleFirst?: string | null
-        titleSecond?: string | null
-        id?: string | null
+        titleFirst?: string | null;
+        titleSecond?: string | null;
+        id?: string | null;
       }[]
-    | null
+    | null;
   groupArray?: {
-    title?: string | null
+    title?: string | null;
     array?:
       | {
-          title?: string | null
-          id?: string | null
+          title?: string | null;
+          id?: string | null;
         }[]
-      | null
-  }
+      | null;
+  };
+  blocks?:
+    | (
+        | {
+            title?: string | null;
+            secondTitle?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'section';
+          }
+        | {
+            cta?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+      )[]
+    | null;
+  select?: ('hello' | 'world')[] | null;
+  tab?: {
+    title?: string | null;
+    label?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested".
+ */
+export interface DeepNested {
+  id: string;
+  array?:
+    | {
+        group?: {
+          array?:
+            | {
+                title?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          title?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | (
+        | {
+            array?:
+              | {
+                  group?: {
+                    title?: string | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'first';
+          }
+        | {
+            group?: {
+              title?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'second';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: string;
+  title?: string | null;
+  arrayLocalized?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   blocks?:
     | {
-        title?: string | null
-        secondTitle?: string | null
-        id?: string | null
-        blockName?: string | null
-        blockType: 'section'
+        title?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
       }[]
-    | null
-  category?: (string | null) | Category
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-items-nested".
+ */
+export interface RelationshipsItemsNested {
+  id: string;
+  title?: string | null;
+  subtitle?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-items".
+ */
+export interface RelationshipsItem {
+  id: string;
+  title?: string | null;
+  subtitle?: string | null;
+  nested?: (string | null) | RelationshipsItemsNested;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships".
+ */
+export interface Relationship {
+  id: string;
+  item?: (string | null) | RelationshipsItem;
+  other?: (string | null) | RelationshipsItem;
+  withDefaultPopulate?: (string | null) | RelationshipsItem;
+  polymorphic?:
+    | ({
+        relationTo: 'relationships-items';
+        value: string | RelationshipsItem;
+      } | null)
+    | ({
+        relationTo: 'relationships-items-nested';
+        value: string | RelationshipsItemsNested;
+      } | null);
+  polymorphicDefault?:
+    | ({
+        relationTo: 'relationships-items';
+        value: string | RelationshipsItem;
+      } | null)
+    | ({
+        relationTo: 'relationships-items-nested';
+        value: string | RelationshipsItemsNested;
+      } | null);
+  array?:
+    | {
+        item?: (string | null) | RelationshipsItem;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string
+  id: string;
   user: {
-    relationTo: 'users'
-    value: string | User
-  }
-  key?: string | null
+    relationTo: 'users';
+    value: string | User;
+  };
+  key?: string | null;
   value?:
     | {
-        [k: string]: unknown
+        [k: string]: unknown;
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string
-  name?: string | null
-  batch?: number | null
-  updatedAt: string
-  createdAt: string
+  id: string;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "someGlobal".
+ */
+export interface SomeGlobal {
+  id: string;
+  title?: string | null;
+  label?: string | null;
+  relFirst?: (string | null) | RelationshipsItem;
+  relSecond?: (string | null) | RelationshipsItem;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+
+
+declare module 'payload' {
+  // @ts-ignore 
+  export interface GeneratedTypes extends Config {}
 }
