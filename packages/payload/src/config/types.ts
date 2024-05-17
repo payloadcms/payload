@@ -325,6 +325,7 @@ export type EditViewConfig =
 export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
+  [key: string]: unknown
   i18n: I18nClient
   locale?: Locale
   params?: { [key: string]: string | string[] | undefined }
