@@ -1,15 +1,18 @@
-import type { Payload } from 'payload/types'
+import type { Field, Payload } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 
 import type { PostgresAdapter } from '../../types.js'
 import type { DocsToResave, WhereConditionMap } from './types.js'
 
+import { fetchAndResave } from './fetchAndResave/index.js'
+
 type Args = {
   collectionSlug?: string
   db: PostgresAdapter
   debug: boolean
   dryRun: boolean
+  fields: Field[]
   globalSlug?: string
   isVersions: boolean
   payload: Payload
@@ -21,6 +24,7 @@ export const migrateRelationships = async ({
   db,
   debug,
   dryRun,
+  fields,
   globalSlug,
   isVersions,
   payload,
@@ -57,6 +61,16 @@ export const migrateRelationships = async ({
           if (!docsToResave[parentID]) docsToResave[parentID] = []
           docsToResave[parentID].push(row)
         }
+      })
+
+      await fetchAndResave({
+        collectionSlug,
+        db,
+        docsToResave,
+        fields,
+        globalSlug,
+        isVersions,
+        payload,
       })
     }
   }

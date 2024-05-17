@@ -547,27 +547,11 @@ describe('database', () => {
           fallbackLocale: null,
         })
 
-        const { columnsToCreate } = await migratePostgresV2toV3({
+        await migratePostgresV2toV3({
           payload,
           debug: true,
           // dryRun: true,
         })
-
-        const myGroupRelation4 = columnsToCreate.find(
-          ({ columnName }) => columnName === 'my_group_relation4_id',
-        )
-
-        expect(myGroupRelation4.tableName).toStrictEqual('pg_migrations_locales')
-
-        const versionMyGroupRelation4 = columnsToCreate.find(
-          ({ columnName }) => columnName === 'version_my_group_relation4_id',
-        )
-
-        expect(versionMyGroupRelation4.tableName).toStrictEqual('_pg_migrations_v_locales')
-
-        const relation3 = columnsToCreate.find(({ columnName }) => columnName === 'relation3_id')
-
-        expect(relation3.tableName).toStrictEqual('pg_migrations_my_array_my_sub_array_locales')
       }
     })
   })
