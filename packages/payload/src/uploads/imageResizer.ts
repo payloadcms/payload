@@ -235,11 +235,6 @@ export default async function resizeAndTransformImageSizes({
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
-  // Noting to resize here so return as early as possible
-  if (!imageSizes) return { sizeData: {}, sizesToSave: [] }
-
-  const sharpBase = sharp(file.tempFilePath || file.data).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-
   // Focal point adjustments
   const incomingFocalPoint = uploadEdits.focalPoint
     ? {
@@ -247,6 +242,17 @@ export default async function resizeAndTransformImageSizes({
         y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
       }
     : undefined
+
+  const defaultResult: ImageSizesResult = {
+    ...(focalPointEnabled && incomingFocalPoint && { focalPoint: incomingFocalPoint }),
+    sizeData: {},
+    sizesToSave: [],
+  }
+
+  // Nothing to resize here so return as early as possible
+  if (!imageSizes) return defaultResult
+
+  const sharpBase = sharp(file.tempFilePath || file.data).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
@@ -352,16 +358,9 @@ export default async function resizeAndTransformImageSizes({
     }),
   )
 
-  return results.reduce(
-    (acc, result) => {
-      Object.assign(acc.sizeData, result.sizeData)
-      acc.sizesToSave.push(...result.sizesToSave)
-      return acc
-    },
-    {
-      ...(focalPointEnabled && incomingFocalPoint && { focalPoint: incomingFocalPoint }),
-      sizeData: {},
-      sizesToSave: [],
-    },
-  )
+  return results.reduce((acc, result) => {
+    Object.assign(acc.sizeData, result.sizeData)
+    acc.sizesToSave.push(...result.sizesToSave)
+    return acc
+  }, defaultResult)
 }
