@@ -491,27 +491,39 @@ describe('database', () => {
           ],
         }
 
+        const migrationDoc = await payload.create({
+          collection: 'pg-migrations',
+          data: enDoc,
+          locale: 'en',
+        })
+
         const esDoc = {
           relation1: relationA2.id,
           myArray: [
             {
+              id: migrationDoc.myArray[0].id,
               relation2: relationB2.id,
               mySubArray: [
                 {
+                  id: migrationDoc.myArray[0].mySubArray[0].id,
                   relation3: relationB2.id,
                 },
                 {
+                  id: migrationDoc.myArray[0].mySubArray[1].id,
                   relation3: relationB1.id,
                 },
               ],
             },
             {
+              id: migrationDoc.myArray[1].id,
               relation2: relationB1.id,
               mySubArray: [
                 {
+                  id: migrationDoc.myArray[1].mySubArray[0].id,
                   relation3: relationB1.id,
                 },
                 {
+                  id: migrationDoc.myArray[1].mySubArray[1].id,
                   relation3: relationB2.id,
                 },
               ],
@@ -522,22 +534,19 @@ describe('database', () => {
           },
           myBlocks: [
             {
+              id: migrationDoc.myBlocks[0].id,
               blockType: 'myBlock',
               relation5: relationA2.id,
               relation6: relationB2.id,
             },
             {
+              id: migrationDoc.myBlocks[1].id,
               blockType: 'myBlock',
               relation5: relationA1.id,
               relation6: relationB1.id,
             },
           ],
         }
-
-        const migrationDoc = await payload.create({
-          collection: 'pg-migrations',
-          data: enDoc,
-        })
 
         const updated = await payload.update({
           collection: 'pg-migrations',

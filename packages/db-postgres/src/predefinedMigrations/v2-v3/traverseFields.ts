@@ -4,7 +4,7 @@ import { type Field, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../../types.js'
-import type { ColumnToCreate, WhereConditionMap } from './types.js'
+import type { ColumnToCreate, PathsToQuery } from './types.js'
 
 type Args = {
   collectionSlug?: string
@@ -18,9 +18,9 @@ type Args = {
   newTableName: string
   parentTableName: string
   path: string
+  pathsToQuery: PathsToQuery
   payload: Payload
   rootTableName: string
-  whereConditionMap: WhereConditionMap
 }
 
 const idTypeMap = {
@@ -131,15 +131,7 @@ export const traverseFields = (args: Args) => {
               tableName,
             })
 
-            const relTableName = `${args.rootTableName}${args.db.relationshipsSuffix}`
-
-            if (!args.whereConditionMap.has(relTableName)) {
-              args.whereConditionMap.set(relTableName, [])
-            }
-
-            args.whereConditionMap
-              .get(relTableName)
-              .push(`${args.path ? `${args.path}.` : ''}${field.name}`)
+            args.pathsToQuery.add(`${args.path ? `${args.path}.` : ''}${field.name}`)
           }
         }
 

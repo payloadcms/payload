@@ -1,11 +1,12 @@
 import type { Payload } from 'payload'
 
 import { sql } from 'drizzle-orm'
+import { createLocalReq } from 'payload/utilities'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../../types.js'
-import type { ColumnToCreate, WhereConditionMap } from './types.js'
+import type { ColumnToCreate, PathsToQuery } from './types.js'
 
 import { createColumns } from './createColumns.js'
 import { migrateRelationships } from './migrateRelationships.js'
@@ -20,11 +21,17 @@ type Args = {
 export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) => {
   const db = payload.db as PostgresAdapter
 
+  // TODO:
+  // NEED TO ACCEPT TRANSACTION HERE
+  // AND THREAD THROUGH ALL OPERATIONS
+
+  const req = await createLocalReq({}, payload)
+
   for (const collection of payload.config.collections) {
     const tableName = db.tableNameMap.get(toSnakeCase(collection.slug))
 
     const columnsToCreate: ColumnToCreate[] = []
-    const whereConditionMap: WhereConditionMap = new Map()
+    const pathsToQuery: PathsToQuery = new Set()
 
     traverseFields({
       collectionSlug: collection.slug,
@@ -37,9 +44,9 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       newTableName: tableName,
       parentTableName: tableName,
       path: '',
+      pathsToQuery,
       payload,
       rootTableName: tableName,
-      whereConditionMap,
     })
 
     await createColumns({
@@ -57,8 +64,10 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       dryRun,
       fields: collection.fields,
       isVersions: false,
+      pathsToQuery,
       payload,
-      whereConditionMap,
+      req,
+      tableName,
     })
 
     if (collection.versions) {
@@ -68,7 +77,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       const versionFields = buildVersionCollectionFields(collection)
 
       const versionColumnsToCreate: ColumnToCreate[] = []
-      const versionWhereConditionMap: WhereConditionMap = new Map()
+      const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
         collectionSlug: collection.slug,
@@ -81,9 +90,9 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
         newTableName: versionsTableName,
         parentTableName: versionsTableName,
         path: '',
+        pathsToQuery: versionPathsToQuery,
         payload,
         rootTableName: versionsTableName,
-        whereConditionMap: versionWhereConditionMap,
       })
 
       await createColumns({
@@ -101,8 +110,10 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
         dryRun,
         fields: versionFields,
         isVersions: true,
+        pathsToQuery: versionPathsToQuery,
         payload,
-        whereConditionMap,
+        req,
+        tableName: versionsTableName,
       })
     }
   }
@@ -111,7 +122,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
     const tableName = db.tableNameMap.get(toSnakeCase(global.slug))
 
     const columnsToCreate: ColumnToCreate[] = []
-    const whereConditionMap: WhereConditionMap = new Map()
+    const pathsToQuery: PathsToQuery = new Set()
 
     traverseFields({
       columnPrefix: '',
@@ -124,9 +135,9 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       newTableName: tableName,
       parentTableName: tableName,
       path: '',
+      pathsToQuery,
       payload,
       rootTableName: tableName,
-      whereConditionMap,
     })
 
     await createColumns({
@@ -144,8 +155,10 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       fields: global.fields,
       globalSlug: global.slug,
       isVersions: false,
+      pathsToQuery,
       payload,
-      whereConditionMap,
+      req,
+      tableName,
     })
 
     if (global.versions) {
@@ -156,7 +169,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       const versionFields = buildVersionGlobalFields(global)
 
       const versionColumnsToCreate: ColumnToCreate[] = []
-      const versionWhereConditionMap: WhereConditionMap = new Map()
+      const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
         columnPrefix: '',
@@ -169,9 +182,9 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
         newTableName: versionsTableName,
         parentTableName: versionsTableName,
         path: '',
+        pathsToQuery: versionPathsToQuery,
         payload,
         rootTableName: versionsTableName,
-        whereConditionMap: versionWhereConditionMap,
       })
 
       await createColumns({
@@ -189,8 +202,10 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
         fields: versionFields,
         globalSlug: global.slug,
         isVersions: true,
+        pathsToQuery: versionPathsToQuery,
         payload,
-        whereConditionMap,
+        req,
+        tableName: versionsTableName,
       })
     }
   }

@@ -1,29 +1,38 @@
 import type { Payload } from 'payload'
-import type { Field } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload/types'
 
 import type { PostgresAdapter } from '../../../types.js'
 import type { DocsToResave } from '../types.js'
 
+import { upsertRow } from '../../../upsertRow/index.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
   collectionSlug?: string
   db: PostgresAdapter
+  debug: boolean
   docsToResave: DocsToResave
+  dryRun: boolean
   fields: Field[]
   globalSlug?: string
   isVersions: boolean
   payload: Payload
+  req: PayloadRequestWithData
+  tableName: string
 }
 
 export const fetchAndResave = async ({
   collectionSlug,
   db,
+  debug,
   docsToResave,
+  dryRun,
   fields,
   globalSlug,
   isVersions,
   payload,
+  req,
+  tableName,
 }: Args) => {
   for (const [id, rows] of Object.entries(docsToResave)) {
     if (collectionSlug) {
@@ -35,6 +44,7 @@ export const fetchAndResave = async ({
             collection: collectionSlug,
             depth: 0,
             fallbackLocale: null,
+            limit: 0,
             locale: 'all',
             showHiddenFields: true,
             where: {
@@ -44,6 +54,12 @@ export const fetchAndResave = async ({
             },
           })
 
+          if (debug) {
+            payload.logger.info(
+              `${docs.length} collection "${collectionConfig.slug}" versions will be migrated`,
+            )
+          }
+
           for (const doc of docs) {
             traverseFields({
               doc,
@@ -52,7 +68,32 @@ export const fetchAndResave = async ({
               rows,
             })
 
-            // Update each doc
+            if (!dryRun) {
+              try {
+                await upsertRow({
+                  id: doc.id,
+                  adapter: db,
+                  data: doc,
+                  db: db.drizzle,
+                  fields,
+                  operation: 'update',
+                  req,
+                  tableName,
+                })
+              } catch (err) {
+                payload.logger.error(
+                  `"${collectionConfig.slug}" version with ID ${doc.id} FAILED TO MIGRATE`,
+                )
+
+                throw err
+              }
+            }
+
+            if (debug) {
+              payload.logger.info(
+                `"${collectionConfig.slug}" version with ID ${doc.id} migrated successfully!`,
+              )
+            }
           }
         } else {
           const doc = await payload.findByID({
@@ -64,14 +105,45 @@ export const fetchAndResave = async ({
             showHiddenFields: true,
           })
 
+          if (debug) {
+            payload.logger.info(
+              `The collection "${collectionConfig.slug}" with ID ${doc.id} will be migrated`,
+            )
+          }
+
           traverseFields({
             doc,
-            fields: collectionConfig.fields,
+            fields,
             path: '',
             rows,
           })
 
-          // Update doc
+          if (!dryRun) {
+            try {
+              await upsertRow({
+                id: doc.id,
+                adapter: db,
+                data: doc,
+                db: db.drizzle,
+                fields,
+                operation: 'update',
+                req,
+                tableName,
+              })
+            } catch (err) {
+              payload.logger.error(
+                `The collection "${collectionConfig.slug}" with ID ${doc.id} has FAILED TO MIGRATE`,
+              )
+
+              throw err
+            }
+          }
+
+          if (debug) {
+            payload.logger.info(
+              `The collection "${collectionConfig.slug}" with ID ${doc.id} has migrated successfully!`,
+            )
+          }
         }
       }
     }
@@ -85,9 +157,14 @@ export const fetchAndResave = async ({
             slug: globalSlug,
             depth: 0,
             fallbackLocale: null,
+            limit: 0,
             locale: 'all',
             showHiddenFields: true,
           })
+
+          if (debug) {
+            payload.logger.info(`${docs.length} global "${globalSlug}" versions will be migrated`)
+          }
 
           for (const doc of docs) {
             traverseFields({
@@ -97,7 +174,30 @@ export const fetchAndResave = async ({
               rows,
             })
 
-            // Update each doc
+            if (!dryRun) {
+              try {
+                await upsertRow({
+                  id: doc.id,
+                  adapter: db,
+                  data: doc,
+                  db: db.drizzle,
+                  fields,
+                  operation: 'update',
+                  req,
+                  tableName,
+                })
+              } catch (err) {
+                payload.logger.error(`"${globalSlug}" version with ID ${doc.id} FAILED TO MIGRATE`)
+
+                throw err
+              }
+            }
+
+            if (debug) {
+              payload.logger.info(
+                `"${globalSlug}" version with ID ${doc.id} migrated successfully!`,
+              )
+            }
           }
         } else {
           const doc = await payload.findGlobal({
@@ -110,136 +210,35 @@ export const fetchAndResave = async ({
 
           traverseFields({
             doc,
-            fields: globalConfig.fields,
+            fields,
             path: '',
             rows,
           })
 
-          // Update doc
+          if (!dryRun) {
+            try {
+              await upsertRow({
+                id: doc.id,
+                adapter: db,
+                data: doc,
+                db: db.drizzle,
+                fields,
+                operation: 'update',
+                req,
+                tableName,
+              })
+            } catch (err) {
+              payload.logger.error(`The global "${globalSlug}" has FAILED TO MIGRATE`)
+
+              throw err
+            }
+          }
+
+          if (debug) {
+            payload.logger.info(`The global "${globalSlug}" has migrated successfully!`)
+          }
         }
       }
     }
   }
 }
-
-// {
-//   "1": [
-//     {
-//       id: 13,
-//       order: null,
-//       parent_id: 1,
-//       path: "relation1",
-//       locale: null,
-//       relation_a_id: 2,
-//       relation_b_id: null,
-//     },
-//     {
-//       id: 14,
-//       order: null,
-//       parent_id: 1,
-//       path: "myArray.0.relation2",
-//       locale: null,
-//       relation_a_id: null,
-//       relation_b_id: 2,
-//     },
-//     {
-//       id: 15,
-//       order: null,
-//       parent_id: 1,
-//       path: "myArray.0.mySubArray.0.relation3",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 2,
-//     },
-//     {
-//       id: 16,
-//       order: null,
-//       parent_id: 1,
-//       path: "myArray.0.mySubArray.1.relation3",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 1,
-//     },
-//     {
-//       id: 17,
-//       order: null,
-//       parent_id: 1,
-//       path: "myArray.1.relation2",
-//       locale: null,
-//       relation_a_id: null,
-//       relation_b_id: 1,
-//     },
-//     {
-//       id: 18,
-//       order: null,
-//       parent_id: 1,
-//       path: "myArray.1.mySubArray.0.relation3",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 1,
-//     },
-//     {
-//       id: 19,
-//       order: null,
-//       parent_id: 1,
-//       path: "myArray.1.mySubArray.1.relation3",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 2,
-//     },
-//     {
-//       id: 20,
-//       order: null,
-//       parent_id: 1,
-//       path: "myGroup.relation4",
-//       locale: "en",
-//       relation_a_id: null,
-//       relation_b_id: 1,
-//     },
-//     {
-//       id: 21,
-//       order: null,
-//       parent_id: 1,
-//       path: "myGroup.relation4",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 2,
-//     },
-//     {
-//       id: 22,
-//       order: null,
-//       parent_id: 1,
-//       path: "myBlocks.0.relation5",
-//       locale: null,
-//       relation_a_id: 2,
-//       relation_b_id: null,
-//     },
-//     {
-//       id: 23,
-//       order: null,
-//       parent_id: 1,
-//       path: "myBlocks.0.relation6",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 2,
-//     },
-//     {
-//       id: 24,
-//       order: null,
-//       parent_id: 1,
-//       path: "myBlocks.1.relation5",
-//       locale: null,
-//       relation_a_id: 1,
-//       relation_b_id: null,
-//     },
-//     {
-//       id: 25,
-//       order: null,
-//       parent_id: 1,
-//       path: "myBlocks.1.relation6",
-//       locale: "es",
-//       relation_a_id: null,
-//       relation_b_id: 1,
-//     },
-//   ],
-// }
