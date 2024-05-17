@@ -285,17 +285,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
           - _community
           - access-control
+          - admin
           - auth
           - field-error-states
           - fields-relationship
+          - fields
           - fields__collections__Blocks
           - fields__collections__Array
           - fields__collections__Relationship
           - fields__collections__RichText
           - fields__collections__Lexical
+          - fields__collections__Date
+          - fields__collections__Number
+          - fields__collections__Point
+          - fields__collections__Tabs
+          - fields__collections__Text
+          - fields__collections__Upload
           - live-preview
           - localization
           - i18n
@@ -305,17 +314,10 @@ jobs:
           - plugin-seo
           - versions
           - uploads
-        part: ['full']
-        include:
-          - suite: fields
-            part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
-          - suite: admin
-            part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
     env:
       SUITE_NAME: ${{ matrix.suite }}
-      PART: ${{ matrix.part }}
-
     steps:
+      # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
@@ -332,16 +334,18 @@ jobs:
 
       - name: Restore build
         uses: actions/cache@v4
+        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start LocalStack
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
         run: pnpm docker:start
+        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
 
       - name: Store Playwright's Version
         run: |
+          # Extract the version number using a more targeted regex pattern with awk
           PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
@@ -362,15 +366,15 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.part }}.json pnpm test:e2e ${{ matrix.suite }} ${{ matrix.part }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.part }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}-${{ matrix.part }}
+          name: test-results-${{ matrix.suite }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
