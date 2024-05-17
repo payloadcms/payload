@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { Breadcrumb, PluginConfig } from '../types.js'
+import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 
 export const formatBreadcrumb = (
-  pluginConfig: PluginConfig,
+  pluginConfig: NestedDocsPluginConfig,
   collection: CollectionConfig,
   docs: Array<Record<string, unknown>>,
 ): Breadcrumb => {

@@ -1,10 +1,13 @@
-import type { Email, FormattedEmail, PluginConfig } from '../../../types.js'
+import type { Email, FormBuilderPluginConfig, FormattedEmail } from '../../../types.js'
 
 import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
 import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
-export const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
+export const sendEmail = async (
+  beforeChangeData: any,
+  formConfig: FormBuilderPluginConfig,
+): Promise<any> => {
   const { data, operation, req } = beforeChangeData
 
   if (operation === 'create') {

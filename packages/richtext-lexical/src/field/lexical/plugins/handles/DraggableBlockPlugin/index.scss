@@ -53,3 +53,11 @@
     transition: none;
   }
 }
+
+
+.rich-text-lexical {
+  .ContentEditable__root > * {
+    will-change: margin-top, margin-bottom;
+    transition: margin-top 0.08s, margin-bottom 0.08s;
+  }
+}

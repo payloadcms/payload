@@ -32,6 +32,8 @@ export const reduceFieldMap = (fieldMap: Column[], i18n) =>
         },
       }
 
+      if (field.admin?.disableListFilter) return reduced
+
       return [...reduced, formattedField]
     }
 

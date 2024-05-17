@@ -1,7 +1,13 @@
-import type { I18nOptions, TFunction } from '@payloadcms/translations'
+import type {
+  DefaultTranslationsObject,
+  I18nClient,
+  I18nOptions,
+  TFunction,
+} from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { DestinationStream, LoggerOptions, P } from 'pino'
+import type { Metadata as NextMetadata } from 'next'
+import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -9,7 +15,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
-import type { User } from '../auth/types.js'
+import type { Permissions } from '../auth/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -19,7 +25,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js'
+import type { GeneratedTypes, Payload } from '../index.js'
 import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -64,6 +70,77 @@ export type LivePreviewConfig = {
         payload: Payload
       }) => Promise<string> | string)
     | string
+}
+
+export type OGImageConfig = {
+  alt?: string
+  height?: number | string
+  type?: string
+  url: string
+  width?: number | string
+}
+
+export type OpenGraphConfig = {
+  description?: string
+  images?: OGImageConfig | OGImageConfig[]
+  siteName?: string
+  title?: string
+}
+
+export type IconConfig = {
+  color?: string
+  /**
+   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
+   */
+  fetchPriority?: 'auto' | 'high' | 'low'
+  media?: string
+  /** defaults to rel="icon" */
+  rel?: string
+  sizes?: string
+  type?: string
+  url: string
+}
+
+export type MetaConfig = {
+  /**
+   * When `static`, a pre-made image will be used for all pages.
+   * When `dynamic`, a unique image will be generated for each page based on page content and given overrides.
+   * When `off`, no Open Graph images will be generated and the `/api/og` endpoint will be disabled. You can still provide custom images using the `openGraph.images` property.
+   * @default 'dynamic'
+   */
+  defaultOGImageType?: 'dynamic' | 'off' | 'static'
+  /**
+   * Overrides the auto-generated <meta name="description"> of admin pages
+   * @example `"This is my custom CMS built with Payload."`
+   */
+  description?: string
+  /**
+   * Icons to be rendered by devices and browsers.
+   *
+   * For example browser tabs, phone home screens, and search engine results.
+   */
+  icons?: IconConfig
+  /**
+   * Overrides the auto-generated <meta name="keywords"> of admin pages
+   * @example `"CMS, Payload, Custom"`
+   */
+  keywords?: string
+  /**
+   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
+   *
+   * For example when sharing the Admin Panel on social media or through messaging services.
+   */
+  openGraph?: OpenGraphConfig
+  /**
+   * Overrides the auto-generated <title> of admin pages
+   * @example `"My Admin Panel"`
+   */
+  title?: string
+  /**
+   * String to append to the auto-generated <title> of admin pages
+   * @example `" - Custom CMS"`
+   */
+  titleSuffix?: string
 }
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
@@ -161,19 +238,19 @@ export type InitOptions = {
  */
 export type AccessResult = Where | boolean
 
-export type AccessArgs<T = any, U = any> = {
+export type AccessArgs<TData = any> = {
   /**
    * The relevant resource that is being accessed.
    *
    * `data` is null when a list is requested
    */
-  data?: T
+  data?: TData
   /** ID of the resource being accessed */
   id?: number | string
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequestWithData<U>
+  req: PayloadRequestWithData
 }
 
 /**
@@ -182,17 +259,15 @@ export type AccessArgs<T = any, U = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<T = any, U = any> = (
-  args: AccessArgs<T, U>,
-) => AccessResult | Promise<AccessResult>
+export type Access<TData = any> = (args: AccessArgs<TData>) => AccessResult | Promise<AccessResult>
 
-/** Web Request/Response model, but the the req has more payload specific properties added to it. */
+/** Web Request/Response model, but the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
  */
-export type Endpoint<U = User> = {
+export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
 
@@ -250,12 +325,29 @@ export type EditViewConfig =
 export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
+  [key: string]: unknown
+  i18n: I18nClient
+  locale?: Locale
+  params?: { [key: string]: string | string[] | undefined }
   payload: Payload
+  permissions?: Permissions
+  searchParams?: { [key: string]: string | string[] | undefined }
+  user?: GeneratedTypes['user']
 }
 
-export const serverProps: (keyof ServerProps)[] = ['payload']
+export const serverProps: (keyof ServerProps)[] = [
+  'payload',
+  'i18n',
+  'locale',
+  'params',
+  'permissions',
+  'searchParams',
+  'permissions',
+]
 
-export type CustomComponent<T extends any = any> = React.ComponentType<T & ServerProps>
+export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
+  TAdditionalProps & Partial<ServerProps>
+>
 
 export type Locale = {
   /**
@@ -452,35 +544,29 @@ export type Config = {
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
-    /** The route the user will be redirected to after being inactive for too long. */
-    inactivityRoute?: string
     livePreview?: LivePreviewConfig & {
       collections?: string[]
       globals?: string[]
     }
-    /** The route for the logout page. */
-    logoutRoute?: string
-    /** Base meta data to use for the Admin panel. Included properties are titleSuffix, ogImage, and favicon. */
-    meta?: {
-      /**
-       * Public path to an icon
-       *
-       * This image may be displayed in the browser next to the title of the page
-       */
-      favicon?: string
-      /**
-       * Public path to an image
-       *
-       * This image may be displayed as preview when the link is shared on social media
-       */
-      ogImage?: string
-      /**
-       * String to append to the <title> of admin pages
-       * @example `" - My Brand"`
-       */
-      titleSuffix?: string
+    /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
+    meta?: MetaConfig
+    routes?: {
+      /** The route for the account page. */
+      account?: string
+      /** The route for the create first user page. */
+      createFirstUser?: string
+      /** The route for the forgot password page. */
+      forgot?: string
+      /** The route the user will be redirected to after being inactive for too long. */
+      inactivity?: string
+      /** The route for the login page. */
+      login?: string
+      /** The route for the logout page. */
+      logout?: string
+      /** The route for the unauthorized page. */
+      unauthorized?: string
     }
-    /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
+    /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
   /** Custom Payload bin scripts can be injected via the config. */
@@ -564,6 +650,10 @@ export type Config = {
      * @see https://payloadcms.com/docs/graphql/extending
      */
     queries?: GraphQLExtension
+    /**
+     * Filepath to write the generated schema to
+     */
+    schemaOutputFile?: string
   }
   /**
    * Tap into Payload-wide hooks.
@@ -574,7 +664,7 @@ export type Config = {
     afterError?: AfterErrorHook
   }
   /** i18n config settings */
-  i18n?: I18nOptions
+  i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**
@@ -629,7 +719,18 @@ export type Config = {
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /** Disable declare block in generated types file */
-    declare?: false
+    declare?:
+      | {
+          /**
+           * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
+           *
+           * Adds a @ts-ignore flag above the GeneratedTypes interface declaration
+           *
+           * @default false
+           */
+          ignoreTSError?: boolean
+        }
+      | false
     /** Filename to write the generated types to */
     outputFile?: string
   }
@@ -694,12 +795,8 @@ export type EditConfig =
 
 export type EntityDescriptionComponent = CustomComponent
 
-export type EntityDescriptionFunction = () => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 
-export type EntityDescription =
-  | EntityDescriptionComponent
-  | EntityDescriptionFunction
-  | Record<string, string>
-  | string
+export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }

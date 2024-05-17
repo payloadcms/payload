@@ -1,10 +1,11 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
+import type React from 'react'
 
-import type { Config, SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldBase, RichTextField, Validate } from '../fields/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../types/index.js'
-import type { WithServerSideProps } from './elements/WithServerSideProps.js'
+import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<
   Value extends object,
@@ -20,14 +21,14 @@ type RichTextAdapterBase<
   ExtraFieldProperties = {},
 > = {
   generateComponentMap: (args: {
-    WithServerSideProps: WithServerSideProps
+    WithServerSideProps: React.FC<Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>>
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     schemaPath: string
   }) => Map<string, React.ReactNode>
   generateSchemaMap?: (args: {
     config: SanitizedConfig
-    i18n: I18n
+    i18n: I18nClient
     schemaMap: Map<string, Field[]>
     schemaPath: string
   }) => Map<string, Field[]>
@@ -58,6 +59,7 @@ type RichTextAdapterBase<
     context: RequestContext
     currentDepth?: number
     depth: number
+    draft: boolean
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     fieldPromises: Promise<void>[]
     findMany: boolean
@@ -91,8 +93,15 @@ export type RichTextAdapterProvider<
   ExtraFieldProperties = {},
 > = ({
   config,
+  isRoot,
 }: {
   config: SanitizedConfig
+  /**
+   * Whether or not this is the root richText editor, defined in the payload.config.ts.
+   *
+   * @default false
+   */
+  isRoot?: boolean
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

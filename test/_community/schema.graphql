@@ -1,23 +1,19 @@
 type Query {
   Post(id: String!, draft: Boolean): Post
   Posts(draft: Boolean, where: Post_where, limit: Int, page: Int, sort: String): Posts
+  countPosts(draft: Boolean, where: Post_where): countPosts
   docAccessPost(id: String!): postsDocAccess
-  Media(id: String!, draft: Boolean): Media
-  allMedia(draft: Boolean, where: Media_where, limit: Int, page: Int, sort: String): allMedia
-  docAccessMedia(id: String!): mediaDocAccess
+  versionPost(id: String): PostVersion
+  versionsPosts(where: versionsPost_where, limit: Int, page: Int, sort: String): versionsPosts
   User(id: String!, draft: Boolean): User
   Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
+  countUsers(draft: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
   PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(
-    draft: Boolean
-    where: PayloadPreference_where
-    limit: Int
-    page: Int
-    sort: String
-  ): PayloadPreferences
+  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
+  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Menu(draft: Boolean): Menu
   docAccessMenu: menuDocAccess
@@ -27,164 +23,26 @@ type Query {
 type Post {
   id: String
   text: String
-  associatedMedia(where: Post_AssociatedMedia_where): Media
+  richText(depth: Int): JSON
+  richText2(depth: Int): JSON
   updatedAt: DateTime
   createdAt: DateTime
+  _status: Post__status
 }
 
-type Media {
-  id: String
-  updatedAt: DateTime
-  createdAt: DateTime
-  url: String
-  filename: String
-  mimeType: String
-  filesize: Float
-  width: Float
-  height: Float
-}
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
 
-input Post_AssociatedMedia_where {
-  updatedAt: Post_AssociatedMedia_updatedAt_operator
-  createdAt: Post_AssociatedMedia_createdAt_operator
-  url: Post_AssociatedMedia_url_operator
-  filename: Post_AssociatedMedia_filename_operator
-  mimeType: Post_AssociatedMedia_mimeType_operator
-  filesize: Post_AssociatedMedia_filesize_operator
-  width: Post_AssociatedMedia_width_operator
-  height: Post_AssociatedMedia_height_operator
-  id: Post_AssociatedMedia_id_operator
-  AND: [Post_AssociatedMedia_where_and]
-  OR: [Post_AssociatedMedia_where_or]
-}
-
-input Post_AssociatedMedia_updatedAt_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_createdAt_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_url_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_filename_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_mimeType_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_filesize_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_width_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_height_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_id_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
-input Post_AssociatedMedia_where_and {
-  updatedAt: Post_AssociatedMedia_updatedAt_operator
-  createdAt: Post_AssociatedMedia_createdAt_operator
-  url: Post_AssociatedMedia_url_operator
-  filename: Post_AssociatedMedia_filename_operator
-  mimeType: Post_AssociatedMedia_mimeType_operator
-  filesize: Post_AssociatedMedia_filesize_operator
-  width: Post_AssociatedMedia_width_operator
-  height: Post_AssociatedMedia_height_operator
-  id: Post_AssociatedMedia_id_operator
-  AND: [Post_AssociatedMedia_where_and]
-  OR: [Post_AssociatedMedia_where_or]
-}
-
-input Post_AssociatedMedia_where_or {
-  updatedAt: Post_AssociatedMedia_updatedAt_operator
-  createdAt: Post_AssociatedMedia_createdAt_operator
-  url: Post_AssociatedMedia_url_operator
-  filename: Post_AssociatedMedia_filename_operator
-  mimeType: Post_AssociatedMedia_mimeType_operator
-  filesize: Post_AssociatedMedia_filesize_operator
-  width: Post_AssociatedMedia_width_operator
-  height: Post_AssociatedMedia_height_operator
-  id: Post_AssociatedMedia_id_operator
-  AND: [Post_AssociatedMedia_where_and]
-  OR: [Post_AssociatedMedia_where_or]
+enum Post__status {
+  draft
+  published
 }
 
 type Posts {
@@ -203,9 +61,11 @@ type Posts {
 
 input Post_where {
   text: Post_text_operator
-  associatedMedia: Post_associatedMedia_operator
+  richText: Post_richText_operator
+  richText2: Post_richText2_operator
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
+  _status: Post__status_operator
   id: Post_id_operator
   AND: [Post_where_and]
   OR: [Post_where_or]
@@ -222,9 +82,19 @@ input Post_text_operator {
   exists: Boolean
 }
 
-input Post_associatedMedia_operator {
-  equals: String
-  not_equals: String
+input Post_richText_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input Post_richText2_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
   exists: Boolean
 }
 
@@ -250,6 +120,20 @@ input Post_createdAt_operator {
   exists: Boolean
 }
 
+input Post__status_operator {
+  equals: Post__status_Input
+  not_equals: Post__status_Input
+  in: [Post__status_Input]
+  not_in: [Post__status_Input]
+  all: [Post__status_Input]
+  exists: Boolean
+}
+
+enum Post__status_Input {
+  draft
+  published
+}
+
 input Post_id_operator {
   equals: String
   not_equals: String
@@ -263,9 +147,11 @@ input Post_id_operator {
 
 input Post_where_and {
   text: Post_text_operator
-  associatedMedia: Post_associatedMedia_operator
+  richText: Post_richText_operator
+  richText2: Post_richText2_operator
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
+  _status: Post__status_operator
   id: Post_id_operator
   AND: [Post_where_and]
   OR: [Post_where_or]
@@ -273,12 +159,18 @@ input Post_where_and {
 
 input Post_where_or {
   text: Post_text_operator
-  associatedMedia: Post_associatedMedia_operator
+  richText: Post_richText_operator
+  richText2: Post_richText2_operator
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
+  _status: Post__status_operator
   id: Post_id_operator
   AND: [Post_where_and]
   OR: [Post_where_or]
+}
+
+type countPosts {
+  totalDocs: Int
 }
 
 type postsDocAccess {
@@ -287,13 +179,16 @@ type postsDocAccess {
   read: PostsReadDocAccess
   update: PostsUpdateDocAccess
   delete: PostsDeleteDocAccess
+  readVersions: PostsReadVersionsDocAccess
 }
 
 type PostsDocAccessFields {
   text: PostsDocAccessFields_text
-  associatedMedia: PostsDocAccessFields_associatedMedia
+  richText: PostsDocAccessFields_richText
+  richText2: PostsDocAccessFields_richText2
   updatedAt: PostsDocAccessFields_updatedAt
   createdAt: PostsDocAccessFields_createdAt
+  _status: PostsDocAccessFields__status
 }
 
 type PostsDocAccessFields_text {
@@ -319,26 +214,49 @@ type PostsDocAccessFields_text_Delete {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_associatedMedia {
-  create: PostsDocAccessFields_associatedMedia_Create
-  read: PostsDocAccessFields_associatedMedia_Read
-  update: PostsDocAccessFields_associatedMedia_Update
-  delete: PostsDocAccessFields_associatedMedia_Delete
+type PostsDocAccessFields_richText {
+  create: PostsDocAccessFields_richText_Create
+  read: PostsDocAccessFields_richText_Read
+  update: PostsDocAccessFields_richText_Update
+  delete: PostsDocAccessFields_richText_Delete
 }
 
-type PostsDocAccessFields_associatedMedia_Create {
+type PostsDocAccessFields_richText_Create {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_associatedMedia_Read {
+type PostsDocAccessFields_richText_Read {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_associatedMedia_Update {
+type PostsDocAccessFields_richText_Update {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_associatedMedia_Delete {
+type PostsDocAccessFields_richText_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2 {
+  create: PostsDocAccessFields_richText2_Create
+  read: PostsDocAccessFields_richText2_Read
+  update: PostsDocAccessFields_richText2_Update
+  delete: PostsDocAccessFields_richText2_Delete
+}
+
+type PostsDocAccessFields_richText2_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2_Delete {
   permission: Boolean!
 }
 
@@ -388,6 +306,29 @@ type PostsDocAccessFields_createdAt_Delete {
   permission: Boolean!
 }
 
+type PostsDocAccessFields__status {
+  create: PostsDocAccessFields__status_Create
+  read: PostsDocAccessFields__status_Read
+  update: PostsDocAccessFields__status_Update
+  delete: PostsDocAccessFields__status_Delete
+}
+
+type PostsDocAccessFields__status_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status_Delete {
+  permission: Boolean!
+}
+
 type PostsCreateDocAccess {
   permission: Boolean!
   where: JSONObject
@@ -396,7 +337,7 @@ type PostsCreateDocAccess {
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSONObject
+scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type PostsReadDocAccess {
   permission: Boolean!
@@ -413,8 +354,36 @@ type PostsDeleteDocAccess {
   where: JSONObject
 }
 
-type allMedia {
-  docs: [Media]
+type PostsReadVersionsDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostVersion {
+  parent(draft: Boolean): Post
+  version: PostVersion_Version
+  createdAt: DateTime
+  updatedAt: DateTime
+  latest: Boolean
+  id: String
+}
+
+type PostVersion_Version {
+  text: String
+  richText(depth: Int): JSON
+  richText2(depth: Int): JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: PostVersion_Version__status
+}
+
+enum PostVersion_Version__status {
+  draft
+  published
+}
+
+type versionsPosts {
+  docs: [PostVersion]
   hasNextPage: Boolean
   hasPrevPage: Boolean
   limit: Int
@@ -427,21 +396,59 @@ type allMedia {
   totalPages: Int
 }
 
-input Media_where {
-  updatedAt: Media_updatedAt_operator
-  createdAt: Media_createdAt_operator
-  url: Media_url_operator
-  filename: Media_filename_operator
-  mimeType: Media_mimeType_operator
-  filesize: Media_filesize_operator
-  width: Media_width_operator
-  height: Media_height_operator
-  id: Media_id_operator
-  AND: [Media_where_and]
-  OR: [Media_where_or]
+input versionsPost_where {
+  parent: versionsPost_parent_operator
+  version__text: versionsPost_version__text_operator
+  version__richText: versionsPost_version__richText_operator
+  version__richText2: versionsPost_version__richText2_operator
+  version__updatedAt: versionsPost_version__updatedAt_operator
+  version__createdAt: versionsPost_version__createdAt_operator
+  version___status: versionsPost_version___status_operator
+  createdAt: versionsPost_createdAt_operator
+  updatedAt: versionsPost_updatedAt_operator
+  latest: versionsPost_latest_operator
+  id: versionsPost_id_operator
+  AND: [versionsPost_where_and]
+  OR: [versionsPost_where_or]
 }
 
-input Media_updatedAt_operator {
+input versionsPost_parent_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsPost_version__text_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPost_version__richText_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input versionsPost_version__richText2_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input versionsPost_version__updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -452,7 +459,7 @@ input Media_updatedAt_operator {
   exists: Boolean
 }
 
-input Media_createdAt_operator {
+input versionsPost_version__createdAt_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -463,7 +470,49 @@ input Media_createdAt_operator {
   exists: Boolean
 }
 
-input Media_url_operator {
+input versionsPost_version___status_operator {
+  equals: versionsPost_version___status_Input
+  not_equals: versionsPost_version___status_Input
+  in: [versionsPost_version___status_Input]
+  not_in: [versionsPost_version___status_Input]
+  all: [versionsPost_version___status_Input]
+  exists: Boolean
+}
+
+enum versionsPost_version___status_Input {
+  draft
+  published
+}
+
+input versionsPost_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_latest_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input versionsPost_id_operator {
   equals: String
   not_equals: String
   like: String
@@ -474,318 +523,36 @@ input Media_url_operator {
   exists: Boolean
 }
 
-input Media_filename_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
+input versionsPost_where_and {
+  parent: versionsPost_parent_operator
+  version__text: versionsPost_version__text_operator
+  version__richText: versionsPost_version__richText_operator
+  version__richText2: versionsPost_version__richText2_operator
+  version__updatedAt: versionsPost_version__updatedAt_operator
+  version__createdAt: versionsPost_version__createdAt_operator
+  version___status: versionsPost_version___status_operator
+  createdAt: versionsPost_createdAt_operator
+  updatedAt: versionsPost_updatedAt_operator
+  latest: versionsPost_latest_operator
+  id: versionsPost_id_operator
+  AND: [versionsPost_where_and]
+  OR: [versionsPost_where_or]
 }
 
-input Media_mimeType_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
-input Media_filesize_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
-input Media_width_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
-input Media_height_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
-input Media_id_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
-input Media_where_and {
-  updatedAt: Media_updatedAt_operator
-  createdAt: Media_createdAt_operator
-  url: Media_url_operator
-  filename: Media_filename_operator
-  mimeType: Media_mimeType_operator
-  filesize: Media_filesize_operator
-  width: Media_width_operator
-  height: Media_height_operator
-  id: Media_id_operator
-  AND: [Media_where_and]
-  OR: [Media_where_or]
-}
-
-input Media_where_or {
-  updatedAt: Media_updatedAt_operator
-  createdAt: Media_createdAt_operator
-  url: Media_url_operator
-  filename: Media_filename_operator
-  mimeType: Media_mimeType_operator
-  filesize: Media_filesize_operator
-  width: Media_width_operator
-  height: Media_height_operator
-  id: Media_id_operator
-  AND: [Media_where_and]
-  OR: [Media_where_or]
-}
-
-type mediaDocAccess {
-  fields: MediaDocAccessFields
-  create: MediaCreateDocAccess
-  read: MediaReadDocAccess
-  update: MediaUpdateDocAccess
-  delete: MediaDeleteDocAccess
-}
-
-type MediaDocAccessFields {
-  updatedAt: MediaDocAccessFields_updatedAt
-  createdAt: MediaDocAccessFields_createdAt
-  url: MediaDocAccessFields_url
-  filename: MediaDocAccessFields_filename
-  mimeType: MediaDocAccessFields_mimeType
-  filesize: MediaDocAccessFields_filesize
-  width: MediaDocAccessFields_width
-  height: MediaDocAccessFields_height
-}
-
-type MediaDocAccessFields_updatedAt {
-  create: MediaDocAccessFields_updatedAt_Create
-  read: MediaDocAccessFields_updatedAt_Read
-  update: MediaDocAccessFields_updatedAt_Update
-  delete: MediaDocAccessFields_updatedAt_Delete
-}
-
-type MediaDocAccessFields_updatedAt_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_updatedAt_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_updatedAt_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_updatedAt_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_createdAt {
-  create: MediaDocAccessFields_createdAt_Create
-  read: MediaDocAccessFields_createdAt_Read
-  update: MediaDocAccessFields_createdAt_Update
-  delete: MediaDocAccessFields_createdAt_Delete
-}
-
-type MediaDocAccessFields_createdAt_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_createdAt_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_createdAt_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_createdAt_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_url {
-  create: MediaDocAccessFields_url_Create
-  read: MediaDocAccessFields_url_Read
-  update: MediaDocAccessFields_url_Update
-  delete: MediaDocAccessFields_url_Delete
-}
-
-type MediaDocAccessFields_url_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_url_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_url_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_url_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filename {
-  create: MediaDocAccessFields_filename_Create
-  read: MediaDocAccessFields_filename_Read
-  update: MediaDocAccessFields_filename_Update
-  delete: MediaDocAccessFields_filename_Delete
-}
-
-type MediaDocAccessFields_filename_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filename_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filename_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filename_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_mimeType {
-  create: MediaDocAccessFields_mimeType_Create
-  read: MediaDocAccessFields_mimeType_Read
-  update: MediaDocAccessFields_mimeType_Update
-  delete: MediaDocAccessFields_mimeType_Delete
-}
-
-type MediaDocAccessFields_mimeType_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_mimeType_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_mimeType_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_mimeType_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filesize {
-  create: MediaDocAccessFields_filesize_Create
-  read: MediaDocAccessFields_filesize_Read
-  update: MediaDocAccessFields_filesize_Update
-  delete: MediaDocAccessFields_filesize_Delete
-}
-
-type MediaDocAccessFields_filesize_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filesize_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filesize_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_filesize_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_width {
-  create: MediaDocAccessFields_width_Create
-  read: MediaDocAccessFields_width_Read
-  update: MediaDocAccessFields_width_Update
-  delete: MediaDocAccessFields_width_Delete
-}
-
-type MediaDocAccessFields_width_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_width_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_width_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_width_Delete {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_height {
-  create: MediaDocAccessFields_height_Create
-  read: MediaDocAccessFields_height_Read
-  update: MediaDocAccessFields_height_Update
-  delete: MediaDocAccessFields_height_Delete
-}
-
-type MediaDocAccessFields_height_Create {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_height_Read {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_height_Update {
-  permission: Boolean!
-}
-
-type MediaDocAccessFields_height_Delete {
-  permission: Boolean!
-}
-
-type MediaCreateDocAccess {
-  permission: Boolean!
-  where: JSONObject
-}
-
-type MediaReadDocAccess {
-  permission: Boolean!
-  where: JSONObject
-}
-
-type MediaUpdateDocAccess {
-  permission: Boolean!
-  where: JSONObject
-}
-
-type MediaDeleteDocAccess {
-  permission: Boolean!
-  where: JSONObject
+input versionsPost_where_or {
+  parent: versionsPost_parent_operator
+  version__text: versionsPost_version__text_operator
+  version__richText: versionsPost_version__richText_operator
+  version__richText2: versionsPost_version__richText2_operator
+  version__updatedAt: versionsPost_version__updatedAt_operator
+  version__createdAt: versionsPost_version__createdAt_operator
+  version___status: versionsPost_version___status_operator
+  createdAt: versionsPost_createdAt_operator
+  updatedAt: versionsPost_updatedAt_operator
+  latest: versionsPost_latest_operator
+  id: versionsPost_id_operator
+  AND: [versionsPost_where_and]
+  OR: [versionsPost_where_or]
 }
 
 type User {
@@ -805,8 +572,7 @@ type User {
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress
-  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
@@ -890,6 +656,10 @@ input User_where_or {
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
+}
+
+type countUsers {
+  totalDocs: Int
 }
 
 type usersDocAccess {
@@ -1052,11 +822,6 @@ enum PayloadPreference_User_RelationTo {
 
 union PayloadPreference_User = User
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON
-
 type PayloadPreferences {
   docs: [PayloadPreference]
   hasNextPage: Boolean
@@ -1165,6 +930,10 @@ input PayloadPreference_where_or {
   id: PayloadPreference_id_operator
   AND: [PayloadPreference_where_and]
   OR: [PayloadPreference_where_or]
+}
+
+type countPayloadPreferences {
+  totalDocs: Int
 }
 
 type payload_preferencesDocAccess {
@@ -1418,7 +1187,6 @@ type MenuUpdateDocAccess {
 type Access {
   canAccessAdmin: Boolean!
   posts: postsAccess
-  media: mediaAccess
   users: usersAccess
   payload_preferences: payload_preferencesAccess
   menu: menuAccess
@@ -1430,13 +1198,16 @@ type postsAccess {
   read: PostsReadAccess
   update: PostsUpdateAccess
   delete: PostsDeleteAccess
+  readVersions: PostsReadVersionsAccess
 }
 
 type PostsFields {
   text: PostsFields_text
-  associatedMedia: PostsFields_associatedMedia
+  richText: PostsFields_richText
+  richText2: PostsFields_richText2
   updatedAt: PostsFields_updatedAt
   createdAt: PostsFields_createdAt
+  _status: PostsFields__status
 }
 
 type PostsFields_text {
@@ -1462,26 +1233,49 @@ type PostsFields_text_Delete {
   permission: Boolean!
 }
 
-type PostsFields_associatedMedia {
-  create: PostsFields_associatedMedia_Create
-  read: PostsFields_associatedMedia_Read
-  update: PostsFields_associatedMedia_Update
-  delete: PostsFields_associatedMedia_Delete
+type PostsFields_richText {
+  create: PostsFields_richText_Create
+  read: PostsFields_richText_Read
+  update: PostsFields_richText_Update
+  delete: PostsFields_richText_Delete
 }
 
-type PostsFields_associatedMedia_Create {
+type PostsFields_richText_Create {
   permission: Boolean!
 }
 
-type PostsFields_associatedMedia_Read {
+type PostsFields_richText_Read {
   permission: Boolean!
 }
 
-type PostsFields_associatedMedia_Update {
+type PostsFields_richText_Update {
   permission: Boolean!
 }
 
-type PostsFields_associatedMedia_Delete {
+type PostsFields_richText_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_richText2 {
+  create: PostsFields_richText2_Create
+  read: PostsFields_richText2_Read
+  update: PostsFields_richText2_Update
+  delete: PostsFields_richText2_Delete
+}
+
+type PostsFields_richText2_Create {
+  permission: Boolean!
+}
+
+type PostsFields_richText2_Read {
+  permission: Boolean!
+}
+
+type PostsFields_richText2_Update {
+  permission: Boolean!
+}
+
+type PostsFields_richText2_Delete {
   permission: Boolean!
 }
 
@@ -1531,6 +1325,29 @@ type PostsFields_createdAt_Delete {
   permission: Boolean!
 }
 
+type PostsFields__status {
+  create: PostsFields__status_Create
+  read: PostsFields__status_Read
+  update: PostsFields__status_Update
+  delete: PostsFields__status_Delete
+}
+
+type PostsFields__status_Create {
+  permission: Boolean!
+}
+
+type PostsFields__status_Read {
+  permission: Boolean!
+}
+
+type PostsFields__status_Update {
+  permission: Boolean!
+}
+
+type PostsFields__status_Delete {
+  permission: Boolean!
+}
+
 type PostsCreateAccess {
   permission: Boolean!
   where: JSONObject
@@ -1551,225 +1368,7 @@ type PostsDeleteAccess {
   where: JSONObject
 }
 
-type mediaAccess {
-  fields: MediaFields
-  create: MediaCreateAccess
-  read: MediaReadAccess
-  update: MediaUpdateAccess
-  delete: MediaDeleteAccess
-}
-
-type MediaFields {
-  updatedAt: MediaFields_updatedAt
-  createdAt: MediaFields_createdAt
-  url: MediaFields_url
-  filename: MediaFields_filename
-  mimeType: MediaFields_mimeType
-  filesize: MediaFields_filesize
-  width: MediaFields_width
-  height: MediaFields_height
-}
-
-type MediaFields_updatedAt {
-  create: MediaFields_updatedAt_Create
-  read: MediaFields_updatedAt_Read
-  update: MediaFields_updatedAt_Update
-  delete: MediaFields_updatedAt_Delete
-}
-
-type MediaFields_updatedAt_Create {
-  permission: Boolean!
-}
-
-type MediaFields_updatedAt_Read {
-  permission: Boolean!
-}
-
-type MediaFields_updatedAt_Update {
-  permission: Boolean!
-}
-
-type MediaFields_updatedAt_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_createdAt {
-  create: MediaFields_createdAt_Create
-  read: MediaFields_createdAt_Read
-  update: MediaFields_createdAt_Update
-  delete: MediaFields_createdAt_Delete
-}
-
-type MediaFields_createdAt_Create {
-  permission: Boolean!
-}
-
-type MediaFields_createdAt_Read {
-  permission: Boolean!
-}
-
-type MediaFields_createdAt_Update {
-  permission: Boolean!
-}
-
-type MediaFields_createdAt_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_url {
-  create: MediaFields_url_Create
-  read: MediaFields_url_Read
-  update: MediaFields_url_Update
-  delete: MediaFields_url_Delete
-}
-
-type MediaFields_url_Create {
-  permission: Boolean!
-}
-
-type MediaFields_url_Read {
-  permission: Boolean!
-}
-
-type MediaFields_url_Update {
-  permission: Boolean!
-}
-
-type MediaFields_url_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_filename {
-  create: MediaFields_filename_Create
-  read: MediaFields_filename_Read
-  update: MediaFields_filename_Update
-  delete: MediaFields_filename_Delete
-}
-
-type MediaFields_filename_Create {
-  permission: Boolean!
-}
-
-type MediaFields_filename_Read {
-  permission: Boolean!
-}
-
-type MediaFields_filename_Update {
-  permission: Boolean!
-}
-
-type MediaFields_filename_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_mimeType {
-  create: MediaFields_mimeType_Create
-  read: MediaFields_mimeType_Read
-  update: MediaFields_mimeType_Update
-  delete: MediaFields_mimeType_Delete
-}
-
-type MediaFields_mimeType_Create {
-  permission: Boolean!
-}
-
-type MediaFields_mimeType_Read {
-  permission: Boolean!
-}
-
-type MediaFields_mimeType_Update {
-  permission: Boolean!
-}
-
-type MediaFields_mimeType_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_filesize {
-  create: MediaFields_filesize_Create
-  read: MediaFields_filesize_Read
-  update: MediaFields_filesize_Update
-  delete: MediaFields_filesize_Delete
-}
-
-type MediaFields_filesize_Create {
-  permission: Boolean!
-}
-
-type MediaFields_filesize_Read {
-  permission: Boolean!
-}
-
-type MediaFields_filesize_Update {
-  permission: Boolean!
-}
-
-type MediaFields_filesize_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_width {
-  create: MediaFields_width_Create
-  read: MediaFields_width_Read
-  update: MediaFields_width_Update
-  delete: MediaFields_width_Delete
-}
-
-type MediaFields_width_Create {
-  permission: Boolean!
-}
-
-type MediaFields_width_Read {
-  permission: Boolean!
-}
-
-type MediaFields_width_Update {
-  permission: Boolean!
-}
-
-type MediaFields_width_Delete {
-  permission: Boolean!
-}
-
-type MediaFields_height {
-  create: MediaFields_height_Create
-  read: MediaFields_height_Read
-  update: MediaFields_height_Update
-  delete: MediaFields_height_Delete
-}
-
-type MediaFields_height_Create {
-  permission: Boolean!
-}
-
-type MediaFields_height_Read {
-  permission: Boolean!
-}
-
-type MediaFields_height_Update {
-  permission: Boolean!
-}
-
-type MediaFields_height_Delete {
-  permission: Boolean!
-}
-
-type MediaCreateAccess {
-  permission: Boolean!
-  where: JSONObject
-}
-
-type MediaReadAccess {
-  permission: Boolean!
-  where: JSONObject
-}
-
-type MediaUpdateAccess {
-  permission: Boolean!
-  where: JSONObject
-}
-
-type MediaDeleteAccess {
+type PostsReadVersionsAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -2153,14 +1752,8 @@ type Mutation {
   createPost(data: mutationPostInput!, draft: Boolean): Post
   updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean): Post
   deletePost(id: String!): Post
-  createMedia(data: mutationMediaInput!, draft: Boolean): Media
-  updateMedia(
-    id: String!
-    autosave: Boolean
-    data: mutationMediaUpdateInput!
-    draft: Boolean
-  ): Media
-  deleteMedia(id: String!): Media
+  duplicatePost(id: String!): Post
+  restoreVersionPost(id: String): Post
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
   deleteUser(id: String!): User
@@ -2172,50 +1765,38 @@ type Mutation {
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(
-    id: String!
-    autosave: Boolean
-    data: mutationPayloadPreferenceUpdateInput!
-    draft: Boolean
-  ): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
+  duplicatePayloadPreference(id: String!): PayloadPreference
   updateMenu(data: mutationMenuInput!, draft: Boolean): Menu
 }
 
 input mutationPostInput {
   text: String
-  associatedMedia: String
+  richText: JSON
+  richText2: JSON
   updatedAt: String
   createdAt: String
+  _status: Post__status_MutationInput
+}
+
+enum Post__status_MutationInput {
+  draft
+  published
 }
 
 input mutationPostUpdateInput {
   text: String
-  associatedMedia: String
+  richText: JSON
+  richText2: JSON
   updatedAt: String
   createdAt: String
+  _status: PostUpdate__status_MutationInput
 }
 
-input mutationMediaInput {
-  updatedAt: String
-  createdAt: String
-  url: String
-  filename: String
-  mimeType: String
-  filesize: Float
-  width: Float
-  height: Float
-}
-
-input mutationMediaUpdateInput {
-  updatedAt: String
-  createdAt: String
-  url: String
-  filename: String
-  mimeType: String
-  filesize: Float
-  width: Float
-  height: Float
+enum PostUpdate__status_MutationInput {
+  draft
+  published
 }
 
 input mutationUserInput {

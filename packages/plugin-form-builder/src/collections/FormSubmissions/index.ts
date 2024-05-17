@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { PluginConfig } from '../../types.js'
+import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { createCharge } from './hooks/createCharge.js'
 import { sendEmail } from './hooks/sendEmail.js'
 
 // all settings can be overridden by the config
-export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
+export const generateSubmissionCollection = (
+  formConfig: FormBuilderPluginConfig,
+): CollectionConfig => {
   const formSlug = formConfig?.formOverrides?.slug || 'forms'
 
   const newConfig: CollectionConfig = {
@@ -91,12 +93,12 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
       ...(formConfig?.formSubmissionOverrides?.fields || []),
     ],
     hooks: {
+      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
       beforeChange: [
         (data) => createCharge(data, formConfig),
         (data) => sendEmail(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
-      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
     },
   }
 

@@ -40,7 +40,7 @@ export interface FieldsConfig {
 export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 
-export interface PluginConfig {
+export type FormBuilderPluginConfig = {
   beforeEmail?: BeforeEmail
   fields?: FieldsConfig
   formOverrides?: Partial<CollectionConfig>

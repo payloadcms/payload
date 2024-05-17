@@ -1,5 +1,5 @@
-import type { SendMailOptions } from 'nodemailer'
 import type { PaginatedDocs } from 'payload/database'
+import type { SendEmailOptions } from 'payload/types'
 
 import type {
   CreateArgs,
@@ -82,7 +82,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     })
   }
 
-  sendEmail = async ({ jwt, ...args }: { jwt?: string } & SendMailOptions): Promise<unknown> => {
+  sendEmail = async ({ jwt, ...args }: { jwt?: string } & SendEmailOptions): Promise<unknown> => {
     return this.fetch({
       operation: 'sendEmail',
       args,

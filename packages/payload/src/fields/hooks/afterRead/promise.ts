@@ -16,6 +16,7 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
   fieldPopulatePath: string
@@ -51,6 +52,7 @@ export const promise = async ({
   currentDepth,
   depth,
   doc,
+  draft,
   fallbackLocale,
   field,
   fieldPopulatePath,
@@ -152,10 +154,14 @@ export const promise = async ({
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
       if (editor?.populationPromises) {
+        const populateDepth =
+          field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
         editor.populationPromises({
           context,
           currentDepth,
-          depth,
+          depth: populateDepth,
+          draft,
           field,
           fieldPromises,
           findMany,
@@ -283,6 +289,7 @@ export const promise = async ({
         relationshipPopulationPromise({
           currentDepth,
           depth,
+          draft,
           fallbackLocale,
           field,
           fieldPopulatePath: `${fieldPopulatePath}${field.name}`,
@@ -308,6 +315,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
         fieldPromises,
@@ -339,6 +347,7 @@ export const promise = async ({
             currentDepth,
             depth,
             doc,
+            draft,
             fallbackLocale,
             fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
             fieldPromises,
@@ -366,6 +375,7 @@ export const promise = async ({
                 currentDepth,
                 depth,
                 doc,
+                draft,
                 fallbackLocale,
                 fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
                 fieldPromises,
@@ -405,6 +415,7 @@ export const promise = async ({
               currentDepth,
               depth,
               doc,
+              draft,
               fallbackLocale,
               fieldPopulatePath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
               fieldPromises,
@@ -436,6 +447,7 @@ export const promise = async ({
                   currentDepth,
                   depth,
                   doc,
+                  draft,
                   fallbackLocale,
                   fieldPopulatePath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
                   fieldPromises,
@@ -471,6 +483,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPopulatePath,
         fieldPromises,
@@ -506,6 +519,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPopulatePath: tabPopulatePath,
         fieldPromises,
@@ -533,6 +547,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),

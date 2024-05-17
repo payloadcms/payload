@@ -13,6 +13,7 @@ import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback } from 'react'
 
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 import type { GenerateDescription } from '../types.js'
 
 import { defaults } from '../defaults.js'
@@ -27,10 +28,10 @@ type MetaDescriptionProps = FormFieldBase & {
 }
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { CustomLabel, hasGenerateDescriptionFn, labelProps, path, required } = props
+  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, path, required } = props
   const { path: pathFromContext } = useFieldProps()
 
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -76,7 +77,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
           {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

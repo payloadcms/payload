@@ -21,6 +21,7 @@ export type Column = {
   Label: React.ReactNode
   accessor: string
   active: boolean
+  admin?: FieldBase['admin']
   cellProps?: Partial<CellComponentProps>
   components: {
     Cell: React.ReactNode

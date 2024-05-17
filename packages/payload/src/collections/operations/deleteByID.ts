@@ -156,6 +156,7 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,

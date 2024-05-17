@@ -107,9 +107,11 @@ export function sortFeaturesForOptimalLoading(
 
 export async function loadFeatures({
   config,
+  isRoot,
   unSanitizedEditorConfig,
 }: {
   config: SanitizedConfig
+  isRoot?: boolean
   unSanitizedEditorConfig: ServerEditorConfig
 }): Promise<ResolvedServerFeatureMap> {
   // First remove all duplicate features. The LAST feature with a given key wins.
@@ -174,6 +176,7 @@ export async function loadFeatures({
     const feature = await featureProvider.feature({
       config,
       featureProviderMap,
+      isRoot,
       resolvedFeatures,
       unSanitizedEditorConfig,
     })

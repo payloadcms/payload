@@ -23,6 +23,7 @@ import { ro } from '../languages/ro.js'
 import { rs } from '../languages/rs.js'
 import { rsLatin } from '../languages/rsLatin.js'
 import { ru } from '../languages/ru.js'
+import { sk } from '../languages/sk.js'
 import { sv } from '../languages/sv.js'
 import { th } from '../languages/th.js'
 import { tr } from '../languages/tr.js'
@@ -55,6 +56,7 @@ export const translations = {
   rs,
   'rs-latin': rsLatin,
   ru,
+  sk,
   sv,
   th,
   tr,

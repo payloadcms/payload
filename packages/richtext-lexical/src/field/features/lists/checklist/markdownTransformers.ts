@@ -2,7 +2,7 @@ import type { ElementTransformer } from '@lexical/markdown'
 
 import { $isListNode, ListItemNode, ListNode } from '@lexical/list'
 
-import { listExport, listReplace } from '../common/markdown.js'
+import { listExport, listReplace } from '../shared/markdown.js'
 
 export const CHECK_LIST: ElementTransformer = {
   type: 'element',

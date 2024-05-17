@@ -5,16 +5,28 @@ const HORIZONTAL_OFFSET = 5
 // This is supposed to position the floatingElem based on the parent (anchorElem) and the target (targetRect) which is usually the selected text.
 // So basically, it positions the floatingElem either below or above the target (targetRect) and aligns it to the left or center of the target (targetRect).
 // This is used for positioning the floating toolbar (anchor: richtext editor) and its caret (anchor: floating toolbar)
-export function setFloatingElemPosition(
-  targetRect: ClientRect | null,
-  floatingElem: HTMLElement,
-  anchorElem: HTMLElement,
-  horizontalPosition: 'center' | 'left' = 'left',
-  verticalGap: number = VERTICAL_GAP,
-  horizontalOffset: number = HORIZONTAL_OFFSET,
-  specialHandlingForCaret = false,
-  anchorFlippedOffset = 0, // Offset which was added to the anchor (for caret, floating toolbar) if it was flipped
-): number {
+export function setFloatingElemPosition(args: {
+  alwaysDisplayOnTop?: boolean
+  anchorElem: HTMLElement
+  anchorFlippedOffset?: number // Offset which was added to the anchor (for caret, floating toolbar) if it was flipped
+  floatingElem: HTMLElement
+  horizontalOffset?: number
+  horizontalPosition?: 'center' | 'left'
+  specialHandlingForCaret?: boolean
+  targetRect: ClientRect | null
+  verticalGap?: number
+}): number {
+  const {
+    alwaysDisplayOnTop = false,
+    anchorElem,
+    anchorFlippedOffset = 0, // Offset which was added to the anchor (for caret, floating toolbar) if it was flipped
+    floatingElem,
+    horizontalOffset = HORIZONTAL_OFFSET,
+    horizontalPosition = 'left',
+    specialHandlingForCaret = false,
+    targetRect,
+    verticalGap = VERTICAL_GAP,
+  } = args
   // Returns the top offset if the target was flipped
   const scrollerElem = anchorElem.parentElement
 
@@ -37,7 +49,7 @@ export function setFloatingElemPosition(
   }
 
   let addedToTop = 0
-  if (top < editorScrollerRect.top && !specialHandlingForCaret) {
+  if (!alwaysDisplayOnTop && top < editorScrollerRect.top && !specialHandlingForCaret) {
     addedToTop = floatingElemRect.height + targetRect.height + verticalGap * 2
 
     top += addedToTop

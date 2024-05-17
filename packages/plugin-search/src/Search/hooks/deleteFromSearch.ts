@@ -1,6 +1,10 @@
 import type { CollectionAfterDeleteHook } from 'payload/types'
 
-const deleteFromSearch: CollectionAfterDeleteHook = async ({ doc, req: { payload }, req }) => {
+export const deleteFromSearch: CollectionAfterDeleteHook = async ({
+  doc,
+  req: { payload },
+  req,
+}) => {
   try {
     const searchDocQuery = await payload.find({
       collection: 'search',
@@ -28,5 +32,3 @@ const deleteFromSearch: CollectionAfterDeleteHook = async ({ doc, req: { payload
 
   return doc
 }
-
-export default deleteFromSearch

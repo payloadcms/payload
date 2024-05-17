@@ -56,6 +56,7 @@ import { findVersions as findVersionsGlobal } from './globals/findVersions.js'
 import { preview as previewGlobal } from './globals/preview.js'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion.js'
 import { update as updateGlobal } from './globals/update.js'
+import { generateOGImage } from './og/index.js'
 import { routeError } from './routeError.js'
 
 const endpoints = {
@@ -113,6 +114,7 @@ const endpoints = {
   root: {
     GET: {
       access,
+      og: generateOGImage,
     },
     POST: {
       'form-state': buildFormState,

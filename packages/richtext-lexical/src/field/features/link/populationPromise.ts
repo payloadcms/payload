@@ -11,6 +11,7 @@ export const linkPopulationPromiseHOC = (
     context,
     currentDepth,
     depth,
+    draft,
     editorPopulationPromises,
     fieldPromises,
     findMany,
@@ -32,10 +33,9 @@ export const linkPopulationPromiseHOC = (
       recurseNestedFields({
         context,
         currentDepth,
-        data: {
-          fields: node.fields,
-        },
+        data: node.fields,
         depth,
+        draft,
         editorPopulationPromises,
         fieldPromises,
         fields: props.fields,
@@ -45,9 +45,7 @@ export const linkPopulationPromiseHOC = (
         populationPromises,
         req,
         showHiddenFields,
-        siblingDoc: {
-          fields: node.fields,
-        },
+        siblingDoc: node.fields,
       })
     }
   }

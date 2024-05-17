@@ -4,6 +4,8 @@ import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { Config } from './payload-types.js'
+
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
@@ -103,7 +105,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     uploadId,
     prefix = '',
   }: {
-    collectionSlug: string
+    collectionSlug: keyof Config['collections']
     prefix?: string
     uploadId: number | string
   }) {

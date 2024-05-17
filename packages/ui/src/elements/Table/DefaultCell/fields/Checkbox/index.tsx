@@ -3,10 +3,14 @@ import type { DefaultCellComponentProps } from 'payload/types'
 
 import React from 'react'
 
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.scss'
 
-export const CheckboxCell: React.FC<DefaultCellComponentProps<boolean>> = ({ cellData }) => (
-  <code className="bool-cell">
-    <span>{JSON.stringify(cellData)}</span>
-  </code>
-)
+export const CheckboxCell: React.FC<DefaultCellComponentProps<boolean>> = ({ cellData }) => {
+  const { t } = useTranslation()
+  return (
+    <code className="bool-cell">
+      <span>{t(`general:${cellData}`).toLowerCase()}</span>
+    </code>
+  )
+}

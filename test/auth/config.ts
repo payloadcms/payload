@@ -223,6 +223,7 @@ export default buildConfigWithDefaults({
           custom: 'Hello, world!',
           email: devUser.email,
           password: devUser.password,
+          roles: ['admin'],
         },
       })
 

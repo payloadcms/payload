@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/config'
+import type { ServerProps } from 'payload/config'
 
 import React from 'react'
 
@@ -32,10 +32,8 @@ const PayloadLogo: React.FC = () => (
   </svg>
 )
 
-export const Logo: React.FC<{
-  config: SanitizedConfig
-}> = (props) => {
-  const { config } = props
+export const Logo: React.FC<ServerProps> = (props) => {
+  const { i18n, locale, params, payload, permissions, searchParams, user } = props
 
   const {
     admin: {
@@ -45,7 +43,21 @@ export const Logo: React.FC<{
         },
       } = {},
     } = {},
-  } = config
+  } = payload.config
 
-  return <RenderCustomComponent CustomComponent={CustomLogo} DefaultComponent={PayloadLogo} />
+  return (
+    <RenderCustomComponent
+      CustomComponent={CustomLogo}
+      DefaultComponent={PayloadLogo}
+      serverOnlyProps={{
+        i18n,
+        locale,
+        params,
+        payload,
+        permissions,
+        searchParams,
+        user,
+      }}
+    />
+  )
 }

@@ -2,7 +2,7 @@
  * WARNING: This file contains exports that can only be safely used on the front-end
  */
 
-export { getDataLoader } from '../collections/dataloader.js'
+export { createDataloaderCacheKey, getDataLoader } from '../collections/dataloader.js'
 export { default as getDefaultValue } from '../fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from '../fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise.js'
@@ -42,10 +42,9 @@ export { isNumber } from '../utilities/isNumber.js'
 
 export { isPlainObject } from '../utilities/isPlainObject.js'
 export {
-  isPlainFunction,
   isReactClientComponent,
-  isReactComponent,
-  isReactServerComponent,
+  isReactComponentOrFunction,
+  isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
 

@@ -1,7 +1,5 @@
 import type { LivePreviewConfig } from 'payload/config'
 
-import type { Tenant } from '../payload-types.js'
-
 export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   data,
   collectionConfig,
@@ -13,7 +11,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   // For example, multi-tenant apps may need to lookup additional data
   if (data.tenant) {
     try {
-      const fullTenant = (await payload
+      const fullTenant = await payload
         .find({
           collection: 'tenants',
           where: {
@@ -24,7 +22,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
           limit: 1,
           depth: 0,
         })
-        .then((res) => res?.docs?.[0])) as Tenant
+        .then((res) => res?.docs?.[0])
 
       if (fullTenant?.clientURL) {
         baseURL = `${fullTenant.clientURL}/live-preview`
@@ -37,7 +35,10 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   // Format the URL as needed, based on the document and data
   // I.e. append '/posts' to the URL if the document is a post
   // You can also do this on individual collection or global config, if preferred
+  const isPage = collectionConfig && collectionConfig.slug === 'pages'
+  const isHomePage = isPage && data?.slug === 'home'
+
   return `${baseURL}${
-    collectionConfig && collectionConfig.slug !== 'pages' ? `/${collectionConfig.slug}` : ''
-  }${data?.slug && data.slug !== 'home' ? `/${data.slug}` : ''}`
+    !isPage && collectionConfig ? `/${collectionConfig.slug}` : ''
+  }${!isHomePage && data.slug ? `/${data.slug}` : ''}`
 }

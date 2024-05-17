@@ -55,8 +55,11 @@ function hideTargetLine(
     targetLineElem.style.opacity = '0'
   }
   if (lastTargetBlockElem) {
-    lastTargetBlockElem.style.opacity = '1'
-    lastTargetBlockElem.style.transform = 'translate(0, 0)'
+    lastTargetBlockElem.style.opacity = ''
+    lastTargetBlockElem.style.transform = ''
+    // Delete marginBottom and marginTop values we set
+    lastTargetBlockElem.style.marginBottom = ''
+    lastTargetBlockElem.style.marginTop = ''
     //lastTargetBlockElem.style.border = 'none'
   }
 }
@@ -139,7 +142,7 @@ function useDraggableBlockMenu(
         isFoundNodeEmptyParagraph,
       } = getNodeCloseToPoint({
         anchorElem,
-        cache_treshold: 0,
+        cache_threshold: 0,
         editor,
         horizontalOffset: -distanceFromScrollerElem,
         point: new Point(event.x, event.y),

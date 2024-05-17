@@ -26,7 +26,7 @@ export default function Home() {
         {". This example demonstrates how to implement Payload's "}
         <Link href="https://payloadcms.com/docs/authentication/overview">Authentication</Link>
         {
-          ' strategies in both the REST and GraphQL APIs. To toggle between these APIs, see `_app.tsx`.'
+          ' strategies through HTTP using the REST and GraphQL APIs. To toggle between these two APIs, see `_app.tsx`.'
         }
       </p>
       <p>

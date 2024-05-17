@@ -11,6 +11,7 @@ export const blockPopulationPromiseHOC = (
     context,
     currentDepth,
     depth,
+    draft,
     editorPopulationPromises,
     fieldPromises,
     findMany,
@@ -45,6 +46,7 @@ export const blockPopulationPromiseHOC = (
       req,
       showHiddenFields,
       // The afterReadPromise gets its data from looking for field.name inside the siblingDoc. Thus, here we cannot pass the whole document's siblingDoc, but only the siblingDoc (sibling fields) of the current field.
+      draft,
       siblingDoc: blockFieldData,
     })
   }

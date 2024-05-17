@@ -33,6 +33,7 @@ export function textToLexicalJSON({
           direction: 'ltr',
           format: '',
           indent: 0,
+          textFormat: 0,
           type: 'paragraph',
           version: 1,
         } as SerializedParagraphNode,

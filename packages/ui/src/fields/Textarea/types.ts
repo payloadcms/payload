@@ -1,11 +1,10 @@
-import type { FieldBase, TextareaField as TextareaFieldType } from 'payload/types'
+import type { TextareaField as TextareaFieldType } from 'payload/types'
 
 import { type ChangeEvent } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 export type TextareaFieldProps = FormFieldBase & {
-  label?: FieldBase['label']
   maxLength?: number
   minLength?: number
   name?: string

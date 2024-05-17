@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
@@ -8,12 +8,18 @@ import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
+import type {
+  Config,
+  NonAdminUser,
+  ReadOnlyCollection,
+  RestrictedVersion,
+} from './payload-types.js'
 
 import {
   closeNav,
   ensureAutoLoginAndCompilationIsDone,
   exactText,
+  getAdminRoutes,
   initPageConsoleErrorCatch,
   login,
   openDocControls,
@@ -22,7 +28,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
   noAdminAccessEmail,
@@ -58,8 +64,10 @@ describe('access control', () => {
   let restrictedVersionsUrl: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
+  let logoutURL: string
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
@@ -73,6 +81,16 @@ describe('access control', () => {
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    const {
+      admin: {
+        routes: { logout: logoutRoute },
+      },
+      routes: { admin: adminRoute },
+    } = getAdminRoutes({})
+
+    logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
 
   test('field without read access should not show', async () => {
@@ -350,8 +368,8 @@ describe('access control', () => {
 
     await expect(page.locator('.dashboard')).toBeVisible()
 
-    await page.goto(`${serverURL}/admin/logout`)
-    await page.waitForURL(`${serverURL}/admin/logout`)
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
 
     await login({
       page,
@@ -364,8 +382,8 @@ describe('access control', () => {
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
 
-    await page.goto(`${serverURL}/admin/logout`)
-    await page.waitForURL(`${serverURL}/admin/logout`)
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
 
     // Log back in for the next test
     await login({
@@ -385,10 +403,12 @@ describe('access control', () => {
 
     await expect(page.locator('.dashboard')).toBeVisible()
 
-    await page.goto(`${serverURL}/admin/logout`)
-    await page.waitForURL(`${serverURL}/admin/logout`)
+    await page.goto(logoutURL)
+    await page.waitForURL(logoutURL)
 
-    const nonAdminUser = await payload.login({
+    const nonAdminUser: NonAdminUser & {
+      token?: string
+    } = await payload.login({
       collection: nonAdminUserSlug,
       data: {
         email: nonAdminUserEmail,
@@ -396,7 +416,7 @@ describe('access control', () => {
       },
     })
 
-    context.addCookies([
+    await context.addCookies([
       {
         name: 'payload-token',
         value: nonAdminUser.token,
@@ -416,5 +436,5 @@ async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown
   return payload.create({
     collection: slug,
     data,
-  })
+  }) as any as Promise<TypeWithID & Record<string, unknown>>
 }

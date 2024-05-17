@@ -85,7 +85,7 @@ The following custom endpoints are automatically opened for you:
 
 ##### Stripe REST Proxy
 
-If `rest` is true, proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. If you need to proxy the API server-side, use the [stripeProxy](#node) function.
+If `rest` is true, proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. This flag should only be used for local development, see the security note below for more information.
 
 ```ts
 const res = await fetch(`/api/stripe/rest`, {
@@ -106,11 +106,19 @@ const res = await fetch(`/api/stripe/rest`, {
 })
 ```
 
+If you need to proxy the API server-side, use the [stripeProxy](#node) function.
+
 <Banner type="info">
   <strong>Note:</strong>
   <br />
   The `/api` part of these routes may be different based on the settings defined in your Payload
   config.
+</Banner>
+
+<Banner type="warning">
+  <strong>Warning:</strong>
+  <br />
+  Opening the REST proxy endpoint in production is a potential security risk. Authenticated users will have open access to the Stripe REST API. In production, open your own endpoint and use the [stripeProxy](#node) function to proxy the Stripe API server-side.
 </Banner>
 
 ## Webhooks

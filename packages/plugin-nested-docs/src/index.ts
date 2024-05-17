@@ -1,19 +1,20 @@
 import type { Plugin } from 'payload/config'
 import type { SingleRelationshipField } from 'payload/types'
 
-import type { PluginConfig } from './types.js'
+import type { NestedDocsPluginConfig } from './types.js'
 
 import { createBreadcrumbsField } from './fields/breadcrumbs.js'
 import { createParentField } from './fields/parent.js'
 import { parentFilterOptions } from './fields/parentFilterOptions.js'
 import { resaveChildren } from './hooks/resaveChildren.js'
 import { resaveSelfAfterCreate } from './hooks/resaveSelfAfterCreate.js'
+import { getParents } from './utilities/getParents.js'
 import { populateBreadcrumbs } from './utilities/populateBreadcrumbs.js'
 
-export { createBreadcrumbsField, createParentField }
+export { createBreadcrumbsField, createParentField, getParents }
 
-export const nestedDocs =
-  (pluginConfig: PluginConfig): Plugin =>
+export const nestedDocsPlugin =
+  (pluginConfig: NestedDocsPluginConfig): Plugin =>
   (config) => ({
     ...config,
     collections: (config.collections || []).map((collection) => {

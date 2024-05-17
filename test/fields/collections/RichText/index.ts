@@ -38,7 +38,8 @@ const RichTextFields: CollectionConfig = {
           TreeViewFeature(),
           HTMLConverterFeature({}),
           LinkFeature({
-            fields: [
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
               {
                 name: 'rel',
                 label: 'Rel Attribute',

@@ -1,4 +1,3 @@
-import en from '../../packages/payload/src/translations/en.json'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ar } from './ar.js'
@@ -8,13 +7,13 @@ import deepMerge from './deepMerge.js'
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],
-  i18n: {
+  /*i18n: {
     fallbackLng: 'en', // default
     debug: false, // default
     resources: {
       ar: deepMerge(en, ar),
     },
-  },
+  },*/
   localization: {
     locales: [
       {

@@ -1,6 +1,6 @@
 import type { Block } from 'payload/types'
 
-import formBuilder, { fields as formFields } from '@payloadcms/plugin-form-builder'
+import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -43,7 +43,7 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    formBuilder({
+    formBuilderPlugin({
       // handlePayment: handleFormPayments,
       // beforeEmail: prepareFormEmails,
       fields: {

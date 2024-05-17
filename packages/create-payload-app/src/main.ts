@@ -53,6 +53,9 @@ export class Main {
         '--use-pnpm': Boolean,
         '--use-yarn': Boolean,
 
+        // Other
+        '--no-git': Boolean,
+
         // Flags
         '--beta': Boolean,
         '--debug': Boolean,

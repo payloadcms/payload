@@ -1,13 +1,14 @@
+import type { AdminViewProps } from 'payload/types'
+
 import LinkImport from 'next/link.js'
 import React from 'react'
-
-import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 import { Button } from '@payloadcms/ui/elements/Button'
 
 import { customNestedViewPath, customViewTitle } from '../../../shared.js'
+import { ClientForm } from './index.client.js'
 
 export const CustomView: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
@@ -48,6 +49,7 @@ export const CustomView: React.FC<AdminViewProps> = ({ initPageResult }) => {
         >
           Go to Nested View
         </Button>
+        <ClientForm />
       </div>
     </div>
   )

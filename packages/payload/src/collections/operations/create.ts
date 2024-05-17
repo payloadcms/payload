@@ -288,6 +288,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
       context: req.context,
       depth,
       doc: result,
+      draft,
       fallbackLocale,
       global: null,
       locale,

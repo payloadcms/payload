@@ -6,19 +6,21 @@ import formatSlug from './hooks/formatSlug'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  access: {
+    create: loggedIn,
+    delete: loggedIn,
+    read: () => true,
+    update: loggedIn,
+  },
   admin: {
-    useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) =>
-        `${process.env.PAYLOAD_PUBLIC_SITE_URL}${data.slug !== 'home' ? `/${data.slug}` : ''}`,
+      url: ({ data }) => {
+        const isHomePage = data.slug === 'home'
+        return `${process.env.PAYLOAD_PUBLIC_SITE_URL}${!isHomePage ? `/${data.slug}` : ''}`
+      },
     },
-  },
-  access: {
-    read: () => true,
-    create: loggedIn,
-    update: loggedIn,
-    delete: loggedIn,
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -28,16 +30,23 @@ export const Pages: CollectionConfig = {
     },
     {
       name: 'slug',
-      label: 'Slug',
       type: 'text',
-      index: true,
       admin: {
         position: 'sidebar',
       },
       hooks: {
         beforeValidate: [formatSlug('title')],
       },
+      index: true,
+      label: 'Slug',
     },
     richText(),
   ],
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 375,
+      },
+    },
+  },
 }

@@ -1,4 +1,4 @@
-import { redirects } from '@payloadcms/plugin-redirects'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -25,7 +25,7 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    redirects({
+    redirectsPlugin({
       collections: ['pages'],
     }),
   ],

@@ -11,6 +11,7 @@ type RecurseRichTextArgs = {
   children: unknown[]
   currentDepth: number
   depth: number
+  draft: boolean
   field: RichTextField<any[], AdapterArguments, AdapterArguments>
   overrideAccess: boolean
   populationPromises: Promise<void>[]
@@ -22,6 +23,7 @@ export const recurseRichText = ({
   children,
   currentDepth = 0,
   depth,
+  draft,
   field,
   overrideAccess = false,
   populationPromises,
@@ -45,6 +47,7 @@ export const recurseRichText = ({
               currentDepth,
               data: element,
               depth,
+              draft,
               field,
               key: 'value',
               overrideAccess,
@@ -61,6 +64,7 @@ export const recurseRichText = ({
             currentDepth,
             data: element.fields || {},
             depth,
+            draft,
             fields: field.admin.upload.collections[element.relationTo].fields,
             overrideAccess,
             populationPromises,
@@ -82,6 +86,7 @@ export const recurseRichText = ({
                 currentDepth,
                 data: element.doc,
                 depth,
+                draft,
                 field,
                 key: 'value',
                 overrideAccess,
@@ -97,6 +102,7 @@ export const recurseRichText = ({
             currentDepth,
             data: element.fields || {},
             depth,
+            draft,
             fields: field.admin?.link?.fields,
             overrideAccess,
             populationPromises,
@@ -111,6 +117,7 @@ export const recurseRichText = ({
           children: element.children,
           currentDepth,
           depth,
+          draft,
           field,
           overrideAccess,
           populationPromises,
@@ -125,6 +132,7 @@ export const recurseRichText = ({
 export const richTextRelationshipPromise = ({
   currentDepth,
   depth,
+  draft,
   field,
   overrideAccess,
   populationPromises,
@@ -136,6 +144,7 @@ export const richTextRelationshipPromise = ({
     children: siblingDoc[field.name] as unknown[],
     currentDepth,
     depth,
+    draft,
     field,
     overrideAccess,
     populationPromises,

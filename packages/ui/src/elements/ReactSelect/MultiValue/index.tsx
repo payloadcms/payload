@@ -21,7 +21,7 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
-    id: typeof value === 'object' && 'path' in value ? String(value.path) : uuid(),
+    id: typeof value === 'string' && value.toString(),
     disabled: !isSortable,
   })
 
@@ -51,6 +51,7 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
         ref: setNodeRef,
         style: {
           transform,
+          ...attributes?.style,
         },
       }}
     />

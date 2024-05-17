@@ -7,9 +7,12 @@ import React from 'react'
 export const Logout: React.FC = () => {
   const config = useConfig()
   const {
-    admin: { logoutRoute },
+    admin: {
+      routes: { logout: logoutRoute },
+    },
     routes: { admin },
   } = config
+
   return (
     <a href={`${admin}${logoutRoute}#custom`}>
       <LogOut />

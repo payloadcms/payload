@@ -11,6 +11,7 @@ type Args = {
   currentDepth?: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   findMany?: boolean
   flattenLocales?: boolean
@@ -39,6 +40,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     currentDepth: incomingCurrentDepth,
     depth: incomingDepth,
     doc: incomingDoc,
+    draft,
     fallbackLocale,
     findMany,
     flattenLocales = true,
@@ -68,6 +70,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     currentDepth,
     depth,
     doc,
+    draft,
     fallbackLocale,
     fieldPromises,
     fields: collection?.fields || global?.fields,

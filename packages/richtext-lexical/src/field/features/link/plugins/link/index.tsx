@@ -10,13 +10,15 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
+import type { PluginComponent } from '../../../types.js'
+import type { ClientProps } from '../../feature.client.js'
 import type { LinkFields } from '../../nodes/types.js'
 import type { LinkPayload } from '../floatingLinkEditor/types.js'
 
 import { validateUrl } from '../../../../lexical/utils/url.js'
 import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode.js'
 
-export function LinkPlugin(): null {
+export const LinkPlugin: PluginComponent<ClientProps> = () => {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
@@ -27,13 +29,6 @@ export function LinkPlugin(): null {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
-          // validate
-          if (payload?.fields.linkType === 'custom') {
-            if (!(validateUrl === undefined || validateUrl(payload?.fields.url))) {
-              return false
-            }
-          }
-
           toggleLink(payload)
           return true
         },

@@ -13,7 +13,6 @@ import type { LexicalField, LexicalMigrateField, RichTextField } from './payload
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { arrayDoc } from './collections/Array/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
@@ -172,7 +171,7 @@ describe('Lexical', () => {
 
       const linkNode: SerializedLinkNode = (lexical.root.children[1] as SerializedParagraphNode)
         .children[3] as SerializedLinkNode
-      expect(linkNode.fields.doc.value.items[1].text).toStrictEqual(arrayDoc.items[1].text)
+      expect(linkNode.fields.doc.value.text).toStrictEqual(textDoc.text)
     })
 
     it('should populate relationship node', async () => {

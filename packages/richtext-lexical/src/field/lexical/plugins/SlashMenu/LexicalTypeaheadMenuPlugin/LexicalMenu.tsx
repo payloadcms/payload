@@ -18,7 +18,7 @@ import {
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import type { MenuTextMatch } from '../useMenuTriggerMatch.js'
-import type { SlashMenuGroup, SlashMenuOption } from './types.js'
+import type { SlashMenuGroupInternal, SlashMenuItem, SlashMenuItemInternal } from './types.js'
 
 export type MenuResolution = {
   getRect: () => DOMRect
@@ -30,10 +30,10 @@ const baseClass = 'slash-menu-popup'
 export type MenuRenderFn = (
   anchorElementRef: MutableRefObject<HTMLElement | null>,
   itemProps: {
-    groupsWithOptions: Array<SlashMenuGroup>
-    selectOptionAndCleanUp: (selectedOption: SlashMenuOption) => void
-    selectedOptionKey: null | string
-    setSelectedOptionKey: (optionKey: string) => void
+    groups: Array<SlashMenuGroupInternal>
+    selectItemAndCleanUp: (selectedItem: SlashMenuItem) => void
+    selectedItemKey: null | string
+    setSelectedItemKey: (itemKey: string) => void
   },
   matchingString: null | string,
 ) => JSX.Element | ReactPortal | null
@@ -63,10 +63,10 @@ const scrollIntoViewIfNeeded = (target: HTMLElement) => {
  * Walk backwards along user input and forward through entity title to try
  * and replace more of the user's text with entity.
  */
-function getFullMatchOffset(documentText: string, entryText: string, offset: number): number {
+function getFullMatchOffset(documentText: string, entryText: string, offset: number) {
   let triggerOffset = offset
   for (let i = triggerOffset; i <= entryText.length; i++) {
-    if (documentText.substr(-i) === entryText.substr(0, i)) {
+    if (documentText.substring(documentText.length - i) === entryText.substring(0, i)) {
       triggerOffset = i
     }
   }
@@ -194,27 +194,27 @@ export function useDynamicPositioning(
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
   index: number
-  option: SlashMenuOption
+  item: SlashMenuItemInternal
 }> = createCommand('SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND')
 
 export function LexicalMenu({
   anchorElementRef,
   close,
   editor,
-  // groupsWithOptions filtering is already handled in SlashMenu/index.tsx. Thus, groupsWithOptions always contains the matching options.
-  groupsWithOptions,
+  // groups filtering is already handled in SlashMenu/index.tsx. Thus, groups always contains the matching items.
+  groups,
   menuRenderFn,
-  onSelectOption,
+  onSelectItem,
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
   anchorElementRef: MutableRefObject<HTMLElement>
   close: () => void
   editor: LexicalEditor
-  groupsWithOptions: Array<SlashMenuGroup>
+  groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectOption: (
-    option: SlashMenuOption,
+  onSelectItem: (
+    item: SlashMenuItem,
     textNodeContainingQuery: TextNode | null,
     closeMenu: () => void,
     matchingString: string,
@@ -222,55 +222,55 @@ export function LexicalMenu({
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
-  const [selectedOptionKey, setSelectedOptionKey] = useState<null | string>(null)
+  const [selectedItemKey, setSelectedItemKey] = useState<null | string>(null)
 
   const matchingString = (resolution.match && resolution.match.matchingString) || ''
 
-  const updateSelectedOption = useCallback(
-    (option: SlashMenuOption) => {
+  const updateSelectedItem = useCallback(
+    (item: SlashMenuItem) => {
       const rootElem = editor.getRootElement()
       if (rootElem !== null) {
-        rootElem.setAttribute('aria-activedescendant', `${baseClass}__item-${option.key}`)
-        setSelectedOptionKey(option.key)
+        rootElem.setAttribute('aria-activedescendant', `${baseClass}__item-${item.key}`)
+        setSelectedItemKey(item.key)
       }
     },
     [editor],
   )
 
-  const setSelectedOptionKeyToFirstMatchingOption = useCallback(() => {
-    // set selected option to the first of the matching ones
-    if (groupsWithOptions !== null && matchingString != null) {
-      // groupsWithOptions filtering is already handled in SlashMenu/index.tsx. Thus, groupsWithOptions always contains the matching options.
-      const allOptions = groupsWithOptions.flatMap((group) => group.options)
+  const setSelectedItemKeyToFirstMatchingItem = useCallback(() => {
+    // set selected item to the first of the matching ones
+    if (groups !== null && matchingString != null) {
+      // groups filtering is already handled in SlashMenu/index.tsx. Thus, groups always contains the matching items.
+      const allItems = groups.flatMap((group) => group.items)
 
-      if (allOptions.length) {
-        const firstMatchingOption = allOptions[0]
-        updateSelectedOption(firstMatchingOption)
+      if (allItems.length) {
+        const firstMatchingItem = allItems[0]
+        updateSelectedItem(firstMatchingItem)
       }
     }
-  }, [groupsWithOptions, updateSelectedOption, matchingString])
+  }, [groups, updateSelectedItem, matchingString])
 
   useEffect(() => {
-    setSelectedOptionKeyToFirstMatchingOption()
-  }, [matchingString, setSelectedOptionKeyToFirstMatchingOption])
+    setSelectedItemKeyToFirstMatchingItem()
+  }, [matchingString, setSelectedItemKeyToFirstMatchingItem])
 
-  const selectOptionAndCleanUp = useCallback(
-    (selectedOption: SlashMenuOption) => {
+  const selectItemAndCleanUp = useCallback(
+    (selectedItem: SlashMenuItem) => {
       editor.update(() => {
         const textNodeContainingQuery =
           resolution.match != null && shouldSplitNodeWithQuery
             ? $splitNodeContainingQuery(resolution.match)
             : null
 
-        onSelectOption(
-          selectedOption,
+        onSelectItem(
+          selectedItem,
           textNodeContainingQuery,
           close,
           resolution.match ? resolution.match.matchingString : '',
         )
       })
     },
-    [editor, shouldSplitNodeWithQuery, resolution.match, onSelectOption, close],
+    [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
   )
 
   useEffect(() => {
@@ -283,25 +283,20 @@ export function LexicalMenu({
   }, [editor])
 
   useLayoutEffect(() => {
-    if (groupsWithOptions === null) {
-      setSelectedOptionKey(null)
-    } else if (selectedOptionKey === null) {
-      setSelectedOptionKeyToFirstMatchingOption()
+    if (groups === null) {
+      setSelectedItemKey(null)
+    } else if (selectedItemKey === null) {
+      setSelectedItemKeyToFirstMatchingItem()
     }
-  }, [
-    groupsWithOptions,
-    selectedOptionKey,
-    updateSelectedOption,
-    setSelectedOptionKeyToFirstMatchingOption,
-  ])
+  }, [groups, selectedItemKey, updateSelectedItem, setSelectedItemKeyToFirstMatchingItem])
 
   useEffect(() => {
     return mergeRegister(
       editor.registerCommand(
         SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND,
-        ({ option }) => {
-          if (option.ref && option.ref.current != null) {
-            scrollIntoViewIfNeeded(option.ref.current)
+        ({ item }) => {
+          if (item.ref && item.ref.current != null) {
+            scrollIntoViewIfNeeded(item.ref.current)
             return true
           }
 
@@ -310,7 +305,7 @@ export function LexicalMenu({
         COMMAND_PRIORITY_LOW,
       ),
     )
-  }, [editor, updateSelectedOption])
+  }, [editor, updateSelectedItem])
 
   useEffect(() => {
     return mergeRegister(
@@ -318,23 +313,19 @@ export function LexicalMenu({
         KEY_ARROW_DOWN_COMMAND,
         (payload) => {
           const event = payload
-          if (
-            groupsWithOptions !== null &&
-            groupsWithOptions.length &&
-            selectedOptionKey !== null
-          ) {
-            const allOptions = groupsWithOptions.flatMap((group) => group.options)
-            const selectedIndex = allOptions.findIndex((option) => option.key === selectedOptionKey)
+          if (groups !== null && groups.length && selectedItemKey !== null) {
+            const allItems = groups.flatMap((group) => group.items)
+            const selectedIndex = allItems.findIndex((item) => item.key === selectedItemKey)
 
-            const newSelectedIndex = selectedIndex !== allOptions.length - 1 ? selectedIndex + 1 : 0
+            const newSelectedIndex = selectedIndex !== allItems.length - 1 ? selectedIndex + 1 : 0
 
-            const newSelectedOption = allOptions[newSelectedIndex]
+            const newSelectedItem = allItems[newSelectedIndex]
 
-            updateSelectedOption(newSelectedOption)
-            if (newSelectedOption.ref != null && newSelectedOption.ref.current) {
+            updateSelectedItem(newSelectedItem)
+            if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
               editor.dispatchCommand(SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND, {
                 index: newSelectedIndex,
-                option: newSelectedOption,
+                item: newSelectedItem,
               })
             }
             event.preventDefault()
@@ -348,21 +339,17 @@ export function LexicalMenu({
         KEY_ARROW_UP_COMMAND,
         (payload) => {
           const event = payload
-          if (
-            groupsWithOptions !== null &&
-            groupsWithOptions.length &&
-            selectedOptionKey !== null
-          ) {
-            const allOptions = groupsWithOptions.flatMap((group) => group.options)
-            const selectedIndex = allOptions.findIndex((option) => option.key === selectedOptionKey)
+          if (groups !== null && groups.length && selectedItemKey !== null) {
+            const allItems = groups.flatMap((group) => group.items)
+            const selectedIndex = allItems.findIndex((item) => item.key === selectedItemKey)
 
-            const newSelectedIndex = selectedIndex !== 0 ? selectedIndex - 1 : allOptions.length - 1
+            const newSelectedIndex = selectedIndex !== 0 ? selectedIndex - 1 : allItems.length - 1
 
-            const newSelectedOption = allOptions[newSelectedIndex]
+            const newSelectedItem = allItems[newSelectedIndex]
 
-            updateSelectedOption(newSelectedOption)
-            if (newSelectedOption.ref != null && newSelectedOption.ref.current) {
-              scrollIntoViewIfNeeded(newSelectedOption.ref.current)
+            updateSelectedItem(newSelectedItem)
+            if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
+              scrollIntoViewIfNeeded(newSelectedItem.ref.current)
             }
             event.preventDefault()
             event.stopImmediatePropagation()
@@ -387,18 +374,18 @@ export function LexicalMenu({
         (payload) => {
           const event = payload
 
-          if (groupsWithOptions === null || selectedOptionKey === null) {
+          if (groups === null || selectedItemKey === null) {
             return false
           }
-          const allOptions = groupsWithOptions.flatMap((group) => group.options)
-          const selectedOption = allOptions.find((option) => option.key === selectedOptionKey)
-          if (!selectedOption) {
+          const allItems = groups.flatMap((group) => group.items)
+          const selectedItem = allItems.find((item) => item.key === selectedItemKey)
+          if (!selectedItem) {
             return false
           }
 
           event.preventDefault()
           event.stopImmediatePropagation()
-          selectOptionAndCleanUp(selectedOption)
+          selectItemAndCleanUp(selectedItem)
           return true
         },
         COMMAND_PRIORITY_LOW,
@@ -406,12 +393,12 @@ export function LexicalMenu({
       editor.registerCommand(
         KEY_ENTER_COMMAND,
         (event: KeyboardEvent | null) => {
-          if (groupsWithOptions === null || selectedOptionKey === null) {
+          if (groups === null || selectedItemKey === null) {
             return false
           }
-          const allOptions = groupsWithOptions.flatMap((group) => group.options)
-          const selectedOption = allOptions.find((option) => option.key === selectedOptionKey)
-          if (!selectedOption) {
+          const allItems = groups.flatMap((group) => group.items)
+          const selectedItem = allItems.find((item) => item.key === selectedItemKey)
+          if (!selectedItem) {
             return false
           }
 
@@ -419,29 +406,22 @@ export function LexicalMenu({
             event.preventDefault()
             event.stopImmediatePropagation()
           }
-          selectOptionAndCleanUp(selectedOption)
+          selectItemAndCleanUp(selectedItem)
           return true
         },
         COMMAND_PRIORITY_LOW,
       ),
     )
-  }, [
-    selectOptionAndCleanUp,
-    close,
-    editor,
-    groupsWithOptions,
-    selectedOptionKey,
-    updateSelectedOption,
-  ])
+  }, [selectItemAndCleanUp, close, editor, groups, selectedItemKey, updateSelectedItem])
 
   const listItemProps = useMemo(
     () => ({
-      groupsWithOptions,
-      selectOptionAndCleanUp,
-      selectedOptionKey,
-      setSelectedOptionKey,
+      groups,
+      selectItemAndCleanUp,
+      selectedItemKey,
+      setSelectedItemKey,
     }),
-    [selectOptionAndCleanUp, selectedOptionKey, groupsWithOptions],
+    [selectItemAndCleanUp, selectedItemKey, groups],
   )
 
   return menuRenderFn(

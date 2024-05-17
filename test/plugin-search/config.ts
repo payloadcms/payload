@@ -1,4 +1,4 @@
-import searchPlugin from '@payloadcms/plugin-search'
+import { searchPlugin } from '@payloadcms/plugin-search'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

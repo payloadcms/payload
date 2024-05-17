@@ -1,7 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { FieldBase, Option } from 'payload/types'
+import type { Option } from 'payload/types'
 
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
@@ -16,14 +16,13 @@ import './index.scss'
 
 const baseClass = 'radio-group'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-
 import type { FormFieldBase } from '../shared/index.js'
 
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+
 export type RadioFieldProps = FormFieldBase & {
-  label?: FieldBase['label']
   layout?: 'horizontal' | 'vertical'
   name?: string
   onChange?: OnChange
@@ -139,6 +138,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
                 }}
                 option={optionIsObject(option) ? option : { label: option, value: option }}
                 path={path}
+                readOnly={readOnly}
                 uuid={uuid}
               />
             </li>

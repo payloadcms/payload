@@ -68,8 +68,6 @@ export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequestWithData, user },
   payload,
 ) => {
-  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config }))
-
   if (payload.config?.localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = payload.config.localization.defaultLocale
@@ -83,6 +81,10 @@ export const createLocalReq: CreateLocalReq = async (
       req.fallbackLocale = fallbackLocaleFromConfig || defaultLocale
     }
   }
+
+  const i18n =
+    req?.i18n ||
+    (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
   // @ts-expect-error
   if (!req.headers) req.headers = new Headers()

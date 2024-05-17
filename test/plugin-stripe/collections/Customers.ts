@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { LinkToDoc } from '../../../packages/plugin-stripe/src/ui/LinkToDoc.js'
+import { LinkToDoc } from '@payloadcms/plugin-stripe'
+
 import { customersSlug } from '../shared.js'
 
 export const Customers: CollectionConfig = {
@@ -31,13 +32,12 @@ export const Customers: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              Field: (args) =>
-                LinkToDoc({
-                  ...args,
-                  isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
-                  nameOfIDField: `${args.path}.stripeSubscriptionID`,
-                  stripeResourceType: 'subscriptions',
-                }),
+              Field: LinkToDoc,
+            },
+            custom: {
+              isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
+              nameOfIDField: `stripeSubscriptionID`,
+              stripeResourceType: 'subscriptions',
             },
           },
           label: 'Link',

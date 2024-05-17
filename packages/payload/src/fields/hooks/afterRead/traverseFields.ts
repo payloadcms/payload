@@ -11,6 +11,7 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   fieldPopulatePath?: string
   /**
@@ -38,6 +39,7 @@ export const traverseFields = ({
   currentDepth,
   depth,
   doc,
+  draft,
   fallbackLocale,
   fieldPopulatePath = '',
   fieldPromises,
@@ -63,6 +65,7 @@ export const traverseFields = ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         field,
         fieldPopulatePath,

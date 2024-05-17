@@ -23,10 +23,21 @@
     width: 150px;
 
     .thumbnail {
-      position: absolute;
+      position: relative;
       width: 100%;
       height: 100%;
       object-fit: contain;
+    }
+  }
+
+  .file-details {
+    img {
+      position: relative;
+      min-width: 100%;
+      height: 100%;
+      transform: scale(var(--file-details-thumbnail--zoom));
+      top: var(--file-details-thumbnail--top-offset);
+      left: var(--file-details-thumbnail--left-offset);
     }
   }
 

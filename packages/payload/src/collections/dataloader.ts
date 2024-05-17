@@ -56,6 +56,7 @@ const batchAndLoadDocs =
         showHiddenFields,
         select,
         populate,
+        draft,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -69,6 +70,7 @@ const batchAndLoadDocs =
         showHiddenFields,
         select,
         populate,
+        draft,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -104,6 +106,7 @@ const batchAndLoadDocs =
         showHiddenFields,
         select,
         populate,
+        draft,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -113,6 +116,7 @@ const batchAndLoadDocs =
         currentDepth,
         depth,
         disableErrors: true,
+        draft,
         fallbackLocale,
         locale,
         overrideAccess: Boolean(overrideAccess),
@@ -132,19 +136,20 @@ const batchAndLoadDocs =
       // Inject doc within docs array if index exists
 
       result.docs.forEach((doc) => {
-        const docKey = JSON.stringify([
-          req.transactionID,
-          collection,
-          doc.id,
-          depth,
+        const docKey = createDataloaderCacheKey({
+          collectionSlug: collection,
           currentDepth,
-          locale,
-          fallbackLocale,
+          depth,
+          docID: doc.id,
+          draft,
+          fallbackLocale: req.fallbackLocale,
+          locale: req.locale,
           overrideAccess,
-          showHiddenFields,
-          select,
           populate,
-        ])
+          select,
+          showHiddenFields,
+          transactionID: req.transactionID,
+        })
         const docsIndex = keys.findIndex((key) => key === docKey)
 
         if (docsIndex > -1) {
@@ -160,3 +165,40 @@ const batchAndLoadDocs =
   }
 
 export const getDataLoader = (req: PayloadRequest) => new DataLoader(batchAndLoadDocs(req))
+
+type CreateCacheKeyArgs = {
+  collectionSlug: string
+  currentDepth: number
+  depth: number
+  docID: number | string
+  draft: boolean
+  fallbackLocale: string
+  locale: string
+  overrideAccess: boolean
+  showHiddenFields: boolean
+  transactionID: number | string
+}
+export const createDataloaderCacheKey = ({
+  collectionSlug,
+  currentDepth,
+  depth,
+  docID,
+  draft,
+  fallbackLocale,
+  locale,
+  overrideAccess,
+  showHiddenFields,
+  transactionID,
+}: CreateCacheKeyArgs): string =>
+  JSON.stringify([
+    transactionID,
+    collectionSlug,
+    docID,
+    depth,
+    currentDepth,
+    locale,
+    fallbackLocale,
+    overrideAccess,
+    showHiddenFields,
+    draft,
+  ])

@@ -62,7 +62,7 @@ export const sanitizeLocales = ({
   locale,
   localization,
 }: SanitizeLocalesArgs): SanitizeLocalesReturn => {
-  if (fallbackLocale === 'none') {
+  if (['none', 'null'].includes(fallbackLocale)) {
     fallbackLocale = 'null'
   } else if (localization && !localization.localeCodes.includes(fallbackLocale)) {
     fallbackLocale = localization.defaultLocale

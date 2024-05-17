@@ -42,7 +42,7 @@ import {
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { tabHasName } from 'payload/types'
-import { toWords } from 'payload/utilities'
+import { createDataloaderCacheKey, toWords } from 'payload/utilities'
 
 import type { Context } from '../resolvers/types.js'
 
@@ -320,12 +320,23 @@ function buildObjectType({
       type = type || newlyCreatedBlockType
 
       const relationshipArgs: {
+        draft?: unknown
         fallbackLocale?: unknown
         limit?: unknown
         locale?: unknown
         page?: unknown
         where?: unknown
       } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => graphqlResult.collections[relation].config.versions?.drafts,
+      )
+
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (config.localization) {
         relationshipArgs.locale = {
@@ -350,6 +361,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           let relatedCollectionSlug = field.relationTo
+          const draft = Boolean(args.draft ?? context.req.query?.draft)
 
           if (hasManyValues) {
             const results = []
@@ -365,17 +377,18 @@ function buildObjectType({
               }
 
               const result = await context.req.payloadDataLoader.load(
-                JSON.stringify([
-                  context.req.transactionID,
-                  collectionSlug,
-                  id,
-                  0,
-                  0,
-                  locale,
+                createDataloaderCacheKey({
+                  collectionSlug: collectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
                   fallbackLocale,
-                  false,
-                  false,
-                ]),
+                  locale,
+                  overrideAccess: false,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
               )
 
               if (result) {
@@ -411,19 +424,18 @@ function buildObjectType({
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
-              JSON.stringify([
-                context.req.transactionID,
-                relatedCollectionSlug,
-                id,
-                0,
-                0,
-                locale,
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug as string,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
                 fallbackLocale,
-                false,
-                false,
-                false,
-                false,
-              ]),
+                locale,
+                overrideAccess: false,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
             )
 
             if (relatedDocument) {
@@ -478,9 +490,13 @@ function buildObjectType({
           if (editor?.populationPromises) {
             const fieldPromises = []
             const populationPromises = []
+            const populateDepth =
+              field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
             editor?.populationPromises({
               context,
-              depth,
+              depth: populateDepth,
+              draft: args.draft,
               field,
               fieldPromises,
               findMany: false,
@@ -614,22 +630,22 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           const id = value
+          const draft = Boolean(args.draft ?? context.req.query?.draft)
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
-              JSON.stringify([
-                context.req.transactionID,
-                relatedCollectionSlug,
-                id,
-                0,
-                0,
-                locale,
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
                 fallbackLocale,
-                false,
-                false,
-                false,
-                false,
-              ]),
+                locale,
+                overrideAccess: false,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
             )
 
             return relatedDocument || null

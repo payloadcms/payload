@@ -11,11 +11,11 @@ import type { Option } from './types.js'
 import type { Props as ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
-import { Chevron } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
+import { DropdownIndicator } from './DropdownIndicator/index.js'
 import { MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
@@ -43,7 +43,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isCreatable,
     isLoading,
     isSearchable = true,
-    noOptionsMessage,
+    noOptionsMessage = () => t('general:noOptions'),
     numberOnly = false,
     onChange,
     onMenuClose,
@@ -53,6 +53,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     showError,
     value,
   } = props
+
+  const loadingMessage = () => t('general:loading') + '...'
 
   const classes = [className, 'react-select', showError && 'react-select--error']
     .filter(Boolean)
@@ -71,7 +73,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         components={{
           ClearIndicator,
           Control,
-          DropdownIndicator: Chevron,
+          DropdownIndicator,
           MultiValue,
           MultiValueLabel,
           MultiValueRemove,
@@ -84,6 +86,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}
+        loadingMessage={loadingMessage}
         menuPlacement="auto"
         noOptionsMessage={noOptionsMessage}
         onChange={onChange}
@@ -141,7 +144,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       components={{
         ClearIndicator,
         Control,
-        DropdownIndicator: Chevron,
+        DropdownIndicator,
         MultiValue,
         MultiValueLabel,
         MultiValueRemove,
@@ -154,6 +157,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       isClearable={isClearable}
       isDisabled={disabled}
       isSearchable={isSearchable}
+      loadingMessage={loadingMessage}
       menuPlacement="auto"
       noOptionsMessage={noOptionsMessage}
       onChange={onChange}

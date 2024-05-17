@@ -5,7 +5,7 @@ import type {
 import type { Adapter, GeneratedAdapter } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin } from 'payload/config'
 
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateUrl } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
@@ -125,7 +125,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       }),
     }
 
-    return cloudStorage({
+    return cloudStoragePlugin({
       collections: collectionsWithAdapter,
     })(config)
   }

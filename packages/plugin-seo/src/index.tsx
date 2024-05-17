@@ -2,15 +2,15 @@ import type { Config } from 'payload/config'
 import type { Field, GroupField, TabsField, TextField } from 'payload/types'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { deepMerge } from 'payload/utilities'
-import React from 'react'
 
 import type {
   GenerateDescription,
   GenerateImage,
   GenerateTitle,
   GenerateURL,
-  PluginConfig,
+  SEOPluginConfig,
 } from './types.js'
 
 import { MetaDescription } from './fields/MetaDescription.js'
@@ -20,8 +20,8 @@ import { translations } from './translations/index.js'
 import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
 
-const seo =
-  (pluginConfig: PluginConfig) =>
+export const seoPlugin =
+  (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
     const seoFields: GroupField[] = [
       {
@@ -43,12 +43,13 @@ const seo =
             type: 'text',
             admin: {
               components: {
-                Field: (props) => (
-                  <MetaTitle
-                    {...props}
-                    hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: MetaTitle,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateTitleFn: typeof pluginConfig?.generateTitle === 'function',
+                  },
+                }),
               },
             },
             localized: true,
@@ -59,14 +60,14 @@ const seo =
             type: 'textarea',
             admin: {
               components: {
-                Field: (props) => (
-                  <MetaDescription
-                    {...props}
-                    hasGenerateDescriptionFn={
-                      typeof pluginConfig?.generateDescription === 'function'
-                    }
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: MetaDescription,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateDescriptionFn:
+                      typeof pluginConfig?.generateDescription === 'function',
+                  },
+                }),
               },
             },
             localized: true,
@@ -80,12 +81,13 @@ const seo =
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: (props) => (
-                        <MetaImage
-                          {...props}
-                          hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
-                        />
-                      ),
+                      Field: withMergedProps({
+                        Component: MetaImage,
+                        sanitizeServerOnlyProps: true,
+                        toMergeIntoProps: {
+                          hasGenerateImageFn: typeof pluginConfig?.generateImage === 'function',
+                        },
+                      }),
                     },
                     description:
                       'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
@@ -103,12 +105,13 @@ const seo =
             type: 'ui',
             admin: {
               components: {
-                Field: (props) => (
-                  <Preview
-                    {...props}
-                    hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: Preview,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateURLFn: typeof pluginConfig?.generateURL === 'function',
+                  },
+                }),
               },
             },
             label: 'Preview',
@@ -297,5 +300,3 @@ const seo =
       },
     }
   }
-
-export { seo }

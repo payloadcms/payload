@@ -16,9 +16,7 @@
   }
 
   &__quote {
-    margin: 0;
-    margin-left: 20px;
-    margin-bottom: 10px;
+    margin: 0 0 10px 20px;
     font-size: 15px;
     color: rgb(101, 103, 107);
     border-left-color: rgb(206, 208, 212);
@@ -115,9 +113,7 @@
     padding: 8px 8px 8px 52px;
     line-height: 1.53;
     font-size: 13px;
-    margin: 0;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin: 8px 0;
     tab-size: 2;
     /* white-space: pre; */
     overflow-x: auto;

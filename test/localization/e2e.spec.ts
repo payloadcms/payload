@@ -17,7 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -51,7 +51,8 @@ let payload: PayloadTestSDK<Config>
 let serverURL: string
 
 describe('Localization', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
@@ -114,7 +115,6 @@ describe('Localization', () => {
       // Add English
 
       await fillValues({ description, title })
-      await saveDocAndAssert(page)
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -240,7 +240,6 @@ describe('Localization', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.id-label')).not.toContainText(originalID)
-      await page.locator('#action-save').click()
 
       // verify that the locale did copy
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)

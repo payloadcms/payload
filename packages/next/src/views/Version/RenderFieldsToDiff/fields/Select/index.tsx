@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { SelectFieldProps } from '@payloadcms/ui/fields/Select'
 import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { OptionObject, SelectField } from 'payload/types'
@@ -35,7 +35,7 @@ const getOptionsToRender = (
 
 const getTranslatedOptions = (
   options: (OptionObject | string)[] | OptionObject | string,
-  i18n: I18n,
+  i18n: I18nClient,
 ): string => {
   if (Array.isArray(options)) {
     return options

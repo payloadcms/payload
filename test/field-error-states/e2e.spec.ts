@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 
 import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const { beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
@@ -15,7 +16,8 @@ describe('field error states', () => {
   let serverURL: string
   let page: Page
 
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     const context = await browser.newContext()
     page = await context.newPage()

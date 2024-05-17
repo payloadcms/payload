@@ -73,7 +73,7 @@ describe('Versions', () => {
         title: 'Here is an autosave post in EN',
       },
     })
-    collectionLocalPostID = autosavePost.id as string
+    collectionLocalPostID = autosavePost.id
 
     await payload.update({
       id: collectionLocalPostID,
@@ -910,6 +910,36 @@ describe('Versions', () => {
       })
 
       expect(byID.docs).toHaveLength(1)
+    })
+
+    it('should be able to query by id AND any other field with draft=true', async () => {
+      const allDocs = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+      })
+
+      expect(allDocs.docs.length).toBeGreaterThan(1)
+
+      const results = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          and: [
+            {
+              id: {
+                not_in: allDocs.docs[0].id,
+              },
+            },
+            {
+              title: {
+                like: 'Published',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(results.docs).toHaveLength(1)
     })
   })
 
