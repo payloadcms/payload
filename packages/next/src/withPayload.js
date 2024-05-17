@@ -16,16 +16,16 @@ export const withPayload = (nextConfig = {}) => {
           'libsql',
         ],
       },
-      serverComponentsExternalPackages: [
-        ...(nextConfig?.experimental?.serverComponentsExternalPackages || []),
-        'drizzle-kit',
-        'drizzle-kit/payload',
-        'libsql',
-        'pino',
-        'pino-pretty',
-        'graphql',
-      ],
     },
+    serverExternalPackages: [
+      ...(nextConfig?.serverExternalPackages || []),
+      'drizzle-kit',
+      'drizzle-kit/payload',
+      'libsql',
+      'pino',
+      'pino-pretty',
+      'graphql',
+    ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
         typeof nextConfig.webpack === 'function'

@@ -1,5 +1,4 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -42,6 +41,7 @@ import {
   customParamViewPath,
   customViewPath,
 } from './shared.js'
+
 export default buildConfigWithDefaults({
   admin: {
     components: {
@@ -83,6 +83,12 @@ export default buildConfigWithDefaults({
     },
     routes: customAdminRoutes,
     meta: {
+      titleSuffix: '- Custom CMS',
+      description: 'This is a custom meta description',
+      openGraph: {
+        title: 'This is a custom OG title',
+        description: 'This is a custom OG description',
+      },
       icons: [
         {
           type: 'image/png',

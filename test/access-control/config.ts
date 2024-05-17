@@ -4,8 +4,10 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { TestButton } from './TestButton.js'
 import {
+  createNotUpdateSlug,
   docLevelAccessSlug,
   firstArrayText,
+  fullyRestrictedSlug,
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
@@ -15,7 +17,6 @@ import {
   readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
-  restrictedSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
@@ -203,10 +204,16 @@ export default buildConfigWithDefaults({
           relationTo: userRestrictedSlug,
           hasMany: true,
         },
+        {
+          name: 'createNotUpdateDocs',
+          type: 'relationship',
+          relationTo: 'create-not-update',
+          hasMany: true,
+        },
       ],
     },
     {
-      slug: restrictedSlug,
+      slug: fullyRestrictedSlug,
       fields: [
         {
           name: 'name',
@@ -254,6 +261,24 @@ export default buildConfigWithDefaults({
             equals: req.user?.email,
           },
         }),
+        delete: () => false,
+      },
+    },
+    {
+      slug: createNotUpdateSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        create: () => true,
+        read: () => true,
+        update: () => false,
         delete: () => false,
       },
     },

@@ -7,8 +7,9 @@ export const generateCreateFirstUserMetadata: GenerateViewMetadata = async ({
   i18n: { t },
 }) =>
   meta({
-    config,
     description: t('authentication:createFirstUser'),
     keywords: t('general:create'),
+    serverURL: config.serverURL,
     title: t('authentication:createFirstUser'),
+    ...(config.admin.meta || {}),
   })

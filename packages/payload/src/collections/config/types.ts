@@ -18,6 +18,7 @@ import type {
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
+  OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -282,6 +283,10 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
+  meta?: {
+    description?: string
+    openGraph?: OpenGraphConfig
+  }
   pagination?: {
     defaultLimit?: number
     limits?: number[]

@@ -42,17 +42,19 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
         INSERT_UPLOAD_COMMAND,
         (payload: InsertUploadPayload) => {
           editor.update(() => {
-            const uploadNode = $createUploadNode({
-              data: {
-                fields: payload.fields,
-                relationTo: payload.relationTo,
-                value: payload.value,
-              },
-            })
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const uploadNode = $createUploadNode({
+                data: {
+                  fields: payload.fields,
+                  relationTo: payload.relationTo,
+                  value: payload.value,
+                },
+              })
+              // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+              $insertNodeToNearestRoot(uploadNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -68,8 +70,6 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(uploadNode)
             }
           })
 

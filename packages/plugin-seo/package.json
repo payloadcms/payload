@@ -51,14 +51,15 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@types/react": "18.2.74",
+    "@types/react": "18.3.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
   },
   "publishConfig": {
     "exports": {

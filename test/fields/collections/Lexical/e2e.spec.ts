@@ -73,7 +73,7 @@ describe('lexical', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsLexicalTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
@@ -86,7 +86,10 @@ describe('lexical', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsLexicalTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: [
+        path.resolve(dirname, './collections/Upload/uploads'),
+        path.resolve(dirname, './collections/Upload2/uploads2'),
+      ],
     })
 
     if (client) {
@@ -354,6 +357,85 @@ describe('lexical', () => {
     })
 
     await expect(reactSelect.locator('.rs__value-container').first()).toHaveText('Option 3')
+  })
+
+  // This reproduces an issue where if you create an upload node, the document drawer opens, you select a collection other than the default one, create a NEW upload document and save, it throws a lexical error
+  test('ensure creation of new upload document within upload node works', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const lastParagraph = richTextField.locator('p').last()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    /**
+     * Create new upload node
+     */
+    // type / to open the slash menu
+    await lastParagraph.click()
+    await page.keyboard.press('/')
+    await page.keyboard.type('Upload')
+
+    // Create Upload node
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const uploadSelectButton = slashMenuPopover.locator('button').nth(1)
+    await expect(uploadSelectButton).toBeVisible()
+    await expect(uploadSelectButton).toContainText('Upload')
+    await uploadSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    await wait(500) // wait for drawer form state to initialize (it's a flake)
+    const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+    await expect(uploadListDrawer).toBeVisible()
+    await wait(500)
+
+    await uploadListDrawer.locator('.rs__control .value-container').first().click()
+    await wait(500)
+    await expect(uploadListDrawer.locator('.rs__option').nth(1)).toBeVisible()
+    await expect(uploadListDrawer.locator('.rs__option').nth(1)).toContainText('Upload 2')
+    await uploadListDrawer.locator('.rs__option').nth(1).click()
+
+    // wait till the text appears in uploadListDrawer: "No Uploads 2 found. Either no Uploads 2 exist yet or none match the filters you've specified above."
+    await expect(
+      uploadListDrawer.getByText(
+        "No Uploads 2 found. Either no Uploads 2 exist yet or none match the filters you've specified above.",
+      ),
+    ).toBeVisible()
+
+    await uploadListDrawer.getByText('Create New').first().click()
+    const createUploadDrawer = page.locator('dialog[id^=doc-drawer_uploads2_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+    await expect(createUploadDrawer).toBeVisible()
+    await wait(500)
+
+    const input = createUploadDrawer.locator('.file-field__upload input[type="file"]').first()
+    await expect(input).toBeAttached()
+
+    await input.setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
+    await expect(createUploadDrawer.locator('.file-field .file-field__filename')).toHaveValue(
+      'payload.jpg',
+    )
+    await wait(500)
+    await createUploadDrawer.getByText('Save').first().click()
+    await expect(createUploadDrawer).toBeHidden()
+    await expect(uploadListDrawer).toBeHidden()
+    await wait(500)
+    await saveDocAndAssert(page)
+
+    // second one should be the newly created one
+    const secondUploadNode = richTextField.locator('.lexical-upload').nth(1)
+    await secondUploadNode.scrollIntoViewIfNeeded()
+    await expect(secondUploadNode).toBeVisible()
+
+    await expect(secondUploadNode.locator('.lexical-upload__bottomRow')).toContainText(
+      'payload.jpg',
+    )
+    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toContainText(
+      'Upload 2',
+    )
   })
 
   describe('nested lexical editor in block', () => {
@@ -850,7 +932,7 @@ describe('lexical', () => {
 
         const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
         const richTextBlock: SerializedBlockNode = lexicalField.root
-          .children[12] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const subRichTextBlock: SerializedBlockNode = richTextBlock.fields.richTextField.root
           .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
@@ -894,7 +976,7 @@ describe('lexical', () => {
 
         const lexicalField2: SerializedEditorState = lexicalDocDepth1.lexicalWithBlocks
         const richTextBlock2: SerializedBlockNode = lexicalField2.root
-          .children[12] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const subRichTextBlock2: SerializedBlockNode = richTextBlock2.fields.richTextField.root
           .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 

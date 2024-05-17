@@ -1,5 +1,3 @@
-import type express from 'express'
-import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
@@ -101,7 +99,6 @@ export type UploadConfig = {
   mimeTypes?: string[]
   resizeOptions?: ResizeOptions
   staticDir?: string
-  staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   trimOptions?: ImageUploadTrimOptions
 }
 

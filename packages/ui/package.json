@@ -111,7 +111,7 @@
     "react-datepicker": "6.2.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.7.4",
-    "react-toastify": "10.0.4",
+    "react-toastify": "10.0.5",
     "use-context-selector": "1.4.1",
     "uuid": "9.0.1"
   },
@@ -119,9 +119,9 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",
-    "@types/react": "18.2.74",
+    "@types/react": "18.3.2",
     "@types/react-datepicker": "4.11.2",
-    "@types/react-dom": "18.2.24",
+    "@types/react-dom": "18.3.0",
     "@types/uuid": "8.3.4",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
@@ -137,10 +137,10 @@
     "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
-    "next": "^14.3.0-canary.7",
+    "next": "^14.3.0-canary.68",
     "payload": "workspace:*",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
   },
   "engines": {
     "node": ">=18.20.2"
