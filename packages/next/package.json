@@ -56,15 +56,15 @@
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",
-    "react-toastify": "8.2.0",
+    "react-toastify": "10.0.5",
     "sass": "^1.71.1",
     "ws": "^8.16.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "18.2.74",
-    "@types/react-dom": "18.2.24",
+    "@types/react": "18.3.2",
+    "@types/react-dom": "18.3.0",
     "@types/ws": "^8.5.10",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
@@ -81,7 +81,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^14.3.0-canary.7",
+    "next": "^14.3.0-canary.68",
     "payload": "workspace:*"
   },
   "engines": {
