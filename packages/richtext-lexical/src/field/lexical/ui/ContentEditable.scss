@@ -1,3 +1,5 @@
+@import '../../../scss/styles.scss';
+
 .ContentEditable__root {
   border: 0;
   font-size: 15px;
@@ -6,6 +8,7 @@
   tab-size: 1;
   outline: 0;
   padding-top: 8px;
+  min-height: base(10);
 
   &:focus-visible {
     outline: none !important;
@@ -19,7 +22,7 @@
 
 @media (max-width: 1025px) {
   .ContentEditable__root {
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
