@@ -299,7 +299,8 @@ jobs:
           - fields__collections__Array
           - fields__collections__Relationship
           - fields__collections__RichText
-          - fields__collections__Lexical
+          - fields__collections__Lexical__e2e_main
+          - fields__collections__Lexical__e2e_blocks
           - fields__collections__Date
           - fields__collections__Number
           - fields__collections__Point
