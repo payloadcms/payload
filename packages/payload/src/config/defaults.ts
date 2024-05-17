@@ -8,6 +8,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
     meta: {
+      defaultOGImageType: 'dynamic',
       titleSuffix: '- Payload',
     },
     routes: {

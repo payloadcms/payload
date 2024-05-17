@@ -1,24 +1,29 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { SanitizedConfig } from 'payload/types'
+import type { MetaConfig } from 'payload/config'
 
-import { payloadFaviconDark, payloadFaviconLight, payloadOgImage } from '@payloadcms/ui/assets'
+import { staticOGImage } from '@payloadcms/ui/assets'
+import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
+import QueryString from 'qs'
 
-export const meta = async (args: {
-  config: SanitizedConfig
-  description?: string
-  keywords?: string
-  title: string
-}): Promise<Metadata> => {
-  const { config, description = '', keywords = 'CMS, Admin, Dashboard', title } = args
+const defaultOpenGraph = {
+  description:
+    'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
+  siteName: 'Payload App',
+  title: 'Payload App',
+}
 
-  const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
-
-  const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
-
-  const customIcons = config.admin.meta.icons as Metadata['icons']
-
-  let icons = customIcons ?? []
+export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
+  const {
+    defaultOGImageType,
+    description,
+    icons: customIcons,
+    keywords,
+    openGraph: openGraphFromProps,
+    serverURL,
+    title,
+    titleSuffix,
+  } = args
 
   const payloadIcons: Icon[] = [
     {
@@ -36,8 +41,52 @@ export const meta = async (args: {
     },
   ]
 
+  let icons = customIcons ?? payloadIcons // TODO: fix this type assertion
+
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = payloadIcons.concat(customIcons)
+    icons = payloadIcons.concat(customIcons) // TODO: fix this type assertion
+  }
+
+  const metaTitle = `${title} ${titleSuffix}`
+
+  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
+
+  const mergedOpenGraph: Metadata['openGraph'] = {
+    ...(defaultOpenGraph || {}),
+    ...(defaultOGImageType === 'dynamic'
+      ? {
+          images: [
+            {
+              alt: ogTitle,
+              height: 630,
+              url: `/api/og${QueryString.stringify(
+                {
+                  description: openGraphFromProps?.description || defaultOpenGraph.description,
+                  title: ogTitle,
+                },
+                {
+                  addQueryPrefix: true,
+                },
+              )}`,
+              width: 1200,
+            },
+          ],
+        }
+      : {}),
+    ...(defaultOGImageType === 'static'
+      ? {
+          images: [
+            {
+              alt: ogTitle,
+              height: 480,
+              url: staticOGImage.src,
+              width: 640,
+            },
+          ],
+        }
+      : {}),
+    title: ogTitle,
+    ...(openGraphFromProps || {}),
   }
 
   return Promise.resolve({
@@ -45,23 +94,11 @@ export const meta = async (args: {
     icons,
     keywords,
     metadataBase: new URL(
-      config?.serverURL ||
+      serverURL ||
         process.env.PAYLOAD_PUBLIC_SERVER_URL ||
         `http://localhost:${process.env.PORT || 3000}`,
     ),
-    openGraph: {
-      type: 'website',
-      description,
-      images: [
-        {
-          alt: `${title} ${titleSuffix}`,
-          height: 630,
-          url: ogImage,
-          width: 1200,
-        },
-      ],
-      title: `${title} ${titleSuffix}`,
-    },
-    title: `${title} ${titleSuffix}`,
+    openGraph: mergedOpenGraph,
+    title: metaTitle,
   })
 }

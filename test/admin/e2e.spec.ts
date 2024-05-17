@@ -15,7 +15,6 @@ import {
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
-  login,
   openDocControls,
   openDocDrawer,
   openNav,
@@ -117,7 +116,12 @@ describe('admin', () => {
   })
 
   describe('metadata', () => {
-    test('should set Payload favicons', async () => {
+    test('should render custom page title suffix', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
+    })
+
+    test('should render payload favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
@@ -130,13 +134,90 @@ describe('admin', () => {
       )
     })
 
-    test('should inject custom favicons', async () => {
+    test('should render custom meta description from root config', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+        'content',
+        /This is a custom meta description/,
+      )
+    })
+
+    test('should render custom meta description from collection config', async () => {
+      await page.goto(postsUrl.collection(postsCollectionSlug))
+      await page.locator('.collection-list .table a').first().click()
+
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+        'content',
+        /This is a custom meta description for posts/,
+      )
+    })
+
+    test('should render custom favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
       await expect(favicons).toHaveCount(4)
       await expect(favicons.nth(2)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
       await expect(favicons.nth(3)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
       await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+    })
+
+    test('should render custom og:title from root config', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        'content',
+        /This is a custom OG title/,
+      )
+    })
+
+    test('should render custom og:description from root config', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+        'content',
+        /This is a custom OG description/,
+      )
+    })
+
+    test('should render custom og:title from collection config', async () => {
+      await page.goto(postsUrl.collection(postsCollectionSlug))
+      await page.locator('.collection-list .table a').first().click()
+
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        'content',
+        /This is a custom OG title for posts/,
+      )
+    })
+
+    test('should render custom og:description from collection config', async () => {
+      await page.goto(postsUrl.collection(postsCollectionSlug))
+      await page.locator('.collection-list .table a').first().click()
+
+      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+        'content',
+        /This is a custom OG description for posts/,
+      )
+    })
+
+    test('should render og:image with dynamic URL', async () => {
+      await page.goto(postsUrl.admin)
+      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+        'content',
+        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+      )
+    })
+
+    test('should render twitter:image with dynamic URL', async () => {
+      await page.goto(postsUrl.admin)
+
+      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+      await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+        'content',
+        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+      )
     })
   })
 
