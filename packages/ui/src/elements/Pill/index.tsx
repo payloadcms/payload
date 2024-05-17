@@ -108,7 +108,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
-      href={to || ''}
+      href={to || null}
       onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >

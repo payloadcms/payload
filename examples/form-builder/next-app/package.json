@@ -20,7 +20,7 @@
     "@payloadcms/richtext-lexical": "beta",
     "escape-html": "^1.0.3",
     "graphql": "^16.8.1",
-    "next": "^14.3.0-canary.50",
+    "next": "^14.3.0-canary.68",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.41.0",

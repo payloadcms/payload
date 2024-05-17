@@ -55,7 +55,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
     "@types/express": "^4.17.21",
-    "@types/react": "18.2.74",
+    "@types/react": "18.3.2",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "nodemon": "3.0.3",
@@ -64,7 +64,8 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
   },
   "publishConfig": {
     "exports": {

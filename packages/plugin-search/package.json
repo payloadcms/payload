@@ -50,12 +50,13 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
-    "@types/react": "18.2.74",
+    "@types/react": "18.3.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
   },
   "publishConfig": {
     "exports": {
