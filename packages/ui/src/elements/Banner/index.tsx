@@ -55,7 +55,7 @@ export const Banner: React.FC<Props> = ({
   if (to) RenderedType = Link
 
   return (
-    <RenderedType className={classes} href={to || ''} onClick={onClick}>
+    <RenderedType className={classes} href={to || null} onClick={onClick}>
       {icon && alignIcon === 'left' && <React.Fragment>{icon}</React.Fragment>}
       <span className={`${baseClass}__content`}>{children}</span>
       {icon && alignIcon === 'right' && <React.Fragment>{icon}</React.Fragment>}
