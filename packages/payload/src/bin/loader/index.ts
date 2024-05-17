@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'url'
 
 import { CLIENT_EXTENSIONS } from './clientExtensions.js'
 import { compile } from './compile.js'
+import { specifiersToIgnore } from './ignores.js'
 import { resolveOriginalPath } from './resolveOriginalPath.js'
 
 interface ResolveContext {
@@ -55,13 +56,15 @@ const TS_EXTENSIONS: string[] = [
 export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   const isTS = TS_EXTENSIONS.some((ext) => specifier.endsWith(ext))
   const isClient = CLIENT_EXTENSIONS.some((ext) => specifier.endsWith(ext))
+  const shouldIgnore = specifiersToIgnore.includes(specifier)
 
-  // If a client file is resolved, we'll set `format: client`
+  // If it's a client file, or a file to be ignored is resolved,
+  // we'll set `format: 'ignore'`
   // and short circuit, so the load step
   // will return source code of empty object
-  if (isClient) {
+  if (isClient || shouldIgnore) {
     return {
-      format: 'client',
+      format: 'ignore',
       shortCircuit: true,
       // No need to resolve the URL using nextResolve. We ignore client files anyway.
       // Additionally, nextResolve throws an error if the URL is a TS path, so we'd have to use TypeScript's resolveModuleName to resolve the URL, which is unnecessary
@@ -147,7 +150,7 @@ const swcOptions = {
   paths: undefined,
 }
 export const load: LoadFn = async (url, context, nextLoad) => {
-  if (context.format === 'client') {
+  if (context.format === 'ignore') {
     const rawSource = 'export default {}'
 
     return {
