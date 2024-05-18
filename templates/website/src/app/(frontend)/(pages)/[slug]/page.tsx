@@ -39,14 +39,14 @@ export default async function Page({ params: { slug = 'home' } }) {
   const { hero, layout } = page
 
   return (
-    <React.Fragment>
+    <article className="pt-16 pb-24">
       <PayloadRedirects url={url} />
       <Hero {...hero} />
       <Blocks
         blocks={layout}
         disableTopPadding={!hero || hero?.type === 'none' || hero?.type === 'lowImpact'}
       />
-    </React.Fragment>
+    </article>
   )
 }
 

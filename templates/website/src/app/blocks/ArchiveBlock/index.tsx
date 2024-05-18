@@ -4,7 +4,6 @@ import RichText from 'src/app/components/RichText'
 import type { ArchiveBlockProps } from './types'
 
 import { CollectionArchive } from '../../components/CollectionArchive'
-import { Gutter } from '../../components/Gutter'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {

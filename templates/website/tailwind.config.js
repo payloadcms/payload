@@ -9,7 +9,7 @@ module.exports = {
   darkMode: ['selector', '[data-theme="dark"]'],
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
   prefix: '',
-  safelist: ['col-span-4', 'col-span-6', 'col-span-8', 'col-span-12'],
+  safelist: ['lg:col-span-4', 'lg:col-span-6', 'lg:col-span-8', 'lg:col-span-12'],
   theme: {
     container: {
       center: true,

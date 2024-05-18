@@ -4,7 +4,6 @@ import RichText from 'src/app/components/RichText'
 import type { Post } from '../../../payload-types'
 
 import { Card } from '../../components/Card'
-import { Gutter } from '../../components/Gutter'
 
 export type RelatedPostsProps = {
   blockName: string

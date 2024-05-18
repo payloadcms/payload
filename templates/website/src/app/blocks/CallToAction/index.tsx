@@ -11,7 +11,7 @@ export const CallToActionBlock: React.FC<
   Props & {
     id?: string
   }
-> = ({ invertBackground, links, richText }) => {
+> = ({ links, richText }) => {
   return (
     <div className="container">
       <div className="classes.wrap">

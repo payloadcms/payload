@@ -6,7 +6,6 @@ import RichText from 'src/app/components/RichText'
 
 import type { Page } from '../../../payload-types'
 
-import { Gutter } from '../../components/Gutter'
 import { Media } from '../../components/Media'
 
 type Props = Extract<Page['layout'][0], { blockType: 'mediaBlock' }> & {
