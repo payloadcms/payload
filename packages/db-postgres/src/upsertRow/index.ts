@@ -20,6 +20,7 @@ export const upsertRow = async <T extends TypeWithID>({
   data,
   db,
   fields,
+  ignoreResult,
   operation,
   path = '',
   req,
@@ -322,6 +323,8 @@ export const upsertRow = async <T extends TypeWithID>({
         )
       : error
   }
+
+  if (ignoreResult) return data as T
 
   // //////////////////////////////////
   // RETRIEVE NEWLY UPDATED ROW

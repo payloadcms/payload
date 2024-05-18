@@ -45,27 +45,29 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
       rootTableName: tableName,
     })
 
-    await createColumns({
-      columnsToCreate,
-      db,
-      debug,
-      dryRun,
-      payload,
-    })
+    if (columnsToCreate) {
+      await createColumns({
+        columnsToCreate,
+        db,
+        debug,
+        dryRun,
+        payload,
+      })
 
-    await migrateRelationships({
-      adapter,
-      collectionSlug: collection.slug,
-      db,
-      debug,
-      dryRun,
-      fields: collection.fields,
-      isVersions: false,
-      pathsToQuery,
-      payload,
-      req,
-      tableName,
-    })
+      await migrateRelationships({
+        adapter,
+        collectionSlug: collection.slug,
+        db,
+        debug,
+        dryRun,
+        fields: collection.fields,
+        isVersions: false,
+        pathsToQuery,
+        payload,
+        req,
+        tableName,
+      })
+    }
 
     if (collection.versions) {
       const versionsTableName = adapter.tableNameMap.get(
@@ -93,27 +95,29 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
         rootTableName: versionsTableName,
       })
 
-      await createColumns({
-        columnsToCreate: versionColumnsToCreate,
-        db,
-        debug,
-        dryRun,
-        payload,
-      })
+      if (versionColumnsToCreate.length) {
+        await createColumns({
+          columnsToCreate: versionColumnsToCreate,
+          db,
+          debug,
+          dryRun,
+          payload,
+        })
 
-      await migrateRelationships({
-        adapter,
-        collectionSlug: collection.slug,
-        db,
-        debug,
-        dryRun,
-        fields: versionFields,
-        isVersions: true,
-        pathsToQuery: versionPathsToQuery,
-        payload,
-        req,
-        tableName: versionsTableName,
-      })
+        await migrateRelationships({
+          adapter,
+          collectionSlug: collection.slug,
+          db,
+          debug,
+          dryRun,
+          fields: versionFields,
+          isVersions: true,
+          pathsToQuery: versionPathsToQuery,
+          payload,
+          req,
+          tableName: versionsTableName,
+        })
+      }
     }
   }
 
@@ -140,27 +144,29 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
       rootTableName: tableName,
     })
 
-    await createColumns({
-      columnsToCreate,
-      db,
-      debug,
-      dryRun,
-      payload,
-    })
+    if (columnsToCreate.length) {
+      await createColumns({
+        columnsToCreate,
+        db,
+        debug,
+        dryRun,
+        payload,
+      })
 
-    await migrateRelationships({
-      adapter,
-      db,
-      debug,
-      dryRun,
-      fields: global.fields,
-      globalSlug: global.slug,
-      isVersions: false,
-      pathsToQuery,
-      payload,
-      req,
-      tableName,
-    })
+      await migrateRelationships({
+        adapter,
+        db,
+        debug,
+        dryRun,
+        fields: global.fields,
+        globalSlug: global.slug,
+        isVersions: false,
+        pathsToQuery,
+        payload,
+        req,
+        tableName,
+      })
+    }
 
     if (global.versions) {
       const versionsTableName = adapter.tableNameMap.get(
@@ -189,27 +195,29 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
         rootTableName: versionsTableName,
       })
 
-      await createColumns({
-        columnsToCreate: versionColumnsToCreate,
-        db,
-        debug,
-        dryRun,
-        payload,
-      })
+      if (versionColumnsToCreate.length) {
+        await createColumns({
+          columnsToCreate: versionColumnsToCreate,
+          db,
+          debug,
+          dryRun,
+          payload,
+        })
 
-      await migrateRelationships({
-        adapter,
-        db,
-        debug,
-        dryRun,
-        fields: versionFields,
-        globalSlug: global.slug,
-        isVersions: true,
-        pathsToQuery: versionPathsToQuery,
-        payload,
-        req,
-        tableName: versionsTableName,
-      })
+        await migrateRelationships({
+          adapter,
+          db,
+          debug,
+          dryRun,
+          fields: versionFields,
+          globalSlug: global.slug,
+          isVersions: true,
+          pathsToQuery: versionPathsToQuery,
+          payload,
+          req,
+          tableName: versionsTableName,
+        })
+      }
     }
   }
 }
