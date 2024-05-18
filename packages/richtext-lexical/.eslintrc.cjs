@@ -4,4 +4,7 @@ module.exports = {
     project: ['./tsconfig.json'],
     tsconfigRootDir: __dirname,
   },
+  extends: [
+    'plugin:@lexical/recommended'
+  ],
 }

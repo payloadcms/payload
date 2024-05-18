@@ -1,8 +1,15 @@
-export const clientTranslationKeys = [
+import type { DefaultTranslationKeys } from './types.js'
+
+function createClientTranslationKeys<T extends DefaultTranslationKeys[]>(keys: T) {
+  return keys
+}
+
+export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:account',
   'authentication:accountOfCurrentUser',
   'authentication:alreadyActivated',
   'authentication:alreadyLoggedIn',
+  'authentication:authenticated',
   'authentication:backToLogin',
   'authentication:beginCreateFirstUser',
   'authentication:changePassword',
@@ -21,6 +28,7 @@ export const clientTranslationKeys = [
   'authentication:forgotPasswordQuestion',
   'authentication:generate',
   'authentication:generateNewAPIKey',
+  'authentication:generatingNewAPIKeyWillInvalidate',
   'authentication:logBackIn',
   'authentication:loggedOutInactivity',
   'authentication:loggedOutSuccessfully',
@@ -62,6 +70,7 @@ export const clientTranslationKeys = [
   'error:unknown',
   'error:unspecific',
   'error:tokenNotProvided',
+  'error:unPublishingDocument',
 
   'fields:addLabel',
   'fields:addLink',
@@ -74,8 +83,13 @@ export const clientTranslationKeys = [
   'fields:blockType',
   'fields:chooseBetweenCustomTextOrDocument',
   'fields:customURL',
+  'fields:chooseDocumentToLink',
+  'fields:openInNewTab',
+  'fields:enterURL',
   'fields:internalLink',
   'fields:chooseFromExisting',
+  'fields:linkType',
+  'fields:textToDisplay',
   'fields:collapseAll',
   'fields:editLink',
   'fields:editRelationship',
@@ -120,6 +134,7 @@ export const clientTranslationKeys = [
   'general:copy',
   'general:create',
   'general:created',
+  'general:createdAt',
   'general:createNew',
   'general:createNewLabel',
   'general:creating',
@@ -128,9 +143,11 @@ export const clientTranslationKeys = [
   'general:dark',
   'general:dashboard',
   'general:delete',
+  'general:deletedSuccessfully',
   'general:deletedCountSuccessfully',
   'general:deleting',
   'general:descending',
+  'general:depth',
   'general:deselectAllRows',
   'general:document',
   'general:documents',
@@ -197,7 +214,7 @@ export const clientTranslationKeys = [
   'general:submit',
   'general:success',
   'general:successfullyCreated',
-  'general:successfullyDeleted',
+  'general:successfullyDuplicated',
   'general:thisLanguage',
   'general:titleDeleted',
   'general:true',
@@ -238,7 +255,10 @@ export const clientTranslationKeys = [
   'upload:setCropArea',
   'upload:setFocalPoint',
   'upload:sizesFor',
+  'upload:sizes',
   'upload:width',
+  'upload:fileName',
+  'upload:fileSize',
 
   'validation:emailAddress',
   'validation:fieldHasNo',
@@ -256,6 +276,7 @@ export const clientTranslationKeys = [
   'version:aboutToUnpublishSelection',
   'version:autosave',
   'version:autosavedSuccessfully',
+  'version:autosavedVersion',
   'version:changed',
   'version:confirmRevertToSaved',
   'version:compareVersion',
@@ -276,6 +297,7 @@ export const clientTranslationKeys = [
   'version:restoredSuccessfully',
   'version:restoreThisVersion',
   'version:restoring',
+  'version:reverting',
   'version:revertToPublished',
   'version:saveDraft',
   'version:selectLocales',
@@ -293,4 +315,4 @@ export const clientTranslationKeys = [
   'version:viewingVersionGlobal',
   'version:viewingVersions',
   'version:viewingVersionsGlobal',
-]
+])

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-redirects",
-  "version": "3.0.0-beta.25",
+  "version": "3.0.0-beta.32",
   "description": "Redirects plugin for Payload",
   "keywords": [
     "payload",
@@ -49,18 +49,13 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
-    "@types/react": "18.2.74",
+    "@types/react": "18.3.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"
   },
   "publishConfig": {
-    "./*": {
-      "import": "./dist/exports/*.js",
-      "require": "./dist/exports/*.js",
-      "types": "./dist/exports/*.d.ts"
-    },
     "exports": {
       ".": {
         "import": "./dist/index.js",

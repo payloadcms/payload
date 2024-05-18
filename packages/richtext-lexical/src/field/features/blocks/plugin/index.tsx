@@ -10,6 +10,8 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
+import type { PluginComponent } from '../../types.js'
+import type { BlocksFeatureClientProps } from '../feature.client.js'
 import type { BlockFields } from '../nodes/BlocksNode.js'
 
 import { BlocksDrawerComponent } from '../drawer/index.js'
@@ -18,7 +20,7 @@ import { INSERT_BLOCK_COMMAND } from './commands.js'
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
-export function BlocksPlugin(): React.ReactNode {
+export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
@@ -31,11 +33,13 @@ export function BlocksPlugin(): React.ReactNode {
         INSERT_BLOCK_COMMAND,
         (payload: InsertBlockPayload) => {
           editor.update(() => {
-            const blockNode = $createBlockNode(payload)
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const blockNode = $createBlockNode(payload)
+              // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+              $insertNodeToNearestRoot(blockNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -51,8 +55,6 @@ export function BlocksPlugin(): React.ReactNode {
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(blockNode)
             }
           })
 

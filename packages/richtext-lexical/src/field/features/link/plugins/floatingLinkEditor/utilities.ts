@@ -1,5 +1,5 @@
 import type { SanitizedConfig } from 'payload/config'
-import type { FieldWithRichTextRequiredEditor } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { getBaseFields } from '../../drawer/baseFields.js'
 
@@ -8,24 +8,21 @@ import { getBaseFields } from '../../drawer/baseFields.js'
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: {
-        config: SanitizedConfig
-        defaultFields: FieldWithRichTextRequiredEditor[]
-      }) => FieldWithRichTextRequiredEditor[])
-    | FieldWithRichTextRequiredEditor[],
+    | ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[])
+    | Field[],
   config: SanitizedConfig,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
   maxDepth?: number,
-): FieldWithRichTextRequiredEditor[] {
-  const baseFields: FieldWithRichTextRequiredEditor[] = getBaseFields(
+): Field[] {
+  const baseFields: Field[] = getBaseFields(
     config,
     enabledCollections,
     disabledCollections,
     maxDepth,
   )
 
-  let fields: FieldWithRichTextRequiredEditor[]
+  let fields: Field[]
 
   if (typeof customFieldSchema === 'function') {
     fields = customFieldSchema({ config, defaultFields: baseFields })

@@ -1,12 +1,5 @@
 import type { Config } from 'payload/config'
-import type {
-  Field,
-  FieldWithRichTextRequiredEditor,
-  FileData,
-  FileSize,
-  Payload,
-  TypeWithID,
-} from 'payload/types'
+import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
 import { sanitizeFields } from 'payload/config'
@@ -21,9 +14,9 @@ import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
-  collections: {
+  collections?: {
     [collection: string]: {
-      fields: FieldWithRichTextRequiredEditor[]
+      fields: Field[]
     }
   }
   /**
@@ -50,7 +43,9 @@ export const UploadFeature: FeatureProviderProviderServer<
     props = { collections: {} }
   }
 
-  const clientProps: UploadFeaturePropsClient = { collections: {} }
+  const clientProps: UploadFeaturePropsClient = {
+    collections: {},
+  }
   if (props.collections) {
     for (const collection in props.collections) {
       clientProps.collections[collection] = {
@@ -60,17 +55,17 @@ export const UploadFeature: FeatureProviderProviderServer<
   }
 
   return {
-    feature: async ({ config: _config }) => {
+    feature: async ({ config: _config, isRoot }) => {
       const validRelationships = _config.collections.map((c) => c.slug) || []
 
       for (const collection in props.collections) {
         if (props.collections[collection].fields?.length) {
-          props.collections[collection].fields = (await sanitizeFields({
+          props.collections[collection].fields = await sanitizeFields({
             config: _config as unknown as Config,
             fields: props.collections[collection].fields,
-            requireFieldLevelRichTextEditor: true,
+            requireFieldLevelRichTextEditor: isRoot,
             validRelationships,
-          })) as FieldWithRichTextRequiredEditor[]
+          })
         }
       }
 

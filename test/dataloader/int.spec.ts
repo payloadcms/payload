@@ -136,6 +136,7 @@ describe('dataloader', () => {
       })
 
       const innerMostRelationship =
+        // @ts-expect-error Deep typing not worth doing
         relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship
 
       expect(innerMostRelationship).toStrictEqual(relationB.id)

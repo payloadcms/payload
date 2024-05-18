@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 
 import React from 'react'
 
@@ -9,7 +9,7 @@ const baseClass = 'error-pill'
 export type ErrorPillProps = {
   className?: string
   count: number
-  i18n: I18n
+  i18n: I18nClient
   withMessage?: boolean
 }
 

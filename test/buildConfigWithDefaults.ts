@@ -4,7 +4,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
   AlignFeature,
-  BlockQuoteFeature,
+  BlockquoteFeature,
   BlocksFeature,
   BoldFeature,
   ChecklistFeature,
@@ -35,7 +35,7 @@ import sharp from 'sharp'
 import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
-// process.env.PAYLOAD_DATABASE = 'postgres'
+process.env.PAYLOAD_DATABASE = 'postgres'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
@@ -94,7 +94,7 @@ export async function buildConfigWithDefaults(
         UnorderedListFeature(),
         OrderedListFeature(),
         AlignFeature(),
-        BlockQuoteFeature(),
+        BlockquoteFeature(),
         BoldFeature(),
         ItalicFeature(),
         UploadFeature({
@@ -161,7 +161,9 @@ export async function buildConfigWithDefaults(
     sharp,
     telemetry: false,
     typescript: {
-      declare: false,
+      declare: {
+        ignoreTSError: true,
+      },
     },
     ...testConfig,
     i18n: {

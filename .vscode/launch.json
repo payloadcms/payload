@@ -17,6 +17,14 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js storage-uploadthing",
+      "cwd": "${workspaceFolder}",
+      "name": "Uploadthing",
+      "request": "launch",
+      "type": "node-terminal",
+      "envFile": "${workspaceFolder}/test/storage-uploadthing/.env"
+    },
+    {
       "command": "node --no-deprecation test/dev.js live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Live Preview",

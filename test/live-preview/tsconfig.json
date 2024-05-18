@@ -1,26 +1,7 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "baseUrl": ".",
     "paths": {
       "@payload-config": ["./config.ts"],
       "@payloadcms/ui/assets": ["../../packages/ui/src/assets/index.ts"],
@@ -35,7 +16,7 @@
       "@payloadcms/ui/utilities/*": ["../../packages/ui/src/utilities/*.ts"],
       "@payloadcms/ui/scss": ["../../packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["../../packages/ui/src/scss/app.scss"],
-      "payload/types": ["../../packages/payload/src/exports/types/index.ts"],
+      "payload/types": ["../../packages/payload/src/exports/types.ts"],
       "@payloadcms/next/*": ["../../packages/next/src/*"],
       "@payloadcms/next": ["../../packages/next/src/exports/*"],
     }

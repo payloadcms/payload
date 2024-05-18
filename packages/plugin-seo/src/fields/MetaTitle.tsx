@@ -14,6 +14,7 @@ import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback } from 'react'
 
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 import type { GenerateTitle } from '../types.js'
 
 import { defaults } from '../defaults.js'
@@ -28,10 +29,10 @@ type MetaTitleProps = FormFieldBase & {
 }
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { CustomLabel, hasGenerateTitleFn, labelProps, path, required } = props || {}
+  const { CustomLabel, hasGenerateTitleFn, label, labelProps, path, required } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const field: FieldType<string> = useField({
     path,
@@ -77,7 +78,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

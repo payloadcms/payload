@@ -1,5 +1,6 @@
 import type { AdminViewProps } from 'payload/types'
 
+import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import { Logo } from '@payloadcms/ui/graphics/Logo'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
@@ -11,11 +12,13 @@ export { generateLoginMetadata } from './meta.js'
 
 export const loginBaseClass = 'login'
 
-export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, searchParams }) => {
-  const { req } = initPageResult
+export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+  const { locale, permissions, req } = initPageResult
 
   const {
+    i18n,
     payload: { config },
+    payload,
     user,
   } = req
 
@@ -24,6 +27,42 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, searchPara
     collections,
     routes: { admin },
   } = config
+
+  const BeforeLogins = Array.isArray(beforeLogin)
+    ? beforeLogin.map((Component, i) => (
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
+      ))
+    : null
+
+  const AfterLogins = Array.isArray(afterLogin)
+    ? afterLogin.map((Component, i) => (
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
+      ))
+    : null
 
   if (user) {
     redirect(admin)
@@ -34,11 +73,19 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, searchPara
   return (
     <Fragment>
       <div className={`${loginBaseClass}__brand`}>
-        <Logo config={config} />
+        <Logo
+          i18n={i18n}
+          locale={locale}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          user={user}
+        />
       </div>
-      {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
+      {Array.isArray(BeforeLogins) && BeforeLogins.map((Component) => Component)}
       {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
-      {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
+      {Array.isArray(AfterLogins) && AfterLogins.map((Component) => Component)}
     </Fragment>
   )
 }

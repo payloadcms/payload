@@ -51,7 +51,7 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
   const calculatedBump = bump || recommendedBump
 
-  const proposedReleaseVersion = semver.inc(fromVersion, calculatedBump, undefined, tag)
+  const proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
 
   console.log({
     tag,
@@ -98,8 +98,8 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
   if (writeChangelog) {
     const changelogPath = 'CHANGELOG.md'
-    const changelog = await fse.readFile(changelogPath, 'utf8')
-    const newChangelog = changelog + '\n\n' + changelog
+    const existingChangelog = await fse.readFile(changelogPath, 'utf8')
+    const newChangelog = changelog + '\n\n' + existingChangelog
     await fse.writeFile(changelogPath, newChangelog)
     console.log(`Changelog updated at ${changelogPath}`)
   }

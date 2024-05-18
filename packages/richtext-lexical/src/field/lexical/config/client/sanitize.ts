@@ -50,6 +50,7 @@ export const sanitizeClientFeatures = (
       feature.plugins.forEach((plugin, i) => {
         sanitized.plugins.push({
           Component: plugin.Component,
+          clientProps: feature.clientFeatureProps,
           key: feature.key + i,
           position: plugin.position,
         })

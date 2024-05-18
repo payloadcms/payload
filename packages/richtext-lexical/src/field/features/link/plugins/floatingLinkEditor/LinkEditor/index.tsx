@@ -77,7 +77,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setStateData({})
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
-  const updateLinkEditor = useCallback(() => {
+  const $updateLinkEditor = useCallback(() => {
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined = null
 
@@ -204,7 +204,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, payload)
 
           // Now, open the modal
-          updateLinkEditor()
+          $updateLinkEditor()
           toggleModal(drawerSlug)
 
           return true
@@ -212,14 +212,14 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         COMMAND_PRIORITY_LOW,
       ),
     )
-  }, [editor, updateLinkEditor, toggleModal, drawerSlug])
+  }, [editor, $updateLinkEditor, toggleModal, drawerSlug])
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
 
     const update = (): void => {
       editor.getEditorState().read(() => {
-        void updateLinkEditor()
+        void $updateLinkEditor()
       })
     }
 
@@ -236,20 +236,20 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         scrollerElem.removeEventListener('scroll', update)
       }
     }
-  }, [anchorElem.parentElement, editor, updateLinkEditor])
+  }, [anchorElem.parentElement, editor, $updateLinkEditor])
 
   useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
-          void updateLinkEditor()
+          void $updateLinkEditor()
         })
       }),
 
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          void updateLinkEditor()
+          void $updateLinkEditor()
           return true
         },
         COMMAND_PRIORITY_LOW,
@@ -267,13 +267,13 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         COMMAND_PRIORITY_HIGH,
       ),
     )
-  }, [editor, updateLinkEditor, isLink, setNotLink])
+  }, [editor, $updateLinkEditor, isLink, setNotLink])
 
   useEffect(() => {
     editor.getEditorState().read(() => {
-      void updateLinkEditor()
+      void $updateLinkEditor()
     })
-  }, [editor, updateLinkEditor])
+  }, [editor, $updateLinkEditor])
 
   return (
     <React.Fragment>

@@ -31,7 +31,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@payloadcms/live-preview": "workspace:^0.x"
+    "@payloadcms/live-preview": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

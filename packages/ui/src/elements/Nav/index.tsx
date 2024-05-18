@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { ServerProps } from 'payload/config'
 
 import React from 'react'
 
@@ -9,16 +9,15 @@ import './index.scss'
 
 const baseClass = 'nav'
 
+import { WithServerSideProps } from '../WithServerSideProps/index.js'
 import { DefaultNavClient } from './index.client.js'
 
-export type NavProps = {
-  config: SanitizedConfig
-}
+export type NavProps = ServerProps
 
 export const DefaultNav: React.FC<NavProps> = (props) => {
-  const { config } = props
+  const { i18n, locale, params, payload, permissions, searchParams, user } = props
 
-  if (!config) {
+  if (!payload?.config) {
     return null
   }
 
@@ -26,15 +25,52 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     admin: {
       components: { afterNavLinks, beforeNavLinks },
     },
-  } = config
+  } = payload.config
+
+  const BeforeNavLinks = Array.isArray(beforeNavLinks)
+    ? beforeNavLinks.map((Component, i) => (
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
+      ))
+    : null
+
+  const AfterNavLinks = Array.isArray(afterNavLinks)
+    ? afterNavLinks.map((Component, i) => (
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
+      ))
+    : null
 
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        {Array.isArray(beforeNavLinks) &&
-          beforeNavLinks.map((Component, i) => <Component key={i} />)}
+        {Array.isArray(BeforeNavLinks) && BeforeNavLinks.map((Component) => Component)}
+
         <DefaultNavClient />
-        {Array.isArray(afterNavLinks) && afterNavLinks.map((Component, i) => <Component key={i} />)}
+        {Array.isArray(AfterNavLinks) && AfterNavLinks.map((Component) => Component)}
+
         <div className={`${baseClass}__controls`}>
           <Logout />
         </div>

@@ -14,6 +14,8 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
+import type { PluginComponentWithAnchor } from '../../types.js'
+import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadData } from '../nodes/UploadNode.js'
 
 import { UploadDrawer } from '../drawer/index.js'
@@ -24,7 +26,9 @@ export type InsertUploadPayload = Readonly<UploadData>
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export function UploadPlugin(): JSX.Element | null {
+export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> = ({
+  clientProps,
+}) => {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 
@@ -38,17 +42,19 @@ export function UploadPlugin(): JSX.Element | null {
         INSERT_UPLOAD_COMMAND,
         (payload: InsertUploadPayload) => {
           editor.update(() => {
-            const uploadNode = $createUploadNode({
-              data: {
-                fields: payload.fields,
-                relationTo: payload.relationTo,
-                value: payload.value,
-              },
-            })
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const uploadNode = $createUploadNode({
+                data: {
+                  fields: payload.fields,
+                  relationTo: payload.relationTo,
+                  value: payload.value,
+                },
+              })
+              // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+              $insertNodeToNearestRoot(uploadNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -64,8 +70,6 @@ export function UploadPlugin(): JSX.Element | null {
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(uploadNode)
             }
           })
 

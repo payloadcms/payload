@@ -53,12 +53,13 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
   const localeCode = typeof locale === 'object' && 'code' in locale ? locale.code : locale
 
   const localLabels = typeof label === 'object' ? label : { [localeCode]: label }
+
   const labelValue = localLabels[localeCode] || localLabels['en'] || ''
 
   if (valueType === 'valueOfField' && !isNumberField) {
     return (
       <div>
-        <div>{labelValue}</div>
+        <div>{String(labelValue)}</div>
         <div
           style={{
             color: '#9A9A9A',

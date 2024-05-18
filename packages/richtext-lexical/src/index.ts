@@ -6,7 +6,12 @@ import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
-import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider } from './types.js'
+import type {
+  AdapterProps,
+  LexicalEditorProps,
+  LexicalRichTextAdapter,
+  LexicalRichTextAdapterProvider,
+} from './types.js'
 
 import { RichTextCell } from './cell/index.js'
 import { RichTextField } from './field/index.js'
@@ -28,7 +33,8 @@ import { richTextValidateHOC } from './validate/index.js'
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
-  return async ({ config }) => {
+  return async ({ config, isRoot }) => {
+    let features: FeatureProviderServer<unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -38,15 +44,25 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           defaultEditorConfig,
           config,
         )
+        features = cloneDeep(defaultEditorFeatures)
       }
 
       finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
-      let features: FeatureProviderServer<unknown, unknown>[] =
+      const rootEditor = config.editor
+      let rootEditorFeatures: FeatureProviderServer<unknown, unknown>[] = []
+      if (typeof rootEditor === 'object' && 'features' in rootEditor) {
+        rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
+      }
+
+      features =
         props.features && typeof props.features === 'function'
-          ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
+          ? props.features({
+              defaultFeatures: cloneDeep(defaultEditorFeatures),
+              rootFeatures: rootEditorFeatures,
+            })
           : (props.features as FeatureProviderServer<unknown, unknown>[])
       if (!features) {
         features = cloneDeep(defaultEditorFeatures)
@@ -56,6 +72,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       resolvedFeatureMap = await loadFeatures({
         config,
+        isRoot,
         unSanitizedEditorConfig: {
           features,
           lexical: lexical ? lexical : defaultEditorConfig.lexical,
@@ -79,6 +96,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
       }),
       editorConfig: finalSanitizedEditorConfig,
+      features,
       generateComponentMap: getGenerateComponentMap({
         resolvedFeatureMap,
       }),
@@ -303,12 +321,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 }
 
 export { AlignFeature } from './field/features/align/feature.server.js'
-export { BlockQuoteFeature } from './field/features/blockquote/feature.server.js'
-export {
-  BlocksFeature,
-  type BlocksFeatureProps,
-  type LexicalBlock,
-} from './field/features/blocks/feature.server.js'
+export { BlockquoteFeature } from './field/features/blockquote/feature.server.js'
+export { BlocksFeature, type BlocksFeatureProps } from './field/features/blocks/feature.server.js'
 export {
   $createBlockNode,
   $isBlockNode,
@@ -335,7 +349,6 @@ export {
   consolidateHTMLConverters,
   lexicalHTML,
 } from './field/features/converters/html/field/index.js'
-export { createClientComponent } from './field/features/createClientComponent.js'
 export { TestRecorderFeature } from './field/features/debug/testRecorder/feature.server.js'
 export { TreeViewFeature } from './field/features/debug/treeView/feature.server.js'
 export { BoldFeature } from './field/features/format/bold/feature.server.js'
@@ -431,6 +444,8 @@ export type {
   FieldNodeHookArgs,
   NodeValidation,
   NodeWithHooks,
+  PluginComponent,
+  PluginComponentWithAnchor,
   PopulationPromise,
   ResolvedClientFeature,
   ResolvedClientFeatureMap,

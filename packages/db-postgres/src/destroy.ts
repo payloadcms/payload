@@ -10,4 +10,8 @@ export const destroy: Destroy = async function destroy(this: PostgresAdapter) {
   this.relations = {}
   this.fieldConstraints = {}
   this.drizzle = undefined
+  this.initializing = new Promise((res, rej) => {
+    this.resolveInitializing = res
+    this.rejectInitializing = rej
+  })
 }

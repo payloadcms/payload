@@ -5,6 +5,8 @@ import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import { useEffect } from 'react'
 
+import type { PluginComponent } from '../../types.js'
+
 import {
   $createHorizontalRuleNode,
   INSERT_HORIZONTAL_RULE_COMMAND,
@@ -14,7 +16,7 @@ import './index.scss'
 /**
  * Registers the INSERT_HORIZONTAL_RULE_COMMAND lexical command and defines the behavior for when it is called.
  */
-export function HorizontalRulePlugin(): null {
+export const HorizontalRulePlugin: PluginComponent<undefined> = () => {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {

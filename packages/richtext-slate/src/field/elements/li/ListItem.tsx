@@ -2,17 +2,13 @@
 
 import type { Element } from 'slate'
 
-import React, { isValidElement } from 'react'
+import React from 'react'
 
 import { useElement } from '../../providers/ElementProvider.js'
 import { listTypes } from '../listTypes.js'
 
 export const ListItemElement: React.FC = () => {
   const { attributes, children, element } = useElement<Element>()
-
-  if (!isValidElement(element)) {
-    return null
-  }
 
   const listType = typeof element.children?.[0]?.type === 'string' ? element.children[0].type : ''
   const disableListStyle = element.children.length >= 1 && listTypes.includes(listType)

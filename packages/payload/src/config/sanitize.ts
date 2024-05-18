@@ -108,7 +108,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     i18nConfig.fallbackLanguage = supportedLangKeys.includes(fallbackLang)
       ? fallbackLang
       : supportedLangKeys[0]
-    i18nConfig.translations = incomingConfig.i18n?.translations || i18nConfig.translations
+    i18nConfig.translations =
+      (incomingConfig.i18n?.translations as SanitizedConfig['i18n']['translations']) ||
+      i18nConfig.translations
   }
 
   config.i18n = i18nConfig
@@ -150,6 +152,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (typeof incomingConfig.editor === 'function') {
     config.editor = await incomingConfig.editor({
       config: config as SanitizedConfig,
+      isRoot: true,
     })
   }
 

@@ -18,6 +18,13 @@ export const Posts: CollectionConfig = {
     listSearchableFields: ['id', 'title', 'description', 'number'],
     preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
+    meta: {
+      description: 'This is a custom meta description for posts',
+      openGraph: {
+        title: 'This is a custom OG title for posts',
+        description: 'This is a custom OG description for posts',
+      },
+    },
   },
   fields: [
     {
@@ -119,7 +126,9 @@ export const Posts: CollectionConfig = {
       name: 'descriptionAsComponent',
       type: 'text',
       admin: {
-        description: FieldDescriptionComponent,
+        components: {
+          Description: FieldDescriptionComponent,
+        },
       },
     },
   ],

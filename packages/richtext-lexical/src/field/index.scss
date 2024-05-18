@@ -15,7 +15,7 @@
   }
 
   &--read-only {
-    .editor-shell {
+    .editor-container {
       .editor {
         background: var(--theme-elevation-200);
         color: var(--theme-elevation-450);
@@ -28,7 +28,7 @@
 html[data-theme='light'] {
   .rich-text-lexical {
     &.error {
-      .editor-shell {
+      .editor-container {
         @include lightInputError;
       }
     }
@@ -38,7 +38,7 @@ html[data-theme='light'] {
 html[data-theme='dark'] {
   .rich-text-lexical {
     &.error {
-      .editor-shell {
+      .editor-container {
         @include darkInputError;
       }
     }

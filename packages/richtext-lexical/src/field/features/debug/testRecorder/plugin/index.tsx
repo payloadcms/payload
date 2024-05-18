@@ -6,6 +6,8 @@ import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
 import * as React from 'react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+import type { PluginComponent } from '../../../types.js'
+
 import { IS_APPLE } from '../../../../lexical/utils/environment.js'
 import './index.scss'
 
@@ -86,7 +88,7 @@ const formatStep = (step: Step) => {
 }
 
 export function isSelectAll(event: KeyboardEvent): boolean {
-  return event.keyCode === 65 && (IS_APPLE ? event.metaKey : event.ctrlKey)
+  return event.code === 'KeyA' && (IS_APPLE ? event.metaKey : event.ctrlKey)
 }
 
 // stolen from LexicalSelection-test
@@ -442,7 +444,7 @@ ${steps.map(formatStep).join(`\n`)}
 
   return [button, output]
 }
-export const TestRecorderPlugin: React.FC = () => {
+export const TestRecorderPlugin: PluginComponent<undefined> = () => {
   const [editor] = useLexicalComposerContext()
   const [testRecorderButton, testRecorderOutput] = useTestRecorder(editor)
 

@@ -580,6 +580,7 @@ describe('versions', () => {
         collection: autosaveCollectionSlug,
         data: {
           title: 'some title',
+          description: 'some description',
         },
         draft: true,
       })

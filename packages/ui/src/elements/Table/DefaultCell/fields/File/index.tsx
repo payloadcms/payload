@@ -1,9 +1,9 @@
 'use client'
 import type { DefaultCellComponentProps } from 'payload/types'
 
-import { Thumbnail } from '@payloadcms/ui/elements/Thumbnail'
 import React from 'react'
 
+import { Thumbnail } from '../../../../Thumbnail/index.js'
 import './index.scss'
 
 const baseClass = 'file'

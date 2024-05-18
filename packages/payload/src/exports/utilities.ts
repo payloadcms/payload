@@ -42,10 +42,9 @@ export { isNumber } from '../utilities/isNumber.js'
 
 export { isPlainObject } from '../utilities/isPlainObject.js'
 export {
-  isPlainFunction,
   isReactClientComponent,
-  isReactComponent,
-  isReactServerComponent,
+  isReactComponentOrFunction,
+  isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
 

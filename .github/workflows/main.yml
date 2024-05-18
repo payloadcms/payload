@@ -2,14 +2,18 @@ name: build
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened
+      - reopened
+      - synchronize
   push:
     branches:
       - main
       - beta
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref_protected && github.sha || ''}}
   cancel-in-progress: true
 
 env:
@@ -52,6 +56,7 @@ jobs:
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -89,10 +94,10 @@ jobs:
             pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm install
-      - name: List changed files
-        run: git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}
       - name: Lint staged
-        run: npx lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
+        run: |
+          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
+          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
 
   build:
     needs: changes
@@ -296,6 +301,7 @@ jobs:
           - fields__collections__Lexical
           - live-preview
           - localization
+          - i18n
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-nested-docs
@@ -340,7 +346,7 @@ jobs:
 
       - name: Cache Playwright Browsers for Playwright's Version
         id: cache-playwright-browsers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
@@ -419,7 +425,6 @@ jobs:
           pnpm run build
 
   tests-type-generation:
-    if: false # This should be replaced with gen on a real Payload project
     runs-on: ubuntu-latest
     needs: build
 
@@ -486,3 +491,18 @@ jobs:
           yarn install
           yarn build
           yarn generate:types
+
+  all-green:
+    name: All Green
+    if: always()
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+      - tests-unit
+      - tests-int
+      - tests-e2e
+
+    steps:
+      - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        run: exit 1

@@ -28,13 +28,17 @@ export const uploadValidation = (
       return t('validation:validUploadID')
     }
 
+    if (!props?.collections) {
+      return true
+    }
+
     if (Object.keys(props?.collections).length === 0) {
       return true
     }
 
     const collection = props?.collections[node.relationTo]
 
-    if (!collection.fields?.length) {
+    if (!collection?.fields?.length) {
       return true
     }
 

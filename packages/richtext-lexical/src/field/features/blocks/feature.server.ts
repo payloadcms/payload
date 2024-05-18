@@ -1,5 +1,5 @@
 import type { Config } from 'payload/config'
-import type { Block, BlockField, Field, FieldWithRichTextRequiredEditor } from 'payload/types'
+import type { Block, BlockField, Field } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
 import { baseBlockFields, sanitizeFields } from 'payload/config'
@@ -14,12 +14,8 @@ import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
 
-export type LexicalBlock = Omit<Block, 'fields'> & {
-  fields: FieldWithRichTextRequiredEditor[]
-}
-
 export type BlocksFeatureProps = {
-  blocks: LexicalBlock[]
+  blocks: Block[]
 }
 
 export const BlocksFeature: FeatureProviderProviderServer<
@@ -27,20 +23,20 @@ export const BlocksFeature: FeatureProviderProviderServer<
   BlocksFeatureClientProps
 > = (props) => {
   return {
-    feature: async ({ config: _config }) => {
+    feature: async ({ config: _config, isRoot }) => {
       if (props?.blocks?.length) {
         const validRelationships = _config.collections.map((c) => c.slug) || []
 
         for (const block of props.blocks) {
-          block.fields = block.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[])
+          block.fields = block.fields.concat(baseBlockFields)
           block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
-          block.fields = (await sanitizeFields({
+          block.fields = await sanitizeFields({
             config: _config as unknown as Config,
             fields: block.fields,
-            requireFieldLevelRichTextEditor: true,
+            requireFieldLevelRichTextEditor: isRoot,
             validRelationships,
-          })) as FieldWithRichTextRequiredEditor[]
+          })
         }
       }
 

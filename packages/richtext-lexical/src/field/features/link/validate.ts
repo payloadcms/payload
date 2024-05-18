@@ -1,4 +1,4 @@
-import type { FieldWithRichTextRequiredEditor } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 
@@ -28,7 +28,7 @@ export const linkValidation = (
     const result = await buildStateFromSchema({
       id,
       data,
-      fieldSchema: props.fields as FieldWithRichTextRequiredEditor[], // Sanitized in feature.server.ts
+      fieldSchema: props.fields as Field[], // Sanitized in feature.server.ts
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       preferences,
       req,

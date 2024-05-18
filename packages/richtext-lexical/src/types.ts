@@ -11,8 +11,33 @@ export type LexicalEditorProps = {
   features?:
     | (({
         defaultFeatures,
+        rootFeatures,
       }: {
+        /**
+         * This opinionated array contains all "recommended" default features.
+         *
+         * @Example
+         *
+         * ```ts
+         *  editor: lexicalEditor({
+         *    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+         *  })
+         *  ```
+         */
         defaultFeatures: FeatureProviderServer<any, any>[]
+        /**
+         * This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts).
+         * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty
+         *
+         * @Example
+         *
+         * ```ts
+         *  editor: lexicalEditor({
+         *    features: ({ rootFeatures }) => [...rootFeatures, FixedToolbarFeature()],
+         *  })
+         *  ```
+         */
+        rootFeatures: FeatureProviderServer<any, any>[]
       }) => FeatureProviderServer<any, any>[])
     | FeatureProviderServer<any, any>[]
   lexical?: LexicalEditorConfig
@@ -20,13 +45,20 @@ export type LexicalEditorProps = {
 
 export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
   editorConfig: SanitizedServerEditorConfig
+  features: FeatureProviderServer<any, any>[]
 }
 
 export type LexicalRichTextAdapterProvider =
   /**
    * This is being called during the payload sanitization process
    */
-  ({ config }: { config: SanitizedConfig }) => Promise<LexicalRichTextAdapter>
+  ({
+    config,
+    isRoot,
+  }: {
+    config: SanitizedConfig
+    isRoot?: boolean
+  }) => Promise<LexicalRichTextAdapter>
 
 export type FieldProps = RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps> & {
   fieldTypes: FieldTypes

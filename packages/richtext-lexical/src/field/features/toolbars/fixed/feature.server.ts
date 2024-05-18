@@ -7,7 +7,6 @@ export const FixedToolbarFeature: FeatureProviderProviderServer<undefined, undef
     feature: () => {
       return {
         ClientComponent: FixedToolbarFeatureClientComponent,
-        clientFeatureProps: null,
         serverFeatureProps: props,
       }
     },

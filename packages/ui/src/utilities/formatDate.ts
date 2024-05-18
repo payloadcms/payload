@@ -4,7 +4,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 
 type FormatDateArgs = {
   date: Date | number | string | undefined
-  i18n: I18n
+  i18n: I18n<any, any>
   pattern: string
 }
 
@@ -15,7 +15,7 @@ export const formatDate = ({ date, i18n, pattern }: FormatDateArgs): string => {
 
 type FormatTimeToNowArgs = {
   date: Date | number | string | undefined
-  i18n: I18n
+  i18n: I18n<any, any>
 }
 
 export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
