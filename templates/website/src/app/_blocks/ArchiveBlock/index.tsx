@@ -5,7 +5,6 @@ import type { ArchiveBlockProps } from './types'
 
 import { CollectionArchive } from '../../_components/CollectionArchive'
 import { Gutter } from '../../_components/Gutter'
-import classes from './index.module.scss'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -25,11 +24,11 @@ export const ArchiveBlock: React.FC<
   } = props
 
   return (
-    <div className={classes.archiveBlock} id={`block-${id}`}>
+    <div className="my-16" id={`block-${id}`}>
       {introContent && (
-        <Gutter className={classes.introContent}>
-          <RichText content={introContent} enableGutter={false} />
-        </Gutter>
+        <div className="container mb-16">
+          <RichText className="ml-0" content={introContent} enableGutter />
+        </div>
       )}
       <CollectionArchive
         categories={categories}

@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
+import { FormBlock } from 'src/blocks/Form'
+
 import type { Page } from '../../payload-types'
 
 import { admins } from '../../access/admins'
@@ -57,7 +59,7 @@ export const Pages: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
               required: true,
             },
           ],

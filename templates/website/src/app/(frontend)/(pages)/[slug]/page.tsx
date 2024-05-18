@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 import configPromise from '@payload-config'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
 import React from 'react'
 
 import type { Page } from '../../../../payload-types'
@@ -14,7 +14,7 @@ import { PayloadRedirects } from '../../../_components/PayloadRedirects'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise })
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
@@ -61,7 +61,7 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
 const queryPageBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise })
   const user = draft ? await payload.auth({ headers: headers() }) : undefined
 
   const result = await payload.find({

@@ -2,6 +2,8 @@ import type { Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
+import { contactForm as contactFormData } from 'src/seed/contact-form'
+import { contact as contactPageData } from 'src/seed/contact-page'
 import { fileURLToPath } from 'url'
 
 import { home } from './home'
@@ -14,7 +16,7 @@ import { postsPage } from './posts-page'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const collections = ['categories', 'media', 'pages', 'posts']
+const collections = ['categories', 'media', 'pages', 'posts', 'forms', 'form-submissions']
 const globals = ['header', 'settings', 'footer']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
@@ -242,6 +244,28 @@ export const seed = async (payload: Payload): Promise<void> => {
     ),
   })
 
+  payload.logger.info(`— Seeding contact form...`)
+
+  const contactForm = await payload.create({
+    collection: 'forms',
+    data: contactFormData,
+  })
+
+  let contactFormID = contactForm.id
+
+  if (payload.db.defaultIDType === 'text') {
+    contactFormID = `"${contactFormID}"`
+  }
+
+  payload.logger.info(`— Seeding contact page...`)
+
+  const contactPage = await payload.create({
+    collection: 'pages',
+    data: JSON.parse(
+      JSON.stringify(contactPageData).replace(/"\{\{CONTACT_FORM_ID\}\}"/g, contactFormID),
+    ),
+  })
+
   payload.logger.info(`— Seeding settings...`)
 
   await payload.updateGlobal({
@@ -265,6 +289,49 @@ export const seed = async (payload: Payload): Promise<void> => {
               relationTo: 'pages',
               value: postsPageDoc.id,
             },
+          },
+        },
+        {
+          link: {
+            type: 'reference',
+            label: 'Contact',
+            reference: {
+              relationTo: 'pages',
+              value: contactPage.id,
+            },
+          },
+        },
+      ],
+    },
+  })
+
+  payload.logger.info(`— Seeding footer...`)
+
+  await payload.updateGlobal({
+    slug: 'footer',
+    data: {
+      navItems: [
+        {
+          link: {
+            type: 'custom',
+            label: 'Admin',
+            url: '/admin',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Source Code',
+            newTab: true,
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Payload',
+            newTab: true,
+            url: 'https://payloadcms.com/',
           },
         },
       ],

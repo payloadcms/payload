@@ -2,12 +2,10 @@
 
 import type { PayloadAdminBarProps } from 'payload-admin-bar'
 
+import { cn } from '@/_utilities/cn'
 import { useSelectedLayoutSegments } from 'next/navigation'
 import { PayloadAdminBar } from 'payload-admin-bar'
 import React, { useState } from 'react'
-
-import { Gutter } from '../Gutter'
-import classes from './index.module.scss'
 
 const collectionLabels = {
   pages: {
@@ -39,15 +37,20 @@ export const AdminBar: React.FC<{
   }, [])
 
   return (
-    <div className={[classes.adminBar, show && classes.show].filter(Boolean).join(' ')}>
-      <Gutter className={classes.blockContainer}>
+    <div
+      className={cn('border-b py-2 border-border text-black dark:text-white', {
+        block: show,
+        hidden: !show,
+      })}
+    >
+      <div className="container">
         <PayloadAdminBar
           {...adminBarProps}
-          className={classes.payloadAdminBar}
+          className="py-2 text-black dark:text-white"
           classNames={{
-            controls: classes.controls,
-            logo: classes.logo,
-            user: classes.user,
+            controls: 'font-medium text-black dark:text-white',
+            logo: 'text-black dark:text-white',
+            user: 'text-black dark:text-white',
           }}
           cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
           collection={collection}
@@ -64,7 +67,7 @@ export const AdminBar: React.FC<{
             zIndex: 'unset',
           }}
         />
-      </Gutter>
+      </div>
     </div>
   )
 }

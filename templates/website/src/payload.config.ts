@@ -1,6 +1,7 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 
 import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
+import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
@@ -92,6 +93,11 @@ export default buildConfig({
       generateTitle,
       tabbedUI: true,
       uploadsCollection: 'media',
+    }),
+    formBuilderPlugin({
+      fields: {
+        payment: false,
+      },
     }),
     payloadCloudPlugin(),
   ],

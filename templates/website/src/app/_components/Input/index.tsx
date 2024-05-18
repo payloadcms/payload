@@ -2,8 +2,6 @@ import type { FieldValues, UseFormRegister } from 'react-hook-form'
 
 import React from 'react'
 
-import classes from './index.module.scss'
-
 type Props = {
   disabled?: boolean
   error: any
@@ -28,14 +26,14 @@ export const Input: React.FC<Props> = ({
   validate,
 }) => {
   return (
-    <div className={classes.inputWrap}>
-      <label className={classes.label} htmlFor="name">
+    <div className="classes.inputWrap">
+      <label className="classes.label" htmlFor="name">
         {label}
-        {required ? <span className={classes.asterisk}>&nbsp;*</span> : ''}
+        {required ? <span className="classes.asterisk">&nbsp;*</span> : ''}
       </label>
       {type === 'textarea' ? (
         <textarea
-          className={[classes.input, classes.textarea, error && classes.error]
+          className={['classes.input', 'classes.textarea', error && 'classes.error']
             .filter(Boolean)
             .join(' ')}
           placeholder={placeholder}
@@ -48,7 +46,7 @@ export const Input: React.FC<Props> = ({
         />
       ) : (
         <input
-          className={[classes.input, error && classes.error].filter(Boolean).join(' ')}
+          className={['classes.input', error && 'casses.errolr'].filter(Boolean).join(' ')}
           placeholder={placeholder}
           type={type}
           {...register(name, {
@@ -67,7 +65,7 @@ export const Input: React.FC<Props> = ({
         />
       )}
       {error && (
-        <div className={classes.errorMessage}>
+        <div className="classes.errorMessage">
           {!error?.message && error?.type === 'required'
             ? 'This field is required'
             : error?.message}

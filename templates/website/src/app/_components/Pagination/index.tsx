@@ -1,7 +1,16 @@
+import {
+  Pagination as PaginationComponent,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/_components/ui/pagination'
+import { cn } from '@/_utilities/cn'
 import React from 'react'
 
 import { Chevron } from '../Chevron'
-import classes from './index.module.scss'
 
 export const Pagination: React.FC<{
   className?: string
@@ -13,33 +22,79 @@ export const Pagination: React.FC<{
   const hasNextPage = page < totalPages
   const hasPrevPage = page > 1
 
+  const hasExtraPrevPages = page - 1 > 1
+  const hasExtraNextPages = page + 1 < totalPages
+
   return (
-    <div className={[classes.pagination, className].filter(Boolean).join(' ')}>
-      <button
-        className={classes.button}
-        disabled={!hasPrevPage}
-        onClick={() => {
-          onClick(page - 1)
-        }}
-        type="button"
-      >
-        <Chevron className={classes.icon} rotate={90} />
-      </button>
-      <div className={classes.pageRange}>
-        <span className={classes.pageRangeLabel}>
-          Page {page} of {totalPages}
-        </span>
-      </div>
-      <button
-        className={classes.button}
-        disabled={!hasNextPage}
-        onClick={() => {
-          onClick(page + 1)
-        }}
-        type="button"
-      >
-        <Chevron className={classes.icon} rotate={-90} />
-      </button>
+    <div className={cn('my-12', className)}>
+      <PaginationComponent>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              disabled={!hasPrevPage}
+              onClick={() => {
+                onClick(page - 1)
+              }}
+            />
+          </PaginationItem>
+
+          {hasExtraPrevPages && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
+
+          {hasPrevPage && (
+            <PaginationItem>
+              <PaginationLink
+                onClick={() => {
+                  onClick(page - 1)
+                }}
+              >
+                {page - 1}
+              </PaginationLink>
+            </PaginationItem>
+          )}
+
+          <PaginationItem>
+            <PaginationLink
+              isActive
+              onClick={() => {
+                onClick(2)
+              }}
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+
+          {hasNextPage && (
+            <PaginationItem>
+              <PaginationLink
+                onClick={() => {
+                  onClick(page + 1)
+                }}
+              >
+                {page + 1}
+              </PaginationLink>
+            </PaginationItem>
+          )}
+
+          {hasExtraNextPages && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
+
+          <PaginationItem>
+            <PaginationNext
+              disabled={!hasNextPage}
+              onClick={() => {
+                onClick(page + 1)
+              }}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </PaginationComponent>
     </div>
   )
 }

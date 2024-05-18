@@ -1,20 +1,23 @@
 import type { Metadata } from 'next'
 
+import { cn } from '@/_utilities/cn'
+import { GeistMono } from 'geist/font/mono'
+import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
 import { AdminBar } from '../_components/AdminBar'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { LivePreviewListener } from '../_components/LivePreviewListener'
-import '../_css/app.scss'
 import { Providers } from '../_providers'
 import { InitTheme } from '../_providers/Theme/InitTheme'
 import { mergeOpenGraph } from '../_utilities/mergeOpenGraph'
+import './globals.css'
 
 // eslint-disable-next-line no-restricted-exports, @typescript-eslint/require-await
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />

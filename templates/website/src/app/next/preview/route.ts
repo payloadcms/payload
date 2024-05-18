@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { payloadToken } from '../../_api/token'
+const payloadToken = 'payload-token'
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function GET(

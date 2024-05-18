@@ -23,7 +23,8 @@
     ],
     "paths": {
       "@payload-config": ["./src/payload.config.ts"],
-      "react": ["./node_modules/@types/react"]
+      "react": ["./node_modules/@types/react"],
+      "@/*": ["./src/app/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

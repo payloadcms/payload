@@ -2,22 +2,22 @@ import type { Field } from 'payload/types'
 
 import deepMerge from '../utilities/deepMerge'
 
-export const appearanceOptions = {
+export type LinkAppearances = 'default' | 'ghost' | 'secondary'
+
+export const appearanceOptions: Record<LinkAppearances, { label: string; value: string }> = {
   default: {
     label: 'Default',
     value: 'default',
   },
-  primary: {
-    label: 'Primary Button',
-    value: 'primary',
+  ghost: {
+    label: 'Ghost Button',
+    value: 'ghost',
   },
   secondary: {
     label: 'Secondary Button',
     value: 'secondary',
   },
 }
-
-export type LinkAppearances = 'default' | 'primary' | 'secondary'
 
 type LinkType = (options?: {
   appearances?: LinkAppearances[] | false
@@ -125,7 +125,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
   if (appearances !== false) {
     let appearanceOptionsToUse = [
       appearanceOptions.default,
-      appearanceOptions.primary,
+      appearanceOptions.ghost,
       appearanceOptions.secondary,
     ]
 

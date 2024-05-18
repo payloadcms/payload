@@ -6,16 +6,17 @@ import type { VerticalPaddingOptions } from '../VerticalPadding'
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
 import { ContentBlock } from '../../_blocks/Content'
+import { FormBlock } from '../../_blocks/Form'
 import { MediaBlock } from '../../_blocks/MediaBlock'
 import { RelatedPosts, type RelatedPostsProps } from '../../_blocks/RelatedPosts'
 import { toKebabCase } from '../../_utilities/toKebabCase'
-import { BackgroundColor } from '../BackgroundColor'
 import { VerticalPadding } from '../VerticalPadding'
 
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
+  formBlock: FormBlock,
   mediaBlock: MediaBlock,
   relatedPosts: RelatedPosts,
 }
@@ -64,12 +65,10 @@ export const Blocks: React.FC<{
 
             if (Block) {
               return (
-                <BackgroundColor invert={blockIsInverted} key={index}>
-                  <VerticalPadding bottom={paddingBottom} top={paddingTop}>
-                    {/* @ts-expect-error */}
-                    <Block id={toKebabCase(blockName)} {...block} />
-                  </VerticalPadding>
-                </BackgroundColor>
+                <VerticalPadding bottom={paddingBottom} top={paddingTop}>
+                  {/* @ts-expect-error */}
+                  <Block id={toKebabCase(blockName)} {...block} />
+                </VerticalPadding>
               )
             }
           }

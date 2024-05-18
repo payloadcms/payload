@@ -1,9 +1,9 @@
 import configPromise from '@payload-config'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { unstable_cache } from 'next/cache'
-import { getPayload } from 'payload'
 
 export async function getRedirect(slug: string, depth = 0) {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise })
 
   const { docs: redirects } = await payload.find({
     collection: 'redirects',
@@ -23,4 +23,6 @@ export async function getRedirect(slug: string, depth = 0) {
  * Returns a unstable_cache function mapped with the cache tag for the slug
  */
 export const getCachedRedirect = (slug: string) =>
-  unstable_cache(async () => getRedirect(slug), [slug])
+  unstable_cache(async () => getRedirect(slug), [slug], {
+    tags: [`redirects_${slug}`],
+  })

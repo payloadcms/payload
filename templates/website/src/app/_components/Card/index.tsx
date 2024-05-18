@@ -1,10 +1,10 @@
+import { cn } from '@/_utilities/cn'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
 import type { Post } from '../../../payload-types'
 
 import { Media } from '../Media'
-import classes from './index.module.scss'
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -34,20 +34,16 @@ export const Card: React.FC<{
   const href = `/${relationTo}/${slug}`
 
   return (
-    <div
-      className={[classes.card, className, orientation && classes[orientation]]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <Link className={classes.mediaWrapper} href={href}>
-        {!metaImage && <div className={classes.placeholder}>No image</div>}
+    <article className={cn('border border-border rounded-lg overflow-hidden', className)}>
+      <Link className="relative h-full w-full " href={href}>
+        {!metaImage && <div className="classes.placeholder">No image</div>}
         {metaImage && typeof metaImage !== 'string' && (
-          <Media fill imgClassName={classes.image} resource={metaImage} />
+          <Media imgClassName="classes.image" resource={metaImage} />
         )}
       </Link>
-      <div className={classes.content}>
+      <div className="p-4">
         {showCategories && hasCategories && (
-          <div className={classes.leader}>
+          <div className="uppercase text-sm mb-4">
             {showCategories && hasCategories && (
               <div>
                 {categories?.map((category, index) => {
@@ -73,18 +69,18 @@ export const Card: React.FC<{
           </div>
         )}
         {titleToUse && (
-          <h4 className={classes.title}>
-            <Link className={classes.titleLink} href={href}>
+          <h3 className="font-bold">
+            <Link className="classes.titleLink" href={href}>
               {titleToUse}
             </Link>
-          </h4>
+          </h3>
         )}
         {description && (
-          <div className={classes.body}>
-            {description && <p className={classes.description}>{sanitizedDescription}</p>}
+          <div className="mt-2">
+            {description && <p className="classes.description">{sanitizedDescription}</p>}
           </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }

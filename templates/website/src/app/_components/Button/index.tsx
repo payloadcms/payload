@@ -5,8 +5,6 @@ import type { ElementType } from 'react'
 import Link from 'next/link'
 import React from 'react'
 
-import classes from './index.module.scss'
-
 export type Props = {
   appearance?: 'default' | 'none' | 'primary' | 'secondary'
   className?: string
@@ -36,18 +34,9 @@ export const Button: React.FC<Props> = ({
 
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
-  const className = [
-    classes.button,
-    classNameFromProps,
-    classes[`appearance--${appearance}`],
-    invert && classes[`${appearance}--invert`],
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   const content = (
-    <div className={classes.content}>
-      <span className={classes.label}>{label}</span>
+    <div className="classes.content">
+      <span className="classes.label">{label}</span>
     </div>
   )
 
@@ -55,7 +44,7 @@ export const Button: React.FC<Props> = ({
 
   if (el === 'link') {
     return (
-      <Link className={className} href={href || ''} {...newTabProps} onClick={onClick}>
+      <Link className="className" href={href || ''} {...newTabProps} onClick={onClick}>
         {content}
       </Link>
     )
@@ -65,7 +54,7 @@ export const Button: React.FC<Props> = ({
 
   return (
     <Element
-      className={className}
+      className="className"
       href={href}
       type={type}
       {...newTabProps}

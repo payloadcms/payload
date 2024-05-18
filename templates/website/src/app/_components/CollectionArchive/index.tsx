@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@/_utilities/cn'
 import qs from 'qs'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -10,7 +11,6 @@ import { Card } from '../Card'
 import { Gutter } from '../Gutter'
 import { PageRange } from '../PageRange'
 import { Pagination } from '../Pagination'
-import classes from './index.module.scss'
 
 type Result = {
   docs: (Post | string)[]
@@ -165,29 +165,27 @@ export const CollectionArchive: React.FC<Props> = (props) => {
   }, [page, categories, relationTo, onResultChange, sort, limit, populateBy])
 
   return (
-    <div className={[classes.collectionArchive, className].filter(Boolean).join(' ')}>
-      <div className={classes.scrollRef} ref={scrollRef} />
-      {!isLoading && error && <Gutter>{error}</Gutter>}
+    <div className={cn('container')}>
+      <div className="" ref={scrollRef} />
+      {!isLoading && error && <div>{error}</div>}
       <Fragment>
         {showPageRange !== false && populateBy !== 'selection' && (
-          <Gutter>
-            <div className={classes.pageRange}>
-              <PageRange
-                collection={relationTo}
-                currentPage={results.page}
-                limit={limit}
-                totalDocs={results.totalDocs}
-              />
-            </div>
-          </Gutter>
+          <div className="mb-6">
+            <PageRange
+              collection={relationTo}
+              currentPage={results.page}
+              limit={limit}
+              totalDocs={results.totalDocs}
+            />
+          </div>
         )}
-        <Gutter>
-          <div className={classes.grid}>
+        <div>
+          <div className="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-12 gap-y-4 gap-x-4 lg:gap-y-8 lg:gap-x-8 xl:gap-x-16">
             {results.docs?.map((result, index) => {
               if (typeof result === 'object' && result !== null) {
                 return (
-                  <div className={classes.column} key={index}>
-                    <Card doc={result} relationTo={relationTo} showCategories />
+                  <div className="col-span-4" key={index}>
+                    <Card className="h-full" doc={result} relationTo={relationTo} showCategories />
                   </div>
                 )
               }
@@ -197,13 +195,13 @@ export const CollectionArchive: React.FC<Props> = (props) => {
           </div>
           {results.totalPages > 1 && populateBy !== 'selection' && (
             <Pagination
-              className={classes.pagination}
+              className="classes.pagination"
               onClick={setPage}
               page={results.page}
               totalPages={results.totalPages}
             />
           )}
-        </Gutter>
+        </div>
       </Fragment>
     </div>
   )

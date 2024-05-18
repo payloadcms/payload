@@ -3,6 +3,7 @@ import type { SerializedHeadingNode } from '@lexical/rich-text'
 import type { LinkFields, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { SerializedElementNode, SerializedLexicalNode, SerializedTextNode } from 'lexical'
 
+import { cn } from '@/_utilities/cn'
 import React, { Fragment } from 'react'
 import { ArchiveBlock } from 'src/app/_blocks/ArchiveBlock'
 import { BannerBlock } from 'src/app/_blocks/Banner'
@@ -95,110 +96,110 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
         const serializedChildren =
           'children' in _node ? serializedChildrenFn(_node as SerializedElementNode) : ''
 
-        switch (_node.type) {
-          case 'linebreak': {
-            return <br key={index} />
-          }
-          case 'paragraph': {
-            return <p key={index}>{serializedChildren}</p>
-          }
-          case 'heading': {
-            const node = _node as SerializedHeadingNode
+        if (_node.type === 'block') {
+          // todo: fix types
 
-            type Heading = Extract<keyof JSX.IntrinsicElements, 'h1' | 'h2' | 'h3' | 'h4' | 'h5'>
-            const Tag = node?.tag as Heading
-            return <Tag key={index}>{serializedChildren}</Tag>
-          }
-          case 'list': {
-            const node = _node as SerializedListNode
+          //@ts-expect-error
+          const block = _node.fields
 
-            type List = Extract<keyof JSX.IntrinsicElements, 'ol' | 'ul'>
-            const Tag = node?.tag as List
-            return (
-              <Tag className="list" key={index}>
-                {serializedChildren}
-              </Tag>
-            )
-          }
-          case 'listitem': {
-            const node = _node as SerializedListItemNode
+          //@ts-expect-error
+          const blockType = _node.fields?.blockType
 
-            if (node?.checked != null) {
+          if (!block || !blockType) {
+            return null
+          }
+
+          switch (blockType) {
+            case 'content':
+              return <ContentBlock key={index} {...block} />
+            case 'cta':
+              return <CallToActionBlock key={index} {...block} />
+            case 'archive':
+              return <ArchiveBlock key={index} {...block} />
+            case 'mediaBlock':
+              return <MediaBlock key={index} {...block} />
+            case 'banner':
+              return <BannerBlock key={index} {...block} />
+            case 'code':
+              return <CodeBlock key={index} {...block} />
+            default:
+              return null
+          }
+        } else {
+          switch (_node.type) {
+            case 'linebreak': {
+              return <br key={index} />
+            }
+            case 'paragraph': {
+              return <p key={index}>{serializedChildren}</p>
+            }
+            case 'heading': {
+              const node = _node as SerializedHeadingNode
+
+              type Heading = Extract<keyof JSX.IntrinsicElements, 'h1' | 'h2' | 'h3' | 'h4' | 'h5'>
+              const Tag = node?.tag as Heading
+              return <Tag key={index}>{serializedChildren}</Tag>
+            }
+            case 'list': {
+              const node = _node as SerializedListNode
+
+              type List = Extract<keyof JSX.IntrinsicElements, 'ol' | 'ul'>
+              const Tag = node?.tag as List
               return (
-                <li
-                  aria-checked={node.checked ? 'true' : 'false'}
-                  className={` ${node.checked ? '' : ''}`}
+                <Tag className="list" key={index}>
+                  {serializedChildren}
+                </Tag>
+              )
+            }
+            case 'listitem': {
+              const node = _node as SerializedListItemNode
+
+              if (node?.checked != null) {
+                return (
+                  <li
+                    aria-checked={node.checked ? 'true' : 'false'}
+                    className={` ${node.checked ? '' : ''}`}
+                    key={index}
+                    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
+                    role="checkbox"
+                    tabIndex={-1}
+                    value={node?.value}
+                  >
+                    {serializedChildren}
+                  </li>
+                )
+              } else {
+                return (
+                  <li key={index} value={node?.value}>
+                    {serializedChildren}
+                  </li>
+                )
+              }
+            }
+            case 'quote': {
+              return <blockquote key={index}>{serializedChildren}</blockquote>
+            }
+            case 'link': {
+              const node = _node as SerializedLinkNode
+
+              const fields: LinkFields = node.fields
+
+              return (
+                <CMSLink
                   key={index}
-                  // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
-                  role="checkbox"
-                  tabIndex={-1}
-                  value={node?.value}
+                  newTab={Boolean(fields?.newTab)}
+                  reference={fields.doc as any}
+                  type={fields.linkType === 'internal' ? 'reference' : 'custom'}
+                  url={fields.url}
                 >
                   {serializedChildren}
-                </li>
-              )
-            } else {
-              return (
-                <li key={index} value={node?.value}>
-                  {serializedChildren}
-                </li>
+                </CMSLink>
               )
             }
-          }
-          case 'quote': {
-            return <blockquote key={index}>{serializedChildren}</blockquote>
-          }
-          case 'link': {
-            const node = _node as SerializedLinkNode
 
-            const fields: LinkFields = node.fields
-
-            return (
-              <CMSLink
-                key={index}
-                newTab={Boolean(fields?.newTab)}
-                reference={fields.doc as any}
-                type={fields.linkType === 'internal' ? 'reference' : 'custom'}
-                url={fields.url}
-              >
-                {serializedChildren}
-              </CMSLink>
-            )
-          }
-
-          case 'block': {
-            // todo: fix types
-
-            //@ts-expect-error
-            const block = _node.fields
-
-            //@ts-expect-error
-            const blockType = _node.fields?.blockType
-
-            if (!block || !blockType) {
+            default:
               return null
-            }
-
-            switch (blockType) {
-              case 'content':
-                return <ContentBlock {...block} />
-              case 'cta':
-                return <CallToActionBlock {...block} />
-              case 'archive':
-                return <ArchiveBlock {...block} />
-              case 'mediaBlock':
-                return <MediaBlock {...block} />
-              case 'banner':
-                return <BannerBlock {...block} />
-              case 'code':
-                return <CodeBlock {...block} />
-              default:
-                return null
-            }
           }
-
-          default:
-            return null
         }
       })}
     </Fragment>

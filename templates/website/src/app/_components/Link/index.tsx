@@ -1,37 +1,37 @@
+import { Button, type ButtonProps } from '@/_components/ui/button'
 import Link from 'next/link'
 import React from 'react'
 
 import type { Page, Post } from '../../../payload-types'
-import type { Props as ButtonProps } from '../Button'
-
-import { Button } from '../Button'
 
 type CMSLinkType = {
-  appearance?: ButtonProps['appearance']
+  appearance?: ButtonProps['variant']
   children?: React.ReactNode
   className?: string
-  invert?: ButtonProps['invert']
   label?: string
   newTab?: boolean
   reference?: {
     relationTo: 'pages' | 'posts'
     value: Page | Post | string
   }
+  size?: ButtonProps['size']
   type?: 'custom' | 'reference'
   url?: string
 }
 
-export const CMSLink: React.FC<CMSLinkType> = ({
-  type,
-  appearance,
-  children,
-  className,
-  invert,
-  label,
-  newTab,
-  reference,
-  url,
-}) => {
+export const CMSLink: React.FC<CMSLinkType> = (props) => {
+  const {
+    type,
+    appearance = 'link',
+    children,
+    className,
+    label,
+    newTab,
+    reference,
+    size: sizeFromProps,
+    url,
+  } = props
+
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
       ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
@@ -41,27 +41,15 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 
   if (!href) return null
 
-  if (!appearance) {
-    const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
-
-    if (href || url) {
-      return (
-        <Link {...newTabProps} className={className} href={href || url}>
-          {label && label}
-          {children && children}
-        </Link>
-      )
-    }
-  }
+  const size = appearance === 'link' ? 'clear' : sizeFromProps
+  const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
   return (
-    <Button
-      appearance={appearance}
-      className={className}
-      href={href}
-      invert={invert}
-      label={label}
-      newTab={newTab}
-    />
+    <Button asChild className={className} size={size} variant={appearance}>
+      <Link className={className} href={href || url} {...newTabProps}>
+        {label && label}
+        {children && children}
+      </Link>
+    </Button>
   )
 }

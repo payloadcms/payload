@@ -1,18 +1,15 @@
 import React from 'react'
 
-import classes from './index.module.scss'
-
+import { Code } from './Code.client'
 type Props = {
   code: string
   language?: string
 }
 
-export const CodeBlock: React.FC<Props> = ({ code }) => {
+export const CodeBlock: React.FC<Props> = ({ code, language }) => {
   return (
-    <div className={[classes.container].filter(Boolean).join(' ')}>
-      <pre className={classes.pre}>
-        <code className={classes.code}>{code}</code>
-      </pre>
+    <div className={['not-prose'].filter(Boolean).join(' ')}>
+      <Code code={code} language={language} />
     </div>
   )
 }
