@@ -227,30 +227,30 @@ describe('database', () => {
       const { id } = await payload.create({
         collection: 'custom-schema',
         data: {
-          text: 'test',
-          relationship: [relationA.id],
-          localizedText: 'hello',
-          select: ['a', 'b'],
-          radio: 'a',
           array: [
             {
-              text: 'hello',
               localizedText: 'goodbye',
+              text: 'hello',
             },
           ],
           blocks: [
             {
               blockType: 'block',
-              text: 'hello',
               localizedText: 'goodbye',
+              text: 'hello',
             },
           ],
+          localizedText: 'hello',
+          radio: 'a',
+          relationship: [relationA.id],
+          select: ['a', 'b'],
+          text: 'test',
         },
       })
 
       const doc = await payload.findByID({
-        collection: 'custom-schema',
         id,
+        collection: 'custom-schema',
       })
 
       expect(doc.relationship[0].title).toStrictEqual(relationA.title)
@@ -449,10 +449,8 @@ describe('database', () => {
         })
 
         const enDoc = {
-          relation1: relationA1.id,
           myArray: [
             {
-              relation2: relationB1.id,
               mySubArray: [
                 {
                   relation3: relationB1.id,
@@ -461,9 +459,9 @@ describe('database', () => {
                   relation3: relationB2.id,
                 },
               ],
+              relation2: relationB1.id,
             },
             {
-              relation2: relationB2.id,
               mySubArray: [
                 {
                   relation3: relationB2.id,
@@ -472,11 +470,9 @@ describe('database', () => {
                   relation3: relationB1.id,
                 },
               ],
+              relation2: relationB2.id,
             },
           ],
-          myGroup: {
-            relation4: relationB1.id,
-          },
           myBlocks: [
             {
               blockType: 'myBlock',
@@ -489,6 +485,10 @@ describe('database', () => {
               relation6: relationB2.id,
             },
           ],
+          myGroup: {
+            relation4: relationB1.id,
+          },
+          relation1: relationA1.id,
         }
 
         const migrationDoc = await payload.create({
@@ -498,11 +498,9 @@ describe('database', () => {
         })
 
         const esDoc = {
-          relation1: relationA2.id,
           myArray: [
             {
               id: migrationDoc.myArray[0].id,
-              relation2: relationB2.id,
               mySubArray: [
                 {
                   id: migrationDoc.myArray[0].mySubArray[0].id,
@@ -513,10 +511,10 @@ describe('database', () => {
                   relation3: relationB1.id,
                 },
               ],
+              relation2: relationB2.id,
             },
             {
               id: migrationDoc.myArray[1].id,
-              relation2: relationB1.id,
               mySubArray: [
                 {
                   id: migrationDoc.myArray[1].mySubArray[0].id,
@@ -527,11 +525,9 @@ describe('database', () => {
                   relation3: relationB2.id,
                 },
               ],
+              relation2: relationB1.id,
             },
           ],
-          myGroup: {
-            relation4: relationB2.id,
-          },
           myBlocks: [
             {
               id: migrationDoc.myBlocks[0].id,
@@ -546,19 +542,23 @@ describe('database', () => {
               relation6: relationB1.id,
             },
           ],
+          myGroup: {
+            relation4: relationB2.id,
+          },
+          relation1: relationA2.id,
         }
 
         const updated = await payload.update({
-          collection: 'pg-migrations',
           id: migrationDoc.id,
+          collection: 'pg-migrations',
           data: esDoc,
-          locale: 'es',
           fallbackLocale: null,
+          locale: 'es',
         })
 
         await migratePostgresV2toV3({
-          payload,
           debug: true,
+          payload,
           // dryRun: true,
         })
       }

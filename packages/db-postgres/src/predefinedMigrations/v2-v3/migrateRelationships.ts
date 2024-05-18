@@ -77,6 +77,10 @@ export const migrateRelationships = async ({
     tableName,
   })
 
-  // TODO:
-  // DELETE ALL MATCHED ROWS FROM `RESULT` ABOVE
+  const deleteStatement = `DELETE FROM ${tableName}${db.relationshipsSuffix} WHERE ${where}`
+  if (debug) {
+    payload.logger.info('DELETING ROWS')
+    payload.logger.info(deleteStatement)
+  }
+  if (!dryRun) await adapter.drizzle.execute(sql.raw(`${deleteStatement}`))
 }
