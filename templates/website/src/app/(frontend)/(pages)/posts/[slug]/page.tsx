@@ -5,13 +5,13 @@ import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import RichText from 'src/app/_components/RichText'
+import RichText from 'src/app/components/RichText'
 
 import type { Post } from '../../../../../payload-types'
 
-import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
-import { PostHero } from '../../../../_heros/PostHero'
-import { generateMeta } from '../../../../_utilities/generateMeta'
+import { PayloadRedirects } from '../../../../components/PayloadRedirects'
+import { PostHero } from '../../../../heros/PostHero'
+import { generateMeta } from '../../../../utilities/generateMeta'
 
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })

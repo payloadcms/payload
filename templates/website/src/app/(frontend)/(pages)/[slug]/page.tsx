@@ -8,10 +8,10 @@ import React from 'react'
 
 import type { Page } from '../../../../payload-types'
 
-import { Blocks } from '../../../_components/Blocks'
-import { Hero } from '../../../_components/Hero'
-import { PayloadRedirects } from '../../../_components/PayloadRedirects'
-import { generateMeta } from '../../../_utilities/generateMeta'
+import { Blocks } from '../../../components/Blocks'
+import { Hero } from '../../../components/Hero'
+import { PayloadRedirects } from '../../../components/PayloadRedirects'
+import { generateMeta } from '../../../utilities/generateMeta'
 
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })

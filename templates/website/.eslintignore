@@ -10,4 +10,3 @@
 **/temp
 playwright.config.ts
 jest.config.js
-**/ui/*.tsx

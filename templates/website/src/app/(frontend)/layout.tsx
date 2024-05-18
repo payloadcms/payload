@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
 
-import { cn } from '@/_utilities/cn'
+import { cn } from '@/utilities/cn'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
-import { AdminBar } from '../_components/AdminBar'
-import { Footer } from '../_components/Footer'
-import { Header } from '../_components/Header'
-import { LivePreviewListener } from '../_components/LivePreviewListener'
-import { Providers } from '../_providers'
-import { InitTheme } from '../_providers/Theme/InitTheme'
-import { mergeOpenGraph } from '../_utilities/mergeOpenGraph'
+import { AdminBar } from '../components/AdminBar'
+import { Footer } from '../components/Footer'
+import { Header } from '../components/Header'
+import { LivePreviewListener } from '../components/LivePreviewListener'
+import { Providers } from '../providers'
+import { InitTheme } from '../providers/Theme/InitTheme'
+import { mergeOpenGraph } from '../utilities/mergeOpenGraph'
 import './globals.css'
 
 // eslint-disable-next-line no-restricted-exports, @typescript-eslint/require-await
