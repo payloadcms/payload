@@ -3,14 +3,15 @@ import type { Payload } from 'payload'
 import { type Field, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleTransaction, PostgresAdapter } from '../../types.js'
 import type { ColumnToCreate, PathsToQuery } from './types.js'
 
 type Args = {
+  adapter: PostgresAdapter
   collectionSlug?: string
   columnPrefix: string
   columnsToCreate: ColumnToCreate[]
-  db: PostgresAdapter
+  db: DrizzleTransaction
   disableNotNull: boolean
   fields: Field[]
   globalSlug?: string
@@ -37,7 +38,7 @@ export const traverseFields = (args: Args) => {
         let newTableName = `${args.newTableName}_${toSnakeCase(field.name)}`
 
         if (field.localized && args.payload.config.localization) {
-          newTableName += args.db.localesSuffix
+          newTableName += args.adapter.localesSuffix
         }
 
         return traverseFields({
@@ -58,7 +59,7 @@ export const traverseFields = (args: Args) => {
       }
 
       case 'array': {
-        const newTableName = args.db.tableNameMap.get(
+        const newTableName = args.adapter.tableNameMap.get(
           `${args.newTableName}_${toSnakeCase(field.name)}`,
         )
 
@@ -74,7 +75,7 @@ export const traverseFields = (args: Args) => {
 
       case 'blocks': {
         return field.blocks.forEach((block) => {
-          const newTableName = args.db.tableNameMap.get(
+          const newTableName = args.adapter.tableNameMap.get(
             `${args.rootTableName}_blocks_${toSnakeCase(block.slug)}`,
           )
 
@@ -97,7 +98,7 @@ export const traverseFields = (args: Args) => {
             args.newTableName = `${args.newTableName}_${toSnakeCase(tab.name)}`
 
             if (tab.localized && args.payload.config.localization) {
-              args.newTableName += args.db.localesSuffix
+              args.newTableName += args.adapter.localesSuffix
             }
           }
 
@@ -118,14 +119,14 @@ export const traverseFields = (args: Args) => {
             let tableName = args.parentTableName
 
             if (field.localized && args.payload.config.localization) {
-              tableName += args.db.localesSuffix
+              tableName += args.adapter.localesSuffix
             }
 
             args.columnsToCreate.push({
               columnName: `${args.columnPrefix}${toSnakeCase(field.name)}_id`,
               columnType:
                 idTypeMap[
-                  args.payload.collections[field.relationTo].customIDType || args.db.idType
+                  args.payload.collections[field.relationTo].customIDType || args.adapter.idType
                 ],
               notNull,
               tableName,

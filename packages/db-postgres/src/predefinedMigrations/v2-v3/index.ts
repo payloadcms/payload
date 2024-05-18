@@ -1,7 +1,6 @@
 import type { Payload } from 'payload'
+import type { PayloadRequestWithData } from 'payload/types'
 
-import { sql } from 'drizzle-orm'
-import { createLocalReq } from 'payload/utilities'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
@@ -16,24 +15,21 @@ type Args = {
   debug?: boolean
   dryRun?: boolean
   payload: Payload
+  req: PayloadRequestWithData
 }
 
-export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) => {
-  const db = payload.db as PostgresAdapter
-
-  // TODO:
-  // NEED TO ACCEPT TRANSACTION HERE
-  // AND THREAD THROUGH ALL OPERATIONS
-
-  const req = await createLocalReq({}, payload)
+export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Args) => {
+  const adapter = payload.db as PostgresAdapter
+  const db = adapter.sessions[req.transactionID]?.db
 
   for (const collection of payload.config.collections) {
-    const tableName = db.tableNameMap.get(toSnakeCase(collection.slug))
+    const tableName = adapter.tableNameMap.get(toSnakeCase(collection.slug))
 
     const columnsToCreate: ColumnToCreate[] = []
     const pathsToQuery: PathsToQuery = new Set()
 
     traverseFields({
+      adapter,
       collectionSlug: collection.slug,
       columnPrefix: '',
       columnsToCreate,
@@ -58,6 +54,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
     })
 
     await migrateRelationships({
+      adapter,
       collectionSlug: collection.slug,
       db,
       debug,
@@ -71,8 +68,8 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
     })
 
     if (collection.versions) {
-      const versionsTableName = db.tableNameMap.get(
-        `_${toSnakeCase(collection.slug)}${db.versionsSuffix}`,
+      const versionsTableName = adapter.tableNameMap.get(
+        `_${toSnakeCase(collection.slug)}${adapter.versionsSuffix}`,
       )
       const versionFields = buildVersionCollectionFields(collection)
 
@@ -80,6 +77,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
+        adapter,
         collectionSlug: collection.slug,
         columnPrefix: '',
         columnsToCreate: versionColumnsToCreate,
@@ -104,6 +102,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       })
 
       await migrateRelationships({
+        adapter,
         collectionSlug: collection.slug,
         db,
         debug,
@@ -119,12 +118,13 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
   }
 
   for (const global of payload.config.globals) {
-    const tableName = db.tableNameMap.get(toSnakeCase(global.slug))
+    const tableName = adapter.tableNameMap.get(toSnakeCase(global.slug))
 
     const columnsToCreate: ColumnToCreate[] = []
     const pathsToQuery: PathsToQuery = new Set()
 
     traverseFields({
+      adapter,
       columnPrefix: '',
       columnsToCreate,
       db,
@@ -149,6 +149,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
     })
 
     await migrateRelationships({
+      adapter,
       db,
       debug,
       dryRun,
@@ -162,8 +163,8 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
     })
 
     if (global.versions) {
-      const versionsTableName = db.tableNameMap.get(
-        `_${toSnakeCase(global.slug)}${db.versionsSuffix}`,
+      const versionsTableName = adapter.tableNameMap.get(
+        `_${toSnakeCase(global.slug)}${adapter.versionsSuffix}`,
       )
 
       const versionFields = buildVersionGlobalFields(global)
@@ -172,6 +173,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
+        adapter,
         columnPrefix: '',
         columnsToCreate: versionColumnsToCreate,
         db,
@@ -196,6 +198,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload }: Args) =>
       })
 
       await migrateRelationships({
+        adapter,
         db,
         debug,
         dryRun,

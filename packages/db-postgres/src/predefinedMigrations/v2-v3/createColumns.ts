@@ -2,12 +2,12 @@ import type { Payload } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleTransaction } from '../../types.js'
 import type { ColumnToCreate } from './types.js'
 
 type Args = {
   columnsToCreate: ColumnToCreate[]
-  db: PostgresAdapter
+  db: DrizzleTransaction
   debug: boolean
   dryRun: boolean
   payload: Payload
@@ -38,6 +38,6 @@ END $$;
   }
 
   if (!dryRun) {
-    await payload.db.drizzle.execute(sql.raw(`${createColumnsStatement}`))
+    await db.execute(sql.raw(`${createColumnsStatement}`))
   }
 }

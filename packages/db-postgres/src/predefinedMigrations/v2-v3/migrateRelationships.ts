@@ -2,14 +2,15 @@ import type { Field, Payload, PayloadRequestWithData } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleTransaction, PostgresAdapter } from '../../types.js'
 import type { DocsToResave, PathsToQuery } from './types.js'
 
 import { fetchAndResave } from './fetchAndResave/index.js'
 
 type Args = {
+  adapter: PostgresAdapter
   collectionSlug?: string
-  db: PostgresAdapter
+  db: DrizzleTransaction
   debug: boolean
   dryRun: boolean
   fields: Field[]
@@ -22,6 +23,7 @@ type Args = {
 }
 
 export const migrateRelationships = async ({
+  adapter,
   collectionSlug,
   db,
   debug,
@@ -40,11 +42,11 @@ export const migrateRelationships = async ({
 
   const where = Array.from(pathsToQuery).reduce((statement, path, i) => {
     return (statement += `
-"${tableName}${db.relationshipsSuffix}"."path" LIKE '${path}'${pathsToQuery.size !== i + 1 ? ' OR' : ''}
+"${tableName}${adapter.relationshipsSuffix}"."path" LIKE '${path}'${pathsToQuery.size !== i + 1 ? ' OR' : ''}
 `)
   }, '')
 
-  const statement = `SELECT * FROM ${tableName}${db.relationshipsSuffix} WHERE
+  const statement = `SELECT * FROM ${tableName}${adapter.relationshipsSuffix} WHERE
     ${where}
 `
   if (debug) {
@@ -52,7 +54,7 @@ export const migrateRelationships = async ({
     payload.logger.info(statement)
   }
 
-  const result = await db.drizzle.execute(sql.raw(`${statement}`))
+  const result = await adapter.drizzle.execute(sql.raw(`${statement}`))
 
   result.rows.forEach((row) => {
     const parentID = row.parent_id
@@ -64,6 +66,7 @@ export const migrateRelationships = async ({
   })
 
   await fetchAndResave({
+    adapter,
     collectionSlug,
     db,
     debug,
@@ -77,10 +80,10 @@ export const migrateRelationships = async ({
     tableName,
   })
 
-  const deleteStatement = `DELETE FROM ${tableName}${db.relationshipsSuffix} WHERE ${where}`
+  const deleteStatement = `DELETE FROM ${tableName}${adapter.relationshipsSuffix} WHERE ${where}`
   if (debug) {
     payload.logger.info('DELETING ROWS')
     payload.logger.info(deleteStatement)
   }
-  if (!dryRun) await adapter.drizzle.execute(sql.raw(`${deleteStatement}`))
+  if (!dryRun) await db.execute(sql.raw(`${deleteStatement}`))
 }

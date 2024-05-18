@@ -1,15 +1,16 @@
 import type { Payload } from 'payload'
 import type { Field, PayloadRequestWithData } from 'payload/types'
 
-import type { PostgresAdapter } from '../../../types.js'
+import type { DrizzleTransaction, PostgresAdapter } from '../../../types.js'
 import type { DocsToResave } from '../types.js'
 
 import { upsertRow } from '../../../upsertRow/index.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  adapter: PostgresAdapter
   collectionSlug?: string
-  db: PostgresAdapter
+  db: DrizzleTransaction
   debug: boolean
   docsToResave: DocsToResave
   dryRun: boolean
@@ -22,6 +23,7 @@ type Args = {
 }
 
 export const fetchAndResave = async ({
+  adapter,
   collectionSlug,
   db,
   debug,
@@ -72,9 +74,9 @@ export const fetchAndResave = async ({
               try {
                 await upsertRow({
                   id: doc.id,
-                  adapter: db,
+                  adapter,
                   data: doc,
-                  db: db.drizzle,
+                  db,
                   fields,
                   operation: 'update',
                   req,
@@ -122,9 +124,9 @@ export const fetchAndResave = async ({
             try {
               await upsertRow({
                 id: doc.id,
-                adapter: db,
+                adapter,
                 data: doc,
-                db: db.drizzle,
+                db,
                 fields,
                 operation: 'update',
                 req,
@@ -178,9 +180,9 @@ export const fetchAndResave = async ({
               try {
                 await upsertRow({
                   id: doc.id,
-                  adapter: db,
+                  adapter,
                   data: doc,
-                  db: db.drizzle,
+                  db,
                   fields,
                   operation: 'update',
                   req,
@@ -219,9 +221,9 @@ export const fetchAndResave = async ({
             try {
               await upsertRow({
                 id: doc.id,
-                adapter: db,
+                adapter,
                 data: doc,
-                db: db.drizzle,
+                db,
                 fields,
                 operation: 'update',
                 req,
