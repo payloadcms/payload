@@ -10,7 +10,7 @@
     "checkJs": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "lib": [
       "dom",
       "dom.iterable",
