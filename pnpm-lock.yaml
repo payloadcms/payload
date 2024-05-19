@@ -5,6 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@types/react': npm:types-react@beta
+  '@types/react-dom': npm:types-react-dom@beta
   copyfiles: 2.4.1
   cross-env: 7.0.3
   dotenv: 8.6.0
@@ -1573,8 +1575,8 @@ importers:
         specifier: 2.1.2
         version: 2.1.2(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
       react-datepicker:
-        specifier: 6.2.0
-        version: 6.2.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
+        specifier: 6.9.0
+        version: 6.9.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
       react-dom:
         specifier: ^19.0.0-beta-04b058868c-20240508
         version: 19.0.0-rc-915b914b3a-20240515(react@19.0.0-rc-915b914b3a-20240515)
@@ -1582,8 +1584,8 @@ importers:
         specifier: 10.1.8
         version: 10.1.8(react@19.0.0-rc-915b914b3a-20240515)
       react-select:
-        specifier: 5.7.4
-        version: 5.7.4(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)(types-react@19.0.0-beta.1)
+        specifier: 5.8.0
+        version: 5.8.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)(types-react@19.0.0-beta.1)
       react-toastify:
         specifier: 10.0.5
         version: 10.0.5(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
@@ -1607,8 +1609,8 @@ importers:
         specifier: npm:types-react@beta
         version: /types-react@19.0.0-beta.1
       '@types/react-datepicker':
-        specifier: 4.11.2
-        version: 4.11.2(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
+        specifier: 6.2.0
+        version: 6.2.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
       '@types/react-dom':
         specifier: npm:types-react-dom@beta
         version: /types-react-dom@19.0.0-beta.1
@@ -1738,6 +1740,12 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      '@types/react':
+        specifier: npm:types-react@beta
+        version: /types-react@19.0.0-beta.1
+      '@types/react-dom':
+        specifier: npm:types-react-dom@beta
+        version: /types-react-dom@19.0.0-beta.1
       comment-json:
         specifier: ^4.2.3
         version: 4.2.3
@@ -3958,14 +3966,12 @@ packages:
     resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
     dependencies:
       '@floating-ui/utils': 0.2.1
-    dev: false
 
   /@floating-ui/dom@1.6.3:
     resolution: {integrity: sha512-RnDthu3mzPlQ31Ss/BTwQ1zjzIhr3lk1gZB1OC56h/1vEtaXkESrOqL5fQVMfXpwGtRwX+YsZBdyHtJMQnkArw==}
     dependencies:
       '@floating-ui/core': 1.6.0
       '@floating-ui/utils': 0.2.1
-    dev: false
 
   /@floating-ui/react-dom@2.0.8(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515):
     resolution: {integrity: sha512-HOdqOt3R3OGeTKidaLvJKcgg75S6tibQ3Tif4eyd91QnIJWr0NLvoXFpJA/j8HqkFSL68GDca9AuyWEHlhyClw==}
@@ -3976,7 +3982,6 @@ packages:
       '@floating-ui/dom': 1.6.3
       react: 19.0.0-rc-915b914b3a-20240515
       react-dom: 19.0.0-rc-915b914b3a-20240515(react@19.0.0-rc-915b914b3a-20240515)
-    dev: false
 
   /@floating-ui/react@0.26.11(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515):
     resolution: {integrity: sha512-fo01Cu+jzLDVG/AYAV2OtV6flhXvxP5rDaR1Fk8WWhtsFqwk478Dr2HGtB8s0HqQCsFWVbdHYpPjMiQiR/A9VA==}
@@ -3989,11 +3994,9 @@ packages:
       react: 19.0.0-rc-915b914b3a-20240515
       react-dom: 19.0.0-rc-915b914b3a-20240515(react@19.0.0-rc-915b914b3a-20240515)
       tabbable: 6.2.0
-    dev: false
 
   /@floating-ui/utils@0.2.1:
     resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
-    dev: false
 
   /@google-cloud/paginator@5.0.0:
     resolution: {integrity: sha512-87aeg6QQcEPxGCOthnpUjvw4xAZ57G7pL8FS0C4e/81fr3FjkpUpibf1s2v5XGyGhUVGF4Jfg7yEcxqn2iUw1w==}
@@ -5906,7 +5909,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.4
       '@testing-library/dom': 9.3.4
-      '@types/react-dom': 18.3.0
+      '@types/react-dom': /types-react-dom@19.0.0-beta.1
       react: 19.0.0-rc-915b914b3a-20240515
       react-dom: 19.0.0-rc-915b914b3a-20240515(react@19.0.0-rc-915b914b3a-20240515)
     dev: true
@@ -6341,6 +6344,7 @@ packages:
 
   /@types/prop-types@15.7.12:
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
+    dev: true
 
   /@types/qs@6.9.14:
     resolution: {integrity: sha512-5khscbd3SwWMhFqylJBLQ0zIu7c1K6Vz0uBIt915BI3zV0q1nfjRQD3RqSBcPaO6PHEF4ov/t9y89fSiyThlPA==}
@@ -6366,16 +6370,21 @@ packages:
       - react-dom
     dev: true
 
-  /@types/react-dom@18.3.0:
-    resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
+  /@types/react-datepicker@6.2.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515):
+    resolution: {integrity: sha512-+JtO4Fm97WLkJTH8j8/v3Ldh7JCNRwjMYjRaKh4KHH0M3jJoXtwiD3JBCsdlg3tsFIw9eQSqyAPeVDN2H2oM9Q==}
     dependencies:
+      '@floating-ui/react': 0.26.11(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
       '@types/react': 18.3.2
+      date-fns: 3.3.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
     dev: true
 
   /@types/react-transition-group@4.4.10:
     resolution: {integrity: sha512-hT/+s0VQs2ojCX823m60m5f0sL5idt9SO6Tj6Dg+rdphGPIeJbJ6CxvBYkgkGKrYeDjvIpKTR38UzmtHJOGW3Q==}
     dependencies:
-      '@types/react': 18.3.2
+      '@types/react': /types-react@19.0.0-beta.1
     dev: false
 
   /@types/react@18.3.2:
@@ -6383,6 +6392,7 @@ packages:
     dependencies:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
+    dev: true
 
   /@types/request@2.48.12:
     resolution: {integrity: sha512-G3sY+NpsA9jnwm0ixhAFQSJ3Q9JkpLZpJbI3GMv0mIAT0y3mRabYeINzal5WOChIiaTEGQYlHOKgkaM9EisWHw==}
@@ -8947,7 +8957,7 @@ packages:
       '@planetscale/database': '>=1'
       '@types/better-sqlite3': '*'
       '@types/pg': '*'
-      '@types/react': '>=18'
+      '@types/react': npm:types-react@beta
       '@types/sql.js': '*'
       '@vercel/postgres': '*'
       better-sqlite3: '>=7'
@@ -14373,14 +14383,14 @@ packages:
       react-dom: 19.0.0-rc-915b914b3a-20240515(react@19.0.0-rc-915b914b3a-20240515)
     dev: false
 
-  /react-datepicker@6.2.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515):
-    resolution: {integrity: sha512-GzEOiE6yLfp9P6XNkOhXuYtZHzoAx3tirbi7/dj2WHlGM+NGE1lefceqGR0ZrYsYaqsNJhIJFTgwUpzVzA+mjw==}
+  /react-datepicker@6.9.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515):
+    resolution: {integrity: sha512-QTxuzeem7BUfVFWv+g5WuvzT0c5BPo+XTCNbMTZKSZQLU+cMMwSUHwspaxuIcDlwNcOH0tiJ+bh1fJ2yxOGYWA==}
     peerDependencies:
       react: ^19.0.0-beta-04b058868c-20240508
       react-dom: ^19.0.0-beta-04b058868c-20240508
     dependencies:
       '@floating-ui/react': 0.26.11(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)
-      classnames: 2.5.1
+      clsx: 2.1.0
       date-fns: 3.3.1
       prop-types: 15.8.1
       react: 19.0.0-rc-915b914b3a-20240515
@@ -14477,8 +14487,8 @@ packages:
       warning: 4.0.3
     dev: true
 
-  /react-select@5.7.4(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)(types-react@19.0.0-beta.1):
-    resolution: {integrity: sha512-NhuE56X+p9QDFh4BgeygHFIvJJszO1i1KSkg/JPcIJrbovyRtI+GuOEa4XzFCEpZRAEoEI8u/cAHK+jG/PgUzQ==}
+  /react-select@5.8.0(react-dom@19.0.0-rc-915b914b3a-20240515)(react@19.0.0-rc-915b914b3a-20240515)(types-react@19.0.0-beta.1):
+    resolution: {integrity: sha512-TfjLDo58XrhP6VG5M/Mi56Us0Yt8X7xD6cDybC7yoRMUNm7BGO7qk8J0TLQOua/prb8vUOtsfnXZwfm30HGsAA==}
     peerDependencies:
       react: ^19.0.0-beta-04b058868c-20240508
       react-dom: ^19.0.0-beta-04b058868c-20240508
@@ -15666,7 +15676,6 @@ packages:
 
   /tabbable@6.2.0:
     resolution: {integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==}
-    dev: false
 
   /tapable@2.2.1:
     resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}

@@ -16,7 +16,7 @@ import {
   COMMAND_PRIORITY_LOW,
   createCommand,
 } from 'lexical'
-import { useCallback, useEffect, useState } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 
 import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch.js'

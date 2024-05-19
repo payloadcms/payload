@@ -6,7 +6,7 @@ import './index.scss'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
-  boundingRef?: React.RefObject<HTMLElement>
+  boundingRef?: React.RefObject<HTMLElement | null>
   children: React.ReactNode
   className?: string
   delay?: number

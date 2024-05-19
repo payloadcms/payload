@@ -181,6 +181,8 @@
       "uuid": "3.4.0"
     },
     "overrides": {
+      "@types/react": "npm:types-react@beta",
+      "@types/react-dom": "npm:types-react-dom@beta",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",

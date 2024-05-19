@@ -2,7 +2,6 @@ import type { MultiValueProps } from 'react-select'
 
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
-import { v4 as uuid } from 'uuid'
 
 import type { Option } from '../types.js'
 
@@ -38,6 +37,7 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
     <SelectComponents.MultiValue
       {...props}
       className={classes}
+      // @ts-expect-error // TODO Fix this - Broke with React 19 types
       innerProps={{
         ...innerProps,
         ...attributes,

@@ -1,6 +1,6 @@
 import type { MultiValueRemoveProps } from 'react-select'
 
-import React from 'react'
+import React, { type JSX } from 'react'
 
 import type { Option as OptionType } from '../types.js'
 

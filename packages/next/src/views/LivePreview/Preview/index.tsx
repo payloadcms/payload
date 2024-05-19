@@ -32,7 +32,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
   const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
 
   const prevWindowType =
-    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>()
+    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
   const [fields] = useAllFormFields()
 

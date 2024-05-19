@@ -7,6 +7,7 @@ import type {
   LexicalNode,
   Spread,
 } from 'lexical'
+import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import { $applyNodeReplacement } from 'lexical'
