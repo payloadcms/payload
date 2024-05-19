@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload/types'
 
-import { link } from '../fields/link'
+import { link } from '../../fields/link'
+import { revalidateFooter } from './hooks/revalidateFooter'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
@@ -19,4 +20,7 @@ export const Footer: GlobalConfig = {
       maxRows: 6,
     },
   ],
+  hooks: {
+    afterChange: [revalidateFooter],
+  },
 }

@@ -15,7 +15,7 @@ export const Textarea: React.FC<
         [x: string]: any
       }>
     >
-    register: UseFormRegister<FieldValues & any>
+    register: UseFormRegister<FieldValues>
     rows?: number
   }
 > = ({

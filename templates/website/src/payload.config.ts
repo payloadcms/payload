@@ -23,9 +23,8 @@ import Users from './_payload/collections/Users'
 import BeforeDashboard from './_payload/components/BeforeDashboard'
 import BeforeLogin from './_payload/components/BeforeLogin'
 import { seed } from './_payload/endpoints/seed'
-import { Footer } from './_payload/globals/Footer'
-import { Header } from './_payload/globals/Header'
-import { Settings } from './_payload/globals/Settings'
+import { Footer } from './_payload/globals/Footer/Footer'
+import { Header } from './_payload/globals/Header/Header'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -80,7 +79,7 @@ export default buildConfig({
       path: '/seed',
     },
   ],
-  globals: [Settings, Header, Footer],
+  globals: [Header, Footer],
   plugins: [
     redirectsPlugin({
       collections: ['pages', 'posts'],

@@ -15,7 +15,7 @@ export const Email: React.FC<
         [x: string]: any
       }>
     >
-    register: UseFormRegister<FieldValues & any>
+    register: UseFormRegister<FieldValues>
   }
 > = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
   return (

@@ -17,7 +17,7 @@ export interface Property {
 }
 
 export interface Data {
-  [key: string]: Property | Property[] | Value
+  [key: string]: Property | Property[]
 }
 
 export type FormBlockType = {

@@ -266,15 +266,6 @@ export const seed = async (payload: Payload): Promise<void> => {
     ),
   })
 
-  payload.logger.info(`— Seeding settings...`)
-
-  await payload.updateGlobal({
-    slug: 'settings',
-    data: {
-      postsPage: postsPageDoc.id,
-    },
-  })
-
   payload.logger.info(`— Seeding header...`)
 
   await payload.updateGlobal({
