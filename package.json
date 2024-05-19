@@ -102,7 +102,8 @@
     "@types/node": "20.12.5",
     "@types/prompts": "^2.4.5",
     "@types/qs": "6.9.14",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta",
     "@types/semver": "^7.5.3",
     "@types/shelljs": "0.8.15",
     "add-stream": "^1.0.0",
@@ -193,6 +194,10 @@
     "patchedDependencies": {
       "playwright@1.43.0": "patches/playwright@1.43.0.patch"
     }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta"
   },
   "workspaces:": [
     "packages/*",

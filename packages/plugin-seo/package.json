@@ -51,7 +51,8 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -78,5 +79,9 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "homepage:": "https://payloadcms.com"
+  "homepage:": "https://payloadcms.com",
+  "overrides": {
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta"
+  }
 }

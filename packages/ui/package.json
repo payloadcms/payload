@@ -119,9 +119,9 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@beta",
     "@types/react-datepicker": "4.11.2",
-    "@types/react-dom": "18.3.0",
+    "@types/react-dom": "npm:types-react-dom@beta",
     "@types/uuid": "8.3.4",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
@@ -226,5 +226,9 @@
       },
       "./scss/app.scss": "./dist/scss/app.scss"
     }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta"
   }
 }

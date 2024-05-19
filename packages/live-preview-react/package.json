@@ -35,7 +35,8 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -53,5 +54,9 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta"
   }
 }
