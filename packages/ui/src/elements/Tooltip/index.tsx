@@ -10,6 +10,10 @@ export type Props = {
   children: React.ReactNode
   className?: string
   delay?: number
+  /**
+   * Whether to change the tooltip position depending on if the toolbar is outside the boundingRef. @default false
+   */
+  dynamicPositioning?: boolean
   show?: boolean
 }
 
@@ -20,6 +24,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     children,
     className,
     delay = 350,
+    dynamicPositioning = false,
     show: showFromProps = true,
   } = props
 
@@ -28,11 +33,14 @@ export const Tooltip: React.FC<Props> = (props) => {
 
   const getTitleAttribute = (content) => (typeof content === 'string' ? content : '')
 
-  const [ref, intersectionEntry] = useIntersect({
-    root: boundingRef?.current || null,
-    rootMargin: '-145px 0px 0px 100px',
-    threshold: 0,
-  })
+  const [ref, intersectionEntry] = useIntersect(
+    {
+      root: boundingRef?.current || null,
+      rootMargin: '-145px 0px 0px 100px',
+      threshold: 0,
+    },
+    !dynamicPositioning,
+  )
 
   useEffect(() => {
     let timerId: NodeJS.Timeout
@@ -52,23 +60,25 @@ export const Tooltip: React.FC<Props> = (props) => {
   }, [showFromProps, delay])
 
   useEffect(() => {
+    if (!dynamicPositioning) return
     setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
-  }, [intersectionEntry])
+  }, [intersectionEntry, dynamicPositioning])
 
   // The first aside is always on top. The purpose of that is that it can reliably be used for the interaction observer (as it's not moving around), to calculate the position of the actual tooltip.
   return (
     <React.Fragment>
-      <aside
-        aria-hidden="true"
-        className={['tooltip', className, `tooltip--caret-${alignCaret}`, 'tooltip--position-top']
-          .filter(Boolean)
-          .join(' ')}
-        ref={ref}
-        style={{ opacity: '0' }}
-      >
-        <div className="tooltip-content">{children}</div>
-      </aside>
-
+      {dynamicPositioning && (
+        <aside
+          aria-hidden="true"
+          className={['tooltip', className, `tooltip--caret-${alignCaret}`, 'tooltip--position-top']
+            .filter(Boolean)
+            .join(' ')}
+          ref={ref}
+          style={{ opacity: '0' }}
+        >
+          <div className="tooltip-content">{children}</div>
+        </aside>
+      )}
       <aside
         className={[
           'tooltip',

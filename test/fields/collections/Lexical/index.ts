@@ -39,6 +39,16 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'title2',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'title3',
+      type: 'text',
+      required: true,
+    },
+    {
       name: 'lexicalSimple',
       type: 'richText',
       editor: lexicalEditor({

@@ -8,6 +8,7 @@ const SelectFields: CollectionConfig = {
     {
       name: 'select',
       type: 'select',
+      required: true,
       admin: {
         isClearable: true,
       },

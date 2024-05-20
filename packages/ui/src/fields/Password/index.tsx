@@ -67,22 +67,25 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <input
-        autoComplete={autoComplete}
-        disabled={formProcessing || disabled}
-        id={`field-${path.replace(/\./g, '__')}`}
-        name={path}
-        onChange={setValue}
-        type="password"
-        value={(value as string) || ''}
-      />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+
+        <input
+          autoComplete={autoComplete}
+          disabled={formProcessing || disabled}
+          id={`field-${path.replace(/\./g, '__')}`}
+          name={path}
+          onChange={setValue}
+          type="password"
+          value={(value as string) || ''}
+        />
+      </div>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import type { FormFieldBase } from '../shared/index.js'
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
@@ -87,6 +88,12 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
         <GroupProvider>
           <div className={`${baseClass}__wrap`}>
             <div className={`${baseClass}__header`}>
+              <FieldLabel
+                CustomLabel={CustomLabel}
+                label={label}
+                required={required}
+                {...(labelProps || {})}
+              />
               {(CustomLabel || CustomDescription || label) && (
                 <header>
                   {CustomLabel !== undefined ? (
