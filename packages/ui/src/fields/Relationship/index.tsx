@@ -154,13 +154,12 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
 
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
-            if (!searchArg) {
-              if (typeof sortOptions === 'string') {
-                fieldToSearch = sortOptions
-              } else if (sortOptions?.[relation]) {
-                fieldToSearch = sortOptions[relation]
-              }
+            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSort = collection?.defaultSort || 'id'
+            if (typeof sortOptions === 'string') {
+              fieldToSort = sortOptions
+            } else if (sortOptions?.[relation]) {
+              fieldToSort = sortOptions[relation]
             }
 
             const query: {
@@ -172,7 +171,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
-              sort: fieldToSearch,
+              sort: fieldToSort,
               where: {
                 and: [
                   {
