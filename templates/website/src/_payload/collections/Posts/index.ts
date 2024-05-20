@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload/types'
 import {
   FixedToolbarFeature,
   HeadingFeature,
+  HorizontalRuleFeature,
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
@@ -58,6 +59,7 @@ export const Posts: CollectionConfig = {
                     BlocksFeature({ blocks: [Banner, Code] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
+                    HorizontalRuleFeature(),
                   ]
                 },
               }),
