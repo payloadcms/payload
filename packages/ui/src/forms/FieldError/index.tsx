@@ -32,7 +32,7 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
 
   if (showMessage && message?.length) {
     return (
-      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0}>
+      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0} staticPositioning>
         {message}
       </Tooltip>
     )

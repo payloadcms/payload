@@ -10,11 +10,11 @@ export type Props = {
   children: React.ReactNode
   className?: string
   delay?: number
-  /**
-   * Whether to change the tooltip position depending on if the toolbar is outside the boundingRef. @default false
-   */
-  dynamicPositioning?: boolean
   show?: boolean
+  /**
+   * If the tooltip position should not change depending on if the toolbar is outside the boundingRef. @default false
+   */
+  staticPositioning?: boolean
 }
 
 export const Tooltip: React.FC<Props> = (props) => {
@@ -24,8 +24,8 @@ export const Tooltip: React.FC<Props> = (props) => {
     children,
     className,
     delay = 350,
-    dynamicPositioning = false,
     show: showFromProps = true,
+    staticPositioning = false,
   } = props
 
   const [show, setShow] = React.useState(showFromProps)
@@ -39,7 +39,7 @@ export const Tooltip: React.FC<Props> = (props) => {
       rootMargin: '-145px 0px 0px 100px',
       threshold: 0,
     },
-    !dynamicPositioning,
+    staticPositioning,
   )
 
   useEffect(() => {
@@ -60,14 +60,14 @@ export const Tooltip: React.FC<Props> = (props) => {
   }, [showFromProps, delay])
 
   useEffect(() => {
-    if (!dynamicPositioning) return
+    if (staticPositioning) return
     setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
-  }, [intersectionEntry, dynamicPositioning])
+  }, [intersectionEntry, staticPositioning])
 
   // The first aside is always on top. The purpose of that is that it can reliably be used for the interaction observer (as it's not moving around), to calculate the position of the actual tooltip.
   return (
     <React.Fragment>
-      {dynamicPositioning && (
+      {!staticPositioning && (
         <aside
           aria-hidden="true"
           className={['tooltip', className, `tooltip--caret-${alignCaret}`, 'tooltip--position-top']
