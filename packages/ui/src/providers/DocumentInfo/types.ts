@@ -40,6 +40,8 @@ export type DocumentInfoContext = DocumentInfoProps & {
   getVersions: () => Promise<void>
   initialData: Data
   initialState?: FormState
+  isInitializing: boolean
+  isLoading: boolean
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (

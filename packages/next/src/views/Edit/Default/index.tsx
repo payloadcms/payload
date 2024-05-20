@@ -52,6 +52,7 @@ export const DefaultEditView: React.FC = () => {
     initialData: data,
     initialState,
     isEditing,
+    isInitializing,
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
@@ -185,8 +186,9 @@ export const DefaultEditView: React.FC = () => {
           action={action}
           className={`${baseClass}__form`}
           disableValidationOnSubmit
-          disabled={!hasSavePermission}
-          initialState={initialState}
+          disabled={isInitializing || !hasSavePermission}
+          initialState={!isInitializing && initialState}
+          isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}

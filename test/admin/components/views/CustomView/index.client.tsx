@@ -23,16 +23,15 @@ export const ClientForm: React.FC = () => {
     >
       <CustomPassword />
       <ConfirmPassword />
-
       <FormSubmit>Submit</FormSubmit>
     </Form>
   )
 }
 
 const CustomPassword: React.FC = () => {
-  const confirmPassword = useFormFields(([fields]) => {
-    return fields['confirm-password']
-  })
+  const confirmPassword = useFormFields(
+    ([fields]) => (fields && fields?.['confirm-password']) || null,
+  )
 
   const confirmValue = confirmPassword.value
 

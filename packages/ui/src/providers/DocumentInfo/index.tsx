@@ -9,7 +9,6 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
-import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
@@ -33,7 +32,8 @@ export const DocumentInfoProvider: React.FC<
   }
 > = ({ children, ...props }) => {
   const { id, collectionSlug, globalSlug, onLoadError, onSave: onSaveFromProps } = props
-  const [isLoading, setIsLoading] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
   const [documentTitle, setDocumentTitle] = useState('')
   const [initialData, setInitialData] = useState<Data>()
@@ -368,10 +368,13 @@ export const DocumentInfoProvider: React.FC<
           }
           setIsError(true)
           setIsLoading(false)
+          setIsInitializing(false)
         }
       }
 
       setIsLoading(false)
+
+      setIsInitializing(false)
     }
 
     void getInitialState()
@@ -435,10 +438,6 @@ export const DocumentInfoProvider: React.FC<
 
   if (isError) notFound()
 
-  if (!initialState || isLoading) {
-    return <LoadingOverlay />
-  }
-
   const value: DocumentInfoContext = {
     ...props,
     docConfig,
@@ -449,6 +448,8 @@ export const DocumentInfoProvider: React.FC<
     hasSavePermission,
     initialData,
     initialState,
+    isInitializing,
+    isLoading,
     onSave,
     publishedDoc,
     setDocFieldPreferences,

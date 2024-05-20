@@ -7,6 +7,7 @@ import { Email } from '@payloadcms/ui/fields/Email'
 import { Password } from '@payloadcms/ui/fields/Password'
 import { useFormFields, useFormModified } from '@payloadcms/ui/forms/Form'
 import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -32,10 +33,11 @@ export const Auth: React.FC<Props> = (props) => {
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
-  const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey)
+  const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
+  const { isLoading } = useDocumentInfo()
 
   const {
     routes: { api },
@@ -91,6 +93,7 @@ export const Auth: React.FC<Props> = (props) => {
         <React.Fragment>
           <Email
             autoComplete="email"
+            disabled={isLoading}
             label={t('general:email')}
             name="email"
             readOnly={readOnly}
@@ -100,7 +103,7 @@ export const Auth: React.FC<Props> = (props) => {
             <div className={`${baseClass}__changing-password`}>
               <Password
                 autoComplete="off"
-                disabled={readOnly}
+                disabled={isLoading || readOnly}
                 label={t('authentication:newPassword')}
                 name="password"
                 required
@@ -108,12 +111,11 @@ export const Auth: React.FC<Props> = (props) => {
               <ConfirmPassword disabled={readOnly} />
             </div>
           )}
-
           <div className={`${baseClass}__controls`}>
             {changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
-                disabled={readOnly}
+                disabled={isLoading || readOnly}
                 onClick={() => handleChangePassword(false)}
                 size="small"
               >
@@ -123,7 +125,7 @@ export const Auth: React.FC<Props> = (props) => {
             {!changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
-                disabled={readOnly}
+                disabled={isLoading || readOnly}
                 id="change-password"
                 onClick={() => handleChangePassword(true)}
                 size="small"
@@ -134,7 +136,7 @@ export const Auth: React.FC<Props> = (props) => {
             {operation === 'update' && (
               <Button
                 buttonStyle="secondary"
-                disabled={readOnly}
+                disabled={isLoading || readOnly}
                 onClick={() => unlock()}
                 size="small"
               >
@@ -147,6 +149,7 @@ export const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
+            disabled={isLoading}
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
             readOnly={readOnly}
@@ -155,7 +158,12 @@ export const Auth: React.FC<Props> = (props) => {
         </div>
       )}
       {verify && (
-        <Checkbox label={t('authentication:verified')} name="_verified" readOnly={readOnly} />
+        <Checkbox
+          disabled={isLoading}
+          label={t('authentication:verified')}
+          name="_verified"
+          readOnly={readOnly}
+        />
       )}
     </div>
   )

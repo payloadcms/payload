@@ -12,7 +12,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { code } = useLocale()
-  const { id, collectionSlug, globalSlug, publishedDoc, unpublishedVersions } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, isLoading, publishedDoc, unpublishedVersions } =
+    useDocumentInfo()
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
   const { getData, submit } = useForm()
   const modified = useFormModified()
@@ -72,8 +73,10 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       }
     }
 
-    void fetchPublishAccess()
-  }, [api, code, collectionSlug, getData, globalSlug, id, serverURL])
+    if (!isLoading) {
+      void fetchPublishAccess()
+    }
+  }, [api, code, collectionSlug, getData, globalSlug, id, serverURL, isLoading])
 
   if (!hasPublishPermission) return null
 

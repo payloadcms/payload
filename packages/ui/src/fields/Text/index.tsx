@@ -60,9 +60,10 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { formProcessing, path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -140,7 +141,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={formProcessing || readOnly}
+      readOnly={formInitializing || formProcessing || readOnly}
       required={required}
       rtl={renderRTL}
       showError={showError}
