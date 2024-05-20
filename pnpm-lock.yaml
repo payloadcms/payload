@@ -1443,7 +1443,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: ^6.10.1
-        version: 6.10.1(next@14.3.0-canary.68)
+        version: 6.10.4(next@14.3.0-canary.68)
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1746,7 +1746,7 @@ importers:
         version: 5.4.5
       uploadthing:
         specifier: ^6.10.1
-        version: 6.10.1(next@14.3.0-canary.68)
+        version: 6.10.4(next@14.3.0-canary.68)
 
 packages:
 
@@ -3366,13 +3366,13 @@ packages:
     dependencies:
       superjson: 2.2.1
 
-  /@effect/schema@0.66.14(effect@3.1.2)(fast-check@3.18.0):
-    resolution: {integrity: sha512-2Yc6gnXpcMmwQnbU2JUwDl0ckeOJmFZzteXn2jjVWuNi9PGv+jp2yK7jxv0pALcieuYwdR5tKkCRI7STuhEwfg==}
+  /@effect/schema@0.66.16(effect@3.1.5)(fast-check@3.18.0):
+    resolution: {integrity: sha512-sT/k5NOgKslGPzs3DUaCFuM6g2JQoIIT8jpwEorAZooplPIMK2xIspr7ECz6pp6Dc7Wz/ppXGk7HVyGZQsIYEQ==}
     peerDependencies:
-      effect: ^3.1.2
+      effect: ^3.1.3
       fast-check: ^3.13.2
     dependencies:
-      effect: 3.1.2
+      effect: 3.1.5
       fast-check: 3.18.0
 
   /@emnapi/runtime@1.1.1:
@@ -6696,21 +6696,19 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  /@uploadthing/mime-types@0.2.9:
-    resolution: {integrity: sha512-7Ap2evP+niXNSXoOck4DUZUAKYrMRRpJ85n+ZxCuRsnr3iziOgv/Rt6es5SnMVgE/aOObxddOxbrxyOhISQWHQ==}
+  /@uploadthing/mime-types@0.2.10:
+    resolution: {integrity: sha512-kz3F0oEgAyts25NAGXlUBCWh3mXonbSOQJFGFMawHuIgbUbnzXbe4w5WI+0XdneCbjNmikfWrdWrs8m/7HATfQ==}
 
-  /@uploadthing/shared@6.7.1(@uploadthing/mime-types@0.2.9):
-    resolution: {integrity: sha512-4Imk46n+rwFaobfDuDSclYcH/OcpJA048Ww0il6nqT7EoXQ7Pa9NJfGkoNkS8+K8rT71IVljdaiaLEapgRxj0Q==}
+  /@uploadthing/shared@6.7.4(@uploadthing/mime-types@0.2.10):
+    resolution: {integrity: sha512-7e35U7/84qQQx+bhldSdze9ODiAo4NCCZiYEV3NomD44O9fE5bfQXcCPtBeXh3y3udf7S28PMZbT6ybJeuKfgw==}
     peerDependencies:
-      '@uploadthing/mime-types': 0.2.9
+      '@uploadthing/mime-types': 0.2.10
     peerDependenciesMeta:
       '@uploadthing/mime-types':
         optional: true
     dependencies:
-      '@effect/schema': 0.66.14(effect@3.1.2)(fast-check@3.18.0)
-      '@uploadthing/mime-types': 0.2.9
-      effect: 3.1.2
-      fast-check: 3.18.0
+      '@uploadthing/mime-types': 0.2.10
+      effect: 3.1.5
       std-env: 3.7.0
 
   /@vercel/blob@0.22.3:
@@ -9020,8 +9018,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: false
 
-  /effect@3.1.2:
-    resolution: {integrity: sha512-XakSWck6w6ROqKyEys0tKE9K6Gx2p8W/09u2ZTEZZrneO5Z3QEdPhXzWTyC73kD5zUvfJinZLVIas8I1xoHaTg==}
+  /effect@3.1.5:
+    resolution: {integrity: sha512-nTkW/ViRF8cXVMKjusYMVp7L1eqLwMZV7K6GHoqq3MD7NjPT/tJRVhY8d6z5Vam9kxgvRAzqwJKkaRpRVz1jTw==}
 
   /electron-to-chromium@1.4.730:
     resolution: {integrity: sha512-oJRPo82XEqtQAobHpJIR3zW5YO3sSRRkPz2an4yxi1UvqhsGm54vR/wzTFV74a3soDOJ8CKW7ajOOX5ESzddwg==}
@@ -16269,8 +16267,8 @@ packages:
       escalade: 3.1.2
       picocolors: 1.0.0
 
-  /uploadthing@6.10.1(next@14.3.0-canary.68):
-    resolution: {integrity: sha512-xqgEauaDYLlQ6NEsQWF+fpsUOuniWazd8ytSK2bCxcKFGakCkXO32GkFolW4iZZgkl7ATnHwN+JXG95FPdo74w==}
+  /uploadthing@6.10.4(next@14.3.0-canary.68):
+    resolution: {integrity: sha512-0hGO0Q7R7MnxzVkUbYHE6PkwFieYH+UUa905uo7JtA0h3Gpc89bNDFaOfK8634Z66088VRLNVuWxY2FTIqw4sg==}
     engines: {node: '>=18.13.0'}
     peerDependencies:
       express: '*'
@@ -16290,11 +16288,11 @@ packages:
       tailwindcss:
         optional: true
     dependencies:
-      '@effect/schema': 0.66.14(effect@3.1.2)(fast-check@3.18.0)
-      '@uploadthing/mime-types': 0.2.9
-      '@uploadthing/shared': 6.7.1(@uploadthing/mime-types@0.2.9)
+      '@effect/schema': 0.66.16(effect@3.1.5)(fast-check@3.18.0)
+      '@uploadthing/mime-types': 0.2.10
+      '@uploadthing/shared': 6.7.4(@uploadthing/mime-types@0.2.10)
       consola: 3.2.3
-      effect: 3.1.2
+      effect: 3.1.5
       fast-check: 3.18.0
       next: 14.3.0-canary.68(@babel/core@7.24.4)(@playwright/test@1.43.0)(react-dom@18.3.1)(react@18.3.1)(sass@1.74.1)
       std-env: 3.7.0

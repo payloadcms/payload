@@ -30,14 +30,14 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
       type: 'image/png',
       rel: 'icon',
       sizes: '32x32',
-      url: payloadFaviconDark?.src,
+      url: typeof payloadFaviconDark === 'object' ? payloadFaviconDark?.src : payloadFaviconDark,
     },
     {
       type: 'image/png',
       media: '(prefers-color-scheme: dark)',
       rel: 'icon',
       sizes: '32x32',
-      url: payloadFaviconLight?.src,
+      url: typeof payloadFaviconLight === 'object' ? payloadFaviconLight?.src : payloadFaviconLight,
     },
   ]
 
@@ -79,7 +79,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
             {
               alt: ogTitle,
               height: 480,
-              url: staticOGImage.src,
+              url: typeof staticOGImage === 'object' ? staticOGImage?.src : staticOGImage,
               width: 640,
             },
           ],
