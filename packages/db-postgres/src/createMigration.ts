@@ -1,19 +1,24 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { CreateMigration } from 'payload/database'
+import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
 
 import fs from 'fs'
 import { createRequire } from 'module'
+import path from 'path'
+import { getPredefinedMigration } from 'payload/database'
 import prompts from 'prompts'
+import { fileURLToPath } from 'url'
 
 import type { PostgresAdapter } from './types.js'
 
 const require = createRequire(import.meta.url)
 
-const migrationTemplate = (
-  upSQL?: string,
-  downSQL?: string,
-) => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+const migrationTemplate = ({
+  downSQL,
+  imports,
+  upSQL,
+}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+${imports}
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${
@@ -55,12 +60,21 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
-  { forceAcceptWarning, migrationName, payload },
+  { file, forceAcceptWarning, migrationName, payload },
 ) {
+  const filename = fileURLToPath(import.meta.url)
+  const dirname = path.dirname(filename)
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
+
+  const predefinedMigration = await getPredefinedMigration({
+    dirname,
+    file,
+    migrationName,
+    payload,
+  })
 
   const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
 
@@ -124,8 +138,12 @@ export const createMigration: CreateMigration = async function createMigration(
   fs.writeFileSync(
     `${filePath}.ts`,
     migrationTemplate(
-      sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
-      sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
+      predefinedMigration
+        ? predefinedMigration
+        : {
+            downSQL: sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
+            upSQL: sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
+          },
     ),
   )
   payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
