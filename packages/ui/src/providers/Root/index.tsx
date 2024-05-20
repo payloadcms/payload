@@ -91,7 +91,7 @@ export const RootProvider: React.FC<Props> = ({
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <AuthProvider>
                             <PreferencesProvider>
-                              <ThemeProvider theme={theme}>
+                              <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
                                 <ParamsProvider>
                                   <LocaleProvider>
                                     <StepNavProvider>
