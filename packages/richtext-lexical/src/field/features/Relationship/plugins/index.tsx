@@ -46,11 +46,12 @@ export function RelationshipPlugin(props?: RelationshipFeatureProps): JSX.Elemen
     return editor.registerCommand<RelationshipData>(
       INSERT_RELATIONSHIP_COMMAND,
       (payload) => {
-        const relationshipNode = $createRelationshipNode(payload)
-
         const selection = $getSelection() || $getPreviousSelection()
 
         if ($isRangeSelection(selection)) {
+          const relationshipNode = $createRelationshipNode(payload)
+          $insertNodeToNearestRoot(relationshipNode)
+
           const { focus } = selection
           const focusNode = focus.getNode()
 
@@ -66,8 +67,6 @@ export function RelationshipPlugin(props?: RelationshipFeatureProps): JSX.Elemen
           ) {
             focusNode.remove()
           }
-
-          $insertNodeToNearestRoot(relationshipNode)
         }
 
         return true

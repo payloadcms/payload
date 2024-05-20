@@ -24,6 +24,14 @@ const RowFields: CollectionConfig = {
           type: 'text',
           required: true,
         },
+        {
+          name: 'disableListColumnText',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+            disableListFilter: false,
+          },
+        },
       ],
     },
     {

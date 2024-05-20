@@ -513,6 +513,26 @@ describe('collections-rest', () => {
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
         })
+
+        it('should query LIKE by ID', async () => {
+          const post = await payload.create({
+            collection: slug,
+            data: {
+              title: 'find me buddy',
+            },
+          })
+
+          const { result, status } = await client.find<Post>({
+            query: {
+              id: {
+                like: post.id,
+              },
+            },
+          })
+
+          expect(status).toStrictEqual(200)
+          expect(result.totalDocs).toStrictEqual(1)
+        })
       })
 
       it('should query nested relationship - hasMany', async () => {

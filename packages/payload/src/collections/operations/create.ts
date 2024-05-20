@@ -130,6 +130,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data,
+      operation: 'create',
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
