@@ -29,7 +29,7 @@ type Args = {
   staticPath: string
 }
 
-async function getSafeFileName({
+export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
   req,
@@ -51,5 +51,3 @@ async function getSafeFileName({
   }
   return modifiedFilename
 }
-
-export default getSafeFileName

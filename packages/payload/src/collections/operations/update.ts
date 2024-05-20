@@ -156,6 +156,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
       collection,
       config,
       data: bulkUpdateData,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
