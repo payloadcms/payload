@@ -12,9 +12,10 @@ export interface Config {
     'non-admin-user': NonAdminUser;
     posts: Post;
     unrestricted: Unrestricted;
-    restricted: Restricted;
+    'fully-restricted': FullyRestricted;
     'read-only-collection': ReadOnlyCollection;
     'user-restricted': UserRestricted;
+    'create-not-update': CreateNotUpdate;
     'restricted-versions': RestrictedVersion;
     'sibling-data': SiblingDatum;
     'rely-on-request-headers': RelyOnRequestHeader;
@@ -97,6 +98,7 @@ export interface Unrestricted {
   id: string;
   name?: string | null;
   userRestrictedDocs?: (string | UserRestricted)[] | null;
+  createNotUpdateDocs?: (string | CreateNotUpdate)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -112,9 +114,19 @@ export interface UserRestricted {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted".
+ * via the `definition` "create-not-update".
  */
-export interface Restricted {
+export interface CreateNotUpdate {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-restricted".
+ */
+export interface FullyRestricted {
   id: string;
   name?: string | null;
   updatedAt: string;

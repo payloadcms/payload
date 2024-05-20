@@ -578,7 +578,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   return (
     <form
-      action={method ? actionString : action}
+      action={method ? actionString : (action as string)}
       className={classes}
       method={method}
       noValidate

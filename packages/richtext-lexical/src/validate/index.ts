@@ -1,9 +1,8 @@
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 import type { RichTextField, Validate } from 'payload/types'
 
 import type { SanitizedServerEditorConfig } from '../field/lexical/config/types.js'
 
-import { defaultRichTextValue, defaultRichTextValueV2 } from '../populate/defaultValue.js'
 import { validateNodes } from './validateNodes.js'
 
 export const richTextValidateHOC = ({
@@ -21,13 +20,17 @@ export const richTextValidateHOC = ({
     } = options
 
     if (required) {
-      if (
-        !value ||
-        !value?.root?.children ||
-        !value?.root?.children?.length ||
-        JSON.stringify(value) === JSON.stringify(defaultRichTextValue) ||
-        JSON.stringify(value) === JSON.stringify(defaultRichTextValueV2)
-      ) {
+      const hasChildren = value?.root?.children?.length
+
+      const hasOnlyEmptyParagraph =
+        (value?.root?.children?.length === 1 &&
+          value?.root?.children[0]?.type === 'paragraph' &&
+          (value?.root?.children[0] as SerializedParagraphNode)?.children?.length === 0) ||
+        ((value?.root?.children[0] as SerializedParagraphNode)?.children?.length === 1 &&
+          (value?.root?.children[0] as SerializedParagraphNode)?.children[0]?.type === 'text' &&
+          (value?.root?.children[0] as SerializedParagraphNode)?.children[0]?.['text'] === '')
+
+      if (!hasChildren || hasOnlyEmptyParagraph) {
         return t('validation:required')
       }
     }

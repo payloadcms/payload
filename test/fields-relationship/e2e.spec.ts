@@ -26,7 +26,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
@@ -530,6 +530,51 @@ describe('fields - relationship', () => {
       await wait(110)
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle')
       await expect(relationship).toHaveText(relationWithTitle.name)
+    })
+
+    test('should update relationship values on page change in list view', async () => {
+      await clearCollectionDocs(slug)
+      // create new docs to paginate to
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection: slug,
+          data: {
+            relationshipHasManyMultiple: [
+              {
+                relationTo: relationOneSlug,
+                value: relationOneDoc.id,
+              },
+            ],
+          },
+        })
+      }
+
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection: slug,
+          data: {
+            relationshipHasManyMultiple: [
+              {
+                relationTo: relationTwoSlug,
+                value: relationTwoDoc.id,
+              },
+            ],
+          },
+        })
+      }
+
+      await page.goto(url.list)
+
+      // check first doc on first page
+      const relationship = page.locator('.row-1 .cell-relationshipHasManyMultiple')
+      await expect(relationship).toHaveText(relationTwoDoc.id)
+
+      const paginator = page.locator('.clickable-arrow--right')
+      await paginator.click()
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+
+      // check first doc on second page (should be different)
+      await expect(relationship).toContainText(relationOneDoc.id)
     })
   })
 
