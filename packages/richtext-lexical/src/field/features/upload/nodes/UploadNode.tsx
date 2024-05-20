@@ -25,7 +25,7 @@ export type UploadData = {
   value: number | string
 }
 
-function convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput | null {
+function $convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput | null {
   if (
     domNode.hasAttribute('data-lexical-upload-relation-to') &&
     domNode.hasAttribute('data-lexical-upload-id')
@@ -82,7 +82,7 @@ export class UploadNode extends DecoratorBlockNode {
   static importDOM(): DOMConversionMap | null {
     return {
       img: (node: HTMLImageElement) => ({
-        conversion: convertUploadElement,
+        conversion: $convertUploadElement,
         priority: 0,
       }),
     }

@@ -223,7 +223,7 @@ export const DefaultEditView: React.FC = () => {
             disableActions={disableActions}
             hasSavePermission={hasSavePermission}
             id={id}
-            isEditing={Boolean(id)}
+            isEditing={isEditing}
             permissions={docPermissions}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />

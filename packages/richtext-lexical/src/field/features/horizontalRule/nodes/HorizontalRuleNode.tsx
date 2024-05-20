@@ -49,7 +49,7 @@ export class HorizontalRuleNode extends DecoratorNode<React.ReactElement> {
   static importDOM(): DOMConversionMap | null {
     return {
       hr: () => ({
-        conversion: convertHorizontalRuleElement,
+        conversion: $convertHorizontalRuleElement,
         priority: 0,
       }),
     }
@@ -107,7 +107,7 @@ export class HorizontalRuleNode extends DecoratorNode<React.ReactElement> {
   }
 }
 
-function convertHorizontalRuleElement(): DOMConversionOutput {
+function $convertHorizontalRuleElement(): DOMConversionOutput {
   return { node: $createHorizontalRuleNode() }
 }
 

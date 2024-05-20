@@ -1,6 +1,7 @@
 import type { BusboyConfig } from 'busboy'
 
 import path from 'path'
+import { APIError } from 'payload/errors'
 
 import { isEligibleRequest } from './isEligibleRequest.js'
 import { processMultipart } from './processMultipart.js'
@@ -141,10 +142,7 @@ type FetchAPIFileUploadResponseFile = {
 }
 
 export type FetchAPIFileUploadResponse = {
-  error?: {
-    code: number
-    message: string
-  }
+  error?: APIError
   fields: Record<string, string>
   files: Record<string, FetchAPIFileUploadResponseFile>
 }
@@ -158,10 +156,7 @@ export const fetchAPIFileUpload: FetchAPIFileUpload = async ({ options, request 
   if (!isEligibleRequest(request)) {
     debugLog(uploadOptions, 'Request is not eligible for file upload!')
     return {
-      error: {
-        code: 500,
-        message: 'Request is not eligible for file upload',
-      },
+      error: new APIError('Request is not eligible for file upload', 500),
       fields: undefined,
       files: undefined,
     }

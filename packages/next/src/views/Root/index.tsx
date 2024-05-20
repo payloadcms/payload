@@ -15,6 +15,7 @@ export { generatePageMetadata } from './meta.js'
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
   i18n: I18n
+  isEditing?: boolean
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>
 
@@ -86,6 +87,7 @@ export const RootPage = async ({
 
   return (
     <Fragment>
+      {!templateType && <Fragment>{RenderedView}</Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}

@@ -83,81 +83,101 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
   return (
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
-        if (plugin.position === 'top') {
+        if (plugin.position === 'aboveContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
-      <RichTextPlugin
-        //@ts-expect-error ts being dumb
-        ErrorBoundary={ErrorBoundaryComponent}
-        contentEditable={
-          <div className="editor-scroller">
-            <div className="editor" ref={onRef}>
-              <LexicalContentEditable />
-            </div>
-          </div>
-        }
-        placeholder={
-          <p className="editor-placeholder">Start typing, or press '/' for commands...</p>
-        }
-      />
-      <OnChangePlugin
-        // Selection changes can be ignored here, reducing the
-        // frequency that the FieldComponent and Payload receive updates.
-        // Selection changes are only needed if you are saving selection state
-        ignoreSelectionChange
-        onChange={(editorState, editor, tags) => {
-          // Ignore any onChange event triggered by focus only
-          if (!tags.has('focus') || tags.size > 1) {
-            if (onChange != null) onChange(editorState, editor, tags)
+      <div className="editor-container">
+        {editorConfig.features.plugins.map((plugin) => {
+          if (plugin.position === 'top') {
+            return (
+              <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
+            )
           }
-        }}
-      />
-      {floatingAnchorElem && (
-        <React.Fragment>
-          {!isSmallWidthViewport && editor.isEditable() && (
-            <React.Fragment>
-              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-              <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
-            </React.Fragment>
-          )}
-          {editorConfig.features.plugins.map((plugin) => {
-            if (
-              plugin.position === 'floatingAnchorElem' &&
-              !(plugin.desktopOnly === true && isSmallWidthViewport)
-            ) {
-              return (
-                <EditorPlugin
-                  anchorElem={floatingAnchorElem}
-                  clientProps={plugin.clientProps}
-                  key={plugin.key}
-                  plugin={plugin}
-                />
-              )
+        })}
+        <RichTextPlugin
+          //@ts-expect-error ts being dumb
+          ErrorBoundary={ErrorBoundaryComponent}
+          contentEditable={
+            <div className="editor-scroller">
+              <div className="editor" ref={onRef}>
+                <LexicalContentEditable />
+              </div>
+            </div>
+          }
+          placeholder={
+            <p className="editor-placeholder">
+              Start typing, or press &apos;/&apos; for commands...
+            </p>
+          }
+        />
+        <OnChangePlugin
+          // Selection changes can be ignored here, reducing the
+          // frequency that the FieldComponent and Payload receive updates.
+          // Selection changes are only needed if you are saving selection state
+          ignoreSelectionChange
+          onChange={(editorState, editor, tags) => {
+            // Ignore any onChange event triggered by focus only
+            if (!tags.has('focus') || tags.size > 1) {
+              if (onChange != null) onChange(editorState, editor, tags)
             }
-          })}
-          {editor.isEditable() && (
-            <React.Fragment>
-              <SlashMenuPlugin anchorElem={floatingAnchorElem} />
-            </React.Fragment>
-          )}
-        </React.Fragment>
-      )}
-      {editor.isEditable() && (
-        <React.Fragment>
-          <HistoryPlugin />
-          {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
-        </React.Fragment>
-      )}
+          }}
+        />
+        {floatingAnchorElem && (
+          <React.Fragment>
+            {!isSmallWidthViewport && editor.isEditable() && (
+              <React.Fragment>
+                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+              </React.Fragment>
+            )}
+            {editorConfig.features.plugins.map((plugin) => {
+              if (
+                plugin.position === 'floatingAnchorElem' &&
+                !(plugin.desktopOnly === true && isSmallWidthViewport)
+              ) {
+                return (
+                  <EditorPlugin
+                    anchorElem={floatingAnchorElem}
+                    clientProps={plugin.clientProps}
+                    key={plugin.key}
+                    plugin={plugin}
+                  />
+                )
+              }
+            })}
+            {editor.isEditable() && (
+              <React.Fragment>
+                <SlashMenuPlugin anchorElem={floatingAnchorElem} />
+              </React.Fragment>
+            )}
+          </React.Fragment>
+        )}
+        {editor.isEditable() && (
+          <React.Fragment>
+            <HistoryPlugin />
+            {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
+          </React.Fragment>
+        )}
 
-      <TabIndentationPlugin />
+        <TabIndentationPlugin />
+        {editorConfig.features.plugins.map((plugin) => {
+          if (plugin.position === 'normal') {
+            return (
+              <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
+            )
+          }
+        })}
+        {editorConfig.features.plugins.map((plugin) => {
+          if (plugin.position === 'bottom') {
+            return (
+              <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
+            )
+          }
+        })}
+      </div>
       {editorConfig.features.plugins.map((plugin) => {
-        if (plugin.position === 'normal') {
-          return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
-        }
-      })}
-      {editorConfig.features.plugins.map((plugin) => {
-        if (plugin.position === 'bottom') {
+        if (plugin.position === 'belowContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}

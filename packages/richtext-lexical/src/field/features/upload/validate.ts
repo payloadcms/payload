@@ -38,7 +38,7 @@ export const uploadValidation = (
 
     const collection = props?.collections[node.relationTo]
 
-    if (!collection.fields?.length) {
+    if (!collection?.fields?.length) {
       return true
     }
 

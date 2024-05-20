@@ -60,7 +60,7 @@ export class LinkNode extends ElementNode {
   static importDOM(): DOMConversionMap | null {
     return {
       a: (node: Node) => ({
-        conversion: convertAnchorElement,
+        conversion: $convertAnchorElement,
         priority: 1,
       }),
     }
@@ -210,7 +210,7 @@ export class LinkNode extends ElementNode {
   }
 }
 
-function convertAnchorElement(domNode: Node): DOMConversionOutput {
+function $convertAnchorElement(domNode: Node): DOMConversionOutput {
   let node: LinkNode | null = null
   if (isHTMLAnchorElement(domNode)) {
     const content = domNode.textContent
@@ -239,7 +239,7 @@ export function $isLinkNode(node: LexicalNode | null | undefined): node is LinkN
 export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
   createCommand('TOGGLE_LINK_COMMAND')
 
-export function toggleLink(payload: LinkPayload): void {
+export function $toggleLink(payload: LinkPayload): void {
   const selection = $getSelection()
 
   if (!$isRangeSelection(selection) && !payload.selectedNodes.length) {
@@ -349,6 +349,8 @@ export function toggleLink(payload: LinkPayload): void {
     })
   }
 }
+/** @deprecated renamed to {@link $toggleLink} by @lexical/eslint-plugin rules-of-lexical */
+export const toggleLink = $toggleLink
 
 function $getLinkAncestor(node: LexicalNode): LinkNode | null {
   return $getAncestor(node, (ancestor) => $isLinkNode(ancestor)) as LinkNode

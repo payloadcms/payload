@@ -71,7 +71,7 @@ export async function parseParams({
           // So we need to loop on keys again here to handle each operator independently
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
-            for (const operator of Object.keys(pathOperators)) {
+            for (let operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
                 const {
@@ -157,6 +157,13 @@ export async function parseParams({
                   break
                 }
 
+                if (
+                  operator === 'like' &&
+                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                ) {
+                  operator = 'equals'
+                }
+
                 if (operator === 'like') {
                   constraints.push(
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
@@ -195,10 +202,10 @@ export async function parseParams({
                   operator === 'not_in'
                 ) {
                   constraints.push(
-                    sql`${notInArray(table[columnName], queryValue)} OR
+                    sql`(${notInArray(table[columnName], queryValue)} OR
                     ${table[columnName]}
                     IS
-                    NULL`,
+                    NULL)`,
                   )
 
                   break
