@@ -37,6 +37,7 @@ export const initContextState: Context = {
   getField: (): FormField => undefined,
   getFields: (): FormState => ({}),
   getSiblingData,
+  initializing: undefined,
   removeFieldRow: () => undefined,
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,

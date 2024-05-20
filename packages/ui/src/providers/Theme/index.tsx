@@ -17,6 +17,13 @@ const initialContext: ThemeContext = {
 
 const Context = createContext(initialContext)
 
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date()
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
+  const expires = 'expires=' + d.toUTCString()
+  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
+}
+
 const getTheme = (
   cookieKey,
 ): {
@@ -65,30 +72,14 @@ export const ThemeProvider: React.FC<{
 
   const setTheme = useCallback(
     (themeToSet: 'auto' | Theme) => {
-      const existingCookies = window.document.cookie
-
       if (themeToSet === 'light' || themeToSet === 'dark') {
         setThemeState(themeToSet)
         setAutoMode(false)
-        // replace cookie if found, if not, set it
-        const cookiesWithNewTheme = existingCookies.includes(cookieKey)
-          ? existingCookies.replace(
-              new RegExp(`${cookieKey}=(light|dark)`),
-              `${cookieKey}=${themeToSet}`,
-            )
-          : `${cookieKey}=${themeToSet}; ${existingCookies}`
-
-        window.document.cookie = cookiesWithNewTheme
+        setCookie(cookieKey, themeToSet, 365)
         document.documentElement.setAttribute('data-theme', themeToSet)
       } else if (themeToSet === 'auto') {
-        // remove cookie if found
-        const cookiesWithoutTheme = existingCookies.replace(
-          new RegExp(`${cookieKey}=(light|dark)`),
-          '',
-        )
-
-        window.document.cookie = cookiesWithoutTheme
-
+        // to delete the cookie, we set an expired date
+        setCookie(cookieKey, themeToSet, -1)
         const themeFromOS =
           window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
             ? 'dark'
