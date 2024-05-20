@@ -54,36 +54,38 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      {BeforeInput}
-      <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
-        <div className="textarea-inner">
-          <div className="textarea-clone" data-value={value || placeholder || ''} />
-          <textarea
-            className="textarea-element"
-            data-rtl={rtl}
-            disabled={readOnly}
-            id={`field-${path.replace(/\./g, '__')}`}
-            name={path}
-            onChange={onChange}
-            placeholder={getTranslation(placeholder, i18n)}
-            rows={rows}
-            value={value || ''}
-          />
-        </div>
-      </label>
-      {AfterInput}
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        {BeforeInput}
+        <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
+          <div className="textarea-inner">
+            <div className="textarea-clone" data-value={value || placeholder || ''} />
+            <textarea
+              className="textarea-element"
+              data-rtl={rtl}
+              disabled={readOnly}
+              id={`field-${path.replace(/\./g, '__')}`}
+              name={path}
+              onChange={onChange}
+              placeholder={getTranslation(placeholder, i18n)}
+              rows={rows}
+              value={value || ''}
+            />
+          </div>
+        </label>
+        {AfterInput}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
+      </div>
     </div>
   )
 }

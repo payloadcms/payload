@@ -1,8 +1,6 @@
 @import '../scss/styles.scss';
 
 .rich-text-lexical {
-  display: flex;
-
   .errorBoundary {
     pre {
       text-wrap: unset;

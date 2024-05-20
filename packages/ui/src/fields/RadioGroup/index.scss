@@ -1,10 +1,6 @@
 @import '../../scss/styles.scss';
 
 .radio-group {
-  &__error-wrap {
-    position: relative;
-  }
-
   &--layout-horizontal {
     ul {
       display: flex;
