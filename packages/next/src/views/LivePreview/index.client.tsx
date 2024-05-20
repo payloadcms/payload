@@ -6,7 +6,6 @@ import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } f
 
 import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
 import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
@@ -65,6 +64,7 @@ const PreviewView: React.FC<Props> = ({
     initialData,
     initialState,
     isEditing,
+    isInitializing,
     onSave: onSaveFromProps,
   } = useDocumentInfo()
 
@@ -119,11 +119,6 @@ const PreviewView: React.FC<Props> = ({
     [serverURL, apiRoute, id, operation, schemaPath, getDocPreferences],
   )
 
-  // Allow the `DocumentInfoProvider` to hydrate
-  if (!collectionSlug && !globalSlug) {
-    return <LoadingOverlay />
-  }
-
   return (
     <Fragment>
       <OperationProvider operation={operation}>
@@ -132,6 +127,7 @@ const PreviewView: React.FC<Props> = ({
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={initialState}
+          isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}

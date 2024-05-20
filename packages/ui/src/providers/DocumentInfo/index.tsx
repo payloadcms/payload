@@ -373,7 +373,6 @@ export const DocumentInfoProvider: React.FC<
       }
 
       setIsLoading(false)
-
       setIsInitializing(false)
     }
 
