@@ -55,6 +55,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
   }, [intersectionEntry])
 
+  // The first aside is always on top. The purpose of that is that it can reliably be used for the interaction observer (as it's not moving around), to calculate the position of the actual tooltip.
   return (
     <React.Fragment>
       <aside
@@ -63,7 +64,7 @@ export const Tooltip: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
         ref={ref}
-        title={getTitleAttribute(children)}
+        style={{ opacity: '0' }}
       >
         <div className="tooltip-content">{children}</div>
       </aside>
