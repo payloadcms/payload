@@ -19,11 +19,11 @@ export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguage
     typeof themeCookie === 'string' ? themeCookie : themeCookie?.value
   ) as Theme
 
-  const themeFromHeader = headers.get('Sec-CH-Prefers-Color-Scheme') as Theme
-
   if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
     return themeFromCookie
   }
+
+  const themeFromHeader = headers.get('Sec-CH-Prefers-Color-Scheme') as Theme
 
   if (themeFromHeader && acceptedThemes.includes(themeFromHeader)) {
     return themeFromHeader
