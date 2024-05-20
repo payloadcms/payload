@@ -17,17 +17,21 @@ const initialContext: ThemeContext = {
 
 const Context = createContext(initialContext)
 
-const localStorageKey = 'payload-theme'
+// TODO: get the cookie prefix from the config
+const cookiesKey = 'payload-theme'
 
 const getTheme = (): {
   theme: Theme
-  themeFromStorage: null | string
+  themeFromCookies: null | string
 } => {
   let theme: Theme
-  const themeFromStorage = window.localStorage.getItem(localStorageKey)
+  const themeFromCookies = window.document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(`${cookiesKey}=`))
+    ?.split('=')[1]
 
-  if (themeFromStorage === 'light' || themeFromStorage === 'dark') {
-    theme = themeFromStorage
+  if (themeFromCookies === 'light' || themeFromCookies === 'dark') {
+    theme = themeFromCookies
   } else {
     theme =
       window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -36,31 +40,34 @@ const getTheme = (): {
   }
 
   document.documentElement.setAttribute('data-theme', theme)
-  return { theme, themeFromStorage }
+  return { theme, themeFromCookies }
 }
 
-const defaultTheme = 'light'
+export const defaultTheme = 'light'
 
-export const ThemeProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme)
+export const ThemeProvider: React.FC<{ children?: React.ReactNode; theme?: Theme }> = ({
+  children,
+  theme: initialTheme,
+}) => {
+  const [theme, setThemeState] = useState<Theme>(initialTheme || defaultTheme)
 
   const [autoMode, setAutoMode] = useState<boolean>()
 
   useEffect(() => {
-    const { theme, themeFromStorage } = getTheme()
+    const { theme, themeFromCookies } = getTheme()
     setThemeState(theme)
-    setAutoMode(!themeFromStorage)
+    setAutoMode(!themeFromCookies)
   }, [])
 
   const setTheme = useCallback((themeToSet: 'auto' | Theme) => {
     if (themeToSet === 'light' || themeToSet === 'dark') {
       setThemeState(themeToSet)
       setAutoMode(false)
-      window.localStorage.setItem(localStorageKey, themeToSet)
+      window.localStorage.setItem(cookiesKey, themeToSet)
       document.documentElement.setAttribute('data-theme', themeToSet)
     } else if (themeToSet === 'auto') {
-      const existingThemeFromStorage = window.localStorage.getItem(localStorageKey)
-      if (existingThemeFromStorage) window.localStorage.removeItem(localStorageKey)
+      const existingThemeFromStorage = window.localStorage.getItem(cookiesKey)
+      if (existingThemeFromStorage) window.localStorage.removeItem(cookiesKey)
       const themeFromOS =
         window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
