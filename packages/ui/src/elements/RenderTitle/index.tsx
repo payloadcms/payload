@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { IDLabel } from '../IDLabel/index.js'
@@ -20,7 +20,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   const documentInfo = useDocumentInfo()
 
-  const { id, title: titleFromContext } = documentInfo
+  const { id, isInitializing, title: titleFromContext } = documentInfo
 
   const title = titleFromProps || titleFromContext || fallback
 
@@ -35,7 +35,11 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
         .join(' ')}
       title={title}
     >
-      {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title || null}
+      {isInitializing ? null : (
+        <Fragment>
+          {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title || null}
+        </Fragment>
+      )}
     </Tag>
   )
 }
