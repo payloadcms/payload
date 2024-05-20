@@ -731,6 +731,32 @@ describe('Fields', () => {
       expect(result.id).not.toEqual(doc.id)
       expect(result.uniqueRequiredText).toStrictEqual('uniqueRequired - Copy')
     })
+
+    it('should not create two docs with same unique author relationship', async () => {
+      const { docs } = await payload.find({
+        collection: 'users',
+      })
+
+      await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          author: docs[0].id,
+          text: 'a',
+          uniqueText: 'a',
+        },
+      })
+
+      await expect(async () =>
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            author: docs[0].id,
+            text: 'b',
+            uniqueText: 'b',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: author')
+    })
   })
 
   describe('array', () => {

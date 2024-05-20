@@ -887,6 +887,7 @@ export interface RowField {
  */
 export interface IndexedField {
   id: string;
+  author?: (string | null) | User;
   text: string;
   uniqueText?: string | null;
   uniqueRequiredText: string;

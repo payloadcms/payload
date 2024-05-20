@@ -6,6 +6,12 @@ const IndexedFields: CollectionConfig = {
   slug: indexedFieldsSlug,
   fields: [
     {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      unique: true,
+    },
+    {
       name: 'text',
       type: 'text',
       index: true,

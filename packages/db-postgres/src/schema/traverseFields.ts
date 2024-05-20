@@ -129,23 +129,28 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index) &&
-        !['array', 'blocks', 'group', 'point', 'relationship', 'upload'].includes(field.type) &&
-        !('hasMany' in field && field.hasMany === true)
+        !['array', 'blocks', 'group', 'point'].includes(field.type)
       ) {
-        const unique = disableUnique !== true && field.unique
-        if (unique) {
-          const constraintValue = `${fieldPrefix || ''}${field.name}`
-          if (!adapter.fieldConstraints?.[rootTableName]) {
-            adapter.fieldConstraints[rootTableName] = {}
+        if (
+          field.type !== 'relationship' ||
+          (field.type === 'relationship' && typeof field.relationTo === 'string' && !field.hasMany)
+        ) {
+          const unique = disableUnique !== true && field.unique
+          if (unique) {
+            const constraintValue = `${fieldPrefix || ''}${field.name}`
+            if (!adapter.fieldConstraints?.[rootTableName]) {
+              adapter.fieldConstraints[rootTableName] = {}
+            }
+            adapter.fieldConstraints[rootTableName][`${newTableName}_${columnName}_idx`] =
+              constraintValue
           }
-          adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
+          targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
+            name: fieldName,
+            columnName,
+            tableName: newTableName,
+            unique,
+          })
         }
-        targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
-          name: fieldName,
-          columnName,
-          tableName: newTableName,
-          unique,
-        })
       }
     }
 
