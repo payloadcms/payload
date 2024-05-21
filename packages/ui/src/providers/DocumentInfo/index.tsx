@@ -267,7 +267,12 @@ export const DocumentInfoProvider: React.FC<
           setDocPermissions(json)
 
           setHasSavePermission(
-            getHasSavePermission({ collectionSlug, docPermissions: json, globalSlug, isEditing }),
+            getHasSavePermission({
+              collectionSlug,
+              docPermissions: json,
+              globalSlug,
+              isEditing: newIsEditing,
+            }),
           )
 
           setHasPublishPermission(publishedAccessJSON?.update?.permission)
@@ -442,7 +447,6 @@ export const DocumentInfoProvider: React.FC<
       const docPermissions: DocumentPermissions = docPermissionsFromProps
       const hasSavePermission: boolean = hasSavePermissionFromProps
       const hasPublishPermission: boolean = hasPublishPermissionFromProps
-
       if (
         !docPermissions ||
         hasSavePermission === undefined ||
