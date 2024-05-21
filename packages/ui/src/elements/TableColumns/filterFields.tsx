@@ -4,7 +4,7 @@ import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildCo
 // 2. Maps through top-level `tabs` fields and filters out the same
 export const filterFields = (fieldMap: FieldMap): FieldMap => {
   const shouldSkipField = (field: MappedField): boolean =>
-    field.type !== 'ui' && field.disabled === true
+    (field.type !== 'ui' && field.disabled === true) || field?.disableListColumn === true
 
   const fields: FieldMap = fieldMap.reduce((formatted, field) => {
     if (shouldSkipField(field)) {
