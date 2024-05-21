@@ -8,21 +8,20 @@ import type {
 
 import { hasSavePermission as getHasSavePermission } from '@payloadcms/ui/utilities/hasSavePermission'
 import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
-import { notFound } from 'next/navigation.js'
 import { docAccessOperation, docAccessOperationGlobal } from 'payload/operations'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   data: Data
   globalConfig?: SanitizedGlobalConfig
-  id: number | string
+  id?: number | string
   req: PayloadRequest
 }): Promise<{
   docPermissions: DocumentPermissions
   hasPublishPermission: boolean
   hasSavePermission: boolean
 }> => {
-  const { id, collectionConfig, data, globalConfig, req } = args
+  const { id, collectionConfig, data = {}, globalConfig, req } = args
 
   let docPermissions: DocumentPermissions
   let hasPublishPermission: boolean
@@ -30,7 +29,7 @@ export const getDocumentPermissions = async (args: {
   if (collectionConfig) {
     try {
       docPermissions = await docAccessOperation({
-        id: id.toString(),
+        id: id?.toString(),
         collection: {
           config: collectionConfig,
         },
@@ -41,7 +40,7 @@ export const getDocumentPermissions = async (args: {
       })
 
       hasPublishPermission = await docAccessOperation({
-        id: id.toString(),
+        id: id?.toString(),
         collection: {
           config: collectionConfig,
         },
@@ -54,7 +53,7 @@ export const getDocumentPermissions = async (args: {
         },
       }).then(({ update }) => update?.permission)
     } catch (error) {
-      notFound()
+      console.error(error) // eslint-disable-line no-console
     }
   }
 
@@ -79,7 +78,7 @@ export const getDocumentPermissions = async (args: {
         },
       }).then(({ update }) => update?.permission)
     } catch (error) {
-      notFound()
+      console.error(error) // eslint-disable-line no-console
     }
   }
 
