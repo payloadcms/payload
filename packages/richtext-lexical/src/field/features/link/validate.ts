@@ -43,7 +43,7 @@ export const linkValidation = (
     }
 
     if (errorPaths.length) {
-      return 'Link fields validation failed: ' + errorPaths.join(', ')
+      return 'The following fields are invalid: ' + errorPaths.join(', ')
     }
 
     return true
