@@ -28,7 +28,6 @@
     }
   }
 
-  // Now rule if it does not have the gutter
   &:not(&--show-gutter) > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
     left: 0;
   }
