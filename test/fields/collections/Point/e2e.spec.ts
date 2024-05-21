@@ -42,22 +42,7 @@ describe('Point', () => {
       // prebuild,
     }))
     url = new AdminUrlUtil(serverURL, pointFieldsSlug)
-    filledGroupPoint = await payload.create({
-      collection: pointFieldsSlug,
-      data: {
-        group: { point: [4, 2] },
-        localized: [4, 2],
-        point: [5, 5],
-      },
-    })
-    emptyGroupPoint = await payload.create({
-      collection: pointFieldsSlug,
-      data: {
-        group: {},
-        localized: [3, -2],
-        point: [5, 5],
-      },
-    })
+
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -82,6 +67,23 @@ describe('Point', () => {
     await client.login()
 
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    filledGroupPoint = await payload.create({
+      collection: pointFieldsSlug,
+      data: {
+        group: { point: [4, 2] },
+        localized: [4, 2],
+        point: [5, 5],
+      },
+    })
+    emptyGroupPoint = await payload.create({
+      collection: pointFieldsSlug,
+      data: {
+        group: {},
+        localized: [3, -2],
+        point: [5, 5],
+      },
+    })
   })
 
   test('should save point', async () => {
