@@ -7,13 +7,11 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { invertBackground } from '../../fields/invertBackground'
 import { linkGroup } from '../../fields/linkGroup'
 
 export const CallToAction: Block = {
   slug: 'cta',
   fields: [
-    invertBackground,
     {
       name: 'richText',
       type: 'richText',

@@ -128,50 +128,44 @@ export const FormBlock: React.FC<
 
   return (
     <div className="container max-w-[48rem] pb-20">
-      <div
-        className={['classes.form', hasSubmitted && 'classes.hasSubmitted']
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {enableIntro && introContent && !hasSubmitted && (
-          <RichText className="mb-8" content={introContent} />
-        )}
-        {!isLoading && hasSubmitted && confirmationType === 'message' && (
-          <RichText className="classes.confirmationMessage" content={confirmationMessage} />
-        )}
-        {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-        {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
-        {!hasSubmitted && (
-          <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4 last:mb-0">
-              {formFromProps &&
-                formFromProps.fields &&
-                formFromProps.fields?.map((field, index) => {
-                  const Field: React.FC<any> = fields?.[field.blockType]
-                  if (Field) {
-                    return (
-                      <div className="mb-4 last:mb-0" key={index}>
-                        <Field
-                          form={formFromProps}
-                          {...field}
-                          {...formMethods}
-                          control={control}
-                          errors={errors}
-                          register={register}
-                        />
-                      </div>
-                    )
-                  }
-                  return null
-                })}
-            </div>
+      {enableIntro && introContent && !hasSubmitted && (
+        <RichText className="mb-8" content={introContent} enableGutter={false} />
+      )}
+      {!isLoading && hasSubmitted && confirmationType === 'message' && (
+        <RichText className="classes.confirmationMessage" content={confirmationMessage} />
+      )}
+      {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
+      {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
+      {!hasSubmitted && (
+        <form id={formID} onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-4 last:mb-0">
+            {formFromProps &&
+              formFromProps.fields &&
+              formFromProps.fields?.map((field, index) => {
+                const Field: React.FC<any> = fields?.[field.blockType]
+                if (Field) {
+                  return (
+                    <div className="mb-4 last:mb-0" key={index}>
+                      <Field
+                        form={formFromProps}
+                        {...field}
+                        {...formMethods}
+                        control={control}
+                        errors={errors}
+                        register={register}
+                      />
+                    </div>
+                  )
+                }
+                return null
+              })}
+          </div>
 
-            <Button form={formID} type="submit" variant="default">
-              {submitButtonLabel}
-            </Button>
-          </form>
-        )}
-      </div>
+          <Button form={formID} type="submit" variant="default">
+            {submitButtonLabel}
+          </Button>
+        </form>
+      )}
     </div>
   )
 }

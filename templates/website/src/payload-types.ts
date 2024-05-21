@@ -20,7 +20,6 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   globals: {
-    settings: Settings;
     header: Header;
     footer: Footer;
   };
@@ -73,7 +72,6 @@ export interface Page {
   };
   layout: (
     | {
-        invertBackground?: boolean | null;
         richText?: {
           root: {
             type: string;
@@ -110,7 +108,6 @@ export interface Page {
         blockType: 'cta';
       }
     | {
-        invertBackground?: boolean | null;
         columns?:
           | {
               size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
@@ -149,7 +146,6 @@ export interface Page {
         blockType: 'content';
       }
     | {
-        invertBackground?: boolean | null;
         position?: ('default' | 'fullscreen') | null;
         media: string | Media;
         id?: string | null;
@@ -576,16 +572,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "settings".
- */
-export interface Settings {
-  id: string;
-  postsPage?: (string | null) | Page;
-  updatedAt?: string | null;
-  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

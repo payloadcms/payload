@@ -12,7 +12,7 @@ import { image2 } from './image-2'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
-import { postsPage } from './posts-page'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -191,6 +191,17 @@ export const seed = async (payload: Payload): Promise<void> => {
     ),
   })
 
+  for (let i = 1; i < 50; i++) {
+    await payload.create({
+      collection: 'posts',
+      data: JSON.parse(
+        JSON.stringify({ ...post3, categories: [financeCategory.id], title: `Generated post ${i}` })
+          .replace(/"\{\{IMAGE\}\}"/g, image1ID)
+          .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
+      ),
+    })
+  }
+
   const posts = [post1Doc, post2Doc, post3Doc]
 
   // update each post with related posts
@@ -219,19 +230,6 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  payload.logger.info(`— Seeding posts page...`)
-
-  const postsPageDoc = await payload.create({
-    collection: 'pages',
-    data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, image1ID)),
-  })
-
-  let postsPageID = postsPageDoc.id
-
-  if (payload.db.defaultIDType === 'text') {
-    postsPageID = `"${postsPageID}"`
-  }
-
   payload.logger.info(`— Seeding home page...`)
 
   await payload.create({
@@ -239,8 +237,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: JSON.parse(
       JSON.stringify(home)
         .replace(/"\{\{IMAGE_1\}\}"/g, image1ID)
-        .replace(/"\{\{IMAGE_2\}\}"/g, image2ID)
-        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageID),
+        .replace(/"\{\{IMAGE_2\}\}"/g, image2ID),
     ),
   })
 
@@ -274,12 +271,9 @@ export const seed = async (payload: Payload): Promise<void> => {
       navItems: [
         {
           link: {
-            type: 'reference',
+            type: 'custom',
             label: 'Posts',
-            reference: {
-              relationTo: 'pages',
-              value: postsPageDoc.id,
-            },
+            url: '/posts',
           },
         },
         {

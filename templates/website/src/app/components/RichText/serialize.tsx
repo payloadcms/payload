@@ -110,12 +110,8 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
           }
 
           switch (blockType) {
-            case 'content':
-              return <ContentBlock key={index} {...block} />
             case 'cta':
               return <CallToActionBlock key={index} {...block} />
-            case 'archive':
-              return <ArchiveBlock key={index} {...block} />
             case 'mediaBlock':
               return <MediaBlock key={index} {...block} />
             case 'banner':

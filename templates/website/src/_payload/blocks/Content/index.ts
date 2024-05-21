@@ -7,7 +7,6 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { invertBackground } from '../../fields/invertBackground'
 import { link } from '../../fields/link'
 
 const columnFields: Field[] = [
@@ -65,7 +64,6 @@ const columnFields: Field[] = [
 export const Content: Block = {
   slug: 'content',
   fields: [
-    invertBackground,
     {
       name: 'columns',
       type: 'array',

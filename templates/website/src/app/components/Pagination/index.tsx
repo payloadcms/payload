@@ -1,3 +1,4 @@
+'use client'
 import {
   Pagination as PaginationComponent,
   PaginationContent,
@@ -8,17 +9,17 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { cn } from '@/utilities/cn'
+import { useRouter } from 'next/navigation'
 import React from 'react'
-
-import { Chevron } from '../Chevron'
 
 export const Pagination: React.FC<{
   className?: string
-  onClick: (page: number) => void
   page: number
   totalPages: number
 }> = (props) => {
-  const { className, onClick, page, totalPages } = props
+  const router = useRouter()
+
+  const { className, page, totalPages } = props
   const hasNextPage = page < totalPages
   const hasPrevPage = page > 1
 
@@ -33,7 +34,7 @@ export const Pagination: React.FC<{
             <PaginationPrevious
               disabled={!hasPrevPage}
               onClick={() => {
-                onClick(page - 1)
+                router.push(`/posts/page/${page - 1}`)
               }}
             />
           </PaginationItem>
@@ -48,7 +49,7 @@ export const Pagination: React.FC<{
             <PaginationItem>
               <PaginationLink
                 onClick={() => {
-                  onClick(page - 1)
+                  router.push(`/posts/page/${page - 1}`)
                 }}
               >
                 {page - 1}
@@ -60,7 +61,7 @@ export const Pagination: React.FC<{
             <PaginationLink
               isActive
               onClick={() => {
-                onClick(2)
+                router.push(`/posts/page/${page}`)
               }}
             >
               {page}
@@ -71,7 +72,7 @@ export const Pagination: React.FC<{
             <PaginationItem>
               <PaginationLink
                 onClick={() => {
-                  onClick(page + 1)
+                  router.push(`/posts/page/${page + 1}`)
                 }}
               >
                 {page + 1}
@@ -89,7 +90,7 @@ export const Pagination: React.FC<{
             <PaginationNext
               disabled={!hasNextPage}
               onClick={() => {
-                onClick(page + 1)
+                router.push(`/posts/page/${page + 1}`)
               }}
             />
           </PaginationItem>
