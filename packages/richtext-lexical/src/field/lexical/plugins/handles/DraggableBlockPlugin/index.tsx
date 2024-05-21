@@ -124,13 +124,12 @@ function useDraggableBlockMenu(
         verbose: false,
       })
 
+      prevIndex = foundAtIndex
+
       //if (DEBUG && _draggableBlockElem) {
       //targetBlockElem.style.border = '3px solid red'
       // highlightElemOriginalPosition(debugHighlightRef, _draggableBlockElem, anchorElem)
       //}
-      if (_draggableBlockElem) {
-        prevIndex = foundAtIndex
-      }
 
       if (!_draggableBlockElem && !isFoundNodeEmptyParagraph) {
         return
