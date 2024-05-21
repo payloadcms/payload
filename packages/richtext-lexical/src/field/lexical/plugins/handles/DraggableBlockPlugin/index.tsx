@@ -9,6 +9,7 @@ import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
 import { isHTMLElement } from '../../../utils/guard.js'
 import { Point } from '../../../utils/point.js'
 import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys.js'
@@ -19,7 +20,6 @@ import { getNodeCloseToPoint } from './getNodeCloseToPoint.js'
 import './index.scss'
 import { setTargetLine } from './setTargetLine.js'
 
-const SPACE = -24
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block'
 
@@ -77,6 +77,9 @@ function useDraggableBlockMenu(
   const isDraggingBlockRef = useRef<boolean>(false)
   const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null)
   const [lastTargetBlockElem, setLastTargetBlockElem] = useState<HTMLElement | null>(null)
+  const { editorConfig } = useEditorConfigContext()
+
+  const blockHandleHorizontalOffset = editorConfig?.admin?.hideGutter ? -24 : -8
 
   const calculateDistanceFromScrollerElem = useCallback(
     (
@@ -176,9 +179,14 @@ function useDraggableBlockMenu(
 
   useEffect(() => {
     if (menuRef.current) {
-      setHandlePosition(draggableBlockElem, menuRef.current, anchorElem, SPACE)
+      setHandlePosition(
+        draggableBlockElem,
+        menuRef.current,
+        anchorElem,
+        blockHandleHorizontalOffset,
+      )
     }
-  }, [anchorElem, draggableBlockElem])
+  }, [anchorElem, draggableBlockElem, blockHandleHorizontalOffset])
 
   useEffect(() => {
     function onDragover(event: DragEvent): boolean {
@@ -229,7 +237,7 @@ function useDraggableBlockMenu(
 
       if (draggableBlockElem !== targetBlockElem) {
         setTargetLine(
-          SPACE,
+          blockHandleHorizontalOffset,
           targetLineElem,
           targetBlockElem,
           lastTargetBlockElem,
@@ -344,6 +352,7 @@ function useDraggableBlockMenu(
       document.removeEventListener('drop', onDrop)
     }
   }, [
+    blockHandleHorizontalOffset,
     anchorElem,
     editor,
     lastTargetBlockElem,

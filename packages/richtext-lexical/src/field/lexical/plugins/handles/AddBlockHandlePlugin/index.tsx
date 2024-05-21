@@ -7,6 +7,7 @@ import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
 import { isHTMLElement } from '../../../utils/guard.js'
 import { Point } from '../../../utils/point.js'
 import { Rect } from '../../../utils/rect.js'
@@ -17,7 +18,6 @@ import { isOnHandleElement } from '../utils/isOnHandleElement.js'
 import { setHandlePosition } from '../utils/setHandlePosition.js'
 import './index.scss'
 
-const SPACE = -24
 const ADD_BLOCK_MENU_CLASSNAME = 'add-block-menu'
 
 const Downward = 1
@@ -142,6 +142,9 @@ function useAddBlockHandle(
 ): JSX.Element {
   const scrollerElem = anchorElem.parentElement
 
+  const { editorConfig } = useEditorConfigContext()
+  const blockHandleHorizontalOffset = editorConfig?.admin?.hideGutter ? -24 : 12
+
   const menuRef = useRef<HTMLButtonElement>(null)
   const [hoveredElement, setHoveredElement] = useState<{
     elem: HTMLElement
@@ -231,11 +234,19 @@ function useAddBlockHandle(
           hoveredElement?.elem,
           menuRef.current,
           anchorElem,
-          isEmptyParagraph ? SPACE : SPACE - 20,
+          isEmptyParagraph
+            ? blockHandleHorizontalOffset
+            : blockHandleHorizontalOffset - (editorConfig?.admin?.hideGutter ? 20 : 0),
         )
       })
     }
-  }, [anchorElem, hoveredElement, editor])
+  }, [
+    anchorElem,
+    hoveredElement,
+    editor,
+    blockHandleHorizontalOffset,
+    editorConfig?.admin?.hideGutter,
+  ])
 
   const handleAddClick = useCallback(
     (event) => {
