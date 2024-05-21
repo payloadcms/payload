@@ -8,7 +8,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
-  const { hasSavePermission, publishedDoc, unpublishedVersions } = useDocumentInfo()
+  const { hasPublishPermission, publishedDoc, unpublishedVersions } = useDocumentInfo()
 
   const { submit } = useForm()
   const modified = useFormModified()
@@ -17,7 +17,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
   const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
-  const canPublish = hasSavePermission && (modified || hasNewerVersions || !publishedDoc)
+  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)
 
   const publish = useCallback(() => {
     void submit({
@@ -27,7 +27,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
     })
   }, [submit])
 
-  if (!hasSavePermission) return null
+  if (!hasPublishPermission) return null
 
   return (
     <FormSubmit

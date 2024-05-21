@@ -27,6 +27,7 @@ export const DocumentControls: React.FC<{
   apiURL: string
   data?: any
   disableActions?: boolean
+  hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id?: number | string
   isAccountView?: boolean

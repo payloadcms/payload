@@ -37,6 +37,7 @@ export const DocumentInfoProvider: React.FC<
     collectionSlug,
     docPermissions: docPermissionsFromProps,
     globalSlug,
+    hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
     onLoadError,
     onSave: onSaveFromProps,
@@ -50,6 +51,7 @@ export const DocumentInfoProvider: React.FC<
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
   const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
+  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(null)
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
@@ -219,69 +221,86 @@ export const DocumentInfoProvider: React.FC<
     }
   }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
 
-  const getDocPermissions = React.useCallback(async () => {
-    const params = {
-      locale: locale || undefined,
-    }
+  const getDocPermissions = React.useCallback(
+    async (data?: Data) => {
+      const params = {
+        locale: locale || undefined,
+      }
 
-    if (isEditing) {
-      const docAccessURL = collectionSlug
-        ? `/${collectionSlug}/access/${id}`
-        : globalSlug
-          ? `/globals/${globalSlug}/access`
-          : null
+      if (isEditing) {
+        const docAccessURL = collectionSlug
+          ? `/${collectionSlug}/access/${id}`
+          : globalSlug
+            ? `/globals/${globalSlug}/access`
+            : null
 
-      if (docAccessURL) {
-        const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-          body: JSON.stringify({
-            _status: 'published',
-            data: initialData,
-          }),
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-          method: 'POST',
-        })
+        if (docAccessURL) {
+          const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          })
 
-        const json: DocumentPermissions = await res.json()
+          const json: DocumentPermissions = await res.json()
 
-        setDocPermissions(json)
+          setDocPermissions(json)
+
+          setHasSavePermission(
+            getHasSavePermission({ collectionSlug, docPermissions: json, globalSlug, isEditing }),
+          )
+
+          const publishedAccessJSON = await fetch(
+            `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
+            {
+              body: JSON.stringify({
+                data: {
+                  ...(data || initialData || {}),
+                  _status: 'published',
+                },
+              }),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              method: 'POST',
+            },
+          ).then((res) => res.json())
+
+          setHasPublishPermission(publishedAccessJSON?.update?.permission)
+        }
+      } else {
+        // when creating new documents, there is no permissions saved for this document yet
+        // use the generic entity permissions instead
+        const newDocPermissions = collectionSlug
+          ? permissions?.collections?.[collectionSlug]
+          : permissions?.globals?.[globalSlug]
+
+        setDocPermissions(newDocPermissions)
 
         setHasSavePermission(
-          getHasSavePermission({ collectionSlug, docPermissions: json, globalSlug, isEditing }),
+          getHasSavePermission({
+            collectionSlug,
+            docPermissions: newDocPermissions,
+            globalSlug,
+            isEditing,
+          }),
         )
       }
-    } else {
-      // when creating new documents, there is no permissions saved for this document yet
-      // use the generic entity permissions instead
-      const newDocPermissions = collectionSlug
-        ? permissions?.collections?.[collectionSlug]
-        : permissions?.globals?.[globalSlug]
-
-      setDocPermissions(newDocPermissions)
-
-      setHasSavePermission(
-        getHasSavePermission({
-          collectionSlug,
-          docPermissions: newDocPermissions,
-          globalSlug,
-          isEditing,
-        }),
-      )
-    }
-  }, [
-    serverURL,
-    api,
-    id,
-    permissions,
-    i18n.language,
-    locale,
-    collectionSlug,
-    globalSlug,
-    isEditing,
-    initialData,
-  ])
+    },
+    [
+      serverURL,
+      api,
+      id,
+      permissions,
+      i18n.language,
+      locale,
+      collectionSlug,
+      globalSlug,
+      isEditing,
+      initialData,
+    ],
+  )
 
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
@@ -426,12 +445,20 @@ export const DocumentInfoProvider: React.FC<
     const loadDocPermissions = async () => {
       const docPermissions: DocumentPermissions = docPermissionsFromProps
       const hasSavePermission: boolean = hasSavePermissionFromProps
+      const hasPublishPermission: boolean = hasPublishPermissionFromProps
 
-      if (!docPermissions || hasSavePermission === undefined || hasSavePermission === null) {
+      if (
+        !docPermissions ||
+        hasSavePermission === undefined ||
+        hasSavePermission === null ||
+        hasPublishPermission === undefined ||
+        hasPublishPermission === null
+      ) {
         await getDocPermissions()
       } else {
         setDocPermissions(docPermissions)
         setHasSavePermission(hasSavePermission)
+        setHasPublishPermission(hasPublishPermission)
       }
     }
 
@@ -442,6 +469,7 @@ export const DocumentInfoProvider: React.FC<
     getDocPermissions,
     docPermissionsFromProps,
     hasSavePermissionFromProps,
+    hasPublishPermissionFromProps,
     setDocPermissions,
     collectionSlug,
     globalSlug,
@@ -460,6 +488,7 @@ export const DocumentInfoProvider: React.FC<
     getDocPermissions,
     getDocPreferences,
     getVersions,
+    hasPublishPermission,
     hasSavePermission,
     initialData,
     initialState,

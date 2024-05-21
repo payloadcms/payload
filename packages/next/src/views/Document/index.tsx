@@ -63,6 +63,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   let docPermissions: DocumentPermissions
   let hasSavePermission: boolean
+  let hasPublishPermission: boolean
   let apiURL: string
   let action: string
 
@@ -94,13 +95,31 @@ export const Document: React.FC<AdminViewProps> = async ({
           data,
         },
       })
+
+      hasPublishPermission = await docAccessOperation({
+        id,
+        collection: {
+          config: collectionConfig,
+        },
+        req: {
+          ...req,
+          data: {
+            ...data,
+            _status: 'published',
+          },
+        },
+      }).then(({ update }) => update?.permission)
     } catch (error) {
       notFound()
     }
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
-    hasSavePermission = getHasSavePermission({ collectionSlug, docPermissions, isEditing })
+    hasSavePermission = getHasSavePermission({
+      collectionSlug,
+      docPermissions,
+      isEditing,
+    })
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
@@ -139,8 +158,6 @@ export const Document: React.FC<AdminViewProps> = async ({
       req,
     })
 
-    console.log('data:', data)
-
     try {
       docPermissions = await docAccessOperationGlobal({
         globalConfig,
@@ -149,15 +166,26 @@ export const Document: React.FC<AdminViewProps> = async ({
           data,
         },
       })
+
+      hasPublishPermission = await docAccessOperationGlobal({
+        globalConfig,
+        req: {
+          ...req,
+          data: {
+            ...data,
+            _status: 'published',
+          },
+        },
+      }).then(({ update }) => update?.permission)
     } catch (error) {
       notFound()
     }
 
-    console.log('docPermissions:', docPermissions)
-
-    hasSavePermission = getHasSavePermission({ docPermissions, globalSlug, isEditing })
-
-    console.log('hasSavePermission:', hasSavePermission)
+    hasSavePermission = getHasSavePermission({
+      docPermissions,
+      globalSlug,
+      isEditing,
+    })
 
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
@@ -230,6 +258,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       disableActions={false}
       docPermissions={docPermissions}
       globalSlug={globalConfig?.slug}
+      hasPublishPermission={hasPublishPermission}
       hasSavePermission={hasSavePermission}
       id={id}
       isEditing={isEditing}

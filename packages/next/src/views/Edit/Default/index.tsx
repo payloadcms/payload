@@ -48,6 +48,7 @@ export const DefaultEditView: React.FC = () => {
     getDocPreferences,
     getVersions,
     globalSlug,
+    hasPublishPermission,
     hasSavePermission,
     initialData: data,
     initialState,
@@ -221,6 +222,7 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
