@@ -24,7 +24,7 @@ body:
     validations:
       required: true
   - type: input
-    id: node-version
+    id: nextjs-version
     attributes:
       label: Next.js Version
       description: What version of Next.js are you running?
