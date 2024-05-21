@@ -44,7 +44,6 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    getDocPermissions,
     getDocPreferences,
     getVersions,
     globalSlug,
@@ -116,7 +115,6 @@ export const DefaultEditView: React.FC = () => {
       }
 
       void getVersions()
-      void getDocPermissions()
 
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
@@ -148,7 +146,6 @@ export const DefaultEditView: React.FC = () => {
       depth,
       collectionSlug,
       getVersions,
-      getDocPermissions,
       isEditing,
       refreshCookieAsync,
       adminRoute,

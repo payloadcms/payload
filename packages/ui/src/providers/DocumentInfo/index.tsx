@@ -5,7 +5,7 @@ import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from
 
 import { notFound } from 'next/navigation.js'
 import qs from 'qs'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
@@ -45,13 +45,14 @@ export const DocumentInfoProvider: React.FC<
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [documentTitle, setDocumentTitle] = useState('')
-  const [initialData, setInitialData] = useState<Data>()
+  const [data, setData] = useState<Data>()
   const [initialState, setInitialState] = useState<FormState>()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
   const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
   const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(null)
+  const hasInitializedDocPermissions = useRef(false)
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
@@ -243,19 +244,12 @@ export const DocumentInfoProvider: React.FC<
           })
 
           const json: DocumentPermissions = await res.json()
-
-          setDocPermissions(json)
-
-          setHasSavePermission(
-            getHasSavePermission({ collectionSlug, docPermissions: json, globalSlug, isEditing }),
-          )
-
           const publishedAccessJSON = await fetch(
             `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
             {
               body: JSON.stringify({
                 data: {
-                  ...(data || initialData || {}),
+                  ...(data || {}),
                   _status: 'published',
                 },
               }),
@@ -266,6 +260,12 @@ export const DocumentInfoProvider: React.FC<
               method: 'POST',
             },
           ).then((res) => res.json())
+
+          setDocPermissions(json)
+
+          setHasSavePermission(
+            getHasSavePermission({ collectionSlug, docPermissions: json, globalSlug, isEditing }),
+          )
 
           setHasPublishPermission(publishedAccessJSON?.update?.permission)
         }
@@ -288,18 +288,7 @@ export const DocumentInfoProvider: React.FC<
         )
       }
     },
-    [
-      serverURL,
-      api,
-      id,
-      permissions,
-      i18n.language,
-      locale,
-      collectionSlug,
-      globalSlug,
-      isEditing,
-      initialData,
-    ],
+    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug, isEditing],
   )
 
   const getDocPreferences = useCallback(() => {
@@ -353,8 +342,11 @@ export const DocumentInfoProvider: React.FC<
         serverURL,
       })
 
+      const newData = json.doc
+
       setInitialState(newState)
-      setInitialData(json.doc)
+      await getDocPermissions(newData)
+      setData(newData)
     },
     [
       api,
@@ -366,6 +358,7 @@ export const DocumentInfoProvider: React.FC<
       locale,
       onSaveFromProps,
       serverURL,
+      getDocPermissions,
     ],
   )
 
@@ -392,7 +385,7 @@ export const DocumentInfoProvider: React.FC<
           signal: abortController.signal,
         })
 
-        setInitialData(reduceFieldsToValues(result, true))
+        setData(reduceFieldsToValues(result, true))
         setInitialState(result)
       } catch (err) {
         if (!abortController.signal.aborted) {
@@ -432,14 +425,14 @@ export const DocumentInfoProvider: React.FC<
     setDocumentTitle(
       formatDocTitle({
         collectionConfig,
-        data: { ...initialData, id },
+        data: { ...data, id },
         dateFormat,
         fallback: id?.toString(),
         globalConfig,
         i18n,
       }),
     )
-  }, [collectionConfig, initialData, dateFormat, i18n, id, globalConfig])
+  }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
     const loadDocPermissions = async () => {
@@ -454,7 +447,7 @@ export const DocumentInfoProvider: React.FC<
         hasPublishPermission === undefined ||
         hasPublishPermission === null
       ) {
-        await getDocPermissions()
+        await getDocPermissions(data)
       } else {
         setDocPermissions(docPermissions)
         setHasSavePermission(hasSavePermission)
@@ -462,7 +455,8 @@ export const DocumentInfoProvider: React.FC<
       }
     }
 
-    if (collectionSlug || globalSlug) {
+    if (!hasInitializedDocPermissions.current && (collectionSlug || globalSlug)) {
+      hasInitializedDocPermissions.current = true
       void loadDocPermissions()
     }
   }, [
@@ -473,6 +467,7 @@ export const DocumentInfoProvider: React.FC<
     setDocPermissions,
     collectionSlug,
     globalSlug,
+    data,
   ])
 
   if (isError) notFound()
@@ -490,7 +485,7 @@ export const DocumentInfoProvider: React.FC<
     getVersions,
     hasPublishPermission,
     hasSavePermission,
-    initialData,
+    initialData: data,
     initialState,
     onSave,
     publishedDoc,
