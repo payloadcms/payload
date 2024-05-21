@@ -2,13 +2,13 @@ import type { DeleteOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const deleteOne: DeleteOne = async function deleteOne(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { collection, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]

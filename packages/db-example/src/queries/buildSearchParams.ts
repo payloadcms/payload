@@ -9,7 +9,7 @@ import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
 import { validOperators } from 'payload/types'
 
-import type { MongooseAdapter } from '..'
+import type { ExampleAdapter } from '..'
 
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'
@@ -122,7 +122,7 @@ export async function buildSearchParam({
         async (priorQuery, { collectionSlug: slug, path: subPath }, i) => {
           const priorQueryResult = await priorQuery
 
-          const SubModel = (payload.db as MongooseAdapter).collections[slug]
+          const SubModel = (payload.db as ExampleAdapter).collections[slug]
 
           // On the "deepest" collection,
           // Search on the value passed through the query

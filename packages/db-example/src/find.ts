@@ -4,14 +4,14 @@ import type { PayloadRequest } from 'payload/types'
 
 import { flattenWhereToOperators } from 'payload/database'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const find: Find = async function find(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
   const Model = this.collections[collection]

@@ -4,14 +4,14 @@ import type { PayloadRequest } from 'payload/types'
 
 import { combineQueries, flattenWhereToOperators } from 'payload/database'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
   const VersionModel = this.versions[collection]

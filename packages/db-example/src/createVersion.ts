@@ -2,12 +2,12 @@ import type { CreateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { withSession } from './withSession'
 
 export const createVersion: CreateVersion = async function createVersion(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   {
     autosave,
     collectionSlug,

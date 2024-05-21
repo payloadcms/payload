@@ -5,14 +5,14 @@ import type { PayloadRequest } from 'payload/types'
 import { flattenWhereToOperators } from 'payload/database'
 import { buildVersionGlobalFields } from 'payload/versions'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   {
     global,
     limit,

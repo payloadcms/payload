@@ -1,13 +1,13 @@
 import type { UpdateGlobal } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { slug, data, req = {} as PayloadRequest },
 ) {
   const Model = this.globals

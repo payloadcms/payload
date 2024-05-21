@@ -1,12 +1,12 @@
 import type { UpdateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { withSession } from './withSession'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { id, collection, locale, req = {} as PayloadRequest, versionData, where },
 ) {
   const VersionModel = this.versions[collection]

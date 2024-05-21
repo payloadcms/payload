@@ -3,13 +3,13 @@ import type { PayloadRequest } from 'payload/types'
 
 import { combineQueries } from 'payload/database'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const findGlobal: FindGlobal = async function findGlobal(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { slug, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.globals

@@ -4,14 +4,14 @@ import type { PayloadRequest } from 'payload/types'
 
 import { flattenWhereToOperators } from 'payload/database'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const findVersions: FindVersions = async function findVersions(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   {
     collection,
     limit,

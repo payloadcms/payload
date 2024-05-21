@@ -1,13 +1,13 @@
 import type { Create } from 'payload/database'
 import type { Document, PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import handleError from './utilities/handleError'
 import { withSession } from './withSession'
 
 export const create: Create = async function create(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { collection, data, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection]

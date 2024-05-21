@@ -6,13 +6,13 @@ import { initTransaction } from 'payload/dist/utilities/initTransaction'
 import { killTransaction } from 'payload/dist/utilities/killTransaction'
 import prompts from 'prompts'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 /**
  * Drop the current database and run all migrate up functions
  */
 export async function migrateFresh(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { forceAcceptWarning = false }: { forceAcceptWarning?: boolean },
 ): Promise<void> {
   const { payload } = this

@@ -1,48 +1,26 @@
-import type { QueryOptions } from 'mongoose'
 import type { Count } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { flattenWhereToOperators } from 'payload/database'
+import type { ExampleAdapter } from '.'
 
-import type { MongooseAdapter } from '.'
-
-import { withSession } from './withSession'
-
+/**
+ * Implement the count function here for the specified collection and return the total number of documents that match the query.
+ *
+ * @example
+ * ```ts
+ * const adapterSpecificModel = this.collections[collection]
+ *
+ * const result = await adapterSpecificModel.countDocuments(query)
+ *
+ * return { totalDocs: result }
+ * ```
+ */
 export const count: Count = async function count(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { collection, locale, req = {} as PayloadRequest, where },
-) {
-  const Model = this.collections[collection]
-  const options: QueryOptions = withSession(this, req.transactionID)
-
-  let hasNearConstraint = false
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
-
-  const query = await Model.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
-
-  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
-
-  if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
-    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
-    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
-    // the correct indexed field
-    options.hint = {
-      _id: 1,
-    }
-  }
-
-  const result = await Model.countDocuments(query, options)
-
+): Promise<{ totalDocs: number }> {
+  // Implement the count function here for the specified collection with where query
+  const result = await Promise.resolve(0)
   return {
     totalDocs: result,
   }

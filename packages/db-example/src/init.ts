@@ -8,7 +8,7 @@ import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 import type { CollectionModel } from './types'
 
 import buildCollectionSchema from './models/buildCollectionSchema'
@@ -17,7 +17,7 @@ import buildSchema from './models/buildSchema'
 import getBuildQueryPlugin from './queries/buildQuery'
 import { getDBName } from './utilities/getDBName'
 
-export const init: Init = async function init(this: MongooseAdapter) {
+export const init: Init = async function init(this: ExampleAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, this.payload.config)
 

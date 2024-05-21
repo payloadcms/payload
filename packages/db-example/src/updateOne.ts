@@ -1,14 +1,14 @@
 import type { UpdateOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import handleError from './utilities/handleError'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const updateOne: UpdateOne = async function updateOne(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   { id, collection, data, locale, req = {} as PayloadRequest, where: whereArg },
 ) {
   const where = id ? { id: { equals: id } } : whereArg

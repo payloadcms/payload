@@ -1,12 +1,12 @@
 import type { UpdateGlobalVersionArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { ExampleAdapter } from '.'
 
 import { withSession } from './withSession'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
-  this: MongooseAdapter,
+  this: ExampleAdapter,
   {
     id,
     global,
