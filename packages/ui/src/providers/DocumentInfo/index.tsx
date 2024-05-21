@@ -225,10 +225,15 @@ export const DocumentInfoProvider: React.FC<
 
       if (docAccessURL) {
         const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+          body: JSON.stringify({
+            _status: 'published',
+            data: initialData,
+          }),
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
           },
+          method: 'POST',
         })
 
         const json: DocumentPermissions = await res.json()
@@ -267,6 +272,7 @@ export const DocumentInfoProvider: React.FC<
     collectionSlug,
     globalSlug,
     isEditing,
+    initialData,
   ])
 
   const getDocPreferences = useCallback(() => {
