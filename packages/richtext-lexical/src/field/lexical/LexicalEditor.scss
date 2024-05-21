@@ -22,10 +22,19 @@
     }
   }
 
+  &--show-gutter  {
+    > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
+      left: 3rem;
+    }
+  }
+
+  &:not(&--show-gutter) > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
+    left: 0;
+  }
+
   .editor-placeholder {
     position: absolute;
     top: 8px;
-    left: 0;
     font-size: 15px;
     color: var(--theme-elevation-500);
     /* Prevent text selection */

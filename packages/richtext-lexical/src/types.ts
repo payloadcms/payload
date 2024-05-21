@@ -7,7 +7,15 @@ import type React from 'react'
 import type { FeatureProviderServer } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
 
+export type LexicalFieldAdminProps = {
+  /**
+   * Controls if the gutter (padding to the left & gray vertical line) should be hidden. @default false
+   */
+  hideGutter?: boolean
+}
+
 export type LexicalEditorProps = {
+  admin?: LexicalFieldAdminProps
   features?:
     | (({
         defaultFeatures,

@@ -8,6 +8,7 @@ import { useHotkey } from '../../hooks/useHotkey.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+
 export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { t } = useTranslation()
   const { submit } = useForm()
@@ -49,8 +50,7 @@ type Props = {
   CustomComponent?: React.ReactNode
 }
 
-export const Save: React.FC<Props> = ({ CustomComponent }) => {
+export const SaveButton: React.FC<Props> = ({ CustomComponent }) => {
   if (CustomComponent) return CustomComponent
-
   return <DefaultSaveButton />
 }

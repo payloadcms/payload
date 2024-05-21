@@ -71,6 +71,7 @@ const _RichText: React.FC<
     className,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
+    editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
   ]
     .filter(Boolean)
     .join(' ')

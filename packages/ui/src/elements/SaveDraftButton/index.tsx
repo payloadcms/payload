@@ -88,8 +88,7 @@ type Props = {
   CustomComponent?: React.ReactNode
 }
 
-export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
+export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
   if (CustomComponent) return CustomComponent
-
   return <DefaultSaveDraftButton />
 }

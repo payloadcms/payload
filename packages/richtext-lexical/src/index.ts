@@ -89,11 +89,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     return {
       CellComponent: withMergedProps({
         Component: RichTextCell,
-        toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+        toMergeIntoProps: {
+          admin: props?.admin,
+          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+        },
       }),
       FieldComponent: withMergedProps({
         Component: RichTextField,
-        toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+        toMergeIntoProps: {
+          admin: props?.admin,
+          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+        },
       }),
       editorConfig: finalSanitizedEditorConfig,
       features,

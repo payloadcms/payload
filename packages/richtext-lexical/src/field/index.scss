@@ -23,22 +23,3 @@
   }
 }
 
-html[data-theme='light'] {
-  .rich-text-lexical {
-    &.error {
-      .editor-container {
-        @include lightInputError;
-      }
-    }
-  }
-}
-
-html[data-theme='dark'] {
-  .rich-text-lexical {
-    &.error {
-      .editor-container {
-        @include darkInputError;
-      }
-    }
-  }
-}

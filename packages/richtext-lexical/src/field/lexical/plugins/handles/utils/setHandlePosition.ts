@@ -28,10 +28,15 @@ export function setHandlePosition(
       ? parseInt(targetStyle.lineHeight, 10)
       : 0
 
-    top = targetRect.top + (actualLineHeight - floatingElemRect.height) / 2 - anchorElementRect.top
+    top =
+      targetRect.top + (actualLineHeight - floatingElemRect.height) / 2 - anchorElementRect.top - 1 // 1px inaccuracy
   } else {
     top =
-      targetRect.top - floatingElemRect.height / 2 - anchorElementRect.top + targetRect.height / 2
+      targetRect.top -
+      floatingElemRect.height / 2 -
+      anchorElementRect.top +
+      targetRect.height / 2 -
+      1 // 1px inaccuracy
   }
 
   const left = leftOffset

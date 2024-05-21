@@ -4,9 +4,9 @@ import { $getNodeByKey } from 'lexical'
 
 import { Point } from '../../../utils/point.js'
 import { Rect } from '../../../utils/rect.js'
+import { getBoundingClientRectWithoutTransform } from '../DraggableBlockPlugin/getBoundingRectWithoutTransform.js'
 import { getCollapsedMargins } from '../utils/getCollapsedMargins.js'
 import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys.js'
-import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
 
 // Directions
 const Downward = 1
@@ -21,6 +21,10 @@ type Props = {
   fuzzy?: boolean
   horizontalOffset?: number
   point: Point
+  /**
+   * By default, empty paragraphs are not returned. Set this to true to return empty paragraphs. @default false
+   */
+  returnEmptyParagraphs?: boolean
   /**
    * The index to start searching from. It can be a considerable performance optimization to start searching from the index of the
    * previously found node, as the node is likely to be close to the next node.
@@ -71,9 +75,6 @@ export function getNodeCloseToPoint(props: Props): Output {
     cache.props.useEdgeAsDefault === props.useEdgeAsDefault &&
     isPointClose(cache.props.point, props.point, cache_threshold)
   ) {
-    if (verbose) {
-      //console.log('Returning cached result')
-    }
     return cache.result
   }
 
@@ -121,10 +122,6 @@ export function getNodeCloseToPoint(props: Props): Output {
         }
 
         if (closestBlockElem?.blockElem) {
-          if (verbose) {
-            //console.log('useEdgeAsDefault', useEdgeAsDefault)
-          }
-
           return {
             blockElem: null,
             isFoundNodeEmptyParagraph: false,
@@ -136,10 +133,6 @@ export function getNodeCloseToPoint(props: Props): Output {
     // Find matching block element
     let index = startIndex
     let direction = Indeterminate
-
-    if (verbose) {
-      //console.log('start index', startIndex)
-    }
 
     while (index >= 0 && index < topLevelNodeKeys.length) {
       const key = topLevelNodeKeys[index]
@@ -163,10 +156,6 @@ export function getNodeCloseToPoint(props: Props): Output {
 
       const { distance, isOnBottomSide, isOnTopSide } = rect.distanceFromPoint(point)
 
-      if (verbose) {
-        //console.log('distance', distance)
-      }
-
       if (distance === 0) {
         closestBlockElem.blockElem = elem
         closestBlockElem.blockNode = $getNodeByKey(key)
@@ -179,7 +168,7 @@ export function getNodeCloseToPoint(props: Props): Output {
           closestBlockElem.blockNode.getType() === 'paragraph' &&
           closestBlockElem.blockNode.getTextContent() === ''
         ) {
-          if (!fuzzy) {
+          if (!fuzzy && !props.returnEmptyParagraphs) {
             closestBlockElem.blockElem = null
             closestBlockElem.blockNode = null
           }
