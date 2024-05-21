@@ -44,7 +44,7 @@ export const blockValidationHOC = (
     }
 
     if (errorPaths.length) {
-      return 'Block validation failed: ' + errorPaths.join(', ')
+      return 'The following fields are invalid: ' + errorPaths.join(', ')
     }
 
     return true

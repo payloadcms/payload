@@ -84,14 +84,14 @@ const _RichText: React.FC<
         width,
       }}
     >
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}

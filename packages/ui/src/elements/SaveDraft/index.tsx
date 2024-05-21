@@ -57,7 +57,9 @@ const DefaultSaveDraftButton: React.FC = () => {
   }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (forceDisable) return
+    if (forceDisable) {
+      // absorb the event
+    }
 
     e.preventDefault()
     e.stopPropagation()

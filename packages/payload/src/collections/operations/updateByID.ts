@@ -147,6 +147,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       collection,
       config,
       data,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,

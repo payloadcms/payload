@@ -9,22 +9,24 @@ import sanitize from 'sanitize-filename'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequestWithData } from '../types/index.js'
-import type { FileData, FileToSave, ProbedImageSize } from './types.js'
+import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
-import canResizeImage from './canResizeImage.js'
-import cropImage from './cropImage.js'
+import { canResizeImage } from './canResizeImage.js'
+import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
-import getSafeFileName from './getSafeFilename.js'
-import resizeAndTransformImageSizes from './imageResizer.js'
-import isImage from './isImage.js'
+import { getSafeFileName } from './getSafeFilename.js'
+import { resizeAndTransformImageSizes } from './imageResizer.js'
+import { isImage } from './isImage.js'
 
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  operation: 'create' | 'update'
+  originalDoc?: T
   overwriteExistingFiles?: boolean
   req: PayloadRequestWithData
   throwOnMissingFile?: boolean
@@ -38,6 +40,8 @@ type Result<T> = Promise<{
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
+  operation,
+  originalDoc,
   overwriteExistingFiles,
   req,
   throwOnMissingFile,
@@ -53,10 +57,22 @@ export const generateFileData = async <T>({
 
   let file = req.file
 
-  const uploadEdits = req.query['uploadEdits'] || {}
+  const uploadEdits = parseUploadEditsFromReqOrIncomingData({
+    data,
+    operation,
+    originalDoc,
+    req,
+  })
 
-  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
-    collectionConfig.upload
+  const {
+    disableLocalStorage,
+    focalPoint: focalPointEnabled = true,
+    formatOptions,
+    imageSizes,
+    resizeOptions,
+    staticDir,
+    trimOptions,
+  } = collectionConfig.upload
 
   const staticPath = staticDir
 
@@ -228,9 +244,9 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (Array.isArray(imageSizes) && fileSupportsResize && sharp) {
+    if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}
-      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
+      const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
         dimensions: !cropData
           ? dimensions
@@ -245,13 +261,16 @@ export const generateFileData = async <T>({
         savedFilename: fsSafeName || file.name,
         sharp,
         staticPath,
+        uploadEdits,
       })
 
       fileData.sizes = sizeData
+      fileData.focalX = focalPoint?.x
+      fileData.focalY = focalPoint?.y
       filesToSave.push(...sizesToSave)
     }
   } catch (err) {
-    console.error(err)
+    req.payload.logger.error(err)
     throw new FileUploadError(req.t)
   }
 
@@ -264,4 +283,51 @@ export const generateFileData = async <T>({
     data: newData,
     files: filesToSave,
   }
+}
+
+/**
+ * Parse upload edits from req or incoming data
+ */
+function parseUploadEditsFromReqOrIncomingData(args: {
+  data: unknown
+  operation: 'create' | 'update'
+  originalDoc: unknown
+  req: PayloadRequestWithData
+}): UploadEdits {
+  const { data, operation, originalDoc, req } = args
+
+  // Get intended focal point change from query string or incoming data
+  const {
+    uploadEdits = {},
+  }: {
+    uploadEdits?: UploadEdits
+  } = req.query || {}
+
+  if (uploadEdits.focalPoint) return uploadEdits
+
+  const incomingData = data as FileData
+  const origDoc = originalDoc as FileData
+
+  // If no change in focal point, return undefined.
+  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+    return undefined
+  }
+
+  if (incomingData?.focalX && incomingData?.focalY) {
+    uploadEdits.focalPoint = {
+      x: incomingData.focalX,
+      y: incomingData.focalY,
+    }
+    return uploadEdits
+  }
+
+  // If no focal point is set, default to center
+  if (operation === 'create') {
+    uploadEdits.focalPoint = {
+      x: 50,
+      y: 50,
+    }
+  }
+  return uploadEdits
 }
