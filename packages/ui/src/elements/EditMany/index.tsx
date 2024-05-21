@@ -55,7 +55,8 @@ const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disab
     </FormSubmit>
   )
 }
-const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+
+const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -76,7 +77,8 @@ const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disa
     </FormSubmit>
   )
 }
-const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+
+const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -219,11 +221,11 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                       <div className={`${baseClass}__document-actions`}>
                         {collection?.versions?.drafts ? (
                           <React.Fragment>
-                            <Publish
+                            <PublishButton
                               action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
-                            <SaveDraft
+                            <SaveDraftButton
                               action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
