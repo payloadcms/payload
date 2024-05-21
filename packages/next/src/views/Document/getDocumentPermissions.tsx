@@ -1,0 +1,102 @@
+import type { DocumentPermissions } from 'payload/auth'
+import type {
+  Data,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
+
+import { hasSavePermission as getHasSavePermission } from '@payloadcms/ui/utilities/hasSavePermission'
+import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
+import { notFound } from 'next/navigation.js'
+import { docAccessOperation, docAccessOperationGlobal } from 'payload/operations'
+
+export const getDocumentPermissions = async (args: {
+  collectionConfig?: SanitizedCollectionConfig
+  data: Data
+  globalConfig?: SanitizedGlobalConfig
+  id: number | string
+  req: PayloadRequest
+}): Promise<{
+  docPermissions: DocumentPermissions
+  hasPublishPermission: boolean
+  hasSavePermission: boolean
+}> => {
+  const { id, collectionConfig, data, globalConfig, req } = args
+
+  let docPermissions: DocumentPermissions
+  let hasPublishPermission: boolean
+
+  if (collectionConfig) {
+    try {
+      docPermissions = await docAccessOperation({
+        id: id.toString(),
+        collection: {
+          config: collectionConfig,
+        },
+        req: {
+          ...req,
+          data,
+        },
+      })
+
+      hasPublishPermission = await docAccessOperation({
+        id: id.toString(),
+        collection: {
+          config: collectionConfig,
+        },
+        req: {
+          ...req,
+          data: {
+            ...data,
+            _status: 'published',
+          },
+        },
+      }).then(({ update }) => update?.permission)
+    } catch (error) {
+      notFound()
+    }
+  }
+
+  if (globalConfig) {
+    try {
+      docPermissions = await docAccessOperationGlobal({
+        globalConfig,
+        req: {
+          ...req,
+          data,
+        },
+      })
+
+      hasPublishPermission = await docAccessOperationGlobal({
+        globalConfig,
+        req: {
+          ...req,
+          data: {
+            ...data,
+            _status: 'published',
+          },
+        },
+      }).then(({ update }) => update?.permission)
+    } catch (error) {
+      notFound()
+    }
+  }
+
+  const hasSavePermission = getHasSavePermission({
+    collectionSlug: collectionConfig?.slug,
+    docPermissions,
+    globalSlug: globalConfig?.slug,
+    isEditing: getIsEditing({
+      id,
+      collectionSlug: collectionConfig?.slug,
+      globalSlug: globalConfig?.slug,
+    }),
+  })
+
+  return {
+    docPermissions,
+    hasPublishPermission,
+    hasSavePermission,
+  }
+}
