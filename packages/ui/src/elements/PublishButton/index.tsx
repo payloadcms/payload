@@ -94,7 +94,7 @@ type Props = {
   CustomComponent?: React.ReactNode
 }
 
-export const Publish: React.FC<Props> = ({ CustomComponent }) => {
+export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
   if (CustomComponent) return CustomComponent
 
   return <DefaultPublishButton />
