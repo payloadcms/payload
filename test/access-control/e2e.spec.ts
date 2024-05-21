@@ -134,7 +134,7 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - fully restricted', () => {
+  describe('collection — fully restricted', () => {
     let existingDoc: ReadOnlyCollection
 
     beforeAll(async () => {
@@ -178,7 +178,7 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - read-only', () => {
+  describe('collection — read-only', () => {
     let existingDoc: ReadOnlyCollection
 
     beforeAll(async () => {
@@ -215,7 +215,7 @@ describe('access control', () => {
       await expect(page.locator(`#card-${readOnlySlug}`)).not.toHaveClass('card__actions')
     })
 
-    test('edit view should not have actions buttons', async () => {
+    test('should not display actions on edit view', async () => {
       await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('.collection-edit__collection-actions li')).toHaveCount(0)
     })
@@ -234,7 +234,7 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - create but not edit', () => {
+  describe('collection — create but not edit', () => {
     test('should not show edit button', async () => {
       const createNotUpdateURL = new AdminUrlUtil(serverURL, createNotUpdateSlug)
       await page.goto(createNotUpdateURL.create)
@@ -277,8 +277,8 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - dynamic update access', () => {
-    test('maintain access control in document drawer', async () => {
+  describe('collection — dynamic update access', () => {
+    test('should maintain access control in document drawer', async () => {
       const unrestrictedDoc = await payload.create({
         collection: unrestrictedSlug,
         data: {
@@ -311,7 +311,7 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - restricted versions', () => {
+  describe('collection — restricted versions', () => {
     let existingDoc: RestrictedVersion
 
     beforeAll(async () => {
@@ -346,7 +346,7 @@ describe('access control', () => {
       })
     })
 
-    test('disable field based on document data', async () => {
+    test('should disable field based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the text input is disabled because the field is "locked"
@@ -354,7 +354,7 @@ describe('access control', () => {
       await expect(isDisabled).toBeDisabled()
     })
 
-    test('disable operation based on document data', async () => {
+    test('should disable operation based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the delete action is not displayed

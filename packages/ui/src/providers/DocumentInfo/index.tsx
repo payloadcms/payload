@@ -42,6 +42,7 @@ export const DocumentInfoProvider: React.FC<
     onLoadError,
     onSave: onSaveFromProps,
   } = props
+
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [documentTitle, setDocumentTitle] = useState('')
@@ -223,14 +224,16 @@ export const DocumentInfoProvider: React.FC<
   }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
 
   const getDocPermissions = React.useCallback(
-    async (data?: Data) => {
+    async (data: Data) => {
       const params = {
         locale: locale || undefined,
       }
 
-      if (isEditing) {
+      const newIsEditing = getIsEditing({ id: data.id, collectionSlug, globalSlug })
+
+      if (newIsEditing) {
         const docAccessURL = collectionSlug
-          ? `/${collectionSlug}/access/${id}`
+          ? `/${collectionSlug}/access/${data.id}`
           : globalSlug
             ? `/globals/${globalSlug}/access`
             : null
@@ -283,12 +286,12 @@ export const DocumentInfoProvider: React.FC<
             collectionSlug,
             docPermissions: newDocPermissions,
             globalSlug,
-            isEditing,
+            isEditing: newIsEditing,
           }),
         )
       }
     },
-    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug, isEditing],
+    [serverURL, api, permissions, i18n.language, locale, collectionSlug, globalSlug, isEditing],
   )
 
   const getDocPreferences = useCallback(() => {
@@ -345,8 +348,8 @@ export const DocumentInfoProvider: React.FC<
       const newData = json.doc
 
       setInitialState(newState)
-      await getDocPermissions(newData)
       setData(newData)
+      await getDocPermissions(newData)
     },
     [
       api,
@@ -455,7 +458,7 @@ export const DocumentInfoProvider: React.FC<
       }
     }
 
-    if (!hasInitializedDocPermissions.current && (collectionSlug || globalSlug)) {
+    if (!hasInitializedDocPermissions.current && data && (collectionSlug || globalSlug)) {
       hasInitializedDocPermissions.current = true
       void loadDocPermissions()
     }
