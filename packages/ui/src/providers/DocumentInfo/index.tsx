@@ -32,7 +32,15 @@ export const DocumentInfoProvider: React.FC<
     children: React.ReactNode
   }
 > = ({ children, ...props }) => {
-  const { id, collectionSlug, globalSlug, onLoadError, onSave: onSaveFromProps } = props
+  const {
+    id,
+    collectionSlug,
+    docPermissions: docPermissionsFromProps,
+    globalSlug,
+    hasSavePermission: hasSavePermissionFromProps,
+    onLoadError,
+    onSave: onSaveFromProps,
+  } = props
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [documentTitle, setDocumentTitle] = useState('')
@@ -416,8 +424,8 @@ export const DocumentInfoProvider: React.FC<
 
   useEffect(() => {
     const loadDocPermissions = async () => {
-      const docPermissions: DocumentPermissions = props.docPermissions
-      const hasSavePermission: boolean = props.hasSavePermission
+      const docPermissions: DocumentPermissions = docPermissionsFromProps
+      const hasSavePermission: boolean = hasSavePermissionFromProps
 
       if (!docPermissions || hasSavePermission === undefined || hasSavePermission === null) {
         await getDocPermissions()
@@ -432,8 +440,8 @@ export const DocumentInfoProvider: React.FC<
     }
   }, [
     getDocPermissions,
-    props.docPermissions,
-    props.hasSavePermission,
+    docPermissionsFromProps,
+    hasSavePermissionFromProps,
     setDocPermissions,
     collectionSlug,
     globalSlug,

@@ -547,20 +547,18 @@ describe('versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('title')
     })
 
-    test('should hide publish when access control prevents updating on globals', async () => {
+    test('globals — should hide publish button when access control prevents update', async () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
-
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
-    test('should hide publish when access control prevents create operation', async () => {
+    test('collections — should hide publish button when access control prevents create', async () => {
       await page.goto(disablePublishURL.create)
-
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
-    test('should hide publish when access control prevents update operation', async () => {
+    test('collections — should hide publish button when access control prevents update', async () => {
       const publishedDoc = await payload.create({
         collection: disablePublishSlug,
         data: {
@@ -571,7 +569,6 @@ describe('versions', () => {
       })
 
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
-
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 

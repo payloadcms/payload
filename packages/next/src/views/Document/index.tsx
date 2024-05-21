@@ -1,5 +1,5 @@
 import type { EditViewComponent } from 'payload/config'
-import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
+import type { AdminViewComponent, Data, ServerSideEditViewProps } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
@@ -12,7 +12,7 @@ import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParam
 import { hasSavePermission as getHasSavePermission } from '@payloadcms/ui/utilities/hasSavePermission'
 import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
 import { notFound, redirect } from 'next/navigation.js'
-import { docAccessOperation } from 'payload/operations'
+import { docAccessOperation, docAccessOperationGlobal } from 'payload/operations'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -71,13 +71,28 @@ export const Document: React.FC<AdminViewProps> = async ({
       notFound()
     }
 
+    let data: Data = {}
+
+    if (id) {
+      data = await payload.findByID({
+        id,
+        collection: collectionSlug,
+        depth: 0,
+        locale: locale.code,
+        req,
+      })
+    }
+
     try {
       docPermissions = await docAccessOperation({
         id,
         collection: {
           config: collectionConfig,
         },
-        req,
+        req: {
+          ...req,
+          data,
+        },
       })
     } catch (error) {
       notFound()
@@ -117,8 +132,32 @@ export const Document: React.FC<AdminViewProps> = async ({
       notFound()
     }
 
-    docPermissions = permissions?.globals?.[globalSlug]
+    const data = await payload.findGlobal({
+      slug: globalSlug,
+      depth: 0,
+      locale: locale.code,
+      req,
+    })
+
+    console.log('data:', data)
+
+    try {
+      docPermissions = await docAccessOperationGlobal({
+        globalConfig,
+        req: {
+          ...req,
+          data,
+        },
+      })
+    } catch (error) {
+      notFound()
+    }
+
+    console.log('docPermissions:', docPermissions)
+
     hasSavePermission = getHasSavePermission({ docPermissions, globalSlug, isEditing })
+
+    console.log('hasSavePermission:', hasSavePermission)
 
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
