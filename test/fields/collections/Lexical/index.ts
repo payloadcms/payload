@@ -68,7 +68,7 @@ export const LexicalFields: CollectionConfig = {
       required: true,
       editor: lexicalEditor({
         admin: {
-          hideGutter: true,
+          hideGutter: false,
         },
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
