@@ -60,7 +60,7 @@ export const uploadValidation = (
     }
 
     if (errorPaths.length) {
-      return 'Upload fields validation failed: ' + errorPaths.join(', ')
+      return 'The following fields are invalid: ' + errorPaths.join(', ')
     }
 
     return true

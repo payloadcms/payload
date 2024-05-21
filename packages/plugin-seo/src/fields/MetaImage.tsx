@@ -120,7 +120,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
           CustomError={errorMessage}
           api={api}
           collection={collection}
-          filterOptions={{}}
+          filterOptions={field.filterOptions}
           label={undefined}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {

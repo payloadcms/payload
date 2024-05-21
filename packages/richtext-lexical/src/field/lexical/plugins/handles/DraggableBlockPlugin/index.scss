@@ -1,3 +1,5 @@
+@import '../../../../../scss/styles.scss';
+
 .draggable-block-menu {
   border-radius: 4px;
   padding: 0;
@@ -7,13 +9,14 @@
   left: 0;
   top: 0;
   will-change: transform;
+  background-color: var(--theme-bg);
 
   &:active {
     cursor: grabbing;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background-color: var(--theme-elevation-100);
     .icon {
       opacity: 1;
     }
@@ -28,8 +31,14 @@
 
   html[data-theme='dark'] & {
     .icon {
-      filter: invert(1);
+      background-image: url(../../../ui/icons/DraggableBlock/light.svg);
     }
+  }
+}
+
+.rich-text-lexical--show-gutter > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor {
+  > .draggable-block-target-line {
+    left: 3rem;
   }
 }
 

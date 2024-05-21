@@ -133,56 +133,59 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        <FieldError CustomError={CustomError} {...(errorProps || {})} />
         <FieldLabel
           CustomLabel={CustomLabel}
           label={label}
           required={required}
           {...(labelProps || {})}
         />
-        {collection?.upload && (
-          <React.Fragment>
-            {fileDoc && !missingFile && (
-              <FileDetails
-                collectionSlug={relationTo}
-                doc={fileDoc}
-                handleRemove={
-                  readOnly
-                    ? undefined
-                    : () => {
-                        onChange(null)
-                      }
-                }
-                uploadConfig={collection.upload}
-              />
-            )}
-            {(!fileDoc || missingFile) && (
-              <div className={`${baseClass}__wrap`}>
-                <div className={`${baseClass}__buttons`}>
-                  <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                    <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                      {t('fields:uploadNewLabel', {
-                        label: getTranslation(collection.labels.singular, i18n),
-                      })}
-                    </Button>
-                  </DocumentDrawerToggler>
-                  <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                    <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                      {t('fields:chooseFromExisting')}
-                    </Button>
-                  </ListDrawerToggler>
+        <div className={`${fieldBaseClass}__wrap`}>
+          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+
+          {collection?.upload && (
+            <React.Fragment>
+              {fileDoc && !missingFile && (
+                <FileDetails
+                  collectionSlug={relationTo}
+                  doc={fileDoc}
+                  handleRemove={
+                    readOnly
+                      ? undefined
+                      : () => {
+                          onChange(null)
+                        }
+                  }
+                  uploadConfig={collection.upload}
+                />
+              )}
+              {(!fileDoc || missingFile) && (
+                <div className={`${baseClass}__wrap`}>
+                  <div className={`${baseClass}__buttons`}>
+                    <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                        {t('fields:uploadNewLabel', {
+                          label: getTranslation(collection.labels.singular, i18n),
+                        })}
+                      </Button>
+                    </DocumentDrawerToggler>
+                    <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                        {t('fields:chooseFromExisting')}
+                      </Button>
+                    </ListDrawerToggler>
+                  </div>
                 </div>
-              </div>
-            )}
-            {CustomDescription !== undefined ? (
-              CustomDescription
-            ) : (
-              <FieldDescription {...(descriptionProps || {})} />
-            )}
-          </React.Fragment>
-        )}
-        {!readOnly && <DocumentDrawer onSave={onSave} />}
-        {!readOnly && <ListDrawer onSelect={onSelect} />}
+              )}
+              {CustomDescription !== undefined ? (
+                CustomDescription
+              ) : (
+                <FieldDescription {...(descriptionProps || {})} />
+              )}
+            </React.Fragment>
+          )}
+          {!readOnly && <DocumentDrawer onSave={onSave} />}
+          {!readOnly && <ListDrawer onSelect={onSelect} />}
+        </div>
       </div>
     )
   }

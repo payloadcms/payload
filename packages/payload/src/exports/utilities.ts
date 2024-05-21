@@ -12,7 +12,7 @@ export { traverseFields as beforeValidateTraverseFields } from '../fields/hooks/
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
-export { default as isImage } from '../uploads/isImage.js'
+export { isImage } from '../uploads/isImage.js'
 
 export { combineMerge } from '../utilities/combineMerge.js'
 export {

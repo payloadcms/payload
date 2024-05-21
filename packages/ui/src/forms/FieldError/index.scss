@@ -2,8 +2,6 @@
 
 .field-error.tooltip {
   font-family: var(--font-body);
-  top: 0;
-  bottom: auto;
   left: auto;
   max-width: 75%;
   right: calc(var(--base) * 0.5);
@@ -12,5 +10,6 @@
 
   &::after {
     border-top-color: var(--theme-error-500);
+    border-bottom-color: var(--theme-error-500);
   }
 }

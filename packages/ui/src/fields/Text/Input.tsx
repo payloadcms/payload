@@ -60,61 +60,64 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      {hasMany ? (
-        <ReactSelect
-          className={`field-${path.replace(/\./g, '__')}`}
-          disabled={readOnly}
-          // prevent adding additional options if maxRows is reached
-          filterOption={() =>
-            !maxRows ? true : !(Array.isArray(value) && maxRows && value.length >= maxRows)
-          }
-          isClearable
-          isCreatable
-          isMulti
-          isSortable
-          noOptionsMessage={() => {
-            const isOverHasMany = Array.isArray(value) && value.length >= maxRows
-            if (isOverHasMany) {
-              return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
-            }
-            return null
-          }}
-          onChange={onChange}
-          options={[]}
-          placeholder={t('general:enterAValue')}
-          showError={showError}
-          value={valueToRender}
-        />
-      ) : (
-        <div>
-          {BeforeInput}
-          <input
-            data-rtl={rtl}
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+
+        {hasMany ? (
+          <ReactSelect
+            className={`field-${path.replace(/\./g, '__')}`}
             disabled={readOnly}
-            id={`field-${path?.replace(/\./g, '__')}`}
-            name={path}
+            // prevent adding additional options if maxRows is reached
+            filterOption={() =>
+              !maxRows ? true : !(Array.isArray(value) && maxRows && value.length >= maxRows)
+            }
+            isClearable
+            isCreatable
+            isMulti
+            isSortable
+            noOptionsMessage={() => {
+              const isOverHasMany = Array.isArray(value) && value.length >= maxRows
+              if (isOverHasMany) {
+                return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
+              }
+              return null
+            }}
             onChange={onChange}
-            onKeyDown={onKeyDown}
-            placeholder={getTranslation(placeholder, i18n)}
-            ref={inputRef}
-            type="text"
-            value={value || ''}
+            options={[]}
+            placeholder={t('general:enterAValue')}
+            showError={showError}
+            value={valueToRender}
           />
-          {AfterInput}
-        </div>
-      )}
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+        ) : (
+          <div>
+            {BeforeInput}
+            <input
+              data-rtl={rtl}
+              disabled={readOnly}
+              id={`field-${path?.replace(/\./g, '__')}`}
+              name={path}
+              onChange={onChange}
+              onKeyDown={onKeyDown}
+              placeholder={getTranslation(placeholder, i18n)}
+              ref={inputRef}
+              type="text"
+              value={value || ''}
+            />
+            {AfterInput}
+          </div>
+        )}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
+      </div>
     </div>
   )
 }

@@ -97,9 +97,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      </div>
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}

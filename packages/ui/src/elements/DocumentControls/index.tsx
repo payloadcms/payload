@@ -15,9 +15,9 @@ import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
-import { Publish } from '../Publish/index.js'
-import { Save } from '../Save/index.js'
-import { SaveDraft } from '../SaveDraft/index.js'
+import { PublishButton } from '../PublishButton/index.js'
+import { SaveButton } from '../SaveButton/index.js'
+import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import './index.scss'
 
@@ -169,12 +169,12 @@ export const DocumentControls: React.FC<{
                       !collectionConfig?.versions?.drafts?.autosave) ||
                       (globalConfig?.versions?.drafts &&
                         !globalConfig?.versions?.drafts?.autosave)) && (
-                      <SaveDraft CustomComponent={componentMap.SaveDraftButton} />
+                      <SaveDraftButton CustomComponent={componentMap.SaveDraftButton} />
                     )}
-                    <Publish CustomComponent={componentMap.PublishButton} />
+                    <PublishButton CustomComponent={componentMap.PublishButton} />
                   </React.Fragment>
                 ) : (
-                  <Save CustomComponent={componentMap.SaveButton} />
+                  <SaveButton CustomComponent={componentMap.SaveButton} />
                 )}
               </React.Fragment>
             )}
