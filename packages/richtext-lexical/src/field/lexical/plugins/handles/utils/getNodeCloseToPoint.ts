@@ -75,9 +75,6 @@ export function getNodeCloseToPoint(props: Props): Output {
     cache.props.useEdgeAsDefault === props.useEdgeAsDefault &&
     isPointClose(cache.props.point, props.point, cache_threshold)
   ) {
-    if (verbose) {
-      console.log('Returning cached result')
-    }
     return cache.result
   }
 
@@ -125,10 +122,6 @@ export function getNodeCloseToPoint(props: Props): Output {
         }
 
         if (closestBlockElem?.blockElem) {
-          if (verbose) {
-            console.log('useEdgeAsDefault', useEdgeAsDefault)
-          }
-
           return {
             blockElem: null,
             isFoundNodeEmptyParagraph: false,
@@ -141,14 +134,7 @@ export function getNodeCloseToPoint(props: Props): Output {
     let index = startIndex
     let direction = Indeterminate
 
-    if (verbose) {
-      //console.log('start index', startIndex)
-    }
-
     while (index >= 0 && index < topLevelNodeKeys.length) {
-      if (verbose) {
-        console.log('AAA', index, topLevelNodeKeys)
-      }
       const key = topLevelNodeKeys[index]
       const elem = editor.getElementByKey(key)
       if (elem === null) {
@@ -170,10 +156,6 @@ export function getNodeCloseToPoint(props: Props): Output {
 
       const { distance, isOnBottomSide, isOnTopSide } = rect.distanceFromPoint(point)
 
-      if (verbose) {
-        console.log('distance', distance)
-      }
-
       if (distance === 0) {
         closestBlockElem.blockElem = elem
         closestBlockElem.blockNode = $getNodeByKey(key)
@@ -191,9 +173,6 @@ export function getNodeCloseToPoint(props: Props): Output {
             closestBlockElem.blockNode = null
           }
 
-          if (verbose) {
-            console.log('Empty paragraph found')
-          }
           closestBlockElem.isFoundNodeEmptyParagraph = true
         }
         break
@@ -229,9 +208,7 @@ export function getNodeCloseToPoint(props: Props): Output {
     foundAtIndex: closestBlockElem.foundAtIndex,
     isFoundNodeEmptyParagraph: closestBlockElem.isFoundNodeEmptyParagraph,
   }
-  if (verbose) {
-    console.log('returning', closestBlockElem)
-  }
+
   return {
     blockElem: closestBlockElem.blockElem,
     blockNode: closestBlockElem.blockNode,
