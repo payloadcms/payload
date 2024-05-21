@@ -138,12 +138,10 @@ export const createMigration: CreateMigration = async function createMigration(
   fs.writeFileSync(
     `${filePath}.ts`,
     migrationTemplate(
-      predefinedMigration
-        ? predefinedMigration
-        : {
-            downSQL: sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
-            upSQL: sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
-          },
+      predefinedMigration ?? {
+        downSQL: sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
+        upSQL: sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
+      },
     ),
   )
   payload.logger.info({ msg: `Migration created at ${filePath}.ts` })

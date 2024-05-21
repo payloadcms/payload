@@ -14,16 +14,19 @@ export const getPredefinedMigration = async ({
   payload,
 }: {
   dirname: string
-  file: string
-  migrationName: string
+  file?: string
+  migrationName?: string
   payload: Payload
 }): Promise<MigrationTemplateArgs> => {
   // Check for predefined migration.
   // Either passed in via --file or prefixed with '@payloadcms/db-mongodb/' for example
-  if (file || migrationNameArg.startsWith('@payloadcms/')) {
+  if (file || migrationNameArg?.startsWith('@payloadcms/')) {
     // removes the package name from the migrationName.
-    const migrationName = migrationNameArg.split('/').slice(2).join('/')
-    const cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}.js`)
+    const migrationName = (file || migrationNameArg).split('/').slice(2).join('/')
+    let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}.js`)
+    if (!fs.existsSync(cleanPath)) {
+      cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}/index.js`)
+    }
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {
@@ -39,4 +42,5 @@ export const getPredefinedMigration = async ({
       process.exit(1)
     }
   }
+  return {}
 }
