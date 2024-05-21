@@ -15,7 +15,7 @@ import { useTheme } from '..'
 import { themeLocalStorageKey } from './types'
 
 export const ThemeSelector: React.FC = () => {
-  const { setTheme, theme } = useTheme()
+  const { setTheme } = useTheme()
   const [value, setValue] = useState('')
 
   const onThemeChange = (themeToSet: Theme & 'auto') => {
@@ -35,7 +35,7 @@ export const ThemeSelector: React.FC = () => {
 
   return (
     <Select onValueChange={onThemeChange} value={value}>
-      <SelectTrigger className="w-auto">
+      <SelectTrigger className="w-auto bg-transparent gap-2 pl-0 md:pl-3 border-none">
         <SelectValue placeholder="Theme" />
       </SelectTrigger>
       <SelectContent>

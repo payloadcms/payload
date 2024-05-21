@@ -46,7 +46,7 @@
     "graphql": "^16.8.1",
     "jsonwebtoken": "9.0.1",
     "lucide-react": "^0.378.0",
-    "next": "14.3.0-canary.70",
+    "next": "14.3.0-canary.68",
     "payload": "3.0.0-beta.34",
     "payload-admin-bar": "^1.0.6",
     "prism-react-renderer": "^2.3.1",

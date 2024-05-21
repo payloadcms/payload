@@ -17,7 +17,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const collections = ['categories', 'media', 'pages', 'posts', 'forms', 'form-submissions']
-const globals = ['header', 'settings', 'footer']
+const globals = ['header', 'footer']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app

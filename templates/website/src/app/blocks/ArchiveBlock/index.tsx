@@ -31,7 +31,7 @@ export const ArchiveBlock: React.FC<
       )}
       <CollectionArchive
         categories={categories}
-        limit={limit}
+        limit={2}
         populateBy={populateBy}
         populatedDocs={populatedDocs}
         populatedDocsTotal={populatedDocsTotal}
