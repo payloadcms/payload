@@ -4,22 +4,19 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-
+/**
+ * Creates a global document in the database.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} slug - The specified slug of the global.
+ * @param {object} data - The full data passed to create (data will have all locales and depth 0).
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @returns {Promise<T>} A promise that resolves with the created global document.
+ */
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: ExampleAdapter,
-  {
-    slug, // The specified slug of the global
-    data, // The full data passed to create
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-  },
+  { slug, data, req = {} as PayloadRequest },
 ) {
-  /**
-   *
-   * If you need to create a global in your DB, here is where you'd do it
-   *
-   */
-
   let result
   /**
    * Implement the logic to create the global document in your database.
@@ -31,8 +28,6 @@ export const createGlobal: CreateGlobal = async function createGlobal(
    */
 
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null

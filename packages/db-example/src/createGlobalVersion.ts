@@ -5,23 +5,23 @@ import type { Document } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
+/**
+ * Creates a global version document in the database.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {boolean} autosave - Indicates if autosave is enabled.
+ * @param {Date} createdAt - Created-At date of the document.
+ * @param {string} globalSlug - The global slug of the document.
+ * @param {string} parent - ID of the parent document for which the version should be created for.
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {Date} updatedAt - Updated-At date of the document.
+ * @param {object} versionData - Full version data passed to create the global version.
+ * @returns {Promise<TypeWithVersion<T>>} A promise that resolves with the created global version document.
+ */
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: ExampleAdapter,
-  {
-    autosave, // Indicates if autosave is enabled
-    createdAt, // Created-At date of the document
-    globalSlug, // The global slug of the document
-    parent, // ID of the parent document for which the version should be created for
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    updatedAt, // Updated-At date of the document
-    versionData, // Full version data passed to create the global version
-  },
+  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
 ) {
-  /**
-   *
-   * If you need to create a global version in your DB, here is where you'd do it
-   *
-   */
   let doc
   /**
    * Implement the logic to create the global version document in your database.
@@ -40,8 +40,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
    */
 
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null

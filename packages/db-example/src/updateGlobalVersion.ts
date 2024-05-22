@@ -1,26 +1,33 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { UpdateGlobalVersionArgs } from 'payload/database'
-import type { PayloadRequest, TypeWithID } from 'payload/types'
+import type { PayloadRequest, TypeWithID, Where } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
+/**
+ * Updates a global version document in the specified collection based on the provided criteria using
+ * the incoming ID, global, locale, and versionData, then returns the updated global version document in the format Payload expects.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} id - The ID of the global version.
+ * @param {string} global - The name of the global to reference for updating a global's version.
+ * @param {string} locale - The locale being used - can be one locale or "all" (locale="all").
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {object} versionData - Full version data passed to update the global version.
+ * @param {Where} where - The specific query for querying the global version documents in question to update.
+ * @returns {Promise<any>} A promise resolving to the updated global version document.
+ */
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: ExampleAdapter,
   {
-    id, // ID of the global version
-    global, // The name of the global to reference for updating a Global's version
-    locale, // The locale being used - you can only create docs in one locale at a time
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    versionData, // Full version data passed to update the global version
-    where, // The specific query for querying the global version documents in question to update
+    id,
+    global,
+    locale,
+    req = {} as PayloadRequest,
+    versionData,
+    where,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  /**
-   *
-   * If you need to perform an update for a global version in your DB, here is where you'd do it
-   *
-   */
-
   let doc
   /**
    * Implement the logic to find one and update the document in your database.
@@ -32,8 +39,6 @@ export async function updateGlobalVersion<T extends TypeWithID>(
    */
 
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null

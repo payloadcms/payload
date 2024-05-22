@@ -2,10 +2,17 @@ import type { Destroy } from 'payload/database'
 
 import type { ExampleAdapter } from './index'
 
+/**
+ * Closes the database connection and cleans up resources used by the adapter.
+ *
+ * This function is typically used to gracefully shutdown the database connections
+ * when the application is closing or when the adapter is no longer needed.
+ *
+ * @param {ExampleAdapter} - The ExampleAdapter instance.
+ * @returns {Promise<void>}
+ */
 export const destroy: Destroy = async function destroy(this: ExampleAdapter) {
   /**
-   * Implement the logic to close the database connection and clean up resources.
-   *
    * If using an in-memory database or a similar service, add the specific steps to drop the database and stop the server.
    *
    * @example

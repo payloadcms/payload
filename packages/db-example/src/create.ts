@@ -6,22 +6,21 @@ import type { ExampleAdapter } from '.'
 
 import handleError from './utilities/handleError'
 
+/**
+ * Creates a new document in the specified collection.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} collection - The name of the collection to reference for creating documents.
+ * @param {object} data - The full data passed to create (data will have all locales and depth 0).
+ * @param {boolean} draft - Determine whether or not to create as a draft or not.
+ * @param {string} locale - The locale being used - can be one locale or "all" (locale="all").
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @returns {Promise<Document>} A promise resolving to the created document.
+ */
 export const create: Create = async function create(
   this: ExampleAdapter,
-  {
-    collection, // The name of the collection to reference for creating documents
-    data, // The full data passed to create.
-    draft, // Determine whether or not to create as a draft or not
-    locale, // The locale being used - you can only create docs in one locale at a time
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-  },
+  { collection, data, draft, locale, req = {} as PayloadRequest },
 ) {
-  /**
-   *
-   * If you need to create a document in your DB, here is where you'd do it
-   *
-   */
-
   let doc
   try {
     /**
@@ -39,8 +38,6 @@ export const create: Create = async function create(
   }
 
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null

@@ -1,26 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { CreateVersion } from 'payload/database'
+import type { CreateVersion, TypeWithVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
+/**
+ * Creates a version document in the database.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {boolean} autosave - Indicates if autosave is enabled.
+ * @param {string} collectionSlug - The collection slug of the document.
+ * @param {Date} createdAt - Created-At date of the document.
+ * @param {string} parent - ID of the parent document for which the version should be created for.
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {Date} updatedAt - Updated-At date of the document.
+ * @param {object} versionData - Full version data passed to create the version.
+ * @returns {Promise<TypeWithVersion<T>>} A promise that resolves with the created version document.
+ *
+ */
 export const createVersion: CreateVersion = async function createVersion(
   this: ExampleAdapter,
   {
-    autosave, // Indicates if autosave is enabled
-    collectionSlug, // The collection slug of the document
-    createdAt, // Created-At date of the document
-    parent, // ID of the parent document for which the version should be created for
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    updatedAt, // Updated-At date of the document
-    versionData, // Full version data passed to create the version
+    autosave,
+    collectionSlug,
+    createdAt,
+    parent,
+    req = {} as PayloadRequest,
+    updatedAt,
+    versionData,
   },
-  /**
-   *
-   * If you need to create a version for a document in your DB, here is where you'd do it
-   *
-   */
 ) {
   let doc
   /**
@@ -40,8 +49,6 @@ export const createVersion: CreateVersion = async function createVersion(
    */
 
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null

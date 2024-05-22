@@ -1,26 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { UpdateVersion } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, Where } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
+/**
+ * Updates a version of a document in the specified collection based on the provided criteria using
+ * the incoming ID, collection, locale, and versionData, then returns the updated version in the format Payload expects.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} id - The ID of the collection document.
+ * @param {string} collection - The name of the collection to reference for updating a document's version.
+ * @param {string} locale - The locale being used - can be one locale or "all" (locale="all").
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {object} versionData - Full version data passed to create the version.
+ * @param {Where} where - The specific query used to find the documents for updating its versions.
+ * @returns {Promise<TypeWithVersion<T>>} A promise resolving to the updated version document.
+ */
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: ExampleAdapter,
-  {
-    id, // ID of the collection document
-    collection, // The name of the collection to reference for updating a documents version
-    locale, // The locale being used - you can only create docs in one locale at a time
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    versionData, // Full version data passed to create the version
-    where, // The specific query used to find the documents for updating its versions
-  },
+  { id, collection, locale, req = {} as PayloadRequest, versionData, where },
 ) {
-  /**
-   *
-   * If you need to perform an update of a version in your DB, here is where you'd do it
-   *
-   */
-
   let doc
   /**
    * Implement the logic to update a document's version in your database.
@@ -32,8 +32,6 @@ export const updateVersion: UpdateVersion = async function updateVersion(
    */
 
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null

@@ -1,28 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { QueryDrafts } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PaginatedDocs, QueryDrafts } from 'payload/database'
+import type { PayloadRequest, Where } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
+/**
+ * Queries for drafts in the specified collection based on the provided criteria using
+ * the incoming where, sort, page query and then only returns the correct drafts in the format Payload expects.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} collection - The name of the collection to reference for querying drafts.
+ * @param {number} limit - The maximum number of drafts to return.
+ * @param {string} locale - The locale being used - can be one locale or "all" (locale="all").
+ * @param {number} page - The page number of the results to return.
+ * @param {boolean} pagination - Determines whether pagination is enabled.
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {string} sort - The top-level field to sort the results by.
+ * @param {Where} where - The specific query used to filter drafts.
+ * @returns {Promise<PaginatedDocs<T>>} A promise resolving to the paginated drafts matching the query criteria.
+ */
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: ExampleAdapter,
-  {
-    collection, // The name of the collection to reference for querying drafts
-    limit, // Max value of the amount of docs to find
-    locale, // The locale being used - you can only create docs in one locale at a time
-    page, // Current page to query from
-    pagination, // Boolean value determining if pagination is enabled
-    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    sort: sortArg, // Top-level field to sort by
-    where, // The specific query used to find the documents for querying drafts
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  /**
-   *
-   * If you need to perform a query for drafts in your DB, here is where you'd do it
-   *
-   */
-
   let result
   /**
    * Implement the logic to paginate the query results according to your database's methods.
@@ -33,10 +33,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
    * ```
    */
 
-  let docs
   /**
-   * Convert the result to the expected document format
-   *
    * This should be the shape of the data that gets returned in Payload when you do:
    *
    * ?depth=0&locale=all&fallbackLocale=null
@@ -44,30 +41,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
    * The result of the outgoing data is always going to be the same shape that Payload expects
    *
    */
-  // const docs = result.docs
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      // Adjust this line according to your database's ID field and data structure
-      doc = {
-        _id: doc.parent,
-        id: doc.parent,
-        ...doc.version,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
-      }
-
-      /**
-       * If needed, implement logic to sanitize internal fields of the document.
-       * This might be necessary to remove any database-specific metadata.
-       *
-       * @example
-       * ```ts
-       * doc = sanitizeInternalFields(doc)
-       * ```
-       */
-      return doc
-    }),
-  }
+  return result
 }
