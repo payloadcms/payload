@@ -42,10 +42,7 @@ export default async function Page({ params: { slug = 'home' } }) {
     <article className="pt-16 pb-24">
       <PayloadRedirects url={url} />
       <Hero {...hero} />
-      <Blocks
-        blocks={layout}
-        disableTopPadding={!hero || hero?.type === 'none' || hero?.type === 'lowImpact'}
-      />
+      <Blocks blocks={layout} />
     </article>
   )
 }
