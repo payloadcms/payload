@@ -624,7 +624,7 @@ describe('admin2', () => {
 
       test('should delete many', async () => {
         await page.goto(postsUrl.list)
-        await page.waitForURL(postsUrl.list)
+        await page.waitForURL(new RegExp(postsUrl.list))
         // delete should not appear without selection
         await expect(page.locator('#confirm-delete')).toHaveCount(0)
         // select one row
