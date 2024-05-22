@@ -114,7 +114,7 @@ describe('admin2', () => {
 
         // prefill search with "a" from the query param
         await page.goto(`${postsUrl.list}?search=dennis`)
-        await page.waitForURL(`${postsUrl.list}?search=dennis`)
+        await page.waitForURL(new RegExp(`${postsUrl.list}\\?search=dennis`))
 
         // input should be filled out, list should filter
         await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
