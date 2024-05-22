@@ -86,16 +86,16 @@
 }
 
 html[data-theme='light'] {
-  .tooltip {
+  .tooltip:not(.field-error) {
     background-color: var(--theme-elevation-100);
     color: var(--theme-elevation-1000);
+  }
 
-    &--position-top:after {
-      border-top-color: var(--theme-elevation-100);
-    }
+  .tooltip--position-top:not(.field-error):after {
+    border-top-color: var(--theme-elevation-100);
+  }
 
-    &--position-bottom:after {
-      border-bottom-color: var(--theme-elevation-100);
-    }
+  .tooltip--position-bottom:not(.field-error):after {
+    border-bottom-color: var(--theme-elevation-100);
   }
 }
