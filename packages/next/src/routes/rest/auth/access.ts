@@ -21,7 +21,6 @@ export const access: BaseRouteHandler = async ({ req }) => {
       status: httpStatus.OK,
     })
   } catch (e: unknown) {
-    console.error('????????')
     return Response.json(
       {
         error: e,

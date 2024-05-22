@@ -448,8 +448,6 @@ export const DocumentInfoProvider: React.FC<
       const hasSavePermission: boolean = hasSavePermissionFromProps
       const hasPublishPermission: boolean = hasPublishPermissionFromProps
 
-      console.log('loadDocPermissions', docPermissions, hasSavePermission, hasPublishPermission)
-
       if (
         !docPermissions ||
         hasSavePermission === undefined ||
@@ -485,11 +483,6 @@ export const DocumentInfoProvider: React.FC<
   if (!initialState || isLoading) {
     return <LoadingOverlay />
   }
-
-  console.log('DocumentInfoProvider', {
-    docPermissions,
-    hasSavePermission,
-  })
 
   const value: DocumentInfoContext = {
     ...props,
