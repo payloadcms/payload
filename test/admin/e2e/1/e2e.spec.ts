@@ -219,6 +219,65 @@ describe('admin1', () => {
     })
   })
 
+  describe('theme', () => {
+    test('should render light theme by default', async () => {
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(postsUrl.admin)
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.waitForURL(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-theme-auto')).toBeChecked()
+      await expect(page.locator('#field-theme-light')).not.toBeChecked()
+      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+    })
+
+    test('should explicitly change to light theme', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.waitForURL(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-theme-light"]').click()
+      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
+      await expect(page.locator('#field-theme-light')).toBeChecked()
+      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+      // reload the page an ensure theme is retained
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+      // go back to auto theme
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.waitForURL(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-theme-auto"]').click()
+      await expect(page.locator('#field-theme-auto')).toBeChecked()
+      await expect(page.locator('#field-theme-light')).not.toBeChecked()
+      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+
+    test('should explicitly change to dark theme', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.waitForURL(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-theme-dark"]').click()
+      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
+      await expect(page.locator('#field-theme-light')).not.toBeChecked()
+      await expect(page.locator('#field-theme-dark')).toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+      // reload the page an ensure theme is retained
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+      // go back to auto theme
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.waitForURL(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-theme-auto"]').click()
+      await expect(page.locator('#field-theme-auto')).toBeChecked()
+      await expect(page.locator('#field-theme-light')).not.toBeChecked()
+      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+  })
+
   describe('routing', () => {
     test('should use custom logout route', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
