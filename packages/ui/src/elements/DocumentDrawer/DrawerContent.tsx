@@ -111,12 +111,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      // Do NOT pass in the docPermissions we have here. This is because the permissions we have here do not have their where: { } returns resolved.
-      // If we set it to null though, the DocumentInfoProvider will fully-fetch the permissions from the server, and the where: { } returns will be resolved.
-      docPermissions={null}
-      // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
-      hasSavePermission={null}
-      // isLoading,
       id={docID}
       isEditing={isEditing}
       onLoadError={onLoadError}
