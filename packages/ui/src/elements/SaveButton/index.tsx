@@ -21,7 +21,9 @@ export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelPr
   const forceDisable = operation === 'update' && !modified
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (forceDisable) return
+    if (forceDisable) {
+      // absorb the event
+    }
 
     e.preventDefault()
     e.stopPropagation()
@@ -48,8 +50,7 @@ type Props = {
   CustomComponent?: React.ReactNode
 }
 
-export const Save: React.FC<Props> = ({ CustomComponent }) => {
+export const SaveButton: React.FC<Props> = ({ CustomComponent }) => {
   if (CustomComponent) return CustomComponent
-
   return <DefaultSaveButton />
 }

@@ -18,7 +18,7 @@ export const withPayload = (nextConfig = {}) => {
       },
     },
     headers: async () => {
-      const headersFromConfig = await nextConfig.headers()
+      const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
       return [
         ...(headersFromConfig || []),

@@ -6,7 +6,7 @@
   opacity: 0;
   background-color: var(--theme-elevation-800);
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   left: 50%;
   padding: base(0.2) base(0.4);
   color: var(--theme-elevation-0);
@@ -52,8 +52,9 @@
     }
   }
 
+
   &--position-top {
-    bottom: 100%;
+    top: calc(var(--base) * -0.6 - 13px);
     transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
 
     &::after {
@@ -62,8 +63,9 @@
     }
   }
 
+
   &--position-bottom {
-    top: 100%;
+    bottom: calc(var(--base) * -0.6 - 13px);
     transform: translate3d(-50%, var(--caret-size), 0);
 
     &::after {

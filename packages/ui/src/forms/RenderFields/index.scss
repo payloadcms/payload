@@ -11,8 +11,13 @@
     --spacing-field: 0;
   }
 
+  .field-type__wrap {
+    position: relative;
+  }
+
   & > .field-type {
     margin-bottom: var(--spacing-field);
+    position: relative;
 
     &[type='hidden'] {
       margin-bottom: 0;

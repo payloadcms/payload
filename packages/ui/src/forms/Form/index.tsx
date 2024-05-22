@@ -498,6 +498,12 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   }, [initializingFromProps])
 
+  useEffect(() => {
+    if (typeof disabledFromProps !== 'undefined') {
+      setDisabled(disabledFromProps)
+    }
+  }, [disabledFromProps])
+
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
   contextRef.current.getField = getField

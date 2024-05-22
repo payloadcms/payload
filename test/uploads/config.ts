@@ -12,6 +12,7 @@ import { Uploads2 } from './collections/Upload2/index.js'
 import {
   audioSlug,
   enlargeSlug,
+  focalNoSizesSlug,
   mediaSlug,
   reduceSlug,
   relationSlug,
@@ -181,6 +182,16 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+      },
+    },
+    {
+      slug: focalNoSizesSlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: true,
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './focal-no-sizes',
       },
     },
     {

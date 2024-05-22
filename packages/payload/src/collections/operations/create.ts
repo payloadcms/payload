@@ -121,6 +121,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
       collection,
       config,
       data,
+      operation: 'create',
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
