@@ -50,14 +50,6 @@ $lexical-contenteditable-bottom-padding: 8px;
 }
 
 html[data-theme='light'] {
-  .rich-text-lexical:not(.rich-text-lexical--show-gutter) {
-    &.error {
-      > .rich-text-lexical__wrap > .editor-container {
-        @include lightInputError;
-      }
-    }
-  }
-
   .rich-text-lexical.rich-text-lexical--show-gutter {
     &.error:not(:hover) {
       > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > .ContentEditable__root::before {
@@ -74,14 +66,6 @@ html[data-theme='light'] {
 }
 
 html[data-theme='dark'] {
-  .rich-text-lexical:not(.rich-text-lexical--show-gutter) {
-    &.error {
-      > .rich-text-lexical__wrap > .editor-container {
-        @include darkInputError;
-      }
-    }
-  }
-
   .rich-text-lexical.rich-text-lexical--show-gutter {
     &.error {
       > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > .ContentEditable__root::before {
