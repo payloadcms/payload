@@ -97,16 +97,26 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding media...`)
 
-  const [image1Doc, image2Doc] = await Promise.all([
+  const [image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     await payload.create({
       collection: 'media',
       data: image1,
-      filePath: path.resolve(dirname, 'image-1.jpg'),
+      filePath: path.resolve(dirname, 'image-post1.webp'),
     }),
     await payload.create({
       collection: 'media',
       data: image2,
-      filePath: path.resolve(dirname, 'image-2.jpg'),
+      filePath: path.resolve(dirname, 'image-post2.webp'),
+    }),
+    await payload.create({
+      collection: 'media',
+      data: image2,
+      filePath: path.resolve(dirname, 'image-post3.webp'),
+    }),
+    await payload.create({
+      collection: 'media',
+      data: image2,
+      filePath: path.resolve(dirname, 'image-hero1.webp'),
     }),
   ])
 
@@ -153,10 +163,14 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   let image1ID = image1Doc.id
   let image2ID = image2Doc.id
+  let image3ID = image3Doc.id
+  let imageHomeID = imageHomeDoc.id
 
   if (payload.db.defaultIDType === 'text') {
     image1ID = `"${image1Doc.id}"`
     image2ID = `"${image2Doc.id}"`
+    image3ID = `"${image3Doc.id}"`
+    imageHomeID = `"${imageHomeDoc.id}"`
     demoAuthorID = `"${demoAuthorID}"`
   }
 
@@ -168,7 +182,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post1, categories: [technologyCategory.id] })
-        .replace(/"\{\{IMAGE\}\}"/g, image1ID)
+        .replace(/"\{\{IMAGE_1\}\}"/g, image1ID)
+        .replace(/"\{\{IMAGE_2\}\}"/g, image2ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
   })
@@ -177,7 +192,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post2, categories: [newsCategory.id] })
-        .replace(/"\{\{IMAGE\}\}"/g, image1ID)
+        .replace(/"\{\{IMAGE\}\}"/g, image2ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
   })
@@ -186,12 +201,12 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post3, categories: [financeCategory.id] })
-        .replace(/"\{\{IMAGE\}\}"/g, image1ID)
+        .replace(/"\{\{IMAGE\}\}"/g, image3ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
   })
 
-  for (let i = 1; i < 50; i++) {
+  /* for (let i = 1; i < 50; i++) {
     await payload.create({
       collection: 'posts',
       data: JSON.parse(
@@ -200,7 +215,7 @@ export const seed = async (payload: Payload): Promise<void> => {
           .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
       ),
     })
-  }
+  } */
 
   const posts = [post1Doc, post2Doc, post3Doc]
 
@@ -236,7 +251,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'pages',
     data: JSON.parse(
       JSON.stringify(home)
-        .replace(/"\{\{IMAGE_1\}\}"/g, image1ID)
+        .replace(/"\{\{IMAGE_1\}\}"/g, imageHomeID)
         .replace(/"\{\{IMAGE_2\}\}"/g, image2ID),
     ),
   })

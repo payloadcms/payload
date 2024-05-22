@@ -51,3 +51,20 @@ export function generateMetadata({ params: { pageNumber = 2 } }): Metadata {
     title: `Payload Website Template Posts Page ${pageNumber}`,
   }
 }
+
+export async function generateStaticParams() {
+  const payload = await getPayloadHMR({ config: configPromise })
+  const posts = await payload.find({
+    collection: 'posts',
+    depth: 0,
+    limit: 10,
+  })
+
+  const pages = []
+
+  for (let i = 1; i <= posts.totalPages; i++) {
+    pages.push(i)
+  }
+
+  return pages
+}

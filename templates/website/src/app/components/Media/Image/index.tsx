@@ -71,6 +71,7 @@ export const Image: React.FC<MediaProps> = (props) => {
         }
       }}
       priority={priority}
+      quality={90}
       sizes={sizes}
       src={src}
       width={!fill ? width : undefined}

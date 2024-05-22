@@ -14,6 +14,14 @@ export const home: Partial<Page> = {
           url: '/posts',
         },
       },
+      {
+        link: {
+          type: 'custom',
+          appearance: 'outline',
+          label: 'Contact',
+          url: '/contact',
+        },
+      },
     ],
     media: '{{IMAGE_1}}',
     richText: {

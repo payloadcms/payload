@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { Page } from '../../../payload-types'
-
 import { admins } from '../../access/admins'
 import { usersOrPublished } from '../../access/usersOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock'

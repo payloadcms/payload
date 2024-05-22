@@ -63,7 +63,7 @@ export interface Page {
             } | null;
             url?: string | null;
             label: string;
-            appearance?: ('default' | 'ghost' | 'secondary') | null;
+            appearance?: ('default' | 'outline') | null;
           };
           id?: string | null;
         }[]
@@ -98,7 +98,7 @@ export interface Page {
                 } | null;
                 url?: string | null;
                 label: string;
-                appearance?: ('default' | 'secondary' | 'ghost') | null;
+                appearance?: ('default' | 'outline') | null;
               };
               id?: string | null;
             }[]
@@ -136,7 +136,7 @@ export interface Page {
                 } | null;
                 url?: string | null;
                 label: string;
-                appearance?: ('default' | 'ghost' | 'secondary') | null;
+                appearance?: ('default' | 'outline') | null;
               };
               id?: string | null;
             }[]
