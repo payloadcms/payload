@@ -16,6 +16,7 @@ import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
+import { IndicatorsContainer } from './IndicatorsContainer/index.js'
 import { MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
@@ -74,6 +75,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
           ClearIndicator,
           Control,
           DropdownIndicator,
+          IndicatorsContainer,
           MultiValue,
           MultiValueLabel,
           MultiValueRemove,
