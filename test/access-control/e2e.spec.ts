@@ -170,12 +170,12 @@ describe('access control', () => {
 
     test('should not have list url', async () => {
       await page.goto(restrictedUrl.list)
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await expect(page.locator('.not-found')).toBeVisible()
     })
 
     test('should not have create url', async () => {
       await page.goto(restrictedUrl.create)
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await expect(page.locator('.not-found')).toBeVisible()
     })
 
     test('should not have access to existing doc', async () => {
