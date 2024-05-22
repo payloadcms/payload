@@ -93,46 +93,46 @@ export const createMigration: CreateMigration = async function createMigration(
 
     const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
     const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
-    const sqlExecute = 'await payload.db.drizzle.execute(sql'
+    const sqlExecute = 'await payload.db.drizzle.execute(sql`'
 
-    if (sqlStatementsUp.length) {
-      upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n')}`
+    if (sqlStatementsUp?.length) {
+      upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n')}\`)`
     }
-    if (sqlStatementsDown.length) {
-      downSQL = `${sqlExecute}\n ${sqlStatementsDown?.join('\n')}`
+    if (sqlStatementsDown?.length) {
+      downSQL = `${sqlExecute}\n ${sqlStatementsDown?.join('\n')}\`)`
     }
-  }
 
-  if (!upSQL.length && !downSQL.length && !forceAcceptWarning) {
-    const { confirm: shouldCreateBlankMigration } = await prompts(
-      {
-        name: 'confirm',
-        type: 'confirm',
-        initial: false,
-        message: 'No schema changes detected. Would you like to create a blank migration file?',
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
+    if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
+      const { confirm: shouldCreateBlankMigration } = await prompts(
+        {
+          name: 'confirm',
+          type: 'confirm',
+          initial: false,
+          message: 'No schema changes detected. Would you like to create a blank migration file?',
         },
-      },
-    )
+        {
+          onCancel: () => {
+            process.exit(0)
+          },
+        },
+      )
 
-    if (!shouldCreateBlankMigration) {
-      process.exit(0)
+      if (!shouldCreateBlankMigration) {
+        process.exit(0)
+      }
     }
-  }
 
-  // write schema
-  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+    // write schema
+    fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+  }
 
   // write migration
   fs.writeFileSync(
     `${filePath}.ts`,
     migrationTemplate({
-      downSQL: downSQL ? downSQL : `  // Migration code`,
+      downSQL: downSQL || `  // Migration code`,
       imports,
-      upSQL: upSQL ? upSQL : `  // Migration code`,
+      upSQL: upSQL || `  // Migration code`,
     }),
   )
   payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
