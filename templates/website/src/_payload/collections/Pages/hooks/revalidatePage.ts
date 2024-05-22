@@ -6,7 +6,8 @@ import { revalidate } from '../../../utilities/revalidate'
 
 export const revalidatePage: CollectionAfterChangeHook<Page> = ({ doc, req: { payload } }) => {
   if (doc._status === 'published') {
-    void revalidate({ collection: 'pages', path: `/${doc.slug}`, payload })
+    const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
+    void revalidate({ collection: 'pages', path, payload })
   }
 
   return doc
