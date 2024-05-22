@@ -1,78 +1,46 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { FindGlobal } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
-
-import { combineQueries } from 'payload/database'
 
 import type { ExampleAdapter } from '.'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: ExampleAdapter,
-  { slug, locale, req = {} as PayloadRequest, where },
+  {
+    slug, // The specified slug of your global
+    locale, // The locale being used - you can only create docs in one locale at a time
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    where, // The specific query for querying the global in question to find
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel for globals from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.globals
-   * ```
-   */
-  let adapterSpecificModel
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
-  /**
-   * Implement the query building logic according to your database syntax.
+   * If you need to perform a find for a global in your DB, here is where you'd do it
    *
-   * @example
-   * ```ts
-   * const query = combineQueries({ globalType: { equals: slug } }, where)
-   * ```
    */
-  const query = combineQueries({ globalType: { equals: slug } }, where)
 
+  let doc
   /**
-   * Implement the logic to find one document in your database.
+   * Implement the logic to find a global in your database.
    *
    * @example
    * ```ts
    * let doc = await adapterSpecificModel.findOne(query, {}, options)
    * ```
    */
-  let doc = await adapterSpecificModel.findOne(query, {}, options)
 
   if (!doc) {
     return null
   }
 
   /**
-   * If your database uses a different field for the document ID,
-   * adjust the following lines accordingly.
+   * Convert the doc to the expected document format
    *
-   * @example
-   * ```ts
-   * if (doc.idField) {
-   *   doc.id = doc.idField
-   *   delete doc.idField
-   * }
-   * ```
-   */
-  if (doc.idField) {
-    // Adjust `idField` to your database's ID field
-    doc.id = doc.idField
-    delete doc.idField
-  }
-
-  /**
-   * Convert the result to the expected document format
+   * This should be the shape of the data that gets returned in Payload when you do:
    *
-   * @example
-   * ```ts
-   * doc = JSON.parse(JSON.stringify(doc))
-   * ```
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
    */
-  doc = JSON.parse(JSON.stringify(doc))
 
   return doc
 }

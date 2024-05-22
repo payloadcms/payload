@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { DeleteMany } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -5,29 +6,12 @@ import type { ExampleAdapter } from '.'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: ExampleAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  {
+    collection, // The specified slug of your collection
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    where, // The specific query for querying the documents in question to delete
+  },
 ) {
-  /**
-   * Implement the logic to get the adapterSpecificModel from your database.
-   *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.collections[collection]
-   * ```
-   */
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
-  /**
-   * Implement the query building logic according to your database syntax.
-   *
-   * @example
-   * ```ts
-   * const query = {} // Build your query here
-   * ```
-   */
-  const query = {}
-
   /**
    * Implement the logic to delete many documents from your database.
    *
@@ -36,5 +20,4 @@ export const deleteMany: DeleteMany = async function deleteMany(
    * await adapterSpecificModel.deleteMany(query, options)
    * ```
    */
-  await adapterSpecificModel.deleteMany(query, options)
 }

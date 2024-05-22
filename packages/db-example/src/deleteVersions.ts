@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { DeleteVersions } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -5,31 +6,13 @@ import type { ExampleAdapter } from '.'
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(
   this: ExampleAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  {
+    collection, // The specified collection to delete versions from
+    locale, // The locale being used - you can only create docs in one locale at a time
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    where, // The specific query for querying the documents in question to delete
+  },
 ) {
-  /**
-   * Implement the logic to get the adapterSpecificVersionsModel from your database.
-   *
-   * @example
-   * ```ts
-   * const adapterSpecificVersionsModel = this.versions[collection]
-   * ```
-   */
-  let adapterSpecificVersionsModel
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
-  /**
-   * Implement the query building logic according to your database syntax.
-   *
-   * @example
-   * ```ts
-   * const query = {} // Build your query here
-   * ```
-   */
-  const query = {}
-
   /**
    * Implement the logic to delete many version documents from your database.
    *
@@ -38,5 +21,4 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
    * await adapterSpecificVersionsModel.deleteMany(query, options)
    * ```
    */
-  await adapterSpecificVersionsModel.deleteMany(query, options)
 }

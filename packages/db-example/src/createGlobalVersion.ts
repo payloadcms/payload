@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { CreateGlobalVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
@@ -6,21 +7,22 @@ import type { ExampleAdapter } from '.'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: ExampleAdapter,
-  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
+  {
+    autosave, // If autosave is enabled or not
+    createdAt, // Created-At date
+    globalSlug,
+    parent, // ID of the parent document for which the version should be created for
+    req = {} as PayloadRequest,
+    updatedAt, // Updated-At date
+    versionData, // Full version data passed to create the global version
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificVersionModel for globals from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificVersionModel = this.versions[globalSlug]
-   * ```
+   * If you need to create a global version in your DB, here is where you'd do it
+   *
    */
-  let adapterSpecificVersionModel
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
+  let doc
   /**
    * Implement the logic to create the global version document in your database.
    *
@@ -36,50 +38,16 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
    * }, options, req)
    * ```
    */
-  const [doc] = await adapterSpecificVersionModel.create(
-    [
-      {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
-      },
-    ],
-    options,
-    req,
-  )
-
-  /**
-   * Implement the logic to update existing global version documents to unset the latest flag.
-   *
-   * @example
-   * ```ts
-   * await adapterSpecificVersionModel.updateMany(
-   *   {},
-   *   { $unset: { latest: 1 } },
-   *   options,
-   * )
-   * ```
-   */
-  await adapterSpecificVersionModel.updateMany(
-    {
-      // Your query conditions here
-    },
-    { $unset: { latest: 1 } },
-    options,
-  )
 
   /**
    * Convert the result to the expected document format
    *
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
    * The result of the outgoing data is always going to be the same shape that Payload expects
    *
-   * @example
-   * ```ts
-   * const result: Document = JSON.parse(JSON.stringify(doc))
-   * ```
    */
   const result: Document = doc
 

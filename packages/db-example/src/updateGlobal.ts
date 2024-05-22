@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { UpdateGlobal } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -5,20 +6,17 @@ import type { ExampleAdapter } from '.'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: ExampleAdapter,
-  { slug, data, req = {} as PayloadRequest },
+  {
+    slug, // The specified slug of your global
+    data, // The full data passed to update
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel for globals from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.globals
-   * ```
+   * If you need to perform an update for a global in your DB, here is where you'd do it
+   *
    */
-  let adapterSpecificModel
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
 
   /**
    * Implement the logic to find one and update the document in your database.
@@ -28,17 +26,17 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
    * result = await adapterSpecificModel.findOneAndUpdate({ globalType: slug }, data, options)
    * ```
    */
-  const result = await adapterSpecificModel.findOneAndUpdate({ globalType: slug }, data, options)
 
+  let result
   /**
-   * Convert the result to the expected document format if needed
+   * Convert the result to the expected document format
+   *
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
    *
    * The result of the outgoing data is always going to be the same shape that Payload expects
    *
-   * @example
-   * ```ts
-   * const result = JSON.parse(JSON.stringify(result))
-   * ```
    */
 
   return result

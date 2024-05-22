@@ -1,30 +1,15 @@
 import type { TransactionOptions } from 'mongodb'
 import type { BeginTransaction } from 'payload/database'
 
-import { APIError } from 'payload/errors'
-import { v4 as uuid } from 'uuid'
-
 import type { ExampleAdapter } from '../index'
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: ExampleAdapter,
   options: TransactionOptions,
 ) {
-  if (!this.connection) {
-    throw new APIError('beginTransaction called while no connection to the database exists')
-  }
+  // if you want to support db transactions, you would initialize them here
 
-  const client = this.connection.getClient()
-  const id = uuid()
+  // alternatively do nothing
 
-  if (!this.sessions[id]) {
-    this.sessions[id] = client.startSession()
-  }
-  if (this.sessions[id].inTransaction()) {
-    this.payload.logger.warn('beginTransaction called while transaction already exists')
-  } else {
-    this.sessions[id].startTransaction(options || (this.transactionOptions as TransactionOptions))
-  }
-
-  return id
+  return null
 }

@@ -1,8 +1,6 @@
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
 
-import fs from 'fs'
-import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { CollectionModel, GlobalModel } from './types'
@@ -59,11 +57,6 @@ export type ExampleAdapter = BaseDatabaseAdapter &
     }
 
     /**
-     * The underlying adapter connection
-     */
-    connection: Connection
-
-    /**
      * Access to underlying global model via `payload.db.globals`
      */
     globals: GlobalModel
@@ -79,7 +72,6 @@ declare module 'payload' {
     collections: {
       [slug: string]: CollectionModel
     }
-    connection: Connection
     globals: GlobalModel
     versions: {
       [slug: string]: CollectionModel
@@ -94,7 +86,6 @@ export function exampleAdapter({ url }: Args): ExampleAdapterResult {
 
       // Example adapter-specific
       collections: {},
-      connection: undefined,
       count,
       globals: undefined,
       url,

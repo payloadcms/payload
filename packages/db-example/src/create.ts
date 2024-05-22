@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Create } from 'payload/database'
 import type { Document, PayloadRequest } from 'payload/types'
 
@@ -7,20 +8,20 @@ import handleError from './utilities/handleError'
 
 export const create: Create = async function create(
   this: ExampleAdapter,
-  { collection, data, req = {} as PayloadRequest },
+  {
+    collection, // The specified collection to create
+    data, // The full data passed to create.
+    draft, // Determine whether or not to create as a draft or not
+    locale, // The locale being used - you can only create docs in one locale at a time
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.collections[collection]
-   * ```
+   * If you need to create a document in your DB, here is where you'd do it
+   *
    */
-  let adapterSpecificModel
 
-  // Replace this with your session handling or remove if not needed
-  const options = {}
   let doc
   try {
     /**
@@ -33,7 +34,6 @@ export const create: Create = async function create(
      * doc = await adapterSpecificModel.create(data, options)
      * ```
      */
-    doc = await adapterSpecificModel.create(data, options)
   } catch (error) {
     handleError(error, req)
   }
@@ -41,12 +41,12 @@ export const create: Create = async function create(
   /**
    * Convert the result to the expected document format
    *
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
    * The result of the outgoing data is always going to be the same shape that Payload expects
    *
-   * @example
-   * ```ts
-   * const result: Document = JSON.parse(JSON.stringify(doc))
-   * ```
    */
   const result: Document = doc
 

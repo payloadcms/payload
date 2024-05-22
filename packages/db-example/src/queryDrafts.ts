@@ -1,111 +1,29 @@
-import type { PaginateOptions } from 'mongoose'
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { QueryDrafts } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { combineQueries, flattenWhereToOperators } from 'payload/database'
-
 import type { ExampleAdapter } from '.'
-
-import { buildSortParam } from './queries/buildSortParam'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: ExampleAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection, // The specified collection to find from
+    limit, // Value of the amount of docs to find
+    locale, // The locale being used - you can only create docs in one locale at a time
+    page, // Current page to query from
+    pagination, // Boolean value determining if pagination is enabled
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    sort: sortArg, // Top-level field to sort by
+    where, // The specific query for querying the global version documents in question to find
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel for versions from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.versions[collection]
-   * ```
-   */
-  let adapterSpecificModel
-
-  const collectionConfig = this.payload.collections[collection].config
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
-  let hasNearConstraint
-  let sort
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
-
-  if (!hasNearConstraint) {
-    sort = buildSortParam({
-      config: this.payload.config,
-      fields: collectionConfig.fields,
-      locale,
-      sort: sortArg || collectionConfig.defaultSort,
-      timestamps: true,
-    })
-  }
-
-  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
-
-  /**
-   * Implement the query building logic according to your database syntax.
+   * If you need to perform a query for drafts in your DB, here is where you'd do it
    *
-   * @example
-   * ```ts
-   * const versionQuery = {} // Build your query here
-   * ```
    */
-  const versionQuery = {}
 
-  // Use estimated count if applicable
-  const useEstimatedCount =
-    hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
-  const paginationOptions: PaginateOptions = {
-    // Add your pagination options here
-    forceCountFn: hasNearConstraint,
-    lean: true,
-    leanWithId: true,
-    options,
-    page,
-    pagination,
-    sort,
-    useEstimatedCount,
-  }
-
-  if (
-    !useEstimatedCount &&
-    Object.keys(versionQuery).length === 0 &&
-    this.disableIndexHints !== true
-  ) {
-    /**
-     * Add custom count function if needed.
-     *
-     * @example
-     * ```ts
-     * paginationOptions.useCustomCountFn = () => {
-     *   return Promise.resolve(
-     *     adapterSpecificModel.countDocuments(versionQuery, {
-     *       hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
-     *     }),
-     *   )
-     * }
-     * ```
-     */
-    paginationOptions.useCustomCountFn = () => {
-      return Promise.resolve(
-        adapterSpecificModel.countDocuments(versionQuery, {
-          hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
-        }),
-      )
-    }
-  }
-
-  if (limit > 0) {
-    paginationOptions.limit = limit
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
-  }
-
+  let result
   /**
    * Implement the logic to paginate the query results according to your database's methods.
    *
@@ -114,8 +32,19 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
    * const result = await adapterSpecificModel.paginate(versionQuery, paginationOptions)
    * ```
    */
-  const result = await adapterSpecificModel.paginate(versionQuery, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+
+  let docs
+  /**
+   * Convert the result to the expected document format
+   *
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   */
+  // const docs = result.docs
 
   return {
     ...result,

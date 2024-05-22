@@ -1,101 +1,29 @@
-import type { PaginateOptions } from 'mongoose'
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Find } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { flattenWhereToOperators } from 'payload/database'
-
 import type { ExampleAdapter } from '.'
-
-import { buildSortParam } from './queries/buildSortParam'
 
 export const find: Find = async function find(
   this: ExampleAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection, // The specified collection to find from
+    limit, // Value of the amount of docs to find
+    locale, // The locale being used - you can only create docs in one locale at a time
+    page, // Current page to query from
+    pagination, // Boolean value determining if pagination is enabled
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    sort: sortArg, // Top-level field to sort by
+    where, // The specific query for querying the documents in question to find
+  },
 ) {
-  // Need to handle the above arguments and pass them to your database adapter
-
   /**
-   * Implement the logic to get the adapterSpecificModel from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.collections[collection]
-   * ```
-   */
-  let adapterSpecificModel
-
-  const collectionConfig = this.payload.collections[collection].config
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
-  let hasNearConstraint = false
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
-
-  let sort
-  if (!hasNearConstraint) {
-    sort = buildSortParam({
-      config: this.payload.config,
-      fields: collectionConfig.fields,
-      locale,
-      sort: sortArg || collectionConfig.defaultSort,
-      timestamps: true,
-    })
-  }
-
-  /**
-   * Implement the query building logic according to your database syntax.
+   * If you need to perform a find to a DB, here is where you'd do it
    *
-   * @example
-   * ```ts
-   * const query = {} // Build your query here
-   * ```
    */
-  const query = {}
 
-  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
-  const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
-    lean: true,
-    leanWithId: true,
-    options,
-    page,
-    pagination,
-    sort,
-    useEstimatedCount,
-  }
-
-  if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
-    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
-    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
-    // the correct indexed field
-    paginationOptions.useCustomCountFn = () => {
-      return Promise.resolve(
-        adapterSpecificModel.countDocuments(query, {
-          ...options,
-          hint: { _id: 1 },
-        }),
-      )
-    }
-  }
-
-  if (limit >= 0) {
-    paginationOptions.limit = limit
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
-
-    // Disable pagination if limit is 0
-    if (limit === 0) {
-      paginationOptions.pagination = false
-    }
-  }
-
+  let result
   /**
    * Implement the logic to paginate the query results according to your database's methods.
    *
@@ -104,9 +32,19 @@ export const find: Find = async function find(
    * const result = await adapterSpecificModel.paginate(query, paginationOptions)
    * ```
    */
-  const result = await adapterSpecificModel.paginate(query, paginationOptions)
 
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  let docs
+  /**
+   * Convert the result to the expected document format
+   *
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   */
+  // const docs = result.docs
 
   return {
     ...result,

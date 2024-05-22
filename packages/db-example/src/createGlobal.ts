@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { CreateGlobal } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -7,26 +8,17 @@ import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: ExampleAdapter,
-  { slug, data, req = {} as PayloadRequest },
+  {
+    slug, // The specified slug of your global
+    data, // The full data passed to create
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel for globals from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.globals
-   * ```
+   * If you need to create a global in your DB, here is where you'd do it
+   *
    */
-  let adapterSpecificModel
-
-  // Construct the global data object
-  const global = {
-    globalType: slug,
-    ...data,
-  }
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
 
   let result
   /**
@@ -37,17 +29,16 @@ export const createGlobal: CreateGlobal = async function createGlobal(
    * result = await adapterSpecificModel.create(global, options)
    * ```
    */
-  result = await adapterSpecificModel.create(global, options)
 
   /**
    * Convert the result to the expected document format
    *
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
    * The result of the outgoing data is always going to be the same shape that Payload expects
    *
-   * @example
-   * ```ts
-   * result = JSON.parse(JSON.stringify(result))
-   * ```
    */
 
   return result

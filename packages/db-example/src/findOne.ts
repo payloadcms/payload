@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { FindOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
@@ -6,32 +7,28 @@ import type { ExampleAdapter } from '.'
 
 export const findOne: FindOne = async function findOne(
   this: ExampleAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  {
+    collection, // The specified collection to find one from
+    locale, // The locale being used - you can only create docs in one locale at a time
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    where, // The specific query for querying the documents in question to find
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel from your database.
    *
-   * @example
-   * ```ts
-   * const adapterSpecificModel = this.collections[collection]
-   * ```
+   * If you need to perform a find for one in your DB, here is where you'd do it
+   *
    */
-  let adapterSpecificModel
 
-  // Replace this with your session handling or remove if not needed
-  const options = {}
-
+  let doc
   /**
-   * Implement the query building logic according to your database syntax.
+   * Implement the logic to find one document in your database.
    *
    * @example
    * ```ts
-   * const query = {} // Build your query here
+   * const doc = await adapterSpecificModel.findOne(query, {}, options)
    * ```
    */
-  const query = {}
-
-  const doc = await adapterSpecificModel.findOne(query, {}, options)
 
   if (!doc) {
     return null
@@ -40,14 +37,13 @@ export const findOne: FindOne = async function findOne(
   /**
    * Convert the result to the expected document format
    *
-   * This should be the shape of the data that gets returned in Payload.
+   * This should be the shape of the data that gets returned in Payload when you do:
    *
-   * @example
-   * ```ts
-   * let result: Document = JSON.parse(JSON.stringify(doc))
-   * ```
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
    */
-  const result: Document = JSON.parse(JSON.stringify(doc))
-
+  const result: Document = doc
   return result
 }

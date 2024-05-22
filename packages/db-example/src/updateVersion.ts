@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { UpdateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
@@ -5,44 +6,41 @@ import type { ExampleAdapter } from '.'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: ExampleAdapter,
-  { id, collection, locale, req = {} as PayloadRequest, versionData, where },
+  {
+    id, // ID of the collection document
+    collection, // The specified collection to update from
+    locale, // The locale being used - you can only create docs in one locale at a time
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    versionData, // Full version data passed to create the version
+    where, // The specific query for querying the documents in question to update
+  },
 ) {
   /**
-   * Implement the logic to get the adapterSpecificModel for globals from your database.
+   *
+   * If you need to perform an update of a version in your DB, here is where you'd do it
+   *
+   */
+
+  let doc
+  /**
+   * Implement the logic to update a document's version in your database.
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.versions[collection]
+   * const doc = await adapterSpecificModel.findOneAndUpdate(query, versionData, options)
    * ```
    */
-  let adapterSpecificModel
-
-  // Replace this with your session handling or remove if not needed
-  const options = {}
 
   /**
-   * Implement the query building logic according to your database syntax.
+   * Convert the result to the expected document format
    *
-   * @example
-   * ```ts
-   * const query = {} // Build your query here
-   * ```
-   */
-  const query = {}
-
-  const doc = await adapterSpecificModel.findOneAndUpdate(query, versionData, options)
-
-  /**
-   * Convert the result to the expected document format if needed
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
    *
    * The result of the outgoing data is always going to be the same shape that Payload expects
    *
-   * @example
-   * ```ts
-   * const result = JSON.parse(JSON.stringify(doc))
-   * ```
    */
-
   const result = doc
 
   return result

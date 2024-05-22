@@ -49,7 +49,6 @@ export async function migrateFresh(
    * await this.connection.dropDatabase()
    * ```
    */
-  await this.connection.dropDatabase() // Placeholder line, adjust to your database
 
   const migrationFiles = await readMigrationFiles({ payload })
   payload.logger.debug({
