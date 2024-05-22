@@ -8,7 +8,7 @@ type Args = {
   config: SanitizedConfig
   fields: Field[]
   locale: string
-  sort: string
+  sort: string | undefined
   timestamps: boolean
 }
 
@@ -30,7 +30,13 @@ export const buildSortParam = ({
   let sortDirection: SortDirection = 'desc'
   const isSortMultipleField = sort.includes(',')
 
-  if (isSortMultipleField) {
+  if (!sort) {
+    if (timestamps) {
+      sortProperty = 'createdAt'
+    } else {
+      sortProperty = '_id'
+    }
+  } else if (isSortMultipleField) {
     const sortFields = sort.split(',')
     return sortFields.reduce((acc, sortField) => {
       const isDesc = sortField.indexOf('-') === 0
@@ -48,14 +54,6 @@ export const buildSortParam = ({
       }
       return [...acc, `${isDesc ? '-' : ''}${currentSortProperty}`]
     }, [])
-  }
-
-  if (!sort) {
-    if (timestamps) {
-      sortProperty = 'createdAt'
-    } else {
-      sortProperty = '_id'
-    }
   } else if (sort.indexOf('-') === 0) {
     sortProperty = sort.substring(1)
   } else {
