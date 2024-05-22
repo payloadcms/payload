@@ -132,6 +132,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
    * ```
    */
   const result = await adapterSpecificModel.paginate(query, paginationOptions)
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

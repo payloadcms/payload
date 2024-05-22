@@ -7,16 +7,27 @@ import { flattenWhereToOperators } from 'payload/database'
 import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
 
 export const find: Find = async function find(
   this: ExampleAdapter,
   { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  const Model = this.collections[collection]
+  // Need to handle the above arguments and pass them to your database adapter
+
+  /**
+   * Implement the logic to get the adapterSpecificModel from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.collections[collection]
+   * ```
+   */
+  let adapterSpecificModel
+
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
   let hasNearConstraint = false
 
@@ -36,11 +47,15 @@ export const find: Find = async function find(
     })
   }
 
-  const query = await Model.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {} // Build your query here
+   * ```
+   */
+  const query = {}
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -62,7 +77,7 @@ export const find: Find = async function find(
     // the correct indexed field
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
-        Model.countDocuments(query, {
+        adapterSpecificModel.countDocuments(query, {
           ...options,
           hint: { _id: 1 },
         }),
@@ -81,15 +96,33 @@ export const find: Find = async function find(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  /**
+   * Implement the logic to paginate the query results according to your database's methods.
+   *
+   * @example
+   * ```ts
+   * const result = await adapterSpecificModel.paginate(query, paginationOptions)
+   * ```
+   */
+  const result = await adapterSpecificModel.paginate(query, paginationOptions)
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
+      doc.id = doc._id // Adjust this line according to your database's ID field
+      /**
+       * If needed, implement logic to sanitize internal fields of the document.
+       * This might be necessary to remove any database-specific metadata.
+       *
+       * @example
+       * ```ts
+       * doc = sanitizeInternalFields(doc)
+       * ```
+       */
+      return doc
     }),
   }
 }
