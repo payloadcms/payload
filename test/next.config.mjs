@@ -19,17 +19,6 @@ export default withBundleAnalyzer(
         },
       ]
     },
-
-    headers: async () => {
-      const headersFromNextConfig = await nextConfig.headers()
-      console.log('is it run>>>')
-      return {
-        ...headersFromNextConfig,
-        'Accept-CH': 'Sec-CH-Prefers-Color-Scheme',
-        Vary: 'Sec-CH-Prefers-Color-Scheme',
-        'Critical-CH': 'Sec-CH-Prefers-Color-Scheme',
-      }
-    },
     images: {
       domains: ['localhost'],
     },

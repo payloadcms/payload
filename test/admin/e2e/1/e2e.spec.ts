@@ -226,7 +226,6 @@ describe('admin1', () => {
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
       await page.waitForURL(`${postsUrl.admin}/account`)
-      await page.locator('#field-theme-auto').scrollIntoViewIfNeeded()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
@@ -235,8 +234,7 @@ describe('admin1', () => {
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
       await page.waitForURL(`${postsUrl.admin}/account`)
-      await page.locator('#field-theme-light').scrollIntoViewIfNeeded()
-      await page.locator('#field-theme-light').click()
+      await page.locator('label[for="field-theme-light"]').click()
       await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
@@ -249,8 +247,7 @@ describe('admin1', () => {
       // go back to auto theme
       await page.goto(`${postsUrl.admin}/account`)
       await page.waitForURL(`${postsUrl.admin}/account`)
-      await page.locator('#field-theme-auto').scrollIntoViewIfNeeded()
-      await page.locator('#field-theme-auto').click()
+      await page.locator('label[for="field-theme-auto"]').click()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
@@ -260,8 +257,7 @@ describe('admin1', () => {
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
       await page.waitForURL(`${postsUrl.admin}/account`)
-      await page.locator('#field-theme-dark').scrollIntoViewIfNeeded()
-      await page.locator('#field-theme-dark').click()
+      await page.locator('label[for="field-theme-dark"]').click()
       await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).toBeChecked()
@@ -274,8 +270,7 @@ describe('admin1', () => {
       // go back to auto theme
       await page.goto(`${postsUrl.admin}/account`)
       await page.waitForURL(`${postsUrl.admin}/account`)
-      await page.locator('#field-theme-dark').scrollIntoViewIfNeeded()
-      await page.locator('#field-theme-auto').check()
+      await page.locator('label[for="field-theme-auto"]').click()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
