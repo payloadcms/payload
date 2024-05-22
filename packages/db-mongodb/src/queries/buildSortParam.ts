@@ -28,7 +28,7 @@ export const buildSortParam = ({
 }: Args): PaginateOptions['sort'] => {
   let sortProperty: string
   let sortDirection: SortDirection = 'desc'
-  const isSortMultipleField = sort.includes(' ') ?? false
+  const isSortMultipleField = sort.includes(' ')
 
   if (isSortMultipleField) {
     const sortFields = sort.split(' ')
