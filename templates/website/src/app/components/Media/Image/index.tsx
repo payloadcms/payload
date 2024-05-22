@@ -2,13 +2,13 @@
 
 import type { StaticImageData } from 'next/image'
 
+import { cn } from '@/utilities/cn'
 import NextImage from 'next/image'
 import React from 'react'
 
 import type { Props as MediaProps } from '../types'
 
 import cssVariables from '../../../cssVariables'
-import classes from './index.module.scss'
 
 const { breakpoints } = cssVariables
 
@@ -21,6 +21,7 @@ export const Image: React.FC<MediaProps> = (props) => {
     onLoad: onLoadFromProps,
     priority,
     resource,
+    size: sizeFromProps,
     src: srcFromProps,
   } = props
 
@@ -50,16 +51,16 @@ export const Image: React.FC<MediaProps> = (props) => {
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
-  const sizes = Object.entries(breakpoints)
-    .map(([, value]) => `(max-width: ${value}px) ${value}px`)
-    .join(', ')
+  const sizes = sizeFromProps
+    ? sizeFromProps
+    : Object.entries(breakpoints)
+        .map(([, value]) => `(max-width: ${value}px) ${value}px`)
+        .join(', ')
 
   return (
     <NextImage
       alt={alt || ''}
-      className={[isLoading && classes.placeholder, classes.image, imgClassName]
-        .filter(Boolean)
-        .join(' ')}
+      className={cn(imgClassName)}
       fill={fill}
       height={!fill ? height : undefined}
       onClick={onClick}

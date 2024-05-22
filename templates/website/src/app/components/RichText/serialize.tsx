@@ -113,28 +113,46 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
             case 'cta':
               return <CallToActionBlock key={index} {...block} />
             case 'mediaBlock':
-              return <MediaBlock key={index} {...block} />
+              return (
+                <MediaBlock
+                  className="col-start-1 col-span-3"
+                  imgClassName="m-0"
+                  key={index}
+                  {...block}
+                  captionClassName="mx-auto max-w-[48rem]"
+                  enableGutter={false}
+                />
+              )
+
             case 'banner':
-              return <BannerBlock key={index} {...block} />
+              return <BannerBlock className="col-start-2" key={index} {...block} />
             case 'code':
-              return <CodeBlock key={index} {...block} />
+              return <CodeBlock className="col-start-2" key={index} {...block} />
             default:
               return null
           }
         } else {
           switch (_node.type) {
             case 'linebreak': {
-              return <br key={index} />
+              return <br className="col-start-2" key={index} />
             }
             case 'paragraph': {
-              return <p key={index}>{serializedChildren}</p>
+              return (
+                <p className="col-start-2" key={index}>
+                  {serializedChildren}
+                </p>
+              )
             }
             case 'heading': {
               const node = _node as SerializedHeadingNode
 
               type Heading = Extract<keyof JSX.IntrinsicElements, 'h1' | 'h2' | 'h3' | 'h4' | 'h5'>
               const Tag = node?.tag as Heading
-              return <Tag key={index}>{serializedChildren}</Tag>
+              return (
+                <Tag className="col-start-2" key={index}>
+                  {serializedChildren}
+                </Tag>
+              )
             }
             case 'list': {
               const node = _node as SerializedListNode
@@ -142,7 +160,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               type List = Extract<keyof JSX.IntrinsicElements, 'ol' | 'ul'>
               const Tag = node?.tag as List
               return (
-                <Tag className="list" key={index}>
+                <Tag className="list col-start-2" key={index}>
                   {serializedChildren}
                 </Tag>
               )
@@ -173,7 +191,11 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               }
             }
             case 'quote': {
-              return <blockquote key={index}>{serializedChildren}</blockquote>
+              return (
+                <blockquote className="col-start-2" key={index}>
+                  {serializedChildren}
+                </blockquote>
+              )
             }
             case 'link': {
               const node = _node as SerializedLinkNode

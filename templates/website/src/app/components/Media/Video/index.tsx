@@ -1,10 +1,9 @@
 'use client'
 
+import { cn } from '@/utilities/cn'
 import React, { useEffect, useRef } from 'react'
 
 import type { Props as MediaProps } from '../types'
-
-import classes from './index.module.scss'
 
 export const Video: React.FC<MediaProps> = (props) => {
   const { onClick, resource, videoClassName } = props
@@ -28,7 +27,7 @@ export const Video: React.FC<MediaProps> = (props) => {
     return (
       <video
         autoPlay
-        className={[classes.video, videoClassName].filter(Boolean).join(' ')}
+        className={cn(videoClassName)}
         controls={false}
         loop
         muted

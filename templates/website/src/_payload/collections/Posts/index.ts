@@ -9,12 +9,11 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { BlocksFeature } from '@payloadcms/richtext-lexical'
 
-import type { Post } from '../../../payload-types'
-
 import { admins } from '../../access/admins'
 import { usersOrPublished } from '../../access/usersOrPublished'
 import { Banner } from '../../blocks/Banner'
 import { Code } from '../../blocks/Code'
+import { MediaBlock } from '../../blocks/MediaBlock'
 import { slugField } from '../../fields/slug'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
@@ -56,7 +55,7 @@ export const Posts: CollectionConfig = {
                   return [
                     ...rootFeatures,
                     HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                    BlocksFeature({ blocks: [Banner, Code] }),
+                    BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),

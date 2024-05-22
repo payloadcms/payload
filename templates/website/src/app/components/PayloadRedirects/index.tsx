@@ -8,6 +8,7 @@ interface Props {
   url: string
 }
 
+/* This component helps us with SSR based dynamic redirects */
 export const PayloadRedirects: React.FC<Props> = async ({ url }) => {
   const slug = url.startsWith('/') ? url : `${url}`
 
