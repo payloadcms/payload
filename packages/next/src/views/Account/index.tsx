@@ -21,6 +21,7 @@ export const Account: React.FC<AdminViewProps> = async ({
   searchParams,
 }) => {
   const {
+    languageOptions,
     locale,
     permissions,
     req,
@@ -58,7 +59,7 @@ export const Account: React.FC<AdminViewProps> = async ({
 
     return (
       <DocumentInfoProvider
-        AfterFields={<Settings />}
+        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} />}
         action={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         collectionSlug={userSlug}

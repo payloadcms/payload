@@ -5,6 +5,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { Locale } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
+import type { LanguageOptions } from '../LanguageOptions.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -40,6 +41,7 @@ export type InitPageResult = {
   cookies: Map<string, string>
   docID?: string
   globalConfig?: SanitizedGlobalConfig
+  languageOptions: LanguageOptions
   locale: Locale
   permissions: Permissions
   req: PayloadRequestWithData
