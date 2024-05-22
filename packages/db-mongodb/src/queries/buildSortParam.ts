@@ -28,6 +28,27 @@ export const buildSortParam = ({
 }: Args): PaginateOptions['sort'] => {
   let sortProperty: string
   let sortDirection: SortDirection = 'desc'
+  const isSortMultipleField = sort.includes(' ') ?? false
+
+  if (isSortMultipleField) {
+    const sortFields = sort.split(' ')
+    return sortFields.reduce((acc, sortField) => {
+      const isDesc = sortField.indexOf('-') === 0
+      let currentSortProperty = sortField.replace(/^-/, '')
+
+      if (currentSortProperty === 'id') {
+        currentSortProperty = '_id'
+      } else {
+        currentSortProperty = getLocalizedSortProperty({
+          config,
+          fields,
+          locale,
+          segments: currentSortProperty.split('.'),
+        })
+      }
+      return [...acc, `${isDesc ? '-' : ''}${currentSortProperty}`]
+    }, [])
+  }
 
   if (!sort) {
     if (timestamps) {
