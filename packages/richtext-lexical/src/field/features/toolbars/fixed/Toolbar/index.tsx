@@ -9,6 +9,7 @@ import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProv
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
 import type { PluginComponentWithAnchor } from '../../../types.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
+import type { FixedToolbarFeatureProps } from '../feature.server.js'
 
 import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -185,25 +186,54 @@ const checkParentEditor = (editorFocus: EditorFocusContextType): boolean => {
   return false
 }
 
-export const FixedToolbarPlugin: PluginComponentWithAnchor<undefined> = ({ anchorElem }) => {
+export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeatureProps> = ({
+  anchorElem,
+  clientProps,
+}) => {
   const [currentEditor] = useLexicalComposerContext()
-  const { editorConfig: currentEditorConfig, uuid } = useEditorConfigContext()
+  const { editorConfig: currentEditorConfig } = useEditorConfigContext()
+
+  console.log('currentEditor', clientProps?.disableIfParentEditorIsFocused)
 
   const editorFocus = useEditorFocus()
-  const editor = editorFocus.focusedEditor || currentEditor
+  const editor = clientProps.applyToFocusedEditor
+    ? editorFocus.focusedEditor || currentEditor
+    : currentEditor
 
-  const editorConfig = editorFocus.focusedEditorConfigContext?.editorConfig || currentEditorConfig
+  const editorConfig = clientProps.applyToFocusedEditor
+    ? editorFocus.focusedEditorConfigContext?.editorConfig || currentEditorConfig
+    : currentEditorConfig
 
-  // Check if there is a parent editor with a fixed toolbar already
-  const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
+  if (clientProps?.disableIfParentHasFixedToolbar) {
+    // Check if there is a parent editor with a fixed toolbar already
+    const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
 
-  if (hasParentWithFixedToolbar) {
-    return null
+    if (hasParentWithFixedToolbar) {
+      return null
+    }
+  }
+
+  if (clientProps?.disableIfChildEditorIsFocused) {
+    if (editorFocus.isChildEditorFocused()) {
+      return null
+    }
+  }
+
+  if (clientProps?.disableIfParentEditorIsFocused) {
+    console.log('disableIfParentEditorIsFocused', editorFocus.isParentEditorFocused())
+    if (editorFocus.isParentEditorFocused() || editorFocus.focusedEditor !== currentEditor) {
+      return null
+    }
   }
 
   if (!editorConfig?.features?.toolbarFixed?.groups?.length) {
     return null
   }
+
+  /**
+   * Last step: disable this if both this and any sub-editor fixed toolbar is in sticky state. No config needed,
+   * there is no world where someone wants both to overlap each other
+   */
 
   return <FixedToolbar anchorElem={anchorElem} editor={editor} editorConfig={editorConfig} />
 }

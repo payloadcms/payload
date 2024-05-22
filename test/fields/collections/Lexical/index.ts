@@ -75,7 +75,12 @@ export const LexicalFields: CollectionConfig = {
           //TestRecorderFeature(),
           TreeViewFeature(),
           //HTMLConverterFeature(),
-          FixedToolbarFeature(),
+          FixedToolbarFeature({
+            applyToFocusedEditor: false,
+            disableIfChildEditorIsFocused: true,
+            disableIfParentEditorIsFocused: false,
+            disableIfParentHasFixedToolbar: false,
+          }),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,
