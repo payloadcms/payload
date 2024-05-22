@@ -52,7 +52,7 @@ const buildQuery = async function buildQuery({
   let orderBy: Result['orderBy'] = []
 
   if (sort) {
-    orderBy = sort.split(' ').map((sortString) => {
+    orderBy = sort.split(',').map((sortString) => {
       const sortPath = sortString.replace(/^-/, '')
       try {
         const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
@@ -68,8 +68,8 @@ const buildQuery = async function buildQuery({
           value: sortPath,
         })
         return {
-          order: sortString[0] === '-' ? desc : asc,
           column: sortTable?.[sortTableColumnName] ?? null,
+          order: sortString[0] === '-' ? desc : asc,
         }
       } catch (err) {
         // continue
