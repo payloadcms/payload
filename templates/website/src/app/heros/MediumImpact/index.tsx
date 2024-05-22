@@ -6,27 +6,39 @@ import { CMSLink } from '../../components/Link'
 import { Media } from '../../components/Media'
 import RichText from '../../components/RichText'
 
-export const MediumImpactHero: React.FC<Page['hero']> = (props) => {
-  const { links, media, richText } = props
-
+export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
   return (
-    <div className="classes.hero">
-      <div className="classes.background">
-        <RichText className="classes.richText" content={richText} enableGutter={false} />
-        {Array.isArray(links) && (
-          <ul className="classes.links">
+    <div className="">
+      <div className="container mb-8">
+        <RichText className="mb-6" content={richText} enableGutter={false} />
+        {Array.isArray(links) && links.length > 0 && (
+          <ul className="flex gap-4">
             {links.map(({ link }, i) => {
               return (
                 <li key={i}>
-                  <CMSLink className="classes.link" {...link} />
+                  <CMSLink {...link} />
                 </li>
               )
             })}
           </ul>
         )}
       </div>
-      <div className="classes.media">
-        {typeof media === 'object' && <Media className="classes.media" resource={media} />}
+      <div className="container ">
+        {typeof media === 'object' && (
+          <div>
+            <Media
+              className="-mx-4 md:-mx-8 2xl:-mx-16"
+              imgClassName=""
+              priority
+              resource={media}
+            />
+            {media?.caption && (
+              <div className="mt-3">
+                <RichText content={media.caption} enableGutter={false} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
