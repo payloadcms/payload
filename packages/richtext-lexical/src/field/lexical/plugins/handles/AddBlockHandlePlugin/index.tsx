@@ -113,33 +113,14 @@ function useAddBlockHandle(
 
   useEffect(() => {
     if (menuRef.current && hoveredElement?.node) {
-      editor.getEditorState().read(() => {
-        // Check if blockNode is an empty text node
-        let isEmptyParagraph = true
-        if (
-          hoveredElement.node.getType() !== 'paragraph' ||
-          hoveredElement.node.getTextContent() !== ''
-        ) {
-          isEmptyParagraph = false
-        }
-
-        setHandlePosition(
-          hoveredElement?.elem,
-          menuRef.current,
-          anchorElem,
-          isEmptyParagraph
-            ? blockHandleHorizontalOffset
-            : blockHandleHorizontalOffset - (editorConfig?.admin?.hideGutter ? 20 : 0),
-        )
-      })
+      setHandlePosition(
+        hoveredElement?.elem,
+        menuRef.current,
+        anchorElem,
+        blockHandleHorizontalOffset,
+      )
     }
-  }, [
-    anchorElem,
-    hoveredElement,
-    editor,
-    blockHandleHorizontalOffset,
-    editorConfig?.admin?.hideGutter,
-  ])
+  }, [anchorElem, hoveredElement, blockHandleHorizontalOffset])
 
   const handleAddClick = useCallback(
     (event) => {

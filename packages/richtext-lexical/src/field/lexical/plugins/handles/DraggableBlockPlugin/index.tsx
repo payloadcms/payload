@@ -80,7 +80,7 @@ function useDraggableBlockMenu(
   const [lastTargetBlockElem, setLastTargetBlockElem] = useState<HTMLElement | null>(null)
   const { editorConfig } = useEditorConfigContext()
 
-  const blockHandleHorizontalOffset = editorConfig?.admin?.hideGutter ? -24 : -8
+  const blockHandleHorizontalOffset = editorConfig?.admin?.hideGutter ? -44 : -8
 
   useEffect(() => {
     /**
@@ -212,7 +212,11 @@ function useDraggableBlockMenu(
 
       if (draggableBlockElem !== targetBlockElem) {
         setTargetLine(
-          blockHandleHorizontalOffset,
+          editorConfig?.admin?.hideGutter ? '0px' : '3rem',
+          blockHandleHorizontalOffset +
+            (editorConfig?.admin?.hideGutter
+              ? menuRef?.current?.getBoundingClientRect()?.width ?? 0
+              : -menuRef?.current?.getBoundingClientRect()?.width ?? 0),
           targetLineElem,
           targetBlockElem,
           lastTargetBlockElem,

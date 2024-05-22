@@ -6,7 +6,8 @@ const TEXT_BOX_HORIZONTAL_PADDING = -24
 const DEBUG = false
 
 export function setTargetLine(
-  SPACE: number,
+  offsetWidth: string,
+  offsetLeft: number,
   targetLineElem: HTMLElement,
   targetBlockElem: HTMLElement,
   lastTargetBlockElem: HTMLElement | null,
@@ -51,10 +52,10 @@ export function setTargetLine(
   if (!isBelow) {
     top -= TARGET_LINE_HALF_HEIGHT * 2
   }
-  const left = TEXT_BOX_HORIZONTAL_PADDING - SPACE
+  const left = TEXT_BOX_HORIZONTAL_PADDING - offsetLeft
 
   targetLineElem.style.transform = `translate(${left}px, ${top}px)`
-  targetLineElem.style.width = `${anchorWidth - (TEXT_BOX_HORIZONTAL_PADDING - SPACE) * 2}px`
+  targetLineElem.style.width = `calc(${anchorWidth}px - ${offsetWidth})`
   targetLineElem.style.opacity = '.4'
 
   /**
