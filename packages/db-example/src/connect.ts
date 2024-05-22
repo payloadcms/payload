@@ -14,7 +14,7 @@ export const connect: Connect = async function connect(this: ExampleAdapter, pay
   try {
     this.connection = await myUnderlyingStore.connect(this.url)
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
+    this.payload.logger.error(`Error: cannot connect to DB. Details: ${err.message}`, err)
     process.exit(1)
   }
 }

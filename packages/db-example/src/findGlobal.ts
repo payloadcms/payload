@@ -5,38 +5,74 @@ import { combineQueries } from 'payload/database'
 
 import type { ExampleAdapter } from '.'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
 export const findGlobal: FindGlobal = async function findGlobal(
   this: ExampleAdapter,
   { slug, locale, req = {} as PayloadRequest, where },
 ) {
-  const Model = this.globals
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificModel for globals from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.globals;
+   * ```
+   */
+  let adapterSpecificModel
 
-  const query = await Model.buildQuery({
-    globalSlug: slug,
-    locale,
-    payload: this.payload,
-    where: combineQueries({ globalType: { equals: slug } }, where),
-  })
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  let doc = (await Model.findOne(query, {}, options)) as any
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = combineQueries({ globalType: { equals: slug } }, where);
+   * ```
+   */
+  const query = combineQueries({ globalType: { equals: slug } }, where)
+
+  /**
+   * Implement the logic to find one document in your database.
+   *
+   * @example
+   * ```ts
+   * let doc = await adapterSpecificModel.findOne(query, {}, options);
+   * ```
+   */
+  let doc = await adapterSpecificModel.findOne(query, {}, options)
 
   if (!doc) {
     return null
   }
-  if (doc._id) {
-    doc.id = doc._id
-    delete doc._id
+
+  /**
+   * If your database uses a different field for the document ID,
+   * adjust the following lines accordingly.
+   *
+   * @example
+   * ```ts
+   * if (doc.idField) {
+   *   doc.id = doc.idField;
+   *   delete doc.idField;
+   * }
+   * ```
+   */
+  if (doc.idField) {
+    // Adjust `idField` to your database's ID field
+    doc.id = doc.idField
+    delete doc.idField
   }
 
+  /**
+   * Convert the result to the expected document format
+   *
+   * @example
+   * ```ts
+   * doc = JSON.parse(JSON.stringify(doc))
+   * ```
+   */
   doc = JSON.parse(JSON.stringify(doc))
-  doc = sanitizeInternalFields(doc)
 
   return doc
 }

@@ -12,7 +12,6 @@ import { count } from './count'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
 import { createGlobalVersion } from './createGlobalVersion'
-import { createMigration } from './createMigration'
 import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
@@ -111,7 +110,6 @@ export function exampleAdapter({ url }: Args): ExampleAdapterResult {
       create,
       createGlobal,
       createGlobalVersion,
-      createMigration,
       createVersion,
       defaultIDType: 'text',
       deleteMany,

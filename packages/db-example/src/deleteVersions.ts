@@ -3,23 +3,40 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import { withSession } from './withSession'
-
 export const deleteVersions: DeleteVersions = async function deleteVersions(
   this: ExampleAdapter,
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
-  const VersionsModel = this.versions[collection]
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificVersionsModel from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificVersionsModel = this.versions[collection];
+   * ```
+   */
+  let adapterSpecificVersionsModel
 
-  const query = await VersionsModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  await VersionsModel.deleteMany(query, options)
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {}; // Build your query here
+   * ```
+   */
+  const query = {}
+
+  /**
+   * Implement the logic to delete many version documents from your database.
+   *
+   * @example
+   * ```ts
+   * await adapterSpecificVersionsModel.deleteMany(query, options);
+   * ```
+   */
+  await adapterSpecificVersionsModel.deleteMany(query, options)
 }

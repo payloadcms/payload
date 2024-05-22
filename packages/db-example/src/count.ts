@@ -20,7 +20,10 @@ export const count: Count = async function count(
   { collection, locale, req = {} as PayloadRequest, where },
 ): Promise<{ totalDocs: number }> {
   // Implement the count function here for the specified collection with where query
-  const result = await Promise.resolve(0)
+  const adapterSpecificModel = this.collections[collection]
+
+  const result = await adapterSpecificModel.countDocuments(query)
+
   return {
     totalDocs: result,
   }

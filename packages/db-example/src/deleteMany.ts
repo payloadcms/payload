@@ -3,22 +3,38 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import { withSession } from './withSession'
-
 export const deleteMany: DeleteMany = async function deleteMany(
   this: ExampleAdapter,
   { collection, req = {} as PayloadRequest, where },
 ) {
-  const Model = this.collections[collection]
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificModel from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.collections[collection];
+   * ```
+   */
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
-    where,
-  })
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {}; // Build your query here
+   * ```
+   */
+  const query = {}
 
-  await Model.deleteMany(query, options)
+  /**
+   * Implement the logic to delete many documents from your database.
+   *
+   * @example
+   * ```ts
+   * await adapterSpecificModel.deleteMany(query, options);
+   * ```
+   */
+  await adapterSpecificModel.deleteMany(query, options)
 }

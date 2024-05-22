@@ -1,40 +1,53 @@
-import type { MongooseQueryOptions } from 'mongoose'
 import type { FindOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
 export const findOne: FindOne = async function findOne(
   this: ExampleAdapter,
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
-  const Model = this.collections[collection]
-  const options: MongooseQueryOptions = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificModel from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.collections[collection];
+   * ```
+   */
+  let adapterSpecificModel
 
-  const query = await Model.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  const doc = await Model.findOne(query, {}, options)
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {}; // Build your query here
+   * ```
+   */
+  const query = {}
+
+  const doc = await adapterSpecificModel.findOne(query, {}, options)
 
   if (!doc) {
     return null
   }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
-
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  /**
+   * Convert the result to the expected document format
+   *
+   * This should be the shape of the data that gets returned in Payload.
+   *
+   * @example
+   * ```ts
+   * let result: Document = JSON.parse(JSON.stringify(doc))
+   * ```
+   */
+  const result: Document = JSON.parse(JSON.stringify(doc))
 
   return result
 }
