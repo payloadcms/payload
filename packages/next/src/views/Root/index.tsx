@@ -5,7 +5,7 @@ import type { SanitizedConfig } from 'payload/types'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
-import React, { Fragment, Suspense } from 'react'
+import React, { Fragment } from 'react'
 
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
@@ -87,26 +87,24 @@ export const RootPage = async ({
 
   return (
     <Fragment>
-      <Suspense fallback={<p>What is up eiskjfnsdfnj</p>}>
-        {!templateType && <Fragment>{RenderedView}</Fragment>}
-        {templateType === 'minimal' && (
-          <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-        )}
-        {templateType === 'default' && (
-          <DefaultTemplate
-            i18n={initPageResult?.req.i18n}
-            locale={initPageResult?.locale}
-            params={params}
-            payload={initPageResult?.req.payload}
-            permissions={initPageResult?.permissions}
-            searchParams={searchParams}
-            user={initPageResult?.req.user}
-            visibleEntities={initPageResult.visibleEntities}
-          >
-            {/* {RenderedView} */}
-          </DefaultTemplate>
-        )}
-      </Suspense>
+      {!templateType && <Fragment>{RenderedView}</Fragment>}
+      {templateType === 'minimal' && (
+        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+      )}
+      {templateType === 'default' && (
+        <DefaultTemplate
+          i18n={initPageResult?.req.i18n}
+          locale={initPageResult?.locale}
+          params={params}
+          payload={initPageResult?.req.payload}
+          permissions={initPageResult?.permissions}
+          searchParams={searchParams}
+          user={initPageResult?.req.user}
+          visibleEntities={initPageResult.visibleEntities}
+        >
+          {RenderedView}
+        </DefaultTemplate>
+      )}
     </Fragment>
   )
 }
