@@ -57,11 +57,10 @@ function hideTargetLine(
   }
   if (lastTargetBlockElem) {
     lastTargetBlockElem.style.opacity = ''
-    lastTargetBlockElem.style.transform = ''
     // Delete marginBottom and marginTop values we set
     lastTargetBlockElem.style.marginBottom = ''
     lastTargetBlockElem.style.marginTop = ''
-    //lastTargetBlockElem.style.border = 'none'
+    //lastTargetBlock.style.border = 'none'
   }
 }
 
@@ -77,7 +76,12 @@ function useDraggableBlockMenu(
   const debugHighlightRef = useRef<HTMLDivElement>(null)
   const isDraggingBlockRef = useRef<boolean>(false)
   const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null)
-  const [lastTargetBlockElem, setLastTargetBlockElem] = useState<HTMLElement | null>(null)
+  const [lastTargetBlock, setLastTargetBlock] = useState<{
+    boundingBox?: DOMRect
+    elem: HTMLElement | null
+    isBelow: boolean
+  }>(null)
+
   const { editorConfig } = useEditorConfigContext()
 
   const blockHandleHorizontalOffset = editorConfig?.admin?.hideGutter ? -44 : -8
@@ -211,7 +215,7 @@ function useDraggableBlockMenu(
       }
 
       if (draggableBlockElem !== targetBlockElem) {
-        setTargetLine(
+        const { isBelow, willStayInSamePosition } = setTargetLine(
           editorConfig?.admin?.hideGutter ? '0px' : '3rem',
           blockHandleHorizontalOffset +
             (editorConfig?.admin?.hideGutter
@@ -219,7 +223,7 @@ function useDraggableBlockMenu(
               : -menuRef?.current?.getBoundingClientRect()?.width ?? 0),
           targetLineElem,
           targetBlockElem,
-          lastTargetBlockElem,
+          lastTargetBlock,
           pageY,
           anchorElem,
           event,
@@ -231,11 +235,22 @@ function useDraggableBlockMenu(
         // Calling preventDefault() adds the green plus icon to the cursor,
         // indicating that the drop is allowed.
         event.preventDefault()
-      } else {
-        hideTargetLine(targetLineElem, lastTargetBlockElem)
-      }
 
-      setLastTargetBlockElem(targetBlockElem)
+        if (!willStayInSamePosition) {
+          setLastTargetBlock({
+            boundingBox: targetBlockElem.getBoundingClientRect(),
+            elem: targetBlockElem,
+            isBelow,
+          })
+        }
+      } else {
+        hideTargetLine(targetLineElem, lastTargetBlock?.elem)
+        setLastTargetBlock({
+          boundingBox: targetBlockElem.getBoundingClientRect(),
+          elem: targetBlockElem,
+          isBelow: false,
+        })
+      }
 
       return true
     }
@@ -317,6 +332,51 @@ function useDraggableBlockMenu(
         if (draggableBlockElem !== null) {
           setDraggableBlockElem(null)
         }
+
+        // find all previous elements with lexical-block-highlighter class and remove them
+        const allPrevHighlighters = document.querySelectorAll('.lexical-block-highlighter')
+        allPrevHighlighters.forEach((highlighter) => {
+          highlighter.remove()
+        })
+
+        const newInsertedElem = editor.getElementByKey(draggedNode.getKey())
+        setTimeout(() => {
+          // add new temp html element to newInsertedElem with the same height and width and the class block-selected
+          // to highlight the new inserted element
+          const newInsertedElemRect = newInsertedElem.getBoundingClientRect()
+
+          const highlightElem = document.createElement('div')
+          highlightElem.className = 'lexical-block-highlighter'
+
+          // if html data-theme is dark, set the highlighter color to white
+          if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            highlightElem.style.backgroundColor = 'white'
+          } else {
+            highlightElem.style.backgroundColor = 'black'
+          }
+
+          highlightElem.style.transition = 'opacity 0.1s ease-in-out'
+          highlightElem.style.zIndex = '1'
+          highlightElem.style.pointerEvents = 'none'
+          highlightElem.style.boxSizing = 'border-box'
+          highlightElem.style.borderRadius = '4px'
+          highlightElem.style.position = 'absolute'
+          document.body.appendChild(highlightElem)
+
+          highlightElem.style.opacity = '0.1'
+
+          highlightElem.style.height = `${newInsertedElemRect.height + 8}px`
+          highlightElem.style.width = `${newInsertedElemRect.width + 8}px`
+          highlightElem.style.top = `${newInsertedElemRect.top + window.scrollY - 4}px`
+          highlightElem.style.left = `${newInsertedElemRect.left - 4}px`
+
+          setTimeout(() => {
+            highlightElem.style.opacity = '0'
+            setTimeout(() => {
+              highlightElem.remove()
+            }, 1000)
+          }, 3000)
+        }, 120)
       })
 
       return true
@@ -336,8 +396,9 @@ function useDraggableBlockMenu(
     blockHandleHorizontalOffset,
     anchorElem,
     editor,
-    lastTargetBlockElem,
+    lastTargetBlock,
     draggableBlockElem,
+    editorConfig?.admin?.hideGutter,
   ])
 
   function onDragStart(event: ReactDragEvent<HTMLDivElement>): void {
@@ -359,7 +420,7 @@ function useDraggableBlockMenu(
 
   function onDragEnd(): void {
     isDraggingBlockRef.current = false
-    hideTargetLine(targetLineRef.current, lastTargetBlockElem)
+    hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
   }
 
   return createPortal(
