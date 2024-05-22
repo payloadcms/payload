@@ -24,7 +24,7 @@ export const getDocumentPermissions = async (args: {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
   let docPermissions: DocumentPermissions
-  let hasPublishPermission: boolean
+  let hasPublishPermission = false
 
   if (collectionConfig) {
     try {
@@ -39,19 +39,21 @@ export const getDocumentPermissions = async (args: {
         },
       })
 
-      hasPublishPermission = await docAccessOperation({
-        id: id?.toString(),
-        collection: {
-          config: collectionConfig,
-        },
-        req: {
-          ...req,
-          data: {
-            ...data,
-            _status: 'published',
+      if (collectionConfig.versions?.drafts) {
+        hasPublishPermission = await docAccessOperation({
+          id: id?.toString(),
+          collection: {
+            config: collectionConfig,
           },
-        },
-      }).then(({ update }) => update?.permission)
+          req: {
+            ...req,
+            data: {
+              ...data,
+              _status: 'published',
+            },
+          },
+        }).then(({ update }) => update?.permission)
+      }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
     }
@@ -67,16 +69,18 @@ export const getDocumentPermissions = async (args: {
         },
       })
 
-      hasPublishPermission = await docAccessOperationGlobal({
-        globalConfig,
-        req: {
-          ...req,
-          data: {
-            ...data,
-            _status: 'published',
+      if (globalConfig.versions?.drafts) {
+        hasPublishPermission = await docAccessOperationGlobal({
+          globalConfig,
+          req: {
+            ...req,
+            data: {
+              ...data,
+              _status: 'published',
+            },
           },
-        },
-      }).then(({ update }) => update?.permission)
+        }).then(({ update }) => update?.permission)
+      }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
     }

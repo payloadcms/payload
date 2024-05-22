@@ -102,11 +102,7 @@ export default buildConfigWithDefaults({
       ],
       access: {
         read: () => true,
-        update: ({ req }) => ({
-          name: {
-            equals: req.user?.email,
-          },
-        }),
+        update: ({ req, data }) => data?.name === req.user?.email,
       },
     },
     {
@@ -593,6 +589,13 @@ export default buildConfigWithDefaults({
             allowPublicReadability: false,
           },
         ],
+      },
+    })
+
+    await payload.updateGlobal({
+      slug: userRestrictedGlobalSlug,
+      data: {
+        name: 'dev@payloadcms.com',
       },
     })
   },

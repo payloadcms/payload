@@ -283,7 +283,7 @@ describe('access control', () => {
     })
   })
 
-  describe('global - read but not update', () => {
+  describe('global — read but not update', () => {
     test('should not show edit button', async () => {
       const createNotUpdateURL = new AdminUrlUtil(serverURL, readNotUpdateGlobalSlug)
       await page.goto(createNotUpdateURL.global(readNotUpdateGlobalSlug))
@@ -350,11 +350,44 @@ describe('access control', () => {
     describe('global', () => {
       test('should restrict update access based on document field', async () => {
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
+        await page.waitForURL(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeVisible()
+        await expect(page.locator('#field-name')).toHaveValue(devUser.email)
+        await expect(page.locator('#field-name')).toBeEnabled()
         await page.locator('#field-name').fill('anonymous@email.com')
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.Toastify')).toContainText(
+          'You are not allowed to perform this action',
+        )
+
+        await payload.updateGlobal({
+          slug: userRestrictedGlobalSlug,
+          data: {
+            name: 'anonymous@payloadcms.com',
+          },
+        })
+
+        await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
+        await page.waitForURL(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeDisabled()
+        await expect(page.locator('#action-save')).toBeHidden()
+      })
+
+      test('should restrict access based on user settings', async () => {
+        const url = `${serverURL}/admin/globals/settings`
+        await page.goto(url)
+        await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
+        await openNav(page)
+        await expect(page.locator('#nav-global-settings')).toBeVisible()
+        await expect(page.locator('#nav-global-test')).toBeHidden()
+        await closeNav(page)
+        await page.locator('.checkbox-input:has(#field-test) input').check()
+        await saveDocAndAssert(page)
+        await openNav(page)
+        const globalTest = page.locator('#nav-global-test')
+        await expect(async () => await globalTest.isVisible()).toPass({
+          timeout: POLL_TOPASS_TIMEOUT,
+        })
       })
     })
   })
@@ -416,37 +449,6 @@ describe('access control', () => {
       await openDocControls(page)
       const deleteAction2 = page.locator('#action-delete')
       await expect(deleteAction2).toBeVisible()
-    })
-  })
-
-  // TODO: Test flakes. In CI, test global does not appear in nav. Perhaps the checkbox setValue is not triggered BEFORE the document is saved, as the custom save button can be clicked even if the form has not been set to modified.
-  test('should show test global immediately after allowing access', async () => {
-    const url = `${serverURL}/admin/globals/settings`
-    await page.goto(url)
-
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
-
-    await openNav(page)
-
-    // Ensure that we have loaded accesses by checking that settings collection
-    // at least is visible in the menu.
-    await expect(page.locator('#nav-global-settings')).toBeVisible()
-
-    // Test collection should be hidden at first.
-    await expect(page.locator('#nav-global-test')).toBeHidden()
-
-    await closeNav(page)
-
-    // Allow access to test global.
-    await page.locator('.checkbox-input:has(#field-test) input').check()
-    await saveDocAndAssert(page)
-
-    await openNav(page)
-
-    const globalTest = page.locator('#nav-global-test')
-
-    await expect(async () => await globalTest.isVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 

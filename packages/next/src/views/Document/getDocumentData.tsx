@@ -15,6 +15,7 @@ export const getDocumentData = async (args: {
   req: PayloadRequest
 }): Promise<Data> => {
   const { id, collectionConfig, globalConfig, locale, payload, req } = args
+
   let data: Data
 
   if (collectionConfig && id !== undefined && id !== null) {
