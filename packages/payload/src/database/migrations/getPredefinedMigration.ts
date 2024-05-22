@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { pathToFileURL } from 'url'
 
 import type { Payload } from '../../index.js'
 import type { MigrationTemplateArgs } from '../types.js'
@@ -23,18 +24,23 @@ export const getPredefinedMigration = async ({
   if (file || migrationNameArg?.startsWith('@payloadcms/')) {
     // removes the package name from the migrationName.
     const migrationName = (file || migrationNameArg).split('/').slice(2).join('/')
-    let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}.js`)
-    if (!fs.existsSync(cleanPath)) {
-      cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}/index.js`)
-    }
+    let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}.mjs`)
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {
-      let migration: MigrationTemplateArgs = await eval(
-        `${typeof require === 'function' ? 'require' : 'import'}(${cleanPath})`,
-      )
-      if ('default' in migration) migration = migration.default
-      return migration
+      cleanPath = cleanPath.replaceAll('\\', '/')
+      const moduleURL = pathToFileURL(cleanPath)
+      try {
+        let migration = await import(moduleURL.href)
+        if ('default' in migration) migration = migration.default
+        return migration
+      } catch (error) {
+        payload.logger.error({
+          error,
+          msg: `Error loading predefined migration ${migrationName}`,
+        })
+        process.exit(1)
+      }
     } else {
       payload.logger.error({
         msg: `Canned migration ${migrationName} not found.`,
