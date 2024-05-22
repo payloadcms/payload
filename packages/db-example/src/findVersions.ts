@@ -7,8 +7,6 @@ import { flattenWhereToOperators } from 'payload/database'
 import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
 
 export const findVersions: FindVersions = async function findVersions(
   this: ExampleAdapter,
@@ -24,10 +22,20 @@ export const findVersions: FindVersions = async function findVersions(
     where,
   },
 ) {
-  const Model = this.versions[collection]
+  /**
+   * Implement the logic to get the adapterSpecificModel for versions from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.versions[collection]
+   * ```
+   */
+  let adapterSpecificModel
+
   const collectionConfig = this.payload.collections[collection].config
+
+  // Replace this with your session handling or remove if not needed
   const options = {
-    ...withSession(this, req.transactionID),
     limit,
     skip,
   }
@@ -50,15 +58,20 @@ export const findVersions: FindVersions = async function findVersions(
     })
   }
 
-  const query = await Model.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {} // Build your query here
+   * ```
+   */
+  const query = {}
 
-  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
+  // Use estimated count if applicable
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
+    // Add your pagination options here
     forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
@@ -71,40 +84,57 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
-    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
-    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
-    // the correct indexed field
+    /**
+     * Add custom count function if needed.
+     *
+     * @example
+     * ```ts
+     * paginationOptions.useCustomCountFn = () => {
+     *   return Promise.resolve(
+     *     adapterSpecificModel.countDocuments(query, {
+     *       ...options,
+     *       hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
+     *     }),
+     *   )
+     * }
+     * ```
+     */
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
-        Model.countDocuments(query, {
+        adapterSpecificModel.countDocuments(query, {
           ...options,
-          hint: { _id: 1 },
+          hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
         }),
       )
     }
   }
 
-  if (limit >= 0) {
-    paginationOptions.limit = limit
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
-
-    // Disable pagination if limit is 0
-    if (limit === 0) {
-      paginationOptions.pagination = false
-    }
-  }
-
-  const result = await Model.paginate(query, paginationOptions)
+  /**
+   * Implement the logic to paginate the query results according to your database's methods.
+   *
+   * @example
+   * ```ts
+   * const result = await adapterSpecificModel.paginate(query, paginationOptions)
+   * ```
+   */
+  const result = await adapterSpecificModel.paginate(query, paginationOptions)
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
+      doc.id = doc._id // Adjust this line according to your database's ID field
+      /**
+       * If needed, implement logic to sanitize internal fields of the document.
+       * This might be necessary to remove any database-specific metadata.
+       *
+       * @example
+       * ```ts
+       * doc = sanitizeInternalFields(doc)
+       * ```
+       */
+      return doc
     }),
   }
 }

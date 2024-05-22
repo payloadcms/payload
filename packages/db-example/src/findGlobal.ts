@@ -14,7 +14,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.globals;
+   * const adapterSpecificModel = this.globals
    * ```
    */
   let adapterSpecificModel
@@ -27,7 +27,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
    *
    * @example
    * ```ts
-   * const query = combineQueries({ globalType: { equals: slug } }, where);
+   * const query = combineQueries({ globalType: { equals: slug } }, where)
    * ```
    */
   const query = combineQueries({ globalType: { equals: slug } }, where)
@@ -37,7 +37,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
    *
    * @example
    * ```ts
-   * let doc = await adapterSpecificModel.findOne(query, {}, options);
+   * let doc = await adapterSpecificModel.findOne(query, {}, options)
    * ```
    */
   let doc = await adapterSpecificModel.findOne(query, {}, options)
@@ -53,8 +53,8 @@ export const findGlobal: FindGlobal = async function findGlobal(
    * @example
    * ```ts
    * if (doc.idField) {
-   *   doc.id = doc.idField;
-   *   delete doc.idField;
+   *   doc.id = doc.idField
+   *   delete doc.idField
    * }
    * ```
    */

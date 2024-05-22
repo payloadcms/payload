@@ -3,38 +3,47 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import handleError from './utilities/handleError'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
 export const updateOne: UpdateOne = async function updateOne(
   this: ExampleAdapter,
   { id, collection, data, locale, req = {} as PayloadRequest, where: whereArg },
 ) {
-  const where = id ? { id: { equals: id } } : whereArg
-  const Model = this.collections[collection]
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-    new: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificModel for globals from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.collections[collection]
+   * ```
+   */
+  let adapterSpecificModel
 
-  const query = await Model.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  let result
-  try {
-    result = await Model.findOneAndUpdate(query, data, options)
-  } catch (error) {
-    handleError(error, req)
-  }
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {} // Build your query here
+   * ```
+   */
+  const query = {}
 
-  result = JSON.parse(JSON.stringify(result))
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  const result = await adapterSpecificModel.findOneAndUpdate(query, data, options)
+
+  /**
+   * Convert the result to the expected document format if needed
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   * @example
+   * ```ts
+   * const result = JSON.parse(JSON.stringify(result))
+   * ```
+   */
+
+  // result = JSON.parse(JSON.stringify(result))
 
   return result
 }

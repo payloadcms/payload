@@ -12,7 +12,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
    *
    * @example
    * ```ts
-   * const adapterSpecificVersionsModel = this.versions[collection];
+   * const adapterSpecificVersionsModel = this.versions[collection]
    * ```
    */
   let adapterSpecificVersionsModel
@@ -25,7 +25,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
    *
    * @example
    * ```ts
-   * const query = {}; // Build your query here
+   * const query = {} // Build your query here
    * ```
    */
   const query = {}
@@ -35,7 +35,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
    *
    * @example
    * ```ts
-   * await adapterSpecificVersionsModel.deleteMany(query, options);
+   * await adapterSpecificVersionsModel.deleteMany(query, options)
    * ```
    */
   await adapterSpecificVersionsModel.deleteMany(query, options)

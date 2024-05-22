@@ -13,7 +13,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
    *
    * @example
    * ```ts
-   * const adapterSpecificVersionModel = this.versions[globalSlug];
+   * const adapterSpecificVersionModel = this.versions[globalSlug]
    * ```
    */
   let adapterSpecificVersionModel
@@ -33,7 +33,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
    *   parent,
    *   updatedAt,
    *   version: versionData,
-   * }, options, req);
+   * }, options, req)
    * ```
    */
   const [doc] = await adapterSpecificVersionModel.create(
@@ -57,12 +57,10 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
    * @example
    * ```ts
    * await adapterSpecificVersionModel.updateMany(
-   *   {
-   *     // Your query conditions here
-   *   },
+   *   {},
    *   { $unset: { latest: 1 } },
    *   options,
-   * );
+   * )
    * ```
    */
   await adapterSpecificVersionModel.updateMany(

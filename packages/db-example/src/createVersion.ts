@@ -21,7 +21,7 @@ export const createVersion: CreateVersion = async function createVersion(
    *
    * @example
    * ```ts
-   * const adapterSpecificVersionModel = this.versions[collectionSlug];
+   * const adapterSpecificVersionModel = this.versions[collectionSlug]
    * ```
    */
   let adapterSpecificVersionModel
@@ -41,7 +41,7 @@ export const createVersion: CreateVersion = async function createVersion(
    *   parent,
    *   updatedAt,
    *   version: versionData,
-   * }, options, req);
+   * }, options, req)
    * ```
    */
   const [doc] = await adapterSpecificVersionModel.create(
@@ -65,12 +65,10 @@ export const createVersion: CreateVersion = async function createVersion(
    * @example
    * ```ts
    * await adapterSpecificVersionModel.updateMany(
-   *   {
-   *     // Your query conditions here
-   *   },
+   *   {},
    *   { $unset: { latest: 1 } },
    *   options,
-   * );
+   * )
    * ```
    */
   await adapterSpecificVersionModel.updateMany(

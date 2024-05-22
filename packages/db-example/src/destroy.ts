@@ -11,17 +11,13 @@ export const destroy: Destroy = async function destroy(this: ExampleAdapter) {
    * @example
    * ```ts
    * if (this.inMemoryDatabase) {
-   *   // Logic to drop the database
-   *   await this.connection.dropDatabase();
+   *   await this.connection.dropDatabase()
    *
-   *   // Logic to close the database connection
-   *   await this.connection.close();
+   *   await this.connection.close()
    *
-   *   // Logic to stop the in-memory database server
-   *   await this.inMemoryDatabase.stop();
+   *   await this.inMemoryDatabase.stop()
    * } else {
-   *   // Logic to close the database connection
-   *   await this.connection.close();
+   *   await this.connection.close()
    * }
    * ```
    */

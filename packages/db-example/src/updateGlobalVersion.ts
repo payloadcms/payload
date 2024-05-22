@@ -3,8 +3,6 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import { withSession } from './withSession'
-
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: ExampleAdapter,
   {
@@ -16,30 +14,52 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  const VersionModel = this.versions[global]
+  /**
+   * Implement the logic to get the adapterSpecificModel for global versions from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.versions[global]
+   * ```
+   */
+  let adapterSpecificModel
+
   const whereToUse = where || { id: { equals: id } }
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-    new: true,
-  }
 
-  const query = await VersionModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where: whereToUse,
-  })
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {} // Build your query here
+   * ```
+   */
+  const query = {}
 
-  const result = JSON.parse(JSON.stringify(doc))
+  /**
+   * Implement the logic to find one and update the document in your database.
+   *
+   * @example
+   * ```ts
+   * const doc = await adapterSpecificModel.findOneAndUpdate(query, versionData, options)
+   * ```
+   */
+  const doc = await adapterSpecificModel.findOneAndUpdate(query, versionData, options)
 
-  const verificationToken = doc._verificationToken
+  /**
+   * Convert the result to the expected document format
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   * @example
+   * ```ts
+   * const result = JSON.parse(JSON.stringify(doc))
+   * ```
+   */
+  const result = doc
 
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
   return result
 }

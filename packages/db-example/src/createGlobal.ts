@@ -14,7 +14,7 @@ export const createGlobal: CreateGlobal = async function createGlobal(
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.globals;
+   * const adapterSpecificModel = this.globals
    * ```
    */
   let adapterSpecificModel
@@ -34,7 +34,7 @@ export const createGlobal: CreateGlobal = async function createGlobal(
    *
    * @example
    * ```ts
-   * result = await adapterSpecificModel.create(global, options);
+   * result = await adapterSpecificModel.create(global, options)
    * ```
    */
   result = await adapterSpecificModel.create(global, options)

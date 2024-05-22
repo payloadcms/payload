@@ -3,28 +3,43 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: ExampleAdapter,
   { slug, data, req = {} as PayloadRequest },
 ) {
-  const Model = this.globals
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-    new: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificModel for globals from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.globals
+   * ```
+   */
+  let adapterSpecificModel
 
-  let result
-  result = await Model.findOneAndUpdate({ globalType: slug }, data, options)
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  result = JSON.parse(JSON.stringify(result))
+  /**
+   * Implement the logic to find one and update the document in your database.
+   *
+   * @example
+   * ```ts
+   * result = await adapterSpecificModel.findOneAndUpdate({ globalType: slug }, data, options)
+   * ```
+   */
+  const result = await adapterSpecificModel.findOneAndUpdate({ globalType: slug }, data, options)
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  /**
+   * Convert the result to the expected document format if needed
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   * @example
+   * ```ts
+   * const result = JSON.parse(JSON.stringify(result))
+   * ```
+   */
 
   return result
 }

@@ -14,7 +14,7 @@ export const create: Create = async function create(
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.collections[collection];
+   * const adapterSpecificModel = this.collections[collection]
    * ```
    */
   let adapterSpecificModel
@@ -30,7 +30,7 @@ export const create: Create = async function create(
      *
      * @example
      * ```ts
-     * doc = await adapterSpecificModel.create(data, options);
+     * doc = await adapterSpecificModel.create(data, options)
      * ```
      */
     doc = await adapterSpecificModel.create(data, options)

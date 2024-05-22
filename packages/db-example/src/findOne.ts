@@ -13,7 +13,7 @@ export const findOne: FindOne = async function findOne(
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.collections[collection];
+   * const adapterSpecificModel = this.collections[collection]
    * ```
    */
   let adapterSpecificModel
@@ -26,7 +26,7 @@ export const findOne: FindOne = async function findOne(
    *
    * @example
    * ```ts
-   * const query = {}; // Build your query here
+   * const query = {} // Build your query here
    * ```
    */
   const query = {}

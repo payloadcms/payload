@@ -7,16 +7,25 @@ import { combineQueries, flattenWhereToOperators } from 'payload/database'
 import type { ExampleAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: ExampleAdapter,
   { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  const VersionModel = this.versions[collection]
+  /**
+   * Implement the logic to get the adapterSpecificModel for versions from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.versions[collection]
+   * ```
+   */
+  let adapterSpecificModel
+
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
   let hasNearConstraint
   let sort
@@ -38,16 +47,21 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
-  const versionQuery = await VersionModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where: combinedWhere,
-  })
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const versionQuery = {} // Build your query here
+   * ```
+   */
+  const versionQuery = {}
 
-  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
+  // Use estimated count if applicable
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
   const paginationOptions: PaginateOptions = {
+    // Add your pagination options here
     forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
@@ -63,14 +77,24 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     Object.keys(versionQuery).length === 0 &&
     this.disableIndexHints !== true
   ) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
-    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
-    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
-    // the correct indexed field
+    /**
+     * Add custom count function if needed.
+     *
+     * @example
+     * ```ts
+     * paginationOptions.useCustomCountFn = () => {
+     *   return Promise.resolve(
+     *     adapterSpecificModel.countDocuments(versionQuery, {
+     *       hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
+     *     }),
+     *   )
+     * }
+     * ```
+     */
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
-        VersionModel.countDocuments(versionQuery, {
-          hint: { _id: 1 },
+        adapterSpecificModel.countDocuments(versionQuery, {
+          hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
         }),
       )
     }
@@ -82,13 +106,21 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     paginationOptions.options.limit = limit
   }
 
-  const result = await VersionModel.paginate(versionQuery, paginationOptions)
+  /**
+   * Implement the logic to paginate the query results according to your database's methods.
+   *
+   * @example
+   * ```ts
+   * const result = await adapterSpecificModel.paginate(versionQuery, paginationOptions)
+   * ```
+   */
+  const result = await adapterSpecificModel.paginate(versionQuery, paginationOptions)
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
+      // Adjust this line according to your database's ID field and data structure
       doc = {
         _id: doc.parent,
         id: doc.parent,
@@ -97,7 +129,16 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
         updatedAt: doc.updatedAt,
       }
 
-      return sanitizeInternalFields(doc)
+      /**
+       * If needed, implement logic to sanitize internal fields of the document.
+       * This might be necessary to remove any database-specific metadata.
+       *
+       * @example
+       * ```ts
+       * doc = sanitizeInternalFields(doc)
+       * ```
+       */
+      return doc
     }),
   }
 }

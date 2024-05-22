@@ -3,36 +3,47 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import { withSession } from './withSession'
-
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: ExampleAdapter,
   { id, collection, locale, req = {} as PayloadRequest, versionData, where },
 ) {
-  const VersionModel = this.versions[collection]
-  const whereToUse = where || { id: { equals: id } }
-  const options = {
-    ...withSession(this, req.transactionID),
-    lean: true,
-    new: true,
-  }
+  /**
+   * Implement the logic to get the adapterSpecificModel for globals from your database.
+   *
+   * @example
+   * ```ts
+   * const adapterSpecificModel = this.versions[collection]
+   * ```
+   */
+  let adapterSpecificModel
 
-  const query = await VersionModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where: whereToUse,
-  })
+  // Replace this with your session handling or remove if not needed
+  const options = {}
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  /**
+   * Implement the query building logic according to your database syntax.
+   *
+   * @example
+   * ```ts
+   * const query = {} // Build your query here
+   * ```
+   */
+  const query = {}
 
-  const result = JSON.parse(JSON.stringify(doc))
+  const doc = await adapterSpecificModel.findOneAndUpdate(query, versionData, options)
 
-  const verificationToken = doc._verificationToken
+  /**
+   * Convert the result to the expected document format if needed
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   * @example
+   * ```ts
+   * const result = JSON.parse(JSON.stringify(doc))
+   * ```
+   */
 
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
+  const result = doc
+
   return result
 }

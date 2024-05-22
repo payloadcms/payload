@@ -28,7 +28,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.versions[global];
+   * const adapterSpecificModel = this.versions[global]
    * ```
    */
   let adapterSpecificModel
@@ -66,7 +66,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
    *
    * @example
    * ```ts
-   * const query = {}; // Build your query here
+   * const query = {} // Build your query here
    * ```
    */
   const query = {}
@@ -98,7 +98,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
      *       ...options,
      *       hint: { _id: 1 }, // Replace with your database's specific hint logic if needed
      *     }),
-     *   );
+     *   )
      * }
      * ```
      */
@@ -128,7 +128,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
    *
    * @example
    * ```ts
-   * const result = await adapterSpecificModel.paginate(query, paginationOptions);
+   * const result = await adapterSpecificModel.paginate(query, paginationOptions)
    * ```
    */
   const result = await adapterSpecificModel.paginate(query, paginationOptions)
@@ -145,7 +145,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
        *
        * @example
        * ```ts
-       * doc = sanitizeInternalFields(doc);
+       * doc = sanitizeInternalFields(doc)
        * ```
        */
       return doc

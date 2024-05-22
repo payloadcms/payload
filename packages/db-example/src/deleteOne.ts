@@ -15,7 +15,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.collections[collection];
+   * const adapterSpecificModel = this.collections[collection]
    * ```
    */
   let adapterSpecificModel
@@ -33,7 +33,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
    *
    * @example
    * ```ts
-   * const doc = await adapterSpecificModel.delete(query, options);
+   * const doc = await adapterSpecificModel.delete(query, options)
    * ```
    */
 

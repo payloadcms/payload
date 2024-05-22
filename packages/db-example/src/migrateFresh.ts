@@ -41,7 +41,15 @@ export async function migrateFresh(
     msg: `Dropping database.`,
   })
 
-  await this.connection.dropDatabase()
+  /**
+   * Implement the logic to drop the database in your database adapter.
+   *
+   * @example
+   * ```ts
+   * await this.connection.dropDatabase()
+   * ```
+   */
+  await this.connection.dropDatabase() // Placeholder line, adjust to your database
 
   const migrationFiles = await readMigrationFiles({ payload })
   payload.logger.debug({

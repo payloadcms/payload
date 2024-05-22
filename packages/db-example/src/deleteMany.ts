@@ -12,7 +12,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
    *
    * @example
    * ```ts
-   * const adapterSpecificModel = this.collections[collection];
+   * const adapterSpecificModel = this.collections[collection]
    * ```
    */
   // Replace this with your session handling or remove if not needed
@@ -23,7 +23,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
    *
    * @example
    * ```ts
-   * const query = {}; // Build your query here
+   * const query = {} // Build your query here
    * ```
    */
   const query = {}
@@ -33,7 +33,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
    *
    * @example
    * ```ts
-   * await adapterSpecificModel.deleteMany(query, options);
+   * await adapterSpecificModel.deleteMany(query, options)
    * ```
    */
   await adapterSpecificModel.deleteMany(query, options)
