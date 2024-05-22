@@ -74,3 +74,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+html {
+  opacity: 0;
+}
+
+html[data-theme='dark'],
+html[data-theme='light'] {
+  opacity: initial;
+}

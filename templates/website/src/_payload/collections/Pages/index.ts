@@ -82,7 +82,9 @@ export const Pages: CollectionConfig = {
   },
   versions: {
     drafts: {
-      autosave: true,
+      autosave: {
+        interval: 350, // We set this interval for optimal live preview
+      },
     },
     maxPerDoc: 50,
   },
