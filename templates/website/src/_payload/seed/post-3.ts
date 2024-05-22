@@ -63,6 +63,7 @@ export const post3: Partial<Post> = {
                 version: 1,
               },
             },
+            style: 'info',
           },
           format: '',
           version: 2,

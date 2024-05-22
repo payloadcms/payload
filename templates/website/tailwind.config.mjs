@@ -73,6 +73,9 @@ export default {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
         },
+        success: 'hsl(var(--success))',
+        error: 'hsl(var(--error))',
+        warning: 'hsl(var(--warning))',
       },
       fontFamily: {
         mono: ['var(--font-geist-mono)'],

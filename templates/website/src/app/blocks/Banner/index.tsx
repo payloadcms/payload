@@ -1,16 +1,24 @@
+import type { BannerBlock as BannerBlockProps } from 'src/payload-types'
+
 import { cn } from '@/utilities/cn'
 import React from 'react'
 import RichText from 'src/app/components/RichText'
 
-type Props = {
+type Props = BannerBlockProps & {
   className?: string
-  content?: any
 }
 
-export const BannerBlock: React.FC<Props> = ({ className, content }) => {
+export const BannerBlock: React.FC<Props> = ({ className, content, style }) => {
   return (
     <div className={cn('mx-auto w-full', className)}>
-      <div className="border border-border rounded bg-card py-3 px-6 flex items-center">
+      <div
+        className={cn('border py-3 px-6 flex items-center rounded', {
+          'border-border bg-card': style === 'info',
+          'border-error bg-error/30': style === 'error',
+          'border-success bg-success/30': style === 'success',
+          'border-warning bg-warning/30': style === 'warning',
+        })}
+      >
         <RichText
           className="classes.richText"
           content={content}
