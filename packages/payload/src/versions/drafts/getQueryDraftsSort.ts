@@ -5,13 +5,16 @@
 export const getQueryDraftsSort = (sort: string): string => {
   if (!sort) return sort
 
-  let direction = ''
-  let orderBy = sort
-
-  if (sort[0] === '-') {
-    direction = '-'
-    orderBy = sort.substring(1)
-  }
-
-  return `${direction}version.${orderBy}`
+  return sort
+    .split(' ')
+    .map((sortString) => {
+      let direction = ''
+      let orderBy = sortString
+      if (sortString[0] === '-') {
+        direction = '-'
+        orderBy = sortString.substring(1)
+      }
+      return `${direction}version.${orderBy}`
+    })
+    .join(' ')
 }
