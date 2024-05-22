@@ -192,7 +192,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post2, categories: [newsCategory.id] })
-        .replace(/"\{\{IMAGE\}\}"/g, image2ID)
+        .replace(/"\{\{IMAGE_1\}\}"/g, image2ID)
+        .replace(/"\{\{IMAGE_2\}\}"/g, image3ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
   })
@@ -201,23 +202,11 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post3, categories: [financeCategory.id] })
-        .replace(/"\{\{IMAGE\}\}"/g, image3ID)
+        .replace(/"\{\{IMAGE_1\}\}"/g, image3ID)
+        .replace(/"\{\{IMAGE_2\}\}"/g, image1ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
   })
-
-  /* for (let i = 1; i < 50; i++) {
-    await payload.create({
-      collection: 'posts',
-      data: JSON.parse(
-        JSON.stringify({ ...post3, categories: [financeCategory.id], title: `Generated post ${i}` })
-          .replace(/"\{\{IMAGE\}\}"/g, image1ID)
-          .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
-      ),
-    })
-  } */
-
-  const posts = [post1Doc, post2Doc, post3Doc]
 
   // update each post with related posts
 

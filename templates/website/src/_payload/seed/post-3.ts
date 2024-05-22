@@ -106,6 +106,18 @@ export const post3: Partial<Post> = {
           version: 1,
         },
         {
+          type: 'block',
+          fields: {
+            id: '664e17c98fe68d721423c1d0',
+            blockName: '',
+            blockType: 'mediaBlock',
+            media: '{{IMAGE_2}}',
+            position: 'default',
+          },
+          format: '',
+          version: 2,
+        },
+        {
           type: 'heading',
           children: [
             {
@@ -221,7 +233,7 @@ export const post3: Partial<Post> = {
   },
   meta: {
     description: 'This is the third post.',
-    image: '{{IMAGE}}',
+    image: '{{IMAGE_1}}',
     title: 'Post 3',
   },
   relatedPosts: [], // this is populated by the seed script
