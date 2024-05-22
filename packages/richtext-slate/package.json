@@ -42,6 +42,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@types/is-hotkey": "^0.1.10",
     "@types/node": "20.12.5",
     "@types/react": "18.3.2",
     "payload": "workspace:*"
