@@ -14,17 +14,7 @@ export const ArchiveBlock: React.FC<
     id?: string
   }
 > = async (props) => {
-  const {
-    id,
-    categories,
-    introContent,
-    limit = 3,
-    populateBy,
-    populatedDocs,
-    populatedDocsTotal,
-    relationTo,
-    selectedDocs,
-  } = props
+  const { id, categories, introContent, limit = 3, populateBy, selectedDocs } = props
 
   let posts: Post[] = []
 

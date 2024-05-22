@@ -42,18 +42,18 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // clear the database
   await Promise.all([
-    ...collections.map(async (collection) =>
+    ...collections.map((collection) =>
       payload.delete({
         collection: collection as 'media',
         where: {},
       }),
-    ), // eslint-disable-line function-paren-newline
-    ...globals.map(async (global) =>
+    ),
+    ...globals.map((global) =>
       payload.updateGlobal({
         slug: global as 'header',
         data: {},
       }),
-    ), // eslint-disable-line function-paren-newline
+    ),
   ])
 
   payload.logger.info(`— Seeding demo author and user...`)
@@ -71,7 +71,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   )
 
-  const [demoAuthor, demoUser] = await Promise.all([
+  const [demoAuthor] = await Promise.all([
     await payload.create({
       collection: 'users',
       data: {
@@ -93,7 +93,6 @@ export const seed = async (payload: Payload): Promise<void> => {
   ])
 
   let demoAuthorID = demoAuthor.id
-  const demoUserID = demoUser.id
 
   payload.logger.info(`— Seeding media...`)
 
