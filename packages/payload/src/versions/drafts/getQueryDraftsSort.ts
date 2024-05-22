@@ -6,7 +6,7 @@ export const getQueryDraftsSort = (sort: string): string => {
   if (!sort) return sort
 
   return sort
-    .split(' ')
+    .split(',')
     .map((sortString) => {
       let direction = ''
       let orderBy = sortString
@@ -16,5 +16,5 @@ export const getQueryDraftsSort = (sort: string): string => {
       }
       return `${direction}version.${orderBy}`
     })
-    .join(' ')
+    .join(',')
 }
