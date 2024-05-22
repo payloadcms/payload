@@ -8,12 +8,12 @@ import type { ExampleAdapter } from '.'
 export const createVersion: CreateVersion = async function createVersion(
   this: ExampleAdapter,
   {
-    autosave, // If autosave is enabled or not
-    collectionSlug,
-    createdAt, // Created-At date
+    autosave, // Indicates if autosave is enabled
+    collectionSlug, // The collection slug of the document
+    createdAt, // Created-At date of the document
     parent, // ID of the parent document for which the version should be created for
-    req = {} as PayloadRequest,
-    updatedAt, // Updated-At date
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    updatedAt, // Updated-At date of the document
     versionData, // Full version data passed to create the version
   },
   /**

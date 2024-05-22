@@ -7,14 +7,14 @@ import type { ExampleAdapter } from '.'
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: ExampleAdapter,
   {
-    collection, // The specified collection to find from
-    limit, // Value of the amount of docs to find
+    collection, // The name of the collection to reference for querying drafts
+    limit, // Max value of the amount of docs to find
     locale, // The locale being used - you can only create docs in one locale at a time
     page, // Current page to query from
     pagination, // Boolean value determining if pagination is enabled
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
     sort: sortArg, // Top-level field to sort by
-    where, // The specific query for querying the global version documents in question to find
+    where, // The specific query used to find the documents for querying drafts
   },
 ) {
   /**

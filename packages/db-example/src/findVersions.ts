@@ -7,7 +7,7 @@ import type { ExampleAdapter } from '.'
 export const findVersions: FindVersions = async function findVersions(
   this: ExampleAdapter,
   {
-    collection, // The specified collection to find from
+    collection, // The name of the collection to reference for finding versions
     limit, // Value of the amount of docs to find
     locale, // The locale being used - you can only create docs in one locale at a time
     page, // Current page to query from
@@ -15,7 +15,7 @@ export const findVersions: FindVersions = async function findVersions(
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
     skip, // Express middleware function that can return true (or promise resulting in true) that will bypass limit.
     sort: sortArg, // Top-level field to sort by
-    where, // The specific query for querying the version documents in question to find
+    where, // The specific query used to find the documents for versions
   },
 ) {
   /**

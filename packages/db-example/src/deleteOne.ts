@@ -8,9 +8,9 @@ import type { ExampleAdapter } from '.'
 export const deleteOne: DeleteOne = async function deleteOne(
   this: ExampleAdapter,
   {
-    collection, // The specified collection you are deleting from
+    collection, // The name of the collection to reference for deleting a document
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    where, // The specific query for querying the document in question to delete
+    where, // The specific query used to find the documents for deleting
   },
 ) {
   /**

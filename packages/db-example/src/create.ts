@@ -9,7 +9,7 @@ import handleError from './utilities/handleError'
 export const create: Create = async function create(
   this: ExampleAdapter,
   {
-    collection, // The specified collection to create
+    collection, // The name of the collection to reference for creating documents
     data, // The full data passed to create.
     draft, // Determine whether or not to create as a draft or not
     locale, // The locale being used - you can only create docs in one locale at a time

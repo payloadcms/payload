@@ -8,12 +8,12 @@ import type { ExampleAdapter } from '.'
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: ExampleAdapter,
   {
-    autosave, // If autosave is enabled or not
-    createdAt, // Created-At date
-    globalSlug,
+    autosave, // Indicates if autosave is enabled
+    createdAt, // Created-At date of the document
+    globalSlug, // The global slug of the document
     parent, // ID of the parent document for which the version should be created for
-    req = {} as PayloadRequest,
-    updatedAt, // Updated-At date
+    req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
+    updatedAt, // Updated-At date of the document
     versionData, // Full version data passed to create the global version
   },
 ) {

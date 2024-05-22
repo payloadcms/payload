@@ -8,11 +8,11 @@ export const updateOne: UpdateOne = async function updateOne(
   this: ExampleAdapter,
   {
     id, // ID of the collection document
-    collection, // The specified collection to update from
+    collection, // The name of the collection to reference for updating one
     data, // The full data passed to update
     locale, // The locale being used - you can only create docs in one locale at a time
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    where: whereArg, // The specific query for querying the documents in question to update
+    where: whereArg, // The specific query used to find the documents for updating
   },
 ) {
   /**

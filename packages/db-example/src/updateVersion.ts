@@ -8,11 +8,11 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   this: ExampleAdapter,
   {
     id, // ID of the collection document
-    collection, // The specified collection to update from
+    collection, // The name of the collection to reference for updating a documents version
     locale, // The locale being used - you can only create docs in one locale at a time
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
     versionData, // Full version data passed to create the version
-    where, // The specific query for querying the documents in question to update
+    where, // The specific query used to find the documents for updating its versions
   },
 ) {
   /**

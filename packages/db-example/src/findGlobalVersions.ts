@@ -7,15 +7,15 @@ import type { ExampleAdapter } from '.'
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: ExampleAdapter,
   {
-    global, // The specified global to find from
-    limit, // Value of the amount of docs to find
+    global, // The name of the global to reference for finding global versions
+    limit, // Max value of docs to query
     locale, // The locale being used - you can only create docs in one locale at a time
     page, // Current page to query from
     pagination, // Boolean value determining if pagination is enabled
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
     skip, // Express middleware function that can return true (or promise resulting in true) that will bypass limit.
     sort: sortArg, // Top-level field to sort by
-    where, // The specific query for querying the global version documents in question to find
+    where, // The specific query used to find the documents for global versions
   },
 ) {
   /**

@@ -7,10 +7,10 @@ import type { ExampleAdapter } from '.'
 export const deleteVersions: DeleteVersions = async function deleteVersions(
   this: ExampleAdapter,
   {
-    collection, // The specified collection to delete versions from
+    collection, // The name of the collection to reference for deleting versions
     locale, // The locale being used - you can only create docs in one locale at a time
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    where, // The specific query for querying the documents in question to delete
+    where, // The specific query used to find the documents for deleting versions
   },
 ) {
   /**

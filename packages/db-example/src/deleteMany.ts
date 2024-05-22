@@ -7,9 +7,9 @@ import type { ExampleAdapter } from '.'
 export const deleteMany: DeleteMany = async function deleteMany(
   this: ExampleAdapter,
   {
-    collection, // The specified slug of your collection
+    collection, // The name of the collection to reference for deleting documents
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    where, // The specific query for querying the documents in question to delete
+    where, // The specific query used to find the documents for deleting
   },
 ) {
   /**

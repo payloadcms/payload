@@ -8,7 +8,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   this: ExampleAdapter,
   {
     id, // ID of the global version
-    global, // The specified global to update from
+    global, // The name of the global to reference for updating a Global's version
     locale, // The locale being used - you can only create docs in one locale at a time
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
     versionData, // Full version data passed to update the global version

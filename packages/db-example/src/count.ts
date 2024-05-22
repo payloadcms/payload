@@ -19,10 +19,10 @@ import type { ExampleAdapter } from '.'
 export const count: Count = async function count(
   this: ExampleAdapter,
   {
-    collection, // The specified collection to reference for count
+    collection, // The name of the collection to reference for counting documents
     locale, // The locale being used - you can only create docs in one locale at a time
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
-    where, // The specific query for querying the document in question to count
+    where, // The specific query used to find the documents for counting
   },
 ): Promise<{ totalDocs: number }> {
   // Implement the count function here for the specified collection with where query

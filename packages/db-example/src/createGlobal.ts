@@ -9,7 +9,7 @@ import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: ExampleAdapter,
   {
-    slug, // The specified slug of your global
+    slug, // The specified slug of the global
     data, // The full data passed to create
     req = {} as PayloadRequest, // The Express request object containing the currently authenticated user
   },
