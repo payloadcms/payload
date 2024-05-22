@@ -23,7 +23,7 @@ export default async function Page({ params: { pageNumber = 2 } }) {
   return (
     <div className="pb-24">
       <div className="container mb-8">
-        <div className="prose max-w-none">
+        <div className="prose dark:prose-invert max-w-none">
           <h1>Posts</h1>
         </div>
       </div>
