@@ -24,7 +24,7 @@ import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/ty
 import type { FormFieldBase } from '../shared/index.js'
 
 import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { useFormInitializing } from '../../forms/Form/context.js'
+import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
@@ -55,6 +55,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   } = useFieldProps()
 
   const formInitializing = useFormInitializing()
+  const formProcessing = useFormProcessing()
 
   const path = pathFromContext || pathFromProps
 
@@ -121,7 +122,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
 
   if (typeof collapsedOnMount !== 'boolean') return null
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <Fragment>

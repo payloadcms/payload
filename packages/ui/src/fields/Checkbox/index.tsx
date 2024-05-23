@@ -63,13 +63,13 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { formInitializing, path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     disableFormData,
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const onToggle = useCallback(() => {
     if (!disabled) {

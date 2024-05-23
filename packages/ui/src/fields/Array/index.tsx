@@ -116,6 +116,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const {
     errorPaths,
     formInitializing,
+    formProcessing,
     path,
     rows = [],
     schemaPath,
@@ -128,7 +129,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number) => {

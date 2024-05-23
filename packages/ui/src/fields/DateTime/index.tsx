@@ -67,12 +67,12 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { formInitializing, path, setValue, showError, value } = useField<Date>({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <div

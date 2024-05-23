@@ -71,6 +71,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
 
   const {
     formInitializing,
+    formProcessing,
     path,
     setValue,
     showError,
@@ -80,7 +81,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const value = valueFromContext || valueFromProps
 

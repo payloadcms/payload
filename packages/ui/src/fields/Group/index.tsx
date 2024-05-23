@@ -11,7 +11,11 @@ import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { useFormInitializing, useFormSubmitted } from '../../forms/Form/context.js'
+import {
+  useFormInitializing,
+  useFormProcessing,
+  useFormSubmitted,
+} from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -55,10 +59,11 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
   const isWithinTab = useTabs()
   const { errorPaths } = useField({ path })
   const formInitializing = useFormInitializing()
+  const formProcessing = useFormProcessing()
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 

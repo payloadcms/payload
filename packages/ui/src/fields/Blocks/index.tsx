@@ -118,6 +118,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const {
     errorPaths,
     formInitializing,
+    formProcessing,
     path,
     permissions,
     rows = [],
@@ -131,7 +132,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {

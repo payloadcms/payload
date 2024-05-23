@@ -67,12 +67,12 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { formInitializing, path, setValue, showError, value } = useField<string>({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <TextareaInput

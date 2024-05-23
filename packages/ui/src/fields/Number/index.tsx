@@ -74,12 +74,14 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { formInitializing, path, setValue, showError, value } = useField<number | number[]>({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
+    number | number[]
+  >({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleChange = useCallback(
     (e) => {

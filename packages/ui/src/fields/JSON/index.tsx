@@ -65,12 +65,13 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { formInitializing, initialValue, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
-  })
+  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+    useField<string>({
+      path: pathFromContext || pathFromProps || name,
+      validate: memoizedValidate,
+    })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleMount = useCallback(
     (editor, monaco) => {
