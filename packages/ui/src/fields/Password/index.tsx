@@ -52,16 +52,22 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { formInitializing, path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = disabledFromProps || formInitializing
+  const disabled = disabledFromProps || formInitializing || formProcessing
 
   return (
     <div
-      className={[fieldBaseClass, 'password', className, showError && 'error']
+      className={[
+        fieldBaseClass,
+        'password',
+        className,
+        showError && 'error',
+        disabled && 'read-only',
+      ]
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -77,7 +83,6 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
         <input
           autoComplete={autoComplete}
           disabled={disabled}
