@@ -13,19 +13,19 @@ import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
-import { revalidateRedirect } from 'src/_payload/hooks/revalidateRedirect'
+import { revalidateRedirect } from 'src/payload/hooks/revalidateRedirect'
 import { fileURLToPath } from 'url'
 
-import Categories from './_payload/collections/Categories'
-import { Media } from './_payload/collections/Media'
-import { Pages } from './_payload/collections/Pages'
-import { Posts } from './_payload/collections/Posts'
-import Users from './_payload/collections/Users'
-import BeforeDashboard from './_payload/components/BeforeDashboard'
-import BeforeLogin from './_payload/components/BeforeLogin'
-import { seed } from './_payload/endpoints/seed'
-import { Footer } from './_payload/globals/Footer/Footer'
-import { Header } from './_payload/globals/Header/Header'
+import Categories from './payload/collections/Categories'
+import { Media } from './payload/collections/Media'
+import { Pages } from './payload/collections/Pages'
+import { Posts } from './payload/collections/Posts'
+import Users from './payload/collections/Users'
+import BeforeDashboard from './payload/components/BeforeDashboard'
+import BeforeLogin from './payload/components/BeforeLogin'
+import { seed } from './payload/endpoints/seed'
+import { Footer } from './payload/globals/Footer/Footer'
+import { Header } from './payload/globals/Header/Header'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -62,7 +62,7 @@ export default buildConfig({
         }),
       ]
     },
-  }), // editor-config
+  }),
   // database-adapter-config-start
   db: mongooseAdapter({
     url: process.env.DATABASE_URI,
