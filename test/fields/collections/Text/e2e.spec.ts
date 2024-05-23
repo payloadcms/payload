@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -204,5 +205,140 @@ describe('Text', () => {
     await saveDocAndAssert(page)
     await expect(field.locator('.rs__value-container')).toContainText(input)
     await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
+  })
+
+  test('should reset filter conditions when adding additional filters', async () => {
+    await page.goto(url.list)
+
+    // open the first filter options
+    await page.locator('.list-controls__toggle-where').click()
+    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await page.locator('.where-builder__add-first-filter').click()
+
+    const firstInitialField = page.locator('.condition__field')
+    const firstOperatorField = page.locator('.condition__operator')
+    const firstValueField = page.locator('.condition__value >> input')
+
+    await firstInitialField.click()
+    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
+    await firstInitialFieldOptions.locator('text=text').first().click()
+    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
+
+    await firstOperatorField.click()
+    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+
+    await firstValueField.fill('hello')
+
+    await wait(500)
+
+    await expect(firstValueField).toHaveValue('hello')
+
+    // open the second filter options
+    await page.locator('.condition__actions-add').click()
+
+    const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+
+    await expect(secondLi).toBeVisible()
+
+    const secondInitialField = secondLi.locator('.condition__field')
+    const secondOperatorField = secondLi.locator('.condition__operator >> input')
+    const secondValueField = secondLi.locator('.condition__value >> input')
+
+    await expect(secondInitialField.locator('.rs__single-value')).toContainText('Text')
+    await expect(secondOperatorField).toHaveValue('')
+    await expect(secondValueField).toHaveValue('')
+  })
+
+  test('should not re-render page upon typing in a value in the filter value field', async () => {
+    await page.goto(url.list)
+
+    // open the first filter options
+    await page.locator('.list-controls__toggle-where').click()
+    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await page.locator('.where-builder__add-first-filter').click()
+
+    const firstInitialField = page.locator('.condition__field')
+    const firstOperatorField = page.locator('.condition__operator')
+    const firstValueField = page.locator('.condition__value >> input')
+
+    await firstInitialField.click()
+    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
+    await firstInitialFieldOptions.locator('text=text').first().click()
+    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
+
+    await firstOperatorField.click()
+    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+
+    // Type into the input field instead of filling it
+    await firstValueField.click()
+    await firstValueField.type('hello', { delay: 100 }) // Add a delay to simulate typing speed
+
+    // Wait for a short period to see if the input loses focus
+    await page.waitForTimeout(500)
+
+    // Check if the input still has the correct value
+    await expect(firstValueField).toHaveValue('hello')
+  })
+
+  test('should still show second filter if two filters exist and first filter is removed', async () => {
+    await page.goto(url.list)
+
+    // open the first filter options
+    await page.locator('.list-controls__toggle-where').click()
+    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await page.locator('.where-builder__add-first-filter').click()
+
+    const firstInitialField = page.locator('.condition__field')
+    const firstOperatorField = page.locator('.condition__operator')
+    const firstValueField = page.locator('.condition__value >> input')
+
+    await firstInitialField.click()
+    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
+    await firstInitialFieldOptions.locator('text=text').first().click()
+    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
+
+    await firstOperatorField.click()
+    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+
+    await firstValueField.fill('hello')
+
+    await wait(500)
+
+    await expect(firstValueField).toHaveValue('hello')
+
+    // open the second filter options
+    await page.locator('.condition__actions-add').click()
+
+    const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+
+    await expect(secondLi).toBeVisible()
+
+    const secondInitialField = secondLi.locator('.condition__field')
+    const secondOperatorField = secondLi.locator('.condition__operator')
+    const secondValueField = secondLi.locator('.condition__value >> input')
+
+    await secondInitialField.click()
+    const secondInitialFieldOptions = secondInitialField.locator('.rs__option')
+    await secondInitialFieldOptions.locator('text=text').first().click()
+    await expect(secondInitialField.locator('.rs__single-value')).toContainText('Text')
+
+    await secondOperatorField.click()
+    await secondOperatorField.locator('.rs__option').locator('text=equals').click()
+
+    await secondValueField.fill('world')
+    await expect(secondValueField).toHaveValue('world')
+
+    await wait(500)
+
+    const firstLi = page.locator('.where-builder__and-filters li:nth-child(1)')
+    const removeButton = firstLi.locator('.condition__actions-remove')
+
+    // remove first filter
+    await removeButton.click()
+
+    const filterListItems = page.locator('.where-builder__and-filters li')
+    await expect(filterListItems).toHaveCount(1)
+
+    await expect(firstValueField).toHaveValue('world')
   })
 })
