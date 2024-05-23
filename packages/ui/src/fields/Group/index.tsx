@@ -11,7 +11,7 @@ import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { useFormSubmitted } from '../../forms/Form/context.js'
+import { useFormInitializing, useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -54,10 +54,11 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
   const { errorPaths } = useField({ path })
+  const formInitializing = useFormInitializing()
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const readOnly = readOnlyFromProps || readOnlyFromContext
+  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
@@ -108,7 +109,7 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
               margins="small"
               path={path}
               permissions={permissions?.fields}
-              readOnly={readOnly}
+              readOnly={disabled}
               schemaPath={schemaPath}
             />
           </div>
