@@ -66,7 +66,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { initialValue, path, setValue, showError, value } = useField<string>({
+  const { formProcessing, initialValue, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -107,12 +107,16 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   useEffect(() => {
-    if (hasLoadedValue) return
+    if (hasLoadedValue || value === undefined) return
+
     setStringValue(
       value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
     )
+
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
+
+  const disabled = readOnly || formProcessing
 
   return (
     <div
@@ -121,7 +125,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -145,7 +149,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={disabled}
           value={stringValue}
         />
         {AfterInput}
