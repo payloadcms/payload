@@ -11,6 +11,9 @@
     "test:int": "pnpm -C \"../\" run test:int",
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
+  "dependencies": {
+    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517"
+  },
   "devDependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
