@@ -15,9 +15,9 @@
         "pragmaFrag": "React.Fragment",
         "throwIfNamespace": true,
         "development": false,
-        "useBuiltins": true,
-      },
-    },
+        "useBuiltins": true
+      }
+    }
   },
   "module": {
     "type": "es6"
