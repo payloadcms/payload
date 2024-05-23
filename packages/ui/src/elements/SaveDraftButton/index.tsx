@@ -57,7 +57,9 @@ const DefaultSaveDraftButton: React.FC = () => {
   }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (forceDisable) return
+    if (forceDisable) {
+      // absorb the event
+    }
 
     e.preventDefault()
     e.stopPropagation()
@@ -86,8 +88,7 @@ type Props = {
   CustomComponent?: React.ReactNode
 }
 
-export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
+export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
   if (CustomComponent) return CustomComponent
-
   return <DefaultSaveDraftButton />
 }

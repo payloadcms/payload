@@ -4,7 +4,6 @@ import type { TypeWithID } from 'payload/types'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
-import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -30,17 +29,20 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
-  createNotUpdateSlug,
+  createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
   noAdminAccessEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
+  readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   restrictedVersionsSlug,
   slug,
   unrestrictedSlug,
+  userRestrictedCollectionSlug,
+  userRestrictedGlobalSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -63,6 +65,8 @@ describe('access control', () => {
   let readOnlyCollectionUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
+  let userRestrictedCollectionURL: AdminUrlUtil
+  let userRestrictedGlobalURL: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
   let logoutURL: string
@@ -77,6 +81,8 @@ describe('access control', () => {
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
+    userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
+    userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -134,7 +140,7 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - fully restricted', () => {
+  describe('collection — fully restricted', () => {
     let existingDoc: ReadOnlyCollection
 
     beforeAll(async () => {
@@ -178,7 +184,7 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - read-only', () => {
+  describe('collection — read-only', () => {
     let existingDoc: ReadOnlyCollection
 
     beforeAll(async () => {
@@ -215,7 +221,7 @@ describe('access control', () => {
       await expect(page.locator(`#card-${readOnlySlug}`)).not.toHaveClass('card__actions')
     })
 
-    test('edit view should not have actions buttons', async () => {
+    test('should not display actions on edit view', async () => {
       await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('.collection-edit__collection-actions li')).toHaveCount(0)
     })
@@ -234,9 +240,9 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - create but not edit', () => {
+  describe('collection — create but not edit', () => {
     test('should not show edit button', async () => {
-      const createNotUpdateURL = new AdminUrlUtil(serverURL, createNotUpdateSlug)
+      const createNotUpdateURL = new AdminUrlUtil(serverURL, createNotUpdateCollectionSlug)
       await page.goto(createNotUpdateURL.create)
       await page.waitForURL(createNotUpdateURL.create)
       await expect(page.locator('#field-name')).toBeVisible()
@@ -265,7 +271,7 @@ describe('access control', () => {
 
       await expect(addDocButton).toBeVisible()
       await addDocButton.click()
-      const documentDrawer = page.locator('[id^=doc-drawer_create-not-update_1_]')
+      const documentDrawer = page.locator(`[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_]`)
       await expect(documentDrawer).toBeVisible()
       await expect(documentDrawer.locator('#action-save')).toBeVisible()
       await documentDrawer.locator('#field-name').fill('name')
@@ -277,41 +283,116 @@ describe('access control', () => {
     })
   })
 
-  describe('collection - dynamic update access', () => {
-    test('maintain access control in document drawer', async () => {
-      const unrestrictedDoc = await payload.create({
-        collection: unrestrictedSlug,
-        data: {
-          name: 'unrestricted-123',
-        },
-      })
-
-      await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
-
-      const addDocButton = page.locator(
-        '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
-      )
-
-      await addDocButton.click()
-      const documentDrawer = page.locator('[id^=doc-drawer_user-restricted_1_]')
-      await expect(documentDrawer).toBeVisible()
-      await documentDrawer.locator('#field-name').fill('anonymous@email.com')
-      await documentDrawer.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
-      await expect(documentDrawer.locator('#field-name')).toBeDisabled()
-      await documentDrawer.locator('button.doc-drawer__header-close').click()
-      await expect(documentDrawer).toBeHidden()
-      await addDocButton.click()
-      const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted_1_]')
-      await expect(documentDrawer2).toBeVisible()
-      await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
-      await documentDrawer2.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
-      await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
+  describe('global — read but not update', () => {
+    test('should not show edit button', async () => {
+      const createNotUpdateURL = new AdminUrlUtil(serverURL, readNotUpdateGlobalSlug)
+      await page.goto(createNotUpdateURL.global(readNotUpdateGlobalSlug))
+      await page.waitForURL(createNotUpdateURL.global(readNotUpdateGlobalSlug))
+      await expect(page.locator('#field-name')).toBeVisible()
+      await expect(page.locator('#field-name')).toBeDisabled()
+      await expect(page.locator('#action-save')).toBeHidden()
     })
   })
 
-  describe('collection - restricted versions', () => {
+  describe('dynamic update access', () => {
+    describe('collection', () => {
+      test('should restrict update access based on document field', async () => {
+        await page.goto(userRestrictedCollectionURL.create)
+        await expect(page.locator('#field-name')).toBeVisible()
+        await page.locator('#field-name').fill('anonymous@email.com')
+        await page.locator('#action-save').click()
+        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('#field-name')).toBeDisabled()
+        await expect(page.locator('#action-save')).toBeHidden()
+
+        await page.goto(userRestrictedCollectionURL.create)
+        await expect(page.locator('#field-name')).toBeVisible()
+        await page.locator('#field-name').fill(devUser.email)
+        await page.locator('#action-save').click()
+        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('#field-name')).toBeEnabled()
+        await expect(page.locator('#action-save')).toBeVisible()
+      })
+
+      test('maintain access control in document drawer', async () => {
+        const unrestrictedDoc = await payload.create({
+          collection: unrestrictedSlug,
+          data: {
+            name: 'unrestricted-123',
+          },
+        })
+
+        await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
+
+        const addDocButton = page.locator(
+          '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
+        )
+
+        await addDocButton.click()
+        const documentDrawer = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
+        await expect(documentDrawer).toBeVisible()
+        await documentDrawer.locator('#field-name').fill('anonymous@email.com')
+        await documentDrawer.locator('#action-save').click()
+        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(documentDrawer.locator('#field-name')).toBeDisabled()
+        await documentDrawer.locator('button.doc-drawer__header-close').click()
+        await expect(documentDrawer).toBeHidden()
+        await addDocButton.click()
+        const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
+        await expect(documentDrawer2).toBeVisible()
+        await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
+        await documentDrawer2.locator('#action-save').click()
+        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
+      })
+    })
+
+    describe('global', () => {
+      test('should restrict update access based on document field', async () => {
+        await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
+        await page.waitForURL(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
+        await expect(page.locator('#field-name')).toBeVisible()
+        await expect(page.locator('#field-name')).toHaveValue(devUser.email)
+        await expect(page.locator('#field-name')).toBeEnabled()
+        await page.locator('#field-name').fill('anonymous@email.com')
+        await page.locator('#action-save').click()
+        await expect(page.locator('.Toastify')).toContainText(
+          'You are not allowed to perform this action',
+        )
+
+        await payload.updateGlobal({
+          slug: userRestrictedGlobalSlug,
+          data: {
+            name: 'anonymous@payloadcms.com',
+          },
+        })
+
+        await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
+        await page.waitForURL(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
+        await expect(page.locator('#field-name')).toBeDisabled()
+        await expect(page.locator('#action-save')).toBeHidden()
+      })
+
+      test('should restrict access based on user settings', async () => {
+        const url = `${serverURL}/admin/globals/settings`
+        await page.goto(url)
+        await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
+        await openNav(page)
+        await expect(page.locator('#nav-global-settings')).toBeVisible()
+        await expect(page.locator('#nav-global-test')).toBeHidden()
+        await closeNav(page)
+        await page.locator('.checkbox-input:has(#field-test) input').check()
+        await saveDocAndAssert(page)
+        await openNav(page)
+        const globalTest = page.locator('#nav-global-test')
+        await expect(async () => await globalTest.isVisible()).toPass({
+          timeout: POLL_TOPASS_TIMEOUT,
+        })
+      })
+    })
+  })
+
+  describe('collection — restricted versions', () => {
     let existingDoc: RestrictedVersion
 
     beforeAll(async () => {
@@ -346,7 +427,7 @@ describe('access control', () => {
       })
     })
 
-    test('disable field based on document data', async () => {
+    test('should disable field based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the text input is disabled because the field is "locked"
@@ -354,7 +435,7 @@ describe('access control', () => {
       await expect(isDisabled).toBeDisabled()
     })
 
-    test('disable operation based on document data', async () => {
+    test('should disable operation based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the delete action is not displayed
@@ -368,37 +449,6 @@ describe('access control', () => {
       await openDocControls(page)
       const deleteAction2 = page.locator('#action-delete')
       await expect(deleteAction2).toBeVisible()
-    })
-  })
-
-  // TODO: Test flakes. In CI, test global does not appear in nav. Perhaps the checkbox setValue is not triggered BEFORE the document is saved, as the custom save button can be clicked even if the form has not been set to modified.
-  test('should show test global immediately after allowing access', async () => {
-    const url = `${serverURL}/admin/globals/settings`
-    await page.goto(url)
-
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
-
-    await openNav(page)
-
-    // Ensure that we have loaded accesses by checking that settings collection
-    // at least is visible in the menu.
-    await expect(page.locator('#nav-global-settings')).toBeVisible()
-
-    // Test collection should be hidden at first.
-    await expect(page.locator('#nav-global-test')).toBeHidden()
-
-    await closeNav(page)
-
-    // Allow access to test global.
-    await page.locator('.checkbox-input:has(#field-test) input').check()
-    await saveDocAndAssert(page)
-
-    await openNav(page)
-
-    const globalTest = page.locator('#nav-global-test')
-
-    await expect(async () => await globalTest.isVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 

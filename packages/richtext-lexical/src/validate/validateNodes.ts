@@ -30,7 +30,7 @@ export async function validateNodes({
           validation: validationFromProps,
         })
         if (validationResult !== true) {
-          return validationResult
+          return `${node.type} node failed to validate: ${validationResult}`
         }
       }
     }

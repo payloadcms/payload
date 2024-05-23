@@ -5,11 +5,12 @@
   align-items: center;
   cursor: pointer;
   margin: base(0.1) 0;
+  position: relative;
 
   input[type='radio'] {
     opacity: 0;
-    width: 0;
     margin: 0;
+    position: absolute;
   }
 
   input[type='radio']:focus + .radio-input__styled-radio {

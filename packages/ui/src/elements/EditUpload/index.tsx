@@ -32,13 +32,12 @@ type FocalPosition = {
 }
 
 export type EditUploadProps = {
-  doc?: Data
   fileName: string
   fileSrc: string
   imageCacheTag?: string
   initialCrop?: CropType
   initialFocalPoint?: FocalPosition
-  onSave?: ({ crop, pointPosition }: { crop: CropType; pointPosition: FocalPosition }) => void
+  onSave?: ({ crop, focalPosition }: { crop: CropType; focalPosition: FocalPosition }) => void
   showCrop?: boolean
   showFocalPoint?: boolean
 }
@@ -49,11 +48,6 @@ const defaultCrop: CropType = {
   width: 100,
   x: 0,
   y: 0,
-}
-
-const defaultPointPosition: FocalPosition = {
-  x: 50,
-  y: 50,
 }
 
 export const EditUpload: React.FC<EditUploadProps> = ({
@@ -76,8 +70,15 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     ...initialCrop,
   }))
 
-  const [pointPosition, setPointPosition] = useState<FocalPosition>(() => ({
-    ...defaultPointPosition,
+  const defaultFocalPosition: FocalPosition = {
+    x: 50,
+    y: 50,
+  }
+
+  console.log({ initialFocalPoint })
+
+  const [focalPosition, setFocalPosition] = useState<FocalPosition>(() => ({
+    ...defaultFocalPosition,
     ...initialFocalPoint,
   }))
   const [checkBounds, setCheckBounds] = useState<boolean>(false)
@@ -103,10 +104,16 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     })
   }
 
-  const fineTuneFocalPoint = ({ coordinate, value }: { coordinate: 'x' | 'y'; value: string }) => {
+  const fineTuneFocalPosition = ({
+    coordinate,
+    value,
+  }: {
+    coordinate: 'x' | 'y'
+    value: string
+  }) => {
     const intValue = parseInt(value)
     if (intValue >= 0 && intValue <= 100) {
-      setPointPosition((prevPosition) => ({ ...prevPosition, [coordinate]: intValue }))
+      setFocalPosition((prevPosition) => ({ ...prevPosition, [coordinate]: intValue }))
     }
   }
 
@@ -114,13 +121,13 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     if (typeof onSave === 'function')
       onSave({
         crop,
-        pointPosition,
+        focalPosition,
       })
     closeModal(editDrawerSlug)
   }
 
   const onDragEnd = React.useCallback(({ x, y }) => {
-    setPointPosition({ x, y })
+    setFocalPosition({ x, y })
     setCheckBounds(false)
   }, [])
 
@@ -133,7 +140,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
       ((boundsRect.left - containerRect.left + boundsRect.width / 2) / containerRect.width) * 100
     const yCenter =
       ((boundsRect.top - containerRect.top + boundsRect.height / 2) / containerRect.height) * 100
-    setPointPosition({ x: xCenter, y: yCenter })
+    setFocalPosition({ x: xCenter, y: yCenter })
   }
 
   const fileSrcToUse = imageCacheTag ? `${fileSrc}?${imageCacheTag}` : fileSrc
@@ -209,7 +216,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 checkBounds={showCrop ? checkBounds : false}
                 className={`${baseClass}__focalPoint`}
                 containerRef={focalWrapRef}
-                initialPosition={pointPosition}
+                initialPosition={focalPosition}
                 onDragEnd={onDragEnd}
                 setCheckBounds={showCrop ? setCheckBounds : false}
               >
@@ -280,13 +287,13 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="X %"
-                    onChange={(value) => fineTuneFocalPoint({ coordinate: 'x', value })}
-                    value={pointPosition.x.toFixed(0)}
+                    onChange={(value) => fineTuneFocalPosition({ coordinate: 'x', value })}
+                    value={focalPosition.x.toFixed(0)}
                   />
                   <Input
                     name="Y %"
-                    onChange={(value) => fineTuneFocalPoint({ coordinate: 'y', value })}
-                    value={pointPosition.y.toFixed(0)}
+                    onChange={(value) => fineTuneFocalPosition({ coordinate: 'y', value })}
+                    value={focalPosition.y.toFixed(0)}
                   />
                 </div>
               </div>
