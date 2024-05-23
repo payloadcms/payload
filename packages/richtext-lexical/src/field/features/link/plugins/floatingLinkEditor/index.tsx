@@ -8,7 +8,6 @@ import type { ClientProps } from '../../feature.client.js'
 import { LinkEditor } from './LinkEditor/index.js'
 import './index.scss'
 
-// @ts-expect-error // TODO: Broke in React 19
 export const FloatingLinkEditorPlugin: PluginComponentWithAnchor<ClientProps> = (props) => {
   const { anchorElem = document.body } = props
 

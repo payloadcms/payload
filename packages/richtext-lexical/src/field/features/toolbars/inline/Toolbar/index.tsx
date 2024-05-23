@@ -392,7 +392,6 @@ function useInlineToolbar(
     return null
   }
 
-  // @ts-expect-error // TODO: Broke in React 19
   return createPortal(<InlineToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
 }
 

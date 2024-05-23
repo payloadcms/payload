@@ -106,7 +106,6 @@ const DateTime: React.FC<Props> = (props) => {
         <CalendarIcon />
       </div>
       <div className={`${baseClass}__input-wrapper`}>
-        {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"

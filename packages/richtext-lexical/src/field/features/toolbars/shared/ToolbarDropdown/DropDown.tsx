@@ -269,12 +269,7 @@ export function DropDown({
         <i className="toolbar-popup__dropdown-caret" />
       </button>
 
-      {showDropDown && (
-        <React.Fragment>
-          {/* @ts-expect-error */}
-          {portal}
-        </React.Fragment>
-      )}
+      {showDropDown && <React.Fragment>{portal}</React.Fragment>}
     </React.Fragment>
   )
 }

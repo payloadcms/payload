@@ -15,6 +15,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
 
   return (
     <div className={baseClass}>
+      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
       <SelectComponents.MultiValueLabel
         {...props}
         innerProps={{

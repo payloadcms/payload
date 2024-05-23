@@ -102,8 +102,8 @@
     "@types/node": "20.12.5",
     "@types/prompts": "^2.4.5",
     "@types/qs": "6.9.14",
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "@types/semver": "^7.5.3",
     "@types/shelljs": "0.8.15",
     "add-stream": "^1.0.0",
@@ -181,8 +181,8 @@
       "uuid": "3.4.0"
     },
     "overrides": {
-      "@types/react": "npm:types-react@beta",
-      "@types/react-dom": "npm:types-react-dom@beta",
+      "@types/react": "npm:types-react@19.0.0-beta.2",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
@@ -198,8 +198,8 @@
     }
   },
   "overrides": {
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta"
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   },
   "workspaces:": [
     "packages/*",
