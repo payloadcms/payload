@@ -183,7 +183,6 @@ describe('Rich Text', () => {
 
     test('should not create new url link when read only', async () => {
       await navigateToRichTextFields()
-      await page.locator('#field-richTextReadOnly').scrollIntoViewIfNeeded()
       const modalTrigger = page.locator('.rich-text--read-only .rich-text__toolbar button .link')
       await expect(modalTrigger).toBeDisabled()
     })

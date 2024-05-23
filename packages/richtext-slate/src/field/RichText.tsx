@@ -73,7 +73,7 @@ const RichTextField: React.FC<
     path: pathFromProps,
     placeholder,
     plugins,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate = richTextValidate,
@@ -102,12 +102,16 @@ const RichTextField: React.FC<
     [validate, required, i18n],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { initialValue, path, schemaPath, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
-  })
+  const { formInitializing, initialValue, path, schemaPath, setValue, showError, value } = useField(
+    {
+      path: pathFromContext || pathFromProps || name,
+      validate: memoizedValidate,
+    },
+  )
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const editor = useMemo(() => {
     let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
@@ -241,12 +245,12 @@ const RichTextField: React.FC<
       })
 
       if (ops && Array.isArray(ops) && ops.length > 0) {
-        if (!readOnly && val !== defaultRichTextValue && val !== value) {
+        if (!disabled && val !== defaultRichTextValue && val !== value) {
           setValue(val)
         }
       }
     },
-    [editor?.operations, readOnly, setValue, value],
+    [editor?.operations, disabled, setValue, value],
   )
 
   useEffect(() => {
@@ -263,16 +267,16 @@ const RichTextField: React.FC<
       })
     }
 
-    if (readOnly) {
+    if (disabled) {
       setClickableState('disabled')
     }
 
     return () => {
-      if (readOnly) {
+      if (disabled) {
         setClickableState('enabled')
       }
     }
-  }, [readOnly])
+  }, [disabled])
 
   // useEffect(() => {
   //   // If there is a change to the initial value, we need to reset Slate history
@@ -289,7 +293,7 @@ const RichTextField: React.FC<
     'field-type',
     className,
     showError && 'error',
-    readOnly && `${baseClass}--read-only`,
+    disabled && `${baseClass}--read-only`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -344,6 +348,7 @@ const RichTextField: React.FC<
                     if (Button) {
                       return (
                         <ElementButtonProvider
+                          disabled={disabled}
                           fieldProps={props}
                           key={element.name}
                           path={path}
@@ -444,7 +449,7 @@ const RichTextField: React.FC<
                   })
                 }}
                 placeholder={getTranslation(placeholder, i18n)}
-                readOnly={readOnly}
+                readOnly={disabled}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
                 spellCheck
