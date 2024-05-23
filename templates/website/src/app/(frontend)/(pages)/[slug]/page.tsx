@@ -57,7 +57,9 @@ const queryPageBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
-  const user = draft ? await payload.auth({ headers: headers() }) : undefined
+  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
+
+  const user = authResult?.user
 
   const result = await payload.find({
     collection: 'pages',
