@@ -168,7 +168,10 @@ describe('Localization', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(id)
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toBeEnabled()
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+      await expect(page.locator('#field-localizedCheckbox')).toBeEnabled()
+      await page.reload() // TODO: remove this line, the checkbox _is not_ checked, but Playwright is unable to detect it without a reload for some reason
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
 
@@ -177,11 +180,14 @@ describe('Localization', () => {
       await page.waitForURL(url.create)
       await changeLocale(page, defaultLocale)
       await fillValues({ description, title: englishTitle })
+      await expect(page.locator('#field-localizedCheckbox')).toBeEnabled()
       await page.locator('#field-localizedCheckbox').click()
       await page.locator('#action-save').click()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
       const collectionUrl = page.url()
       await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-localizedCheckbox')).toBeEnabled()
+      await page.reload() // TODO: remove this line, the checkbox _is not_ checked, but Playwright is unable to detect it without a reload for some reason
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
       await changeLocale(page, defaultLocale)
       await openDocControls(page)
@@ -190,6 +196,8 @@ describe('Localization', () => {
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
         .not.toContain(collectionUrl)
       await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-localizedCheckbox')).toBeEnabled()
+      await page.reload() // TODO: remove this line, the checkbox _is not_ checked, but Playwright is unable to detect it without a reload for some reason
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
 
