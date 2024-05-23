@@ -11,9 +11,6 @@
     "test:int": "pnpm -C \"../\" run test:int",
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
-  "dependencies": {
-    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517"
-  },
   "devDependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
@@ -45,6 +42,7 @@
     "@payloadcms/ui": "workspace:*",
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "8.6.0",
