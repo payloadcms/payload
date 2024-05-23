@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "esModuleInterop": true,
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -10,8 +11,8 @@
     "noEmit": true,
     "incremental": true,
     "jsx": "preserve",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "sourceMap": true,
     "isolatedModules": true,
@@ -21,7 +22,9 @@
       }
     ],
     "paths": {
-      "react": ["./node_modules/@types/react"]
+      "@payload-config": ["./src/payload.config.ts"],
+      "react": ["./node_modules/@types/react"],
+      "@/*": ["./src/app/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

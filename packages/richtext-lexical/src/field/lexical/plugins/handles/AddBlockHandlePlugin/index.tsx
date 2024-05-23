@@ -4,7 +4,7 @@ import type { LexicalEditor, LexicalNode, ParagraphNode } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $createParagraphNode } from 'lexical'
 import * as React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
@@ -113,33 +113,14 @@ function useAddBlockHandle(
 
   useEffect(() => {
     if (menuRef.current && hoveredElement?.node) {
-      editor.getEditorState().read(() => {
-        // Check if blockNode is an empty text node
-        let isEmptyParagraph = true
-        if (
-          hoveredElement.node.getType() !== 'paragraph' ||
-          hoveredElement.node.getTextContent() !== ''
-        ) {
-          isEmptyParagraph = false
-        }
-
-        setHandlePosition(
-          hoveredElement?.elem,
-          menuRef.current,
-          anchorElem,
-          isEmptyParagraph
-            ? blockHandleHorizontalOffset
-            : blockHandleHorizontalOffset - (editorConfig?.admin?.hideGutter ? 20 : 0),
-        )
-      })
+      setHandlePosition(
+        hoveredElement?.elem,
+        menuRef.current,
+        anchorElem,
+        blockHandleHorizontalOffset,
+      )
     }
-  }, [
-    anchorElem,
-    hoveredElement,
-    editor,
-    blockHandleHorizontalOffset,
-    editorConfig?.admin?.hideGutter,
-  ])
+  }, [anchorElem, hoveredElement, blockHandleHorizontalOffset])
 
   const handleAddClick = useCallback(
     (event) => {

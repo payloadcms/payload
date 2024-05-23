@@ -1,14 +1,30 @@
 import type { Block } from 'payload/types'
 
-import richText from '../../fields/richText'
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
 export const Archive: Block = {
   slug: 'archive',
   fields: [
-    richText({
+    {
       name: 'introContent',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+          ]
+        },
+      }),
       label: 'Intro Content',
-    }),
+    },
     {
       name: 'populateBy',
       type: 'select',
@@ -36,10 +52,6 @@ export const Archive: Block = {
         {
           label: 'Posts',
           value: 'posts',
-        },
-        {
-          label: 'Projects',
-          value: 'projects',
         },
       ],
     },
@@ -71,7 +83,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Selection',
-      relationTo: ['posts', 'projects'],
+      relationTo: ['posts'],
     },
     {
       name: 'populatedDocs',
@@ -83,7 +95,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Populated Docs',
-      relationTo: ['posts', 'projects'],
+      relationTo: ['posts'],
     },
     {
       name: 'populatedDocsTotal',

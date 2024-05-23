@@ -85,9 +85,9 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const [originalHeight, setOriginalHeight] = useState<number>(0)
   const [originalWidth, setOriginalWidth] = useState<number>(0)
 
-  const focalWrapRef = useRef<HTMLDivElement | undefined>()
-  const imageRef = useRef<HTMLImageElement | undefined>()
-  const cropRef = useRef<HTMLDivElement | undefined>()
+  const focalWrapRef = useRef<HTMLDivElement | undefined>(undefined)
+  const imageRef = useRef<HTMLImageElement | undefined>(undefined)
+  const cropRef = useRef<HTMLDivElement | undefined>(undefined)
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
@@ -317,7 +317,7 @@ const DraggableElement = ({
 }) => {
   const [position, setPosition] = useState({ x: initialPosition.x, y: initialPosition.y })
   const [isDragging, setIsDragging] = useState(false)
-  const dragRef = useRef<HTMLButtonElement | undefined>()
+  const dragRef = useRef<HTMLButtonElement | undefined>(undefined)
 
   const getCoordinates = React.useCallback(
     (mouseXArg?: number, mouseYArg?: number, recenter?: boolean) => {

@@ -76,6 +76,7 @@ const DateTime: React.FC<Props> = (props) => {
     monthsShown: Math.min(2, monthsToShow),
     onChange,
     placeholderText,
+    // @ts-expect-error // TODO Fix this - Broke with React 19 types
     popperPlacement: 'bottom-start',
     selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',

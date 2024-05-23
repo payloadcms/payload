@@ -9,6 +9,7 @@ import type GraphQL from 'graphql'
 import type { Metadata as NextMetadata } from 'next'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
+import type { JSX } from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 

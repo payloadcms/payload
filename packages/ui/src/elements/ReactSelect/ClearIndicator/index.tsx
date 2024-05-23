@@ -18,7 +18,8 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
   return (
     <div
       className={baseClass}
-      ref={ref}
+      // TODO Fix this - Broke with React 19 types
+      ref={typeof ref === 'string' ? null : ref}
       {...restInnerProps}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {

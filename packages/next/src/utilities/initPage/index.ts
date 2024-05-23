@@ -66,6 +66,7 @@ export const initPage = async ({
       fallbackLocale: null,
       locale: locale.code,
       req: {
+        host: headers.get('host'),
         i18n,
         query: qs.parse(queryString, {
           depth: 10,
