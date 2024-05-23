@@ -137,7 +137,7 @@
     "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
-    "next": "^14.3.0-canary.70",
+    "next": "^15.0.0-rc.0",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
