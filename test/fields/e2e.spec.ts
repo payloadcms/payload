@@ -146,12 +146,13 @@ describe('fields', () => {
 
     test('should create', async () => {
       const input = '{"foo": "bar"}'
-
       await page.goto(url.create)
-      const json = page.locator('.json-field .inputarea')
-      await json.fill(input)
-
-      await saveDocAndAssert(page, '.form-submit button')
+      await page.waitForURL(url.create)
+      await expect(() => expect(page.locator('.json-field .code-editor')).toBeVisible()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+      await page.locator('.json-field .inputarea').fill(input)
+      await saveDocAndAssert(page)
       await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
     })
   })

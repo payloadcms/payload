@@ -42,7 +42,6 @@ export const DocumentInfoProvider: React.FC<
     onSave: onSaveFromProps,
   } = props
 
-  const [isInitializing, setIsInitializing] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [documentTitle, setDocumentTitle] = useState('')
@@ -402,12 +401,10 @@ export const DocumentInfoProvider: React.FC<
           }
           setIsError(true)
           setIsLoading(false)
-          setIsInitializing(false)
         }
       }
 
       setIsLoading(false)
-      setIsInitializing(false)
     }
 
     void getInitialState()
@@ -493,7 +490,7 @@ export const DocumentInfoProvider: React.FC<
     hasSavePermission,
     initialData: data,
     initialState,
-    isInitializing,
+    isInitializing: !initialState,
     isLoading,
     onSave,
     publishedDoc,

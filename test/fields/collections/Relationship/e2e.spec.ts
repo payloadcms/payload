@@ -77,26 +77,20 @@ describe('relationship', () => {
 
   test('should create inline relationship within field with many relations', async () => {
     await page.goto(url.create)
-
     await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
-
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
-
     const textField = page.locator('.drawer__content #field-text')
+    await expect(textField).toBeEnabled()
     const textValue = 'hello'
-
     await textField.fill(textValue)
-
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
     await expect(page.locator('.Toastify')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
-
     await expect(
       page.locator('#field-relationship .relationship--single-value__text'),
     ).toContainText(textValue)
-
     await page.locator('#action-save').click()
     await expect(page.locator('.Toastify')).toContainText('successfully')
   })
