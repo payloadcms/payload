@@ -1,8 +1,8 @@
-/** @type {import('next').NextConfig} */
 import { withPayload } from '@payloadcms/next/withPayload'
 
 import redirects from './redirects.js'
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     domains: ['localhost', process.env.NEXT_PUBLIC_SERVER_URL]
@@ -11,7 +11,6 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
-  swcMinify: true,
 }
 
 export default withPayload(nextConfig)
