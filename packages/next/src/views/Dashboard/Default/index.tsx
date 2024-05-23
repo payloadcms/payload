@@ -10,7 +10,7 @@ import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import { EntityType, type groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
-import React, { Fragment, Suspense } from 'react'
+import React, { Fragment } from 'react'
 
 import './index.scss'
 
@@ -82,84 +82,82 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     : null
 
   return (
-    <Suspense fallback={<p>Suppppp</p>}>
-      <div className={baseClass}>
-        <SetStepNav nav={[]} />
-        <SetViewActions actions={[]} />
-        <Gutter className={`${baseClass}__wrap`}>
-          {Array.isArray(BeforeDashboards) && BeforeDashboards.map((Component) => Component)}
-          <Fragment>
-            <SetViewActions actions={[]} />
-            {!navGroups || navGroups?.length === 0 ? (
-              <p>no nav groups....</p>
-            ) : (
-              navGroups.map(({ entities, label }, groupIndex) => {
-                return (
-                  <div className={`${baseClass}__group`} key={groupIndex}>
-                    <h2 className={`${baseClass}__label`}>{label}</h2>
-                    <ul className={`${baseClass}__card-list`}>
-                      {entities.map(({ type, entity }, entityIndex) => {
-                        let title: string
-                        let buttonAriaLabel: string
-                        let createHREF: string
-                        let href: string
-                        let hasCreatePermission: boolean
+    <div className={baseClass}>
+      <SetStepNav nav={[]} />
+      <SetViewActions actions={[]} />
+      <Gutter className={`${baseClass}__wrap`}>
+        {Array.isArray(BeforeDashboards) && BeforeDashboards.map((Component) => Component)}
+        <Fragment>
+          <SetViewActions actions={[]} />
+          {!navGroups || navGroups?.length === 0 ? (
+            <p>no nav groups....</p>
+          ) : (
+            navGroups.map(({ entities, label }, groupIndex) => {
+              return (
+                <div className={`${baseClass}__group`} key={groupIndex}>
+                  <h2 className={`${baseClass}__label`}>{label}</h2>
+                  <ul className={`${baseClass}__card-list`}>
+                    {entities.map(({ type, entity }, entityIndex) => {
+                      let title: string
+                      let buttonAriaLabel: string
+                      let createHREF: string
+                      let href: string
+                      let hasCreatePermission: boolean
 
-                        if (type === EntityType.collection) {
-                          title = getTranslation(entity.labels.plural, i18n)
-                          buttonAriaLabel = t('general:showAllLabel', { label: title })
-                          href = `${adminRoute}/collections/${entity.slug}`
-                          createHREF = `${adminRoute}/collections/${entity.slug}/create`
-                          hasCreatePermission =
-                            permissions?.collections?.[entity.slug]?.create?.permission
-                        }
+                      if (type === EntityType.collection) {
+                        title = getTranslation(entity.labels.plural, i18n)
+                        buttonAriaLabel = t('general:showAllLabel', { label: title })
+                        href = `${adminRoute}/collections/${entity.slug}`
+                        createHREF = `${adminRoute}/collections/${entity.slug}/create`
+                        hasCreatePermission =
+                          permissions?.collections?.[entity.slug]?.create?.permission
+                      }
 
-                        if (type === EntityType.global) {
-                          title = getTranslation(entity.label, i18n)
-                          buttonAriaLabel = t('general:editLabel', {
-                            label: getTranslation(entity.label, i18n),
-                          })
-                          href = `${adminRoute}/globals/${entity.slug}`
-                        }
+                      if (type === EntityType.global) {
+                        title = getTranslation(entity.label, i18n)
+                        buttonAriaLabel = t('general:editLabel', {
+                          label: getTranslation(entity.label, i18n),
+                        })
+                        href = `${adminRoute}/globals/${entity.slug}`
+                      }
 
-                        return (
-                          <li key={entityIndex}>
-                            <Card
-                              Link={Link}
-                              actions={
-                                hasCreatePermission && type === EntityType.collection ? (
-                                  <Button
-                                    Link={Link}
-                                    aria-label={t('general:createNewLabel', {
-                                      label: getTranslation(entity.labels.singular, i18n),
-                                    })}
-                                    buttonStyle="icon-label"
-                                    el="link"
-                                    icon="plus"
-                                    iconStyle="with-border"
-                                    round
-                                    to={createHREF}
-                                  />
-                                ) : undefined
-                              }
-                              buttonAriaLabel={buttonAriaLabel}
-                              href={href}
-                              id={`card-${entity.slug}`}
-                              title={title}
-                              titleAs="h3"
-                            />
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                )
-              })
-            )}
-          </Fragment>
-          {Array.isArray(AfterDashboards) && AfterDashboards.map((Component) => Component)}
-        </Gutter>
-      </div>
-    </Suspense>
+                      return (
+                        <li key={entityIndex}>
+                          <Card
+                            Link={Link}
+                            actions={
+                              hasCreatePermission && type === EntityType.collection ? (
+                                <Button
+                                  Link={Link}
+                                  aria-label={t('general:createNewLabel', {
+                                    label: getTranslation(entity.labels.singular, i18n),
+                                  })}
+                                  buttonStyle="icon-label"
+                                  el="link"
+                                  icon="plus"
+                                  iconStyle="with-border"
+                                  round
+                                  to={createHREF}
+                                />
+                              ) : undefined
+                            }
+                            buttonAriaLabel={buttonAriaLabel}
+                            href={href}
+                            id={`card-${entity.slug}`}
+                            title={title}
+                            titleAs="h3"
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )
+            })
+          )}
+        </Fragment>
+        {Array.isArray(AfterDashboards) && AfterDashboards.map((Component) => Component)}
+      </Gutter>
+    </div>
   )
 }

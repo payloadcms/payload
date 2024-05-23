@@ -5,7 +5,7 @@ import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
 import LinkImport from 'next/link.js'
-import React, { Suspense } from 'react'
+import React, { Fragment } from 'react'
 
 import type { DashboardProps } from './Default/index.js'
 
@@ -79,7 +79,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
   }
 
   return (
-    <Suspense fallback={<p>ok</p>}>
+    <Fragment>
       <HydrateClientUser permissions={permissions} user={user} />
       <RenderCustomComponent
         CustomComponent={
@@ -97,6 +97,6 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user,
         }}
       />
-    </Suspense>
+    </Fragment>
   )
 }
