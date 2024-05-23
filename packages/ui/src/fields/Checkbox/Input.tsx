@@ -7,7 +7,7 @@ import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { Check } from '../../icons/Check/index.js'
 import { Line } from '../../icons/Line/index.js'
 
-type Props = {
+export type CheckboxInputProps = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
   CustomLabel?: React.ReactNode
@@ -26,7 +26,7 @@ type Props = {
 
 export const inputBaseClass = 'checkbox-input'
 
-export const CheckboxInput: React.FC<Props> = ({
+export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
   AfterInput,
