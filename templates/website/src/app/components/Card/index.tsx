@@ -1,4 +1,6 @@
+'use client'
 import { cn } from '@/utilities/cn'
+import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
@@ -10,20 +12,12 @@ export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
   doc?: Post
-  hideImagesOnMobile?: boolean
-  orientation?: 'horizontal' | 'vertical'
   relationTo?: 'posts'
   showCategories?: boolean
   title?: string
 }> = (props) => {
-  const {
-    className,
-    doc,
-    orientation = 'vertical',
-    relationTo,
-    showCategories,
-    title: titleFromProps,
-  } = props
+  const { card, link } = useClickableCard({})
+  const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
   const { slug, categories, meta, title } = doc || {}
   const { description, image: metaImage } = meta || {}
@@ -34,11 +28,17 @@ export const Card: React.FC<{
   const href = `/${relationTo}/${slug}`
 
   return (
-    <article className={cn('border border-border rounded-lg overflow-hidden bg-card', className)}>
-      <Link className="relative h-full w-full " href={href}>
-        {!metaImage && <div className="classes.placeholder">No image</div>}
+    <article
+      className={cn(
+        'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
+        className,
+      )}
+      ref={card.ref}
+    >
+      <div className="relative w-full ">
+        {!metaImage && <div className="">No image</div>}
         {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="360px" />}
-      </Link>
+      </div>
       <div className="p-4">
         {showCategories && hasCategories && (
           <div className="uppercase text-sm mb-4">
@@ -67,11 +67,13 @@ export const Card: React.FC<{
           </div>
         )}
         {titleToUse && (
-          <h3 className="font-bold">
-            <Link className="classes.titleLink" href={href}>
-              {titleToUse}
-            </Link>
-          </h3>
+          <div className="prose">
+            <h3>
+              <Link className="not-prose" href={href} ref={link.ref}>
+                {titleToUse}
+              </Link>
+            </h3>
+          </div>
         )}
         {description && (
           <div className="mt-2">

@@ -7,11 +7,11 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import RichText from 'src/app/components/RichText'
 
-import type { Post } from '../../../../../payload-types'
+import type { Post } from '../../../../payload-types'
 
-import { PayloadRedirects } from '../../../../components/PayloadRedirects'
-import { PostHero } from '../../../../heros/PostHero'
-import { generateMeta } from '../../../../utilities/generateMeta'
+import { PayloadRedirects } from '../../../components/PayloadRedirects'
+import { PostHero } from '../../../heros/PostHero'
+import { generateMeta } from '../../../utilities/generateMeta'
 import PageClient from './page.client'
 
 export async function generateStaticParams() {
@@ -63,7 +63,9 @@ const queryPostBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
-  const user = draft ? await payload.auth({ headers: headers() }) : undefined
+  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
+
+  const user = authResult?.user
 
   const result = await payload.find({
     collection: 'posts',
