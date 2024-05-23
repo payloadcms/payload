@@ -81,12 +81,13 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField({
+  const { formInitializing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   let valueToRender
 
@@ -108,7 +109,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
 
   const onChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!disabled) {
         let newValue
         if (!selectedOption) {
           newValue = null
@@ -129,7 +130,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, hasMany, setValue, onChangeFromProps],
+    [disabled, hasMany, setValue, onChangeFromProps],
   )
 
   return (
@@ -139,7 +140,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
         'select',
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -160,7 +161,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
         <ReactSelect
-          disabled={readOnly}
+          disabled={disabled}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}

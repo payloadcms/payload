@@ -61,12 +61,12 @@ const TextField: React.FC<TextFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { formProcessing, path, setValue, showError, value } = useField({
+  const { formInitializing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing
+  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,

@@ -32,7 +32,7 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     CustomLabel,
     autoComplete,
     className,
-    disabled,
+    disabled: disabledFromProps,
     errorProps,
     label,
     labelProps,
@@ -52,10 +52,12 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { formProcessing, path, setValue, showError, value } = useField({
+  const { formInitializing, path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = disabledFromProps || formInitializing
 
   return (
     <div
@@ -78,7 +80,7 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
 
         <input
           autoComplete={autoComplete}
-          disabled={formProcessing || disabled}
+          disabled={disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

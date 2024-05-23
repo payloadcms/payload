@@ -64,12 +64,13 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { formProcessing, initialValue, path, setValue, showError, value } = useField<string>({
+  const { formInitializing, initialValue, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const handleMount = useCallback(
     (editor, monaco) => {
@@ -92,7 +93,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) return
+      if (disabled) return
       setStringValue(val)
 
       try {
@@ -103,7 +104,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [disabled, setValue, setStringValue],
   )
 
   useEffect(() => {
@@ -115,8 +116,6 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
-
-  const disabled = readOnly || formProcessing
 
   return (
     <div

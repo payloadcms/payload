@@ -111,7 +111,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       errorPaths: field?.errorPaths || [],
       filterOptions,
       formInitializing: initializing,
-      formProcessing: processing || initializing,
+      formProcessing: processing,
       formSubmitted: submitted,
       initialValue,
       path,
