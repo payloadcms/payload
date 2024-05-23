@@ -420,7 +420,7 @@ describe('Rich Text', () => {
     test('should not take value from previous block', async () => {
       await navigateToRichTextFields()
       await page.locator('#field-blocks').scrollIntoViewIfNeeded()
-      await expect(page.locator('#field-blocks__0__text')).toBeEnabled()
+      await expect(page.locator('#field-blocks__0__text')).toBeVisible()
       await expect(page.locator('#field-blocks__0__text')).toHaveValue('Regular text')
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
