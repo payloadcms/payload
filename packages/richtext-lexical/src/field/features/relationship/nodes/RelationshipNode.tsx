@@ -10,6 +10,7 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
+import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import * as React from 'react'

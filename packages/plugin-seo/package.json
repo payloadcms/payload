@@ -51,15 +51,16 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
+    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
   },
   "publishConfig": {
     "exports": {
@@ -78,5 +79,9 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "homepage:": "https://payloadcms.com"
+  "homepage:": "https://payloadcms.com",
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+  }
 }

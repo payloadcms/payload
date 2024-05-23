@@ -37,7 +37,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@swc/core": "^1.4.13",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "date-fns": "3.3.1",
     "dotenv": "8.6.0",
     "prettier": "^3.0.3",
@@ -63,5 +64,9 @@
     },
     "main": "./dist/exports/index.js",
     "types": "./dist/exports/index.d.ts"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

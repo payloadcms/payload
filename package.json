@@ -102,7 +102,8 @@
     "@types/node": "20.12.5",
     "@types/prompts": "^2.4.5",
     "@types/qs": "6.9.14",
-    "@types/react": "18.3.2",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "@types/semver": "^7.5.3",
     "@types/shelljs": "0.8.15",
     "add-stream": "^1.0.0",
@@ -132,7 +133,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "14.3.0-canary.68",
+    "next": "15.0.0-rc.0",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",
@@ -144,8 +145,8 @@
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0-rc-f994737d14-20240522",
+    "react-dom": "^19.0.0-rc-f994737d14-20240522",
     "read-stream": "^2.1.1",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
@@ -166,8 +167,8 @@
     "yocto-queue": "^1.0.0"
   },
   "peerDependencies": {
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
+    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
   },
   "engines": {
     "node": ">=18.20.2",
@@ -180,6 +181,8 @@
       "uuid": "3.4.0"
     },
     "overrides": {
+      "@types/react": "npm:types-react@19.0.0-beta.2",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
@@ -193,6 +196,10 @@
     "patchedDependencies": {
       "playwright@1.43.0": "patches/playwright@1.43.0.patch"
     }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   },
   "workspaces:": [
     "packages/*",

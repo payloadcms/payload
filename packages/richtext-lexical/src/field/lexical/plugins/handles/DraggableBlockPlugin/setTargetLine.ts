@@ -20,7 +20,7 @@ export function setTargetLine(
   mouseY: number,
   anchorElem: HTMLElement,
   event: DragEvent,
-  debugHighlightRef: React.RefObject<HTMLDivElement>,
+  debugHighlightRef: React.RefObject<HTMLDivElement | null>,
   isFoundNodeEmptyParagraph: boolean = false,
 ) {
   const { height: targetBlockElemHeight, top: targetBlockElemTop } =

@@ -404,7 +404,6 @@ export const DocumentInfoProvider: React.FC<
           setIsLoading(false)
         }
       }
-
       setIsLoading(false)
     }
 
@@ -413,17 +412,7 @@ export const DocumentInfoProvider: React.FC<
     return () => {
       abortController.abort()
     }
-  }, [
-    api,
-    operation,
-    collectionSlug,
-    serverURL,
-    id,
-    getPreference,
-    globalSlug,
-    locale,
-    onLoadError,
-  ])
+  }, [api, operation, collectionSlug, serverURL, id, globalSlug, locale, onLoadError])
 
   useEffect(() => {
     void getVersions()
