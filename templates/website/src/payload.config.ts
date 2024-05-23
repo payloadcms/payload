@@ -13,6 +13,7 @@ import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
+import { revalidateRedirect } from 'src/_payload/hooks/revalidateRedirect'
 import { fileURLToPath } from 'url'
 
 import Categories from './_payload/collections/Categories'
@@ -83,6 +84,11 @@ export default buildConfig({
   plugins: [
     redirectsPlugin({
       collections: ['pages', 'posts'],
+      overrides: {
+        hooks: {
+          afterChange: [revalidateRedirect],
+        },
+      },
     }),
     nestedDocsPlugin({
       collections: ['categories'],
