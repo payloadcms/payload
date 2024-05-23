@@ -10,6 +10,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload({
     reactStrictMode: false,
+    experimental: {
+      reactCompiler: false
+    },
     async redirects() {
       return [
         {
