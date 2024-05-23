@@ -16,16 +16,40 @@ export const withPayload = (nextConfig = {}) => {
           'libsql',
         ],
       },
-      serverComponentsExternalPackages: [
-        ...(nextConfig?.experimental?.serverComponentsExternalPackages || []),
-        'drizzle-kit',
-        'drizzle-kit/payload',
-        'libsql',
-        'pino',
-        'pino-pretty',
-        'graphql',
-      ],
     },
+    headers: async () => {
+      const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
+
+      return [
+        ...(headersFromConfig || []),
+        {
+          source: '/:path*',
+          headers: [
+            {
+              key: 'Accept-CH',
+              value: 'Sec-CH-Prefers-Color-Scheme',
+            },
+            {
+              key: 'Vary',
+              value: 'Sec-CH-Prefers-Color-Scheme',
+            },
+            {
+              key: 'Critical-CH',
+              value: 'Sec-CH-Prefers-Color-Scheme',
+            },
+          ],
+        },
+      ]
+    },
+    serverExternalPackages: [
+      ...(nextConfig?.serverExternalPackages || []),
+      'drizzle-kit',
+      'drizzle-kit/payload',
+      'libsql',
+      'pino',
+      'pino-pretty',
+      'graphql',
+    ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
         typeof nextConfig.webpack === 'function'

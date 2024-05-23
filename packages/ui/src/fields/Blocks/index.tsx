@@ -215,11 +215,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <div className={`${baseClass}__error-wrap`}>
-          <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        </div>
-      )}
+      {showError && <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>

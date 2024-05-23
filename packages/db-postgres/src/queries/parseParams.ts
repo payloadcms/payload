@@ -71,7 +71,7 @@ export async function parseParams({
           // So we need to loop on keys again here to handle each operator independently
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
-            for (const operator of Object.keys(pathOperators)) {
+            for (let operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
                 const {
@@ -155,6 +155,13 @@ export async function parseParams({
                     throw new QueryError([{ path: relationOrPath }])
                   }
                   break
+                }
+
+                if (
+                  operator === 'like' &&
+                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                ) {
+                  operator = 'equals'
                 }
 
                 if (operator === 'like') {

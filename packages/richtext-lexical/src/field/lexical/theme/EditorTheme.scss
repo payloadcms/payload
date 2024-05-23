@@ -15,6 +15,11 @@
     position: relative;
   }
 
+  // No bottom margin for last paragraph in editor. This also created nice animations when adding a new line at the end
+  .ContentEditable__root > &__paragraph:last-child {
+    margin-bottom: 0;
+  }
+
   &__quote {
     margin: 0 0 10px 20px;
     font-size: 15px;

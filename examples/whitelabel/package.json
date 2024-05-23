@@ -1,23 +1,23 @@
 {
   "name": "payload-example-whitelabel-cms",
   "version": "1.0.0",
-  "main": "dist/server.js",
   "license": "MIT",
+  "main": "dist/server.js",
   "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "generate:types": "payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "generate:types": "payload generate:types"
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "beta",
     "@payloadcms/next": "beta",
     "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
-    "next": "^14.3.0-canary.7",
+    "next": "^14.3.0-canary.68",
     "payload": "beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

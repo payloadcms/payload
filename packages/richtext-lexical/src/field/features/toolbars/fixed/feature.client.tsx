@@ -13,7 +13,7 @@ const FixedToolbarFeatureClient: FeatureProviderProviderClient<undefined> = (pro
       plugins: [
         {
           Component: FixedToolbarPlugin,
-          position: 'top',
+          position: 'aboveContainer',
         },
       ],
     }),

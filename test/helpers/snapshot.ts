@@ -7,7 +7,10 @@ import { sql } from 'drizzle-orm'
 import { isMongoose } from './isMongoose.js'
 
 export const uploadsDirCache: {
-  [key: string]: string
+  [key: string]: {
+    cacheDir: string
+    originalDir: string
+  }[]
 } = {}
 export const dbSnapshot = {}
 

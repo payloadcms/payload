@@ -30,23 +30,3 @@ export const defaultRichTextValue: SerializedEditorState = {
     version: 1,
   },
 }
-
-export const defaultRichTextValueV2: SerializedEditorState = {
-  root: {
-    type: 'root',
-    children: [
-      {
-        type: 'paragraph',
-        children: [],
-        direction: null,
-        format: '',
-        indent: 0,
-        version: 1,
-      } as SerializedParagraphNode,
-    ],
-    direction: null,
-    format: '',
-    indent: 0,
-    version: 1,
-  },
-}

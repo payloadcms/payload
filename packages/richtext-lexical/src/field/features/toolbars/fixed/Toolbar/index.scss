@@ -47,6 +47,7 @@ html[data-theme='dark'] {
 .fixed-toolbar {
   @include blur-bg(var(--theme-elevation-0));
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   padding: calc(var(--base) / 4);
   vertical-align: middle;
@@ -83,9 +84,29 @@ html[data-theme='dark'] {
     }
   }
 
-  + .editor-scroller {
-    .ContentEditable__root {
-      padding-top: calc(var(--base) * 1.25);
+  + .editor-container {
+    > .editor-scroller > .editor {
+      > .ContentEditable__root {
+        padding-top: calc(var(--base) * 1.25);
+      }
+    }
+
+    > .editor-placeholder {
+      top: calc(var(--base) * 1.25);
+    }
+  }
+}
+
+
+.rich-text-lexical--show-gutter {
+  .fixed-toolbar {
+    + .editor-container {
+      > .editor-scroller > .editor {
+        > .ContentEditable__root::before {
+          top: calc(var(--base) * 1.25)!important;
+          height: calc(100% - calc(var(--base) * 1.25) - 8px)!important;
+        }
+      }
     }
   }
 }

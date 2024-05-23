@@ -2,7 +2,7 @@ export const percentToPixel = (value, dimension) => {
   return Math.floor((parseFloat(value) / 100) * dimension)
 }
 
-export default async function cropImage({ cropData, dimensions, file, sharp }) {
+export async function cropImage({ cropData, dimensions, file, sharp }) {
   try {
     const { height, width, x, y } = cropData
 

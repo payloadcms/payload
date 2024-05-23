@@ -8,11 +8,11 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise, { requestHeaders } from './config.js'
 import {
   firstArrayText,
+  fullyRestrictedSlug,
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   relyOnRequestHeadersSlug,
-  restrictedSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
@@ -36,7 +36,7 @@ describe('Access Control', () => {
     })
 
     restricted = await payload.create({
-      collection: restrictedSlug,
+      collection: fullyRestrictedSlug,
       data: { name: 'restricted' },
     })
   })
@@ -324,7 +324,7 @@ describe('Access Control', () => {
       it('should allow overrideAccess: false', async () => {
         const req = async () =>
           await payload.update({
-            collection: restrictedSlug,
+            collection: fullyRestrictedSlug,
             id: restricted.id,
             data: { name: updatedName },
             overrideAccess: false, // this should respect access control
@@ -335,7 +335,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: true', async () => {
         const doc = await payload.update({
-          collection: restrictedSlug,
+          collection: fullyRestrictedSlug,
           id: restricted.id,
           data: { name: updatedName },
           overrideAccess: true, // this should override access control
@@ -346,7 +346,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess by default', async () => {
         const doc = await payload.update({
-          collection: restrictedSlug,
+          collection: fullyRestrictedSlug,
           id: restricted.id,
           data: { name: updatedName },
         })
@@ -357,7 +357,7 @@ describe('Access Control', () => {
       it('should allow overrideAccess: false - update many', async () => {
         const req = async () =>
           await payload.update({
-            collection: restrictedSlug,
+            collection: fullyRestrictedSlug,
             where: {
               id: { equals: restricted.id },
             },
@@ -370,7 +370,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: true - update many', async () => {
         const doc = await payload.update({
-          collection: restrictedSlug,
+          collection: fullyRestrictedSlug,
           where: {
             id: { equals: restricted.id },
           },
@@ -383,7 +383,7 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess by default - update many', async () => {
         const doc = await payload.update({
-          collection: restrictedSlug,
+          collection: fullyRestrictedSlug,
           where: {
             id: { equals: restricted.id },
           },

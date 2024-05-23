@@ -152,7 +152,7 @@ type FetchAPIFileUpload = (args: {
   request: Request
 }) => Promise<FetchAPIFileUploadResponse>
 export const fetchAPIFileUpload: FetchAPIFileUpload = async ({ options, request }) => {
-  const uploadOptions = { ...DEFAULT_OPTIONS, ...options }
+  const uploadOptions: FetchAPIFileUploadOptions = { ...DEFAULT_OPTIONS, ...options }
   if (!isEligibleRequest(request)) {
     debugLog(uploadOptions, 'Request is not eligible for file upload!')
     return {

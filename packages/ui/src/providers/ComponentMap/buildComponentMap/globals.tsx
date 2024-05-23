@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 
+import { isReactComponentOrFunction } from 'payload/utilities'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
@@ -67,11 +68,12 @@ export const mapGlobals = ({
     const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
-        : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
+        : typeof editViewFromConfig === 'object' &&
+            isReactComponentOrFunction(editViewFromConfig.Default)
           ? editViewFromConfig.Default
           : typeof editViewFromConfig?.Default === 'object' &&
               'Component' in editViewFromConfig.Default &&
-              typeof editViewFromConfig.Default.Component === 'function'
+              isReactComponentOrFunction(editViewFromConfig.Default.Component)
             ? editViewFromConfig.Default.Component
             : undefined
 

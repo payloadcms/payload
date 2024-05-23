@@ -48,11 +48,13 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
     return editor.registerCommand<RelationshipData>(
       INSERT_RELATIONSHIP_COMMAND,
       (payload) => {
-        const relationshipNode = $createRelationshipNode(payload)
-
         const selection = $getSelection() || $getPreviousSelection()
 
         if ($isRangeSelection(selection)) {
+          const relationshipNode = $createRelationshipNode(payload)
+          // Insert relationship node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+          $insertNodeToNearestRoot(relationshipNode)
+
           const { focus } = selection
           const focusNode = focus.getNode()
 
@@ -68,8 +70,6 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
           ) {
             focusNode.remove()
           }
-
-          $insertNodeToNearestRoot(relationshipNode)
         }
 
         return true

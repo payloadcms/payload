@@ -7,7 +7,7 @@ import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { GeneratedFeatureProviderComponent } from '../types.js'
+import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 import type { FeatureProviderClient } from './features/types.js'
 import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
@@ -21,12 +21,13 @@ const RichTextEditor = lazy(() =>
 
 export const RichTextField: React.FC<
   FormFieldBase & {
+    admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }
 > = (props) => {
-  const { lexicalEditorConfig, richTextComponentMap } = props
+  const { admin, lexicalEditorConfig, richTextComponentMap } = props
   const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
@@ -82,11 +83,13 @@ export const RichTextField: React.FC<
           sanitizeClientEditorConfig(
             lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
             resolvedClientFeatures,
+            admin,
           ),
         )
       }
     }
   }, [
+    admin,
     hasLoadedFeatures,
     clientFunctions,
     schemaPath,

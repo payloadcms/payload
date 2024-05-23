@@ -1,32 +1,31 @@
 import type { SerializedBlockNode, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { BrowserContext, Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
 import { expect, test } from '@playwright/test'
-import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { Config, LexicalField, Upload } from '../../payload-types.js'
+import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
 import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  throttleTest,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { RESTClient } from '../../../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../slugs.js'
-import { lexicalDocData } from './data.js'
+} from '../../../../../helpers.js'
+import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
+import { RESTClient } from '../../../../../helpers/rest.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
+import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
-const dirname = path.resolve(currentFolder, '../../')
+const dirname = path.resolve(currentFolder, '../../../../')
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -60,7 +59,7 @@ async function navigateToLexicalFields(
   await page.waitForURL(`**${linkDocHref}`)
 }
 
-describe('lexical', () => {
+describe('lexicalBlocks', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -72,8 +71,8 @@ describe('lexical', () => {
     initPageConsoleErrorCatch(page)
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsLexicalTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      snapshotKey: 'fieldsLexicalBlocksTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
@@ -85,8 +84,11 @@ describe('lexical', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsLexicalTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      snapshotKey: 'fieldsLexicalBlocksTest',
+      uploadsDir: [
+        path.resolve(dirname, './collections/Upload/uploads'),
+        path.resolve(dirname, './collections/Upload2/uploads2'),
+      ],
     })
 
     if (client) {
@@ -94,266 +96,6 @@ describe('lexical', () => {
     }
     client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
-  })
-
-  test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page without actually changing anything', async () => {
-    // This used to be an issue in the past, due to the node.setFields function in the blocks node being called unnecessarily when it's initialized after opening the document
-    // Other than the annoying unsaved changed prompt, this can also cause unnecessary auto-saves, when drafts & autosave is enabled
-
-    await navigateToLexicalFields()
-    await expect(
-      page.locator('.rich-text-lexical').nth(1).locator('.lexical-block').first(),
-    ).toBeVisible()
-
-    // Navigate to some different page, away from the current document
-    await page.locator('.app-header__step-nav').first().locator('a').first().click()
-
-    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
-    await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
-  })
-
-  test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
-    // Relevant issue: https://github.com/payloadcms/payload/issues/4115
-    await navigateToLexicalFields()
-    const thirdBlock = page.locator('.rich-text-lexical').nth(1).locator('.lexical-block').nth(2)
-    await thirdBlock.scrollIntoViewIfNeeded()
-    await expect(thirdBlock).toBeVisible()
-
-    const spanInBlock = thirdBlock
-      .locator('span')
-      .getByText('Some text below relationship node 1')
-      .first()
-    await spanInBlock.scrollIntoViewIfNeeded()
-    await expect(spanInBlock).toBeVisible()
-
-    await spanInBlock.click() // Click works better than focus
-
-    await page.keyboard.type('moretext')
-    const newSpanInBlock = thirdBlock
-      .locator('span')
-      .getByText('Some text below rmoretextelationship node 1')
-      .first()
-    await expect(newSpanInBlock).toBeVisible()
-    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
-
-    // Save
-    await saveDocAndAssert(page)
-    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
-
-    // Navigate to some different page, away from the current document
-    await page.locator('.app-header__step-nav').first().locator('a').first().click()
-
-    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
-    await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
-  })
-
-  test('should type and save typed text', async () => {
-    await navigateToLexicalFields()
-    const richTextField = page.locator('.rich-text-lexical').nth(1) // second
-    await richTextField.scrollIntoViewIfNeeded()
-    await expect(richTextField).toBeVisible()
-
-    const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
-    await expect(spanInEditor).toBeVisible()
-
-    await spanInEditor.click() // Click works better than focus
-    // Now go to the END of the span
-    for (let i = 0; i < 6; i++) {
-      await page.keyboard.press('ArrowRight')
-    }
-
-    await page.keyboard.type('moretext')
-    await expect(spanInEditor).toHaveText('Upload Node:moretext')
-
-    await saveDocAndAssert(page)
-
-    await expect(async () => {
-      const lexicalDoc: LexicalField = (
-        await payload.find({
-          collection: lexicalFieldsSlug,
-          depth: 0,
-          overrideAccess: true,
-          where: {
-            title: {
-              equals: lexicalDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const firstParagraphTextNode: SerializedTextNode = (
-        lexicalField.root.children[0] as SerializedParagraphNode
-      ).children[0] as SerializedTextNode
-
-      expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
-    }).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-  })
-  test('should be able to bold text using floating select toolbar', async () => {
-    await navigateToLexicalFields()
-    const richTextField = page.locator('.rich-text-lexical').nth(1) // second
-    await richTextField.scrollIntoViewIfNeeded()
-    await expect(richTextField).toBeVisible()
-
-    const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
-    await expect(spanInEditor).toBeVisible()
-
-    await spanInEditor.click() // Click works better than focus
-    await page.keyboard.press('ArrowRight')
-
-    // Now select the text 'Node' (the .click() makes it click in the middle of the span)
-    for (let i = 0; i < 4; i++) {
-      await page.keyboard.press('Shift+ArrowRight')
-    }
-    // The following text should now be selected: Node
-
-    const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
-
-    await expect(floatingToolbar_formatSection).toBeVisible()
-
-    await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
-
-    const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
-
-    await expect(boldButton).toBeVisible()
-    await boldButton.click()
-
-    /**
-     * Next test section: check if it worked correctly
-     */
-
-    const boldText = richTextField
-      .locator('.LexicalEditorTheme__paragraph')
-      .first()
-      .locator('strong')
-    await expect(boldText).toBeVisible()
-    await expect(boldText).toHaveText('Node')
-
-    await saveDocAndAssert(page)
-
-    await expect(async () => {
-      const lexicalDoc: LexicalField = (
-        await payload.find({
-          collection: lexicalFieldsSlug,
-          depth: 0,
-          overrideAccess: true,
-          where: {
-            title: {
-              equals: lexicalDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const firstParagraph: SerializedParagraphNode = lexicalField.root
-        .children[0] as SerializedParagraphNode
-      expect(firstParagraph.children).toHaveLength(3)
-
-      const textNode1: SerializedTextNode = firstParagraph.children[0] as SerializedTextNode
-      const boldNode: SerializedTextNode = firstParagraph.children[1] as SerializedTextNode
-      const textNode2: SerializedTextNode = firstParagraph.children[2] as SerializedTextNode
-
-      expect(textNode1.text).toBe('Upload ')
-      expect(textNode1.format).toBe(0)
-
-      expect(boldNode.text).toBe('Node')
-      expect(boldNode.format).toBe(1)
-
-      expect(textNode2.text).toBe(':')
-      expect(textNode2.format).toBe(0)
-    }).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-  })
-
-  test('Make sure highly specific issue does not occur when two richText fields share the same editor prop', async () => {
-    // Reproduces https://github.com/payloadcms/payload/issues/4282
-    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'tabsWithRichText')
-    await page.goto(url.global('tabsWithRichText'))
-    const richTextField = page.locator('.rich-text-lexical').first()
-    await richTextField.scrollIntoViewIfNeeded()
-    await expect(richTextField).toBeVisible()
-    await richTextField.click() // Use click, because focus does not work
-    await page.keyboard.type('some text')
-
-    await page.locator('.tabs-field__tabs').first().getByText('en tab2').first().click()
-    await richTextField.scrollIntoViewIfNeeded()
-    await expect(richTextField).toBeVisible()
-
-    const contentEditable = richTextField.locator('.ContentEditable__root').first()
-
-    await expect
-      .poll(async () => await contentEditable.textContent(), { timeout: POLL_TOPASS_TIMEOUT })
-      .not.toBe('some text')
-    await expect
-      .poll(async () => await contentEditable.textContent(), { timeout: POLL_TOPASS_TIMEOUT })
-      .toBe('')
-  })
-
-  test('ensure blocks content is not hidden behind components outside of the editor', async () => {
-    // This test expects there to be a TreeView below the editor
-
-    // This test makes sure there are no z-index issues here
-    await navigateToLexicalFields()
-    const richTextField = page.locator('.rich-text-lexical').first()
-    await richTextField.scrollIntoViewIfNeeded()
-    await expect(richTextField).toBeVisible()
-
-    // Find span in contentEditable with text "Some text below relationship node"
-    const contentEditable = richTextField.locator('.ContentEditable__root').first()
-    await expect(contentEditable).toBeVisible()
-    await contentEditable.click() // Use click, because focus does not work
-
-    await page.keyboard.press('/')
-
-    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-    await expect(slashMenuPopover).toBeVisible()
-
-    // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
-    const popoverSelectButton = slashMenuPopover
-      .locator('button.slash-menu-popup__item-block-select')
-      .first()
-    await expect(popoverSelectButton).toBeVisible()
-    await popoverSelectButton.click()
-
-    const newSelectBlock = richTextField.locator('.lexical-block').first()
-    await newSelectBlock.scrollIntoViewIfNeeded()
-    await expect(newSelectBlock).toBeVisible()
-
-    await page.mouse.wheel(0, 300) // Scroll down so that the future react-select menu popover is displayed below and not above
-
-    const reactSelect = newSelectBlock.locator('.rs__control').first()
-    await reactSelect.click()
-
-    const popover = page.locator('.rs__menu').first()
-    const popoverOption3 = popover.locator('.rs__option').nth(2)
-
-    await expect(async () => {
-      const popoverOption3BoundingBox = await popoverOption3.boundingBox()
-      expect(popoverOption3BoundingBox).not.toBeNull()
-      expect(popoverOption3BoundingBox).not.toBeUndefined()
-      expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
-      expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
-
-      // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
-      // by using page.mouse and the correct coordinates
-      // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
-      // see: https://github.com/microsoft/playwright/issues/9923
-      // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
-      // and usually the only method which works.
-
-      const x = popoverOption3BoundingBox.x
-      const y = popoverOption3BoundingBox.y
-
-      await page.mouse.click(x, y, { button: 'left' })
-    }).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-
-    await expect(reactSelect.locator('.rs__value-container').first()).toHaveText('Option 3')
   })
 
   describe('nested lexical editor in block', () => {
@@ -850,7 +592,7 @@ describe('lexical', () => {
 
         const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
         const richTextBlock: SerializedBlockNode = lexicalField.root
-          .children[12] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const subRichTextBlock: SerializedBlockNode = richTextBlock.fields.richTextField.root
           .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
@@ -894,7 +636,7 @@ describe('lexical', () => {
 
         const lexicalField2: SerializedEditorState = lexicalDocDepth1.lexicalWithBlocks
         const richTextBlock2: SerializedBlockNode = lexicalField2.root
-          .children[12] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const subRichTextBlock2: SerializedBlockNode = richTextBlock2.fields.richTextField.root
           .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
@@ -1164,12 +906,6 @@ describe('lexical', () => {
       await wait(300)
 
       await expect(requiredTooltip).toBeInViewport() // toBeVisible() doesn't work for some reason
-    })
-  })
-
-  describe('localization', () => {
-    test.skip('ensure simple localized lexical field works', async () => {
-      await navigateToLexicalFields(true, true)
     })
   })
 })

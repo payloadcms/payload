@@ -48,7 +48,7 @@ describe('relationship', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsRelationshipTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
@@ -56,7 +56,7 @@ describe('relationship', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsRelationshipTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {

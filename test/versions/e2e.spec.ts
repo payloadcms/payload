@@ -206,7 +206,7 @@ describe('versions', () => {
       await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
-    test('bulk update - should publish changes', async () => {
+    test('bulk update — should publish changes', async () => {
       const description = 'published document'
       await page.goto(url.list)
 
@@ -233,7 +233,7 @@ describe('versions', () => {
       await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
     })
 
-    test('bulk update - should draft changes', async () => {
+    test('bulk update — should draft changes', async () => {
       const description = 'draft document'
       await page.goto(url.list)
 
@@ -259,7 +259,7 @@ describe('versions', () => {
       await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
-    test('collection - has versions tab', async () => {
+    test('collection — has versions tab', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
 
@@ -276,7 +276,7 @@ describe('versions', () => {
       expect(href).toBe(`${pathname}/versions`)
     })
 
-    test('collection - tab displays proper number of versions', async () => {
+    test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
 
       const linkToDoc = page
@@ -297,12 +297,10 @@ describe('versions', () => {
       expect(versionCount).toBe('11')
     })
 
-    test('collection - has versions route', async () => {
+    test('collection — has versions route', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
-
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
-
       await page.goto(`${page.url()}/versions`)
       expect(page.url()).toMatch(/\/versions/)
     })
@@ -361,7 +359,7 @@ describe('versions', () => {
 
     // TODO: Check versions/:version-id view for collections / globals
 
-    test('global - has versions tab', async () => {
+    test('global — has versions tab', async () => {
       const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
       await page.goto(global.global(draftGlobalSlug))
 
@@ -378,7 +376,7 @@ describe('versions', () => {
       expect(href).toBe(`${pathname}/versions`)
     })
 
-    test('global - has versions route', async () => {
+    test('global — has versions route', async () => {
       const global = new AdminUrlUtil(serverURL, globalSlug)
       const versionsURL = `${global.global(globalSlug)}/versions`
       await page.goto(versionsURL)
@@ -488,7 +486,7 @@ describe('versions', () => {
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
     })
 
-    test('collection - autosave should only update the current document', async () => {
+    test('collection — autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
       // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
@@ -547,20 +545,18 @@ describe('versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('title')
     })
 
-    test('should hide publish when access control prevents updating on globals', async () => {
+    test('globals — should hide publish button when access control prevents update', async () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
-
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
-    test('should hide publish when access control prevents create operation', async () => {
+    test('collections — should hide publish button when access control prevents create', async () => {
       await page.goto(disablePublishURL.create)
-
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
-    test('should hide publish when access control prevents update operation', async () => {
+    test('collections — should hide publish button when access control prevents update', async () => {
       const publishedDoc = await payload.create({
         collection: disablePublishSlug,
         data: {
@@ -571,7 +567,6 @@ describe('versions', () => {
       })
 
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
-
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
