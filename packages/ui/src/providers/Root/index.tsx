@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig } from 'payload/types'
+import type { ClientConfig, LanguageOptions } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import * as facelessUIImport3 from '@faceless-ui/scroll-info'
@@ -10,7 +10,6 @@ import { Slide, ToastContainer } from 'react-toastify'
 
 import type { ComponentMap } from '../ComponentMap/buildComponentMap/types.js'
 import type { Theme } from '../Theme/index.js'
-import type { LanguageOptions } from '../Translation/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
