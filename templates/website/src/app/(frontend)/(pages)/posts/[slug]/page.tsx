@@ -31,13 +31,13 @@ export default async function Post({ params: { slug = '' } }) {
   const post = await queryPostBySlug({ slug })
 
   if (!post) {
-    notFound()
+    return <PayloadRedirects url={url} />
   }
 
   return (
     <article className="pt-16 pb-16">
       <PageClient />
-      <PayloadRedirects url={url} />
+
       <PostHero post={post} />
 
       <div className="flex flex-col gap-4 pt-8">

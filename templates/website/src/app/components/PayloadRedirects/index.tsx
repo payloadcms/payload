@@ -1,8 +1,9 @@
 import type React from 'react'
+import type { Page, Post } from 'src/payload-types'
 
 import { getCachedDocument } from '@/utilities/getDocument'
 import { getCachedRedirect } from '@/utilities/getRedirect'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 interface Props {
   url: string
@@ -12,29 +13,31 @@ interface Props {
 export const PayloadRedirects: React.FC<Props> = async ({ url }) => {
   const slug = url.startsWith('/') ? url : `${url}`
 
-  const cachedRedirect = getCachedRedirect(slug)
-  const redirectItem = await cachedRedirect()
+  const redirectItem = await getCachedRedirect(slug)()
 
   if (redirectItem) {
     if (redirectItem.to?.url) {
       redirect(redirectItem.to.url)
-    } else if (
-      redirectItem.to?.reference?.value &&
-      typeof redirectItem.to?.reference?.value === 'string' &&
-      redirectItem.to?.reference?.relationTo &&
-      typeof redirectItem.to?.reference?.relationTo === 'string'
-    ) {
-      const collection = redirectItem.to?.reference?.relationTo
-      const id = redirectItem.to?.reference?.relationTo
-      const cachedDocument = getCachedDocument(collection, id)
-
-      const document = await cachedDocument()
-
-      if ('slug' in document && document.slug) {
-        redirect(document.slug)
-      }
     }
+
+    let redirectUrl: string
+
+    if (typeof redirectItem.to?.reference?.value === 'string') {
+      const collection = redirectItem.to?.reference?.relationTo
+      const id = redirectItem.to?.reference?.value
+
+      const document = (await getCachedDocument(collection, id)()) as Page | Post
+      redirectUrl = `${redirectItem.to?.reference?.relationTo !== 'pages' ? `/${redirectItem.to?.reference?.relationTo}` : ''}/${
+        document?.slug
+      }`
+    } else {
+      redirectUrl = `${redirectItem.to?.reference?.relationTo !== 'pages' ? `/${redirectItem.to?.reference?.relationTo}` : ''}/${
+        redirectItem.to?.reference?.value?.slug
+      }`
+    }
+
+    if (redirectUrl) redirect(redirectUrl)
   }
 
-  return null
+  return notFound()
 }

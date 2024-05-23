@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
-import { notFound } from 'next/navigation'
 import React from 'react'
 
 import type { Page } from '../../../../payload-types'
@@ -33,14 +32,13 @@ export default async function Page({ params: { slug = 'home' } }) {
   })
 
   if (!page) {
-    return notFound()
+    return <PayloadRedirects url={url} />
   }
 
   const { hero, layout } = page
 
   return (
     <article className="pt-16 pb-24">
-      <PayloadRedirects url={url} />
       <Hero {...hero} />
       <Blocks blocks={layout} />
     </article>

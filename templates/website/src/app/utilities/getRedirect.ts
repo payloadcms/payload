@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { unstable_cache } from 'next/cache'
 
-export async function getRedirect(slug: string, depth = 0) {
+export async function getRedirect(slug: string, depth = 1) {
   const payload = await getPayloadHMR({ config: configPromise })
 
   const { docs: redirects } = await payload.find({
