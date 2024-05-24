@@ -83,6 +83,17 @@ export default buildConfigWithDefaults({
           ]
         },
       },
+      formSubmissionOverrides: {
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'custom',
+              type: 'text',
+            },
+          ]
+        },
+      },
       redirectRelationships: ['pages'],
     }),
   ],
