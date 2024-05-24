@@ -1,3 +1,4 @@
+'use client'
 import { useId } from 'react'
 
 import { useEditDepth } from '../../providers/EditDepth/index.js'

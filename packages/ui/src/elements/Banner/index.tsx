@@ -1,3 +1,4 @@
+'use client'
 import LinkImport from 'next/link.js' // TODO: abstract this out to support all routers
 import type { MouseEvent } from 'react'
 
