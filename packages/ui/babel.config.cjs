@@ -1,11 +1,19 @@
+
+const excludeToBeCompiled = [
+  'src/providers/ComponentMap', 'src/elements/DocumentHeader', 'src/elements/withMergedProps', 'src/elements/Gutter', 'src/elements/WithServerSideProps', 'src/elements/RenderCustomComponent', 'src/elements/Nav',  'src/templates', 'src/graphics/Logo'
+]
+
 const ReactCompilerConfig = {
-  /*sources: (filename) => {
-    if(filename.indexOf('src/providers') !== -1) {
-      console.log('Babl.', filename)
+  sources: (filename) => {
+      for(const exclude of excludeToBeCompiled) {
+        if(filename.includes(exclude)) {
+          return false
+        }
+      }
+      console.log("Compiling: " + filename)
       return true
-    }
-    return false
-  },*/
+
+  },
   //runtimeModule: "react"
 }
 
