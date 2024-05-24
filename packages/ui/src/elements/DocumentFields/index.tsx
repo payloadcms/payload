@@ -77,6 +77,7 @@ export const DocumentFields: React.FC<Args> = ({
               <div className={`${baseClass}__sidebar-fields`}>
                 <RenderFields
                   fieldMap={sidebarFields}
+                  forceRender
                   path=""
                   permissions={docPermissions?.fields}
                   readOnly={readOnly}

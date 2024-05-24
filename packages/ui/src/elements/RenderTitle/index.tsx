@@ -18,9 +18,7 @@ export type RenderTitleProps = {
 export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const { className, element = 'h1', fallback, title: titleFromProps } = props
 
-  const documentInfo = useDocumentInfo()
-
-  const { id, isInitializing, title: titleFromContext } = documentInfo
+  const { id, isInitializing, title: titleFromContext } = useDocumentInfo()
 
   const title = titleFromProps || titleFromContext || fallback
 
