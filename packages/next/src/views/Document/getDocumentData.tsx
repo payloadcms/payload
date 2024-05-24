@@ -1,41 +1,53 @@
 import type {
   Data,
-  Payload,
-  PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
 
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale: Locale
-  payload: Payload
-  req: PayloadRequest
+  token: string
 }): Promise<Data> => {
-  const { id, collectionConfig, globalConfig, locale, payload, req } = args
+  const { id, collectionConfig, config, globalConfig, locale, token } = args
 
-  let data: Data
+  const {
+    routes: { api: apiRoute },
+    serverURL,
+  } = config
 
-  if (collectionConfig && id !== undefined && id !== null) {
-    data = await payload.findByID({
-      id,
-      collection: collectionConfig.slug,
-      depth: 0,
-      locale: locale.code,
-      req,
+  try {
+    const formState = await getFormState({
+      apiRoute,
+      body: {
+        id,
+        collectionSlug: collectionConfig?.slug,
+        globalSlug: globalConfig?.slug,
+        locale: locale.code,
+        operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
+        schemaPath: collectionConfig?.slug || globalConfig?.slug,
+      },
+      onError: (error) => {
+        console.error('Error getting form state', error)
+      },
+      serverURL: serverURL || process.env.__NEXT_PRIVATE_ORIGIN,
+      token,
     })
-  }
 
-  if (globalConfig) {
-    data = await payload.findGlobal({
-      slug: globalConfig.slug,
-      depth: 0,
-      locale: locale.code,
-      req,
-    })
-  }
+    const data = reduceFieldsToValues(formState, true)
 
-  return data
+    return {
+      data,
+      formState,
+    }
+  } catch (error) {
+    return {}
+  }
 }

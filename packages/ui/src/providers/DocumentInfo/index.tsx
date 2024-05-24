@@ -38,6 +38,8 @@ export const DocumentInfoProvider: React.FC<
     globalSlug,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
+    initialData: initialDataFromProps,
+    initialState: initialStateFromProps,
     onLoadError,
     onSave: onSaveFromProps,
   } = props
@@ -45,8 +47,8 @@ export const DocumentInfoProvider: React.FC<
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [documentTitle, setDocumentTitle] = useState('')
-  const [data, setData] = useState<Data>()
-  const [initialState, setInitialState] = useState<FormState>()
+  const [data, setData] = useState<Data>(initialDataFromProps)
+  const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
@@ -372,46 +374,59 @@ export const DocumentInfoProvider: React.FC<
   useEffect(() => {
     const abortController = new AbortController()
 
-    const getInitialState = async () => {
-      setIsError(false)
-      setIsLoading(true)
+    if (!initialStateFromProps || !initialDataFromProps) {
+      const getInitialState = async () => {
+        setIsError(false)
+        setIsLoading(true)
 
-      try {
-        const result = await getFormState({
-          apiRoute: api,
-          body: {
-            id,
-            collectionSlug,
-            globalSlug,
-            locale,
-            operation,
-            schemaPath: collectionSlug || globalSlug,
-          },
-          onError: onLoadError,
-          serverURL,
-          signal: abortController.signal,
-        })
+        try {
+          const result = await getFormState({
+            apiRoute: api,
+            body: {
+              id,
+              collectionSlug,
+              globalSlug,
+              locale,
+              operation,
+              schemaPath: collectionSlug || globalSlug,
+            },
+            onError: onLoadError,
+            serverURL,
+            signal: abortController.signal,
+          })
 
-        setData(reduceFieldsToValues(result, true))
-        setInitialState(result)
-      } catch (err) {
-        if (!abortController.signal.aborted) {
-          if (typeof onLoadError === 'function') {
-            void onLoadError()
+          setData(reduceFieldsToValues(result, true))
+          setInitialState(result)
+        } catch (err) {
+          if (!abortController.signal.aborted) {
+            if (typeof onLoadError === 'function') {
+              void onLoadError()
+            }
+            setIsError(true)
+            setIsLoading(false)
           }
-          setIsError(true)
-          setIsLoading(false)
         }
+        setIsLoading(false)
       }
-      setIsLoading(false)
-    }
 
-    void getInitialState()
+      void getInitialState()
+    }
 
     return () => {
       abortController.abort()
     }
-  }, [api, operation, collectionSlug, serverURL, id, globalSlug, locale, onLoadError])
+  }, [
+    api,
+    operation,
+    collectionSlug,
+    serverURL,
+    id,
+    globalSlug,
+    locale,
+    onLoadError,
+    initialDataFromProps,
+    initialStateFromProps,
+  ])
 
   useEffect(() => {
     void getVersions()
@@ -479,7 +494,7 @@ export const DocumentInfoProvider: React.FC<
     hasSavePermission,
     initialData: data,
     initialState,
-    isInitializing: !initialState,
+    isInitializing: !initialState || !data,
     isLoading,
     onSave,
     publishedDoc,

@@ -62,6 +62,7 @@ export const DocumentFields: React.FC<Args> = ({
             <RenderFields
               className={`${baseClass}__fields`}
               fieldMap={mainFields}
+              forceRender
               path=""
               permissions={docPermissions?.fields}
               readOnly={readOnly}
