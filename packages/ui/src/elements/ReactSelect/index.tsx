@@ -16,7 +16,7 @@ import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
-import { MultiValue } from './MultiValue/index.js'
+import { MultiValue, generateMultiValueDraggableID } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
 import { SingleValue } from './SingleValue/index.js'
@@ -172,18 +172,19 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 }
 
 const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
-  const { onChange, value } = props
+  const { getOptionValue, onChange, value } = props
 
-  let ids: string[] = []
-  if (value)
-    ids = Array.isArray(value)
-      ? value.map((item) => item?.id ?? `${item?.value}`)
-      : [value?.id || `${value?.value}`]
+  let draggableIDs: string[] = []
+  if (value) {
+    draggableIDs = (Array.isArray(value) ? value : [value]).map((optionValue) => {
+      return generateMultiValueDraggableID(optionValue, getOptionValue)
+    })
+  }
 
   return (
     <DraggableSortable
       className="react-select-container"
-      ids={ids}
+      ids={draggableIDs}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         let sorted = value
         if (value && Array.isArray(value)) {
