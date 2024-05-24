@@ -438,6 +438,52 @@ importers:
         specifier: ^29.1.0
         version: 29.1.2(@babel/core@7.24.4)(jest@29.7.0)(typescript@5.2.2)
 
+  packages/db-example:
+    dependencies:
+      bson-objectid:
+        specifier: 2.0.4
+        version: 2.0.4
+      deepmerge:
+        specifier: 4.3.1
+        version: 4.3.1
+      get-port:
+        specifier: 5.1.1
+        version: 5.1.1
+      http-status:
+        specifier: 1.6.2
+        version: 1.6.2
+      mongoose:
+        specifier: 6.12.3
+        version: 6.12.3
+      mongoose-aggregate-paginate-v2:
+        specifier: 1.0.6
+        version: 1.0.6
+      mongoose-paginate-v2:
+        specifier: 1.7.22
+        version: 1.7.22
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
+      uuid:
+        specifier: 9.0.0
+        version: 9.0.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@types/mongoose-aggregate-paginate-v2':
+        specifier: 1.0.9
+        version: 1.0.9
+      mongodb:
+        specifier: 4.17.1
+        version: 4.17.1
+      mongodb-memory-server:
+        specifier: ^9
+        version: 9.2.0
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/db-mongodb:
     dependencies:
       bson-objectid:
@@ -6207,7 +6253,7 @@ packages:
   /@types/whatwg-url@8.2.2:
     resolution: {integrity: sha512-FtQu10RWgn3D9U4aazdwIE2yzphmTJREDqNdODHrbrZmmMqI0vMheC/6NE/J1Yveaj8H+ela+YwWTjq5PGmuhA==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.96
       '@types/webidl-conversions': 7.0.3
 
   /@types/ws@8.5.10:
