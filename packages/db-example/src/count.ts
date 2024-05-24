@@ -20,11 +20,7 @@ export const count: Count = async function count(
   this: ExampleAdapter,
   { collection, locale, req = {} as PayloadRequest, where },
 ): Promise<{ totalDocs: number }> {
-  const adapterSpecificModel = this.collections[collection]
-
-  const result = await adapterSpecificModel.countDocuments()
-
   return {
-    totalDocs: result,
+    totalDocs: 0,
   }
 }

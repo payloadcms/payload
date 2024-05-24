@@ -8,6 +8,8 @@ import type { ExampleAdapter } from './index'
  * This function is typically used to gracefully shutdown the database connections
  * when the application is closing or when the adapter is no longer needed.
  *
+ * Optional - this method is not required
+ *
  * @param {ExampleAdapter} - The ExampleAdapter instance.
  * @returns {Promise<void>}
  */

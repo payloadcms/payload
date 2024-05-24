@@ -3,8 +3,6 @@ import type { BaseDatabaseAdapter } from 'payload/database'
 
 import { createDatabaseAdapter } from 'payload/database'
 
-import type { CollectionModel, GlobalModel } from './types'
-
 import { connect } from './connect'
 import { count } from './count'
 import { create } from './create'
@@ -21,7 +19,6 @@ import { findGlobalVersions } from './findGlobalVersions'
 import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
-// import { migrateFresh } from './migrateFresh'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
@@ -53,28 +50,34 @@ export type ExampleAdapter = BaseDatabaseAdapter &
      * This optional
      */
     collections: {
-      [slug: string]: CollectionModel
+      [slug: string]: unknown
     }
 
     /**
      * Access to underlying global model via `payload.db.globals`
      */
-    globals: GlobalModel
+    globals: {
+      [slug: string]: unknown
+    }
   }
 
 type ExampleAdapterResult = (args: { payload: Payload }) => ExampleAdapter
 
 /**
  * This declaration injects the proper types for the DB Adapter into Payload when accessing the adapter in code
+ *
+ * Optional
  */
 declare module 'payload' {
   export interface DatabaseAdapter extends BaseDatabaseAdapter {
     collections: {
-      [slug: string]: CollectionModel
+      [slug: string]: unknown
     }
-    globals: GlobalModel
+    globals: {
+      [slug: string]: unknown
+    }
     versions: {
-      [slug: string]: CollectionModel
+      [slug: string]: unknown
     }
   }
 }

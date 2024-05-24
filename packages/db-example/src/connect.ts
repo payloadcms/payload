@@ -5,6 +5,8 @@ import type { ExampleAdapter } from '.'
 /**
  * Implement the connect feature here. This will connect to the underlying resource and set the this.connection property.
  *
+ * Optional - this method is not required
+ *
  * @param {ExampleAdapter} this - The ExampleAdapter instance.
  * @param {Payload} payload
  * @returns {Promise<void>} A promise that resolves when the connection is established.

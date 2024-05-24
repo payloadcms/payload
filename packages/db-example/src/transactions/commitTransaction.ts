@@ -4,6 +4,8 @@ import type { CommitTransaction } from 'payload/database'
 /**
  * Commits a transaction identified by its ID.
  *
+ * Optional - this method is not required
+ *
  * @param {string} id - The ID of the transaction to commit.
  * @returns {Promise<void>}
  *

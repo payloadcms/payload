@@ -4,7 +4,7 @@ import type { Document, PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import handleError from './utilities/handleError'
+import handleError from './errors/handleError'
 
 /**
  * Creates a new document in the specified collection.
