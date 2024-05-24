@@ -13,7 +13,6 @@ type Args = {
   db: DrizzleTransaction
   debug: boolean
   docsToResave: DocsToResave
-  dryRun: boolean
   fields: Field[]
   globalSlug?: string
   isVersions: boolean
@@ -28,7 +27,6 @@ export const fetchAndResave = async ({
   db,
   debug,
   docsToResave,
-  dryRun,
   fields,
   globalSlug,
   isVersions,
@@ -48,6 +46,7 @@ export const fetchAndResave = async ({
             fallbackLocale: null,
             limit: 0,
             locale: 'all',
+            req,
             showHiddenFields: true,
             where: {
               parent: {
@@ -70,26 +69,24 @@ export const fetchAndResave = async ({
               rows,
             })
 
-            if (!dryRun) {
-              try {
-                await upsertRow({
-                  id: doc.id,
-                  adapter,
-                  data: doc,
-                  db,
-                  fields,
-                  ignoreResult: true,
-                  operation: 'update',
-                  req,
-                  tableName,
-                })
-              } catch (err) {
-                payload.logger.error(
-                  `"${collectionConfig.slug}" version with ID ${doc.id} FAILED TO MIGRATE`,
-                )
+            try {
+              await upsertRow({
+                id: doc.id,
+                adapter,
+                data: doc,
+                db,
+                fields,
+                ignoreResult: true,
+                operation: 'update',
+                req,
+                tableName,
+              })
+            } catch (err) {
+              payload.logger.error(
+                `"${collectionConfig.slug}" version with ID ${doc.id} FAILED TO MIGRATE`,
+              )
 
-                throw err
-              }
+              throw err
             }
 
             if (debug) {
@@ -105,6 +102,7 @@ export const fetchAndResave = async ({
             depth: 0,
             fallbackLocale: null,
             locale: 'all',
+            req,
             showHiddenFields: true,
           })
 
@@ -121,26 +119,24 @@ export const fetchAndResave = async ({
             rows,
           })
 
-          if (!dryRun) {
-            try {
-              await upsertRow({
-                id: doc.id,
-                adapter,
-                data: doc,
-                db,
-                fields,
-                ignoreResult: true,
-                operation: 'update',
-                req,
-                tableName,
-              })
-            } catch (err) {
-              payload.logger.error(
-                `The collection "${collectionConfig.slug}" with ID ${doc.id} has FAILED TO MIGRATE`,
-              )
+          try {
+            await upsertRow({
+              id: doc.id,
+              adapter,
+              data: doc,
+              db,
+              fields,
+              ignoreResult: true,
+              operation: 'update',
+              req,
+              tableName,
+            })
+          } catch (err) {
+            payload.logger.error(
+              `The collection "${collectionConfig.slug}" with ID ${doc.id} has FAILED TO MIGRATE`,
+            )
 
-              throw err
-            }
+            throw err
           }
 
           if (debug) {
@@ -163,6 +159,7 @@ export const fetchAndResave = async ({
             fallbackLocale: null,
             limit: 0,
             locale: 'all',
+            req,
             showHiddenFields: true,
           })
 
@@ -178,24 +175,22 @@ export const fetchAndResave = async ({
               rows,
             })
 
-            if (!dryRun) {
-              try {
-                await upsertRow({
-                  id: doc.id,
-                  adapter,
-                  data: doc,
-                  db,
-                  fields,
-                  ignoreResult: true,
-                  operation: 'update',
-                  req,
-                  tableName,
-                })
-              } catch (err) {
-                payload.logger.error(`"${globalSlug}" version with ID ${doc.id} FAILED TO MIGRATE`)
+            try {
+              await upsertRow({
+                id: doc.id,
+                adapter,
+                data: doc,
+                db,
+                fields,
+                ignoreResult: true,
+                operation: 'update',
+                req,
+                tableName,
+              })
+            } catch (err) {
+              payload.logger.error(`"${globalSlug}" version with ID ${doc.id} FAILED TO MIGRATE`)
 
-                throw err
-              }
+              throw err
             }
 
             if (debug) {
@@ -210,6 +205,7 @@ export const fetchAndResave = async ({
             depth: 0,
             fallbackLocale: null,
             locale: 'all',
+            req,
             showHiddenFields: true,
           })
 
@@ -220,24 +216,22 @@ export const fetchAndResave = async ({
             rows,
           })
 
-          if (!dryRun) {
-            try {
-              await upsertRow({
-                id: doc.id,
-                adapter,
-                data: doc,
-                db,
-                fields,
-                ignoreResult: true,
-                operation: 'update',
-                req,
-                tableName,
-              })
-            } catch (err) {
-              payload.logger.error(`The global "${globalSlug}" has FAILED TO MIGRATE`)
+          try {
+            await upsertRow({
+              id: doc.id,
+              adapter,
+              data: doc,
+              db,
+              fields,
+              ignoreResult: true,
+              operation: 'update',
+              req,
+              tableName,
+            })
+          } catch (err) {
+            payload.logger.error(`The global "${globalSlug}" has FAILED TO MIGRATE`)
 
-              throw err
-            }
+            throw err
           }
 
           if (debug) {

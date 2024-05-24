@@ -19,7 +19,6 @@ const require = createRequire(import.meta.url)
 
 type Args = {
   debug?: boolean
-  dryRun?: boolean
   payload: Payload
   req: PayloadRequestWithData
 }
@@ -35,11 +34,10 @@ type Args = {
  *    DROP CONSTRAINTs
  *    DROP COLUMNs
  * @param debug
- * @param dryRun
  * @param payload
  * @param req
  */
-export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Args) => {
+export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as PostgresAdapter
   const db = adapter.sessions[req.transactionID]?.db
   const dir = payload.db.migrationDir
@@ -47,8 +45,6 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   // get the drizzle migrateUpSQL from drizzle using the last schema
   const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
   const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
-
-  // TODO: write drizzle json snapshot file
 
   // Get latest migration snapshot
   const latestSnapshot = fs
@@ -83,9 +79,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
     payload.logger.info(addColumnsStatement)
   }
 
-  if (!dryRun) {
-    await db.execute(sql.raw(addColumnsStatement))
-  }
+  await db.execute(sql.raw(addColumnsStatement))
 
   for (const collection of payload.config.collections) {
     const tableName = adapter.tableNameMap.get(toSnakeCase(collection.slug))
@@ -112,7 +106,6 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
       collectionSlug: collection.slug,
       db,
       debug,
-      dryRun,
       fields: collection.fields,
       isVersions: false,
       pathsToQuery,
@@ -149,7 +142,6 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
         collectionSlug: collection.slug,
         db,
         debug,
-        dryRun,
         fields: versionFields,
         isVersions: true,
         pathsToQuery: versionPathsToQuery,
@@ -185,7 +177,6 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
       adapter,
       db,
       debug,
-      dryRun,
       fields: global.fields,
       globalSlug: global.slug,
       isVersions: false,
@@ -224,7 +215,6 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
         adapter,
         db,
         debug,
-        dryRun,
         fields: versionFields,
         globalSlug: global.slug,
         isVersions: true,
@@ -237,24 +227,14 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   // ADD CONSTRAINT
-  const addConstraintsStatement = sqlUpStatements.addConstraint.reduce((statement, line) => {
-    return `${statement}
-    DO $$ BEGIN
-      ${line}
-    EXCEPTION
-      WHEN duplicate_object THEN null;
-    END $$;
-    `
-  }, '')
+  const addConstraintsStatement = sqlUpStatements.addConstraint.join('\n')
 
   if (debug) {
     payload.logger.info('ADDING CONSTRAINTS')
     payload.logger.info(addConstraintsStatement)
   }
 
-  if (!dryRun) {
-    await db.execute(sql.raw(addConstraintsStatement))
-  }
+  await db.execute(sql.raw(addConstraintsStatement))
 
   // NOT NULL
   const notNullStatements = sqlUpStatements.notNull.join('\n')
@@ -264,9 +244,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
     payload.logger.info(notNullStatements)
   }
 
-  if (!dryRun) {
-    await db.execute(sql.raw(notNullStatements))
-  }
+  await db.execute(sql.raw(notNullStatements))
 
   // DROP TABLE
   const dropTablesStatement = sqlUpStatements.dropTable.join('\n')
@@ -276,9 +254,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
     payload.logger.info(dropTablesStatement)
   }
 
-  if (!dryRun) {
-    await db.execute(sql.raw(dropTablesStatement))
-  }
+  await db.execute(sql.raw(dropTablesStatement))
 
   // DROP CONSTRAINT
   const dropConstraintsStatement = sqlUpStatements.dropConstraint.join('\n')
@@ -288,9 +264,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
     payload.logger.info(dropConstraintsStatement)
   }
 
-  if (!dryRun) {
-    await db.execute(sql.raw(dropConstraintsStatement))
-  }
+  await db.execute(sql.raw(dropConstraintsStatement))
 
   // DROP COLUMN
   const dropColumnsStatement = sqlUpStatements.dropColumn.join('\n')
@@ -300,7 +274,5 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
     payload.logger.info(dropColumnsStatement)
   }
 
-  if (!dryRun) {
-    await db.execute(sql.raw(dropColumnsStatement))
-  }
+  await db.execute(sql.raw(dropColumnsStatement))
 }

@@ -12,7 +12,6 @@ type Args = {
   collectionSlug?: string
   db: DrizzleTransaction
   debug: boolean
-  dryRun: boolean
   fields: Field[]
   globalSlug?: string
   isVersions: boolean
@@ -27,7 +26,6 @@ export const migrateRelationships = async ({
   collectionSlug,
   db,
   debug,
-  dryRun,
   fields,
   globalSlug,
   isVersions,
@@ -71,7 +69,6 @@ export const migrateRelationships = async ({
     db,
     debug,
     docsToResave,
-    dryRun,
     fields,
     globalSlug,
     isVersions,
@@ -85,5 +82,5 @@ export const migrateRelationships = async ({
     payload.logger.info('DELETING ROWS')
     payload.logger.info(deleteStatement)
   }
-  if (!dryRun) await db.execute(sql.raw(`${deleteStatement}`))
+  await db.execute(sql.raw(`${deleteStatement}`))
 }
