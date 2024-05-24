@@ -81,10 +81,10 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:babel": "babel src --out-dir /Users/alessio/Documents/GitHub/payload-3.0-alpha-demo/node_modules/@payloadcms/ui/dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
+    "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
     "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
-    "build:swc": "swc ./src -d /Users/alessio/Documents/GitHub/payload-3.0-alpha-demo/node_modules/@payloadcms/ui/dist --config-file .swcrc",
+    "build:swc": "swc ./src -d dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:webpack": "webpack --config webpack.config.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
