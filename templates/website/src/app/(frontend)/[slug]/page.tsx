@@ -5,12 +5,12 @@ import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
 import React from 'react'
 
-import type { Page } from '../../../../payload-types'
+import type { Page } from '../../../payload-types'
 
-import { Blocks } from '../../../components/Blocks'
-import { Hero } from '../../../components/Hero'
-import { PayloadRedirects } from '../../../components/PayloadRedirects'
-import { generateMeta } from '../../../utilities/generateMeta'
+import { Blocks } from '../../components/Blocks'
+import { Hero } from '../../components/Hero'
+import { PayloadRedirects } from '../../components/PayloadRedirects'
+import { generateMeta } from '../../utilities/generateMeta'
 
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })
@@ -57,7 +57,9 @@ const queryPageBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
-  const user = draft ? await payload.auth({ headers: headers() }) : undefined
+  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
+
+  const user = authResult?.user
 
   const result = await payload.find({
     collection: 'pages',

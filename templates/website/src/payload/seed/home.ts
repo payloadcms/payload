@@ -67,7 +67,7 @@ export const home: Partial<Page> = {
                 fields: {
                   linkType: 'custom',
                   newTab: false,
-                  url: 'http://localhost:3000/admin',
+                  url: '/admin',
                 },
                 format: '',
                 indent: 0,
@@ -216,7 +216,7 @@ export const home: Partial<Page> = {
                       fields: {
                         linkType: 'custom',
                         newTab: false,
-                        url: 'http://localhost:3000/admin',
+                        url: '/admin',
                       },
                       format: '',
                       indent: 0,
@@ -422,7 +422,7 @@ export const home: Partial<Page> = {
                       fields: {
                         linkType: 'custom',
                         newTab: false,
-                        url: 'http://localhost:3000/admin',
+                        url: '/admin',
                       },
                       format: '',
                       indent: 0,
@@ -640,7 +640,7 @@ export const home: Partial<Page> = {
                   fields: {
                     linkType: 'custom',
                     newTab: false,
-                    url: 'http://localhost:3000/admin',
+                    url: '/admin',
                   },
                   format: '',
                   indent: 0,

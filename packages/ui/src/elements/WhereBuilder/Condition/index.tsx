@@ -37,7 +37,7 @@ export type Props = {
   }) => void
 }
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import { RenderCustomClientComponent } from '../../../elements/RenderCustomClientComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
@@ -161,7 +161,7 @@ export const Condition: React.FC<Props> = (props) => {
             />
           </div>
           <div className={`${baseClass}__value`}>
-            <RenderCustomComponent
+            <RenderCustomClientComponent
               CustomComponent={internalField?.props?.admin?.components?.Filter}
               DefaultComponent={ValueComponent}
               componentProps={{
@@ -203,8 +203,8 @@ export const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               addCondition({
-                andIndex,
-                fieldName,
+                andIndex: andIndex + 1,
+                fieldName: fields[0].value,
                 orIndex,
                 relation: 'and',
               })

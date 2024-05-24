@@ -10,19 +10,18 @@ import React from 'react'
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page({ params: { pageNumber = 2 } }) {
+export default async function Page() {
   const payload = await getPayloadHMR({ config: configPromise })
 
   const posts = await payload.find({
     collection: 'posts',
     depth: 1,
     limit: 12,
-    page: pageNumber,
   })
 
   return (
-    <div className="pb-24">
-      <div className="container mb-8">
+    <div className="pt-24 pb-24">
+      <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
           <h1>Posts</h1>
         </div>
@@ -46,25 +45,8 @@ export default async function Page({ params: { pageNumber = 2 } }) {
   )
 }
 
-export function generateMetadata({ params: { pageNumber = 2 } }): Metadata {
+export function generateMetadata(): Metadata {
   return {
-    title: `Payload Website Template Posts Page ${pageNumber}`,
+    title: `Payload Website Template Posts`,
   }
-}
-
-export async function generateStaticParams() {
-  const payload = await getPayloadHMR({ config: configPromise })
-  const posts = await payload.find({
-    collection: 'posts',
-    depth: 0,
-    limit: 10,
-  })
-
-  const pages = []
-
-  for (let i = 1; i <= posts.totalPages; i++) {
-    pages.push(i)
-  }
-
-  return pages
 }
