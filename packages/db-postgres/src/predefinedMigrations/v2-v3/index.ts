@@ -48,6 +48,8 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
   const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
 
+  // TODO: write drizzle json snapshot file
+
   // Get latest migration snapshot
   const latestSnapshot = fs
     .readdirSync(dir)
@@ -82,7 +84,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   if (!dryRun) {
-    await db.execute(sql`${addColumnsStatement}`)
+    await db.execute(sql.raw(addColumnsStatement))
   }
 
   for (const collection of payload.config.collections) {
@@ -251,7 +253,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   if (!dryRun) {
-    await db.execute(sql`${addConstraintsStatement}`)
+    await db.execute(sql.raw(addConstraintsStatement))
   }
 
   // NOT NULL
@@ -263,7 +265,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   if (!dryRun) {
-    await db.execute(sql`${notNullStatements}`)
+    await db.execute(sql.raw(notNullStatements))
   }
 
   // DROP TABLE
@@ -275,7 +277,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   if (!dryRun) {
-    await db.execute(sql`${dropTablesStatement}`)
+    await db.execute(sql.raw(dropTablesStatement))
   }
 
   // DROP CONSTRAINT
@@ -287,7 +289,7 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   if (!dryRun) {
-    await db.execute(sql`${dropConstraintsStatement}`)
+    await db.execute(sql.raw(dropConstraintsStatement))
   }
 
   // DROP COLUMN
@@ -299,6 +301,6 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
   }
 
   if (!dryRun) {
-    await db.execute(sql`${dropColumnsStatement}`)
+    await db.execute(sql.raw(dropColumnsStatement))
   }
 }
