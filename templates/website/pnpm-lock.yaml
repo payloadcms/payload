@@ -86,6 +86,9 @@ dependencies:
   jsonwebtoken:
     specifier: 9.0.1
     version: 9.0.1
+  lexical:
+    specifier: ^0.15
+    version: 0.15.0
   lucide-react:
     specifier: ^0.378.0
     version: 0.378.0(react@19.0.0-beta-26f2496093-20240514)
