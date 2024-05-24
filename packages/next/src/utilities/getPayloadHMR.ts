@@ -34,7 +34,7 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
     config: config.globals,
   }
 
-  // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
+  // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
 
   await payload.db.init()
   await payload.db.connect({ hotReload: true })
