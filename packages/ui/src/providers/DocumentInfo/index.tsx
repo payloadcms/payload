@@ -52,8 +52,10 @@ export const DocumentInfoProvider: React.FC<
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
-  const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
-  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(null)
+  const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
+  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
+    hasPublishPermissionFromProps,
+  )
   const hasInitializedDocPermissions = useRef(false)
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -459,10 +461,6 @@ export const DocumentInfoProvider: React.FC<
         hasPublishPermission === null
       ) {
         await getDocPermissions(data)
-      } else {
-        setDocPermissions(docPermissions)
-        setHasSavePermission(hasSavePermission)
-        setHasPublishPermission(hasPublishPermission)
       }
     }
 
