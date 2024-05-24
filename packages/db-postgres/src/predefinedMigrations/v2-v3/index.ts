@@ -1,15 +1,21 @@
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
 
+import { sql } from 'drizzle-orm'
+import fs from 'fs'
+import { createRequire } from 'module'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../../types.js'
-import type { ColumnToCreate, PathsToQuery } from './types.js'
+import type { PathsToQuery } from './types.js'
 
-import { createColumns } from './createColumns.js'
+import { groupUpSQLStatements } from './groupUpSQLStatements.js'
 import { migrateRelationships } from './migrateRelationships.js'
 import { traverseFields } from './traverseFields.js'
+
+const require = createRequire(import.meta.url)
 
 type Args = {
   debug?: boolean
@@ -18,21 +24,75 @@ type Args = {
   req: PayloadRequestWithData
 }
 
+/**
+ * Movess upload and relationship columns from the join table and into the tables while moving data
+ * This is done in the following order:
+ *    ADD COLUMNs
+ *    -- manipulate data to move relationships to new columns
+ *    ADD CONSTRAINTs
+ *    NOT NULLs
+ *    DROP TABLEs
+ *    DROP CONSTRAINTs
+ *    DROP COLUMNs
+ * @param debug
+ * @param dryRun
+ * @param payload
+ * @param req
+ */
 export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Args) => {
   const adapter = payload.db as PostgresAdapter
   const db = adapter.sessions[req.transactionID]?.db
+  const dir = payload.db.migrationDir
+
+  // get the drizzle migrateUpSQL from drizzle using the last schema
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
+  const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
+
+  // Get latest migration snapshot
+  const latestSnapshot = fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith('.json'))
+    .sort()
+    .reverse()?.[0]
+
+  if (!latestSnapshot) {
+    throw new Error(
+      `No previous migration schema file found! A prior migration from v2 is required to migrate to v3.`,
+    )
+  }
+
+  const drizzleJsonBefore = JSON.parse(
+    fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
+  ) as DrizzleSnapshotJSON
+
+  const generatedSQL = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+
+  if (!generatedSQL.length) {
+    payload.logger.info(`No schema changes needed.`)
+    process.exit(0)
+  }
+
+  const sqlUpStatements = groupUpSQLStatements(generatedSQL)
+
+  const addColumnsStatement = sqlUpStatements.addColumn.join('\n')
+
+  if (debug) {
+    payload.logger.info('CREATING NEW RELATIONSHIP COLUMNS')
+    payload.logger.info(addColumnsStatement)
+  }
+
+  if (!dryRun) {
+    await db.execute(sql`${addColumnsStatement}`)
+  }
 
   for (const collection of payload.config.collections) {
     const tableName = adapter.tableNameMap.get(toSnakeCase(collection.slug))
-
-    const columnsToCreate: ColumnToCreate[] = []
     const pathsToQuery: PathsToQuery = new Set()
 
     traverseFields({
       adapter,
       collectionSlug: collection.slug,
       columnPrefix: '',
-      columnsToCreate,
       db,
       disableNotNull: false,
       fields: collection.fields,
@@ -45,44 +105,31 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
       rootTableName: tableName,
     })
 
-    if (columnsToCreate) {
-      await createColumns({
-        columnsToCreate,
-        db,
-        debug,
-        dryRun,
-        payload,
-      })
-
-      await migrateRelationships({
-        adapter,
-        collectionSlug: collection.slug,
-        db,
-        debug,
-        dryRun,
-        fields: collection.fields,
-        isVersions: false,
-        pathsToQuery,
-        payload,
-        req,
-        tableName,
-      })
-    }
+    await migrateRelationships({
+      adapter,
+      collectionSlug: collection.slug,
+      db,
+      debug,
+      dryRun,
+      fields: collection.fields,
+      isVersions: false,
+      pathsToQuery,
+      payload,
+      req,
+      tableName,
+    })
 
     if (collection.versions) {
       const versionsTableName = adapter.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${adapter.versionsSuffix}`,
       )
       const versionFields = buildVersionCollectionFields(collection)
-
-      const versionColumnsToCreate: ColumnToCreate[] = []
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
         adapter,
         collectionSlug: collection.slug,
         columnPrefix: '',
-        columnsToCreate: versionColumnsToCreate,
         db,
         disableNotNull: true,
         fields: versionFields,
@@ -95,42 +142,30 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
         rootTableName: versionsTableName,
       })
 
-      if (versionColumnsToCreate.length) {
-        await createColumns({
-          columnsToCreate: versionColumnsToCreate,
-          db,
-          debug,
-          dryRun,
-          payload,
-        })
-
-        await migrateRelationships({
-          adapter,
-          collectionSlug: collection.slug,
-          db,
-          debug,
-          dryRun,
-          fields: versionFields,
-          isVersions: true,
-          pathsToQuery: versionPathsToQuery,
-          payload,
-          req,
-          tableName: versionsTableName,
-        })
-      }
+      await migrateRelationships({
+        adapter,
+        collectionSlug: collection.slug,
+        db,
+        debug,
+        dryRun,
+        fields: versionFields,
+        isVersions: true,
+        pathsToQuery: versionPathsToQuery,
+        payload,
+        req,
+        tableName: versionsTableName,
+      })
     }
   }
 
   for (const global of payload.config.globals) {
     const tableName = adapter.tableNameMap.get(toSnakeCase(global.slug))
 
-    const columnsToCreate: ColumnToCreate[] = []
     const pathsToQuery: PathsToQuery = new Set()
 
     traverseFields({
       adapter,
       columnPrefix: '',
-      columnsToCreate,
       db,
       disableNotNull: false,
       fields: global.fields,
@@ -144,29 +179,19 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
       rootTableName: tableName,
     })
 
-    if (columnsToCreate.length) {
-      await createColumns({
-        columnsToCreate,
-        db,
-        debug,
-        dryRun,
-        payload,
-      })
-
-      await migrateRelationships({
-        adapter,
-        db,
-        debug,
-        dryRun,
-        fields: global.fields,
-        globalSlug: global.slug,
-        isVersions: false,
-        pathsToQuery,
-        payload,
-        req,
-        tableName,
-      })
-    }
+    await migrateRelationships({
+      adapter,
+      db,
+      debug,
+      dryRun,
+      fields: global.fields,
+      globalSlug: global.slug,
+      isVersions: false,
+      pathsToQuery,
+      payload,
+      req,
+      tableName,
+    })
 
     if (global.versions) {
       const versionsTableName = adapter.tableNameMap.get(
@@ -175,13 +200,11 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
 
       const versionFields = buildVersionGlobalFields(global)
 
-      const versionColumnsToCreate: ColumnToCreate[] = []
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
         adapter,
         columnPrefix: '',
-        columnsToCreate: versionColumnsToCreate,
         db,
         disableNotNull: true,
         fields: versionFields,
@@ -195,29 +218,87 @@ export const migratePostgresV2toV3 = async ({ debug, dryRun, payload, req }: Arg
         rootTableName: versionsTableName,
       })
 
-      if (versionColumnsToCreate.length) {
-        await createColumns({
-          columnsToCreate: versionColumnsToCreate,
-          db,
-          debug,
-          dryRun,
-          payload,
-        })
-
-        await migrateRelationships({
-          adapter,
-          db,
-          debug,
-          dryRun,
-          fields: versionFields,
-          globalSlug: global.slug,
-          isVersions: true,
-          pathsToQuery: versionPathsToQuery,
-          payload,
-          req,
-          tableName: versionsTableName,
-        })
-      }
+      await migrateRelationships({
+        adapter,
+        db,
+        debug,
+        dryRun,
+        fields: versionFields,
+        globalSlug: global.slug,
+        isVersions: true,
+        pathsToQuery: versionPathsToQuery,
+        payload,
+        req,
+        tableName: versionsTableName,
+      })
     }
+  }
+
+  // ADD CONSTRAINT
+  const addConstraintsStatement = sqlUpStatements.addConstraint.reduce((statement, line) => {
+    return `${statement}
+    DO $$ BEGIN
+      ${line}
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
+    `
+  }, '')
+
+  if (debug) {
+    payload.logger.info('ADDING CONSTRAINTS')
+    payload.logger.info(addConstraintsStatement)
+  }
+
+  if (!dryRun) {
+    await db.execute(sql`${addConstraintsStatement}`)
+  }
+
+  // NOT NULL
+  const notNullStatements = sqlUpStatements.notNull.join('\n')
+
+  if (debug) {
+    payload.logger.info('NOT NULL CONSTRAINTS')
+    payload.logger.info(notNullStatements)
+  }
+
+  if (!dryRun) {
+    await db.execute(sql`${notNullStatements}`)
+  }
+
+  // DROP TABLE
+  const dropTablesStatement = sqlUpStatements.dropTable.join('\n')
+
+  if (debug) {
+    payload.logger.info('DROPPING TABLES')
+    payload.logger.info(dropTablesStatement)
+  }
+
+  if (!dryRun) {
+    await db.execute(sql`${dropTablesStatement}`)
+  }
+
+  // DROP CONSTRAINT
+  const dropConstraintsStatement = sqlUpStatements.dropConstraint.join('\n')
+
+  if (debug) {
+    payload.logger.info('DROPPING CONSTRAINTS')
+    payload.logger.info(dropConstraintsStatement)
+  }
+
+  if (!dryRun) {
+    await db.execute(sql`${dropConstraintsStatement}`)
+  }
+
+  // DROP COLUMN
+  const dropColumnsStatement = sqlUpStatements.dropColumn.join('\n')
+
+  if (debug) {
+    payload.logger.info('DROPPING COLUMNS')
+    payload.logger.info(dropColumnsStatement)
+  }
+
+  if (!dryRun) {
+    await db.execute(sql`${dropColumnsStatement}`)
   }
 }
