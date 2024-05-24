@@ -1,29 +1,40 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { CreateGlobal } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
+/**
+ * Creates a global document in the database.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} slug - The specified slug of the global.
+ * @param {object} data - The full data passed to create (data will have all locales and depth 0).
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @returns {Promise<T>} A promise that resolves with the created global document.
+ */
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: ExampleAdapter,
   { slug, data, req = {} as PayloadRequest },
 ) {
-  const Model = this.globals
-  const global = {
-    globalType: slug,
-    ...data,
-  }
-  const options = withSession(this, req.transactionID)
+  let result
+  /**
+   * Implement the logic to create the global document in your database.
+   *
+   * @example
+   * ```ts
+   * result = await adapterSpecificModel.create(global, options)
+   * ```
+   */
 
-  let [result] = (await Model.create([global], options)) as any
-
-  result = JSON.parse(JSON.stringify(result))
-
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  /**
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   */
 
   return result
 }

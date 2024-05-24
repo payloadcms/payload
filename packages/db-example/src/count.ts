@@ -1,27 +1,26 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Count } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, Where } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
 /**
+ * Counts the total number of documents that match the query in the specified collection.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} collection - The name of the collection to reference for counting documents.
+ * @param {string} locale - The locale being used - can be one locale or "all" (locale="all").
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {Where} where - The specific query used to find the documents for counting.
+ * @returns {Promise<{ totalDocs: number }>} A promise resolving to an object containing the total number of documents.
+ *
  * Implement the count function here for the specified collection and return the total number of documents that match the query.
- *
- * @example
- * ```ts
- * const adapterSpecificModel = this.collections[collection]
- *
- * const result = await adapterSpecificModel.countDocuments(query)
- *
- * return { totalDocs: result }
- * ```
  */
 export const count: Count = async function count(
   this: ExampleAdapter,
   { collection, locale, req = {} as PayloadRequest, where },
 ): Promise<{ totalDocs: number }> {
-  // Implement the count function here for the specified collection with where query
-  const result = await Promise.resolve(0)
   return {
-    totalDocs: result,
+    totalDocs: 0,
   }
 }

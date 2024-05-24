@@ -1,103 +1,46 @@
-import type { PaginateOptions } from 'mongoose'
-import type { QueryDrafts } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
-
-import { combineQueries, flattenWhereToOperators } from 'payload/database'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { PaginatedDocs, QueryDrafts } from 'payload/database'
+import type { PayloadRequest, Where } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
+/**
+ * Queries for drafts in the specified collection based on the provided criteria using
+ * the incoming where, sort, page query and then only returns the correct drafts in the format Payload expects.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} collection - The name of the collection to reference for querying drafts.
+ * @param {number} limit - The maximum number of drafts to return.
+ * @param {string} locale - The locale being used - can be one locale or "all" (locale="all").
+ * @param {number} page - The page number of the results to return.
+ * @param {boolean} pagination - Determines whether pagination is enabled.
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {string} sort - The top-level field to sort the results by.
+ * @param {Where} where - The specific query used to filter drafts.
+ * @returns {Promise<PaginatedDocs<T>>} A promise resolving to the paginated drafts matching the query criteria.
+ */
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: ExampleAdapter,
   { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  const VersionModel = this.versions[collection]
-  const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  let result
+  /**
+   * Implement the logic to paginate the query results according to your database's methods.
+   *
+   * @example
+   * ```ts
+   * const result = await adapterSpecificModel.paginate(versionQuery, paginationOptions)
+   * ```
+   */
 
-  let hasNearConstraint
-  let sort
+  /**
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   */
 
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
-
-  if (!hasNearConstraint) {
-    sort = buildSortParam({
-      config: this.payload.config,
-      fields: collectionConfig.fields,
-      locale,
-      sort: sortArg || collectionConfig.defaultSort,
-      timestamps: true,
-    })
-  }
-
-  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
-
-  const versionQuery = await VersionModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where: combinedWhere,
-  })
-
-  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount =
-    hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
-  const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
-    lean: true,
-    leanWithId: true,
-    options,
-    page,
-    pagination,
-    sort,
-    useEstimatedCount,
-  }
-
-  if (
-    !useEstimatedCount &&
-    Object.keys(versionQuery).length === 0 &&
-    this.disableIndexHints !== true
-  ) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
-    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
-    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
-    // the correct indexed field
-    paginationOptions.useCustomCountFn = () => {
-      return Promise.resolve(
-        VersionModel.countDocuments(versionQuery, {
-          hint: { _id: 1 },
-        }),
-      )
-    }
-  }
-
-  if (limit > 0) {
-    paginationOptions.limit = limit
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
-  }
-
-  const result = await VersionModel.paginate(versionQuery, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
-
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
-      doc = {
-        _id: doc.parent,
-        id: doc.parent,
-        ...doc.version,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
-      }
-
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  return result
 }

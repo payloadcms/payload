@@ -1,15 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { CommitTransaction } from 'payload/database'
 
-export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
-  if (!this.sessions[id]?.inTransaction()) {
-    return
-  }
-
-  await this.sessions[id].commitTransaction()
-  try {
-    await this.sessions[id].endSession()
-  } catch (error) {
-    // ending sessions is only best effort and won't impact anything if it fails since the transaction was committed
-  }
-  delete this.sessions[id]
-}
+/**
+ * Commits a transaction identified by its ID.
+ *
+ * Optional - this method is not required
+ *
+ * @param {string} id - The ID of the transaction to commit.
+ * @returns {Promise<void>}
+ *
+ * This function is optional and can be implemented as needed for database adapters that support transactions.
+ */
+export const commitTransaction: CommitTransaction = async function commitTransaction(id) {}

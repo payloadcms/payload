@@ -1,6 +1,4 @@
-# Payload MongoDB Adapter
-
-Official MongoDB adapter for [Payload](https://payloadcms.com).
+# Example Database Adapter for Payload
 
 - [Main Repository](https://github.com/payloadcms/payload)
 - [Payload Docs](https://payloadcms.com/docs)
@@ -8,23 +6,21 @@ Official MongoDB adapter for [Payload](https://payloadcms.com).
 ## Installation
 
 ```bash
-npm install @payloadcms/db-mongodb
+npm install @payloadcms/db-example
 ```
 
 ## Usage
 
 ```ts
 import { buildConfig } from 'payload/config'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { exampleAdapter } from '@payloadcms/db-example'
 
 export default buildConfig({
-  db: mongooseAdapter({
+  db: exampleAdapter({
     url: process.env.DATABASE_URI,
   }),
   // ...rest of config
 })
-
 ```
 
 More detailed usage can be found in the [Payload Docs](https://payloadcms.com/docs/configuration/overview).
-

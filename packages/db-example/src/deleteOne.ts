@@ -1,31 +1,43 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { DeleteOne } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, Where } from 'payload/types'
 import type { Document } from 'payload/types'
 
 import type { ExampleAdapter } from '.'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
-
+/**
+ * Deletes a single document from the specified collection in the database.
+ *
+ * @param {ExampleAdapter} this - The ExampleAdapter instance.
+ * @param {string} collection - The name of the collection to reference for deleting a document.
+ * @param {PayloadRequest} req - The Express request object containing the currently authenticated user.
+ * @param {Where} where - The specific query used to find the document for deleting.
+ * @returns {Promise<Document>} A promise that resolves with the deleted document.
+ */
 export const deleteOne: DeleteOne = async function deleteOne(
   this: ExampleAdapter,
   { collection, req = {} as PayloadRequest, where },
 ) {
-  const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  let doc
+  /**
+   * Need to go delete your document through the API
+   *
+   * Implement the logic to delete the document from your database.
+   *
+   * @example
+   * ```ts
+   * doc = await adapterSpecificModel.delete(query, options)
+   * ```
+   */
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
-    where,
-  })
-
-  const doc = await Model.findOneAndDelete(query, options).lean()
-
-  let result: Document = JSON.parse(JSON.stringify(doc))
-
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
-
+  /**
+   * This should be the shape of the data that gets returned in Payload when you do:
+   *
+   * ?depth=0&locale=all&fallbackLocale=null
+   *
+   * The result of the outgoing data is always going to be the same shape that Payload expects
+   *
+   */
+  const result: Document = doc
   return result
 }
