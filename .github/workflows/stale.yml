@@ -24,7 +24,7 @@ jobs:
 
           # Issues
           stale-issue-label: 'stale'
-          exempt-issue-labels: 'blocked,must,should,keep,created-by: Payload team'
+          exempt-issue-labels: 'blocked,must,should,keep,created-by: Payload team,created-by: Contributor'
           stale-issue-message: >
             This issue has been marked as stale due to lack of activity. To keep the ticket open, please indicate that it is still relevant in a comment below.
           close-issue-message: >
@@ -32,7 +32,7 @@ jobs:
 
           # Pull Requests
           stale-pr-label: 'stale'
-          exempt-pr-labels: 'blocked,must,should,keep,created-by: Payload team'
+          exempt-pr-labels: 'blocked,must,should,keep,created-by: Payload team,created-by: Contributor'
           stale-pr-message: >
             This PR is stale due to lack of activity. To keep the PR open, please indicate that it is still relevant in a comment below.
           close-pr-message: >

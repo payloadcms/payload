@@ -1,6 +1,6 @@
 name: Bug Report v3
 description: Create a bug report for Payload v3 (beta)
-labels: ['status:needs-triage', 'v3']
+labels: ['status: needs-triage', 'v3']
 body:
   - type: input
     id: reproduction-link
