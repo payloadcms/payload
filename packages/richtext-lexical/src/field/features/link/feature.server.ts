@@ -1,7 +1,7 @@
 import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
-import { traverseFields } from '@payloadcms/next/utilities'
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
 import { deepCopyObject } from 'payload/utilities'
 
