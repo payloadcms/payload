@@ -56,6 +56,7 @@ export const DocumentInfoProvider: React.FC<
   const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
     hasPublishPermissionFromProps,
   )
+  const isInitializing = initialState === undefined || data === undefined
   const hasInitializedDocPermissions = useRef(false)
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -376,7 +377,7 @@ export const DocumentInfoProvider: React.FC<
   useEffect(() => {
     const abortController = new AbortController()
 
-    if (!initialStateFromProps || !initialDataFromProps) {
+    if (initialStateFromProps === undefined || initialDataFromProps === undefined) {
       const getInitialState = async () => {
         setIsError(false)
         setIsLoading(true)
@@ -492,7 +493,7 @@ export const DocumentInfoProvider: React.FC<
     hasSavePermission,
     initialData: data,
     initialState,
-    isInitializing: !initialState || !data,
+    isInitializing,
     isLoading,
     onSave,
     publishedDoc,
