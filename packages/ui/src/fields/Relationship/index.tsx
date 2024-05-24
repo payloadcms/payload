@@ -495,6 +495,11 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               }}
               disabled={readOnly || formProcessing || drawerIsOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
+              getOptionValue={(option) => {
+                return hasMany && Array.isArray(relationTo)
+                  ? `${option.relationTo}_${option.value}`
+                  : option.value
+              }}
               isLoading={isLoading}
               isMulti={hasMany}
               isSortable={isSortable}

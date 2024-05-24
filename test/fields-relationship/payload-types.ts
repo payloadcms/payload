@@ -18,6 +18,9 @@ export interface Config {
     'relation-updated-externally': RelationUpdatedExternally;
     'collection-1': Collection1;
     'collection-2': Collection2;
+    videos: Video;
+    podcasts: Podcast;
+    mixedMedia: MixedMedia;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -189,6 +192,47 @@ export interface Collection1 {
 export interface Collection2 {
   id: string;
   name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts".
+ */
+export interface Podcast {
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mixedMedia".
+ */
+export interface MixedMedia {
+  id: string;
+  relatedMedia?:
+    | (
+        | {
+            relationTo: 'videos';
+            value: number | Video;
+          }
+        | {
+            relationTo: 'podcasts';
+            value: number | Podcast;
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

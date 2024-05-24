@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -22,12 +21,12 @@ import {
   openDocControls,
   openDocDrawer,
   saveDocAndAssert,
-  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
+  mixedMediaCollectionSlug,
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
@@ -395,6 +394,26 @@ describe('fields - relationship', () => {
 
     const options = page.locator('#field-relationshipManyFiltered .rs__menu')
     await expect(options).toContainText('truth')
+  })
+
+  test('should allow docs with same ID but different collections to be selectable', async () => {
+    const mixedMedia = new AdminUrlUtil(serverURL, mixedMediaCollectionSlug)
+    await page.goto(mixedMedia.create)
+    // wait for relationship options to load
+    const podcastsFilterOptionsReq = page.waitForResponse(/api\/podcasts/)
+    const videosFilterOptionsReq = page.waitForResponse(/api\/videos/)
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relatedMedia .rs__control').click()
+    await podcastsFilterOptionsReq
+    await videosFilterOptionsReq
+
+    const options = page.locator('.rs__option')
+    await expect(options).toHaveCount(4) // 4 docs
+    await options.locator(`text=Video 0`).click()
+
+    await page.locator('#field-relatedMedia .rs__control').click()
+    const remainingOptions = page.locator('.rs__option')
+    await expect(remainingOptions).toHaveCount(3) // 3 docs
   })
 
   // TODO: Flaky test in CI - fix.
