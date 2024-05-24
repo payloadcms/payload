@@ -1,44 +1,35 @@
 import type {
   Data,
+  PayloadRequestWithData,
   SanitizedCollectionConfig,
-  SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale: Locale
-  token: string
+  req: PayloadRequestWithData
 }): Promise<Data> => {
-  const { id, collectionConfig, config, globalConfig, locale, token } = args
-
-  const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
+  const { id, collectionConfig, globalConfig, locale, req } = args
 
   try {
-    const formState = await getFormState({
-      apiRoute,
-      body: {
-        id,
-        collectionSlug: collectionConfig?.slug,
-        globalSlug: globalConfig?.slug,
-        locale: locale.code,
-        operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
-        schemaPath: collectionConfig?.slug || globalConfig?.slug,
+    const formState = await buildFormState({
+      req: {
+        ...req,
+        data: {
+          id,
+          collectionSlug: collectionConfig?.slug,
+          globalSlug: globalConfig?.slug,
+          locale: locale.code,
+          operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
+          schemaPath: collectionConfig?.slug || globalConfig?.slug,
+        },
       },
-      onError: (error) => {
-        console.error('Error getting form state', error)
-      },
-      serverURL: serverURL || process.env.__NEXT_PRIVATE_ORIGIN,
-      token,
     })
 
     const data = reduceFieldsToValues(formState, true)
@@ -48,6 +39,7 @@ export const getDocumentData = async (args: {
       formState,
     }
   } catch (error) {
+    console.error('Error getting document data', error) // eslint-disable-line no-console
     return {}
   }
 }

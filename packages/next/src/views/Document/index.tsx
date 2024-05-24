@@ -29,7 +29,6 @@ export const Document: React.FC<AdminViewProps> = async ({
 }) => {
   const {
     collectionConfig,
-    cookies,
     docID: id,
     globalConfig,
     locale,
@@ -67,10 +66,9 @@ export const Document: React.FC<AdminViewProps> = async ({
   const { data, formState } = await getDocumentData({
     id,
     collectionConfig,
-    config: payload.config,
     globalConfig,
     locale,
-    token: cookies.get('payload-token'),
+    req,
   })
 
   const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
