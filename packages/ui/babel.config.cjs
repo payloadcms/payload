@@ -1,18 +1,17 @@
-
-const excludeToBeCompiled = [
-  'src/providers/ComponentMap', 'src/elements/DocumentHeader', 'src/elements/withMergedProps', 'src/elements/Gutter', 'src/elements/WithServerSideProps', 'src/elements/RenderCustomComponent', 'src/elements/Nav',  'src/templates', 'src/graphics/Logo'
-]
+const fs = require('fs')
 
 const ReactCompilerConfig = {
   sources: (filename) => {
-      for(const exclude of excludeToBeCompiled) {
-        if(filename.includes(exclude)) {
-          return false
-        }
-      }
+
+    // read file and check if 'use client' is at top. if not, return false
+    // if it is, return true
+    const file = fs.readFileSync(filename, 'utf8')
+    if(file.includes("'use client'")) {
       console.log("Compiling: " + filename)
       return true
-
+    }
+    console.log("Skipping: " + filename)
+    return false
   },
   //runtimeModule: "react"
 }
