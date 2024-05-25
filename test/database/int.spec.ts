@@ -556,10 +556,13 @@ describe('database', () => {
           locale: 'es',
         })
 
+        const req: PayloadRequestWithData = {} as PayloadRequestWithData
+        await initTransaction(req)
+
         await migratePostgresV2toV3({
           debug: true,
           payload,
-          // dryRun: true,
+          req,
         })
       }
     })
