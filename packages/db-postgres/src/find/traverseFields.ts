@@ -33,8 +33,9 @@ export const traverseFields = ({
   fields.forEach((field) => {
     // handle simple relationship
     if (
-      field.type === 'upload' ||
-      (field.type === 'relationship' && !field.hasMany && typeof field.relationTo === 'string')
+      depth > 0 &&
+      (field.type === 'upload' ||
+        (field.type === 'relationship' && !field.hasMany && typeof field.relationTo === 'string'))
     ) {
       if (field.localized) {
         _locales.with[`${path}${field.name}`] = true
