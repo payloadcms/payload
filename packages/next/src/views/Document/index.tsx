@@ -1,6 +1,5 @@
 import type { EditViewComponent } from 'payload/config'
 import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
-import type { DocumentPermissions } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
 import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
@@ -9,13 +8,15 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomCompo
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
 import { notFound, redirect } from 'next/navigation.js'
-import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { NotFoundView } from '../NotFound/index.js'
+import { getDocumentData } from './getDocumentData.js'
+import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
@@ -52,40 +53,39 @@ export const Document: React.FC<AdminViewProps> = async ({
   const collectionSlug = collectionConfig?.slug || undefined
   const globalSlug = globalConfig?.slug || undefined
 
-  const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
+  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
   let ViewOverride: EditViewComponent
   let CustomView: EditViewComponent
   let DefaultView: EditViewComponent
   let ErrorView: AdminViewComponent
 
-  let docPermissions: DocumentPermissions
-  let hasSavePermission: boolean
   let apiURL: string
   let action: string
+
+  const data = await getDocumentData({
+    id,
+    collectionConfig,
+    globalConfig,
+    locale,
+    payload,
+    req,
+  })
+
+  const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
+    id,
+    collectionConfig,
+    data,
+    globalConfig,
+    req,
+  })
 
   if (collectionConfig) {
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
       notFound()
     }
 
-    try {
-      docPermissions = await docAccessOperation({
-        id,
-        collection: {
-          config: collectionConfig,
-        },
-        req,
-      })
-    } catch (error) {
-      notFound()
-    }
-
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
-
-    hasSavePermission =
-      (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
-      (!isEditing && permissions?.collections?.[collectionSlug]?.create?.permission)
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
@@ -117,8 +117,6 @@ export const Document: React.FC<AdminViewProps> = async ({
       notFound()
     }
 
-    docPermissions = permissions?.globals?.[globalSlug]
-    hasSavePermission = isEditing && docPermissions?.update?.permission
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${
@@ -190,6 +188,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       disableActions={false}
       docPermissions={docPermissions}
       globalSlug={globalConfig?.slug}
+      hasPublishPermission={hasPublishPermission}
       hasSavePermission={hasSavePermission}
       id={id}
       isEditing={isEditing}

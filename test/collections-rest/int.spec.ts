@@ -133,10 +133,10 @@ describe('collections-rest', () => {
 
         const description = 'updated'
         const response = await restClient.PATCH(`/${slug}`, {
-          query: { where: { title: { equals: 'title' } } },
           body: JSON.stringify({
             description,
           }),
+          query: { where: { title: { equals: 'title' } } },
         })
         const { docs, errors } = await response.json()
 
@@ -155,10 +155,10 @@ describe('collections-rest', () => {
         const description = 'updated'
 
         const response = await restClient.PATCH(`/${slug}`, {
-          query: { where: { missing: { equals: 'title' } } },
           body: JSON.stringify({
             description,
           }),
+          query: { where: { missing: { equals: 'title' } } },
         })
         const { docs: noDocs, errors } = await response.json()
 
@@ -181,18 +181,18 @@ describe('collections-rest', () => {
 
         const description = 'updated'
         const relationFieldResponse = await restClient.PATCH(`/${slug}`, {
-          query: { where: { 'relationField.missing': { equals: 'title' } } },
           body: JSON.stringify({
             description,
           }),
+          query: { where: { 'relationField.missing': { equals: 'title' } } },
         })
         expect(relationFieldResponse.status).toEqual(400)
 
         const relationMultiRelationToResponse = await restClient.PATCH(`/${slug}`, {
-          query: { where: { 'relationMultiRelationTo.missing': { equals: 'title' } } },
           body: JSON.stringify({
             description,
           }),
+          query: { where: { 'relationMultiRelationTo.missing': { equals: 'title' } } },
         })
         expect(relationMultiRelationToResponse.status).toEqual(400)
 
@@ -214,10 +214,10 @@ describe('collections-rest', () => {
 
         const description = 'description'
         const response = await restClient.PATCH(`/${slug}`, {
-          query: { where: { restrictedField: { equals: 'restricted' } } },
           body: JSON.stringify({
             description,
           }),
+          query: { where: { restrictedField: { equals: 'restricted' } } },
         })
         const result = await response.json()
 
@@ -253,10 +253,10 @@ describe('collections-rest', () => {
 
         const update = 'update'
         const response = await restClient.PATCH(`/${errorOnHookSlug}`, {
-          query: { where: { text: { equals: text } } },
           body: JSON.stringify({
             text: update,
           }),
+          query: { where: { text: { equals: text } } },
         })
         const result = await response.json()
 
@@ -543,6 +543,29 @@ describe('collections-rest', () => {
           expect(response.status).toEqual(200)
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
+        })
+
+        it('should query LIKE by ID', async () => {
+          const post = await payload.create({
+            collection: slug,
+            data: {
+              title: 'find me buddy',
+            },
+          })
+
+          const response = await restClient.GET(`/${slug}`, {
+            query: {
+              where: {
+                id: {
+                  like: post.id,
+                },
+              },
+            },
+          })
+
+          const result = await response.json()
+          expect(response.status).toStrictEqual(200)
+          expect(result.totalDocs).toStrictEqual(1)
         })
       })
 
@@ -1058,13 +1081,13 @@ describe('collections-rest', () => {
             const { docs } = await restClient
               .GET(`/${pointSlug}`, {
                 query: {
+                  limit: 5,
                   where: {
                     point: {
                       // querying large enough range to include all docs
                       near: '0, 0, 100000, 0',
                     },
                   },
-                  limit: 5,
                 },
               })
               .then((res) => res.json())
@@ -1094,8 +1117,8 @@ describe('collections-rest', () => {
                 where: {
                   point: {
                     within: {
-                      coordinates: [polygon],
                       type: 'Polygon',
+                      coordinates: [polygon],
                     },
                   },
                 },
@@ -1113,8 +1136,8 @@ describe('collections-rest', () => {
                 where: {
                   point: {
                     within: {
-                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
                       type: 'Polygon',
+                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
                     },
                   },
                 },
@@ -1144,8 +1167,8 @@ describe('collections-rest', () => {
                 where: {
                   point: {
                     intersects: {
-                      coordinates: [polygon],
                       type: 'Polygon',
+                      coordinates: [polygon],
                     },
                   },
                 },
@@ -1163,8 +1186,8 @@ describe('collections-rest', () => {
                 where: {
                   point: {
                     intersects: {
-                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
                       type: 'Polygon',
+                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
                     },
                   },
                 },
@@ -1397,12 +1420,12 @@ describe('collections-rest', () => {
           it('should query a limited set of docs', async () => {
             const response = await restClient.GET(`/${slug}`, {
               query: {
+                limit: 15,
                 where: {
                   title: {
                     equals: 'limit-test',
                   },
                 },
-                limit: 15,
               },
             })
             const result = await response.json()
@@ -1414,12 +1437,12 @@ describe('collections-rest', () => {
           it('should query all docs when limit=0', async () => {
             const response = await restClient.GET(`/${slug}`, {
               query: {
+                limit: 0,
                 where: {
                   title: {
                     equals: 'limit-test',
                   },
                 },
-                limit: 0,
               },
             })
             const result = await response.json()

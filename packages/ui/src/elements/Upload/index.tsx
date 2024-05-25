@@ -101,7 +101,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   }, [setValue])
 
   const onEditsSave = React.useCallback(
-    ({ crop, pointPosition }) => {
+    ({ crop, focalPosition }) => {
       setCrop({
         x: crop.x || 0,
         y: crop.y || 0,
@@ -122,10 +122,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
         type: 'SET',
         params: {
           uploadEdits:
-            crop || pointPosition
+            crop || focalPosition
               ? {
                   crop: crop || null,
-                  focalPoint: pointPosition ? pointPosition : null,
+                  focalPoint: focalPosition ? focalPosition : null,
                 }
               : null,
         },
@@ -164,10 +164,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const hasImageSizes = uploadConfig?.imageSizes?.length > 0
   const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
+  // Explicity check if set to true, default is undefined
+  const focalPointEnabled = uploadConfig?.focalPoint === true
 
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
 
-  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions)
+  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
 
   const lastSubmittedTime = submitted ? new Date().toISOString() : null
 
@@ -234,14 +236,13 @@ export const Upload: React.FC<UploadProps> = (props) => {
       {(value || doc.filename) && (
         <Drawer Header={null} slug={editDrawerSlug}>
           <EditUpload
-            doc={doc || undefined}
             fileName={value?.name || doc?.filename}
             fileSrc={fileSrc || doc?.url}
             imageCacheTag={lastSubmittedTime}
             initialCrop={formQueryParams?.uploadEdits?.crop ?? {}}
             initialFocalPoint={{
-              x: formQueryParams?.uploadEdits?.focalPoint.x || 0,
-              y: formQueryParams?.uploadEdits?.focalPoint.y || 0,
+              x: formQueryParams?.uploadEdits?.focalPoint.x || doc.focalX || 50,
+              y: formQueryParams?.uploadEdits?.focalPoint.y || doc.focalY || 50,
             }}
             onSave={onEditsSave}
             showCrop={showCrop}

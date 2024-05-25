@@ -1,5 +1,6 @@
 import type { SerializedLexicalNode, Spread } from 'lexical'
 import type { EditorConfig, LexicalNode, NodeKey } from 'lexical'
+import type { JSX } from 'react'
 
 import { addClassNamesToElement } from '@lexical/utils'
 import { DecoratorNode } from 'lexical'

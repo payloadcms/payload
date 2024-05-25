@@ -44,10 +44,10 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    getDocPermissions,
     getDocPreferences,
     getVersions,
     globalSlug,
+    hasPublishPermission,
     hasSavePermission,
     initialData: data,
     initialState,
@@ -115,7 +115,6 @@ export const DefaultEditView: React.FC = () => {
       }
 
       void getVersions()
-      void getDocPermissions()
 
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
@@ -147,7 +146,6 @@ export const DefaultEditView: React.FC = () => {
       depth,
       collectionSlug,
       getVersions,
-      getDocPermissions,
       isEditing,
       refreshCookieAsync,
       adminRoute,
@@ -221,9 +219,10 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
-            isEditing={Boolean(id)}
+            isEditing={isEditing}
             permissions={docPermissions}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />

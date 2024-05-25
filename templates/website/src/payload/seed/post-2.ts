@@ -1,82 +1,242 @@
-import type { Post } from '../payload-types'
+import type { Post } from '../../payload-types'
 
 export const post2: Partial<Post> = {
   slug: 'post-2',
   _status: 'published',
   authors: ['{{AUTHOR}}'],
-  enablePremiumContent: true,
-  hero: {
-    type: 'lowImpact',
-    links: null,
-    media: null,
-    richText: [
-      {
-        type: 'h1',
-        children: [
-          {
-            text: 'Post 2',
-          },
-        ],
-      },
-    ],
-  },
-  layout: [
-    {
-      blockType: 'content',
-      columns: [
+  content: {
+    root: {
+      type: 'root',
+      children: [
         {
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
-          richText: [
+          type: 'paragraph',
+          children: [
             {
-              children: [
-                {
-                  text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
-                },
-              ],
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: "In the dynamic landscape of website development and content management, a robust CMS (Content Management System) is the cornerstone of a successful digital presence. While several CMS platforms vie for attention, PayloadCMS emerges as a versatile and powerful tool, offering a plethora of features and functionalities that empower developers and content creators alike. Let's delve into the transformative potential of PayloadCMS and how it's reshaping the way we manage and deliver digital content.",
+              version: 1,
             },
           ],
-          size: 'twoThirds',
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          version: 1,
+        },
+        {
+          type: 'block',
+          fields: {
+            id: '6643854cf1b6f340d1c1f367',
+            blockName: '',
+            blockType: 'banner',
+            content: {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'The Payload config is where you configure everything that Payload does.',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    textFormat: 0,
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            style: 'info',
+          },
+          format: '',
+          version: 2,
+        },
+        {
+          type: 'heading',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Streamlined Content Management',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          tag: 'h2',
+          version: 1,
+        },
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'PayloadCMS prioritizes simplicity without compromising on functionality. Its intuitive interface allows users to effortlessly manage content, from creating and editing pages to organizing media assets. With a user-friendly dashboard, content updates become swift and seamless, enabling teams to focus on crafting engaging content rather than grappling with complex technicalities.',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          version: 1,
+        },
+        {
+          type: 'block',
+          fields: {
+            id: '664e17c98fe68d721423c1d0',
+            blockName: '',
+            blockType: 'mediaBlock',
+            media: '{{IMAGE_2}}',
+            position: 'default',
+          },
+          format: '',
+          version: 2,
+        },
+        {
+          type: 'heading',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Flexibility and Customization',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          tag: 'h3',
+          version: 1,
+        },
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: "One of PayloadCMS's standout features is its flexibility and extensibility. Tailored to suit diverse project requirements, it offers customizable schemas that empower developers to define content structures tailored to specific needs. Whether it's a blog, e-commerce site, or a portfolio showcase, PayloadCMS adapts effortlessly, providing a solid foundation for building dynamic, content-rich websites.",
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          version: 1,
+        },
+        {
+          type: 'heading',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Simple Collection Example',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          tag: 'h3',
+          version: 1,
+        },
+        {
+          type: 'block',
+          fields: {
+            id: '664397d9e0ef87fa1fec2fc0',
+            blockName: '',
+            blockType: 'code',
+            code: "import { CollectionConfig } from 'payload/types'\n\nexport const Orders: CollectionConfig = {\n  slug: 'orders',\n  fields: [\n    {\n      name: 'total',\n      type: 'number',\n      required: true,\n    },\n    {\n      name: 'placedBy',\n      type: 'relationship',\n      relationTo: 'customers',\n      required: true,\n    },\n  ],\n}",
+            language: 'typescript',
+          },
+          format: '',
+          version: 2,
+        },
+        {
+          type: 'heading',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Conclusion',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          tag: 'h2',
+          version: 1,
+        },
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: "In an era where content is king, a powerful CMS is the linchpin of digital success. PayloadCMS stands out as a formidable contender, offering a potent blend of simplicity, flexibility, and performance. By empowering developers and content creators with intuitive tools and robust features, PayloadCMS is redefining the landscape of content management, enabling organizations to create immersive digital experiences that captivate audiences and drive growth. Whether you're a developer seeking efficiency or a content creator craving creativity, PayloadCMS unlocks a world of possibilities, revolutionizing the way we manage and deliver digital content.",
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          version: 1,
         },
       ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      version: 1,
     },
-  ],
+  },
   meta: {
     description: 'This is the second post.',
-    image: '{{IMAGE}}',
+    image: '{{IMAGE_1}}',
     title: 'Post 2',
   },
-  premiumContent: [
-    {
-      blockType: 'content',
-      columns: [
-        {
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
-          richText: [
-            {
-              children: [
-                {
-                  bold: true,
-                  text: 'This is premium content.',
-                },
-                {
-                  text: ' It is only available to authenticated users. This content can be anything from additional video, text, and content, to download links and more. These are simply layout building blocks configured in the CMS.',
-                },
-              ],
-            },
-          ],
-          size: 'twoThirds',
-        },
-      ],
-    },
-  ],
   relatedPosts: [], // this is populated by the seed script
   title: 'Post 2',
 }

@@ -87,14 +87,14 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div>
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}

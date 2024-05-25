@@ -80,9 +80,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     <LexicalComposer initialConfig={initialConfig} key={path}>
       <EditorFocusProvider>
         <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
-          <div className="editor-shell">
-            <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />
-          </div>
+          <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />
         </EditorConfigProvider>
       </EditorFocusProvider>
     </LexicalComposer>

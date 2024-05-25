@@ -15,6 +15,7 @@ export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props
 
   return (
     <div className={baseClass} ref={customProps?.droppableRef}>
+      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
       <SelectComponents.ValueContainer {...props} />
     </div>
   )

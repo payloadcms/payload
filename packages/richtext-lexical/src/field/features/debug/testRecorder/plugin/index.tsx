@@ -4,7 +4,7 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
 import * as React from 'react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { PluginComponent } from '../../../types.js'
 

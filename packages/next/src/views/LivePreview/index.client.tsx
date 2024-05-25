@@ -61,9 +61,11 @@ const PreviewView: React.FC<Props> = ({
     docPermissions,
     getDocPreferences,
     globalSlug,
+    hasPublishPermission,
     hasSavePermission,
     initialData,
     initialState,
+    isEditing,
     onSave: onSaveFromProps,
   } = useDocumentInfo()
 
@@ -159,9 +161,10 @@ const PreviewView: React.FC<Props> = ({
             apiURL={apiURL}
             data={initialData}
             disableActions={disableActions}
+            hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
-            isEditing={Boolean(id)}
+            isEditing={isEditing}
             permissions={docPermissions}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />

@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../field/features/types.js'
 import type { SanitizedClientEditorConfig } from '../field/lexical/config/types.js'
-import type { GeneratedFeatureProviderComponent } from '../types.js'
+import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 
 import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default.js'
 import { loadClientFeatures } from '../field/lexical/config/client/loader.js'
@@ -18,9 +18,10 @@ import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanit
 import { getEnabledNodes } from '../field/lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<{
+  admin?: LexicalFieldAdminProps
   lexicalEditorConfig: LexicalEditorConfig
 }> = (props) => {
-  const { lexicalEditorConfig } = props
+  const { admin, lexicalEditorConfig } = props
 
   const [preview, setPreview] = React.useState('Loading...')
   const { schemaPath } = useFieldProps()
@@ -81,11 +82,13 @@ export const RichTextCell: React.FC<{
           sanitizeClientEditorConfig(
             lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
             resolvedClientFeatures,
+            admin,
           ),
         )
       }
     }
   }, [
+    admin,
     hasLoadedFeatures,
     clientFunctions,
     schemaPath,

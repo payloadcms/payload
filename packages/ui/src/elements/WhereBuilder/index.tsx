@@ -131,7 +131,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     setConditions((prevConditions) => {
       const newConditions = [...prevConditions]
       newConditions[orIndex].and.splice(andIndex, 1)
-
       if (newConditions[orIndex].and.length === 0) {
         newConditions.splice(orIndex, 1)
       }
@@ -156,44 +155,48 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             {t('general:filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
           </div>
           <ul className={`${baseClass}__or-filters`}>
-            {conditions.map((or, orIndex) => (
-              <li key={orIndex}>
-                {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
-                <ul className={`${baseClass}__and-filters`}>
-                  {Array.isArray(or?.and) &&
-                    or.and.map((_, andIndex) => {
-                      const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
-                      const initialOperator =
-                        Object.keys(
-                          conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
-                        )?.[0] || undefined
-                      const initialValue =
-                        conditions[orIndex].and[andIndex]?.[initialFieldName]?.[initialOperator] ||
-                        ''
+            {conditions.map((or, orIndex) => {
+              const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
 
-                      return (
-                        <li key={andIndex}>
-                          {andIndex !== 0 && (
-                            <div className={`${baseClass}__label`}>{t('general:and')}</div>
-                          )}
-                          <Condition
-                            addCondition={addCondition}
-                            andIndex={andIndex}
-                            fieldName={initialFieldName}
-                            fields={reducedFields}
-                            initialValue={initialValue}
-                            key={andIndex}
-                            operator={initialOperator}
-                            orIndex={orIndex}
-                            removeCondition={removeCondition}
-                            updateCondition={updateCondition}
-                          />
-                        </li>
-                      )
-                    })}
-                </ul>
-              </li>
-            ))}
+              return (
+                <li key={compoundOrKey}>
+                  {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
+                  <ul className={`${baseClass}__and-filters`}>
+                    {Array.isArray(or?.and) &&
+                      or.and.map((_, andIndex) => {
+                        const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
+                        const initialOperator =
+                          Object.keys(
+                            conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
+                          )?.[0] || undefined
+                        const initialValue =
+                          conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
+                            initialOperator
+                          ] || ''
+
+                        return (
+                          <li key={andIndex}>
+                            {andIndex !== 0 && (
+                              <div className={`${baseClass}__label`}>{t('general:and')}</div>
+                            )}
+                            <Condition
+                              addCondition={addCondition}
+                              andIndex={andIndex}
+                              fieldName={initialFieldName}
+                              fields={reducedFields}
+                              initialValue={initialValue}
+                              operator={initialOperator}
+                              orIndex={orIndex}
+                              removeCondition={removeCondition}
+                              updateCondition={updateCondition}
+                            />
+                          </li>
+                        )
+                      })}
+                  </ul>
+                </li>
+              )
+            })}
           </ul>
           <Button
             buttonStyle="icon-label"

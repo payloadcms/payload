@@ -3,6 +3,7 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
+import type { CheckboxInputProps } from './Input.js'
 import type { CheckboxFieldProps } from './types.js'
 
 import { FieldDescription } from '../../forms/FieldDescription/index.js'
@@ -19,7 +20,7 @@ import './index.scss'
 
 const baseClass = 'checkbox'
 
-export { CheckboxFieldProps, CheckboxInput }
+export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 
 const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
   const {
@@ -97,9 +98,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      </div>
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}

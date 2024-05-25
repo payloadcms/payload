@@ -26,6 +26,7 @@ export type DocumentInfoProps = {
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
   globalSlug?: SanitizedGlobalConfig['slug']
+  hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id: null | number | string
   isEditing?: boolean
@@ -35,7 +36,7 @@ export type DocumentInfoProps = {
 
 export type DocumentInfoContext = DocumentInfoProps & {
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
-  getDocPermissions: () => Promise<void>
+  getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
   initialData: Data

@@ -289,7 +289,8 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin
+          - admin__e2e__1
+          - admin__e2e__2
           - auth
           - field-error-states
           - fields-relationship
@@ -298,7 +299,14 @@ jobs:
           - fields__collections__Array
           - fields__collections__Relationship
           - fields__collections__RichText
-          - fields__collections__Lexical
+          - fields__collections__Lexical__e2e__main
+          - fields__collections__Lexical__e2e__blocks
+          - fields__collections__Date
+          - fields__collections__Number
+          - fields__collections__Point
+          - fields__collections__Tabs
+          - fields__collections__Text
+          - fields__collections__Upload
           - live-preview
           - localization
           - i18n

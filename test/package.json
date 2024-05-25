@@ -40,6 +40,9 @@
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "8.6.0",
@@ -53,5 +56,9 @@
     "ts-essentials": "7.0.3",
     "typescript": "5.4.5",
     "uploadthing": "^6.10.1"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

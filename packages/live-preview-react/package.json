@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "3.0.0-beta.32",
+  "version": "3.0.0-beta.36",
   "description": "The official live preview React SDK for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -35,11 +35,13 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "18.2.74",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
   },
   "publishConfig": {
     "exports": {
@@ -52,5 +54,9 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }
