@@ -731,7 +731,7 @@ export const traverseFields = ({
           // make the foreign key column for relationship using the correct id column type
           targetTable[fieldName] = parentIDColumnMap[colType](`${columnName}_id`).references(
             () => adapter.tables[tableName].id,
-            { onDelete: 'cascade' },
+            { onDelete: 'set null' },
           )
 
           // add relationship to table
@@ -746,10 +746,6 @@ export const traverseFields = ({
             targetTable[fieldName].notNull()
           }
         }
-
-        // if (field.localized && adapter.payload.config.localization) {
-        //   hasLocalizedRelationshipField = true
-        // }
 
         break
 
