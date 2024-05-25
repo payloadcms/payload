@@ -4,6 +4,7 @@ import type { Field, TabAsField } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 
+import type { PostgresAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
 import { transformHasManyNumber } from './hasManyNumber.js'
@@ -11,6 +12,10 @@ import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
 
 type TraverseFieldsArgs = {
+  /**
+   * The DB adapter
+   */
+  adapter: PostgresAdapter
   /**
    * Pre-formatted blocks map
    */
@@ -60,6 +65,7 @@ type TraverseFieldsArgs = {
 // Traverse fields recursively, transforming data
 // for each field type into required Payload shape
 export const traverseFields = <T extends Record<string, unknown>>({
+  adapter,
   blocks,
   config,
   dataRef,
@@ -77,6 +83,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   const formatted = fields.reduce((result, field) => {
     if (field.type === 'tabs') {
       traverseFields({
+        adapter,
         blocks,
         config,
         dataRef,
@@ -97,6 +104,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       (field.type === 'tab' && !('name' in field))
     ) {
       traverseFields({
+        adapter,
         blocks,
         config,
         dataRef,
@@ -139,6 +147,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 }
 
                 const rowResult = traverseFields<T>({
+                  adapter,
                   blocks,
                   config,
                   dataRef: data,
@@ -173,6 +182,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               }
 
               return traverseFields<T>({
+                adapter,
                 blocks,
                 config,
                 dataRef: row,
@@ -217,6 +227,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
                 if (block) {
                   const blockResult = traverseFields<T>({
+                    adapter,
                     blocks,
                     config,
                     dataRef: row,
@@ -248,6 +259,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
               if (block) {
                 return traverseFields<T>({
+                  adapter,
                   blocks,
                   config,
                   dataRef: row,
@@ -427,6 +439,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       valuesToTransform.forEach(({ ref, table }) => {
         const fieldData = table[`${fieldPrefix || ''}${field.name}`]
         const locale = table?._locale
+        let val = fieldData
 
         switch (field.type) {
           case 'tab':
@@ -441,6 +454,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
+                  adapter,
                   blocks,
                   config,
                   dataRef: groupLocaleData as Record<string, unknown>,
@@ -461,6 +475,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               const groupData = {}
 
               ref[field.name] = traverseFields<Record<string, unknown>>({
+                adapter,
                 blocks,
                 config,
                 dataRef: groupData as Record<string, unknown>,
@@ -482,60 +497,49 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
 
           case 'text': {
-            let val = fieldData
             if (typeof fieldData === 'string') {
               val = String(fieldData)
-            }
-
-            if (typeof locale === 'string') {
-              ref[locale] = val
-            } else {
-              result[field.name] = val
             }
 
             break
           }
 
           case 'number': {
-            let val = fieldData
             if (typeof fieldData === 'string') {
               val = Number.parseFloat(fieldData)
-            }
-
-            if (typeof locale === 'string') {
-              ref[locale] = val
-            } else {
-              result[field.name] = val
             }
 
             break
           }
 
           case 'date': {
-            let val = fieldData
-
             if (typeof fieldData === 'string') {
               val = new Date(fieldData).toISOString()
             }
 
-            if (typeof locale === 'string') {
-              ref[locale] = val
-            } else {
-              result[field.name] = val
+            break
+          }
+
+          case 'relationship':
+          case 'upload': {
+            if (
+              typeof field.relationTo === 'string' &&
+              adapter.payload.collections[field.relationTo].customIDType === 'number'
+            ) {
+              val = Number(val)
             }
 
             break
           }
 
           default: {
-            if (typeof locale === 'string') {
-              ref[locale] = fieldData
-            } else {
-              result[field.name] = fieldData
-            }
-
             break
           }
+        }
+        if (typeof locale === 'string') {
+          ref[locale] = val
+        } else {
+          result[field.name] = val
         }
       })
 

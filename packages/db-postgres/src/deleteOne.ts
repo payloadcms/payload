@@ -59,6 +59,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   }
 
   const result = transform({
+    adapter: this,
     config: this.payload.config,
     data: docToDelete,
     fields: collection.fields,

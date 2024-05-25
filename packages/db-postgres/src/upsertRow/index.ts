@@ -346,6 +346,7 @@ export const upsertRow = async <T extends TypeWithID>({
   // //////////////////////////////////
 
   const result = transform<T>({
+    adapter,
     config: adapter.payload.config,
     data: doc,
     fields,

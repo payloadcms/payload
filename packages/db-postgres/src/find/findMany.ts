@@ -172,6 +172,7 @@ export const findMany = async function find({
 
   const docs = rawDocs.map((data: TypeWithID) => {
     return transform({
+      adapter,
       config: adapter.payload.config,
       data,
       fields,
