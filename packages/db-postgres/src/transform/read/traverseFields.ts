@@ -523,6 +523,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'relationship':
           case 'upload': {
             if (
+              val &&
               typeof field.relationTo === 'string' &&
               adapter.payload.collections[field.relationTo].customIDType === 'number'
             ) {
