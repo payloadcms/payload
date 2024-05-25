@@ -2,7 +2,6 @@ import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import chalk from 'chalk'
-// @ts-expect-error no types
 import { detect } from 'detect-package-manager'
 import figures from 'figures'
 import path from 'path'
