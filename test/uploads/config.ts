@@ -23,7 +23,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  serverURL: undefined,
   collections: [
     {
       slug: relationSlug,
@@ -59,13 +58,6 @@ export default buildConfigWithDefaults({
       slug: 'gif-resize',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media-gif'),
-        mimeTypes: ['image/gif'],
-        resizeOptions: {
-          position: 'center',
-          width: 200,
-          height: 200,
-        },
         formatOptions: {
           format: 'gif',
         },
@@ -83,27 +75,32 @@ export default buildConfigWithDefaults({
             width: 1000,
           },
         ],
+        mimeTypes: ['image/gif'],
+        resizeOptions: {
+          height: 200,
+          position: 'center',
+          width: 200,
+        },
+        staticDir: path.resolve(dirname, './media-gif'),
       },
     },
     {
       slug: 'no-image-sizes',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './no-image-sizes'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
           height: 200,
           position: 'center',
           width: 200,
         },
+        staticDir: path.resolve(dirname, './no-image-sizes'),
       },
     },
     {
       slug: 'object-fit',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './object-fit'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'fitContain',
@@ -130,6 +127,8 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './object-fit'),
       },
     },
     {
@@ -137,8 +136,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         focalPoint: false,
-        staticDir: path.resolve(dirname, './crop-only'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
@@ -156,6 +153,8 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './crop-only'),
       },
     },
     {
@@ -163,8 +162,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         crop: false,
-        staticDir: path.resolve(dirname, './focal-only'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
@@ -182,6 +179,8 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './focal-only'),
       },
     },
     {
@@ -191,7 +190,7 @@ export default buildConfigWithDefaults({
         crop: false,
         focalPoint: true,
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        staticDir: './focal-no-sizes',
+        staticDir: path.resolve(dirname, './focal-no-sizes'),
       },
     },
     {
@@ -295,15 +294,6 @@ export default buildConfigWithDefaults({
       slug: enlargeSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media/enlarge'),
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -336,13 +326,21 @@ export default buildConfigWithDefaults({
             width: 300,
           },
         ],
+        mimeTypes: [
+          'image/png',
+          'image/jpg',
+          'image/jpeg',
+          'image/gif',
+          'image/svg+xml',
+          'audio/mpeg',
+        ],
+        staticDir: path.resolve(dirname, './media/enlarge'),
       },
     },
     {
       slug: reduceSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media/reduce'),
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -377,15 +375,13 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
+        staticDir: path.resolve(dirname, './media/reduce'),
       },
     },
     {
       slug: 'media-trim',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media-trim'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        trimOptions: 0,
         imageSizes: [
           {
             name: 'trimNumber',
@@ -409,6 +405,9 @@ export default buildConfigWithDefaults({
             width: 1024,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './media-trim'),
+        trimOptions: 0,
       },
     },
     {
@@ -442,8 +441,8 @@ export default buildConfigWithDefaults({
       slug: 'required-file',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './required'),
         filesRequiredOnCreate: true,
+        staticDir: path.resolve(dirname, './required'),
       },
     },
     {
@@ -455,21 +454,14 @@ export default buildConfigWithDefaults({
         },
       ],
       upload: {
-        staticDir: path.resolve(dirname, `./${versionSlug}`),
         filesRequiredOnCreate: true,
+        staticDir: path.resolve(dirname, `./${versionSlug}`),
       },
       versions: {
         drafts: true,
       },
     },
   ],
-  upload: {
-    // debug: true,
-    abortOnLimit: true,
-    limits: {
-      fileSize: 2_000_000, // 2MB
-    },
-  },
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
@@ -553,5 +545,13 @@ export default buildConfigWithDefaults({
         name: `function-image-${imageFile.name}`,
       },
     })
+  },
+  serverURL: undefined,
+  upload: {
+    // debug: true,
+    abortOnLimit: true,
+    limits: {
+      fileSize: 2_000_000, // 2MB
+    },
   },
 })
