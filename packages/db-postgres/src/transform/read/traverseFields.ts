@@ -493,7 +493,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               }
             }
 
-            break
+            return
           }
 
           case 'text': {
