@@ -1,6 +1,6 @@
 'use client'
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
-import type { MutableRefObject, ReactPortal } from 'react'
+import type { JSX, MutableRefObject, ReactPortal } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'

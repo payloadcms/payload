@@ -13,7 +13,7 @@ export interface LivePreviewContextType {
   breakpoints: LivePreviewConfig['breakpoints']
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
   iframeHasLoaded: boolean
-  iframeRef: React.RefObject<HTMLIFrameElement>
+  iframeRef: React.RefObject<HTMLIFrameElement | null>
   isPopupOpen: boolean
   measuredDeviceSize: {
     height: number

@@ -9,7 +9,7 @@ It abstracts all of the email functionality that was in Payload by default in 2.
 ## Installation
 
 ```sh
-pnpm add @payloadcms/email-nodemailer` nodemailer
+pnpm add @payloadcms/email-nodemailer nodemailer
 ```
 
 ## Usage

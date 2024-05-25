@@ -15,7 +15,7 @@ import { useField } from '@payloadcms/ui/forms/useField'
 import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import isHotkey from 'is-hotkey'
+import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
@@ -315,14 +315,14 @@ const RichTextField: React.FC<
         width,
       }}
     >
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor

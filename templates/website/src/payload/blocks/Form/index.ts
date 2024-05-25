@@ -1,6 +1,11 @@
 import type { Block } from 'payload/types'
 
-import richText from '../../fields/richText'
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
 export const FormBlock: Block = {
   slug: 'formBlock',
@@ -16,13 +21,24 @@ export const FormBlock: Block = {
       type: 'checkbox',
       label: 'Enable Intro Content',
     },
-    richText({
+    {
       name: 'introContent',
+      type: 'richText',
       admin: {
         condition: (_, { enableIntro }) => Boolean(enableIntro),
       },
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+          ]
+        },
+      }),
       label: 'Intro Content',
-    }),
+    },
   ],
   graphQL: {
     singularName: 'FormBlock',

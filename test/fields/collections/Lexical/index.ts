@@ -67,6 +67,9 @@ export const LexicalFields: CollectionConfig = {
       type: 'richText',
       required: true,
       editor: lexicalEditor({
+        admin: {
+          hideGutter: false,
+        },
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           //TestRecorderFeature(),

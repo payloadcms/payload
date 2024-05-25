@@ -14,6 +14,11 @@ export type RenderCustomComponentProps = {
   serverOnlyProps?: ServerProps
 }
 
+/**
+ * If you are passing dynamic props or function props to this component,
+ * you should instead use the <RenderCustomClientComponent/>
+ */
+
 export const RenderCustomComponent: React.FC<RenderCustomComponentProps> = (props) => {
   const { CustomComponent, DefaultComponent, componentProps, serverOnlyProps } = props
 

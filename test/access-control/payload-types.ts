@@ -14,8 +14,8 @@ export interface Config {
     unrestricted: Unrestricted;
     'fully-restricted': FullyRestricted;
     'read-only-collection': ReadOnlyCollection;
-    'user-restricted': UserRestricted;
-    'create-not-update': CreateNotUpdate;
+    'user-restricted-collection': UserRestrictedCollection;
+    'create-not-update-collection': CreateNotUpdateCollection;
     'restricted-versions': RestrictedVersion;
     'sibling-data': SiblingDatum;
     'rely-on-request-headers': RelyOnRequestHeader;
@@ -30,6 +30,8 @@ export interface Config {
     settings: Setting;
     test: Test;
     'read-only-global': ReadOnlyGlobal;
+    'user-restricted-global': UserRestrictedGlobal;
+    'read-not-update-global': ReadNotUpdateGlobal;
   };
   locale: null;
   user:
@@ -97,16 +99,16 @@ export interface Post {
 export interface Unrestricted {
   id: string;
   name?: string | null;
-  userRestrictedDocs?: (string | UserRestricted)[] | null;
-  createNotUpdateDocs?: (string | CreateNotUpdate)[] | null;
+  userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
+  createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "user-restricted".
+ * via the `definition` "user-restricted-collection".
  */
-export interface UserRestricted {
+export interface UserRestrictedCollection {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -114,9 +116,9 @@ export interface UserRestricted {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "create-not-update".
+ * via the `definition` "create-not-update-collection".
  */
-export interface CreateNotUpdate {
+export interface CreateNotUpdateCollection {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -298,6 +300,26 @@ export interface Test {
  * via the `definition` "read-only-global".
  */
 export interface ReadOnlyGlobal {
+  id: string;
+  name?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-restricted-global".
+ */
+export interface UserRestrictedGlobal {
+  id: string;
+  name?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-not-update-global".
+ */
+export interface ReadNotUpdateGlobal {
   id: string;
   name?: string | null;
   updatedAt?: string | null;
