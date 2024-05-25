@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -17,8 +17,7 @@ export const load = async (filePath) => {
       'Looks like payload has not been built. Please run `pnpm build:core` in the monorepo root',
     )
   }
-
-  const importConfigImport = await import(resolvedImportWithoutClientFilesPath)
+  const importConfigImport = await import(pathToFileURL(resolvedImportWithoutClientFilesPath).href)
   const importConfig = importConfigImport.importConfig
 
   const result = await importConfig(filePath)
