@@ -27,5 +27,5 @@ export const buildProjection = ({
     select,
   })
 
-  return projection.join(' ')
+  return projection
 }
