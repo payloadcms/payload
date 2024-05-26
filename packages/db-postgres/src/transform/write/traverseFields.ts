@@ -408,7 +408,7 @@ export const traverseFields = ({
           if (typeof fieldData === 'object') {
             Object.entries(fieldData).forEach(([localeKey, localeData]) => {
               if (typeof localeData === 'object') {
-                if ('id' in localeData && localeData?.id) {
+                if (localeData && 'id' in localeData && localeData?.id) {
                   fieldData[localeKey] = localeData.id
                 }
               } else {
