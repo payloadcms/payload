@@ -745,6 +745,10 @@ export const traverseFields = ({
           if (!disableNotNull && field.required && !field.admin?.condition) {
             targetTable[fieldName].notNull()
           }
+          break
+        }
+        if (adapter.payload.config.localization && field.localized) {
+          hasLocalizedRelationshipField = true
         }
 
         break
