@@ -36,6 +36,13 @@ export const selectDistinct = ({
       chainedMethods.push({ args: [where], method: 'where' })
     }
 
+    joinAliases.forEach(({ condition, table }) => {
+      chainedMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
+
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
         chainedMethods.push({
@@ -44,14 +51,6 @@ export const selectDistinct = ({
         })
       }
     })
-
-    joinAliases.forEach(({ condition, table }) => {
-      chainedMethods.push({
-        args: [table, condition],
-        method: 'leftJoin',
-      })
-    })
-
     return chainMethods({
       methods: chainedMethods,
       query: db.selectDistinct(selectFields).from(adapter.tables[tableName]),

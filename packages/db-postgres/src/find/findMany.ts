@@ -122,6 +122,12 @@ export const findMany = async function find({
 
   if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
     const selectCountMethods: ChainedMethods = []
+    joinAliases.forEach(({ condition, table }) => {
+      selectCountMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
 
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
@@ -130,13 +136,6 @@ export const findMany = async function find({
           method: 'leftJoin',
         })
       }
-    })
-
-    joinAliases.forEach(({ condition, table }) => {
-      selectCountMethods.push({
-        args: [table, condition],
-        method: 'leftJoin',
-      })
     })
 
     const countResult = await chainMethods({
