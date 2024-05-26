@@ -2,6 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
+import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
@@ -82,7 +83,16 @@ export const RootPage = async ({
   }
 
   const RenderedView = (
-    <DefaultView initPageResult={initPageResult} params={params} searchParams={searchParams} />
+    <WithServerSideProps
+      Component={DefaultView}
+      serverOnlyProps={
+        {
+          initPageResult,
+          params,
+          searchParams,
+        } as any
+      }
+    />
   )
 
   return (
