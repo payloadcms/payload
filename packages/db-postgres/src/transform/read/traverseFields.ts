@@ -317,7 +317,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
             const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
 
             relationPathMatch.forEach((row) => {
-              // TODO: the row.locale is not defined
               if (typeof row.locale === 'string') {
                 if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
                 relationsByLocale[row.locale].push(row)

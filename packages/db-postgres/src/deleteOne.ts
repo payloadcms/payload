@@ -22,7 +22,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   let docToDelete: Record<string, unknown>
 
-  const { joinAliases, joins, selectFields, where } = await buildQuery({
+  const { joins, selectFields, where } = await buildQuery({
     adapter: this,
     fields: collection.fields,
     locale: req.locale,
@@ -34,7 +34,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
     db,
-    joinAliases,
     joins,
     selectFields,
     tableName,
