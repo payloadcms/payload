@@ -153,6 +153,7 @@ export const findByIDOperation = async <T extends TypeWithID>(
       overrideAccess,
       populateArg: populate,
       req,
+      select,
       showHiddenFields,
     })
 

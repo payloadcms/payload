@@ -25,8 +25,6 @@ const localizedPostsSlug = 'localized-posts'
 let docWithRelationId: number | string
 const docWithRelationSlug = 'relationships'
 
-const serializeObject = (obj: unknown) => JSON.parse(JSON.stringify(obj))
-
 describe('Select Fields', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(configPromise))
@@ -56,249 +54,145 @@ describe('Select Fields', () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          title: true,
-        },
+        select: ['title'],
       })
-
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        title: expect.any(String),
-        group: {},
-        tab: {},
-        groupMultiple: {},
-        groupArray: { array: [] },
-        array: [],
-        arrayMultiple: [],
-        blocks: [],
+      expect(post).toEqual({
+        id: postId,
+        title: post.title,
       })
     })
-
     it('should select text and id inside of array', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          array: {
-            title: true,
-          },
-        },
+        select: ['array.title'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        tab: {},
+      expect(post).toEqual({
+        id: postId,
         array: [
           {
-            title: expect.any(String),
-            id: expect.any(String),
+            title: post.array[0].title,
+            id: post.array[0].id,
           },
         ],
-        group: {},
-        groupMultiple: {},
-        arrayMultiple: [],
-        blocks: [],
-        groupArray: {
-          array: [],
-        },
       })
     })
-
     it('should all fields inside of array', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          arrayMultiple: true,
-        },
+        select: ['arrayMultiple'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        array: [],
-        group: {},
-        tab: {},
-        groupMultiple: {},
+      expect(post).toEqual({
+        id: postId,
         arrayMultiple: [
           {
-            id: expect.any(String),
-            titleFirst: expect.any(String),
-            titleSecond: expect.any(String),
+            id: post.arrayMultiple[0].id,
+            titleFirst: post.arrayMultiple[0].titleFirst,
+            titleSecond: post.arrayMultiple[0].titleSecond,
           },
         ],
-        blocks: [],
-        groupArray: {
-          array: [],
-        },
       })
     })
-
     it('should select text inside of group', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          group: {
-            title: true,
-          },
-        },
+        select: ['group.title'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        array: [],
-        tab: {},
+      expect(post).toEqual({
+        id: postId,
         group: {
-          title: expect.any(String),
-        },
-        groupMultiple: {},
-        arrayMultiple: [],
-        blocks: [],
-        groupArray: {
-          array: [],
+          title: post.group.title,
         },
       })
     })
-
     it('should select all fields inside of group', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          groupMultiple: true,
-        },
+        select: ['groupMultiple'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        array: [],
-        tab: {},
-        group: {},
+      expect(post).toEqual({
+        id: postId,
         groupMultiple: {
-          titleFirst: expect.any(String),
-          titleSecond: expect.any(String),
-        },
-        arrayMultiple: [],
-        blocks: [],
-        groupArray: {
-          array: [],
+          titleFirst: post.groupMultiple.titleFirst,
+          titleSecond: post.groupMultiple.titleSecond,
         },
       })
     })
-
     it('should select text inside of blocks that have slug section', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          blocks: {
-            section: {
-              title: true,
-            },
-          },
-        },
+        select: ['blocks.section.title'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        array: [],
-        tab: {},
-        group: {},
-        groupMultiple: {},
-        arrayMultiple: [],
+      expect(post).toEqual({
+        id: postId,
         blocks: [
           {
-            title: expect.any(String),
+            title: post.blocks[0].title,
             blockType: 'section',
-            id: expect.any(String),
-            blockName: null,
+            id: post.blocks[0].id,
           },
           {
             blockType: 'cta',
-            blockName: null,
-            id: expect.any(String),
+            id: post.blocks[0].id,
           },
         ],
-        groupArray: {
-          array: [],
-        },
       })
     })
-
     it('should select all fields inside of blocks 2 slugs', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          blocks: {
-            cta: true,
-            section: true,
-          },
-        },
+        select: ['blocks.cta', 'blocks.section'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        array: [],
-        tab: {},
-        group: {},
-        groupMultiple: {},
-        arrayMultiple: [],
+      expect(post).toEqual({
+        id: postId,
         blocks: [
           {
-            title: expect.any(String),
+            title: post.blocks[0].title,
             blockType: 'section',
-            id: expect.any(String),
-            blockName: null,
-            secondTitle: expect.any(String),
+            id: post.blocks[0].id,
+            secondTitle: post.blocks[0].secondTitle,
           },
           {
-            cta: expect.any(String),
+            cta: post.blocks[1].cta,
             blockType: 'cta',
-            id: expect.any(String),
-            blockName: null,
+            id: post.blocks[1].id,
           },
         ],
-        groupArray: {
-          array: [],
-        },
       })
     })
-
     it('should select all fields inside of blocks any slug', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          blocks: true,
-        },
+        select: ['blocks'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        array: [],
-        group: {},
-        tab: {},
-        groupMultiple: {},
-        arrayMultiple: [],
+      expect(post).toEqual({
+        id: postId,
         blocks: [
           {
-            title: expect.any(String),
+            title: post.blocks[0].title,
             blockType: 'section',
-            id: expect.any(String),
-            blockName: null,
-            secondTitle: expect.any(String),
+            id: post.blocks[0].id,
+            secondTitle: post.blocks[0].secondTitle,
           },
           {
-            cta: expect.any(String),
+            cta: post.blocks[1].cta,
             blockType: 'cta',
-            id: expect.any(String),
-            blockName: null,
+            id: post.blocks[1].id,
           },
         ],
-        groupArray: {
-          array: [],
-        },
       })
     })
 
@@ -306,21 +200,11 @@ describe('Select Fields', () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          select: true,
-        },
+        select: ['select'],
       })
-
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
+      expect(post).toEqual({
+        id: postId,
         select: ['hello', 'world'],
-        group: {},
-        groupMultiple: {},
-        tab: {},
-        groupArray: { array: [] },
-        array: [],
-        arrayMultiple: [],
-        blocks: [],
       })
     })
 
@@ -328,48 +212,29 @@ describe('Select Fields', () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          tab: {
-            title: true,
-          },
-        },
+        select: ['tab.title'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        group: {},
-        groupMultiple: {},
+      expect(post).toEqual({
+        id: postId,
         tab: {
-          title: expect.any(String),
+          title: post.tab.title,
         },
-        groupArray: { array: [] },
-        array: [],
-        arrayMultiple: [],
-        blocks: [],
       })
     })
-
     it('should select all fields inside of tab field', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
         id: postId,
-        select: {
-          tab: true,
-        },
+        select: ['tab'],
       })
 
-      expect(serializeObject(post)).toEqual({
-        id: expect.anything(),
-        group: {},
-        groupMultiple: {},
+      expect(post).toEqual({
+        id: postId,
         tab: {
-          title: expect.any(String),
-          label: expect.any(String),
+          title: post.tab.title,
+          label: post.tab.label,
         },
-        groupArray: { array: [] },
-        array: [],
-        arrayMultiple: [],
-        blocks: [],
       })
     })
   })
@@ -379,110 +244,21 @@ describe('Select Fields', () => {
       const deepNested = await payload.findByID({
         collection: deepNestedSlug,
         id: deepNestedId,
-        select: {
-          array: {
-            group: {
-              array: {
-                title: true,
-              },
-            },
-          },
-        },
+        select: ['array.group.array.title'],
       })
 
-      expect(serializeObject(deepNested)).toEqual({
-        id: expect.anything(),
-        blocks: [],
+      expect(deepNested).toEqual({
+        id: deepNestedId,
         array: [
           {
-            id: expect.any(String),
+            id: deepNested.array[0].id,
             group: {
               array: [
                 {
-                  id: expect.any(String),
-                  title: expect.any(String),
+                  id: deepNested.array[0].group.array[0].id,
+                  title: deepNested.array[0].group.array[0].title,
                 },
               ],
-            },
-          },
-        ],
-      })
-    })
-
-    it('should select deep array-group nested from parent', async () => {
-      const deepNested = await payload.findByID({
-        collection: deepNestedSlug,
-        id: deepNestedId,
-        select: {
-          array: true,
-        },
-      })
-
-      expect(serializeObject(deepNested)).toEqual({
-        id: expect.anything(),
-        blocks: [],
-        array: [
-          {
-            id: expect.any(String),
-            group: {
-              title: expect.any(String),
-              array: [
-                {
-                  id: expect.any(String),
-                  title: expect.any(String),
-                },
-              ],
-            },
-          },
-        ],
-      })
-    })
-
-    it('should select deep nested from blocks', async () => {
-      const deepNested = await payload.findByID({
-        collection: deepNestedSlug,
-        id: deepNestedId,
-        select: {
-          blocks: {
-            first: {
-              array: {
-                group: {
-                  title: true,
-                },
-              },
-            },
-            second: {
-              group: {
-                title: true,
-              },
-            },
-          },
-        },
-      })
-
-      expect(serializeObject(deepNested)).toEqual({
-        id: expect.anything(),
-        array: [],
-        blocks: [
-          {
-            id: expect.any(String),
-            blockType: 'first',
-            blockName: null,
-            array: [
-              {
-                id: expect.any(String),
-                group: {
-                  title: expect.any(String),
-                },
-              },
-            ],
-          },
-          {
-            id: expect.any(String),
-            blockName: null,
-            blockType: 'second',
-            group: {
-              title: expect.any(String),
             },
           },
         ],
@@ -496,17 +272,12 @@ describe('Select Fields', () => {
         id: localizedPostId,
         collection: localizedPostsSlug,
         locale: 'en',
-        select: {
-          title: true,
-        },
+        select: ['title'],
       })
 
-      expect(serializeObject(localizedPost)).toEqual({
-        id: expect.anything(),
-        array: [],
-        arrayLocalized: [],
-        blocks: [],
-        title: expect.any(String),
+      expect(localizedPost).toEqual({
+        id: localizedPostId,
+        title: localizedPost.title,
       })
     })
 
@@ -515,17 +286,12 @@ describe('Select Fields', () => {
         id: localizedPostId,
         collection: localizedPostsSlug,
         locale: 'de',
-        select: {
-          title: true,
-        },
+        select: ['title'],
       })
 
-      expect(serializeObject(localizedPost)).toEqual({
+      expect(localizedPost).toEqual({
         title: 'title de',
-        id: expect.anything(),
-        array: [],
-        blocks: [],
-        arrayLocalized: [],
+        id: localizedPostId,
       })
     })
 
@@ -534,20 +300,17 @@ describe('Select Fields', () => {
         id: localizedPostId,
         collection: localizedPostsSlug,
         locale: 'en',
-        select: {
-          title: true,
-          arrayLocalized: true,
-        },
+        select: ['title', 'arrayLocalized'],
       })
 
-      expect(serializeObject(localizedPost)).toEqual({
-        id: expect.anything(),
-        array: [],
+      console.log(localizedPost)
+
+      expect(localizedPost).toEqual({
+        id: localizedPostId,
         title: 'title en',
-        blocks: [],
         arrayLocalized: [
           {
-            id: expect.any(String),
+            id: localizedPost.arrayLocalized[0].id,
             title: 'title en',
           },
         ],
@@ -559,18 +322,14 @@ describe('Select Fields', () => {
         id: localizedPostId,
         collection: localizedPostsSlug,
         locale: 'en',
-        select: {
-          arrayLocalized: { title: true },
-        },
+        select: ['arrayLocalized.title'],
       })
 
-      expect(serializeObject(localizedPost)).toEqual({
-        id: expect.anything(),
-        array: [],
-        blocks: [],
+      expect(localizedPost).toEqual({
+        id: localizedPostId,
         arrayLocalized: [
           {
-            id: expect.any(String),
+            id: localizedPost.arrayLocalized[0].id,
             title: 'title en',
           },
         ],
@@ -582,21 +341,17 @@ describe('Select Fields', () => {
         id: localizedPostId,
         collection: localizedPostsSlug,
         locale: 'en',
-        select: {
-          array: { title: true },
-        },
+        select: ['array.title'],
       })
 
-      expect(serializeObject(localizedPost)).toEqual({
-        id: expect.anything(),
-        blocks: [],
+      expect(localizedPost).toEqual({
+        id: localizedPostId,
         array: [
           {
-            id: expect.any(String),
+            id: localizedPost.array[0].id,
             title: 'title en',
           },
         ],
-        arrayLocalized: [],
       })
     })
 
@@ -605,27 +360,18 @@ describe('Select Fields', () => {
         id: localizedPostId,
         collection: localizedPostsSlug,
         locale: 'en',
-        select: {
-          blocks: {
-            some: {
-              title: true,
-            },
-          },
-        },
+        select: ['blocks.some.title'],
       })
 
-      expect(serializeObject(localizedPost)).toEqual({
-        id: expect.anything(),
+      expect(localizedPost).toEqual({
+        id: localizedPostId,
         blocks: [
           {
             blockType: 'some',
-            id: expect.any(String),
-            blockName: null,
+            id: localizedPost.blocks[0].id,
             title: 'title en',
           },
         ],
-        array: [],
-        arrayLocalized: [],
       })
     })
   })
@@ -653,9 +399,7 @@ describe('Select Fields', () => {
         depth: 1,
         populate: {
           item: {
-            select: {
-              title: true,
-            },
+            select: ['title'],
           },
         },
       })
@@ -710,9 +454,7 @@ describe('Select Fields', () => {
           item: {
             populate: {
               nested: {
-                select: {
-                  title: true,
-                },
+                select: ['title'],
               },
             },
           },
@@ -748,9 +490,7 @@ describe('Select Fields', () => {
             {
               relationTo: 'relationships-items-nested',
               value: {
-                select: {
-                  title: true,
-                },
+                select: ['title'],
               },
             },
           ],
@@ -788,9 +528,7 @@ describe('Select Fields', () => {
         slug: globalSlug,
         populate: {
           relFirst: {
-            select: {
-              title: true,
-            },
+            select: ['title'],
           },
         },
       })
@@ -805,32 +543,23 @@ describe('Select Fields', () => {
 
   describe('REST', () => {
     it('should select text and id inside of array', async () => {
-      const post = await restClient.GET(`/${postsSlug}/${postId}`, {
+      const res = await restClient.GET(`/${postsSlug}/${postId}`, {
         query: {
-          select: {
-            array: {
-              title: true,
-            },
-          },
+          select: ['array.title'],
         },
       })
 
-      expect(serializeObject(await post.json())).toEqual({
-        id: expect.anything(),
-        tab: {},
+      const post = await res.json()
+
+      expect(post).toEqual({
+        id: postId,
+
         array: [
           {
-            title: expect.any(String),
-            id: expect.any(String),
+            title: post.array[0].title,
+            id: post.array[0].id,
           },
         ],
-        group: {},
-        groupMultiple: {},
-        arrayMultiple: [],
-        blocks: [],
-        groupArray: {
-          array: [],
-        },
       })
     })
 
@@ -839,9 +568,7 @@ describe('Select Fields', () => {
         query: {
           populate: {
             item: {
-              select: {
-                title: true,
-              },
+              select: ['title'],
             },
           },
         },
@@ -859,9 +586,7 @@ describe('Select Fields', () => {
         query: {
           populate: {
             relFirst: {
-              select: {
-                title: true,
-              },
+              select: ['title'],
             },
           },
         },

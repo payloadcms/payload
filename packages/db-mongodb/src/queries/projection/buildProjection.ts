@@ -11,7 +11,7 @@ export const buildProjection = ({
   localeCodes: string[]
   select?: Select
 }) => {
-  if (!select || typeof select === 'boolean') return
+  if (!select) return
 
   const projection: string[] = []
 

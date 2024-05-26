@@ -1,6 +1,11 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, Populate, RequestContext } from '../../../types/index.js'
+import type {
+  PayloadRequestWithData,
+  Populate,
+  RequestContext,
+  Select,
+} from '../../../types/index.js'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
@@ -13,6 +18,7 @@ type Args = {
   doc: Record<string, unknown>
   draft: boolean
   fallbackLocale: null | string
+  fieldPath?: string
   findMany?: boolean
   flattenLocales?: boolean
   global: SanitizedGlobalConfig | null
@@ -20,6 +26,7 @@ type Args = {
   overrideAccess: boolean
   populateArg?: Populate
   req: PayloadRequestWithData
+  select?: Select
   showHiddenFields: boolean
 }
 
@@ -42,6 +49,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     doc: incomingDoc,
     draft,
     fallbackLocale,
+    fieldPath,
     findMany,
     flattenLocales = true,
     global,
@@ -49,6 +57,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     overrideAccess,
     populateArg,
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -72,6 +81,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     doc,
     draft,
     fallbackLocale,
+    fieldPath,
     fieldPromises,
     fields: collection?.fields || global?.fields,
     findMany,
@@ -82,6 +92,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     populateArg,
     populationPromises,
     req,
+    select,
     showHiddenFields,
     siblingDoc: doc,
   })

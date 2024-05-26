@@ -208,6 +208,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
             overrideAccess,
             populateArg: populate,
             req,
+            select,
             showHiddenFields,
           }),
         ),

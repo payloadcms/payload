@@ -2,7 +2,12 @@
 import type { RichTextAdapter } from '../../../admin/types.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, Populate, RequestContext } from '../../../types/index.js'
+import type {
+  PayloadRequestWithData,
+  Populate,
+  RequestContext,
+  Select,
+} from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -19,6 +24,7 @@ type Args = {
   draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
+  fieldPath?: string
   fieldPopulatePath: string
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
@@ -32,6 +38,7 @@ type Args = {
   populateArg?: Populate
   populationPromises: Promise<void>[]
   req: PayloadRequestWithData
+  select?: Select
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
   triggerAccessControl?: boolean
@@ -55,6 +62,7 @@ export const promise = async ({
   draft,
   fallbackLocale,
   field,
+  fieldPath = '',
   fieldPopulatePath,
   fieldPromises,
   findMany,
@@ -65,18 +73,25 @@ export const promise = async ({
   populateArg,
   populationPromises,
   req,
+  select,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
-  if (
-    fieldAffectsData(field) &&
-    field.hidden &&
-    typeof siblingDoc[field.name] !== 'undefined' &&
-    !showHiddenFields
-  ) {
-    delete siblingDoc[field.name]
+  if (fieldAffectsData(field)) {
+    if (
+      select &&
+      !select.some((path) => {
+        return `${path}.`.startsWith(`${fieldPath}${field.name}.`)
+      })
+    ) {
+      delete siblingDoc[field.name]
+      return
+    }
+
+    if (field.hidden && typeof siblingDoc[field.name] !== 'undefined' && !showHiddenFields)
+      delete siblingDoc[field.name]
   }
 
   const shouldHoistLocalizedValue =
@@ -127,6 +142,7 @@ export const promise = async ({
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
+
       if (typeof siblingDoc[field.name] === 'undefined') {
         siblingDoc[field.name] = {}
       }
@@ -181,8 +197,6 @@ export const promise = async ({
       const pointDoc = siblingDoc[field.name] as Record<string, unknown>
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
         siblingDoc[field.name] = pointDoc.coordinates
-      } else {
-        siblingDoc[field.name] = undefined
       }
 
       break
@@ -292,7 +306,7 @@ export const promise = async ({
           draft,
           fallbackLocale,
           field,
-          fieldPopulatePath: `${fieldPopulatePath}${field.name}`,
+          fieldPopulatePath: `${fieldPath}${field.name}`,
           locale,
           overrideAccess,
           populateArg,
@@ -317,7 +331,8 @@ export const promise = async ({
         doc,
         draft,
         fallbackLocale,
-        fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
+        fieldPath: `${fieldPath}${field.name}.`,
+        fieldPopulatePath,
         fieldPromises,
         fields: field.fields,
         findMany,
@@ -325,8 +340,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        populateArg,
         populationPromises,
         req,
+        select,
         showHiddenFields,
         siblingDoc: groupDoc,
         triggerAccessControl,
@@ -349,6 +366,7 @@ export const promise = async ({
             doc,
             draft,
             fallbackLocale,
+            fieldPath: `${fieldPath}${field.name}.`,
             fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
             fieldPromises,
             fields: field.fields,
@@ -357,8 +375,10 @@ export const promise = async ({
             global,
             locale,
             overrideAccess,
+            populateArg,
             populationPromises,
             req,
+            select,
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
@@ -377,6 +397,7 @@ export const promise = async ({
                 doc,
                 draft,
                 fallbackLocale,
+                fieldPath: `${fieldPath}${field.name}.`,
                 fieldPopulatePath: `${fieldPopulatePath}${field.name}.`,
                 fieldPromises,
                 fields: field.fields,
@@ -385,8 +406,10 @@ export const promise = async ({
                 global,
                 locale,
                 overrideAccess,
+                populateArg,
                 populationPromises,
                 req,
+                select,
                 showHiddenFields,
                 siblingDoc: row || {},
                 triggerAccessControl,
@@ -417,6 +440,7 @@ export const promise = async ({
               doc,
               draft,
               fallbackLocale,
+              fieldPath: `${fieldPath}${field.name}.${block.slug}.`,
               fieldPopulatePath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
               fieldPromises,
               fields: block.fields,
@@ -425,8 +449,10 @@ export const promise = async ({
               global,
               locale,
               overrideAccess,
+              populateArg,
               populationPromises,
               req,
+              select,
               showHiddenFields,
               siblingDoc: row || {},
               triggerAccessControl,
@@ -449,6 +475,7 @@ export const promise = async ({
                   doc,
                   draft,
                   fallbackLocale,
+                  fieldPath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
                   fieldPopulatePath: `${fieldPopulatePath}${field.name}.${block.slug}.`,
                   fieldPromises,
                   fields: block.fields,
@@ -457,8 +484,10 @@ export const promise = async ({
                   global,
                   locale,
                   overrideAccess,
+                  populateArg,
                   populationPromises,
                   req,
+                  select,
                   showHiddenFields,
                   siblingDoc: row || {},
                   triggerAccessControl,
@@ -485,6 +514,7 @@ export const promise = async ({
         doc,
         draft,
         fallbackLocale,
+        fieldPath,
         fieldPopulatePath,
         fieldPromises,
         fields: field.fields,
@@ -493,8 +523,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        populateArg,
         populationPromises,
         req,
+        select,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
@@ -507,9 +539,12 @@ export const promise = async ({
     case 'tab': {
       let tabDoc = siblingDoc
       let tabPopulatePath = fieldPopulatePath
+      let tabSelectPath = fieldPath
+
       if (tabHasName(field)) {
         tabDoc = siblingDoc[field.name] as Record<string, unknown>
         tabPopulatePath = `${fieldPopulatePath}${field.name}.`
+        tabSelectPath = `${fieldPath}${field.name}.`
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
@@ -521,6 +556,7 @@ export const promise = async ({
         doc,
         draft,
         fallbackLocale,
+        fieldPath: tabSelectPath,
         fieldPopulatePath: tabPopulatePath,
         fieldPromises,
         fields: field.fields,
@@ -529,8 +565,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        populateArg,
         populationPromises,
         req,
+        select,
         showHiddenFields,
         siblingDoc: tabDoc,
         triggerAccessControl,
@@ -549,6 +587,8 @@ export const promise = async ({
         doc,
         draft,
         fallbackLocale,
+        fieldPath,
+        fieldPopulatePath,
         fieldPromises,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         findMany,
@@ -556,8 +596,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        populateArg,
         populationPromises,
         req,
+        select,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,

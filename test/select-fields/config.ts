@@ -396,9 +396,7 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'relationships-items',
           defaultPopulate: {
-            select: {
-              title: true,
-            },
+            select: ['title'],
           },
         },
         {
@@ -413,9 +411,7 @@ export default buildConfigWithDefaults({
             {
               relationTo: 'relationships-items',
               value: {
-                select: {
-                  title: true,
-                },
+                select: ['title'],
               },
             },
           ],

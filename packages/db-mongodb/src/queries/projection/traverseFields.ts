@@ -1,27 +1,34 @@
 import { type Field, type Select, fieldAffectsData, tabHasName } from 'payload/types'
 
-import { buildFieldSelect } from './buildFieldSelect.js'
-
 export const traverseFields = ({
   addProjection,
   fields,
   localeCodes,
-  path = '',
+  schemaPath = '',
   select,
+  selectPath = '',
+  shouldSelectCurrentLevel,
 }: {
   addProjection: (path: string) => void
   fields: Field[]
   localeCodes: string[]
-  path?: string
-  select: Select | boolean
+  /** including locales like array.en.title */
+  schemaPath?: string
+  select: Select
+  selectPath?: string
+  shouldSelectCurrentLevel?: boolean
 }) => {
   fields.forEach((field) => {
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         const hasName = tabHasName(tab)
 
-        const tabPath = hasName ? `${path}${tab.name}.` : path
-        const tabSelect = hasName ? buildFieldSelect({ field: tab, select }) : select
+        const tabPath = hasName ? `${selectPath}${tab.name}` : selectPath
+
+        if ((select.includes(tabPath) || shouldSelectCurrentLevel) && hasName) {
+          addProjection(`${schemaPath}${tab.name}`)
+          return
+        }
 
         if (hasName && tab.localized) {
           localeCodes.forEach((locale) => {
@@ -29,8 +36,10 @@ export const traverseFields = ({
               addProjection,
               fields: tab.fields,
               localeCodes,
-              path: `${tabPath}${locale}.`,
-              select: tabSelect,
+              schemaPath: `${schemaPath}${tabPath}.${locale}.`,
+              select,
+              selectPath: `${selectPath}${tabPath}.`,
+              shouldSelectCurrentLevel,
             })
           })
         } else
@@ -38,8 +47,10 @@ export const traverseFields = ({
             addProjection,
             fields: tab.fields,
             localeCodes,
-            path: tabPath,
-            select: tabSelect,
+            schemaPath: `${schemaPath}${tabPath}.`,
+            select,
+            selectPath: `${selectPath}${tabPath}.`,
+            shouldSelectCurrentLevel,
           })
       })
 
@@ -49,21 +60,21 @@ export const traverseFields = ({
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {
-          const currentSelect = buildFieldSelect({ field, select })
-          if (!currentSelect) break
-
-          const arrayPath = `${path}${field.name}.`
+          if (select.includes(`${selectPath}${field.name}`) || shouldSelectCurrentLevel) {
+            addProjection(`${schemaPath}${field.name}`)
+            return
+          }
 
           if (field.localized) {
             localeCodes.forEach((locale) => {
-              const localePath = `${arrayPath}${locale}.`
-
               traverseFields({
                 addProjection,
                 fields: field.fields,
                 localeCodes,
-                path: localePath,
-                select: currentSelect,
+                schemaPath: `${schemaPath}${field.name}.${locale}.`,
+                select,
+                selectPath: `${selectPath}${field.name}.`,
+                shouldSelectCurrentLevel,
               })
             })
           } else {
@@ -71,53 +82,52 @@ export const traverseFields = ({
               addProjection,
               fields: field.fields,
               localeCodes,
-              path: arrayPath,
-              select: currentSelect,
+              schemaPath: `${schemaPath}${field.name}.`,
+              select,
+              selectPath: `${selectPath}${field.name}.`,
+              shouldSelectCurrentLevel,
             })
           }
           break
         }
 
         case 'blocks': {
-          const currentSelect = buildFieldSelect({ field, select })
+          const blocksPath = `${selectPath}${field.name}`
 
-          if (!currentSelect) break
-          const blocksPath = `${path}${field.name}.`
+          if (select.includes(blocksPath) || shouldSelectCurrentLevel) {
+            addProjection(`${schemaPath}${field.name}`)
+            return
+          }
 
           if (field.localized) {
-            localeCodes.map((locale) => {
-              const localePath = `${blocksPath}${locale}.`
-              addProjection(`${localePath}blockName`)
-
-              field.blocks.forEach((block) => {
-                const blockSelect = buildFieldSelect({ field: block, select: currentSelect })
-
+            for (const locale of localeCodes) {
+              for (const block of field.blocks) {
                 traverseFields({
                   addProjection,
                   fields: block.fields,
                   localeCodes,
-                  path: localePath,
-                  select: blockSelect,
+                  schemaPath: `${schemaPath}${field.name}.${locale}.`,
+                  select,
+                  selectPath: `${selectPath}${field.name}.${block.slug}.`,
+                  shouldSelectCurrentLevel: select.includes(
+                    `${selectPath}${field.name}.${block.slug}`,
+                  ),
                 })
-              })
-            })
+              }
+            }
           } else {
-            addProjection(`${blocksPath}blockName`)
-
             field.blocks.forEach((block) => {
-              const blockSelect = buildFieldSelect({ field: block, select: currentSelect })
-
-              if (!blockSelect) return false
-
               traverseFields({
                 addProjection,
                 fields: block.fields,
                 localeCodes,
-                path: blocksPath,
-                select: blockSelect,
+                schemaPath: `${schemaPath}${field.name}.`,
+                select,
+                selectPath: `${selectPath}${field.name}.${block.slug}.`,
+                shouldSelectCurrentLevel: select.includes(
+                  `${selectPath}${field.name}.${block.slug}`,
+                ),
               })
-
-              return true
             })
           }
 
@@ -125,20 +135,21 @@ export const traverseFields = ({
         }
 
         case 'group': {
-          const currentSelect = buildFieldSelect({ field, select })
-          if (!currentSelect) break
-
-          const groupPath = `${path}${field.name}.`
+          const groupPath = `${selectPath}${field.name}`
+          if (select.includes(groupPath) || shouldSelectCurrentLevel) {
+            addProjection(groupPath)
+            return
+          }
 
           if (field.localized) {
             localeCodes.forEach((locale) => {
-              const localePath = `${groupPath}${locale}.`
               traverseFields({
                 addProjection,
                 fields: field.fields,
                 localeCodes,
-                path: localePath,
-                select: currentSelect,
+                schemaPath: `${schemaPath}${field.name}.${locale}.`,
+                select,
+                selectPath: `${selectPath}${field.name}.`,
               })
             })
           } else {
@@ -146,26 +157,17 @@ export const traverseFields = ({
               addProjection,
               fields: field.fields,
               localeCodes,
-              path: groupPath,
-              select: currentSelect,
+              schemaPath: `${schemaPath}${field.name}.`,
+              select,
+              selectPath: `${selectPath}${field.name}.`,
             })
           }
           break
         }
 
         default: {
-          const currentSelect = buildFieldSelect({ field, select })
-
-          if (!currentSelect) break
-
-          const fieldPath = `${path}${field.name}`
-
-          if (field.localized) {
-            localeCodes.forEach((locale) => {
-              addProjection(`${fieldPath}.${locale}`)
-            })
-          } else {
-            addProjection(fieldPath)
+          if (select.includes(`${selectPath}${field.name}`) || shouldSelectCurrentLevel) {
+            addProjection(`${schemaPath}${field.name}`)
           }
 
           break

@@ -85,9 +85,7 @@ export type Where = {
   or?: Where[]
 }
 
-export type Select = {
-  [key: string]: Select | boolean
-}
+export type Select = string[]
 
 export type PopulatePolymorphicValue = {
   relationTo: string
