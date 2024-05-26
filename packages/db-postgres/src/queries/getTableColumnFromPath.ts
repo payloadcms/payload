@@ -547,7 +547,10 @@ export const getTableColumnFromPath = ({
             tableName: newTableName,
             value,
           })
-        } else if (pathSegments.length > 1) {
+        } else if (
+          pathSegments.length > 1 &&
+          !(pathSegments.length === 2 && pathSegments[1] === 'id')
+        ) {
           // simple relationships
           const columnName = `${columnPrefix}${field.name}`
           const newTableName = adapter.tableNameMap.get(
@@ -575,7 +578,10 @@ export const getTableColumnFromPath = ({
             })
           } else {
             joinAliases.push({
-              condition: and(eq(newAliasTable.id, adapter.tables[tableName][columnName])),
+              condition: eq(
+                newAliasTable.id,
+                aliasTable ? aliasTable[columnName] : adapter.tables[tableName][columnName],
+              ),
               table: newAliasTable,
             })
           }
@@ -595,14 +601,6 @@ export const getTableColumnFromPath = ({
             tableName: newTableName,
             value,
           })
-        } else {
-          // simple relationship on id
-          return {
-            columnName: `${columnPrefix}${field.name}`,
-            constraints,
-            field,
-            table: adapter.tables[tableName],
-          }
         }
         break
       }
