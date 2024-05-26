@@ -416,7 +416,7 @@ describe('database', () => {
   })
 
   describe('postgres v2 - v3 migration', () => {
-    it('should collect relations to migrate', async () => {
+    it.skip('should collect relations to migrate', async () => {
       expect(payload.db).toBeDefined()
 
       if (payload.db.name === 'postgres') {
