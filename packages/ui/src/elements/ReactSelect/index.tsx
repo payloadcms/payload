@@ -3,7 +3,7 @@ import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useId } from 'react'
+import React, { useEffect, useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
@@ -32,6 +32,11 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
   const [inputValue, setInputValue] = React.useState('') // for creatable select
   const uuid = useId()
+  const [hasMounted, setHasMounted] = React.useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   const {
     className,
@@ -60,6 +65,10 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const classes = [className, 'react-select', showError && 'react-select--error']
     .filter(Boolean)
     .join(' ')
+
+  if (!hasMounted) {
+    return null
+  }
 
   if (!isCreatable) {
     return (

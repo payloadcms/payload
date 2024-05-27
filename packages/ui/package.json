@@ -110,7 +110,7 @@
     "react-animate-height": "2.1.2",
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.7.7",
+    "react-select": "5.8.0",
     "react-toastify": "10.0.5",
     "use-context-selector": "1.4.1",
     "uuid": "9.0.1"
