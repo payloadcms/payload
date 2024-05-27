@@ -12,16 +12,6 @@ export const LanguageSelector: React.FC<{
 
   const { i18n, switchLanguage } = useTranslation()
 
-  const [hasMounted, setHasMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setHasMounted(true)
-  }, [])
-
-  if (!hasMounted) {
-    return null
-  }
-
   return (
     <ReactSelect
       inputId="language-select"

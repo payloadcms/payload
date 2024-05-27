@@ -71,8 +71,6 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
-  console.log('Form', disabledFromProps)
-
   const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()

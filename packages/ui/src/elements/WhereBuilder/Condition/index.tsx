@@ -71,8 +71,6 @@ export const Condition: React.FC<Props> = (props) => {
     removeCondition,
     updateCondition,
   } = props
-  const [hasMounted, setHasMounted] = useState(false)
-
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
@@ -80,12 +78,6 @@ export const Condition: React.FC<Props> = (props) => {
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
 
   const debouncedValue = useDebounce(internalQueryValue, 300)
-
-  useEffect(() => {
-    if (!hasMounted) {
-      setHasMounted(true)
-    }
-  }, [hasMounted])
 
   useEffect(() => {
     // This is to trigger changes when the debounced value changes
@@ -123,10 +115,6 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = ['true', 'false']
   } else if (internalField?.props && 'options' in internalField.props) {
     valueOptions = internalField.props.options
-  }
-
-  if (!hasMounted) {
-    return null
   }
 
   return (

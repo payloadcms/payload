@@ -3,7 +3,7 @@ import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
@@ -31,6 +31,7 @@ const createOption = (label: string) => ({
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
   const [inputValue, setInputValue] = React.useState('') // for creatable select
+  const uuid = useId()
 
   const {
     className,
@@ -83,6 +84,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         }}
         filterOption={filterOption}
         getOptionValue={getOptionValue}
+        instanceId={uuid}
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}
@@ -154,6 +156,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       }}
       filterOption={filterOption}
       inputValue={inputValue}
+      instanceId={uuid}
       isClearable={isClearable}
       isDisabled={disabled}
       isSearchable={isSearchable}

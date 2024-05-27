@@ -1,9 +1,8 @@
 'use client'
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
-import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
 import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import type { Props } from './types.js'
 
@@ -14,11 +13,6 @@ const baseClass = 'select-version-locales'
 export const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
   const { t } = useTranslation()
   const { code } = useLocale()
-  const [hasMounted, setHasMounted] = React.useState(false)
-
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
 
   const format = (items) => {
     return items.map((item) => {
@@ -35,17 +29,13 @@ export const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__label`}>{t('version:showLocales')}</div>
-      {!hasMounted ? (
-        <ShimmerEffect />
-      ) : (
-        <ReactSelect
-          isMulti
-          onChange={onChange}
-          options={format(options)}
-          placeholder={t('version:selectLocales')}
-          value={format(value)}
-        />
-      )}
+      <ReactSelect
+        isMulti
+        onChange={onChange}
+        options={format(options)}
+        placeholder={t('version:selectLocales')}
+        value={format(value)}
+      />
     </div>
   )
 }

@@ -3,14 +3,13 @@ import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
 
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
-import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
 import { fieldBaseClass } from '@payloadcms/ui/fields/shared'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import qs from 'qs'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
 
@@ -25,7 +24,6 @@ const baseOptions = [mostRecentVersionOption]
 
 export const SelectComparison: React.FC<Props> = (props) => {
   const { baseURL, onChange, parentID, publishedDoc, value, versionID } = props
-  const [hasMounted, setHasMounted] = useState(false)
 
   const {
     admin: { dateFormat },
@@ -111,10 +109,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
     void getResults({ lastLoadedPage: 1 })
   }, [getResults])
 
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
-
   return (
     <div
       className={[fieldBaseClass, baseClass, errorLoading && 'error-loading']
@@ -122,27 +116,21 @@ export const SelectComparison: React.FC<Props> = (props) => {
         .join(' ')}
     >
       <div className={`${baseClass}__label`}>{t('version:compareVersion')}</div>
-      {!hasMounted ? (
-        <ShimmerEffect />
-      ) : (
-        <Fragment>
-          {!errorLoading && (
-            <ReactSelect
-              isClearable={false}
-              isSearchable={false}
-              onChange={onChange}
-              onMenuScrollToBottom={() => {
-                void getResults({ lastLoadedPage: lastLoadedPage + 1 })
-              }}
-              options={[
-                ...(publishedDoc?._status === 'published' ? [publishedVersionOption] : []),
-                ...options,
-              ]}
-              placeholder={t('version:selectVersionToCompare')}
-              value={value}
-            />
-          )}
-        </Fragment>
+      {!errorLoading && (
+        <ReactSelect
+          isClearable={false}
+          isSearchable={false}
+          onChange={onChange}
+          onMenuScrollToBottom={() => {
+            void getResults({ lastLoadedPage: lastLoadedPage + 1 })
+          }}
+          options={[
+            ...(publishedDoc?._status === 'published' ? [publishedVersionOption] : []),
+            ...options,
+          ]}
+          placeholder={t('version:selectVersionToCompare')}
+          value={value}
+        />
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
     </div>
