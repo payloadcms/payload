@@ -405,7 +405,7 @@ function buildObjectType({
             }
 
             await Promise.all(resultPromises)
-            return results
+            return results.filter((doc) => doc != null)
           }
 
           let id = value

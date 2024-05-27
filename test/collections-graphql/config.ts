@@ -32,6 +32,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts'
 export const relationSlug = 'relation'
+export const relationWithAccessControlSlug = 'relationWithAccessControl'
 
 export const pointSlug = 'point'
 
@@ -95,6 +96,13 @@ export default buildConfigWithDefaults({
           name: 'relationHasManyField',
           hasMany: true,
           relationTo: relationSlug,
+          type: 'relationship',
+        },
+        // Relation hasMany with access control
+        {
+          name: 'relationHasManyFieldWithAccessControl',
+          hasMany: true,
+          relationTo: relationWithAccessControlSlug,
           type: 'relationship',
         },
         // Relation multiple relationTo
@@ -259,6 +267,26 @@ export default buildConfigWithDefaults({
       slug: 'custom-ids',
     },
     collectionWithName(relationSlug),
+    {
+      slug: relationWithAccessControlSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'visible',
+          type: 'checkbox',
+        },
+      ],
+      access: {
+        read: () => {
+          return {
+            visible: { equals: true },
+          }
+        },
+      },
+    },
     collectionWithName('dummy'),
     {
       ...collectionWithName(errorOnHookSlug),
