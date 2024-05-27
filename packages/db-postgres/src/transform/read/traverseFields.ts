@@ -405,7 +405,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.localized && Array.isArray(table._locales)) {
         table._locales.forEach((localeRow) => {
-          valuesToTransform.push({ ref: localizedFieldData, table: localeRow })
+          valuesToTransform.push({
+            ref: localizedFieldData,
+            table: {
+              ...localeRow,
+            },
+          })
         })
       } else {
         valuesToTransform.push({ ref: result, table })
@@ -420,49 +425,30 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'group': {
             const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
 
-            if (field.localized) {
-              if (typeof locale === 'string' && !ref[locale]) {
-                ref[locale] = {}
-                delete table._locale
-              }
+            const groupData = {}
 
-              Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
-                ref[groupLocale] = traverseFields<Record<string, unknown>>({
-                  blocks,
-                  config,
-                  dataRef: groupLocaleData as Record<string, unknown>,
-                  deletions,
-                  fieldPrefix: groupFieldPrefix,
-                  fields: field.fields,
-                  numbers,
-                  path: `${sanitizedPath}${field.name}`,
-                  relationships,
-                  table,
-                  texts,
-                })
-              })
-              if ('_order' in ref) {
-                delete ref._order
-              }
-            } else {
-              const groupData = {}
+            const locale = table._locale as string
 
-              ref[field.name] = traverseFields<Record<string, unknown>>({
-                blocks,
-                config,
-                dataRef: groupData as Record<string, unknown>,
-                deletions,
-                fieldPrefix: groupFieldPrefix,
-                fields: field.fields,
-                numbers,
-                path: `${sanitizedPath}${field.name}`,
-                relationships,
-                table,
-                texts,
-              })
-              if ('_order' in ref) {
-                delete ref._order
-              }
+            if (field.localized && locale) delete table._locale
+
+            const refKey = field.localized && locale ? locale : field.name
+
+            ref[refKey] = traverseFields<Record<string, unknown>>({
+              blocks,
+              config,
+              dataRef: groupData as Record<string, unknown>,
+              deletions,
+              fieldPrefix: groupFieldPrefix,
+              fields: field.fields,
+              numbers,
+              path: `${sanitizedPath}${field.name}`,
+              relationships,
+              table,
+              texts,
+            })
+
+            if ('_order' in ref) {
+              delete ref._order
             }
 
             break
