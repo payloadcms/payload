@@ -13,9 +13,14 @@ export function sanitizeUrl(url: string): string {
   return 'https://'
 }
 
-// Source: https://stackoverflow.com/a/8234912/2013580
+/**
+ * This regex checks for URLs in a string. Tested for the following use cases:
+ * - URLs starting with http:// or https://
+ * - relative URLs starting with /
+ * - anchor links starting with #
+ *  */
 const urlRegExp =
-  /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)((?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?\w*)?)/
+  /(?:[A-Za-z]{3,9}:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)(?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?[\w-]*|\/[+~%/.\w-]*|#[\w-]*/
 
 // Do not keep validateUrl function too loose. This is run when pasting in text, to determine if links are in that text and if it should create AutoLinkNodes.
 // This is why we do not allow stuff like anchors here, as we don't want copied anchors to be turned into AutoLinkNodes.
