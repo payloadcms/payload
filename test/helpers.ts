@@ -75,6 +75,10 @@ export async function ensureAutoLoginAndCompilationIsDone({
   await page.goto(adminURL)
   await page.waitForURL(adminURL)
 
+  await expect(() => expect(page.locator('.login').first()).toBeVisible()).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+
   await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
@@ -85,7 +89,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  // Check if hero is there
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
 }
 
