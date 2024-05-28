@@ -1,3 +1,4 @@
+'use client'
 import type { OptionObject } from 'payload/types'
 import type { SanitizedCollectionConfig } from 'payload/types'
 

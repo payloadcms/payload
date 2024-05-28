@@ -1,3 +1,4 @@
+'use client'
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
