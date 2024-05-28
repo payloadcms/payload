@@ -62,7 +62,7 @@ export const DocumentFields: React.FC<Args> = ({
             <RenderFields
               className={`${baseClass}__fields`}
               fieldMap={mainFields}
-              forceRender
+              forceRender={10}
               path=""
               permissions={docPermissions?.fields}
               readOnly={readOnly}
@@ -77,7 +77,7 @@ export const DocumentFields: React.FC<Args> = ({
               <div className={`${baseClass}__sidebar-fields`}>
                 <RenderFields
                   fieldMap={sidebarFields}
-                  forceRender
+                  forceRender={10}
                   path=""
                   permissions={docPermissions?.fields}
                   readOnly={readOnly}
