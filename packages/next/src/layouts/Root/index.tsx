@@ -3,6 +3,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { initI18n } from '@payloadcms/translations'
+import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
 import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
 import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -10,7 +11,7 @@ import { Merriweather } from 'next/font/google'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'
-import React from 'react'
+import React, { Suspense } from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
@@ -105,20 +106,22 @@ export const RootLayout = async ({
   return (
     <html className={merriweather.variable} data-theme={theme} dir={dir} lang={languageCode}>
       <body>
-        <RootProvider
-          componentMap={componentMap}
-          config={clientConfig}
-          dateFNSKey={i18n.dateFNSKey}
-          fallbackLang={clientConfig.i18n.fallbackLanguage}
-          languageCode={languageCode}
-          languageOptions={languageOptions}
-          // eslint-disable-next-line react/jsx-no-bind
-          switchLanguageServerAction={switchLanguageServerAction}
-          theme={theme}
-          translations={i18n.translations}
-        >
-          {wrappedChildren}
-        </RootProvider>
+        <Suspense fallback={<LoadingOverlay loadingText={i18n.t('general:loading')} />}>
+          <RootProvider
+            componentMap={componentMap}
+            config={clientConfig}
+            dateFNSKey={i18n.dateFNSKey}
+            fallbackLang={clientConfig.i18n.fallbackLanguage}
+            languageCode={languageCode}
+            languageOptions={languageOptions}
+            // eslint-disable-next-line react/jsx-no-bind
+            switchLanguageServerAction={switchLanguageServerAction}
+            theme={theme}
+            translations={i18n.translations}
+          >
+            {wrappedChildren}
+          </RootProvider>
+        </Suspense>
         <div id="portal" />
       </body>
     </html>
