@@ -955,8 +955,10 @@ describe('Fields', () => {
         }
       }
       removeId(esArrayBlocks)
+      removeId(createdEnDoc.arrayWithBlocks[0].blocksWithinArray)
 
       expect(esArrayBlocks).toEqual(blocksWithinArray)
+      expect(createdEnDoc.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArray)
     })
   })
 
