@@ -178,6 +178,18 @@ const ArrayFields: CollectionConfig = {
 
       localized: true,
     },
+    {
+      name: 'arrayWithLocalizedRelation',
+      type: 'array',
+      fields: [
+        {
+          name: 'localizedRelation',
+          type: 'relationship',
+          localized: true,
+          relationTo: 'text-fields',
+        },
+      ],
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,

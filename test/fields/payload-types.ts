@@ -68,7 +68,7 @@ export interface Config {
  * via the `definition` "lexical-fields".
  */
 export interface LexicalField {
-  id: string;
+  id: number;
   title: string;
   lexicalSimple?: {
     root: {
@@ -108,7 +108,7 @@ export interface LexicalField {
  * via the `definition` "lexical-migrate-fields".
  */
 export interface LexicalMigrateField {
-  id: string;
+  id: number;
   title: string;
   lexicalWithLexicalPluginData?: {
     root: {
@@ -203,7 +203,7 @@ export interface LexicalMigrateField {
  * via the `definition` "lexical-localized-fields".
  */
 export interface LexicalLocalizedField {
-  id: string;
+  id: number;
   title: string;
   lexicalSimple?: {
     root: {
@@ -258,7 +258,7 @@ export interface LexicalLocalizedField {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   canViewConditionalField?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -276,7 +276,7 @@ export interface User {
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
-  id: string;
+  id: number;
   title?: string | null;
   items: {
     text: string;
@@ -336,12 +336,18 @@ export interface ArrayField {
     | {
         blocksWithinArray?:
           | {
-              relationWithinBlock?: (string | null) | TextField;
+              relationWithinBlock?: (number | null) | TextField;
               id?: string | null;
               blockName?: string | null;
               blockType: 'someBlock';
             }[]
           | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithLocalizedRelation?:
+    | {
+        localizedRelation?: (number | null) | TextField;
         id?: string | null;
       }[]
     | null;
@@ -353,7 +359,7 @@ export interface ArrayField {
  * via the `definition` "text-fields".
  */
 export interface TextField {
-  id: string;
+  id: number;
   text: string;
   localizedText?: string | null;
   i18nText?: string | null;
@@ -380,7 +386,7 @@ export interface TextField {
  * via the `definition` "block-fields".
  */
 export interface BlockField {
-  id: string;
+  id: number;
   blocks: (
     | {
         text: string;
@@ -707,7 +713,7 @@ export interface BlockField {
     | null;
   relationshipBlocks?:
     | {
-        relationship?: (string | null) | TextField;
+        relationship?: (number | null) | TextField;
         id?: string | null;
         blockName?: string | null;
         blockType: 'relationships';
@@ -721,7 +727,7 @@ export interface BlockField {
  * via the `definition` "checkbox-fields".
  */
 export interface CheckboxField {
-  id: string;
+  id: number;
   checkbox: boolean;
   updatedAt: string;
   createdAt: string;
@@ -731,7 +737,7 @@ export interface CheckboxField {
  * via the `definition` "code-fields".
  */
 export interface CodeField {
-  id: string;
+  id: number;
   javascript?: string | null;
   typescript?: string | null;
   json?: string | null;
@@ -745,7 +751,7 @@ export interface CodeField {
  * via the `definition` "collapsible-fields".
  */
 export interface CollapsibleField {
-  id: string;
+  id: number;
   text: string;
   group?: {
     textWithinGroup?: string | null;
@@ -777,7 +783,7 @@ export interface CollapsibleField {
  * via the `definition` "conditional-logic".
  */
 export interface ConditionalLogic {
-  id: string;
+  id: number;
   text: string;
   toggleField?: boolean | null;
   fieldToToggle?: string | null;
@@ -802,7 +808,7 @@ export interface ConditionalLogic {
  * via the `definition` "date-fields".
  */
 export interface DateField {
-  id: string;
+  id: number;
   default: string;
   timeOnly?: string | null;
   timeOnlyWithCustomFormat?: string | null;
@@ -817,7 +823,7 @@ export interface DateField {
  * via the `definition` "radio-fields".
  */
 export interface RadioField {
-  id: string;
+  id: number;
   radio?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
@@ -827,7 +833,7 @@ export interface RadioField {
  * via the `definition` "group-fields".
  */
 export interface GroupField {
-  id: string;
+  id: number;
   group: {
     text: string;
     defaultParent?: string | null;
@@ -899,7 +905,7 @@ export interface RowField {
  * via the `definition` "indexed-fields".
  */
 export interface IndexedField {
-  id: string;
+  id: number;
   text: string;
   uniqueText?: string | null;
   uniqueRequiredText: string;
@@ -928,7 +934,7 @@ export interface IndexedField {
  * via the `definition` "json-fields".
  */
 export interface JsonField {
-  id: string;
+  id: number;
   json?:
     | {
         [k: string]: unknown;
@@ -946,7 +952,7 @@ export interface JsonField {
  * via the `definition` "number-fields".
  */
 export interface NumberField {
-  id: string;
+  id: number;
   number?: number | null;
   min?: number | null;
   max?: number | null;
@@ -967,7 +973,7 @@ export interface NumberField {
  * via the `definition` "point-fields".
  */
 export interface PointField {
-  id: string;
+  id: number;
   /**
    * @minItems 2
    * @maxItems 2
@@ -993,49 +999,49 @@ export interface PointField {
  * via the `definition` "relationship-fields".
  */
 export interface RelationshipField {
-  id: string;
+  id: number;
   text?: string | null;
   relationship:
     | {
         relationTo: 'text-fields';
-        value: string | TextField;
+        value: number | TextField;
       }
     | {
         relationTo: 'array-fields';
-        value: string | ArrayField;
+        value: number | ArrayField;
       };
   relationHasManyPolymorphic?:
     | (
         | {
             relationTo: 'text-fields';
-            value: string | TextField;
+            value: number | TextField;
           }
         | {
             relationTo: 'array-fields';
-            value: string | ArrayField;
+            value: number | ArrayField;
           }
       )[]
     | null;
-  relationToSelf?: (string | null) | RelationshipField;
-  relationToSelfSelectOnly?: (string | null) | RelationshipField;
-  relationWithDynamicDefault?: (string | null) | User;
+  relationToSelf?: (number | null) | RelationshipField;
+  relationToSelfSelectOnly?: (number | null) | RelationshipField;
+  relationWithDynamicDefault?: (number | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
-  relationshipWithMin?: (string | TextField)[] | null;
-  relationshipWithMax?: (string | TextField)[] | null;
-  relationshipHasMany?: (string | TextField)[] | null;
+  relationshipWithMin?: (number | TextField)[] | null;
+  relationshipWithMax?: (number | TextField)[] | null;
+  relationshipHasMany?: (number | TextField)[] | null;
   array?:
     | {
-        relationship?: (string | null) | TextField;
+        relationship?: (number | null) | TextField;
         id?: string | null;
       }[]
     | null;
   relationshipWithMinRows?:
     | {
         relationTo: 'text-fields';
-        value: string | TextField;
+        value: number | TextField;
       }[]
     | null;
   updatedAt: string;
@@ -1046,7 +1052,7 @@ export interface RelationshipField {
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
-  id: string;
+  id: number;
   title: string;
   lexicalCustomFields: {
     root: {
@@ -1121,7 +1127,7 @@ export interface RichTextField {
  * via the `definition` "select-fields".
  */
 export interface SelectField {
-  id: string;
+  id: number;
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
@@ -1139,7 +1145,7 @@ export interface SelectField {
  * via the `definition` "tabs-fields".
  */
 export interface TabsField {
-  id: string;
+  id: number;
   sidebarField?: string | null;
   array: {
     text: string;
@@ -1248,9 +1254,9 @@ export interface TabsField {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
+  id: number;
   text?: string | null;
-  media?: string | Upload | null;
+  media?: number | Upload | null;
   richText?: {
     root: {
       type: string;
@@ -1283,9 +1289,9 @@ export interface Upload {
  * via the `definition` "uploads2".
  */
 export interface Uploads2 {
-  id: string;
+  id: number;
   text?: string | null;
-  media?: string | Uploads2 | null;
+  media?: number | Uploads2 | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1303,8 +1309,8 @@ export interface Uploads2 {
  * via the `definition` "uploads3".
  */
 export interface Uploads3 {
-  id: string;
-  media?: string | Uploads3 | null;
+  id: number;
+  media?: number | Uploads3 | null;
   richText?: {
     root: {
       type: string;
@@ -1337,7 +1343,7 @@ export interface Uploads3 {
  * via the `definition` "ui-fields".
  */
 export interface UiField {
-  id: string;
+  id: number;
   text: string;
   updatedAt: string;
   createdAt: string;
@@ -1347,10 +1353,10 @@ export interface UiField {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -1370,7 +1376,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1381,7 +1387,7 @@ export interface PayloadMigration {
  * via the `definition` "tabsWithRichText".
  */
 export interface TabsWithRichText {
-  id: string;
+  id: number;
   tab1?: {
     rt1?: {
       root: {
