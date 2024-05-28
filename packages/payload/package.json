@@ -108,7 +108,6 @@
     "pino-pretty": "10.2.0",
     "pluralize": "8.0.0",
     "sanitize-filename": "1.6.3",
-    "scheduler": "0.23.0",
     "scmp": "2.1.0",
     "ts-essentials": "7.0.3",
     "uuid": "^9.0.1"
