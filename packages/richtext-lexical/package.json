@@ -37,7 +37,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "translateNewKeys": "tsx scripts/translateNewKeys.ts"
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.2",

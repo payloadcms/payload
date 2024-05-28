@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
@@ -28,11 +28,12 @@ type RichTextAdapterBase<
   }) => Map<string, React.ReactNode>
   generateSchemaMap?: (args: {
     config: SanitizedConfig
-    i18n: I18nClient
+    i18n: I18n<any, any>
     schemaMap: Map<string, Field[]>
     schemaPath: string
   }) => Map<string, Field[]>
   hooks?: FieldBase['hooks']
+  i18n?: Partial<GenericLanguages>
   outputSchema?: ({
     collectionIDFieldTypes,
     config,
