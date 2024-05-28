@@ -889,8 +889,14 @@ describe('Fields', () => {
           depth: 0,
         })
       ).docs[0]
+      const randomTextDoc2 = (
+        await payload.find({
+          collection: 'text-fields',
+          depth: 0,
+        })
+      ).docs[1]
 
-      const blocksWithinArray = [
+      const blocksWithinArrayEN = [
         {
           blockName: '1',
           blockType: 'someBlock',
@@ -905,6 +911,24 @@ describe('Fields', () => {
           blockName: '3',
           blockType: 'someBlock',
           relationWithinBlock: randomTextDoc.id,
+        },
+      ]
+
+      const blocksWithinArrayES = [
+        {
+          blockName: '1',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc2.id,
+        },
+        {
+          blockName: '2',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc2.id,
+        },
+        {
+          blockName: '3',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc2.id,
         },
       ]
 
@@ -926,7 +950,7 @@ describe('Fields', () => {
           ],
           arrayWithBlocks: [
             {
-              blocksWithinArray: blocksWithinArray as any,
+              blocksWithinArray: blocksWithinArrayEN as any,
             },
           ],
         },
@@ -940,7 +964,7 @@ describe('Fields', () => {
         data: {
           arrayWithBlocks: [
             {
-              blocksWithinArray: blocksWithinArray as any,
+              blocksWithinArray: blocksWithinArrayES as any,
             },
           ],
         },
@@ -957,8 +981,18 @@ describe('Fields', () => {
       removeId(esArrayBlocks)
       removeId(createdEnDoc.arrayWithBlocks[0].blocksWithinArray)
 
-      expect(esArrayBlocks).toEqual(blocksWithinArray)
-      expect(createdEnDoc.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArray)
+      expect(esArrayBlocks).toEqual(blocksWithinArrayES)
+      expect(createdEnDoc.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
+
+      // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
+      const enDoc2 = await payload.findByID({
+        id: createdEnDoc.id,
+        collection,
+        locale: 'en',
+        depth: 0,
+      })
+      removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
+      expect(enDoc2.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
     })
   })
 
