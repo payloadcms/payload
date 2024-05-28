@@ -176,18 +176,15 @@ export async function translateObject(props: {
   }
 
   // merge with existing translations
-  console.log('Merged object1:', allTranslatedTranslationsObject)
+  console.log('Merged object:', allTranslatedTranslationsObject)
 
-  console.log('New translations1:', allOnlyNewTranslatedTranslationsObject)
+  console.log('New translations:', allOnlyNewTranslatedTranslationsObject)
 
   if (inlineFile?.length) {
-    console.log('Simple')
     const simpleTranslationsObject = {}
     for (const lang in allTranslatedTranslationsObject) {
       simpleTranslationsObject[lang] = allTranslatedTranslationsObject[lang].translations
     }
-
-    console.log('Writing1', simpleTranslationsObject)
 
     // write allTranslatedTranslationsObject
     const filePath = path.resolve(inlineFile)
@@ -211,7 +208,6 @@ export async function translateObject(props: {
     fs.writeFileSync(filePath, fileContent, 'utf8')
   } else {
     // save
-    console.log('Not Simple')
 
     for (const key of languages) {
       // e.g. sanitize rs-latin to rsLatin
