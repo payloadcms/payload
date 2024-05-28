@@ -44,9 +44,35 @@ export const DocumentInfoProvider: React.FC<
     onSave: onSaveFromProps,
   } = props
 
+  const {
+    admin: { dateFormat },
+    collections,
+    globals,
+    routes: { api },
+    serverURL,
+  } = useConfig()
+
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
+  const globalConfig = globals.find((g) => g.slug === globalSlug)
+  const docConfig = collectionConfig || globalConfig
+
+  const { i18n } = useTranslation()
+
+  const [documentTitle, setDocumentTitle] = useState(() => {
+    if (!initialDataFromProps) return ''
+
+    return formatDocTitle({
+      collectionConfig,
+      data: { ...initialDataFromProps, id },
+      dateFormat,
+      fallback: id?.toString(),
+      globalConfig,
+      i18n,
+    })
+  })
+
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
-  const [documentTitle, setDocumentTitle] = useState('')
   const [data, setData] = useState<Data>(initialDataFromProps)
   const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
@@ -62,22 +88,10 @@ export const DocumentInfoProvider: React.FC<
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
   const { getPreference, setPreference } = usePreferences()
-  const { i18n } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
 
-  const {
-    admin: { dateFormat },
-    collections,
-    globals,
-    routes: { api },
-    serverURL,
-  } = useConfig()
-
-  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
-  const globalConfig = globals.find((g) => g.slug === globalSlug)
-  const docConfig = collectionConfig || globalConfig
   const versionsConfig = docConfig?.versions
 
   const baseURL = `${serverURL}${api}`
