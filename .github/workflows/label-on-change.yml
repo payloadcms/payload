@@ -5,9 +5,7 @@ on:
   issues:
     types:
       - assigned
-      - unassigned
       - closed
-      - edited
       - labeled
       - reopened
 
@@ -91,6 +89,19 @@ jobs:
     steps:
       - name: Add needs-triage label on issue reopen
         uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: 'status: needs-triage'
+
+  on-issue-assigned:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    if: >
+      github.event.action == 'assigned' &&
+      contains(github.event.issue.labels.*.name, 'status: needs-triage')
+    steps:
+      - name: Remove needs-triage label on issue assign
+        uses: actions-ecosystem/action-remove-labels@v1
         with:
           labels: 'status: needs-triage'
 
