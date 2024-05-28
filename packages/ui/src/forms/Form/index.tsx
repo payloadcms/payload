@@ -522,6 +522,10 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.initializing = initializing
 
   useEffect(() => {
+    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
+  }, [disabledFromProps])
+
+  useEffect(() => {
     if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
   }, [submittedFromProps])
 
