@@ -808,9 +808,6 @@ importers:
       sanitize-filename:
         specifier: 1.6.3
         version: 1.6.3
-      scheduler:
-        specifier: 0.23.0
-        version: 0.23.0
       scmp:
         specifier: 2.1.0
         version: 2.1.0
@@ -1589,6 +1586,9 @@ importers:
       react-toastify:
         specifier: 10.0.5
         version: 10.0.5(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+      scheduler:
+        specifier: 0.23.0
+        version: 0.23.0
       use-context-selector:
         specifier: 1.4.1
         version: 1.4.1(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(scheduler@0.23.0)
