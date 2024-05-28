@@ -1,17 +1,11 @@
 import type { Payload } from 'payload'
 
-import path from 'path'
-import { getFileByPath } from 'payload/uploads'
-import { fileURLToPath } from 'url'
-
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import configPromise from './config.js'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 let payload: Payload
 let token: string
@@ -49,57 +43,15 @@ describe('_Community Tests', () => {
   // You can run tests against the local API or the REST API
   // use the tests below as a guide
   // --__--__--__--__--__--__--__--__--__
-  it('test', async () => {
-    const arrayDoc = await payload.create({
-      collection: 'array-fields',
-      depth: 0,
-      overrideAccess: true,
-      data: {
-        localized: [
-          {
-            text: 'first row',
-          },
-        ],
-        title: 'array doc 1',
-      },
-    })
-    expect(arrayDoc).toBeDefined()
-  })
 
   it('local API example', async () => {
-    const category = await payload.create({
-      collection: 'categories',
-      data: { title: 'test' },
-    })
-
-    // Create image
-    const imageFilePath = path.resolve(dirname, '../uploads/image.png')
-    const imageFile = await getFileByPath(imageFilePath)
-
-    const media = await payload.create({
-      collection: 'media',
-      data: {},
-      file: imageFile,
-    })
-
     const newPost = await payload.create({
       collection: postsSlug,
       data: {
-        associatedMedia: media.id,
-        array: [{ category: category.id }],
-        categories: category.id,
-        postCategory: category.id,
-        blocks: [{ blockType: 'relationship', category: category.id }],
-        richText: {},
         text: 'LOCAL API EXAMPLE',
       },
     })
 
-    expect(newPost.associatedMedia?.id).toStrictEqual(media.id)
-    expect(newPost.categories).toBeDefined()
-    expect(newPost.postCategory?.id).toStrictEqual(category.id)
-    expect(newPost.array[0].category).toBeDefined()
-    expect(newPost.blocks[0].category).toBeDefined()
     expect(newPost.text).toEqual('LOCAL API EXAMPLE')
   })
 
