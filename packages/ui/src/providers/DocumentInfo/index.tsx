@@ -51,7 +51,7 @@ export const DocumentInfoProvider: React.FC<
   const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(docPermissionsFromProps)
   const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
   const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
     hasPublishPermissionFromProps,
