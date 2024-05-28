@@ -13,14 +13,17 @@ export function sanitizeUrl(url: string): string {
   return 'https://'
 }
 
+// Source: https://stackoverflow.com/a/8234912/2013580
+const absoluteRegExp =
+  /(?:[A-Za-z]{3,9}:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)(?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?\w*/
+
 /**
- * This regex checks for URLs in a string. Tested for the following use cases:
- * - URLs starting with http:// or https://
- * - relative URLs starting with /
- * - anchor links starting with #
+ * This regex checks for relative URLs starting with / or anchor links starting with # in a string. Tested for the following use cases:
+ * - /privacy-policy
+ * - /privacy-policy#primary-terms
+ * - #primary-terms
  *  */
-const urlRegExp =
-  /(?:[A-Za-z]{3,9}:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)(?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?[\w-]*|\/[+~%/.\w-]*|#[\w-]*/
+const relativeOrAnchorRegExp = /^[\w\-./]*(?:#\w[\w-]*)?$/
 
 // Do not keep validateUrl function too loose. This is run when pasting in text, to determine if links are in that text and if it should create AutoLinkNodes.
 // This is why we do not allow stuff like anchors here, as we don't want copied anchors to be turned into AutoLinkNodes.
@@ -33,7 +36,10 @@ export function validateUrl(url: string): boolean {
   if (url === 'https://') return true
 
   // This makes sure URLs starting with www. instead of https are valid too
-  if (urlRegExp.test(url)) return true
+  if (absoluteRegExp.test(url)) return true
+
+  // Check relative or anchor links
+  if (relativeOrAnchorRegExp.test(url)) return true
 
   // While this doesn't allow URLs starting with www (which is why we use the regex above), it does properly handle tel: URLs
   try {
