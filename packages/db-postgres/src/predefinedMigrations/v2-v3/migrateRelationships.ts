@@ -36,7 +36,9 @@ export const migrateRelationships = async ({
 }: Args) => {
   if (pathsToQuery.size === 0) return
 
-  const docsToResave: DocsToResave = {}
+  let offset = 0
+
+  let paginationResult
 
   const where = Array.from(pathsToQuery).reduce((statement, path, i) => {
     return (statement += `
@@ -44,38 +46,52 @@ export const migrateRelationships = async ({
 `)
   }, '')
 
-  const statement = `SELECT * FROM ${tableName}${adapter.relationshipsSuffix} WHERE
-    ${where}
+  while (typeof paginationResult === 'undefined' || paginationResult.rows.length > 0) {
+    const paginationStatement = `SELECT DISTINCT parent_id FROM ${tableName}${adapter.relationshipsSuffix} WHERE
+    ${where} LIMIT 500 OFFSET ${offset * 500};
+  `
+
+    paginationResult = await adapter.drizzle.execute(sql.raw(`${paginationStatement}`))
+
+    if (paginationResult.rows.length === 0) return
+
+    offset += 1
+
+    const statement = `SELECT * FROM ${tableName}${adapter.relationshipsSuffix} WHERE
+    (${where}) AND parent_id IN (${paginationResult.rows.map((row) => row.parent_id).join(', ')});
 `
-  if (debug) {
-    payload.logger.info('FINDING ROWS TO MIGRATE')
-    payload.logger.info(statement)
-  }
-
-  const result = await adapter.drizzle.execute(sql.raw(`${statement}`))
-
-  result.rows.forEach((row) => {
-    const parentID = row.parent_id
-
-    if (typeof parentID === 'string' || typeof parentID === 'number') {
-      if (!docsToResave[parentID]) docsToResave[parentID] = []
-      docsToResave[parentID].push(row)
+    if (debug) {
+      payload.logger.info('FINDING ROWS TO MIGRATE')
+      payload.logger.info(statement)
     }
-  })
 
-  await fetchAndResave({
-    adapter,
-    collectionSlug,
-    db,
-    debug,
-    docsToResave,
-    fields,
-    globalSlug,
-    isVersions,
-    payload,
-    req,
-    tableName,
-  })
+    const result = await adapter.drizzle.execute(sql.raw(`${statement}`))
+
+    const docsToResave: DocsToResave = {}
+
+    result.rows.forEach((row) => {
+      const parentID = row.parent_id
+
+      if (typeof parentID === 'string' || typeof parentID === 'number') {
+        if (!docsToResave[parentID]) docsToResave[parentID] = []
+        docsToResave[parentID].push(row)
+      }
+    })
+
+    await fetchAndResave({
+      adapter,
+      collectionSlug,
+      db,
+      debug,
+      docsToResave,
+      fields,
+      globalSlug,
+      isVersions,
+      payload,
+      req,
+      tableName,
+    })
+  }
 
   const deleteStatement = `DELETE FROM ${tableName}${adapter.relationshipsSuffix} WHERE ${where}`
   if (debug) {
