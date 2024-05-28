@@ -304,6 +304,7 @@ export const traverseFields = ({
               parent: one(adapter.tables[parentTableName], {
                 fields: [adapter.tables[selectTableName].parent],
                 references: [adapter.tables[parentTableName].id],
+                relationName: fieldName,
               }),
             }),
           )
@@ -394,11 +395,14 @@ export const traverseFields = ({
               _parentID: one(adapter.tables[parentTableName], {
                 fields: [adapter.tables[arrayTableName]._parentID],
                 references: [adapter.tables[parentTableName].id],
+                relationName: fieldName,
               }),
             }
 
             if (hasLocalesTable(field.fields)) {
-              result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`])
+              result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`], {
+                relationName: '_locales',
+              })
             }
 
             subRelationsToBuild.forEach(({ type, localized, target }, key) => {
@@ -413,7 +417,7 @@ export const traverseFields = ({
                 })
               }
               if (type === 'many') {
-                result[key] = many(adapter.tables[target])
+                result[key] = many(adapter.tables[target], { relationName: key })
               }
             })
 
@@ -493,32 +497,34 @@ export const traverseFields = ({
             adapter.relations[`relations_${blockTableName}`] = relations(
               adapter.tables[blockTableName],
               ({ many, one }) => {
-                const result: Record<string, Relation<string>> = {}
-
-                result._parentID = one(adapter.tables[rootTableName], {
-                  fields: [adapter.tables[blockTableName]._parentID],
-                  references: [adapter.tables[rootTableName].id],
-                })
+                const result: Record<string, Relation<string>> = {
+                  _parentID: one(adapter.tables[rootTableName], {
+                    fields: [adapter.tables[blockTableName]._parentID],
+                    references: [adapter.tables[rootTableName].id],
+                    relationName: `_blocks_${block.slug}`,
+                  }),
+                }
 
                 if (hasLocalesTable(block.fields)) {
                   result._locales = many(
                     adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
+                    { relationName: '_locales' },
                   )
                 }
 
                 subRelationsToBuild.forEach(({ type, localized, target }, key) => {
                   if (type === 'one') {
-                    const arrayWithLocalized = localized
+                    const blockWithLocalized = localized
                       ? `${blockTableName}${adapter.localesSuffix}`
                       : blockTableName
                     result[key] = one(adapter.tables[target], {
-                      fields: [adapter.tables[arrayWithLocalized][key]],
+                      fields: [adapter.tables[blockWithLocalized][key]],
                       references: [adapter.tables[target].id],
                       relationName: key,
                     })
                   }
                   if (type === 'many') {
-                    result[key] = many(adapter.tables[target])
+                    result[key] = many(adapter.tables[target], { relationName: key })
                   }
                 })
 
@@ -534,6 +540,7 @@ export const traverseFields = ({
               tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
+          // blocks relationships are defined from the collection or globals table down to the block, bypassing any subBlocks
           rootRelationsToBuild.set(`_blocks_${block.slug}`, {
             type: 'many',
             // blocks are not localized on the parent table

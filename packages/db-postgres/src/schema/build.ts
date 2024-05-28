@@ -198,6 +198,8 @@ export const buildTable = ({
       result._parentID = one(table, {
         fields: [localesTable._parentID],
         references: [table.id],
+        // name the relationship by what the many() relationName is
+        relationName: '_locales',
       })
 
       localizedRelations.forEach(({ type, target }, key) => {
@@ -209,7 +211,9 @@ export const buildTable = ({
           })
         }
         if (type === 'many') {
-          result[key] = many(adapter.tables[target])
+          result[key] = many(adapter.tables[target], {
+            relationName: key,
+          })
         }
       })
 
@@ -262,6 +266,7 @@ export const buildTable = ({
         parent: one(table, {
           fields: [textsTable.parent],
           references: [table.id],
+          relationName: '_texts',
         }),
       }))
     }
@@ -310,6 +315,7 @@ export const buildTable = ({
         parent: one(table, {
           fields: [numbersTable.parent],
           references: [table.id],
+          relationName: '_numbers',
         }),
       }))
     }
@@ -409,6 +415,7 @@ export const buildTable = ({
             result[idColumnName] = one(adapter.tables[relatedTableName], {
               fields: [relationshipsTable[idColumnName]],
               references: [adapter.tables[relatedTableName].id],
+              relationName: relationTo,
             })
           })
 
@@ -430,20 +437,20 @@ export const buildTable = ({
         })
       }
       if (type === 'many') {
-        result[key] = many(adapter.tables[target])
+        result[key] = many(adapter.tables[target], { relationName: key })
       }
     })
 
     if (hasLocalizedField) {
-      result._locales = many(localesTable)
+      result._locales = many(localesTable, { relationName: '_locales' })
     }
 
     if (hasManyTextField) {
-      result._texts = many(textsTable)
+      result._texts = many(textsTable, { relationName: '_texts' })
     }
 
     if (hasManyNumberField) {
-      result._numbers = many(numbersTable)
+      result._numbers = many(numbersTable, { relationName: '_numbers' })
     }
 
     if (relationships.size && relationshipsTable) {
