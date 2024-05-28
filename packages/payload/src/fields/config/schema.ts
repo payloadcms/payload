@@ -521,6 +521,7 @@ export const ui = joi.object().keys({
         })
         .default({}),
       condition: joi.func(),
+      disableListColumn: joi.boolean().default(false),
       position: joi.string().valid('sidebar'),
       width: joi.string(),
     })
