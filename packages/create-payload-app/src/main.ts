@@ -2,21 +2,21 @@ import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import chalk from 'chalk'
-// @ts-expect-error no types
-import { detect } from 'detect-package-manager'
 import figures from 'figures'
 import path from 'path'
 
-import type { CliArgs, PackageManager } from './types.js'
+import type { CliArgs } from './types.js'
 
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
 import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
+import { getPackageManager } from './lib/get-package-manager.js'
 import { getNextAppDetails, initNext } from './lib/init-next.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
+import { updatePayloadInProject } from './lib/update-payload-in-project.js'
 import { writeEnvFile } from './lib/write-env-file.js'
 import { error, info } from './utils/log.js'
 import {
@@ -85,7 +85,28 @@ export class Main {
 
       // Detect if inside Next.js project
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const { hasTopLevelLayout, nextAppDir, nextConfigPath } = nextAppDetails
+      const { hasTopLevelLayout, isPayloadInstalled, nextAppDir, nextConfigPath } = nextAppDetails
+
+      // Upgrade Payload in existing project
+      if (isPayloadInstalled && nextConfigPath) {
+        p.log.warn(`Payload installation detected in current project.`)
+        const shouldUpdate = await p.confirm({
+          initialValue: false,
+          message: chalk.bold(`Upgrade Payload in this project?`),
+        })
+
+        if (!p.isCancel(shouldUpdate) || shouldUpdate) {
+          const { message, success: updateSuccess } = await updatePayloadInProject(nextAppDetails)
+          if (updateSuccess) {
+            info(message)
+          } else {
+            error(message)
+          }
+        }
+
+        p.outro(feedbackOutro())
+        process.exit(0)
+      }
 
       if (nextConfigPath) {
         this.args['--name'] = slugify(path.basename(path.dirname(nextConfigPath)))
@@ -96,7 +117,7 @@ export class Main {
         ? path.dirname(nextConfigPath)
         : path.resolve(process.cwd(), slugify(projectName))
 
-      const packageManager = await getPackageManager(this.args, projectDir)
+      const packageManager = await getPackageManager({ cliArgs: this.args, projectDir })
 
       if (nextConfigPath) {
         p.log.step(
@@ -211,20 +232,4 @@ export class Main {
       error(err instanceof Error ? err.message : 'An error occurred')
     }
   }
-}
-
-async function getPackageManager(args: CliArgs, projectDir: string): Promise<PackageManager> {
-  let packageManager: PackageManager = 'npm'
-
-  if (args['--use-npm']) {
-    packageManager = 'npm'
-  } else if (args['--use-yarn']) {
-    packageManager = 'yarn'
-  } else if (args['--use-pnpm']) {
-    packageManager = 'pnpm'
-  } else {
-    const detected = await detect({ cwd: projectDir })
-    packageManager = detected || 'npm'
-  }
-  return packageManager
 }
