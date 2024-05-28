@@ -332,6 +332,46 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  arrayWithBlocks?:
+    | {
+        blocksWithinArray?:
+          | {
+              relationWithinBlock?: (string | null) | TextField;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'someBlock';
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields".
+ */
+export interface TextField {
+  id: string;
+  text: string;
+  localizedText?: string | null;
+  i18nText?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  customLabel?: string | null;
+  customError?: string | null;
+  beforeAndAfterInput?: string | null;
+  hasMany?: string[] | null;
+  validatesHasMany?: string[] | null;
+  localizedHasMany?: string[] | null;
+  withMinRows?: string[] | null;
+  withMaxRows?: string[] | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -678,33 +718,6 @@ export interface BlockField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text-fields".
- */
-export interface TextField {
-  id: string;
-  text: string;
-  localizedText?: string | null;
-  i18nText?: string | null;
-  defaultFunction?: string | null;
-  defaultAsync?: string | null;
-  overrideLength?: string | null;
-  fieldWithDefaultValue?: string | null;
-  dependentOnFieldWithDefaultValue?: string | null;
-  customLabel?: string | null;
-  customError?: string | null;
-  beforeAndAfterInput?: string | null;
-  hasMany?: string[] | null;
-  validatesHasMany?: string[] | null;
-  localizedHasMany?: string[] | null;
-  withMinRows?: string[] | null;
-  withMaxRows?: string[] | null;
-  disableListColumnText?: string | null;
-  disableListFilterText?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "checkbox-fields".
  */
 export interface CheckboxField {
@@ -851,7 +864,7 @@ export interface GroupField {
       nestedField?: string | null;
     };
   };
-  groups: {
+  groups?: {
     groupInRow?: {
       field?: string | null;
       secondField?: string | null;
@@ -1207,16 +1220,16 @@ export interface TabsField {
         }[]
       | null;
   };
-  namedTabWithDefaultValue: {
+  namedTabWithDefaultValue?: {
     defaultValue?: string | null;
   };
-  localizedTab: {
+  localizedTab?: {
     text?: string | null;
   };
-  accessControlTab: {
+  accessControlTab?: {
     text?: string | null;
   };
-  hooksTab: {
+  hooksTab?: {
     beforeValidate?: boolean | null;
     beforeChange?: boolean | null;
     afterChange?: boolean | null;
@@ -1224,7 +1237,7 @@ export interface TabsField {
   };
   textarea?: string | null;
   anotherText: string;
-  nestedTab: {
+  nestedTab?: {
     text?: string | null;
   };
   updatedAt: string;
@@ -1262,6 +1275,8 @@ export interface Upload {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1280,6 +1295,8 @@ export interface Uploads2 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1312,6 +1329,8 @@ export interface Uploads3 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1363,7 +1382,7 @@ export interface PayloadMigration {
  */
 export interface TabsWithRichText {
   id: string;
-  tab1: {
+  tab1?: {
     rt1?: {
       root: {
         type: string;
@@ -1380,7 +1399,7 @@ export interface TabsWithRichText {
       [k: string]: unknown;
     } | null;
   };
-  tab2: {
+  tab2?: {
     rt2?: {
       root: {
         type: string;
@@ -1413,6 +1432,6 @@ export interface LexicalBlocksRadioButtonsBlock {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

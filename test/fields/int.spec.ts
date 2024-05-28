@@ -881,6 +881,83 @@ describe('Fields', () => {
       expect(allLocales.localized.en[0].text).toStrictEqual(enText)
       expect(allLocales.localized.es[0].text).toStrictEqual(esText)
     })
+
+    it('should not duplicate block rows for blocks within localized array fields', async () => {
+      const randomTextDoc = (
+        await payload.find({
+          collection: 'text-fields',
+          depth: 0,
+        })
+      ).docs[0]
+
+      const blocksWithinArray = [
+        {
+          blockName: '1',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc.id,
+        },
+        {
+          blockName: '2',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc.id,
+        },
+        {
+          blockName: '3',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc.id,
+        },
+      ]
+
+      const createdEnDoc = await payload.create({
+        collection,
+        locale: 'en',
+        depth: 0,
+        data: {
+          items: [
+            {
+              text: 'hello',
+              localizedText: 'hello',
+            },
+          ],
+          localized: [
+            {
+              text: 'hello',
+            },
+          ],
+          arrayWithBlocks: [
+            {
+              blocksWithinArray: blocksWithinArray as any,
+            },
+          ],
+        },
+      })
+
+      const updatedEsDoc = await payload.update({
+        collection,
+        id: createdEnDoc.id,
+        depth: 0,
+        locale: 'es',
+        data: {
+          arrayWithBlocks: [
+            {
+              blocksWithinArray: blocksWithinArray as any,
+            },
+          ],
+        },
+      })
+
+      const esArrayBlocks = updatedEsDoc.arrayWithBlocks[0].blocksWithinArray
+      // recursively remove any id field within esArrayRow
+      const removeId = (obj) => {
+        if (obj instanceof Object) {
+          delete obj.id
+          Object.values(obj).forEach(removeId)
+        }
+      }
+      removeId(esArrayBlocks)
+
+      expect(esArrayBlocks).toEqual(blocksWithinArray)
+    })
   })
 
   describe('group', () => {

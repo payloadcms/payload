@@ -154,6 +154,30 @@ const ArrayFields: CollectionConfig = {
       ],
       type: 'array',
     },
+    {
+      name: 'arrayWithBlocks',
+      type: 'array',
+      fields: [
+        {
+          name: 'blocksWithinArray',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'someBlock',
+              fields: [
+                {
+                  name: 'relationWithinBlock',
+                  type: 'relationship',
+                  relationTo: 'text-fields',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+
+      localized: true,
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,
