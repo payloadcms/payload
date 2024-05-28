@@ -13,6 +13,7 @@ export type { Option } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
@@ -67,7 +68,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     .join(' ')
 
   if (!hasMounted) {
-    return null
+    return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
   }
 
   if (!isCreatable) {
