@@ -320,7 +320,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     }) => JSONSchema4
   }
   /**
-   * Here you can provide i18n translations for your feature. These will only be available on the server.
+   * Here you can provide i18n translations for your feature. These will only be available on the server and client.
    *
    * Translations here are automatically scoped to `lexical.featureKey.yourKey`
    *
@@ -335,8 +335,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    *   },
    * }
    * ```
-   * In order to access these translations on the server, you would use `i18n.t('lexical:horizontalRule:label')`.
-   * If you want to access them on both the server and the client, you will have to add them to your ClientFeature as well.
+   * In order to access these translations, you would use `i18n.t('lexical:horizontalRule:label')`.
    */
   i18n?: Partial<GenericLanguages>
   markdownTransformers?: Transformer[]
