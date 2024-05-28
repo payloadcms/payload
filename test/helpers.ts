@@ -75,7 +75,7 @@ export async function ensureAutoLoginAndCompilationIsDone({
   await page.goto(adminURL)
   await page.waitForURL(adminURL)
 
-  await expect(() => expect(page.locator('.login').first()).toBeVisible()).toPass({
+  await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
