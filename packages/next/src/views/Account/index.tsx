@@ -40,7 +40,7 @@ export const Account: React.FC<AdminViewProps> = async ({
 
   const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
 
-  if (collectionConfig) {
+  if (collectionConfig && user?.id) {
     const { docPermissions, hasPublishPermission, hasSavePermission } =
       await getDocumentPermissions({
         id: user.id,

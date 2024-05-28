@@ -32,7 +32,7 @@
     "build:types": "tsc --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "tsx scripts/translateNewKeys/index.ts"
+    "translateNewKeys": "tsx scripts/translateNewKeys/run.ts"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

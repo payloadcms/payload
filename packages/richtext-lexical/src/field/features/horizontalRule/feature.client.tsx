@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientTranslationKeys } from '@payloadcms/translations'
+
 import { $isNodeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
@@ -36,7 +38,10 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
                 Icon: HorizontalRuleIcon,
                 key: 'horizontalRule',
                 keywords: ['hr', 'horizontal rule', 'line', 'separator'],
-                label: `Horizontal Rule`,
+                label: ({ i18n }) => {
+                  return i18n.t('lexical:horizontalRule:label')
+                },
+
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
                 },
@@ -47,6 +52,7 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
           },
         ],
       },
+
       toolbarFixed: {
         groups: [
           toolbarAddDropdownGroupWithItems([
@@ -61,7 +67,9 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
                 return $isHorizontalRuleNode(firstNode)
               },
               key: 'horizontalRule',
-              label: `Horizontal Rule`,
+              label: ({ i18n }) => {
+                return i18n.t('lexical:horizontalRule:label')
+              },
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
               },
