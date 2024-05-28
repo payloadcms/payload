@@ -278,21 +278,19 @@ describe('versions', () => {
 
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
-
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
         })
         .first()
-
       expect(linkToDoc).toBeTruthy()
       await linkToDoc.click()
-
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-
+      const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
+      await versionsPill.waitFor({ state: 'visible' })
       const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
       expect(versionCount).toBe('11')
     })
