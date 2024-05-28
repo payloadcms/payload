@@ -65,6 +65,7 @@ export const DocumentInfoProvider: React.FC<
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
+  const prevLocale = useRef(locale)
 
   const {
     admin: { dateFormat },
@@ -376,8 +377,15 @@ export const DocumentInfoProvider: React.FC<
 
   useEffect(() => {
     const abortController = new AbortController()
+    const localeChanged = locale !== prevLocale.current
 
-    if (initialStateFromProps === undefined || initialDataFromProps === undefined) {
+    if (
+      initialStateFromProps === undefined ||
+      initialDataFromProps === undefined ||
+      localeChanged
+    ) {
+      if (localeChanged) prevLocale.current = locale
+
       const getInitialState = async () => {
         setIsError(false)
         setIsLoading(true)
