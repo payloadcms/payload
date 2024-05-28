@@ -1,3 +1,4 @@
+'use client'
 import { isImage } from 'payload/utilities'
 import React from 'react'
 

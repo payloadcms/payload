@@ -1,3 +1,4 @@
+'use client'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'

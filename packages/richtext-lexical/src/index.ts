@@ -109,6 +109,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
+      i18n: finalSanitizedEditorConfig.features.i18n,
       /* hooks: {
         afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
         afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,

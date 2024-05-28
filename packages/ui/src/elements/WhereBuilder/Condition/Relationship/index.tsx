@@ -1,3 +1,4 @@
+'use client'
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import type { PaginatedDocs } from 'payload/database'
 

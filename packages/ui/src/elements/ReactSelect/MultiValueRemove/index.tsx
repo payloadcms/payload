@@ -1,3 +1,4 @@
+'use client'
 import type { MultiValueRemoveProps } from 'react-select'
 
 import React, { type JSX } from 'react'

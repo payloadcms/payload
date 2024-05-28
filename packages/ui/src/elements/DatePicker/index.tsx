@@ -1,3 +1,4 @@
+'use client'
 import React, { Suspense, lazy } from 'react'
 
 import type { Props } from './types.js'

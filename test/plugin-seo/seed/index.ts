@@ -1,10 +1,13 @@
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
 
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 
 import { mediaSlug } from '../shared.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -12,7 +15,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
   try {
     // Create image
-    const filePath = path.resolve(process.cwd(), './test/plugin-seo/image-1.jpg')
+    const filePath = path.resolve(dirname, '../image-1.jpg')
     const file = await getFileByPath(filePath)
 
     const mediaDoc = await payload.create({
@@ -24,14 +27,14 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     await payload.create({
       collection: 'pages',
       data: {
-        title: 'Test Page',
         slug: 'test-page',
         meta: {
-          title: 'This is a test meta title',
           description: 'This is a test meta description',
-          ogTitle: 'This is a custom og:title field',
           image: mediaDoc.id,
+          ogTitle: 'This is a custom og:title field',
+          title: 'This is a test meta title',
         },
+        title: 'Test Page',
       },
       req,
     })
