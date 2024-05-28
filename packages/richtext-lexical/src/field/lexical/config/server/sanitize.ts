@@ -13,10 +13,10 @@ export const sanitizeServerFeatures = (
       html: [],
     },
     enabledFeatures: [],
-
     generatedTypes: {
       modifyOutputSchemas: [],
     },
+
     hooks: {
       afterChange: new Map(),
       afterRead: new Map(),
@@ -24,6 +24,7 @@ export const sanitizeServerFeatures = (
       beforeDuplicate: new Map(),
       beforeValidate: new Map(),
     },
+    i18n: {},
     markdownTransformers: [],
     nodes: [],
     populationPromises: new Map(),
@@ -38,6 +39,17 @@ export const sanitizeServerFeatures = (
   features.forEach((feature) => {
     if (feature?.generatedTypes?.modifyOutputSchema) {
       sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
+    }
+
+    if (feature?.i18n) {
+      for (const lang in feature.i18n) {
+        if (!sanitized.i18n[lang]) {
+          sanitized.i18n[lang] = {
+            lexical: {},
+          }
+        }
+        sanitized.i18n[lang].lexical[feature.key] = feature.i18n[lang]
+      }
     }
 
     if (feature.nodes?.length) {
