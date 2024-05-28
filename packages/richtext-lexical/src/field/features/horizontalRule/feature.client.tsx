@@ -48,9 +48,7 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
               },
             ],
             key: 'basic',
-            label: ({ i18n }) => {
-              return i18n.t('validation:limitReached' as ClientTranslationKeys)
-            },
+            label: 'Basic',
           },
         ],
       },
