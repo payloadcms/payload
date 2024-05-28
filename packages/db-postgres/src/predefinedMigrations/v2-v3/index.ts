@@ -24,7 +24,7 @@ type Args = {
 }
 
 /**
- * Movess upload and relationship columns from the join table and into the tables while moving data
+ * Moves upload and relationship columns from the join table and into the tables while moving data
  * This is done in the following order:
  *    ADD COLUMNs
  *    -- manipulate data to move relationships to new columns

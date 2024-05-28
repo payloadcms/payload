@@ -40,60 +40,53 @@ export const fetchAndResave = async ({
 
       if (collectionConfig) {
         if (isVersions) {
-          const { docs } = await payload.findVersions({
+          const doc = await payload.findVersionByID({
+            id,
             collection: collectionSlug,
             depth: 0,
             fallbackLocale: null,
-            limit: 0,
             locale: 'all',
             req,
             showHiddenFields: true,
-            where: {
-              parent: {
-                equals: id,
-              },
-            },
           })
 
           if (debug) {
             payload.logger.info(
-              `${docs.length} collection "${collectionConfig.slug}" versions will be migrated`,
+              `The collection "${collectionConfig.slug}" version with ID ${id} will be migrated`,
             )
           }
 
-          for (const doc of docs) {
-            traverseFields({
-              doc,
+          traverseFields({
+            doc,
+            fields,
+            path: '',
+            rows,
+          })
+
+          try {
+            await upsertRow({
+              id: doc.id,
+              adapter,
+              data: doc,
+              db,
               fields,
-              path: '',
-              rows,
+              ignoreResult: true,
+              operation: 'update',
+              req,
+              tableName,
             })
+          } catch (err) {
+            payload.logger.error(
+              `"${collectionConfig.slug}" version with ID ${doc.id} FAILED TO MIGRATE`,
+            )
 
-            try {
-              await upsertRow({
-                id: doc.id,
-                adapter,
-                data: doc,
-                db,
-                fields,
-                ignoreResult: true,
-                operation: 'update',
-                req,
-                tableName,
-              })
-            } catch (err) {
-              payload.logger.error(
-                `"${collectionConfig.slug}" version with ID ${doc.id} FAILED TO MIGRATE`,
-              )
+            throw err
+          }
 
-              throw err
-            }
-
-            if (debug) {
-              payload.logger.info(
-                `"${collectionConfig.slug}" version with ID ${doc.id} migrated successfully!`,
-              )
-            }
+          if (debug) {
+            payload.logger.info(
+              `"${collectionConfig.slug}" version with ID ${doc.id} migrated successfully!`,
+            )
           }
         } else {
           const doc = await payload.findByID({
