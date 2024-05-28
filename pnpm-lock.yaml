@@ -161,9 +161,6 @@ importers:
       jwt-decode:
         specifier: 4.0.0
         version: 4.0.0
-      lexical:
-        specifier: 0.15.0
-        version: 0.15.0
       lint-staged:
         specifier: ^14.0.1
         version: 14.0.1
@@ -175,7 +172,7 @@ importers:
         version: 9.1.8
       next:
         specifier: 15.0.0-rc.0
-        version: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(sass@1.74.1)
+        version: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       node-mocks-http:
         specifier: ^1.14.1
         version: 1.14.1
@@ -1794,6 +1791,9 @@ importers:
       http-status:
         specifier: 1.6.2
         version: 1.6.2
+      lexical:
+        specifier: 0.15.0
+        version: 0.15.0
       payload:
         specifier: workspace:*
         version: link:../packages/payload
@@ -13858,7 +13858,6 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
-    dev: false
 
   /next@15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(sass@1.74.1):
     resolution: {integrity: sha512-IWcCvxUSCAuOK5gig4+9yiyt/dLKpIa+WT01Qcx4CBE4TtwJljyTDnCVVn64jDZ4qmSzsaEYXpb4DTI8qbk03A==}
@@ -13906,6 +13905,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    dev: false
 
   /node-abi@3.57.0:
     resolution: {integrity: sha512-Dp+A9JWxRaKuHP35H77I4kCKesDy5HUDEmScia2FyncMTOXASMyg251F5PhFoDA5uqBrDDffiLpbqnrZmNXW+g==}
@@ -17627,7 +17627,7 @@ packages:
       consola: 3.2.3
       effect: 3.1.5
       fast-check: 3.18.0
-      next: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(sass@1.74.1)
+      next: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       std-env: 3.7.0
 
   /uri-js@4.4.1:
