@@ -263,7 +263,9 @@ describe('fields', () => {
 
     test('the drag handle should be hidden', async () => {
       await page.goto(url.create)
-      const field = page.locator('#field-disableSort .collapsible__drag')
+      const field = page.locator(
+        '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
+      )
       expect(await field.count()).toEqual(0)
     })
   })
@@ -282,7 +284,9 @@ describe('fields', () => {
 
     test('the drag handle should be hidden', async () => {
       await page.goto(url.create)
-      const field = page.locator('#field-disableSort .collapsible__drag')
+      const field = page.locator(
+        '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
+      )
       expect(await field.count()).toEqual(0)
     })
   })
