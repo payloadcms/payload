@@ -1,5 +1,4 @@
-// @ts-expect-error no types
-import { detect } from 'detect-package-manager'
+import * as p from '@clack/prompts'
 import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
@@ -11,12 +10,14 @@ const dirname = path.dirname(filename)
 import type { NextAppDetails } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
-import { debug, info, warning } from '../utils/log.js'
+import { info } from '../utils/log.js'
+import { getPackageManager } from './get-package-manager.js'
+import { installPackages } from './install-packages.js'
 
 export async function updatePayloadInProject(
   appDetails: NextAppDetails,
-): Promise<{ success: boolean }> {
-  if (!appDetails.nextConfigPath) return { success: false }
+): Promise<{ message: string; success: boolean }> {
+  if (!appDetails.nextConfigPath) return { message: 'No Next.js config found', success: false }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
 
@@ -32,7 +33,7 @@ export async function updatePayloadInProject(
     throw new Error('Payload is not installed in this project')
   }
 
-  const packageManager = await detect({ cwd: projectDir })
+  const packageManager = await getPackageManager({ projectDir })
 
   // Fetch latest Payload version from npm
   const { exitCode: getLatestVersionExitCode, stdout: latestPayloadVersion } = await execa('npm', [
@@ -45,56 +46,29 @@ export async function updatePayloadInProject(
   }
 
   if (payloadVersion === latestPayloadVersion) {
-    throw new Error(`Payload v${payloadVersion} is already up to date.`)
+    return { message: `Payload v${payloadVersion} is already up to date.`, success: true }
   }
 
   // Update all existing Payload packages
   const payloadPackages = Object.keys(packageObj.dependencies).filter((dep) =>
     dep.startsWith('@payloadcms/'),
   )
-  const packagesToUpdate = ['payload', ...payloadPackages].map(
-    (pkg) => `${pkg}@${latestPayloadVersion}`,
+
+  const packageNames = ['payload', ...payloadPackages]
+
+  const packagesToUpdate = packageNames.map((pkg) => `${pkg}@${latestPayloadVersion}`)
+
+  info(
+    `Updating ${packagesToUpdate.length} Payload packages to v${latestPayloadVersion}...\n\n${packageNames.map((p) => `  - ${p}`).join('\n')}`,
   )
 
-  info(`Updating ${packagesToUpdate.length} Payload packages to v${latestPayloadVersion}...`)
-  debug(`Packages to update: ${packagesToUpdate.join(', ')}`)
-  debug(`Package Manager: ${packageManager}`)
-  debug(`Project directory: ${projectDir}`)
+  const { success: updateSuccess } = await installPackages({
+    packageManager,
+    packagesToInstall: packagesToUpdate,
+    projectDir,
+  })
 
-  // Update all packages
-  let exitCode = 0
-  let stdout = ''
-  let stderr = ''
-  switch (packageManager) {
-    case 'npm': {
-      ;({ exitCode, stderr, stdout } = await execa(
-        'npm',
-        ['install', '--save', ...packagesToUpdate],
-        {
-          cwd: projectDir,
-        },
-      ))
-      break
-    }
-    case 'yarn':
-    case 'pnpm': {
-      debug(`args: ${[packageManager, 'add', ...packagesToUpdate].join(' ')}`)
-      ;({ exitCode, stderr, stdout } = await execa(packageManager, ['add', ...packagesToUpdate], {
-        cwd: projectDir,
-      }))
-      break
-    }
-    case 'bun': {
-      warning('Bun support is untested.')
-      ;({ exitCode } = await execa('bun', ['add', ...packagesToUpdate], { cwd: projectDir }))
-      break
-    }
-  }
-  debug(`Exit code: ${exitCode}`)
-  debug(`stdout: ${stdout}`)
-  debug(`stderr: ${stderr}`)
-
-  if (exitCode !== 0) {
+  if (!updateSuccess) {
     throw new Error('Failed to update Payload packages')
   }
   info('Payload packages updated successfully.')
@@ -111,5 +85,5 @@ export async function updatePayloadInProject(
     path.resolve(projectDir, appDetails.isSrcDir ? 'src/app' : 'app', '(payload)'),
   )
 
-  return { success: true }
+  return { message: 'Payload updated successfully.', success: true }
 }

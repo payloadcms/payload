@@ -3,17 +3,24 @@ import { detect } from 'detect-package-manager'
 
 import type { CliArgs, PackageManager } from '../types.js'
 
-export async function getPackageManager(
-  args: CliArgs,
-  projectDir: string,
-): Promise<PackageManager> {
+export async function getPackageManager(args: {
+  cliArgs?: CliArgs
+  projectDir: string
+}): Promise<PackageManager> {
+  const { cliArgs, projectDir } = args
+
+  if (!cliArgs) {
+    const detected = await detect({ cwd: projectDir })
+    return detected || 'npm'
+  }
+
   let packageManager: PackageManager = 'npm'
 
-  if (args['--use-npm']) {
+  if (cliArgs['--use-npm']) {
     packageManager = 'npm'
-  } else if (args['--use-yarn']) {
+  } else if (cliArgs['--use-yarn']) {
     packageManager = 'yarn'
-  } else if (args['--use-pnpm']) {
+  } else if (cliArgs['--use-pnpm']) {
     packageManager = 'pnpm'
   } else {
     const detected = await detect({ cwd: projectDir })

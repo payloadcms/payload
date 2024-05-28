@@ -15,6 +15,7 @@ import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
+import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
 const readFile = promisify(fs.readFile)
@@ -229,29 +230,7 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')
 
-  let exitCode = 0
-  switch (packageManager) {
-    case 'npm': {
-      ;({ exitCode } = await execa('npm', ['install', '--save', ...packagesToInstall], {
-        cwd: projectDir,
-      }))
-      break
-    }
-    case 'yarn':
-    case 'pnpm': {
-      ;({ exitCode } = await execa(packageManager, ['add', ...packagesToInstall], {
-        cwd: projectDir,
-      }))
-      break
-    }
-    case 'bun': {
-      warning('Bun support is untested.')
-      ;({ exitCode } = await execa('bun', ['add', ...packagesToInstall], { cwd: projectDir }))
-      break
-    }
-  }
-
-  return { success: exitCode === 0 }
+  return await installPackages({ packageManager, packagesToInstall, projectDir })
 }
 
 export async function getNextAppDetails(projectDir: string): Promise<NextAppDetails> {

@@ -89,14 +89,19 @@ export class Main {
 
       // Upgrade Payload in existing project
       if (isPayloadInstalled && nextConfigPath) {
-        p.log.warn(`Payload is already installed in this project.`)
+        p.log.warn(`Payload installation detected in current project.`)
         const shouldUpdate = await p.confirm({
           initialValue: false,
           message: chalk.bold(`Upgrade Payload in this project?`),
         })
 
         if (!p.isCancel(shouldUpdate) || shouldUpdate) {
-          await updatePayloadInProject(nextAppDetails)
+          const { message, success: updateSuccess } = await updatePayloadInProject(nextAppDetails)
+          if (updateSuccess) {
+            info(message)
+          } else {
+            error(message)
+          }
         }
 
         p.outro(feedbackOutro())
@@ -112,7 +117,7 @@ export class Main {
         ? path.dirname(nextConfigPath)
         : path.resolve(process.cwd(), slugify(projectName))
 
-      const packageManager = await getPackageManager(this.args, projectDir)
+      const packageManager = await getPackageManager({ cliArgs: this.args, projectDir })
 
       if (nextConfigPath) {
         p.log.step(
