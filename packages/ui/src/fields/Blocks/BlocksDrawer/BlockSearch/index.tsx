@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 
 import { Search } from '../../../../graphics/Search/index.js'

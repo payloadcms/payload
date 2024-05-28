@@ -1,3 +1,4 @@
+'use client'
 import type { ValueContainerProps } from 'react-select'
 
 import React from 'react'

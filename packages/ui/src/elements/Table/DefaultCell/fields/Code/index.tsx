@@ -1,3 +1,4 @@
+'use client'
 import type { DefaultCellComponentProps } from 'payload/types'
 
 import React from 'react'

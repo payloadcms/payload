@@ -1,3 +1,4 @@
+'use client'
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 // 1. Skips fields that are hidden, disabled, or presentational-only (i.e. `ui` fields)

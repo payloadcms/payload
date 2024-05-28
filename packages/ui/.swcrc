@@ -16,7 +16,7 @@
         "development": false,
         "useBuiltins": true
       }
-    }
+    },
     "experimental": {
       "plugins": [
         [

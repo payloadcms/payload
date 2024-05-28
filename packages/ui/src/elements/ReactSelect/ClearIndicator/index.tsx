@@ -1,3 +1,4 @@
+'use client'
 import type { ClearIndicatorProps } from 'react-select'
 
 import React from 'react'

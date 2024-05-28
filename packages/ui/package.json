@@ -81,8 +81,10 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
+    "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:webpack": "webpack --config webpack.config.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
@@ -116,6 +118,11 @@
     "uuid": "9.0.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",
@@ -123,6 +130,8 @@
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "@types/uuid": "8.3.4",
+    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
+    "babel-plugin-transform-remove-imports": "^1.7.1",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
     "mini-css-extract-plugin": "1.6.2",

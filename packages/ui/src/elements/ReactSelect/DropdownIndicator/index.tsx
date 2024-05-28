@@ -1,3 +1,4 @@
+'use client'
 import type { DropdownIndicatorProps } from 'react-select'
 
 import { Chevron } from '@payloadcms/ui/icons/Chevron'

@@ -1,3 +1,4 @@
+'use client'
 import { formatFilesize } from 'payload/utilities'
 import React, { useState } from 'react'
 

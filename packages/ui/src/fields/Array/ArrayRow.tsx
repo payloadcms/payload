@@ -1,3 +1,4 @@
+'use client'
 import type { FieldPermissions } from 'payload/auth'
 import type { ArrayField, Row } from 'payload/types'
 
