@@ -58,7 +58,8 @@ const reduceFields = (fields, i18n) =>
         },
       }
 
-      if ('disableListFilter' in field.admin && field.admin?.disableListFilter) return reduced
+      if (field.admin && 'disableListFilter' in field.admin && field.admin?.disableListFilter)
+        return reduced
 
       return [...reduced, formattedField]
     }
