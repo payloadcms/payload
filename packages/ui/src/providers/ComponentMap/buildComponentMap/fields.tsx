@@ -524,6 +524,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
+              isSortable: field.admin?.isSortable,
               readOnly: field.admin?.readOnly,
               relationTo: field.relationTo,
               required: field.required,
