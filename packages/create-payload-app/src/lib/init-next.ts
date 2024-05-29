@@ -221,9 +221,12 @@ function installAndConfigurePayload(
 }
 
 async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
-  const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@beta`,
-  )
+  const packagesToInstall = [
+    'payload',
+    '@payloadcms/next',
+    '@payloadcms/richtext-lexical',
+    '@payloadcms/plugin-cloud',
+  ].map((pkg) => `${pkg}@beta`)
 
   packagesToInstall.push(`@payloadcms/db-${dbType}@beta`)
 

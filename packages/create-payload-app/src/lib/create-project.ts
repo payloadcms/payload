@@ -9,7 +9,7 @@ import path from 'path'
 import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types.js'
 
 import { tryInitRepoAndCommit } from '../utils/git.js'
-import { debug, error, warning } from '../utils/log.js'
+import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -99,6 +99,7 @@ export async function createProject(args: {
   }
 
   if (!cliArgs['--no-deps']) {
+    info(`Using ${packageManager}.\n`)
     spinner.message('Installing dependencies...')
     const result = await installDeps({ cliArgs, packageManager, projectDir })
     if (result) {
