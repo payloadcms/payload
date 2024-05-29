@@ -1,4 +1,3 @@
-import * as p from '@clack/prompts'
 import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
@@ -58,6 +57,7 @@ export async function updatePayloadInProject(
 
   const packagesToUpdate = packageNames.map((pkg) => `${pkg}@${latestPayloadVersion}`)
 
+  info(`Using ${packageManager}.\n`)
   info(
     `Updating ${packagesToUpdate.length} Payload packages to v${latestPayloadVersion}...\n\n${packageNames.map((p) => `  - ${p}`).join('\n')}`,
   )
