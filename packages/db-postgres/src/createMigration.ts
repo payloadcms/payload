@@ -3,15 +3,12 @@ import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
 
 import fs from 'fs'
-import { createRequire } from 'module'
 import path from 'path'
 import { getPredefinedMigration } from 'payload/database'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
 import type { PostgresAdapter } from './types.js'
-
-const require = createRequire(import.meta.url)
 
 const migrationTemplate = ({
   downSQL,
@@ -35,12 +32,12 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
     schemas: {},
     tables: {},
   },
-  dialect: 'pg',
+  dialect: 'postgresql',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
   tables: {},
-  version: '5',
+  version: '6',
 })
 
 export const createMigration: CreateMigration = async function createMigration(
@@ -53,7 +50,9 @@ export const createMigration: CreateMigration = async function createMigration(
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
+  const { generateDrizzleJson, generateMigration, upPgSnapshot } = await import(
+    'drizzle-kit/payload'
+  )
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -89,6 +88,11 @@ export const createMigration: CreateMigration = async function createMigration(
       drizzleJsonBefore = JSON.parse(
         fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
       ) as DrizzleSnapshotJSON
+
+      // Upgrade old snapshots to match the installed drizzle-kit version
+      if (drizzleJsonBefore.version < drizzleJsonBefore.version) {
+        drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
+      }
     }
 
     const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
