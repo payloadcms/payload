@@ -75,6 +75,10 @@ export async function ensureAutoLoginAndCompilationIsDone({
   await page.goto(adminURL)
   await page.waitForURL(adminURL)
 
+  await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+
   await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
@@ -85,7 +89,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  // Check if hero is there
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
 }
 
@@ -197,6 +200,16 @@ export async function openNav(page: Page): Promise<void> {
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
   await wait(500) // wait for parent form state to initialize
   await page.locator(selector).click()
+  await wait(500) // wait for drawer form state to initialize
+}
+
+export async function openCreateDocDrawer(page: Page, fieldSelector: string): Promise<void> {
+  await wait(500) // wait for parent form state to initialize
+  const relationshipField = page.locator(fieldSelector)
+  await expect(relationshipField.locator('input')).toBeEnabled()
+  const addNewButton = relationshipField.locator('.relationship-add-new__add-button')
+  await expect(addNewButton).toBeVisible()
+  await addNewButton.click()
   await wait(500) // wait for drawer form state to initialize
 }
 

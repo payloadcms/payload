@@ -1,7 +1,7 @@
 import type { Config } from 'payload/config'
 import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
-import { traverseFields } from '@payloadcms/next/utilities'
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
 
 import type { FeatureProviderProviderServer } from '../types.js'

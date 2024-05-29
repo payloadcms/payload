@@ -107,9 +107,6 @@ test.describe('Form Builder', () => {
     })
 
     test('can create form submission', async () => {
-      await page.goto(submissionsUrl.list)
-      await page.waitForURL(submissionsUrl.list)
-
       const { docs } = await payload.find({
         collection: 'forms',
       })

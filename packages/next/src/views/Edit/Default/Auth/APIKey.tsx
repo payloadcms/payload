@@ -25,7 +25,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
   const { t } = useTranslation()
   const config = useConfig()
 
-  const apiKey = useFormFields(([fields]) => fields[path])
+  const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
 
   const validate = (val) =>
     text(val, {

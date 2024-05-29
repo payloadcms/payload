@@ -71,7 +71,6 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   } = props
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -116,6 +115,8 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
 
   const {
     errorPaths,
+    formInitializing,
+    formProcessing,
     path,
     rows = [],
     schemaPath,
@@ -127,6 +128,8 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number) => {
@@ -187,7 +190,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = readOnly && rows.length === 0
+  const showRequired = disabled && rows.length === 0
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
 
   return (
@@ -257,7 +260,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               errorPath.startsWith(`${path}.${i}.`),
             ).length
             return (
-              <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
+              <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -274,7 +277,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                     moveRow={moveRow}
                     path={path}
                     permissions={permissions}
-                    readOnly={readOnly}
+                    readOnly={disabled}
                     removeRow={removeRow}
                     row={row}
                     rowCount={rows.length}
@@ -307,7 +310,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
+      {!disabled && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
