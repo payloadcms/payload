@@ -1,0 +1,84 @@
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+.blur {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('/blur.png');
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  background-blend-mode: soft-light, normal;
+  backdrop-filter: blur(60px);
+  z-index: -1;
+}
+
+.gradient {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('/gradient.webp');
+  background-size: cover;
+  background-position: center;
+  z-index: -3;
+}
+
+.gridlineContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0 var(--gutter);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  z-index: 0;
+  & div {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      width: 1px;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background: var(--gridline);
+    }
+
+    &:last-of-type::after {
+      content: '';
+      display: block;
+      position: absolute;
+      width: 1px;
+      height: 100%;
+      right: 0;
+      top: 0;
+      background: var(--gridline);
+    }
+
+    &.hideMed {
+      @media screen and (max-width: 1200px) {
+        display: none;
+      }
+    }
+
+    &.hideSmall {
+      @media screen and (max-width: 600px) {
+        display: none;
+      }
+    }
+  }
+}
