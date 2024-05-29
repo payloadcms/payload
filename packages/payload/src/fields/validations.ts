@@ -519,8 +519,7 @@ export const relationship: Validate<
   } = options
 
   if (
-    (!['number', 'string'].includes(typeof value) ||
-      (Array.isArray(value) && value.length === 0)) &&
+    ((!value && typeof value !== 'number') || (Array.isArray(value) && value.length === 0)) &&
     required
   ) {
     return t('validation:required')
@@ -555,7 +554,7 @@ export const relationship: Validate<
         collectionSlug = relationTo
 
         // custom id
-        if (['number', 'string'].includes(typeof val)) {
+        if (val || typeof val === 'number') {
           requestedID = val
         }
       }
