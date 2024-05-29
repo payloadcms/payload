@@ -10,7 +10,7 @@ export type Props = {
    *
    * If true, the fields will be rendered immediately, rather than waiting for them to intersect with the viewport.
    *
-   * If a number is provided, will immediately  render fields _up to that index_.
+   * If a number is provided, will immediately render fields _up to that index_.
    */
   forceRender?: boolean | number
   indexPath?: string
