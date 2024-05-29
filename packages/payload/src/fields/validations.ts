@@ -555,7 +555,7 @@ export const relationship: Validate<
         collectionSlug = relationTo
 
         // custom id
-        if (['number', 'string'].includes(typeof value)) {
+        if (['number', 'string'].includes(typeof val)) {
           requestedID = val
         }
       }
