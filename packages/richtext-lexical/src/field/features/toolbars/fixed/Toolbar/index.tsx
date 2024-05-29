@@ -4,6 +4,7 @@ import type { LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import * as React from 'react'
+import { useEffect, useState } from 'react'
 
 import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
@@ -134,13 +135,107 @@ function ToolbarGroupComponent({
 
 function FixedToolbar({
   anchorElem,
+  clientProps,
   editor,
   editorConfig,
 }: {
   anchorElem: HTMLElement
+  clientProps?: FixedToolbarFeatureProps
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
 }): React.ReactNode {
+  const toolbarRef = React.useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (clientProps?.disableIfParentHasFixedToolbar) {
+      // With disableIfParentHasFixedToolbar enabled, there will never be 2 overlapping fixed toolbars anyway
+      return
+    }
+
+    const docControls = document.querySelector('.doc-controls')
+
+    const cachedRef = toolbarRef.current
+    const observer = new IntersectionObserver(
+      ([e]) => {
+        if (e.intersectionRatio < 1) {
+          // check if you scrolled up (last window y is greater than current window y). If yes, return. // TODO
+
+          toolbarRef.current.className =
+            'fixed-toolbar lexical-fixed-toolbar-sticking-enabled lexical-fixed-toolbar-sticking'
+          // Remove lexical-fixed-toolbar-sticking-enabled class from all other dom elements which have it right now
+          const stickingElements = document.querySelectorAll(
+            '.lexical-fixed-toolbar-sticking-enabled',
+          )
+          stickingElements.forEach((element) => {
+            if (element !== toolbarRef.current) {
+              element.classList.remove('lexical-fixed-toolbar-sticking-enabled')
+            }
+          })
+        } else {
+          toolbarRef.current.className = 'fixed-toolbar'
+          // Add lexical-fixed-toolbar-sticking-enabled class back to all other dom elements which have lexical-fixed-toolbar-sticking
+          const stickingElements = document.querySelectorAll(
+            '.lexical-fixed-toolbar-sticking:not(.lexical-fixed-toolbar-sticking-enabled)',
+          )
+          stickingElements.forEach((element) => {
+            if (element !== toolbarRef.current) {
+              element.classList.add('lexical-fixed-toolbar-sticking-enabled')
+            }
+          })
+        }
+      },
+      {
+        root: null,
+        rootMargin: `-${docControls.getBoundingClientRect().height + toolbarRef.current.getBoundingClientRect().height}px 0px 1000000px 0px`,
+        threshold: [1],
+      },
+    )
+
+    // observer2 properly handles the case
+    // - when a child editor toolbar becomes unsticky due to scrolling down. This is not handled by observer1
+    // - when a child editor becomes sticky due to scrolling up. This is not handled by observer1
+    const observer2 = new IntersectionObserver(
+      ([e]) => {
+        if (e.intersectionRatio < 1) {
+          // Add lexical-fixed-toolbar-sticking-enabled class back to all other dom elements which have lexical-fixed-toolbar-sticking
+          const stickingElements = document.querySelectorAll(
+            '.lexical-fixed-toolbar-sticking:not(.lexical-fixed-toolbar-sticking-enabled)',
+          )
+          stickingElements.forEach((element) => {
+            if (element !== toolbarRef.current) {
+              element.classList.add('lexical-fixed-toolbar-sticking-enabled')
+            }
+          })
+        } else {
+          if (!toolbarRef.current.classList.contains('lexical-fixed-toolbar-sticking-enabled')) {
+            return
+          }
+
+          // Remove lexical-fixed-toolbar-sticking-enabled class from all other dom elements which have it right now
+          const stickingElements = document.querySelectorAll(
+            '.lexical-fixed-toolbar-sticking-enabled',
+          )
+          stickingElements.forEach((element) => {
+            if (element !== toolbarRef.current) {
+              element.classList.remove('lexical-fixed-toolbar-sticking-enabled')
+            }
+          })
+        }
+      },
+      {
+        root: null,
+        threshold: [1],
+      },
+    )
+
+    observer.observe(cachedRef)
+    observer2.observe(cachedRef)
+    return () => {
+      observer.unobserve(cachedRef)
+      observer2.unobserve(cachedRef)
+    }
+  }, [toolbarRef, clientProps?.disableIfParentHasFixedToolbar])
+
   return (
     <div
       className="fixed-toolbar"
@@ -149,6 +244,7 @@ function FixedToolbar({
         // the parent editor will be focused, and the child editor will lose focus.
         event.stopPropagation()
       }}
+      ref={toolbarRef}
     >
       {editor.isEditable() && (
         <React.Fragment>
@@ -214,11 +310,6 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
   if (!editorConfig?.features?.toolbarFixed?.groups?.length) {
     return null
   }
-
-  /**
-   * Last step: disable this if both this and any sub-editor fixed toolbar is in sticky state. No config needed,
-   * there is no world where someone wants both to overlap each other
-   */
 
   return <FixedToolbar anchorElem={anchorElem} editor={editor} editorConfig={editorConfig} />
 }
