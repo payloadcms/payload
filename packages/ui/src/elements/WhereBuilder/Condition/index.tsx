@@ -82,7 +82,7 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     // This is to trigger changes when the debounced value changes
     if (
-      ['number', 'string'].includes(typeof internalField?.value) &&
+      (internalField?.value || typeof internalField?.value === 'number') &&
       internalOperatorOption &&
       ![null, undefined].includes(debouncedValue)
     ) {
