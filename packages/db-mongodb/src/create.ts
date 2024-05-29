@@ -3,7 +3,7 @@ import type { Document, PayloadRequestWithData } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 
-import handleError from './utilities/handleError.js'
+import { handleError } from './utilities/handleError.js'
 import { withSession } from './withSession.js'
 
 export const create: Create = async function create(
@@ -16,7 +16,7 @@ export const create: Create = async function create(
   try {
     ;[doc] = await Model.create([data], options)
   } catch (error) {
-    handleError(error, req)
+    handleError({ collection, error, req })
   }
 
   // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here

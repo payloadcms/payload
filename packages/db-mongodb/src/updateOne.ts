@@ -3,7 +3,7 @@ import type { PayloadRequestWithData } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 
-import handleError from './utilities/handleError.js'
+import { handleError } from './utilities/handleError.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -30,7 +30,7 @@ export const updateOne: UpdateOne = async function updateOne(
   try {
     result = await Model.findOneAndUpdate(query, data, options)
   } catch (error) {
-    handleError(error, req)
+    handleError({ collection, error, req })
   }
 
   result = JSON.parse(JSON.stringify(result))
