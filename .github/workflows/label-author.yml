@@ -30,7 +30,37 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const payloadTeamUsernames = [
+              'denolfe',
+              'jmikrut',
+              'DanRibbens',
+              'jacobsfletch',
+              'JarrodMFlesch',
+              'AlessioGr',
+              'JessChowdhury',
+              'kendelljoseph',
+              'PatrikKozak',
+              'tylandavis',
+              'paulpopus',
+            ];
+
             const type = context.payload.pull_request ? 'pull_request' : 'issue';
+
+            const isTeamMember = payloadTeamUsernames
+              .map(n => n.toLowerCase())
+              .includes(context.payload[type].user.login.toLowerCase());
+
+            if (isTeamMember) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['created-by: Payload team'],
+              });
+              console.log(`Added 'created-by: Payload team' label`);
+              return;
+            }
+
             const association = context.payload[type].author_association;
             let label = ''
             if (association === 'MEMBER' || association === 'OWNER') {
@@ -47,4 +77,4 @@ jobs:
               repo: context.repo.repo,
               labels: [label],
             });
-            console.log('Added created-by: Payload team label');
+            console.log(`Added '${label}' label.`);
