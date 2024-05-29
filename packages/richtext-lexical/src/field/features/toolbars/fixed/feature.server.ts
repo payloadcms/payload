@@ -12,18 +12,6 @@ export type FixedToolbarFeatureProps = {
    */
   applyToFocusedEditor?: boolean
   /**
-   * @default false
-   *
-   * If any child-editor is focused, this will disable the toolbar for this editor.
-   */
-  disableIfChildEditorIsFocused?: boolean
-  /**
-   * @default false
-   *
-   * If any parent-editor is focused, this will disable the toolbar for this editor.
-   */
-  disableIfParentEditorIsFocused?: boolean
-  /**
    * @default true
    *
    * If there is a parent editor with a fixed toolbar, this will disable the toolbar for this editor.
@@ -40,14 +28,6 @@ export const FixedToolbarFeature: FeatureProviderProviderServer<
       const sanitizedProps: FixedToolbarFeatureProps = {
         applyToFocusedEditor:
           props?.applyToFocusedEditor === undefined ? true : props.applyToFocusedEditor,
-        disableIfChildEditorIsFocused:
-          props?.disableIfChildEditorIsFocused === undefined
-            ? false
-            : props.disableIfChildEditorIsFocused,
-        disableIfParentEditorIsFocused:
-          props?.disableIfParentEditorIsFocused === undefined
-            ? true
-            : props.disableIfParentEditorIsFocused,
         disableIfParentHasFixedToolbar:
           props?.disableIfParentHasFixedToolbar === undefined
             ? false

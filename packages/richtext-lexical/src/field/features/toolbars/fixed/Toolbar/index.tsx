@@ -193,8 +193,6 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
   const [currentEditor] = useLexicalComposerContext()
   const { editorConfig: currentEditorConfig } = useEditorConfigContext()
 
-  console.log('currentEditor', clientProps?.disableIfParentEditorIsFocused)
-
   const editorFocus = useEditorFocus()
   const editor = clientProps.applyToFocusedEditor
     ? editorFocus.focusedEditor || currentEditor
@@ -209,19 +207,6 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
     const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
 
     if (hasParentWithFixedToolbar) {
-      return null
-    }
-  }
-
-  if (clientProps?.disableIfChildEditorIsFocused) {
-    if (editorFocus.isChildEditorFocused()) {
-      return null
-    }
-  }
-
-  if (clientProps?.disableIfParentEditorIsFocused) {
-    console.log('disableIfParentEditorIsFocused', editorFocus.isParentEditorFocused())
-    if (editorFocus.isParentEditorFocused() || editorFocus.focusedEditor !== currentEditor) {
       return null
     }
   }
