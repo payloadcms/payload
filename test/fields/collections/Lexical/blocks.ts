@@ -118,12 +118,7 @@ export const RichTextBlock: Block = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          FixedToolbarFeature({
-            applyToFocusedEditor: false,
-            disableIfChildEditorIsFocused: true,
-            disableIfParentEditorIsFocused: true,
-            disableIfParentHasFixedToolbar: false,
-          }),
+          FixedToolbarFeature(),
           BlocksFeature({
             blocks: [
               {
