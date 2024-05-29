@@ -73,12 +73,26 @@ export default buildConfigWithDefaults({
         //   singular: 'Contact Form',
         //   plural: 'Contact Forms'
         // },
-        fields: [
-          {
-            name: 'custom',
-            type: 'text',
-          },
-        ],
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'custom',
+              type: 'text',
+            },
+          ]
+        },
+      },
+      formSubmissionOverrides: {
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'custom',
+              type: 'text',
+            },
+          ]
+        },
       },
       redirectRelationships: ['pages'],
     }),

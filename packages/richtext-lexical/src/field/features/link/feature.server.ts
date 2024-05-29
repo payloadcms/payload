@@ -11,6 +11,8 @@ import type { ClientProps } from './feature.client.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
 import { LinkFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
+import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
 import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
@@ -108,6 +110,8 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
 
           return schemaMap
         },
+        i18n,
+        markdownTransformers: [LinkMarkdownTransformer],
         nodes: [
           createNode({
             converters: {
@@ -124,6 +128,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+                  const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
                   let href: string = node.fields.url
                   if (node.fields.linkType === 'internal') {
@@ -133,7 +138,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                         : node.fields.doc?.value?.id
                   }
 
-                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                  return `<a href="${href}"${target}${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [AutoLinkNode.getType()],
               },
@@ -164,13 +169,14 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+                  const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
                   const href: string =
                     node.fields.linkType === 'custom'
                       ? node.fields.url
                       : (node.fields.doc?.value as string)
 
-                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                  return `<a href="${href}"${target}${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [LinkNode.getType()],
               },

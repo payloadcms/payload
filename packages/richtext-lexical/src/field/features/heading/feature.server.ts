@@ -7,6 +7,7 @@ import type { FeatureProviderProviderServer } from '../types.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
 import { HeadingFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
 export type HeadingFeatureProps = {
@@ -28,6 +29,7 @@ export const HeadingFeature: FeatureProviderProviderServer<
       return {
         ClientComponent: HeadingFeatureClientComponent,
         clientFeatureProps: props,
+        i18n,
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
         nodes: [
           createNode({

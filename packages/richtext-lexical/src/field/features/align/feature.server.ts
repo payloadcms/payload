@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../types.js'
 
 import { AlignFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 
 export const AlignFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {
@@ -8,6 +9,7 @@ export const AlignFeature: FeatureProviderProviderServer<undefined, undefined> =
       return {
         ClientComponent: AlignFeatureClientComponent,
         clientFeatureProps: null,
+        i18n,
         serverFeatureProps: props,
       }
     },

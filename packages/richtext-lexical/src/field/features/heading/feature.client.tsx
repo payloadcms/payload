@@ -18,6 +18,7 @@ import { H4Icon } from '../../lexical/ui/icons/H4/index.js'
 import { H5Icon } from '../../lexical/ui/icons/H5/index.js'
 import { H6Icon } from '../../lexical/ui/icons/H6/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
@@ -65,7 +66,9 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
                 return true
               },
               key: headingSize,
-              label: `Heading ${headingSize.charAt(1)}`,
+              label: ({ i18n }) => {
+                return i18n.t('lexical:heading:label', { headingLevel: headingSize.charAt(1) })
+              },
               onSelect: ({ editor }) => {
                 editor.update(() => {
                   $setHeading(headingSize)
@@ -84,13 +87,17 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
         slashMenu: {
           groups: enabledHeadingSizes?.length
             ? [
-                {
-                  items: enabledHeadingSizes.map((headingSize) => {
+                slashMenuBasicGroupWithItems(
+                  enabledHeadingSizes.map((headingSize) => {
                     return {
                       Icon: iconImports[headingSize],
                       key: `heading-${headingSize.charAt(1)}`,
                       keywords: ['heading', headingSize],
-                      label: `Heading ${headingSize.charAt(1)}`,
+                      label: ({ i18n }) => {
+                        return i18n.t('lexical:heading:label', {
+                          headingLevel: headingSize.charAt(1),
+                        })
+                      },
                       onSelect: ({ editor }) => {
                         editor.update(() => {
                           $setHeading(headingSize)
@@ -98,9 +105,7 @@ const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> =
                       },
                     }
                   }),
-                  key: 'basic',
-                  label: 'Basic',
-                },
+                ),
               ]
             : [],
         },

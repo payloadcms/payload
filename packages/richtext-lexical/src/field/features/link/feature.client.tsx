@@ -14,6 +14,7 @@ import { LinkIcon } from '../../lexical/ui/icons/Link/index.js'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode.js'
 import { createClientComponent } from '../createClientComponent.js'
 import { toolbarFeatureButtonsGroupWithItems } from '../shared/toolbar/featureButtonsGroup.js'
+import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode.js'
 import { AutoLinkPlugin } from './plugins/autoLink/index.js'
@@ -40,7 +41,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return !!($isRangeSelection(selection) && $getSelection()?.getTextContent()?.length)
       },
       key: 'link',
-      label: `Link`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:link:label')
+      },
       onSelect: ({ editor, isActive }) => {
         if (!isActive) {
           let selectedText: string = null
@@ -82,6 +85,7 @@ const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) =>
     clientFeatureProps: props,
     feature: () => ({
       clientFeatureProps: props,
+      markdownTransformers: [LinkMarkdownTransformer],
       nodes: [LinkNode, AutoLinkNode],
       plugins: [
         {
