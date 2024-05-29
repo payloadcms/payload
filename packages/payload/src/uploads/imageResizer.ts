@@ -236,7 +236,7 @@ export default async function resizeAndTransformImageSizes({
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
   // Focal point adjustments
-  const incomingFocalPoint = uploadEdits.focalPoint
+  const incomingFocalPoint = uploadEdits?.focalPoint
     ? {
         x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
         y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
