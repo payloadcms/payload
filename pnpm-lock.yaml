@@ -1677,6 +1677,12 @@ importers:
 
   test:
     devDependencies:
+      '@lexical/headless':
+        specifier: 0.15.0
+        version: 0.15.0
+      '@lexical/markdown':
+        specifier: 0.15.0
+        version: 0.15.0
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../packages/db-mongodb
@@ -5585,7 +5591,6 @@ packages:
       '@lexical/selection': 0.15.0
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/code@0.15.0:
     resolution: {integrity: sha512-n185gjinGhz/M4BW1ayNPYAEgwW4T/NEFl2Wey/O+07W3zvh9k9ai7RjWd0c8Qzqc4DLlqvibvWPebWObQHA4w==}
@@ -5593,7 +5598,6 @@ packages:
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
       prismjs: 1.29.0
-    dev: false
 
   /@lexical/devtools-core@0.15.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
     resolution: {integrity: sha512-kK/IVEiQyqs2DsY4QRYFaFiKQMpaAukAl8PXmNeGTZ7cfFVsP29E4n0/pjY+oxmiRvxbO1s2i14q58nfuhj4VQ==}
@@ -5636,7 +5640,6 @@ packages:
     resolution: {integrity: sha512-soLjCphUEHw+z2ulV9cOtisTWmGj6k7TU+O/6nzgn7E1FlvskrrykGhYFrXDsXqB1wJRaILHKlHxQSoNzf931A==}
     dependencies:
       lexical: 0.15.0
-    dev: false
 
   /@lexical/history@0.15.0:
     resolution: {integrity: sha512-r+pzR2k/51AL6l8UfXeVe/GWPIeWY1kEOuKx9nsYB9tmAkTF66tTFz33DJIMWBVtAHWN7Dcdv0/yy6q8R6CAUQ==}
@@ -5651,21 +5654,18 @@ packages:
       '@lexical/selection': 0.15.0
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/link@0.15.0:
     resolution: {integrity: sha512-KBV/zWk5FxqZGNcq3IKGBDCcS4t0uteU1osAIG+pefo4waTkOOgibxxEJDop2QR5wtjkYva3Qp0D8ZyJDMMMlw==}
     dependencies:
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/list@0.15.0:
     resolution: {integrity: sha512-JuF4k7uo4rZFOSZGrmkxo1+sUrwTKNBhhJAiCgtM+6TO90jppxzCFNKur81yPzF1+g4GWLC9gbjzKb52QPb6cQ==}
     dependencies:
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/mark@0.15.0:
     resolution: {integrity: sha512-cdePA98sOJRc4/HHqcOcPBFq4UDwzaFJOK1N1E6XUGcXH1GU8zHtV1ElTgmbsGkyjBRwhR+OqKm9eso1PBOUkg==}
@@ -5684,7 +5684,6 @@ packages:
       '@lexical/text': 0.15.0
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/offset@0.15.0:
     resolution: {integrity: sha512-VO1f3m8+RRdRjuXMtCBhi1COVKRC2LhP8AFYxnFlvbV+Waz9R5xB9pqFFUe4RtyqyTLmOUj6+LtsUFhq+23voQ==}
@@ -5746,26 +5745,22 @@ packages:
       '@lexical/selection': 0.15.0
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/selection@0.15.0:
     resolution: {integrity: sha512-S+AQC6eJiQYSa5zOPuecN85prCT0Bcb8miOdJaE17Zh+vgdUH5gk9I0tEBeG5T7tkSpq6lFiEqs2FZSfaHflbQ==}
     dependencies:
       lexical: 0.15.0
-    dev: false
 
   /@lexical/table@0.15.0:
     resolution: {integrity: sha512-3IRBg8IoIHetqKozRQbJQ2aPyG0ziXZ+lc8TOIAGs6METW/wxntaV+rTNrODanKAgvk2iJTIyfFkYjsqS9+VFg==}
     dependencies:
       '@lexical/utils': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/text@0.15.0:
     resolution: {integrity: sha512-WsAkAt9T1RH1iDrVuWeoRUeMCOAWar5oSFtnQ4m9vhT/zuf5b8efK87GiqCH00ZAn4DGzOuAfyXlMFqBVCQdkQ==}
     dependencies:
       lexical: 0.15.0
-    dev: false
 
   /@lexical/utils@0.15.0:
     resolution: {integrity: sha512-/6954LDmTcVFgexhy5WOZDa4TxNQOEZNrf8z7TRAFiAQkihcME/GRoq1en5cbXoVNF8jv5AvNyyc7x0MByRJ6A==}
@@ -5774,7 +5769,6 @@ packages:
       '@lexical/selection': 0.15.0
       '@lexical/table': 0.15.0
       lexical: 0.15.0
-    dev: false
 
   /@lexical/yjs@0.15.0(yjs@13.6.14):
     resolution: {integrity: sha512-Rf4AIu620Cq90li6GU58gkzlGRdntHP4ZeZrbJ3ToW7vEEnkW6Wl9/HhO647GG4OL5w46M0iWvx1b1b8xjYT1w==}
@@ -15437,7 +15431,6 @@ packages:
   /prismjs@1.29.0:
     resolution: {integrity: sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==}
     engines: {node: '>=6'}
-    dev: false
 
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
