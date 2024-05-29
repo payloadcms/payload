@@ -193,17 +193,19 @@ export async function buildSearchParam({
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
+        let multiIDCondition = '$or'
+        if (operatorKey === '$ne') multiIDCondition = '$and'
 
         const result = {
           value: {
-            $or: [{ [path]: { [operatorKey]: formattedValue } }],
+            [multiIDCondition]: [{ [path]: { [operatorKey]: formattedValue } }],
           },
         }
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({
-              [path]: { [operatorKey]: new ObjectId(formattedValue) },
+            result.value[multiIDCondition].push({
+              [path]: { [operatorKey]: ObjectId(formattedValue) },
             })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
@@ -218,11 +220,13 @@ export async function buildSearchParam({
             )
 
             if (hasNumberIDRelation)
-              result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } })
+              result.value[multiIDCondition].push({
+                [path]: { [operatorKey]: parseFloat(formattedValue) },
+              })
           }
         }
 
-        if (result.value.$or.length > 1) {
+        if (result.value[multiIDCondition].length > 1) {
           return result
         }
       }
