@@ -126,6 +126,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+                  const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
                   let href: string = node.fields.url
                   if (node.fields.linkType === 'internal') {
@@ -135,7 +136,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                         : node.fields.doc?.value?.id
                   }
 
-                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                  return `<a href="${href}"${target}${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [AutoLinkNode.getType()],
               },
