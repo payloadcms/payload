@@ -15,7 +15,7 @@ export const OrderedListFeature: FeatureProviderProviderServer<undefined, undefi
         ClientComponent: OrderedListFeatureClientComponent,
         i18n,
         markdownTransformers: [ORDERED_LIST],
-        nodes: featureProviderMap.has('unorderedlist')
+        nodes: featureProviderMap.has('unorderedList')
           ? []
           : [
               createNode({
