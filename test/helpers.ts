@@ -203,6 +203,16 @@ export async function openDocDrawer(page: Page, selector: string): Promise<void>
   await wait(500) // wait for drawer form state to initialize
 }
 
+export async function openCreateDocDrawer(page: Page, fieldSelector: string): Promise<void> {
+  await wait(500) // wait for parent form state to initialize
+  const relationshipField = page.locator(fieldSelector)
+  await expect(relationshipField.locator('input')).toBeEnabled()
+  const addNewButton = relationshipField.locator('.relationship-add-new__add-button')
+  await expect(addNewButton).toBeVisible()
+  await addNewButton.click()
+  await wait(500) // wait for drawer form state to initialize
+}
+
 export async function closeNav(page: Page): Promise<void> {
   if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
   await page.locator('.nav-toggler >> visible=true').click()

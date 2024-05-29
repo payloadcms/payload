@@ -12,7 +12,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openDocDrawer,
+  openCreateDocDrawer,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
@@ -77,7 +77,7 @@ describe('relationship', () => {
 
   test('should create inline relationship within field with many relations', async () => {
     await page.goto(url.create)
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -99,7 +99,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // Open first modal
-    await openDocDrawer(page, '#relationToSelf-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationToSelf')
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
@@ -109,11 +109,10 @@ describe('relationship', () => {
       )
       .click()
 
-    // Open second modal
-    await openDocDrawer(
-      page,
+    const secondModalButton = page.locator(
       '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
     )
+    await secondModalButton.click()
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
@@ -243,7 +242,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -258,7 +257,7 @@ describe('relationship', () => {
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await openDocDrawer(page, '#field-relationshipHasMany .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationshipHasMany')
     const value = 'Hello, world!'
     await page.locator('.drawer__content #field-text').fill(value)
 
@@ -307,7 +306,7 @@ describe('relationship', () => {
   test('should save using hotkey in edit document drawer', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
     await wait(500)
     // Select "Seeded text document" relationship
@@ -348,7 +347,7 @@ describe('relationship', () => {
   test.skip('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -360,7 +359,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -419,7 +418,7 @@ describe('relationship', () => {
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
 
     await page.goto(url.list)
-    await page.waitForURL(url.list)
+    await page.waitForURL(new RegExp(url.list))
     await wait(400)
 
     await page.locator('.list-controls__toggle-columns').click()
@@ -433,6 +432,7 @@ describe('relationship', () => {
 
     await wait(400)
     const conditionField = page.locator('.condition__field')
+    await expect(conditionField.locator('input')).toBeEnabled()
     await conditionField.click()
     await wait(400)
 
@@ -441,6 +441,7 @@ describe('relationship', () => {
     await wait(400)
 
     const operatorField = page.locator('.condition__operator')
+    await expect(operatorField.locator('input')).toBeEnabled()
     await operatorField.click()
     await wait(400)
 
@@ -449,6 +450,7 @@ describe('relationship', () => {
     await wait(400)
 
     const valueField = page.locator('.condition__value')
+    await expect(valueField.locator('input')).toBeEnabled()
     await valueField.click()
     await wait(400)
 

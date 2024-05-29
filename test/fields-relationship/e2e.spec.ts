@@ -141,19 +141,13 @@ describe('fields - relationship', () => {
 
   test('should create relationship', async () => {
     await page.goto(url.create)
-
     const field = page.locator('#field-relationship')
-
+    await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
-
     const options = page.locator('.rs__option')
-
     await expect(options).toHaveCount(2) // two docs
-
-    // Select a relationship
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
-
     await saveDocAndAssert(page)
   })
 
@@ -186,30 +180,20 @@ describe('fields - relationship', () => {
 
   test('should create hasMany relationship', async () => {
     await page.goto(url.create)
-
     const field = page.locator('#field-relationshipHasMany')
+    await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
-
     const options = page.locator('.rs__option')
-
     await expect(options).toHaveCount(2) // Two relationship options
-
     const values = page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')
-
-    // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click()
     await expect(values).toHaveText([relationOneDoc.id])
     await expect(values).not.toHaveText([anotherRelationOneDoc.id])
-
-    // Add second relationship
     await field.click({ delay: 100 })
     await options.locator(`text=${anotherRelationOneDoc.id}`).click()
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
-
-    // No options left
     await field.locator('.rs__input').click({ delay: 100 })
     await expect(page.locator('.rs__menu')).toHaveText('No options')
-
     await saveDocAndAssert(page)
     await wait(200)
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
@@ -257,49 +241,30 @@ describe('fields - relationship', () => {
   async function runFilterOptionsTest(fieldName: string) {
     await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
-
-    // fill the first relation field
     const field = page.locator('#field-relationship')
-
+    await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
-
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
-
-    // then verify that the filtered field's options match
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     let filteredOptions = filteredField.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await filteredOptions.nth(0).click()
     await expect(filteredField).toContainText(relationOneDoc.id)
-
-    // change the first relation field
     await field.click({ delay: 100 })
     await options.nth(1).click()
     await expect(field).toContainText(anotherRelationOneDoc.id)
-
-    // Need to wait form state to come back
-    // before clicking save
-    await wait(2000)
-
-    // Now, save the document. This should fail, as the filitered field doesn't match the selected relationship value
+    await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
     await expect(page.locator('.Toastify')).toContainText(`is invalid: ${fieldName}`)
-
-    // then verify that the filtered field's options match
     filteredField = page.locator(`#field-${fieldName} .react-select`)
-
     await filteredField.click({ delay: 100 })
-
     filteredOptions = filteredField.locator('.rs__option')
-
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await filteredOptions.nth(1).click()
     await expect(filteredField).toContainText(anotherRelationOneDoc.id)
-
-    // Now, saving the document should succeed
     await saveDocAndAssert(page)
   }
 

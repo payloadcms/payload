@@ -321,13 +321,12 @@ describe('access control', () => {
             name: 'unrestricted-123',
           },
         })
-
         await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
-
+        const field = page.locator('#field-userRestrictedDocs')
+        await expect(field.locator('input')).toBeEnabled()
         const addDocButton = page.locator(
           '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
         )
-
         await addDocButton.click()
         const documentDrawer = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
         await expect(documentDrawer).toBeVisible()
