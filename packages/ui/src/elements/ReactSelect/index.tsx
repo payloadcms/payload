@@ -3,7 +3,7 @@ import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
@@ -16,6 +16,7 @@ import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
+import { Input } from './Input/index.js'
 import { MultiValue, generateMultiValueDraggableID } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
@@ -31,6 +32,7 @@ const createOption = (label: string) => ({
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
   const [inputValue, setInputValue] = React.useState('') // for creatable select
+  const selectID = useId()
 
   const {
     className,
@@ -74,6 +76,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
           ClearIndicator,
           Control,
           DropdownIndicator,
+          Input,
           MultiValue,
           MultiValueLabel,
           MultiValueRemove,
@@ -83,6 +86,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         }}
         filterOption={filterOption}
         getOptionValue={getOptionValue}
+        instanceId={selectID}
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}
@@ -145,6 +149,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         ClearIndicator,
         Control,
         DropdownIndicator,
+        Input,
         MultiValue,
         MultiValueLabel,
         MultiValueRemove,
@@ -154,6 +159,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       }}
       filterOption={filterOption}
       inputValue={inputValue}
+      instanceId={selectID}
       isClearable={isClearable}
       isDisabled={disabled}
       isSearchable={isSearchable}
