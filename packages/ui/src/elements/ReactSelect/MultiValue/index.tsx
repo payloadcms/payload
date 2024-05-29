@@ -10,18 +10,22 @@ import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortab
 import './index.scss'
 
 const baseClass = 'multi-value'
+
+export function generateMultiValueDraggableID(optionData, valueFunction) {
+  return typeof valueFunction === 'function' ? valueFunction(optionData) : optionData.value
+}
 export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     className,
-    data: { value },
+    data,
     innerProps,
     isDisabled,
     // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
-    selectProps: { customProps: { disableMouseDown } = {}, isSortable } = {},
+    selectProps: { customProps: { disableMouseDown } = {}, getOptionValue, isSortable } = {},
   } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
-    id: typeof value === 'string' && value.toString(),
+    id: generateMultiValueDraggableID(data, getOptionValue),
     disabled: !isSortable,
   })
 
