@@ -41,7 +41,6 @@
     "command-exists": "^1.2.9",
     "comment-json": "^4.2.3",
     "degit": "^2.8.4",
-    "detect-package-manager": "^3.0.1",
     "esprima-next": "^6.0.3",
     "execa": "^5.0.0",
     "figures": "^6.1.0",
