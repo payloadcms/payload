@@ -5,6 +5,7 @@ import type { FeatureProviderProviderServer } from '../../types.js'
 import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
 import { OrderedListFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { ORDERED_LIST } from './markdownTransformer.js'
 
 export const OrderedListFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
@@ -12,6 +13,7 @@ export const OrderedListFeature: FeatureProviderProviderServer<undefined, undefi
     feature: ({ featureProviderMap }) => {
       return {
         ClientComponent: OrderedListFeatureClientComponent,
+        i18n,
         markdownTransformers: [ORDERED_LIST],
         nodes: featureProviderMap.has('unorderedlist')
           ? []

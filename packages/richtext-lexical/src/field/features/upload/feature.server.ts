@@ -9,6 +9,7 @@ import type { UploadFeaturePropsClient } from './feature.client.js'
 
 import { createNode } from '../typeUtilities.js'
 import { UploadFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { UploadNode } from './nodes/UploadNode.js'
 import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
@@ -175,6 +176,7 @@ export const UploadFeature: FeatureProviderProviderServer<
                 nodeTypes: [UploadNode.getType()],
               },
             },
+            i18n,
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
             validations: [uploadValidation(props)],

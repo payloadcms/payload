@@ -6,6 +6,7 @@ import type { FeatureProviderProviderClient } from '../types.js'
 
 import { UploadIcon } from '../../lexical/ui/icons/Upload/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarAddDropdownGroupWithItems } from '../shared/toolbar/addDropdownGroup.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'
 import { $isUploadNode, UploadNode } from './nodes/UploadNode.js'
@@ -33,23 +34,21 @@ const UploadFeatureClient: FeatureProviderProviderClient<UploadFeaturePropsClien
       ],
       slashMenu: {
         groups: [
-          {
-            items: [
-              {
-                Icon: UploadIcon,
-                key: 'upload',
-                keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
-                label: 'Upload',
-                onSelect: ({ editor }) => {
-                  editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
-                    replace: false,
-                  })
-                },
+          slashMenuBasicGroupWithItems([
+            {
+              Icon: UploadIcon,
+              key: 'upload',
+              keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
+              label: ({ i18n }) => {
+                return i18n.t('lexical:upload:label')
               },
-            ],
-            key: 'basic',
-            label: 'Basic',
-          },
+              onSelect: ({ editor }) => {
+                editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
+                  replace: false,
+                })
+              },
+            },
+          ]),
         ],
       },
       toolbarFixed: {
@@ -66,7 +65,9 @@ const UploadFeatureClient: FeatureProviderProviderClient<UploadFeaturePropsClien
                 return $isUploadNode(firstNode)
               },
               key: 'upload',
-              label: 'Upload',
+              label: ({ i18n }) => {
+                return i18n.t('lexical:upload:label')
+              },
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
                   replace: false,

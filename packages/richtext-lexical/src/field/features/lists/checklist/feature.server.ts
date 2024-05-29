@@ -5,6 +5,7 @@ import type { FeatureProviderProviderServer } from '../../types.js'
 import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
 import { ChecklistFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { CHECK_LIST } from './markdownTransformers.js'
 
 export const ChecklistFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
@@ -12,6 +13,7 @@ export const ChecklistFeature: FeatureProviderProviderServer<undefined, undefine
     feature: ({ featureProviderMap }) => {
       return {
         ClientComponent: ChecklistFeatureClientComponent,
+        i18n,
         markdownTransformers: [CHECK_LIST],
         nodes:
           featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
