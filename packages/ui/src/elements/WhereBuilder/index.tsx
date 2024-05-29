@@ -75,8 +75,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
       // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
       const transformedWhere = transformWhereQuery(whereFromSearch)
-
       if (validateWhereQuery(transformedWhere)) {
+        return transformedWhere.or
+      } else if ('or' in transformedWhere && transformedWhere.or) {
         return transformedWhere.or
       }
 
@@ -106,18 +107,27 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   }, [])
 
   const updateCondition = React.useCallback(
-    ({ andIndex, fieldName: fieldNameArg, operator: operatorArg, orIndex, value: valueArg }) => {
+    ({
+      andIndex,
+      fieldName: fieldNameArg,
+      operator: operatorArg,
+      orIndex,
+      rawQuery,
+      value: valueArg,
+    }) => {
       setConditions((prevConditions) => {
         const newConditions = [...prevConditions]
         if (typeof newConditions[orIndex].and[andIndex] === 'object') {
           const fieldName = fieldNameArg
           const operator = operatorArg
           const value = valueArg ?? (operator ? newConditions[orIndex].and[andIndex][operator] : '')
-
           if (fieldName && operator && ![null, undefined].includes(value)) {
             newConditions[orIndex].and[andIndex] = {
               [fieldName]: operator ? { [operator]: value } : {},
             }
+            setShouldUpdateQuery(true)
+          } else if (rawQuery) {
+            newConditions[orIndex].and[andIndex] = rawQuery
             setShouldUpdateQuery(true)
           }
         }
@@ -144,6 +154,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   React.useEffect(() => {
     if (shouldUpdateQuery) {
       handleWhereChange({ or: conditions })
+      console.log('here')
       setShouldUpdateQuery(false)
     }
   }, [conditions, handleWhereChange, shouldUpdateQuery])
@@ -164,7 +175,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                   {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
                   <ul className={`${baseClass}__and-filters`}>
                     {Array.isArray(or?.and) &&
-                      or.and.map((_, andIndex) => {
+                      or.and.map((andCondition, andIndex) => {
                         const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
                         const initialOperator =
                           Object.keys(
@@ -174,6 +185,68 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                           conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
                             initialOperator
                           ] || ''
+
+                        // if (initialFieldName === 'and' || initialFieldName == 'or') {
+                        //   initialValue = []
+                        //   // polymorphic relationships
+                        //   andCondition[initialFieldName].forEach((polyAndCondition, i) => {
+                        //     if ('and' in polyAndCondition) {
+                        //       initialOperator = 'in'
+                        //       let relationTo = ''
+                        //       let value = ''
+                        //       polyAndCondition.and.forEach((whereGroup) => {
+                        //         for (const [key, whereQuery] of Object.entries(whereGroup)) {
+                        //           const keyParts = key.split('.')
+                        //           initialFieldName = keyParts[0] // relationship field name
+                        //           const relationKey = keyParts[1] // `relationTo` or `value`
+                        //           relationTo =
+                        //             relationKey === 'relationTo' &&
+                        //             typeof whereQuery === 'object' &&
+                        //             'equals' in whereQuery
+                        //               ? String(whereQuery.equals)
+                        //               : relationTo
+                        //           value =
+                        //             relationKey === 'value' &&
+                        //             typeof whereQuery === 'object' &&
+                        //             'equals' in whereQuery
+                        //               ? String(whereQuery.equals)
+                        //               : value
+                        //         }
+                        //       })
+                        //       initialValue.push({
+                        //         relationTo,
+                        //         value,
+                        //       })
+                        //     } else {
+                        //       initialOperator = 'not_in'
+                        //       let relationTo = ''
+                        //       let value = ''
+                        //       polyAndCondition.or.forEach((whereGroup) => {
+                        //         for (const [key, whereQuery] of Object.entries(whereGroup)) {
+                        //           const keyParts = key.split('.')
+                        //           initialFieldName = keyParts[0] // relationship field name
+                        //           const relationKey = keyParts[1] // `relationTo` or `value`
+                        //           relationTo =
+                        //             relationKey === 'relationTo' &&
+                        //             typeof whereQuery === 'object' &&
+                        //             'equals' in whereQuery
+                        //               ? String(whereQuery.equals)
+                        //               : relationTo
+                        //           value =
+                        //             relationKey === 'value' &&
+                        //             typeof whereQuery === 'object' &&
+                        //             'equals' in whereQuery
+                        //               ? String(whereQuery.equals)
+                        //               : value
+                        //         }
+                        //       })
+                        //       initialValue.push({
+                        //         relationTo,
+                        //         value,
+                        //       })
+                        //     }
+                        //   })
+                        // }
 
                         return (
                           <li key={andIndex}>

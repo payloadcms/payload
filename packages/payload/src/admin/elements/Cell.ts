@@ -26,6 +26,7 @@ export type CellComponentProps = {
   className?: string
   dateDisplayFormat?: DateField['admin']['date']['displayFormat']
   fieldType?: Field['type']
+  hasMany?: RelationshipField['hasMany']
   isFieldAffectingData?: boolean
   label?: Record<string, string> | string
   labels?: Labels

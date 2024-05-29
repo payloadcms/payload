@@ -121,7 +121,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
               options.forEach((opt) => {
                 if (opt.options) {
                   opt.options.some((subOpt) => {
-                    if (subOpt?.value === val.value) {
+                    if (subOpt?.relationTo === val.relationTo && subOpt?.value === val.value) {
                       matchedOption = subOpt
                       return true
                     }
@@ -149,7 +149,10 @@ export const RelationshipField: React.FC<Props> = (props) => {
         options.forEach((opt) => {
           if (opt?.options) {
             opt.options.some((subOpt) => {
-              if (subOpt?.value === valueWithRelation.value) {
+              if (
+                subOpt?.relationTo === valueWithRelation.relationTo &&
+                subOpt?.value === valueWithRelation.value
+              ) {
                 matchedOption = subOpt
                 return true
               }
@@ -165,7 +168,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
     }
 
     return undefined
-  }, [hasMany, hasMultipleRelations, value, options])
+  }, [hasMany, hasMultipleRelations, options, value])
 
   const handleInputChange = useCallback(
     (newSearch) => {
@@ -178,14 +181,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptionByID = useCallback(
     async (id, relation) => {
-      if (!errorLoading && id !== 'null' && id && relation) {
+      if (!errorLoading && id !== 'null' && ['number', 'string'].includes(typeof id) && relation) {
         const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
           },
         })
-
         if (response.ok) {
           const data = await response.json()
           addOptions({ docs: [data] }, relation)
@@ -223,7 +225,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
     if (value && hasLoadedFirstOptions) {
       if (hasMany) {
         const matchedOptions = findOptionsByValue()
-
         ;((matchedOptions as Option[]) || []).forEach((option, i) => {
           if (!option) {
             if (hasMultipleRelations) {
@@ -267,6 +268,12 @@ export const RelationshipField: React.FC<Props> = (props) => {
       {!errorLoading && (
         <ReactSelect
           disabled={disabled}
+          getOptionValue={(option) => {
+            if (!option) return undefined
+            return hasMany && Array.isArray(relationTo)
+              ? `${option.relationTo}_${option.value}`
+              : option.value
+          }}
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={(selected) => {

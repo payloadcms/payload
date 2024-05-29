@@ -5,10 +5,14 @@ import fieldTypes from './field-types.js'
 
 export const reduceFieldMap = (fieldMap: Column[], i18n) =>
   fieldMap.reduce((reduced, field) => {
-    if (typeof fieldTypes[field.type] === 'object') {
+    const fieldType: keyof typeof fieldTypes = Array.isArray(field.cellProps?.relationTo)
+      ? `relationship_polymorphic`
+      : (field.type as keyof typeof fieldTypes)
+
+    if (typeof fieldTypes[fieldType] === 'object') {
       const operatorKeys = new Set()
 
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+      const operators = fieldTypes[fieldType].operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           return [
@@ -25,7 +29,7 @@ export const reduceFieldMap = (fieldMap: Column[], i18n) =>
       const formattedField = {
         label: field.Label,
         value: field.name,
-        ...fieldTypes[field.type],
+        ...fieldTypes[fieldType],
         operators,
         props: {
           ...field,

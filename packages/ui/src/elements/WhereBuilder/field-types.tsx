@@ -9,8 +9,7 @@ const boolean = [
   },
 ]
 
-const base = [
-  ...boolean,
+const array = [
   {
     label: 'isIn',
     value: 'in',
@@ -19,6 +18,11 @@ const base = [
     label: 'isNotIn',
     value: 'not_in',
   },
+]
+
+const base = [
+  ...boolean,
+  ...array,
   {
     label: 'exists',
     value: 'exists',
@@ -113,6 +117,10 @@ const fieldTypeConditions = {
   relationship: {
     component: 'Relationship',
     operators: [...base],
+  },
+  relationship_polymorphic: {
+    component: 'Relationship',
+    operators: [...array],
   },
   richText: {
     component: 'Text',

@@ -142,6 +142,10 @@ export const buildColumnState = (args: Args): Column[] => {
         cellProps: {
           ...field.cellComponentProps,
           ...cellProps?.[index],
+          hasMany:
+            field.type === 'relationship' && 'hasMany' in field.fieldComponentProps
+              ? field.fieldComponentProps.hasMany
+              : undefined,
           link: isFirstActiveColumn,
           relationTo:
             field.type === 'relationship' && 'relationTo' in field.fieldComponentProps

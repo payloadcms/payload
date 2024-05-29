@@ -27,13 +27,15 @@ export type Props = {
     fieldName,
     operator,
     orIndex,
+    rawQuery,
     value,
   }: {
     andIndex: number
-    fieldName: string
+    fieldName?: string
     operator: string
     orIndex: number
-    value: string
+    rawQuery?: Record<string, any>
+    value?: string
   }) => void
 }
 
@@ -59,6 +61,49 @@ const valueFields: Record<ComponentType, React.FC> = {
 
 const baseClass = 'condition'
 
+type BuildRawPolymorphicRelationshipWhereQueryArgs = {
+  fieldName: string
+  operator: 'in' | 'not_in'
+  polyRelationshipValues: {
+    relationTo: string
+    value: number | string
+  }[]
+}
+
+function buildRawPolymorphicRelationshipWhereQuery({
+  fieldName,
+  operator,
+  polyRelationshipValues,
+}: BuildRawPolymorphicRelationshipWhereQueryArgs) {
+  const keys = {
+    constraint: operator === 'in' ? 'and' : 'or',
+    equality: operator === 'in' ? 'equals' : 'not_equals',
+    // in: any constraints must be true
+    // not_in: all constraints must be true
+    inclusion: operator === 'in' ? 'or' : 'and',
+  }
+
+  const relationQueries = []
+  polyRelationshipValues.map((relation, i) => {
+    relationQueries[i] = {
+      [keys.constraint]: [
+        {
+          [`${fieldName}.relationTo`]: {
+            [keys.equality]: relation.relationTo,
+          },
+        },
+        {
+          [`${fieldName}.value`]: {
+            [keys.equality]: relation.value,
+          },
+        },
+      ],
+    }
+  })
+
+  return { [keys.inclusion]: relationQueries }
+}
+
 export const Condition: React.FC<Props> = (props) => {
   const {
     addCondition,
@@ -76,28 +121,46 @@ export const Condition: React.FC<Props> = (props) => {
   )
   const [internalOperatorOption, setInternalOperatorOption] = useState(operator)
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
-
   const debouncedValue = useDebounce(internalQueryValue, 300)
 
   useEffect(() => {
     // This is to trigger changes when the debounced value changes
     if (
-      internalField.value &&
+      internalField?.value &&
       internalOperatorOption &&
       ![null, undefined].includes(debouncedValue)
     ) {
-      updateCondition({
-        andIndex,
-        fieldName: internalField.value,
-        operator: internalOperatorOption,
-        orIndex,
-        value: debouncedValue,
-      })
+      if (
+        'relationTo' in internalField.props &&
+        Array.isArray(internalField.props.relationTo) &&
+        Array.isArray(debouncedValue)
+      ) {
+        updateCondition({
+          andIndex,
+          operator: internalOperatorOption,
+          orIndex,
+          rawQuery: buildRawPolymorphicRelationshipWhereQuery({
+            fieldName: internalField.value,
+            operator:
+              internalOperatorOption as BuildRawPolymorphicRelationshipWhereQueryArgs['operator'],
+            polyRelationshipValues: debouncedValue,
+          }),
+        })
+      } else {
+        updateCondition({
+          andIndex,
+          fieldName: internalField.value,
+          operator: internalOperatorOption,
+          orIndex,
+          value: debouncedValue,
+        })
+      }
     }
   }, [
     debouncedValue,
     andIndex,
     internalField?.value,
+    internalField?.props,
     internalOperatorOption,
     orIndex,
     updateCondition,
@@ -116,7 +179,7 @@ export const Condition: React.FC<Props> = (props) => {
   } else if (internalField?.props && 'options' in internalField.props) {
     valueOptions = internalField.props.options
   }
-
+  console.log('internalQueryValue', internalQueryValue)
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
@@ -130,12 +193,12 @@ export const Condition: React.FC<Props> = (props) => {
                 setInternalQueryValue(undefined)
               }}
               options={fields}
-              value={fields.find((field) => internalField.value === field.value) || fields[0]}
+              value={fields.find((field) => internalField?.value === field.value) || fields[0]}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!internalField.value}
+              disabled={!internalField?.value}
               isClearable={false}
               onChange={(operator) => {
                 setInternalOperatorOption(operator.value)
@@ -165,7 +228,8 @@ export const Condition: React.FC<Props> = (props) => {
                   'relationTo' in internalField.props.cellProps
                     ? internalField.props.cellProps?.relationTo
                     : undefined,
-                value: internalQueryValue ?? '',
+                // value: internalQueryValue ?? '',
+                // value: [],
               }}
             />
           </div>
