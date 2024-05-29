@@ -20,7 +20,7 @@ jobs:
           operations-per-run: 300
 
           # Ignore all assigned
-          exempt-all-assignees: true
+          exempt-all-assignees: false
 
           # Issues
           stale-issue-label: 'stale'
