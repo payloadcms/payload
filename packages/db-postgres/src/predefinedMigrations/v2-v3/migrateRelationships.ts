@@ -48,7 +48,7 @@ export const migrateRelationships = async ({
 
   while (typeof paginationResult === 'undefined' || paginationResult.rows.length > 0) {
     const paginationStatement = `SELECT DISTINCT parent_id FROM ${tableName}${adapter.relationshipsSuffix} WHERE
-    ${where} LIMIT 500 OFFSET ${offset * 500};
+    ${where} ORDER BY parent_id LIMIT 500 OFFSET ${offset * 500};
   `
 
     paginationResult = await adapter.drizzle.execute(sql.raw(`${paginationStatement}`))
