@@ -112,6 +112,7 @@ export const huTranslations: DefaultTranslationsObject = {
     unauthorized: 'Jogosulatlan, a kéréshez be kell jelentkeznie.',
     unknown: 'Ismeretlen hiba történt.',
     unspecific: 'Hiba történt.',
+    userEmailAlreadyRegistered: 'A megadott email címmel már regisztráltak egy felhasználót.',
     userLocked: 'Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van.',
     valueMustBeUnique: 'Az értéknek egyedinek kell lennie',
     verificationTokenInvalid: 'Az ellenőrző token érvénytelen.',

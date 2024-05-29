@@ -114,6 +114,7 @@ export const frTranslations: DefaultTranslationsObject = {
     unauthorized: 'Non autorisé, vous devez être connecté pour effectuer cette demande.',
     unknown: 'Une erreur inconnue s’est produite.',
     unspecific: 'Une erreur est survenue.',
+    userEmailAlreadyRegistered: "Un utilisateur avec l'email donné est déjà enregistré.",
     userLocked:
       'Cet utilisateur est verrouillé en raison d’un trop grand nombre de tentatives de connexion infructueuses.',
     valueMustBeUnique: 'La valeur doit être unique',

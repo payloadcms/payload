@@ -112,6 +112,7 @@ export const deTranslations: DefaultTranslationsObject = {
     unauthorized: 'Nicht autorisiert - du musst angemeldet sein, um diese Anfrage zu stellen.',
     unknown: 'Ein unbekannter Fehler ist aufgetreten.',
     unspecific: 'Ein Fehler ist aufgetreten.',
+    userEmailAlreadyRegistered: 'Ein Benutzer mit der angegebenen E-Mail ist bereits registriert.',
     userLocked:
       'Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.',
     valueMustBeUnique: 'Wert muss einzigartig sein',

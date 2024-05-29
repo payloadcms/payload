@@ -110,6 +110,7 @@ export const azTranslations: DefaultTranslationsObject = {
     unauthorized: 'İcazəniz yoxdur, bu tələbi yerinə yetirmək üçün daxil olmalısınız.',
     unknown: 'Naməlum bir xəta baş verdi.',
     unspecific: 'Xəta baş verdi.',
+    userEmailAlreadyRegistered: 'Verilən e-poçt ünvanı ilə artıq istifadəçi qeydiyyatdan keçib.',
     userLocked: 'Bu istifadəçi çoxsaylı uğursuz giriş cəhdləri səbəbindən kilidlənib.',
     valueMustBeUnique: 'Dəyər təkrar olmamalıdır',
     verificationTokenInvalid: 'Doğrulama tokenı yanlışdır.',

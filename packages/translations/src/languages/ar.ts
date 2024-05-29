@@ -110,6 +110,7 @@ export const arTranslations: DefaultTranslationsObject = {
     unauthorized: 'غير مصرّح لك ، عليك أن تقوم بتسجيل الدّخول لتتمكّن من تقديم هذا الطّلب.',
     unknown: 'حدث خطأ غير معروف.',
     unspecific: 'حدث خطأ.',
+    userEmailAlreadyRegistered: 'يوجد مستخدم مسجل بالفعل بهذا البريد الإلكتروني.',
     userLocked: 'تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة.',
     valueMustBeUnique: 'على القيمة أن تكون فريدة',
     verificationTokenInvalid: 'رمز التحقّق غير صالح.',
