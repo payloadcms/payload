@@ -18,6 +18,7 @@ import type {
 import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
+  openCreateDocDrawer,
   openDocControls,
   openDocDrawer,
   saveDocAndAssert,
@@ -398,30 +399,17 @@ describe('fields - relationship', () => {
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
-
-    const field = page.locator('#field-relationshipHasMany')
-
-    // open the document drawer
-    const addNewButton = field.locator(
-      'button.relationship-add-new__add-button.doc-drawer__toggler',
-    )
-    await addNewButton.click()
+    await openCreateDocDrawer(page, '#field-relationshipHasMany')
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
-
-    // fill in the field and save the document, keep the drawer open for further testing
     const drawerField = documentDrawer.locator('#field-name')
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()
     await expect(page.locator('.Toastify')).toContainText('successfully')
-
-    // count the number of values in the field to ensure only one was added
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
     ).toHaveCount(1)
-
-    // save the same document again to ensure the relationship field doesn't receive duplicative values
     await drawerField.fill('Updated document')
     await saveButton.click()
     await expect(page.locator('.Toastify')).toContainText('Updated successfully')
@@ -434,12 +422,9 @@ describe('fields - relationship', () => {
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
-
       const field = page.locator('#field-relationship')
-
-      // Check dropdown options
+      await expect(field.locator('input')).toBeEnabled()
       await field.click({ delay: 100 })
-
       await expect(page.locator('.rs__option--is-selected')).toHaveCount(1)
       await expect(page.locator('.rs__option--is-selected')).toHaveText(relationOneDoc.id)
     })

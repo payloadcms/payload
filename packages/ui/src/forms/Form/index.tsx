@@ -88,6 +88,7 @@ export const Form: React.FC<FormProps> = (props) => {
   } = config
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
+  const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
   const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
@@ -522,6 +523,10 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.initializing = initializing
 
   useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
     if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
   }, [disabledFromProps])
 
@@ -608,7 +613,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }}
         >
           <SubmittedContext.Provider value={submitted}>
-            <InitializingContext.Provider value={initializing}>
+            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
               <ProcessingContext.Provider value={processing}>
                 <ModifiedContext.Provider value={modified}>
                   <FormFieldsContext.Provider value={fieldsReducer}>
