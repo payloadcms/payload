@@ -1,13 +1,16 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { I18n } from '@payloadcms/translations'
+import type { SanitizedConfig } from 'payload/types'
 
 import type { FieldSchemaMap } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
-export const buildFieldSchemaMap = ({
-  i18n,
-  payload: { config },
-}: PayloadRequestWithData): FieldSchemaMap => {
+export const buildFieldSchemaMap = (args: {
+  config: SanitizedConfig
+  i18n: I18n
+}): FieldSchemaMap => {
+  const { config, i18n } = args
+
   const result: FieldSchemaMap = new Map()
 
   const validRelationships = config.collections.map((c) => c.slug) || []
