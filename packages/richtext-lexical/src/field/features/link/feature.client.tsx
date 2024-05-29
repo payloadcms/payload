@@ -40,7 +40,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return !!($isRangeSelection(selection) && $getSelection()?.getTextContent()?.length)
       },
       key: 'link',
-      label: `Link`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:link:label')
+      },
       onSelect: ({ editor, isActive }) => {
         if (!isActive) {
           let selectedText: string = null

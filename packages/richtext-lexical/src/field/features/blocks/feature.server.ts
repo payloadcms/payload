@@ -10,6 +10,7 @@ import type { BlocksFeatureClientProps } from './feature.client.js'
 
 import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
@@ -110,6 +111,7 @@ export const BlocksFeature: FeatureProviderProviderServer<
             return currentSchema
           },
         },
+        i18n,
         nodes: [
           createNode({
             /* // TODO: Implement these hooks once docWithLocales / originalSiblingDoc => node matching has been figured out

@@ -27,6 +27,7 @@ import {
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
+import { i18n } from './i18n.js'
 import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
 import { richTextValidateHOC } from './validate/index.js'
 
@@ -86,6 +87,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     }
 
+    const featureI18n = finalSanitizedEditorConfig.features.i18n
+    for (const lang in i18n) {
+      if (!featureI18n[lang]) {
+        featureI18n[lang] = {
+          lexical: {},
+        }
+      }
+
+      featureI18n[lang].lexical.general = i18n[lang]
+    }
+
     return {
       CellComponent: withMergedProps({
         Component: RichTextCell,
@@ -109,7 +121,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
-      i18n: finalSanitizedEditorConfig.features.i18n,
+      i18n: featureI18n,
       /* hooks: {
         afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
         afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
