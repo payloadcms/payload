@@ -4,6 +4,12 @@
  * @returns {import('next').NextConfig}
  * */
 export const withPayload = (nextConfig = {}) => {
+  if (nextConfig.experimental?.staleTimes?.dynamic) {
+    console.warn(
+      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This option is not compatible with the Admin Panel and will be overridden. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config, or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
+    )
+  }
+
   return {
     ...nextConfig,
     experimental: {
@@ -16,6 +22,14 @@ export const withPayload = (nextConfig = {}) => {
           'libsql',
         ],
       },
+      ...(nextConfig.experimental?.staleTimes
+        ? {
+            staleTimes: {
+              ...(nextConfig.experimental.staleTimes || {}),
+              dynamic: 0,
+            },
+          }
+        : {}),
     },
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
