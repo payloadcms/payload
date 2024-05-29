@@ -74,7 +74,7 @@
     "fs-extra": "10.1.0",
     "get-port": "5.1.1",
     "get-stream": "6.0.1",
-    "glob": "8.1.0",
+    "glob": "10.4.1",
     "graphql-request": "6.1.0",
     "husky": "^8.0.3",
     "isomorphic-fetch": "3.0.0",
