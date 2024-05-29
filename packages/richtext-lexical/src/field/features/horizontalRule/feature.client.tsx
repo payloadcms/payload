@@ -1,11 +1,14 @@
 'use client'
 
+import type { ClientTranslationKeys } from '@payloadcms/translations'
+
 import { $isNodeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
 import { HorizontalRuleIcon } from '../../lexical/ui/icons/HorizontalRule/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarAddDropdownGroupWithItems } from '../shared/toolbar/addDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 import {
@@ -30,23 +33,23 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
       ],
       slashMenu: {
         groups: [
-          {
-            items: [
-              {
-                Icon: HorizontalRuleIcon,
-                key: 'horizontalRule',
-                keywords: ['hr', 'horizontal rule', 'line', 'separator'],
-                label: `Horizontal Rule`,
-                onSelect: ({ editor }) => {
-                  editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
-                },
+          slashMenuBasicGroupWithItems([
+            {
+              Icon: HorizontalRuleIcon,
+              key: 'horizontalRule',
+              keywords: ['hr', 'horizontal rule', 'line', 'separator'],
+              label: ({ i18n }) => {
+                return i18n.t('lexical:horizontalRule:label')
               },
-            ],
-            key: 'basic',
-            label: 'Basic',
-          },
+
+              onSelect: ({ editor }) => {
+                editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
+              },
+            },
+          ]),
         ],
       },
+
       toolbarFixed: {
         groups: [
           toolbarAddDropdownGroupWithItems([
@@ -61,7 +64,9 @@ const HorizontalRuleFeatureClient: FeatureProviderProviderClient<undefined> = (p
                 return $isHorizontalRuleNode(firstNode)
               },
               key: 'horizontalRule',
-              label: `Horizontal Rule`,
+              label: ({ i18n }) => {
+                return i18n.t('lexical:horizontalRule:label')
+              },
               onSelect: ({ editor }) => {
                 editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
               },

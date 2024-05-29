@@ -427,8 +427,8 @@ jobs:
           cd templates/blank-3.0
           cp .env.example .env
           ls -la
-          pnpm add ./*.tgz
-          pnpm install --ignore-workspace
+          pnpm add ./*.tgz --ignore-workspace
+          pnpm install --ignore-workspace --no-frozen-lockfile
           cat package.json
           pnpm run build
 

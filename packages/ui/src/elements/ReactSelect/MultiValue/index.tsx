@@ -1,8 +1,8 @@
+'use client'
 import type { MultiValueProps } from 'react-select'
 
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
-import { v4 as uuid } from 'uuid'
 
 import type { Option } from '../types.js'
 
@@ -10,18 +10,22 @@ import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortab
 import './index.scss'
 
 const baseClass = 'multi-value'
+
+export function generateMultiValueDraggableID(optionData, valueFunction) {
+  return typeof valueFunction === 'function' ? valueFunction(optionData) : optionData.value
+}
 export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     className,
-    data: { value },
+    data,
     innerProps,
     isDisabled,
     // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
-    selectProps: { customProps: { disableMouseDown } = {}, isSortable } = {},
+    selectProps: { customProps: { disableMouseDown } = {}, getOptionValue, isSortable } = {},
   } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
-    id: typeof value === 'string' && value.toString(),
+    id: generateMultiValueDraggableID(data, getOptionValue),
     disabled: !isSortable,
   })
 
@@ -35,25 +39,28 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
     .join(' ')
 
   return (
-    <SelectComponents.MultiValue
-      {...props}
-      className={classes}
-      innerProps={{
-        ...innerProps,
-        ...attributes,
-        ...listeners,
-        onMouseDown: (e) => {
-          if (!disableMouseDown) {
-            // we need to prevent the dropdown from opening when clicking on the drag handle, but not when a modal is open (i.e. the 'Relationship' field component)
-            e.stopPropagation()
-          }
-        },
-        ref: setNodeRef,
-        style: {
-          transform,
-          ...attributes?.style,
-        },
-      }}
-    />
+    <React.Fragment>
+      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
+      <SelectComponents.MultiValue
+        {...props}
+        className={classes}
+        innerProps={{
+          ...innerProps,
+          ...attributes,
+          ...listeners,
+          onMouseDown: (e) => {
+            if (!disableMouseDown) {
+              // we need to prevent the dropdown from opening when clicking on the drag handle, but not when a modal is open (i.e. the 'Relationship' field component)
+              e.stopPropagation()
+            }
+          },
+          ref: setNodeRef,
+          style: {
+            transform,
+            ...attributes?.style,
+          },
+        }}
+      />
+    </React.Fragment>
   )
 }

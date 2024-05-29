@@ -16,6 +16,9 @@ export default withBundleAnalyzer(
     typescript: {
       ignoreBuildErrors: true,
     },
+    experimental: {
+      reactCompiler: false
+    },
     async redirects() {
       return [
         {

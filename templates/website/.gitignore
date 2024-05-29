@@ -1,3 +1,9 @@
 build
 dist / media
-node_modules.DS_Store.env.next.vercel
+node_modules
+.DS_Store
+.env
+.next
+.vercel
+
+media

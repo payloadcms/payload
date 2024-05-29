@@ -1,5 +1,5 @@
 import type { Transformer } from '@lexical/markdown'
-import type { I18n, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
@@ -319,6 +319,25 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  /**
+   * Here you can provide i18n translations for your feature. These will only be available on the server and client.
+   *
+   * Translations here are automatically scoped to `lexical.featureKey.yourKey`
+   *
+   * @Example
+   * ```ts
+   * i18n: {
+   *   en: {
+   *     label: 'Horizontal Rule',
+   *   },
+   *   de: {
+   *     label: 'Trennlinie',
+   *   },
+   * }
+   * ```
+   * In order to access these translations, you would use `i18n.t('lexical:horizontalRule:label')`.
+   */
+  i18n?: Partial<GenericLanguages>
   markdownTransformers?: Transformer[]
   nodes?: Array<NodeWithHooks>
 
@@ -395,8 +414,9 @@ export type SanitizedPlugin =
       key: string
       position: 'belowContainer'
     }
+
 export type SanitizedServerFeatures = Required<
-  Pick<ResolvedServerFeature<unknown, unknown>, 'markdownTransformers' | 'nodes'>
+  Pick<ResolvedServerFeature<unknown, unknown>, 'i18n' | 'markdownTransformers' | 'nodes'>
 > & {
   /**  The node types mapped to their converters */
   converters: {

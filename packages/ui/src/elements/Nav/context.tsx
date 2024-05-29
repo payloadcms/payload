@@ -7,7 +7,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 
 type NavContextType = {
   navOpen: boolean
-  navRef: React.RefObject<HTMLDivElement>
+  navRef: React.RefObject<HTMLDivElement | null>
   setNavOpen: (value: boolean) => void
 }
 

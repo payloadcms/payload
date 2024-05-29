@@ -6,7 +6,7 @@ type CustomSelectProps = {
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   draggableProps?: any
-  droppableRef?: React.RefObject<HTMLDivElement>
+  droppableRef?: React.RefObject<HTMLDivElement | null>
   onSave?: DocumentDrawerProps['onSave']
   setDrawerIsOpen?: (isOpen: boolean) => void
 }

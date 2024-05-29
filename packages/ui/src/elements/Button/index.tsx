@@ -124,7 +124,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
     case 'anchor':
       return (
-        <a {...buttonProps} href={url} ref={ref as React.LegacyRef<HTMLAnchorElement>}>
+        <a {...buttonProps} href={url} ref={ref as React.Ref<HTMLAnchorElement>}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

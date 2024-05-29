@@ -39,7 +39,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'alignLeft',
-      label: `Align Left`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:align:alignLeftLabel')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')
       },
@@ -70,7 +72,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'alignCenter',
-      label: `Align Center`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:align:alignCenterLabel')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')
       },
@@ -101,7 +105,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'alignRight',
-      label: `Align Right`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:align:alignRightLabel')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')
       },
@@ -132,7 +138,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'alignJustify',
-      label: `Align Justify`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:align:alignJustifyLabel')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')
       },

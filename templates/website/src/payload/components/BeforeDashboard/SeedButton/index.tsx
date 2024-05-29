@@ -1,3 +1,5 @@
+'use client'
+
 import React, { Fragment, useCallback, useState } from 'react'
 
 export const SeedButton: React.FC = () => {
@@ -12,14 +14,12 @@ export const SeedButton: React.FC = () => {
 
       setLoading(true)
 
-      setTimeout(async () => {
-        try {
-          await fetch('/api/seed')
-          setSeeded(true)
-        } catch (err) {
-          setError(err)
-        }
-      }, 1000)
+      try {
+        await fetch('/api/seed')
+        setSeeded(true)
+      } catch (err) {
+        setError(err)
+      }
     },
     [loading, seeded],
   )

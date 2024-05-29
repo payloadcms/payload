@@ -6,6 +6,7 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
 import { mergeRegister } from '@lexical/utils'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -29,6 +30,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const editorFocus = useEditorFocus()
+  const { t } = useTranslation<{}, string>()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -105,11 +107,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
               </div>
             </div>
           }
-          placeholder={
-            <p className="editor-placeholder">
-              Start typing, or press &apos;/&apos; for commands...
-            </p>
-          }
+          placeholder={<p className="editor-placeholder">{t('lexical:general:placeholder')}</p>}
         />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the
