@@ -1,4 +1,4 @@
-import glob from 'glob'
+import { globSync } from 'glob'
 import minimist from 'minimist'
 import path from 'path'
 import shelljs from 'shelljs'
@@ -14,7 +14,7 @@ const suiteName = args[0]
 
 // Run all
 if (!suiteName) {
-  let files = glob.sync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  let files = globSync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
 
   const totalFiles = files.length
 
