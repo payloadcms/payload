@@ -95,6 +95,7 @@ export const UploadFeature: FeatureProviderProviderServer<
 
           return schemaMap
         },
+        i18n,
         nodes: [
           createNode({
             converters: {
@@ -176,7 +177,6 @@ export const UploadFeature: FeatureProviderProviderServer<
                 nodeTypes: [UploadNode.getType()],
               },
             },
-            i18n,
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
             validations: [uploadValidation(props)],
