@@ -12,6 +12,7 @@ import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js
 import { createNode } from '../typeUtilities.js'
 import { LinkFeatureClientComponent } from './feature.client.js'
 import { i18n } from './i18n.js'
+import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
 import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
@@ -110,6 +111,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           return schemaMap
         },
         i18n,
+        markdownTransformers: [LinkMarkdownTransformer],
         nodes: [
           createNode({
             converters: {
