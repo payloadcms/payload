@@ -3,7 +3,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { initI18n } from '@payloadcms/translations'
-import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
+import { PayloadIcon } from '@payloadcms/ui/graphics/Icon'
 import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
 import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -19,6 +19,7 @@ import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultListView } from '../../views/List/Default/index.js'
+import { Loading } from './loading.js'
 
 const merriweather = Merriweather({
   display: 'swap',
@@ -106,7 +107,7 @@ export const RootLayout = async ({
   return (
     <html className={merriweather.variable} data-theme={theme} dir={dir} lang={languageCode}>
       <body>
-        <Suspense fallback={<LoadingOverlay loadingText={i18n.t('general:loading')} />}>
+        <Suspense fallback={<Loading Icon={componentMap?.Icon || <PayloadIcon />} t={i18n.t} />}>
           <RootProvider
             componentMap={componentMap}
             config={clientConfig}

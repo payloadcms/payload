@@ -1,0 +1,73 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.loading {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  pointer-events: none;
+  gap: calc(var(--base) / 2);
+  opacity: 0;
+  animation-name: fadeIn;
+  animation-fill-mode: forwards;
+  animation-duration: 0.3s;
+  animation-timing-function: linear;
+  animation-delay: 0.3s;
+
+  &__icon {
+    width: calc(var(--base) * 3);
+    height: calc(var(--base) * 3);
+  }
+
+  &__text {
+    margin: 0;
+  }
+
+  // ellipsis contains three spans with a dot in them, animate each span one after the other in an infinite loop
+  &__ellipsis {
+    display: inline-flex;
+    position: relative;
+
+    span {
+      text-align: center;
+      animation: ellipsis 1.5s infinite;
+
+      &:nth-child(1) {
+        animation-delay: 0s;
+      }
+
+      &:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 1s;
+      }
+    }
+
+    @keyframes ellipsis {
+      0% {
+        opacity: 0.5;
+      }
+      20% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0.5;
+      }
+    }
+  }
+}
