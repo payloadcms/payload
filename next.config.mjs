@@ -18,9 +18,6 @@ export default withBundleAnalyzer(
     },
     experimental: {
       reactCompiler: false,
-      staleTimes: {
-        dynamic: 1,
-      },
     },
     async redirects() {
       return [
