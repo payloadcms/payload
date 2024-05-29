@@ -135,7 +135,7 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!['number', 'string'].includes(typeof internalField?.value)}
+              disabled={!internalField?.value && typeof internalField?.value !== 'number'}
               isClearable={false}
               onChange={(operator) => {
                 setInternalOperatorOption(operator.value)
