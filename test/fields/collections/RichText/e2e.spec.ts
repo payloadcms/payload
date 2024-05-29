@@ -183,8 +183,6 @@ describe('Rich Text', () => {
 
     test('should not create new url link when read only', async () => {
       await navigateToRichTextFields()
-
-      // Attempt to open link popup
       const modalTrigger = page.locator('.rich-text--read-only .rich-text__toolbar button .link')
       await expect(modalTrigger).toBeDisabled()
     })
@@ -421,19 +419,14 @@ describe('Rich Text', () => {
     })
     test('should not take value from previous block', async () => {
       await navigateToRichTextFields()
-
-      // check first block value
-      const textField = page.locator('#field-blocks__0__text')
-      await expect(textField).toHaveValue('Regular text')
-
-      // remove the first block
+      await page.locator('#field-blocks').scrollIntoViewIfNeeded()
+      await expect(page.locator('#field-blocks__0__text')).toBeVisible()
+      await expect(page.locator('#field-blocks__0__text')).toHaveValue('Regular text')
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
       const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
       await removeButton.click()
-
-      // check new first block value
       const richTextField = page.locator('#field-blocks__0__text')
       const richTextValue = await richTextField.innerText()
       expect(richTextValue).toContain('Rich text')

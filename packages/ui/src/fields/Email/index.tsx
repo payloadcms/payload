@@ -60,16 +60,17 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+      className={[fieldBaseClass, 'email', className, showError && 'error', disabled && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -88,7 +89,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         {BeforeInput}
         <input
           autoComplete={autoComplete}
-          disabled={readOnly}
+          disabled={disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

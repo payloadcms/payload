@@ -62,20 +62,21 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     disableFormData,
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+
   const onToggle = useCallback(() => {
-    if (!readOnly) {
+    if (!disabled) {
       setValue(!value)
       if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
     }
-  }, [onChangeFromProps, readOnly, setValue, value])
+  }, [onChangeFromProps, disabled, setValue, value])
 
   const checked = checkedFromProps || Boolean(value)
 
@@ -89,7 +90,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         showError && 'error',
         className,
         value && `${baseClass}--checked`,
-        readOnly && `${baseClass}--read-only`,
+        disabled && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -111,7 +112,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
-        readOnly={readOnly}
+        readOnly={disabled}
         required={required}
       />
       {CustomDescription !== undefined ? (

@@ -3,7 +3,7 @@ import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useEffect, useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
@@ -13,6 +13,7 @@ export type { Option } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
@@ -31,6 +32,12 @@ const createOption = (label: string) => ({
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
   const [inputValue, setInputValue] = React.useState('') // for creatable select
+  const uuid = useId()
+  const [hasMounted, setHasMounted] = React.useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   const {
     className,
@@ -60,6 +67,10 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
+  if (!hasMounted) {
+    return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
+  }
+
   if (!isCreatable) {
     return (
       <Select
@@ -83,6 +94,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         }}
         filterOption={filterOption}
         getOptionValue={getOptionValue}
+        instanceId={uuid}
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}
@@ -154,6 +166,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       }}
       filterOption={filterOption}
       inputValue={inputValue}
+      instanceId={uuid}
       isClearable={isClearable}
       isDisabled={disabled}
       isSearchable={isSearchable}

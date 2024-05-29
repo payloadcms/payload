@@ -63,12 +63,11 @@ export const Document: React.FC<AdminViewProps> = async ({
   let apiURL: string
   let action: string
 
-  const data = await getDocumentData({
+  const { data, formState } = await getDocumentData({
     id,
     collectionConfig,
     globalConfig,
     locale,
-    payload,
     req,
   })
 
@@ -191,6 +190,8 @@ export const Document: React.FC<AdminViewProps> = async ({
       hasPublishPermission={hasPublishPermission}
       hasSavePermission={hasSavePermission}
       id={id}
+      initialData={data}
+      initialState={formState}
       isEditing={isEditing}
     >
       {!ViewOverride && (

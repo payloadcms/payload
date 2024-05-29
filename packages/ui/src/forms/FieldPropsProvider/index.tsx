@@ -32,6 +32,7 @@ export type Props = {
   children: React.ReactNode
   custom?: Record<any, string>
   indexPath?: string
+  isForceRendered?: boolean
   path: string
   permissions?: FieldPermissions
   readOnly: boolean

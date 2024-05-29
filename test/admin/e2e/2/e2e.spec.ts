@@ -114,7 +114,7 @@ describe('admin2', () => {
 
         // prefill search with "a" from the query param
         await page.goto(`${postsUrl.list}?search=dennis`)
-        await page.waitForURL(`${postsUrl.list}?search=dennis`)
+        await page.waitForURL(new RegExp(`${postsUrl.list}\\?search=dennis`))
 
         // input should be filled out, list should filter
         await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
@@ -624,7 +624,7 @@ describe('admin2', () => {
 
       test('should delete many', async () => {
         await page.goto(postsUrl.list)
-        await page.waitForURL(postsUrl.list)
+        await page.waitForURL(new RegExp(postsUrl.list))
         // delete should not appear without selection
         await expect(page.locator('#confirm-delete')).toHaveCount(0)
         // select one row

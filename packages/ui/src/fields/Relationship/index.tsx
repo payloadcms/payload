@@ -14,7 +14,6 @@ import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { FieldError } from '../../forms/FieldError/index.js'
 import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { useFormProcessing } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
@@ -72,7 +71,6 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
-  const formProcessing = useFormProcessing()
   const hasMultipleRelations = Array.isArray(relationTo)
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
@@ -93,14 +91,22 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     [validate, required],
   )
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { filterOptions, initialValue, path, setValue, showError, value } = useField<
-    Value | Value[]
-  >({
+  const {
+    filterOptions,
+    formInitializing,
+    formProcessing,
+    initialValue,
+    path,
+    setValue,
+    showError,
+    value,
+  } = useField<Value | Value[]>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const readOnly = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const valueRef = useRef(value)
   valueRef.current = value

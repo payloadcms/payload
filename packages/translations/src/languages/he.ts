@@ -22,16 +22,19 @@ export const heTranslations: DefaultTranslationsObject = {
     failedToUnlock: 'ביטול נעילה נכשל',
     forceUnlock: 'אלץ ביטול נעילה',
     forgotPassword: 'שכחתי סיסמה',
-    forgotPasswordEmailInstructions: 'אנא הזן את כתובת הדוא"ל שלך למטה. תקבל הודעה עם הוראות לאיפוס הסיסמה שלך.',
+    forgotPasswordEmailInstructions:
+      'אנא הזן את כתובת הדוא"ל שלך למטה. תקבל הודעה עם הוראות לאיפוס הסיסמה שלך.',
     forgotPasswordQuestion: 'שכחת סיסמה?',
     generate: 'יצירה',
     generateNewAPIKey: 'יצירת מפתח API חדש',
-    generatingNewAPIKeyWillInvalidate: 'יצירת מפתח API חדש תבטל את המפתח הקודם. האם אתה בטוח שברצונך להמשיך?',
+    generatingNewAPIKeyWillInvalidate:
+      'יצירת מפתח API חדש תבטל את המפתח הקודם. האם אתה בטוח שברצונך להמשיך?',
     lockUntil: 'נעילה עד',
     logBackIn: 'התחברות מחדש',
     logOut: 'התנתקות',
     loggedIn: 'כדי להתחבר עם משתמש אחר, יש להתנתק תחילה.',
-    loggedInChangePassword: 'כדי לשנות את הסיסמה שלך, יש לעבור ל<a href="{{serverURL}}">חשבון</a> שלך ולערוך את הסיסמה שם.',
+    loggedInChangePassword:
+      'כדי לשנות את הסיסמה שלך, יש לעבור ל<a href="{{serverURL}}">חשבון</a> שלך ולערוך את הסיסמה שם.',
     loggedOutInactivity: 'התנתקת בשל חוסר פעילות.',
     loggedOutSuccessfully: 'התנתקת בהצלחה.',
     loggingOut: 'מתנתק...',
@@ -43,7 +46,8 @@ export const heTranslations: DefaultTranslationsObject = {
     logoutSuccessful: 'התנתקות הצליחה.',
     logoutUser: 'התנתקות משתמש',
     newAPIKeyGenerated: 'נוצר מפתח API חדש.',
-    newAccountCreated: 'נוצר חשבון חדש עבורך כדי לגשת אל <a href="{{serverURL}}">{{serverURL}}</a>. אנא לחץ על הקישור הבא או הדבק את ה-URL בדפדפן שלך כדי לאמת את הדוא"ל שלך: <a href="{{verificationURL}}">{{verificationURL}}</a>.<br> לאחר אימות כתובת הדוא"ל, תוכל להתחבר בהצלחה.',
+    newAccountCreated:
+      'נוצר חשבון חדש עבורך כדי לגשת אל <a href="{{serverURL}}">{{serverURL}}</a>. אנא לחץ על הקישור הבא או הדבק את ה-URL בדפדפן שלך כדי לאמת את הדוא"ל שלך: <a href="{{verificationURL}}">{{verificationURL}}</a>.<br> לאחר אימות כתובת הדוא"ל, תוכל להתחבר בהצלחה.',
     newPassword: 'סיסמה חדשה',
     passed: 'אימות הצליח',
     passwordResetSuccessfully: 'איפוס הסיסמה הצליח.',
@@ -61,9 +65,11 @@ export const heTranslations: DefaultTranslationsObject = {
     verify: 'אמת',
     verifyUser: 'אמת משתמש',
     verifyYourEmail: 'אמת את כתובת הדוא"ל שלך',
-    youAreInactive: 'לא היית פעיל לזמן קצר ובקרוב תתנתק אוטומטית כדי לשמור על האבטחה של חשבונך. האם ברצונך להישאר מחובר?',
-    youAreReceivingResetPassword: 'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
-    youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.'
+    youAreInactive:
+      'לא היית פעיל לזמן קצר ובקרוב תתנתק אוטומטית כדי לשמור על האבטחה של חשבונך. האם ברצונך להישאר מחובר?',
+    youAreReceivingResetPassword:
+      'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
+    youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
   error: {
     accountAlreadyActivated: 'חשבון זה כבר הופעל.',
@@ -339,7 +345,8 @@ export const heTranslations: DefaultTranslationsObject = {
     type: 'סוג',
     aboutToPublishSelection: 'אתה עומד לפרסם את כל ה{{label}} שנבחרו. האם אתה בטוח?',
     aboutToRestore: 'אתה עומד לשחזר את מסמך {{label}} למצב שהיה בו בתאריך {{versionDate}}.',
-    aboutToRestoreGlobal: 'אתה עומד לשחזר את {{label}} הגלובלי למצב שהיה בו בתאריך {{versionDate}}.',
+    aboutToRestoreGlobal:
+      'אתה עומד לשחזר את {{label}} הגלובלי למצב שהיה בו בתאריך {{versionDate}}.',
     aboutToRevertToPublished: 'אתה עומד להחזיר את השינויים במסמך הזה לגרסה שפורסמה. האם אתה בטוח?',
     aboutToUnpublish: 'אתה עומד לבטל את הפרסום של מסמך זה. האם אתה בטוח?',
     aboutToUnpublishSelection: 'אתה עומד לבטל את הפרסום של כל ה{{label}} שנבחרו. האם אתה בטוח?',
