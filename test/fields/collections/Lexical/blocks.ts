@@ -1,6 +1,6 @@
 import type { ArrayField, Block } from 'payload/types'
 
-import { BlocksFeature } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, FixedToolbarFeature } from '@payloadcms/richtext-lexical'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { textFieldsSlug } from '../Text/shared.js'
@@ -118,6 +118,7 @@ export const RichTextBlock: Block = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          FixedToolbarFeature(),
           BlocksFeature({
             blocks: [
               {

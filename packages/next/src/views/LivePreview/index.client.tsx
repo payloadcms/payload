@@ -8,8 +8,10 @@ import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
 import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { OperationProvider } from '@payloadcms/ui/providers/Operation'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
@@ -71,20 +73,27 @@ const PreviewView: React.FC<Props> = ({
 
   const operation = id ? 'update' : 'create'
 
+  const {
+    admin: { user: userSlug },
+  } = useConfig()
   const { t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
+  const { refreshCookieAsync, user } = useAuth()
+  const { reportUpdate } = useDocumentEvents()
 
   const onSave = useCallback(
     (json) => {
-      // reportUpdate({
-      //   id,
-      //   entitySlug: collectionConfig.slug,
-      //   updatedAt: json?.result?.updatedAt || new Date().toISOString(),
-      // })
+      reportUpdate({
+        id,
+        entitySlug: collectionSlug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
 
-      // if (auth && id === user.id) {
-      //   await refreshCookieAsync()
-      // }
+      // If we're editing the doc of the logged-in user,
+      // Refresh the cookie to get new permissions
+      if (user && collectionSlug === userSlug && id === user.id) {
+        void refreshCookieAsync()
+      }
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -93,12 +102,7 @@ const PreviewView: React.FC<Props> = ({
         })
       }
     },
-    [
-      id,
-      onSaveFromProps,
-      // refreshCookieAsync,
-      //  reportUpdate
-    ],
+    [collectionSlug, id, onSaveFromProps, refreshCookieAsync, reportUpdate, user, userSlug],
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
