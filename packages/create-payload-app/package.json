@@ -38,7 +38,6 @@
     "@sindresorhus/slugify": "^1.1.0",
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
-    "command-exists": "^1.2.9",
     "comment-json": "^4.2.3",
     "degit": "^2.8.4",
     "esprima-next": "^6.0.3",
@@ -49,7 +48,6 @@
     "terminal-link": "^2.1.1"
   },
   "devDependencies": {
-    "@types/command-exists": "^1.2.0",
     "@types/degit": "^2.8.3",
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
