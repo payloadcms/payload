@@ -68,7 +68,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       namespace: editorConfig.lexical.namespace,
       nodes: [...getEnabledNodes({ editorConfig })],
       onError: (error: Error) => {
-        console.error('An error occurred in the editor: ', error)
+        throw error
       },
       theme: editorConfig.lexical.theme,
     }
