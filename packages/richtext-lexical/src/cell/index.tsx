@@ -1,5 +1,6 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
+import type { CellComponentProps } from 'payload/types'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useTableCell } from '@payloadcms/ui/elements/Table'
@@ -16,18 +17,19 @@ import { loadClientFeatures } from '../field/lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize.js'
 import { getEnabledNodes } from '../field/lexical/nodes/index.js'
 
-export const RichTextCell: React.FC<{
-  admin?: LexicalFieldAdminProps
-  lexicalEditorConfig: LexicalEditorConfig
-}> = (props) => {
-  const { admin, lexicalEditorConfig } = props
+export const RichTextCell: React.FC<
+  CellComponentProps & {
+    admin?: LexicalFieldAdminProps
+    lexicalEditorConfig: LexicalEditorConfig
+  }
+> = (props) => {
+  const { admin, lexicalEditorConfig, richTextComponentMap } = props
 
   const [preview, setPreview] = React.useState('Loading...')
 
   const {
     cellData,
     cellProps: { schemaPath },
-    richTextComponentMap,
   } = useTableCell()
 
   const clientFunctions = useClientFunctions()

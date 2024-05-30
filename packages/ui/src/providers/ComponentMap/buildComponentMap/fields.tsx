@@ -75,7 +75,7 @@ export const mapFields = (args: {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let CustomFieldComponent: CustomComponent<FieldComponentProps> = field.admin?.components?.Field
 
-    const CustomCellComponent = field.admin?.components?.Cell
+    let CustomCellComponent = field.admin?.components?.Cell
 
     const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
 
@@ -589,9 +589,7 @@ export const mapFields = (args: {
             }
 
             if (RichTextCellComponent) {
-              cellComponentProps.CellComponentOverride = (
-                <WithServerSideProps Component={RichTextCellComponent} />
-              )
+              CustomCellComponent = RichTextCellComponent
             }
 
             fieldComponentProps = richTextField
