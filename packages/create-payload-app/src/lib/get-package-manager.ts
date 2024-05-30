@@ -18,11 +18,12 @@ export async function getPackageManager(args: {
   ) {
     detected = 'pnpm'
   } else if (
-    (cliArgs?.['--use-yarn'] && fse.existsSync(`${projectDir}/yarn.lock`)) ||
+    cliArgs?.['--use-yarn'] ||
+    fse.existsSync(`${projectDir}/yarn.lock`) ||
     (await commandExists('yarn'))
   ) {
     detected = 'yarn'
-  } else if (cliArgs?.['--use-npm'] && fse.existsSync(`${projectDir}/package-lock.json`)) {
+  } else if (cliArgs?.['--use-npm'] || fse.existsSync(`${projectDir}/package-lock.json`)) {
     detected = 'npm'
   }
   return detected || 'npm'
