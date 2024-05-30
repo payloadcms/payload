@@ -12,7 +12,7 @@ const useLexicalFeatureProp = <T,>(featureKey: string, componentKey: string, pro
 
   const schemaPathFromCellProps = tableCell?.cellProps?.schemaPath
 
-  const schemaPath = schemaPathFromFieldProps || schemaPathFromCellProps
+  const schemaPath = schemaPathFromCellProps || schemaPathFromFieldProps // schemaPathFromCellProps needs to have priority, as there can be cells within fields (e.g. list drawers) and the cell schemaPath needs to be used there - not the parent field schemaPath. There cannot be fields within cells.
 
   useAddClientFunction(
     `lexicalFeature.${schemaPath}.${featureKey}.components.${componentKey}`,
