@@ -157,7 +157,6 @@
   },
   "publishConfig": {
     "exports": {
-      ".": "./dist/exports/index.js",
       "./assets/*": "./dist/assets/*",
       "./*": {
         "import": "./dist/exports/*.js",
