@@ -8,9 +8,9 @@ import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 type TraverseFieldArgs = {
-  _locales: Record<string, unknown>
+  _locales: Result
   adapter: PostgresAdapter
-  currentArgs: Record<string, unknown>
+  currentArgs: Result
   currentTableName: string
   depth?: number
   fields: Field[]
@@ -31,6 +31,19 @@ export const traverseFields = ({
   topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
+    // handle simple relationship
+    if (
+      depth > 0 &&
+      (field.type === 'upload' ||
+        (field.type === 'relationship' && !field.hasMany && typeof field.relationTo === 'string'))
+    ) {
+      if (field.localized) {
+        _locales.with[`${path}${field.name}`] = true
+      } else {
+        currentArgs.with[`${path}${field.name}`] = true
+      }
+    }
+
     if (field.type === 'collapsible' || field.type === 'row') {
       traverseFields({
         _locales,
@@ -84,11 +97,19 @@ export const traverseFields = ({
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
-          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
+          if (adapter.tables[arrayTableNameWithLocales]) {
+            withArray.with._locales = {
+              columns: {
+                id: false,
+                _parentID: false,
+              },
+              with: {},
+            }
+          }
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
-            _locales,
+            _locales: withArray.with._locales,
             adapter,
             currentArgs: withArray,
             currentTableName: arrayTableName,
@@ -137,12 +158,14 @@ export const traverseFields = ({
               )
 
               if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
-                withBlock.with._locales = _locales
+                withBlock.with._locales = {
+                  with: {},
+                }
               }
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({
-                _locales,
+                _locales: withBlock.with._locales,
                 adapter,
                 currentArgs: withBlock,
                 currentTableName: tableName,

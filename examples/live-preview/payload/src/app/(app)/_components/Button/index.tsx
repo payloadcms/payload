@@ -1,4 +1,4 @@
-import type { ElementType } from 'react';
+import type { ElementType } from 'react'
 
 import Link from 'next/link'
 import React from 'react'

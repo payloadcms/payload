@@ -55,6 +55,7 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
       collection: collectionConfig.slug,
       limit: 1,
       locale,
+      pagination: false,
       req,
       where: { id: { equals: id } },
     })

@@ -21,6 +21,11 @@
       "import": "./src/types.ts",
       "require": "./src/types.ts",
       "types": "./src/types.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "require": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts"
     }
   },
   "main": "./src/index.ts",
@@ -30,11 +35,12 @@
     "mock.js"
   ],
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
+    "build": "pnpm build:swc && pnpm build:types && pnpm renamePredefinedMigrations",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.5.2",
@@ -66,6 +72,11 @@
         "import": "./dist/types.js",
         "require": "./dist/types.js",
         "types": "./dist/types.d.ts"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "require": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts"
       }
     },
     "main": "./dist/index.js",
