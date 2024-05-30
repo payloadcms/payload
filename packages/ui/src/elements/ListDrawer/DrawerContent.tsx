@@ -8,8 +8,8 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
-import usePayloadAPI from '../../hooks/usePayloadAPI.js'
+import { FieldLabel } from '../../fields/shared/FieldLabel/index.js'
+import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'

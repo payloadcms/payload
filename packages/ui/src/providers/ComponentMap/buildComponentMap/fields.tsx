@@ -44,7 +44,7 @@ import type {
 } from './types.js'
 
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
-import { FieldDescription } from '../../../forms/FieldDescription/index.js'
+import { FieldDescription } from '../../../fields/shared/FieldDescription/index.js'
 
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated
