@@ -110,6 +110,7 @@ export const myTranslations: DefaultTranslationsObject = {
     unauthorized: 'အခွင့်မရှိပါ။ ဤတောင်းဆိုချက်ကို လုပ်ဆောင်နိုင်ရန် သင်သည် လော့ဂ်အင်ဝင်ရပါမည်။',
     unknown: 'ဘာမှန်းမသိသော error တက်သွားပါသည်။',
     unspecific: 'Error တက်နေပါသည်။',
+    userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     userLocked:
       'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
     valueMustBeUnique: 'value သည် အဓိပ္ပာယ်ရှိရပါမည်။',

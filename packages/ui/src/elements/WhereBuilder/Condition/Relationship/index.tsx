@@ -1,11 +1,13 @@
 'use client'
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import type { PaginatedDocs } from 'payload/database'
+import type { Where } from 'payload/types'
 
+import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'
-import type { GetResults, Props, ValueWithRelation } from './types.js'
+import type { Props, ValueWithRelation } from './types.js'
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'
@@ -29,13 +31,21 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const hasMultipleRelations = Array.isArray(relationTo)
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
-  const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
-  const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [search, setSearch] = useState('')
   const [errorLoading, setErrorLoading] = useState('')
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation()
+  const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
+  const initialRelationMap = () => {
+    const map: Map<string, number> = new Map()
+    relationSlugs.forEach((relation) => {
+      map.set(relation, 1)
+    })
+    return map
+  }
+  const nextPageByRelationshipRef = React.useRef<Map<string, number>>(initialRelationMap())
+  const partiallyLoadedRelationshipSlugs = React.useRef<string[]>(relationSlugs)
 
   const addOptions = useCallback(
     (data, relation) => {
@@ -45,70 +55,93 @@ export const RelationshipField: React.FC<Props> = (props) => {
     [collections, hasMultipleRelations, i18n],
   )
 
-  const getResults = useCallback<GetResults>(
+  const loadRelationOptions = React.useCallback(
     async ({
-      lastFullyLoadedRelation: lastFullyLoadedRelationArg,
-      lastLoadedPage: lastLoadedPageArg,
-      search: searchArg,
-      // eslint-disable-next-line @typescript-eslint/require-await
+      abortController,
+      relationSlug,
+    }: {
+      abortController: AbortController
+      relationSlug: string
     }) => {
-      let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1
-      const lastFullyLoadedRelationToUse =
-        typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
+      const collection = collections.find((coll) => coll.slug === relationSlug)
+      const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+      const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
-      const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
-      const relationsToFetch =
-        lastFullyLoadedRelationToUse === -1
-          ? relations
-          : relations.slice(lastFullyLoadedRelationToUse + 1)
+      if (partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
+        const query: {
+          depth?: number
+          limit?: number
+          page?: number
+          where: Where
+        } = {
+          depth: 0,
+          limit: maxResultsPerRequest,
+          page: pageIndex,
+          where: {
+            and: [],
+          },
+        }
 
-      let resultsFetched = 0
+        if (debouncedSearch) {
+          query.where.and.push({
+            [fieldToSearch]: {
+              like: debouncedSearch,
+            },
+          })
+        }
 
-      if (!errorLoading) {
-        relationsToFetch.reduce(async (priorRelation, relation) => {
-          await priorRelation
-
-          if (resultsFetched < 10) {
-            const collection = collections.find((coll) => coll.slug === relation)
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-            const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : ''
-
-            const response = await fetch(
-              `${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`,
-              {
-                credentials: 'include',
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
+        try {
+          const response = await fetch(
+            `${serverURL}${api}/${relationSlug}${QueryString.stringify(query, { addQueryPrefix: true })}`,
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
               },
-            )
+              signal: abortController.signal,
+            },
+          )
 
-            if (response.ok) {
-              const data: PaginatedDocs = await response.json()
-              if (data.docs.length > 0) {
-                resultsFetched += data.docs.length
-                addOptions(data, relation)
-                setLastLoadedPage(data.page)
+          if (response.ok) {
+            const data: PaginatedDocs = await response.json()
+            if (data.docs.length > 0) {
+              addOptions(data, relationSlug)
 
-                if (!data.nextPage) {
-                  setLastFullyLoadedRelation(relations.indexOf(relation))
-
-                  // If there are more relations to search, need to reset lastLoadedPage to 1
-                  // both locally within function and state
-                  if (relations.indexOf(relation) + 1 < relations.length) {
-                    lastLoadedPageToUse = 1
-                  }
+              if (!debouncedSearch) {
+                if (data.nextPage) {
+                  nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
+                } else {
+                  partiallyLoadedRelationshipSlugs.current =
+                    partiallyLoadedRelationshipSlugs.current.filter(
+                      (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
+                    )
                 }
               }
-            } else {
-              setErrorLoading(t('error:unspecific'))
             }
+          } else {
+            setErrorLoading(t('error:unspecific'))
           }
-        }, Promise.resolve())
+        } catch (e) {
+          if (!abortController.signal.aborted) {
+            console.error(e)
+          }
+        }
       }
+
+      setHasLoadedFirstOptions(true)
     },
-    [i18n, relationTo, errorLoading, collections, serverURL, api, addOptions, t],
+    [addOptions, api, collections, debouncedSearch, i18n.language, serverURL, t],
   )
+
+  const loadMoreOptions = React.useCallback(() => {
+    if (partiallyLoadedRelationshipSlugs.current.length > 0) {
+      const abortController = new AbortController()
+      loadRelationOptions({
+        abortController,
+        relationSlug: partiallyLoadedRelationshipSlugs.current[0],
+      })
+    }
+  }, [loadRelationOptions])
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -198,27 +231,34 @@ export const RelationshipField: React.FC<Props> = (props) => {
     [i18n, addOptions, api, errorLoading, serverURL, t],
   )
 
-  // ///////////////////////////
-  // Get results when search input changes
-  // ///////////////////////////
-
+  /**
+   * 1. Trigger initial relationship options fetch
+   * 2. When search changes, loadRelationOptions will
+   *    fire off again
+   */
   useEffect(() => {
-    dispatchOptions({
-      type: 'CLEAR',
-      i18n,
-      required: true,
+    const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
+    const abortControllers: AbortController[] = []
+    relations.forEach((relation) => {
+      const abortController = new AbortController()
+      loadRelationOptions({
+        abortController,
+        relationSlug: relation,
+      })
+      abortControllers.push(abortController)
     })
 
-    setHasLoadedFirstOptions(true)
-    setLastLoadedPage(1)
-    setLastFullyLoadedRelation(-1)
-    getResults({ search: debouncedSearch })
-  }, [getResults, debouncedSearch, relationTo, i18n])
+    return () => {
+      abortControllers.forEach((controller) => {
+        if (controller.signal) controller.abort()
+      })
+    }
+  }, [i18n, loadRelationOptions, relationTo])
 
-  // ///////////////////////////
-  // Format options once first options have been retrieved
-  // ///////////////////////////
-
+  /**
+   * Load any options that were not returned
+   * in the first 10 of each relation fetch
+   */
   useEffect(() => {
     if (value && hasLoadedFirstOptions) {
       if (hasMany) {
@@ -299,9 +339,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
             }
           }}
           onInputChange={handleInputChange}
-          onMenuScrollToBottom={() => {
-            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
-          }}
+          onMenuScrollToBottom={loadMoreOptions}
           options={options}
           placeholder={t('general:selectValue')}
           value={valueToRender}

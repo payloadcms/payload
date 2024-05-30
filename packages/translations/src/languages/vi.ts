@@ -109,6 +109,7 @@ export const viTranslations: DefaultTranslationsObject = {
     unauthorized: 'Lỗi - Bạn cần phải đăng nhập trước khi gửi request sau.',
     unknown: 'Lỗi - Không xác định (unknown error).',
     unspecific: 'Lỗi - Đã xảy ra (unspecific error).',
+    userEmailAlreadyRegistered: 'Người dùng với email đã cho đã được đăng ký.',
     userLocked: 'Lỗi- Tài khoản đã bị khóa do đăng nhập thất bại nhiều lần.',
     valueMustBeUnique: 'Lỗi - Giá trị không được trùng lặp.',
     verificationTokenInvalid: 'Lỗi - Token dùng để xác thực không hợp lệ.',

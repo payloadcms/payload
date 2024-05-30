@@ -1,41 +1,45 @@
 import type {
   Data,
-  Payload,
-  PayloadRequest,
+  PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
+
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale: Locale
-  payload: Payload
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }): Promise<Data> => {
-  const { id, collectionConfig, globalConfig, locale, payload, req } = args
+  const { id, collectionConfig, globalConfig, locale, req } = args
 
-  let data: Data
-
-  if (collectionConfig && id !== undefined && id !== null) {
-    data = await payload.findByID({
-      id,
-      collection: collectionConfig.slug,
-      depth: 0,
-      locale: locale.code,
-      req,
+  try {
+    const formState = await buildFormState({
+      req: {
+        ...req,
+        data: {
+          id,
+          collectionSlug: collectionConfig?.slug,
+          globalSlug: globalConfig?.slug,
+          locale: locale.code,
+          operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
+          schemaPath: collectionConfig?.slug || globalConfig?.slug,
+        },
+      },
     })
-  }
 
-  if (globalConfig) {
-    data = await payload.findGlobal({
-      slug: globalConfig.slug,
-      depth: 0,
-      locale: locale.code,
-      req,
-    })
-  }
+    const data = reduceFieldsToValues(formState, true)
 
-  return data
+    return {
+      data,
+      formState,
+    }
+  } catch (error) {
+    console.error('Error getting document data', error) // eslint-disable-line no-console
+    return {}
+  }
 }

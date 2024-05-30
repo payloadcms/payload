@@ -618,6 +618,30 @@ describe('collections-rest', () => {
         })
       })
 
+      it('should query relationships by not_equals', async () => {
+        const ogPost = await createPost({
+          relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
+        })
+        await createPost()
+
+        const response = await restClient.GET(`/${slug}`, {
+          query: {
+            where: {
+              and: [
+                {
+                  'relationMultiRelationTo.value': { not_equals: relation.id },
+                },
+              ],
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toEqual(200)
+        const foundExcludedDoc = result.docs.some((doc) => ogPost.id === doc.id)
+        expect(foundExcludedDoc).toBe(false)
+      })
+
       describe('relationTo multi hasMany', () => {
         it('nested by id', async () => {
           const post1 = await createPost({

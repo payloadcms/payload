@@ -64,12 +64,14 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { initialValue, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
-  })
+  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+    useField<string>({
+      path: pathFromContext || pathFromProps || name,
+      validate: memoizedValidate,
+    })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleMount = useCallback(
     (editor, monaco) => {
@@ -92,7 +94,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) return
+      if (disabled) return
       setStringValue(val)
 
       try {
@@ -103,14 +105,16 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [disabled, setValue, setStringValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue) return
+    if (hasLoadedValue || value === undefined) return
+
     setStringValue(
       value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
     )
+
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
 
@@ -121,7 +125,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -145,7 +149,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={disabled}
           value={stringValue}
         />
         {AfterInput}

@@ -52,12 +52,14 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { filterOptions, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps,
-    validate: memoizedValidate,
-  })
+  const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
+    useField<string>({
+      path: pathFromContext || pathFromProps,
+      validate: memoizedValidate,
+    })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const onChange = useCallback(
     (incomingValue) => {
@@ -83,7 +85,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
         labelProps={labelProps}
         onChange={onChange}
         path={path}
-        readOnly={readOnly}
+        readOnly={disabled}
         relationTo={relationTo}
         required={required}
         serverURL={serverURL}

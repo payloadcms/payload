@@ -14,6 +14,7 @@ export type FieldType<T> = {
   errorMessage?: string
   errorPaths?: string[]
   filterOptions?: FilterOptionsResult
+  formInitializing: boolean
   formProcessing: boolean
   formSubmitted: boolean
   initialValue?: T

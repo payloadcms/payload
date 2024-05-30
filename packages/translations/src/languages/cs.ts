@@ -110,6 +110,7 @@ export const csTranslations: DefaultTranslationsObject = {
     unauthorized: 'Neautorizováno, pro zadání tohoto požadavku musíte být přihlášeni.',
     unknown: 'Došlo k neznámé chybě.',
     unspecific: 'Došlo k chybě.',
+    userEmailAlreadyRegistered: 'Uživatel s daným e-mailem je již zaregistrován.',
     userLocked: 'Tento uživatel je uzamčen kvůli příliš mnoha neúspěšným pokusům o přihlášení.',
     valueMustBeUnique: 'Hodnota musí být jedinečná',
     verificationTokenInvalid: 'Ověřovací token je neplatný.',

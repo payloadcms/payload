@@ -110,6 +110,7 @@ export const koTranslations: DefaultTranslationsObject = {
     unauthorized: '권한 없음, 이 요청을 수행하려면 로그인해야 합니다.',
     unknown: '알 수 없는 오류가 발생했습니다.',
     unspecific: '오류가 발생했습니다.',
+    userEmailAlreadyRegistered: '주어진 이메일로 이미 등록된 사용자가 있습니다.',
     userLocked: '이 사용자는 로그인 실패 횟수가 너무 많아 잠겼습니다.',
     valueMustBeUnique: '값은 고유해야 합니다.',
     verificationTokenInvalid: '확인 토큰이 유효하지 않습니다.',

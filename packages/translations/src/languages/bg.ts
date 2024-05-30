@@ -110,6 +110,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     unauthorized: 'Неавторизиран, трябва да влезеш, за да извършиш тази заявка.',
     unknown: 'Неизвестна грешка.',
     unspecific: 'Грешка.',
+    userEmailAlreadyRegistered: 'Потребител с дадения имейл вече е регистриран.',
     userLocked: 'Този потребител има прекалено много невалидни опити за влизане и е заключен.',
     valueMustBeUnique: 'Стойността трябва да е уникална',
     verificationTokenInvalid: 'Ключът за верификация е невалиден.',

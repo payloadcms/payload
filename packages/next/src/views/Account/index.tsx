@@ -9,6 +9,7 @@ import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParam
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
+import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
@@ -21,6 +22,7 @@ export const Account: React.FC<AdminViewProps> = async ({
   searchParams,
 }) => {
   const {
+    languageOptions,
     locale,
     permissions,
     req,
@@ -49,6 +51,13 @@ export const Account: React.FC<AdminViewProps> = async ({
         req,
       })
 
+    const { data, formState } = await getDocumentData({
+      id: user.id,
+      collectionConfig,
+      locale,
+      req,
+    })
+
     const viewComponentProps: ServerSideEditViewProps = {
       initPageResult,
       params,
@@ -58,7 +67,7 @@ export const Account: React.FC<AdminViewProps> = async ({
 
     return (
       <DocumentInfoProvider
-        AfterFields={<Settings />}
+        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} />}
         action={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         collectionSlug={userSlug}
@@ -66,6 +75,8 @@ export const Account: React.FC<AdminViewProps> = async ({
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
         id={user?.id.toString()}
+        initialData={data}
+        initialState={formState}
         isEditing
       >
         <DocumentHeader

@@ -1,0 +1,38 @@
+{
+  "name": "vercel-deploy-payload-postgres",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "ci": "payload migrate && pnpm build",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "generate:types": "payload generate:types"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "beta",
+    "@payloadcms/next": "beta",
+    "@payloadcms/richtext-lexical": "beta",
+    "@payloadcms/storage-vercel-blob": "beta",
+    "@vercel/blob": "^0.22.3",
+    "cross-env": "^7.0.3",
+    "next": "15.0.0-rc.0",
+    "payload": "beta",
+    "react": "19.0.0-rc-38e3b23483-20240529",
+    "react-dom": "19.0.0-rc-38e3b23483-20240529",
+    "sharp": "0.32.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
+}

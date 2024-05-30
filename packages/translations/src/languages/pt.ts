@@ -111,6 +111,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     unauthorized: 'Não autorizado. Você deve estar logado para fazer essa requisição',
     unknown: 'Ocorreu um erro desconhecido.',
     unspecific: 'Ocorreu um erro.',
+    userEmailAlreadyRegistered: 'Um usuário com o email fornecido já está registrado.',
     userLocked: 'Esse usuário está bloqueado devido a muitas tentativas de login malsucedidas.',
     valueMustBeUnique: 'Valor deve ser único',
     verificationTokenInvalid: 'Token de verificação inválido.',

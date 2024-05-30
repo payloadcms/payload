@@ -1,6 +1,5 @@
 'use client'
 
-import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
@@ -16,9 +15,8 @@ export const EditViewClient: React.FC = () => {
     globalSlug,
   })
 
-  // Allow the `DocumentInfoProvider` to hydrate
-  if (!Edit || (!collectionSlug && !globalSlug)) {
-    return <LoadingOverlay />
+  if (!Edit) {
+    return null
   }
 
   return (

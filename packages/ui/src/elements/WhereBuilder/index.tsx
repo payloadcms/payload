@@ -86,9 +86,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     return []
   })
 
-  const addCondition = React.useCallback(({ andIndex, fieldName, orIndex, relation }) => {
-    setConditions((prevConditions) => {
-      const newConditions = [...prevConditions]
+  const addCondition = React.useCallback(
+    ({ andIndex, fieldName, orIndex, relation }) => {
+      const newConditions = [...conditions]
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, { [fieldName]: {} })
       } else {
@@ -100,46 +100,45 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           ],
         })
       }
-
-      return newConditions
-    })
-  }, [])
+      setConditions(newConditions)
+    },
+    [conditions],
+  )
 
   const updateCondition = React.useCallback(
-    ({ andIndex, fieldName: fieldNameArg, operator: operatorArg, orIndex, value: valueArg }) => {
-      setConditions((prevConditions) => {
-        const newConditions = [...prevConditions]
-        if (typeof newConditions[orIndex].and[andIndex] === 'object') {
-          const fieldName = fieldNameArg
-          const operator = operatorArg
-          const value = valueArg ?? (operator ? newConditions[orIndex].and[andIndex][operator] : '')
+    ({ andIndex, fieldName, operator, orIndex, value: valueArg }) => {
+      const existingRowCondition = conditions[orIndex].and[andIndex]
+      if (typeof existingRowCondition === 'object' && fieldName && operator) {
+        const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
+        const newRowCondition = {
+          [fieldName]: operator ? { [operator]: value } : {},
+        }
 
-          if (fieldName && operator && ![null, undefined].includes(value)) {
-            newConditions[orIndex].and[andIndex] = {
-              [fieldName]: operator ? { [operator]: value } : {},
-            }
+        if (JSON.stringify(existingRowCondition) !== JSON.stringify(newRowCondition)) {
+          conditions[orIndex].and[andIndex] = newRowCondition
+          setConditions(conditions)
+          if (![null, undefined].includes(value)) {
+            // only update query when field/operator/value are filled out
             setShouldUpdateQuery(true)
           }
         }
-
-        return newConditions
-      })
+      }
     },
-    [],
+    [conditions],
   )
 
-  const removeCondition = React.useCallback(({ andIndex, orIndex }) => {
-    setConditions((prevConditions) => {
-      const newConditions = [...prevConditions]
+  const removeCondition = React.useCallback(
+    ({ andIndex, orIndex }) => {
+      const newConditions = [...conditions]
       newConditions[orIndex].and.splice(andIndex, 1)
       if (newConditions[orIndex].and.length === 0) {
         newConditions.splice(orIndex, 1)
       }
-
-      return newConditions
-    })
-    setShouldUpdateQuery(true)
-  }, [])
+      setConditions(newConditions)
+      setShouldUpdateQuery(true)
+    },
+    [conditions],
+  )
 
   React.useEffect(() => {
     if (shouldUpdateQuery) {
