@@ -11,7 +11,7 @@ import { $getSelection } from 'lexical'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
-import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
 
@@ -91,7 +91,7 @@ export const ToolbarDropdown = ({
 }) => {
   const [activeItemKeys, setActiveItemKeys] = React.useState<string[]>([])
   const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
-  const editorFocusContext = useEditorFocus()
+  const editorConfigContext = useEditorConfigContext()
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -103,14 +103,14 @@ export const ToolbarDropdown = ({
 
       for (const item of items) {
         if (item.isActive && (!maxActiveItems || _activeItemKeys.length < maxActiveItems)) {
-          const isActive = item.isActive({ editor, editorFocusContext, selection })
+          const isActive = item.isActive({ editor, editorConfigContext, selection })
           if (isActive) {
             _activeItemKeys.push(item.key)
             _activeItems.push(item)
           }
         }
         if (item.isEnabled) {
-          const isEnabled = item.isEnabled({ editor, editorFocusContext, selection })
+          const isEnabled = item.isEnabled({ editor, editorConfigContext, selection })
           if (isEnabled) {
             _enabledItemKeys.push(item.key)
           }
@@ -125,7 +125,7 @@ export const ToolbarDropdown = ({
         onActiveChange({ activeItems: _activeItems })
       }
     })
-  }, [editor, editorFocusContext, items, maxActiveItems, onActiveChange])
+  }, [editor, editorConfigContext, items, maxActiveItems, onActiveChange])
 
   useEffect(() => {
     updateStates()

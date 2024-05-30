@@ -9,9 +9,11 @@ import * as React from 'react'
 
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
-import { EditorFocusProvider } from './EditorFocusProvider.js'
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
-import { EditorConfigProvider } from './config/client/EditorConfigProvider.js'
+import {
+  EditorConfigProvider,
+  useEditorConfigContext,
+} from './config/client/EditorConfigProvider.js'
 import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
@@ -29,6 +31,9 @@ export type LexicalProviderProps = {
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const { editorConfig, fieldProps, onChange, path, readOnly } = props
   let { value } = props
+  const parentContext = useEditorConfigContext()
+
+  const editorContainerRef = React.useRef<HTMLDivElement>(null)
 
   const [initialConfig, setInitialConfig] = React.useState<InitialConfigType | null>(null)
 
@@ -78,11 +83,18 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
   return (
     <LexicalComposer initialConfig={initialConfig} key={path}>
-      <EditorFocusProvider>
-        <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
-          <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />
-        </EditorConfigProvider>
-      </EditorFocusProvider>
+      <EditorConfigProvider
+        editorConfig={editorConfig}
+        editorContainerRef={editorContainerRef}
+        fieldProps={fieldProps}
+        parentContext={parentContext}
+      >
+        <LexicalEditorComponent
+          editorConfig={editorConfig}
+          editorContainerRef={editorContainerRef}
+          onChange={onChange}
+        />
+      </EditorConfigProvider>
     </LexicalComposer>
   )
 }

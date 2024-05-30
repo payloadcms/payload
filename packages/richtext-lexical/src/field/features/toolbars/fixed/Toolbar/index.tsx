@@ -4,15 +4,14 @@ import type { LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import * as React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
-import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
+import type { EditorConfigContextType } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
 import type { PluginComponentWithAnchor } from '../../../types.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 import type { FixedToolbarFeatureProps } from '../feature.server.js'
 
-import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../shared/ToolbarDropdown/index.js'
@@ -267,15 +266,15 @@ function FixedToolbar({
   )
 }
 
-const checkParentEditor = (editorFocus: EditorFocusContextType): boolean => {
-  if (editorFocus.parentEditorConfigContext?.editorConfig) {
-    if (
-      editorFocus.parentEditorConfigContext?.editorConfig.resolvedFeatureMap.has('toolbarFixed')
-    ) {
-      return true
+const getParentEditorWithFixedToolbar = (
+  editorConfigContext: EditorConfigContextType,
+): EditorConfigContextType | false => {
+  if (editorConfigContext.parentEditor?.editorConfig) {
+    if (editorConfigContext.parentEditor?.editorConfig.resolvedFeatureMap.has('toolbarFixed')) {
+      return editorConfigContext.parentEditor
     } else {
-      if (editorFocus.parentEditorFocus) {
-        return checkParentEditor(editorFocus.parentEditorFocus)
+      if (editorConfigContext.parentEditor) {
+        return getParentEditorWithFixedToolbar(editorConfigContext.parentEditor)
       }
     }
   }
@@ -287,22 +286,22 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
   clientProps,
 }) => {
   const [currentEditor] = useLexicalComposerContext()
-  const { editorConfig: currentEditorConfig } = useEditorConfigContext()
+  const editorConfigContext = useEditorConfigContext()
 
-  const editorFocus = useEditorFocus()
+  const { editorConfig: currentEditorConfig } = editorConfigContext
+
   const editor = clientProps.applyToFocusedEditor
-    ? editorFocus.focusedEditor || currentEditor
+    ? editorConfigContext.focusedEditor?.editor || currentEditor
     : currentEditor
 
   const editorConfig = clientProps.applyToFocusedEditor
-    ? editorFocus.focusedEditorConfigContext?.editorConfig || currentEditorConfig
+    ? editorConfigContext.focusedEditor?.editorConfig || currentEditorConfig
     : currentEditorConfig
 
-  if (clientProps?.disableIfParentHasFixedToolbar) {
-    // Check if there is a parent editor with a fixed toolbar already
-    const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
+  const parentWithFixedToolbar = getParentEditorWithFixedToolbar(editorConfigContext)
 
-    if (hasParentWithFixedToolbar) {
+  if (clientProps?.disableIfParentHasFixedToolbar) {
+    if (parentWithFixedToolbar) {
       return null
     }
   }
