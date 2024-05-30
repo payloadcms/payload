@@ -157,13 +157,7 @@
   },
   "publishConfig": {
     "exports": {
-      ".": "./dist/exports/index.js",
       "./assets/*": "./dist/assets/*",
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
-      },
       "./assets": {
         "import": "./dist/assets/index.js",
         "require": "./dist/assets/index.js",
