@@ -64,12 +64,13 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <div
@@ -78,7 +79,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -98,9 +99,9 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
-          onChange={readOnly ? () => null : (val) => setValue(val)}
+          onChange={disabled ? () => null : (val) => setValue(val)}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={disabled}
           value={(value as string) || ''}
         />
         {AfterInput}

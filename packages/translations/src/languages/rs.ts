@@ -110,6 +110,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     unauthorized: 'Нисте ауторизовани да бисте упутили овај захтев.',
     unknown: 'Дошло је до непознате грешке.',
     unspecific: 'Дошло је до грешке.',
+    userEmailAlreadyRegistered: 'Корисник са датом имејл адресом је већ регистрован.',
     userLocked: 'Овај корисник је закључан због превеликог броја неуспешних покушаја пријаве.',
     valueMustBeUnique: 'Вредност мора бити јединствена.',
     verificationTokenInvalid: 'Верификациони токен је невалидан.',

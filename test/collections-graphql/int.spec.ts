@@ -1190,7 +1190,7 @@ describe('collections-graphql', () => {
       expect(errors[1].path[0]).toEqual('test3')
       expect(errors[1].extensions.name).toEqual('ValidationError')
       expect(errors[1].extensions.data[0].message).toEqual(
-        'A user with the given email is already registered',
+        'A user with the given email is already registered.',
       )
       expect(errors[1].extensions.data[0].field).toEqual('email')
 

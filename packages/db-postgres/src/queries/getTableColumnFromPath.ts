@@ -12,7 +12,7 @@ import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'
 
 import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.js'
-import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.js'
+import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 type Constraint = {
   columnName: string
@@ -38,8 +38,7 @@ type Args = {
   constraintPath?: string
   constraints?: Constraint[]
   fields: (Field | TabAsField)[]
-  joinAliases: BuildQueryJoinAliases
-  joins: BuildQueryJoins
+  joins: BuildQueryJoinAliases
   locale?: string
   pathSegments: string[]
   rootTableName?: string
@@ -67,7 +66,6 @@ export const getTableColumnFromPath = ({
   constraintPath: incomingConstraintPath,
   constraints = [],
   fields,
-  joinAliases,
   joins,
   locale: incomingLocale,
   pathSegments: incomingSegments,
@@ -129,7 +127,6 @@ export const getTableColumnFromPath = ({
             ...tab,
             type: 'tab',
           })),
-          joinAliases,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -150,7 +147,6 @@ export const getTableColumnFromPath = ({
             constraintPath: `${constraintPath}${field.name}.`,
             constraints,
             fields: field.fields,
-            joinAliases,
             joins,
             locale,
             pathSegments: pathSegments.slice(1),
@@ -169,7 +165,6 @@ export const getTableColumnFromPath = ({
           constraintPath,
           constraints,
           fields: field.fields,
-          joinAliases,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -185,10 +180,10 @@ export const getTableColumnFromPath = ({
         if (locale && field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}${adapter.localesSuffix}`
 
-          joins[tableName] = eq(
-            adapter.tables[tableName].id,
-            adapter.tables[newTableName]._parentID,
-          )
+          joins.push({
+            condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            table: adapter.tables[newTableName],
+          })
           if (locale !== 'all') {
             constraints.push({
               columnName: '_locale',
@@ -205,7 +200,6 @@ export const getTableColumnFromPath = ({
           constraintPath: `${constraintPath}${field.name}.`,
           constraints,
           fields: field.fields,
-          joinAliases,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -224,10 +218,13 @@ export const getTableColumnFromPath = ({
           )
 
           if (locale && field.localized && adapter.payload.config.localization) {
-            joins[newTableName] = and(
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
-              eq(adapter.tables[newTableName]._locale, locale),
-            )
+            joins.push({
+              condition: and(
+                eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+                eq(adapter.tables[newTableName]._locale, locale),
+              ),
+              table: adapter.tables[newTableName],
+            })
             if (locale !== 'all') {
               constraints.push({
                 columnName: '_locale',
@@ -236,10 +233,10 @@ export const getTableColumnFromPath = ({
               })
             }
           } else {
-            joins[newTableName] = eq(
-              adapter.tables[tableName].id,
-              adapter.tables[newTableName].parent,
-            )
+            joins.push({
+              condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              table: adapter.tables[newTableName],
+            })
           }
 
           return {
@@ -268,10 +265,10 @@ export const getTableColumnFromPath = ({
           ]
 
           if (locale && field.localized && adapter.payload.config.localization) {
-            joins[newTableName] = and(
-              ...joinConstraints,
-              eq(adapter.tables[newTableName]._locale, locale),
-            )
+            joins.push({
+              condition: and(...joinConstraints, eq(adapter.tables[newTableName]._locale, locale)),
+              table: adapter.tables[newTableName],
+            })
             if (locale !== 'all') {
               constraints.push({
                 columnName: 'locale',
@@ -280,7 +277,10 @@ export const getTableColumnFromPath = ({
               })
             }
           } else {
-            joins[newTableName] = and(...joinConstraints)
+            joins.push({
+              condition: and(...joinConstraints),
+              table: adapter.tables[newTableName],
+            })
           }
 
           return {
@@ -300,10 +300,13 @@ export const getTableColumnFromPath = ({
 
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
-          joins[newTableName] = and(
-            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-            eq(adapter.tables[newTableName]._locale, locale),
-          )
+          joins.push({
+            condition: and(
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+              eq(adapter.tables[newTableName]._locale, locale),
+            ),
+            table: adapter.tables[newTableName],
+          })
           if (locale !== 'all') {
             constraints.push({
               columnName: '_locale',
@@ -312,10 +315,10 @@ export const getTableColumnFromPath = ({
             })
           }
         } else {
-          joins[newTableName] = eq(
-            adapter.tables[tableName].id,
-            adapter.tables[newTableName]._parentID,
-          )
+          joins.push({
+            condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            table: adapter.tables[newTableName],
+          })
         }
         return getTableColumnFromPath({
           adapter,
@@ -323,7 +326,6 @@ export const getTableColumnFromPath = ({
           constraintPath,
           constraints,
           fields: field.fields,
-          joinAliases,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -344,18 +346,19 @@ export const getTableColumnFromPath = ({
           const blockTypes = Array.isArray(value) ? value : [value]
           blockTypes.forEach((blockType) => {
             const block = field.blocks.find((block) => block.slug === blockType)
-
             newTableName = adapter.tableNameMap.get(
               `${tableName}_blocks_${toSnakeCase(block.slug)}`,
             )
+            const newAliasTableName = toSnakeCase(uuid())
+            const newAliasTable = alias(adapter.tables[newTableName], newAliasTableName)
 
-            joins[newTableName] = eq(
-              adapter.tables[tableName].id,
-              adapter.tables[newTableName]._parentID,
-            )
+            joins.push({
+              condition: eq(adapter.tables[tableName].id, newAliasTable._parentID),
+              table: newAliasTable,
+            })
             constraints.push({
               columnName: '_path',
-              table: adapter.tables[newTableName],
+              table: newAliasTable,
               value: pathSegments[0],
             })
           })
@@ -381,7 +384,6 @@ export const getTableColumnFromPath = ({
               constraintPath,
               constraints: blockConstraints,
               fields: block.fields,
-              joinAliases,
               joins,
               locale,
               pathSegments: pathSegments.slice(1),
@@ -400,10 +402,16 @@ export const getTableColumnFromPath = ({
           constraints = constraints.concat(blockConstraints)
           selectFields = { ...selectFields, ...blockSelectFields }
           if (field.localized && adapter.payload.config.localization) {
-            joins[newTableName] = and(
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-              eq(adapter.tables[newTableName]._locale, locale),
-            )
+            joins.push({
+              condition: and(
+                eq(
+                  (aliasTable || adapter.tables[tableName]).id,
+                  adapter.tables[newTableName]._parentID,
+                ),
+                eq(adapter.tables[newTableName]._locale, locale),
+              ),
+              table: adapter.tables[newTableName],
+            })
             if (locale) {
               constraints.push({
                 columnName: '_locale',
@@ -412,10 +420,13 @@ export const getTableColumnFromPath = ({
               })
             }
           } else {
-            joins[newTableName] = eq(
-              adapter.tables[tableName].id,
-              adapter.tables[newTableName]._parentID,
-            )
+            joins.push({
+              condition: eq(
+                (aliasTable || adapter.tables[tableName]).id,
+                adapter.tables[newTableName]._parentID,
+              ),
+              table: adapter.tables[newTableName],
+            })
           }
           return true
         })
@@ -434,116 +445,178 @@ export const getTableColumnFromPath = ({
 
       case 'relationship':
       case 'upload': {
-        let relationshipFields
-        const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
         const newCollectionPath = pathSegments.slice(1).join('.')
-        const aliasRelationshipTableName = uuid()
-        const aliasRelationshipTable = alias(
-          adapter.tables[relationTableName],
-          aliasRelationshipTableName,
-        )
+        if (Array.isArray(field.relationTo) || (field.type === 'relationship' && field.hasMany)) {
+          let relationshipFields
+          const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
+          const aliasRelationshipTableName = uuid()
+          const aliasRelationshipTable = alias(
+            adapter.tables[relationTableName],
+            aliasRelationshipTableName,
+          )
 
-        // Join in the relationships table
-        if (locale && field.localized && adapter.payload.config.localization) {
-          joinAliases.push({
-            condition: and(
-              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
-              eq(aliasRelationshipTable.locale, locale),
-              like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
-            ),
-            table: aliasRelationshipTable,
-          })
-          if (locale !== 'all') {
-            constraints.push({
-              columnName: 'locale',
+          // Join in the relationships table
+          if (locale && field.localized && adapter.payload.config.localization) {
+            joins.push({
+              condition: and(
+                eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+                eq(aliasRelationshipTable.locale, locale),
+                like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+              ),
               table: aliasRelationshipTable,
-              value: locale,
+            })
+            if (locale !== 'all') {
+              constraints.push({
+                columnName: 'locale',
+                table: aliasRelationshipTable,
+                value: locale,
+              })
+            }
+          } else {
+            // Join in the relationships table
+            joins.push({
+              condition: and(
+                eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+                like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+              ),
+              table: aliasRelationshipTable,
             })
           }
-        } else {
-          // Join in the relationships table
-          joinAliases.push({
-            condition: and(
-              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
-              like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
-            ),
-            table: aliasRelationshipTable,
-          })
-        }
 
-        selectFields[`${relationTableName}.path`] = aliasRelationshipTable.path
+          selectFields[`${relationTableName}.path`] = aliasRelationshipTable.path
 
-        let newAliasTable
+          let newAliasTable
 
-        if (typeof field.relationTo === 'string') {
-          const relationshipConfig = adapter.payload.collections[field.relationTo].config
+          if (typeof field.relationTo === 'string') {
+            const relationshipConfig = adapter.payload.collections[field.relationTo].config
 
-          newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
+            newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
 
-          // parent to relationship join table
-          relationshipFields = relationshipConfig.fields
+            // parent to relationship join table
+            relationshipFields = relationshipConfig.fields
 
-          newAliasTable = alias(adapter.tables[newTableName], toSnakeCase(uuid()))
+            newAliasTable = alias(adapter.tables[newTableName], toSnakeCase(uuid()))
 
-          joinAliases.push({
-            condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),
-            table: newAliasTable,
-          })
+            joins.push({
+              condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),
+              table: newAliasTable,
+            })
 
-          if (newCollectionPath === '' || newCollectionPath === 'id') {
+            if (newCollectionPath === '' || newCollectionPath === 'id') {
+              return {
+                columnName: `${field.relationTo}ID`,
+                constraints,
+                field,
+                table: aliasRelationshipTable,
+              }
+            }
+          } else if (newCollectionPath === 'value') {
+            const tableColumnsNames = field.relationTo.map((relationTo) => {
+              const relationTableName = adapter.tableNameMap.get(
+                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+              )
+
+              return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+            })
             return {
-              columnName: `${field.relationTo}ID`,
               constraints,
               field,
+              rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
               table: aliasRelationshipTable,
             }
-          }
-        } else if (newCollectionPath === 'value') {
-          const tableColumnsNames = field.relationTo.map((relationTo) => {
-            const relationTableName = adapter.tableNameMap.get(
-              toSnakeCase(adapter.payload.collections[relationTo].config.slug),
-            )
+          } else if (newCollectionPath === 'relationTo') {
+            const relationTo = Array.isArray(field.relationTo)
+              ? field.relationTo
+              : [field.relationTo]
 
-            return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+            return {
+              constraints,
+              field,
+              getNotNullColumnByValue: (val) => {
+                const matchedRelation = relationTo.find((relation) => relation === val)
+                if (matchedRelation) return `${matchedRelation}ID`
+                return undefined
+              },
+              table: aliasRelationshipTable,
+            }
+          } else {
+            throw new APIError('Not supported')
+          }
+
+          return getTableColumnFromPath({
+            adapter,
+            aliasTable: newAliasTable,
+            collectionPath: newCollectionPath,
+            constraints,
+            fields: relationshipFields,
+            joins,
+            locale,
+            pathSegments: pathSegments.slice(1),
+            rootTableName: newTableName,
+            selectFields,
+            tableName: newTableName,
+            value,
           })
-          return {
-            constraints,
-            field,
-            rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
-            table: aliasRelationshipTable,
-          }
-        } else if (newCollectionPath === 'relationTo') {
-          const relationTo = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
+        } else if (
+          pathSegments.length > 1 &&
+          !(pathSegments.length === 2 && pathSegments[1] === 'id')
+        ) {
+          // simple relationships
+          const columnName = `${columnPrefix}${field.name}`
+          const newTableName = adapter.tableNameMap.get(
+            toSnakeCase(adapter.payload.collections[field.relationTo].config.slug),
+          )
+          const aliasTableName = uuid()
+          const newAliasTable = alias(adapter.tables[newTableName], aliasTableName)
 
-          return {
-            constraints,
-            field,
-            getNotNullColumnByValue: (val) => {
-              const matchedRelation = relationTo.find((relation) => relation === val)
-              if (matchedRelation) return `${matchedRelation}ID`
-              return undefined
-            },
-            table: aliasRelationshipTable,
+          if (field.localized && adapter.payload.config.localization) {
+            const aliasLocaleTableName = uuid()
+            const aliasLocaleTable = alias(
+              adapter.tables[`${rootTableName}${adapter.localesSuffix}`],
+              aliasLocaleTableName,
+            )
+            joins.push({
+              condition: and(
+                eq(aliasLocaleTable._parentID, adapter.tables[rootTableName].id),
+                eq(aliasLocaleTable._locale, locale),
+              ),
+              table: aliasLocaleTable,
+            })
+            joins.push({
+              condition: eq(aliasLocaleTable[columnName], newAliasTable.id),
+              table: newAliasTable,
+            })
+          } else {
+            joins.push({
+              condition: eq(
+                newAliasTable.id,
+                aliasTable ? aliasTable[columnName] : adapter.tables[tableName][columnName],
+              ),
+              table: newAliasTable,
+            })
           }
-        } else {
-          throw new APIError('Not supported')
+
+          return getTableColumnFromPath({
+            adapter,
+            aliasTable: newAliasTable,
+            collectionPath: newCollectionPath,
+            constraintPath: '',
+            constraints,
+            fields: adapter.payload.collections[field.relationTo].config.fields,
+            joins,
+            locale,
+            pathSegments: pathSegments.slice(1),
+            selectFields,
+            tableName: newTableName,
+            value,
+          })
         }
+        break
+      }
 
-        return getTableColumnFromPath({
-          adapter,
-          aliasTable: newAliasTable,
-          collectionPath: newCollectionPath,
-          constraints,
-          fields: relationshipFields,
-          joinAliases,
-          joins,
-          locale,
-          pathSegments: pathSegments.slice(1),
-          rootTableName: newTableName,
-          selectFields,
-          tableName: newTableName,
-          value,
-        })
+      default: {
+        // fall through
+        break
       }
     }
 
@@ -551,11 +624,13 @@ export const getTableColumnFromPath = ({
       if (field.localized && adapter.payload.config.localization) {
         // If localized, we go to localized table and set aliasTable to undefined
         // so it is not picked up below to be used as targetTable
+        const parentTable = aliasTable || adapter.tables[tableName]
         newTableName = `${tableName}${adapter.localesSuffix}`
 
-        const parentTable = aliasTable || adapter.tables[tableName]
-
-        joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
+        joins.push({
+          condition: eq(parentTable.id, adapter.tables[newTableName]._parentID),
+          table: adapter.tables[newTableName],
+        })
 
         aliasTable = undefined
 

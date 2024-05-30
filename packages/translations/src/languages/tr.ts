@@ -111,6 +111,7 @@ export const trTranslations: DefaultTranslationsObject = {
     unauthorized: 'Bu işlemi gerçekleştirmek için lütfen giriş yapın.',
     unknown: 'Bilinmeyen bir hata oluştu.',
     unspecific: 'Bir hata oluştu.',
+    userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
     valueMustBeUnique: 'Değer benzersiz olmalıdır',

@@ -18,7 +18,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const whereToUse = whereArg || { id: { equals: id } }
   let idToUpdate = id
 
-  const { joinAliases, joins, selectFields, where } = await buildQuery({
+  const { joins, selectFields, where } = await buildQuery({
     adapter: this,
     fields: collection.fields,
     locale,
@@ -30,7 +30,6 @@ export const updateOne: UpdateOne = async function updateOne(
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
     db,
-    joinAliases,
     joins,
     selectFields,
     tableName,

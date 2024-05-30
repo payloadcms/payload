@@ -17,11 +17,11 @@ export default buildConfigWithDefaults({
     PostsCollection,
     // MediaCollection
   ],
+  cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,
     // ...add more globals here
   ],
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

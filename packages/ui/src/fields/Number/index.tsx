@@ -73,12 +73,15 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField<number | number[]>({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
+    number | number[]
+  >({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleChange = useCallback(
     (e) => {
@@ -104,7 +107,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!disabled) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -117,7 +120,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [disabled, setValue],
   )
 
   // useEffect update valueToRender:
@@ -145,7 +148,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         'number',
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        disabled && 'read-only',
         hasMany && 'has-many',
       ]
         .filter(Boolean)
@@ -166,7 +169,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
-            disabled={readOnly}
+            disabled={disabled}
             filterOption={(_, rawInput) => {
               // eslint-disable-next-line no-restricted-globals
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
@@ -194,7 +197,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           <div>
             {BeforeInput}
             <input
-              disabled={readOnly}
+              disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}
               min={min}

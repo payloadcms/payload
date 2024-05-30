@@ -33,6 +33,7 @@ import {
   FormContext,
   FormFieldsContext,
   FormWatchContext,
+  InitializingContext,
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
@@ -60,6 +61,7 @@ export const Form: React.FC<FormProps> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
+    isInitializing: initializingFromProps,
     onChange,
     onSubmit,
     onSuccess,
@@ -86,13 +88,16 @@ export const Form: React.FC<FormProps> = (props) => {
   } = config
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
+  const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
+  const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
+
   /**
    * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
    * which calls the fieldReducer, which then updates the state.
@@ -489,8 +494,10 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
-  }, [disabledFromProps])
+    if (initializingFromProps !== undefined) {
+      setInitializing(initializingFromProps)
+    }
+  }, [initializingFromProps])
 
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
@@ -513,6 +520,15 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.removeFieldRow = removeFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
+  contextRef.current.initializing = initializing
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
+  }, [disabledFromProps])
 
   useEffect(() => {
     if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
@@ -521,7 +537,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ type: 'REPLACE_STATE', state: initialState })
+      dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: initialState })
     }
   }, [initialState, dispatchFields])
 
@@ -597,13 +613,15 @@ export const Form: React.FC<FormProps> = (props) => {
           }}
         >
           <SubmittedContext.Provider value={submitted}>
-            <ProcessingContext.Provider value={processing}>
-              <ModifiedContext.Provider value={modified}>
-                <FormFieldsContext.Provider value={fieldsReducer}>
-                  {children}
-                </FormFieldsContext.Provider>
-              </ModifiedContext.Provider>
-            </ProcessingContext.Provider>
+            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
+              <ProcessingContext.Provider value={processing}>
+                <ModifiedContext.Provider value={modified}>
+                  <FormFieldsContext.Provider value={fieldsReducer}>
+                    {children}
+                  </FormFieldsContext.Provider>
+                </ModifiedContext.Provider>
+              </ProcessingContext.Provider>
+            </InitializingContext.Provider>
           </SubmittedContext.Provider>
         </FormWatchContext.Provider>
       </FormContext.Provider>

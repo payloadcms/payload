@@ -463,11 +463,6 @@ export type UIField = {
      * @type boolean
      */
     disableListColumn?: boolean
-    /**
-     * Shows / hides fields from appearing in the list view filter options.
-     * @type boolean
-     */
-    disableListFilter?: boolean
     position?: string
     width?: string
   }

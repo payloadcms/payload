@@ -5,7 +5,6 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
-import { mergeRegister } from '@lexical/utils'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
@@ -13,7 +12,6 @@ import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
-import { useEditorFocus } from './EditorFocusProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
@@ -23,13 +21,14 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
-export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>> = (
-  props,
-) => {
-  const { editorConfig, onChange } = props
+export const LexicalEditor: React.FC<
+  Pick<LexicalProviderProps, 'editorConfig' | 'onChange'> & {
+    editorContainerRef: React.RefObject<HTMLDivElement>
+  }
+> = (props) => {
+  const { editorConfig, editorContainerRef, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
-  const editorFocus = useEditorFocus()
   const { t } = useTranslation<{}, string>()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
@@ -40,27 +39,46 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
   }
 
   useEffect(() => {
-    return mergeRegister(
-      editor.registerCommand<MouseEvent>(
-        FOCUS_COMMAND,
-        () => {
-          editorFocus.focusEditor(editor, editorConfigContext)
-          return true
-        },
+    if (!editorConfigContext?.uuid) {
+      console.error('Lexical Editor must be used within an EditorConfigProvider')
+      return
+    }
+    if (editorConfigContext?.parentEditor?.uuid) {
+      editorConfigContext.parentEditor?.registerChild(editorConfigContext.uuid, editorConfigContext)
+    }
 
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand<MouseEvent>(
-        BLUR_COMMAND,
-        () => {
-          editorFocus.blurEditor()
-          return true
-        },
+    const handleFocus = () => {
+      editorConfigContext.focusEditor(editorConfigContext)
+    }
 
-        COMMAND_PRIORITY_LOW,
-      ),
+    const handleBlur = () => {
+      editorConfigContext.blurEditor(editorConfigContext)
+    }
+
+    const unregisterFocus = editor.registerCommand<MouseEvent>(
+      FOCUS_COMMAND,
+      () => {
+        handleFocus()
+        return true
+      },
+      COMMAND_PRIORITY_LOW,
     )
-  }, [editor, editorConfig, editorConfigContext, editorFocus])
+
+    const unregisterBlur = editor.registerCommand<MouseEvent>(
+      BLUR_COMMAND,
+      () => {
+        handleBlur()
+        return true
+      },
+      COMMAND_PRIORITY_LOW,
+    )
+
+    return () => {
+      unregisterFocus()
+      unregisterBlur()
+      editorConfigContext.parentEditor?.unregisterChild?.(editorConfigContext.uuid)
+    }
+  }, [editor, editorConfigContext])
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
 
@@ -89,7 +107,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
-      <div className="editor-container">
+      <div className="editor-container" ref={editorContainerRef}>
         {editorConfig.features.plugins.map((plugin) => {
           if (plugin.position === 'top') {
             return (

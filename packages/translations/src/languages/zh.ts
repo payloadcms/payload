@@ -105,6 +105,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     unauthorized: '未经授权，您必须登录才能提出这个请求。',
     unknown: '发生了一个未知的错误。',
     unspecific: '发生了一个错误。',
+    userEmailAlreadyRegistered: '给定电子邮件的用户已经注册。',
     userLocked: '该用户由于有太多次失败的登录尝试而被锁定。',
     valueMustBeUnique: '值必须是唯一的',
     verificationTokenInvalid: '验证令牌无效。',

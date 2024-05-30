@@ -35,6 +35,7 @@ export type FormProps = (
   fields?: Field[]
   handleResponse?: (res: Response) => void
   initialState?: FormState
+  isInitializing?: boolean
   log?: boolean
   onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
@@ -197,6 +198,7 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
+  initializing: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     data,

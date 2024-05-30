@@ -30,10 +30,6 @@ export const transformRelationship = ({ field, locale, ref, relations }: Args) =
             value: matchedRelation[1],
           }
         }
-      } else {
-        // Handle hasOne
-        const relatedData = relation[`${field.relationTo}ID`]
-        result = relatedData
       }
     }
   } else {

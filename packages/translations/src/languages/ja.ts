@@ -111,6 +111,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     unauthorized: '認証されていません。このリクエストを行うにはログインが必要です。',
     unknown: '不明なエラーが発生しました。',
     unspecific: 'エラーが発生しました。',
+    userEmailAlreadyRegistered: '指定されたメールのユーザーはすでに登録されています。',
     userLocked: 'このユーザーは、ログイン試行回数が多すぎるため、ロックされています。',
     valueMustBeUnique: 'ユニークな値である必要があります。',
     verificationTokenInvalid: '認証トークンが無効です。',

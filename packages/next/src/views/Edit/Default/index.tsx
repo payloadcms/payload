@@ -3,7 +3,6 @@ import type { FormProps } from '@payloadcms/ui/forms/Form'
 
 import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
 import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
 import { Upload } from '@payloadcms/ui/elements/Upload'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { useAuth } from '@payloadcms/ui/providers/Auth'
@@ -14,7 +13,6 @@ import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
 import { OperationProvider } from '@payloadcms/ui/providers/Operation'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { useRouter } from 'next/navigation.js'
 import { useSearchParams } from 'next/navigation.js'
@@ -52,6 +50,7 @@ export const DefaultEditView: React.FC = () => {
     initialData: data,
     initialState,
     isEditing,
+    isInitializing,
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
@@ -63,8 +62,6 @@ export const DefaultEditView: React.FC = () => {
   const params = useSearchParams()
   const depth = useEditDepth()
   const { reportUpdate } = useDocumentEvents()
-
-  const { i18n } = useTranslation()
 
   const {
     admin: { user: userSlug },
@@ -183,23 +180,13 @@ export const DefaultEditView: React.FC = () => {
           action={action}
           className={`${baseClass}__form`}
           disableValidationOnSubmit
-          disabled={!hasSavePermission}
-          initialState={initialState}
+          disabled={isInitializing || !hasSavePermission}
+          initialState={!isInitializing && initialState}
+          isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          <FormLoadingOverlayToggle
-            action={operation}
-            // formIsLoading={isLoading}
-            // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
-            name={`collection-edit--${
-              typeof collectionConfig?.labels?.singular === 'string'
-                ? collectionConfig.labels.singular
-                : i18n.t('general:document')
-            }`}
-            type="withoutNav"
-          />
           {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetDocumentStepNav

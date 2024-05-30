@@ -12,6 +12,7 @@ export interface Config {
     pages: Page;
     posts: Post;
     ssr: Ssr;
+    'ssr-autosave': SsrAutosave;
     tenants: Tenant;
     categories: Category;
     media: Media;
@@ -233,7 +234,7 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
-  tab: {
+  tab?: {
     relationshipInTab?: (string | null) | Post;
   };
   meta?: {
@@ -271,6 +272,8 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -419,6 +422,137 @@ export interface Category {
  * via the `definition` "ssr".
  */
 export interface Ssr {
+  id: string;
+  slug: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact';
+    richText?:
+      | {
+          [k: string]: unknown;
+        }[]
+      | null;
+    media?: string | Media | null;
+  };
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null;
+            richText?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    appearance?: ('primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            invertBackground?: boolean | null;
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
+                  enableLink?: boolean | null;
+                  link?: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    appearance?: ('default' | 'primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            invertBackground?: boolean | null;
+            position?: ('default' | 'fullscreen') | null;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | {
+            introContent?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            populateBy?: ('collection' | 'selection') | null;
+            relationTo?: 'posts' | null;
+            categories?: (string | Category)[] | null;
+            limit?: number | null;
+            selectedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            populatedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            populatedDocsTotal?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'archive';
+          }
+      )[]
+    | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: string | Media | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ssr-autosave".
+ */
+export interface SsrAutosave {
   id: string;
   slug: string;
   tenant?: (string | null) | Tenant;

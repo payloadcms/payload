@@ -29,6 +29,8 @@ export type DocumentInfoProps = {
   hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id: null | number | string
+  initialData?: Data
+  initialState?: FormState
   isEditing?: boolean
   onLoadError?: (data?: any) => Promise<void> | void
   onSave?: (data: Data) => Promise<void> | void
@@ -41,6 +43,8 @@ export type DocumentInfoContext = DocumentInfoProps & {
   getVersions: () => Promise<void>
   initialData: Data
   initialState?: FormState
+  isInitializing: boolean
+  isLoading: boolean
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (

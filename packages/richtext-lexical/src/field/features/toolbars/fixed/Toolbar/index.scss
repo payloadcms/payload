@@ -44,6 +44,13 @@ html[data-theme='dark'] {
   }
 }
 
+.fixed-toolbar.fixed-toolbar--hide {
+  visibility: hidden; // Still needs to take up space so content does not jump, thus we cannot use display: none
+  // make sure you cant interact with it
+  pointer-events: none;
+  user-select: none;
+}
+
 .fixed-toolbar {
   @include blur-bg(var(--theme-elevation-0));
   display: flex;

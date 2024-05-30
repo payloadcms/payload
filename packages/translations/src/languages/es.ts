@@ -110,6 +110,8 @@ export const esTranslations: DefaultTranslationsObject = {
     unauthorized: 'No autorizado, debes iniciar sesión para realizar esta solicitud.',
     unknown: 'Ocurrió un error desconocido.',
     unspecific: 'Ocurrió un error.',
+    userEmailAlreadyRegistered:
+      'Ya hay un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
       'Este usuario ha sido bloqueado debido a que tiene muchos intentos fallidos para iniciar sesión.',
     valueMustBeUnique: 'El valor debe ser único',

@@ -4,7 +4,6 @@ import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
 import { NumberField as NumberInput } from '@payloadcms/ui/fields/Number'
-import { Select } from '@payloadcms/ui/fields/Select'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { MinimizeMaximize } from '@payloadcms/ui/icons/MinimizeMaximize'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
@@ -19,6 +18,7 @@ import * as React from 'react'
 import { toast } from 'react-toastify'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
+import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 import './index.scss'
 
@@ -173,15 +173,7 @@ export const APIViewClient: React.FC = () => {
                 path="authenticated"
               />
             </div>
-            {localeOptions && (
-              <Select
-                label={t('general:locale')}
-                name="locale"
-                onChange={(value) => setLocale(value)}
-                options={localeOptions}
-                path="locale"
-              />
-            )}
+            {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
             <NumberInput
               label={t('general:depth')}
               max={10}

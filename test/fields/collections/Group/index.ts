@@ -77,6 +77,17 @@ const GroupFields: CollectionConfig = {
       ],
     },
     {
+      name: 'localizedGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      localized: true,
+    },
+    {
       name: 'potentiallyEmptyGroup',
       type: 'group',
       fields: [

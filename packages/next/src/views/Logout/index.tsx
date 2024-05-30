@@ -1,6 +1,5 @@
 import type { AdminViewProps } from 'payload/types'
 
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import React from 'react'
 
 import { LogoutClient } from './LogoutClient.js'
@@ -26,15 +25,13 @@ export const LogoutView: React.FC<
   } = initPageResult
 
   return (
-    <MinimalTemplate className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
-        <LogoutClient
-          adminRoute={admin}
-          inactivity={inactivity}
-          redirect={searchParams.redirect as string}
-        />
-      </div>
-    </MinimalTemplate>
+    <div className={`${baseClass}__wrap`}>
+      <LogoutClient
+        adminRoute={admin}
+        inactivity={inactivity}
+        redirect={searchParams.redirect as string}
+      />
+    </div>
   )
 }
 

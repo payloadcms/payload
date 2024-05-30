@@ -110,6 +110,7 @@ export const plTranslations: DefaultTranslationsObject = {
     unauthorized: 'Brak dostępu, musisz być zalogowany.',
     unknown: 'Wystąpił nieznany błąd.',
     unspecific: 'Wystąpił błąd',
+    userEmailAlreadyRegistered: 'Użytkownik o podanym adresie e-mail jest już zarejestrowany.',
     userLocked: 'Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.',
     valueMustBeUnique: 'Wartość musi być unikalna',
     verificationTokenInvalid: 'Token weryfikacyjny jest nieprawidłowy.',
