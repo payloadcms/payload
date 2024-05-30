@@ -47,11 +47,26 @@ export const initPage = async ({
     language,
   })
 
+  const languageOptions = Object.entries(payload.config.i18n.supportedLanguages || {}).reduce(
+    (acc, [language, languageConfig]) => {
+      if (Object.keys(payload.config.i18n.supportedLanguages).includes(language)) {
+        acc.push({
+          label: languageConfig.translations.general.thisLanguage,
+          value: language,
+        })
+      }
+
+      return acc
+    },
+    [],
+  )
+
   const req = await createLocalReq(
     {
       fallbackLocale: null,
       locale: locale.code,
       req: {
+        host: headers.get('host'),
         i18n,
         query: qs.parse(queryString, {
           depth: 10,
@@ -97,6 +112,7 @@ export const initPage = async ({
     cookies,
     docID,
     globalConfig,
+    languageOptions,
     locale,
     permissions,
     req,

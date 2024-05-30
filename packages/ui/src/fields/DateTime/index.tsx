@@ -67,12 +67,12 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { path, setValue, showError, value } = useField<Date>({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <div
@@ -81,7 +81,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
         baseClass,
         className,
         showError && `${baseClass}--has-error`,
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -90,24 +90,22 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      </div>
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
+      <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!readOnly) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) setValue(incomingDate?.toISOString() || null)
           }}
           placeholder={getTranslation(placeholder, i18n)}
-          readOnly={readOnly}
+          readOnly={disabled}
           value={value}
         />
         {AfterInput}

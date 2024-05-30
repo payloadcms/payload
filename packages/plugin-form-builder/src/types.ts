@@ -39,12 +39,13 @@ export interface FieldsConfig {
 
 export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
+export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
 export type FormBuilderPluginConfig = {
   beforeEmail?: BeforeEmail
   fields?: FieldsConfig
-  formOverrides?: Partial<CollectionConfig>
-  formSubmissionOverrides?: Partial<CollectionConfig>
+  formOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields: FieldsOverride }
+  formSubmissionOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields: FieldsOverride }
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }

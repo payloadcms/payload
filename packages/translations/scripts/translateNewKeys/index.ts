@@ -3,7 +3,6 @@
 import fs from 'fs'
 import path from 'path'
 import { format } from 'prettier'
-import { fileURLToPath } from 'url'
 
 import type {
   AcceptedLanguages,
@@ -11,8 +10,6 @@ import type {
   GenericTranslationsObject,
 } from '../../src/types.js'
 
-import { translations } from '../../src/exports/all.js'
-import { enTranslations } from '../../src/languages/en.js'
 import { cloneDeep } from '../../src/utilities/cloneDeep.js'
 import { deepMerge } from '../../src/utilities/deepMerge.js'
 import { acceptedLanguages } from '../../src/utilities/languages.js'
@@ -21,9 +18,6 @@ import { findMissingKeys } from './findMissingKeys.js'
 import { generateTsObjectLiteral } from './generateTsObjectLiteral.js'
 import { sortKeys } from './sortKeys.js'
 import { translateText } from './translateText.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 /**
  *
@@ -59,6 +53,13 @@ export async function translateObject(props: {
     }
   }
   fromTranslationsObject: GenericTranslationsObject
+  /**
+   *
+   * If set, will output the entire translations object (incl. all locales) to this file.
+   *
+   * @default false
+   */
+  inlineFile?: string
   languages?: AcceptedLanguages[]
   targetFolder?: string
   tsFilePrefix?: string
@@ -67,6 +68,7 @@ export async function translateObject(props: {
   const {
     allTranslationsObject,
     fromTranslationsObject,
+    inlineFile,
     languages = acceptedLanguages.filter((lang) => lang !== 'en'),
     targetFolder = '',
     tsFilePrefix = `import type { DefaultTranslationsObject, Language } from '../types.js'\n\nexport const {{locale}}Translations: DefaultTranslationsObject = `,
@@ -87,6 +89,12 @@ export async function translateObject(props: {
   const translationPromises: Promise<void>[] = []
 
   for (const targetLang of languages) {
+    if (!allTranslatedTranslationsObject?.[targetLang]) {
+      allTranslatedTranslationsObject[targetLang] = {
+        dateFNSKey: targetLang,
+        translations: {},
+      }
+    }
     const keysWhichDoNotExistInFromlang = findMissingKeys(
       allTranslatedTranslationsObject?.[targetLang].translations,
       fromTranslationsObject,
@@ -172,22 +180,18 @@ export async function translateObject(props: {
 
   console.log('New translations:', allOnlyNewTranslatedTranslationsObject)
 
-  // save
+  if (inlineFile?.length) {
+    const simpleTranslationsObject = {}
+    for (const lang in allTranslatedTranslationsObject) {
+      simpleTranslationsObject[lang] = allTranslatedTranslationsObject[lang].translations
+    }
 
-  for (const key of languages) {
-    // e.g. sanitize rs-latin to rsLatin
-    const sanitizedKey = key.replace(
-      /-(\w)(\w*)/g,
-      (_, firstLetter, remainingLetters) =>
-        firstLetter.toUpperCase() + remainingLetters.toLowerCase(),
-    )
-    const filePath = path.resolve(dirname, targetFolder, `${sanitizedKey}.ts`)
-
-    // prefix & translations
-    let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
+    // write allTranslatedTranslationsObject
+    const filePath = path.resolve(inlineFile)
+    let fileContent: string = `${tsFilePrefix}${generateTsObjectLiteral(simpleTranslationsObject)}\n`
 
     // suffix
-    fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key].dateFNSKey}'`)}\n`
+    fileContent += `${tsFileSuffix}\n`
 
     // eslint
     fileContent = await applyEslintFixes(fileContent, filePath)
@@ -202,28 +206,39 @@ export async function translateObject(props: {
     })
 
     fs.writeFileSync(filePath, fileContent, 'utf8')
+  } else {
+    // save
+
+    for (const key of languages) {
+      // e.g. sanitize rs-latin to rsLatin
+      const sanitizedKey = key.replace(
+        /-(\w)(\w*)/g,
+        (_, firstLetter, remainingLetters) =>
+          firstLetter.toUpperCase() + remainingLetters.toLowerCase(),
+      )
+      const filePath = path.resolve(targetFolder, `${sanitizedKey}.ts`)
+
+      // prefix & translations
+      let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
+
+      // suffix
+      fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key].dateFNSKey}'`)}\n`
+
+      // eslint
+      fileContent = await applyEslintFixes(fileContent, filePath)
+
+      // prettier
+      fileContent = await format(fileContent, {
+        parser: 'typescript',
+        printWidth: 100,
+        semi: false,
+        singleQuote: true,
+        trailingComma: 'all',
+      })
+
+      fs.writeFileSync(filePath, fileContent, 'utf8')
+    }
   }
 
   return allTranslatedTranslationsObject
 }
-
-const allTranslations: {
-  [key in AcceptedLanguages]?: {
-    dateFNSKey: string
-    translations: GenericTranslationsObject
-  }
-} = {}
-
-for (const key of Object.keys(translations)) {
-  allTranslations[key] = {
-    dateFNSKey: translations[key].dateFNSKey,
-    translations: translations[key].translations,
-  }
-}
-
-void translateObject({
-  allTranslationsObject: allTranslations,
-  fromTranslationsObject: enTranslations,
-  //languages: ['de'],
-  targetFolder: '../../src/languages',
-})

@@ -111,6 +111,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     unauthorized: 'Ongeautoriseerd, u moet ingelogd zijn om dit verzoek te doen.',
     unknown: 'Er is een onbekende fout opgetreden.',
     unspecific: 'Er is een fout opgetreden.',
+    userEmailAlreadyRegistered: 'Een gebruiker met het opgegeven e-mailadres is al geregistreerd.',
     userLocked: 'Deze gebruiker is vergrendeld wegens te veel mislukte inlogpogingen.',
     valueMustBeUnique: 'De waarde moet uniek zijn',
     verificationTokenInvalid: 'Verificatietoken is ongeldig.',

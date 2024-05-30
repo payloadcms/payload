@@ -9,6 +9,8 @@ import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js'
 import {
   collection1Slug,
   collection2Slug,
+  mixedMediaCollectionSlug,
+  podcastCollectionSlug,
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
@@ -17,6 +19,7 @@ import {
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
   slug,
+  videoCollectionSlug,
 } from './collectionSlugs.js'
 
 export interface FieldsRelationship {
@@ -325,6 +328,51 @@ export default buildConfigWithDefaults({
       ],
       slug: collection2Slug,
     },
+    {
+      slug: videoCollectionSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+          required: true,
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: podcastCollectionSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+          required: true,
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: mixedMediaCollectionSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relatedMedia',
+          relationTo: [videoCollectionSlug, podcastCollectionSlug],
+          hasMany: true,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -458,6 +506,23 @@ export default buildConfigWithDefaults({
         overrideAccess: true,
         data: {
           name: `relationship-test ${i}`,
+        },
+      })
+    }
+
+    for (let i = 0; i < 2; i++) {
+      await payload.create({
+        collection: videoCollectionSlug,
+        data: {
+          id: i,
+          title: `Video ${i}`,
+        },
+      })
+      await payload.create({
+        collection: podcastCollectionSlug,
+        data: {
+          id: i,
+          title: `Podcast ${i}`,
         },
       })
     }

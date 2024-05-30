@@ -38,6 +38,7 @@ async function main() {
     'db-mongodb',
     'richtext-lexical',
     'translations',
+    'plugin-cloud',
   ]
 
   const packageDetails = await getPackageDetails(packageWhitelist)

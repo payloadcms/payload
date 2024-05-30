@@ -9,6 +9,7 @@ import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
 import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../plugin/index.js'
+import { slashMenuListGroupWithItems } from '../shared/slashMenuListGroup.js'
 import { CHECK_LIST } from './markdownTransformers.js'
 import { LexicalCheckListPlugin } from './plugin/index.js'
 
@@ -42,7 +43,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'checklist',
-      label: `Check List`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:checklist:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
       },
@@ -79,21 +82,19 @@ const ChecklistFeatureClient: FeatureProviderProviderClient<undefined> = (props)
         plugins,
         slashMenu: {
           groups: [
-            {
-              items: [
-                {
-                  Icon: ChecklistIcon,
-                  key: 'checklist',
-                  keywords: ['check list', 'check', 'checklist', 'cl'],
-                  label: 'Check List',
-                  onSelect: ({ editor }) => {
-                    editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
-                  },
+            slashMenuListGroupWithItems([
+              {
+                Icon: ChecklistIcon,
+                key: 'checklist',
+                keywords: ['check list', 'check', 'checklist', 'cl'],
+                label: ({ i18n }) => {
+                  return i18n.t('lexical:checklist:label')
                 },
-              ],
-              key: 'lists',
-              label: 'Lists',
-            },
+                onSelect: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
+                },
+              },
+            ]),
           ],
         },
         toolbarFixed: {

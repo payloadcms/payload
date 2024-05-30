@@ -3,7 +3,7 @@ import type React from 'react'
 import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
 
 export function highlightElemOriginalPosition(
-  debugHighlightRef: React.RefObject<HTMLDivElement>,
+  debugHighlightRef: React.RefObject<HTMLDivElement | null>,
   htmlElem: HTMLElement,
   anchorElem: HTMLElement,
 ) {

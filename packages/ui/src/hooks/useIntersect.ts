@@ -12,7 +12,7 @@ export const useIntersect = (
   const [node, setNode] = useState(null)
 
   const observer = useRef(
-    typeof window !== 'undefined' && 'IntersectionObserver' in window
+    typeof window !== 'undefined' && 'IntersectionObserver' in window && !disable
       ? new window.IntersectionObserver(([ent]) => updateEntry(ent), {
           root,
           rootMargin,

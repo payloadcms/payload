@@ -13,7 +13,7 @@ export type SlashMenuItem = {
   keyboardShortcut?: string
   // For extra searching.
   keywords?: Array<string>
-  label?: (({ i18n }: { i18n: I18nClient }) => string) | string
+  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
   // What happens when you select this item?
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
 }
@@ -22,7 +22,7 @@ export type SlashMenuGroup = {
   items: Array<SlashMenuItem>
   key: string
   // Used for class names and, if label is not provided, for display.
-  label?: (({ i18n }: { i18n: I18nClient }) => string) | string
+  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
 }
 
 export type SlashMenuItemInternal = SlashMenuItem & {

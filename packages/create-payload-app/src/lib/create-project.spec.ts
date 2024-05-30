@@ -29,7 +29,7 @@ describe('createProject', () => {
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
-      '--local-template': 'blank',
+      '--local-template': 'blank-3.0',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'

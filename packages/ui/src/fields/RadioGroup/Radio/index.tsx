@@ -37,6 +37,7 @@ export const Radio: React.FC<{
           checked={isSelected}
           disabled={readOnly}
           id={id}
+          name={path}
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
           type="radio"
         />

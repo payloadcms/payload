@@ -49,7 +49,7 @@ export type ToolbarGroupItem = {
   }) => boolean
   key: string
   /** The label is displayed as text if the item is part of a dropdown group */
-  label?: (({ i18n }: { i18n: I18nClient }) => string) | string
+  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }

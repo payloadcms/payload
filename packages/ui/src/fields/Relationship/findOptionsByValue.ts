@@ -7,7 +7,7 @@ type Args = {
 }
 
 export const findOptionsByValue = ({ options, value }: Args): Option | Option[] => {
-  if (value) {
+  if (value || typeof value === 'number') {
     if (Array.isArray(value)) {
       return value.map((val) => {
         let matchedOption: Option

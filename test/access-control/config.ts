@@ -4,7 +4,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { TestButton } from './TestButton.js'
 import {
-  createNotUpdateSlug,
+  createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
@@ -14,6 +14,7 @@ import {
   noAdminAccessEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
+  readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
@@ -22,7 +23,8 @@ import {
   siblingDataSlug,
   slug,
   unrestrictedSlug,
-  userRestrictedSlug,
+  userRestrictedCollectionSlug,
+  userRestrictedGlobalSlug,
 } from './shared.js'
 
 const openAccess = {
@@ -79,6 +81,32 @@ export default buildConfigWithDefaults({
     },
     {
       slug: readOnlyGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+    },
+    {
+      slug: userRestrictedGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: ({ req, data }) => data?.name === req.user?.email,
+      },
+    },
+    {
+      slug: readNotUpdateGlobalSlug,
       fields: [
         {
           name: 'name',
@@ -201,13 +229,13 @@ export default buildConfigWithDefaults({
         {
           name: 'userRestrictedDocs',
           type: 'relationship',
-          relationTo: userRestrictedSlug,
+          relationTo: userRestrictedCollectionSlug,
           hasMany: true,
         },
         {
           name: 'createNotUpdateDocs',
           type: 'relationship',
-          relationTo: 'create-not-update',
+          relationTo: createNotUpdateCollectionSlug,
           hasMany: true,
         },
       ],
@@ -243,7 +271,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: userRestrictedSlug,
+      slug: userRestrictedCollectionSlug,
       admin: {
         useAsTitle: 'name',
       },
@@ -265,7 +293,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: createNotUpdateSlug,
+      slug: createNotUpdateCollectionSlug,
       admin: {
         useAsTitle: 'name',
       },
@@ -561,6 +589,13 @@ export default buildConfigWithDefaults({
             allowPublicReadability: false,
           },
         ],
+      },
+    })
+
+    await payload.updateGlobal({
+      slug: userRestrictedGlobalSlug,
+      data: {
+        name: 'dev@payloadcms.com',
       },
     })
   },

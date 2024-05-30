@@ -2,11 +2,14 @@
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, TypeWithID } from 'payload/types'
 
+import type { PostgresAdapter } from '../../types.js'
+
 import { createBlocksMap } from '../../utilities/createBlocksMap.js'
 import { createPathMap } from '../../utilities/createRelationshipMap.js'
 import { traverseFields } from './traverseFields.js'
 
 type TransformArgs = {
+  adapter: PostgresAdapter
   config: SanitizedConfig
   data: Record<string, unknown>
   fallbackLocale?: false | string
@@ -16,7 +19,12 @@ type TransformArgs = {
 
 // This is the entry point to transform Drizzle output data
 // into the shape Payload expects based on field schema
-export const transform = <T extends TypeWithID>({ config, data, fields }: TransformArgs): T => {
+export const transform = <T extends TypeWithID>({
+  adapter,
+  config,
+  data,
+  fields,
+}: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
   let texts: Record<string, Record<string, unknown>[]> = {}
   let numbers: Record<string, Record<string, unknown>[]> = {}
@@ -40,6 +48,7 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
   const deletions = []
 
   const result = traverseFields<T>({
+    adapter,
     blocks,
     config,
     dataRef: {

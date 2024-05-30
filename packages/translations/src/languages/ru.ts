@@ -111,6 +111,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     unauthorized: 'Нет доступа, вы должны войти, чтобы сделать этот запрос.',
     unknown: 'Произошла неизвестная ошибка.',
     unspecific: 'Произошла ошибка.',
+    userEmailAlreadyRegistered: 'Пользователь с указанным email уже зарегистрирован.',
     userLocked:
       'Этот пользователь заблокирован из-за слишком большого количества неудачных попыток входа.',
     valueMustBeUnique: 'Значение должно быть уникальным',

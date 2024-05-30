@@ -74,9 +74,6 @@ export async function buildConfigWithDefaults(
 
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
-    secret: 'TEST_SECRET',
-    email: testEmailAdapter,
-    endpoints: [localAPIEndpoint, reInitEndpoint],
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
@@ -158,6 +155,9 @@ export async function buildConfigWithDefaults(
         }),
       ],
     }),
+    email: testEmailAdapter,
+    endpoints: [localAPIEndpoint, reInitEndpoint],
+    secret: 'TEST_SECRET',
     sharp,
     telemetry: false,
     typescript: {
@@ -168,9 +168,9 @@ export async function buildConfigWithDefaults(
     ...testConfig,
     i18n: {
       supportedLanguages: {
+        de,
         en,
         es,
-        de,
       },
       ...(testConfig?.i18n || {}),
     },

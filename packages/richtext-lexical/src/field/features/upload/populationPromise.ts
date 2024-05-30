@@ -64,7 +64,7 @@ export const uploadPopulationPromiseHOC = (
           fieldPromises,
           fields: props?.collections?.[node?.relationTo]?.fields,
           findMany,
-          flattenLocales,
+          flattenLocales: false, // Disable localization handling which does not work properly yet. Once we fully support hooks, this can be enabled (pass through flattenLocales again)
           overrideAccess,
           populationPromises,
           req,

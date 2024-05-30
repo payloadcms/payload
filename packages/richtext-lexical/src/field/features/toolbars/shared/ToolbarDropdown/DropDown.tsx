@@ -10,7 +10,7 @@ import type { ToolbarGroupItem } from '../../types.js'
 const baseClass = 'toolbar-popup__dropdown-item'
 
 interface DropDownContextType {
-  registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
+  registerItem: (ref: React.RefObject<HTMLButtonElement | null>) => void
 }
 
 const DropDownContext = React.createContext<DropDownContextType | null>(null)
@@ -102,11 +102,12 @@ function DropDownItems({
   itemsContainerClassNames?: string[]
   onClose: () => void
 }): React.ReactElement {
-  const [items, setItems] = useState<Array<React.RefObject<HTMLButtonElement>>>()
-  const [highlightedItem, setHighlightedItem] = useState<React.RefObject<HTMLButtonElement>>()
+  const [items, setItems] = useState<Array<React.RefObject<HTMLButtonElement | null>>>()
+  const [highlightedItem, setHighlightedItem] =
+    useState<React.RefObject<HTMLButtonElement | null>>()
 
   const registerItem = useCallback(
-    (itemRef: React.RefObject<HTMLButtonElement>) => {
+    (itemRef: React.RefObject<HTMLButtonElement | null>) => {
       setItems((prev) => (prev != null ? [...prev, itemRef] : [itemRef]))
     },
     [setItems],
@@ -233,6 +234,17 @@ export function DropDown({
     }
   }, [dropDownRef, buttonRef, showDropDown, stopCloseOnClickSelf])
 
+  const portal = createPortal(
+    <DropDownItems
+      dropDownRef={dropDownRef}
+      itemsContainerClassNames={itemsContainerClassNames}
+      onClose={handleClose}
+    >
+      {children}
+    </DropDownItems>,
+    document.body,
+  )
+
   return (
     <React.Fragment>
       <button
@@ -257,17 +269,7 @@ export function DropDown({
         <i className="toolbar-popup__dropdown-caret" />
       </button>
 
-      {showDropDown &&
-        createPortal(
-          <DropDownItems
-            dropDownRef={dropDownRef}
-            itemsContainerClassNames={itemsContainerClassNames}
-            onClose={handleClose}
-          >
-            {children}
-          </DropDownItems>,
-          document.body,
-        )}
+      {showDropDown && <React.Fragment>{portal}</React.Fragment>}
     </React.Fragment>
   )
 }

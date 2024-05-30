@@ -1,3 +1,4 @@
+'use client'
 import type { UseDraggableArguments } from '@dnd-kit/core'
 
 import { useSortable } from '@dnd-kit/sortable'

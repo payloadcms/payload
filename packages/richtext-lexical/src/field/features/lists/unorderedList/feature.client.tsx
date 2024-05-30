@@ -10,6 +10,7 @@ import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList/index
 import { createClientComponent } from '../../createClientComponent.js'
 import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../plugin/index.js'
+import { slashMenuListGroupWithItems } from '../shared/slashMenuListGroup.js'
 import { UNORDERED_LIST } from './markdownTransformer.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -42,7 +43,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'unorderedList',
-      label: `Unordered List`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:unorderedList:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
       },
@@ -67,21 +70,19 @@ const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (pr
         ],
         slashMenu: {
           groups: [
-            {
-              items: [
-                {
-                  Icon: UnorderedListIcon,
-                  key: 'unorderedList',
-                  keywords: ['unordered list', 'ul'],
-                  label: 'Unordered List',
-                  onSelect: ({ editor }) => {
-                    editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
-                  },
+            slashMenuListGroupWithItems([
+              {
+                Icon: UnorderedListIcon,
+                key: 'unorderedList',
+                keywords: ['unordered list', 'ul'],
+                label: ({ i18n }) => {
+                  return i18n.t('lexical:unorderedList:label')
                 },
-              ],
-              key: 'lists',
-              label: 'Lists',
-            },
+                onSelect: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+                },
+              },
+            ]),
           ],
         },
         toolbarFixed: {

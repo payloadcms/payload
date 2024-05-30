@@ -112,6 +112,7 @@ export const roTranslations: DefaultTranslationsObject = {
     unauthorized: 'neautorizat, trebuie să vă conectați pentru a face această cerere.',
     unknown: 'S-a produs o eroare necunoscută.',
     unspecific: 'S-a produs o eroare.',
+    userEmailAlreadyRegistered: 'Un utilizator cu emailul dat este deja înregistrat.',
     userLocked:
       'Acest utilizator este blocat din cauza unui număr prea mare de încercări de autentificare eșuate.',
     valueMustBeUnique: 'Valoarea trebuie să fie unică',

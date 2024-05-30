@@ -2,6 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
+import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
@@ -82,7 +83,16 @@ export const RootPage = async ({
   }
 
   const RenderedView = (
-    <DefaultView initPageResult={initPageResult} params={params} searchParams={searchParams} />
+    <WithServerSideProps
+      Component={DefaultView}
+      serverOnlyProps={
+        {
+          initPageResult,
+          params,
+          searchParams,
+        } as any
+      }
+    />
   )
 
   return (
@@ -100,7 +110,12 @@ export const RootPage = async ({
           permissions={initPageResult?.permissions}
           searchParams={searchParams}
           user={initPageResult?.req.user}
-          visibleEntities={initPageResult.visibleEntities}
+          visibleEntities={{
+            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+            // which this caused as soon as initPageResult.visibleEntities is passed in
+            collections: initPageResult.visibleEntities?.collections,
+            globals: initPageResult.visibleEntities?.globals,
+          }}
         >
           {RenderedView}
         </DefaultTemplate>

@@ -30,20 +30,6 @@ export const formBuilderPlugin =
 
     return {
       ...config,
-      // admin: {
-      //   ...config.admin,
-      //   webpack: (webpackConfig) => ({
-      //     ...webpackConfig,
-      //     resolve: {
-      //       ...webpackConfig.resolve,
-      //       alias: {
-      //         ...webpackConfig.resolve.alias,
-      //         [path.resolve(__dirname, 'collections/FormSubmissions/hooks/sendEmail.ts')]: path.resolve(__dirname, 'mocks/serverModule.js'),
-      //         [path.resolve(__dirname, 'collections/FormSubmissions/hooks/createCharge.ts')]: path.resolve(__dirname, 'mocks/serverModule.js'),
-      //       },
-      //     },
-      //   })
-      // },
       collections: [
         ...(config?.collections || []),
         generateFormCollection(formConfig),

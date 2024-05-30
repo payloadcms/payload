@@ -8,6 +8,7 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
+import { deepMerge } from '../../utilities/deepMerge.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
@@ -166,6 +167,10 @@ export const sanitizeFields = async ({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
           })
+        }
+
+        if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
+          config.i18n.translations = deepMerge(config.i18n.translations, field.editor.i18n)
         }
 
         // Add editor adapter hooks to field hooks

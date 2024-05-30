@@ -1,3 +1,4 @@
+'use client'
 import { type CellComponentProps, type SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 

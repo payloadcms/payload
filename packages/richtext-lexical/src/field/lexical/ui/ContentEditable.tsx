@@ -1,3 +1,5 @@
+import type { JSX } from 'react'
+
 import { ContentEditable } from '@lexical/react/LexicalContentEditable.js'
 import * as React from 'react'
 

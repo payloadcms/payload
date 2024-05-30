@@ -1,5 +1,5 @@
 'use client'
-import type React from 'react';
+import type React from 'react'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname } from 'next/navigation'

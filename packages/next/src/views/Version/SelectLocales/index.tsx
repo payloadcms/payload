@@ -1,3 +1,4 @@
+'use client'
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'

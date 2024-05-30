@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig } from 'payload/types'
+import type { ClientConfig, LanguageOptions } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import * as facelessUIImport3 from '@faceless-ui/scroll-info'
@@ -9,7 +9,7 @@ import React, { Fragment } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
 import type { ComponentMap } from '../ComponentMap/buildComponentMap/types.js'
-import type { LanguageOptions } from '../Translation/index.js'
+import type { Theme } from '../Theme/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
@@ -39,6 +39,7 @@ type Props = {
   languageCode: string
   languageOptions: LanguageOptions
   switchLanguageServerAction?: (lang: string) => Promise<void>
+  theme: Theme
   translations: I18nClient['translations']
 }
 
@@ -51,6 +52,7 @@ export const RootProvider: React.FC<Props> = ({
   languageCode,
   languageOptions,
   switchLanguageServerAction,
+  theme,
   translations,
 }) => {
   const { ModalContainer, ModalProvider } = facelessUIImport || {
@@ -88,7 +90,7 @@ export const RootProvider: React.FC<Props> = ({
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <AuthProvider>
                             <PreferencesProvider>
-                              <ThemeProvider>
+                              <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
                                 <ParamsProvider>
                                   <LocaleProvider>
                                     <StepNavProvider>

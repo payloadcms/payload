@@ -1,7 +1,6 @@
 import type { SanitizedConfig } from 'payload/types'
 
 const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
-  'account',
   'createFirstUser',
   'forgot',
   'login',

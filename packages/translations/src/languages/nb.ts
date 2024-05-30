@@ -110,6 +110,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     unauthorized: 'Uautorisert, du må være innlogget for å gjøre denne forespørselen.',
     unknown: 'En ukjent feil har oppstått.',
     unspecific: 'En feil har oppstått.',
+    userEmailAlreadyRegistered: 'En bruker med den oppgitte e-posten er allerede registrert.',
     userLocked: 'Denne brukeren er låst på grunn av for mange mislykkede innloggingsforsøk.',
     valueMustBeUnique: 'Verdien må være unik',
     verificationTokenInvalid: 'Verifiseringskoden er ugyldig.',
