@@ -43,12 +43,7 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export { sql } from 'drizzle-orm'
 
-type DrizzleType = {
-  columnType: unknown
-  createTable: () => unknown
-}
-
-export function createDrizzleAdapter<T>(args: Args): DatabaseAdapterObj<PostgresAdapter> {
+export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 
