@@ -56,6 +56,7 @@ const buildColumns = ({
             }
             label={field.label || field.name}
             name={field.name}
+            type={field.type}
           />
         ),
         renderCell: (rowData, cellData) => {

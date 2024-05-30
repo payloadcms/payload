@@ -13,7 +13,7 @@ import './index.scss'
 const baseClass = 'sort-column'
 
 const SortColumn: React.FC<Props> = (props) => {
-  const { name, disable = false, label } = props
+  const { name, type, disable = false, label } = props
   const params = useSearchParams()
   const history = useHistory()
   const { i18n, t } = useTranslation('general')
@@ -28,6 +28,8 @@ const SortColumn: React.FC<Props> = (props) => {
 
   const descClasses = [`${baseClass}__desc`]
   if (sort === desc) descClasses.push(`${baseClass}--active`)
+
+  const shouldRenderButtons = !disable && type !== 'array' && type !== 'group' && type !== 'blocks'
 
   const setSort = useCallback(
     (newSort) => {
@@ -47,7 +49,7 @@ const SortColumn: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <span className={`${baseClass}__label`}>{getTranslation(label, i18n)}</span>
-      {!disable && (
+      {shouldRenderButtons && (
         <div className={`${baseClass}__buttons`}>
           <button
             aria-label={t('sortByLabelDirection', {
