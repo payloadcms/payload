@@ -1,4 +1,4 @@
-import type { Block, BlockField } from 'payload/types'
+import type { Block, BlockField, Field } from 'payload/types'
 
 import { baseBlockFields, sanitizeFields } from 'payload/config'
 import { fieldsToJSONSchema, formatLabels, getTranslation } from 'payload/utilities'
@@ -21,11 +21,10 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   if (props?.blocks?.length) {
     props.blocks = props.blocks.map((block) => {
       const blockCopy = cloneDeep(block)
-      return {
-        ...blockCopy,
-        fields: blockCopy.fields.concat(baseBlockFields),
-        labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
-      }
+
+      blockCopy.fields = blockCopy.fields.concat(baseBlockFields)
+      blockCopy.labels = !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels
+      return blockCopy
     })
     //  unsanitizedBlock.fields are sanitized in the React component and not here.
     // That's because we do not have access to the payload config here.
@@ -36,6 +35,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         generatedTypes: {
           modifyOutputSchema: ({
             collectionIDFieldTypes,
+            config,
             currentSchema,
             field,
             interfaceNameDefinitions,
@@ -46,15 +46,16 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
             }
 
             // sanitize blocks
-            const validRelationships = payload.config.collections.map((c) => c.slug) || []
+            const validRelationships = config?.collections?.map((c) => c.slug) || []
 
             const sanitizedBlocks = props.blocks.map((block) => {
               const blockCopy = cloneDeep(block)
               return {
                 ...blockCopy,
                 fields: sanitizeFields({
-                  config: payload.config,
+                  config,
                   fields: blockCopy.fields,
+                  requireFieldLevelRichTextEditor: true,
                   validRelationships,
                 }),
               }
@@ -73,6 +74,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
               [blocksField],
               interfaceNameDefinitions,
               payload,
+              config,
             )
 
             return currentSchema

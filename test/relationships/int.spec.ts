@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 
+import type { PayloadRequest } from '../../packages/payload/types'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -8,6 +9,7 @@ import type {
   Post,
   Relation,
 } from './payload-types'
+import type { PostsLocalized } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -20,6 +22,7 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
+  slugWithLocalizedRel,
   treeSlug,
 } from './config'
 
@@ -340,6 +343,106 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
+      it('should query using "contains" by hasMany relationship field', async () => {
+        const movie1 = await payload.create({
+          collection: 'movies',
+          data: {},
+        })
+        const movie2 = await payload.create({
+          collection: 'movies',
+          data: {},
+        })
+
+        await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+            movies: [movie2.id, movie1.id],
+          },
+        })
+
+        await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+            movies: [movie2.id],
+          },
+        })
+
+        const query1 = await payload.find({
+          collection: 'directors',
+          depth: 0,
+          where: {
+            movies: {
+              contains: movie1.id,
+            },
+          },
+        })
+        const query2 = await payload.find({
+          collection: 'directors',
+          depth: 0,
+          where: {
+            movies: {
+              contains: movie2.id,
+            },
+          },
+        })
+
+        expect(query1.totalDocs).toStrictEqual(1)
+        expect(query2.totalDocs).toStrictEqual(2)
+      })
+
+      it('should query using "in" by hasMany relationship field', async () => {
+        const tree1 = await payload.create({
+          collection: treeSlug,
+          data: {
+            text: 'Tree 1',
+          },
+        })
+
+        const tree2 = await payload.create({
+          collection: treeSlug,
+          data: {
+            parent: tree1.id,
+            text: 'Tree 2',
+          },
+        })
+
+        const tree3 = await payload.create({
+          collection: treeSlug,
+          data: {
+            parent: tree2.id,
+            text: 'Tree 3',
+          },
+        })
+
+        const tree4 = await payload.create({
+          collection: treeSlug,
+          data: {
+            parent: tree3.id,
+            text: 'Tree 4',
+          },
+        })
+
+        const validParents = [tree2.id, tree3.id]
+
+        const query = await payload.find({
+          collection: treeSlug,
+          depth: 0,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              in: validParents,
+            },
+          },
+        })
+        // should only return tree3 and tree4
+
+        expect(query.totalDocs).toEqual(2)
+        expect(query.docs[0].text).toEqual('Tree 3')
+        expect(query.docs[1].text).toEqual('Tree 4')
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { doc } = await client.findByID<Post>({ id: post.id })
@@ -406,6 +509,85 @@ describe('Relationships', () => {
           expect(doc?.maxDepthRelation).not.toHaveProperty('name')
           // should not affect other fields
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
+        })
+      })
+
+      describe('with localization', () => {
+        let relation1: Relation
+        let relation2: Relation
+        let localizedPost1: PostsLocalized
+        let localizedPost2: PostsLocalized
+
+        beforeAll(async () => {
+          relation1 = await payload.create<Relation>({
+            collection: relationSlug,
+            data: {
+              name: 'english',
+            },
+          })
+
+          relation2 = await payload.create<Relation>({
+            collection: relationSlug,
+            data: {
+              name: 'german',
+            },
+          })
+
+          localizedPost1 = await payload.create<'postsLocalized'>({
+            collection: slugWithLocalizedRel,
+            data: {
+              title: 'english',
+              relationField: relation1.id,
+            },
+            locale: 'en',
+          })
+
+          await payload.update({
+            id: localizedPost1.id,
+            collection: slugWithLocalizedRel,
+            locale: 'de',
+            data: {
+              relationField: relation2.id,
+            },
+          })
+
+          localizedPost2 = await payload.create({
+            collection: slugWithLocalizedRel,
+            data: {
+              title: 'german',
+              relationField: relation2.id,
+            },
+            locale: 'de',
+          })
+        })
+        it('should find two docs for german locale', async () => {
+          const { docs } = await payload.find<PostsLocalized>({
+            collection: slugWithLocalizedRel,
+            locale: 'de',
+            where: {
+              relationField: {
+                equals: relation2.id,
+              },
+            },
+          })
+
+          const mappedIds = docs.map((doc) => doc?.id)
+          expect(mappedIds).toContain(localizedPost1.id)
+          expect(mappedIds).toContain(localizedPost2.id)
+        })
+
+        it("shouldn't find a relationship query outside of the specified locale", async () => {
+          const { docs } = await payload.find<PostsLocalized>({
+            collection: slugWithLocalizedRel,
+            locale: 'en',
+            where: {
+              relationField: {
+                equals: relation2.id,
+              },
+            },
+          })
+
+          expect(docs.map((doc) => doc?.id)).not.toContain(localizedPost2.id)
         })
       })
     })
@@ -623,6 +805,28 @@ describe('Relationships', () => {
     })
 
     describe('Hierarchy', () => {
+      beforeAll(async () => {
+        await payload.delete({
+          collection: treeSlug,
+          where: { id: { exists: true } },
+        })
+
+        const root = await payload.create({
+          collection: 'tree',
+          data: {
+            text: 'root',
+          },
+        })
+
+        await payload.create({
+          collection: 'tree',
+          data: {
+            parent: root.id,
+            text: 'sub',
+          },
+        })
+      })
+
       it('finds 1 root item with equals', async () => {
         const {
           docs: [item],
@@ -677,6 +881,35 @@ describe('Relationships', () => {
         })
         expect(count).toBe(1)
         expect(item.text).toBe('sub')
+      })
+    })
+  })
+
+  describe('Creating', () => {
+    describe('With transactions', () => {
+      it('should be able to create filtered relations within a transaction', async () => {
+        const req = {} as PayloadRequest
+        req.transactionID = await payload.db.beginTransaction?.()
+        const related = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'parent',
+          },
+          req,
+        })
+        const withRelation = await payload.create({
+          collection: slug,
+          data: {
+            filteredRelation: related.id,
+          },
+          req,
+        })
+
+        if (req.transactionID) {
+          await payload.db.commitTransaction?.(req.transactionID)
+        }
+
+        expect(withRelation.filteredRelation.id).toEqual(related.id)
       })
     })
   })

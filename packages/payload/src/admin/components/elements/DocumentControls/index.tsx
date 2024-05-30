@@ -5,6 +5,7 @@ import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 
+import { getTranslation } from '../../../../utilities/getTranslation'
 import { formatDate } from '../../../utilities/formatDate'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -63,6 +64,12 @@ export const DocumentControls: React.FC<{
     collection && id && !disableActions && (hasCreatePermission || hasDeletePermission),
   )
 
+  const collectionLabel = () => {
+    const label = collection?.labels?.singular
+    if (!label) return t('document')
+    return typeof label === 'string' ? label : getTranslation(label, i18n)
+  }
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -71,12 +78,7 @@ export const DocumentControls: React.FC<{
             {collection && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
-                  {t('creatingNewLabel', {
-                    label:
-                      typeof collection?.labels?.singular === 'string'
-                        ? collection.labels.singular
-                        : 'document',
-                  })}
+                  {t('creatingNewLabel', { label: collectionLabel() })}
                 </p>
               </li>
             )}

@@ -25,11 +25,16 @@ export const getPackageDetails = async (pkg?: string): Promise<PackageDetails[]>
   if (pkg) {
     packageDirs = fse.readdirSync(packagesDir).filter((d) => d === pkg)
   } else {
-    packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
+    packageDirs = fse
+      .readdirSync(packagesDir)
+      .filter((d) => d !== 'eslint-config-payload' && d !== 'live-preview-vue')
   }
 
   const packageDetails = await Promise.all(
     packageDirs.map(async (dirName) => {
+      const pjsonPathFromRoot = `${packagesDir}/${dirName}/package.json`
+      const pjsonExists = await fse.pathExists(pjsonPathFromRoot)
+      if (!pjsonExists) return null
       const packageJson = await fse.readJson(`${packagesDir}/${dirName}/package.json`)
       const isPublic = packageJson.private !== true
       if (!isPublic) return null

@@ -32,7 +32,7 @@ export const EditUpload: React.FC<{
   imageCacheTag?: string
   showCrop?: boolean
   showFocalPoint?: boolean
-}> = ({ fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
+}> = ({ doc, fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
@@ -45,10 +45,11 @@ export const EditUpload: React.FC<{
     y: uploadEdits?.crop?.y || 0,
   })
 
-  const [pointPosition, setPointPosition] = useState<{ x: number; y: number }>({
-    x: uploadEdits?.focalPoint?.x || 50,
-    y: uploadEdits?.focalPoint?.y || 50,
+  const [focalPosition, setFocalPosition] = useState<{ x: number; y: number }>({
+    x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
+    y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
   })
+
   const [checkBounds, setCheckBounds] = useState<boolean>(false)
   const [originalHeight, setOriginalHeight] = useState<number>(0)
   const [originalWidth, setOriginalWidth] = useState<number>(0)
@@ -72,10 +73,16 @@ export const EditUpload: React.FC<{
     })
   }
 
-  const fineTuneFocalPoint = ({ coordinate, value }: { coordinate: 'x' | 'y'; value: string }) => {
+  const fineTuneFocalPosition = ({
+    coordinate,
+    value,
+  }: {
+    coordinate: 'x' | 'y'
+    value: string
+  }) => {
     const intValue = parseInt(value)
     if (intValue >= 0 && intValue <= 100) {
-      setPointPosition((prevPosition) => ({ ...prevPosition, [coordinate]: intValue }))
+      setFocalPosition((prevPosition) => ({ ...prevPosition, [coordinate]: intValue }))
     }
   }
 
@@ -84,14 +91,14 @@ export const EditUpload: React.FC<{
       ...formQueryParams,
       uploadEdits: {
         crop: crop || undefined,
-        focalPoint: pointPosition ? pointPosition : undefined,
+        focalPoint: focalPosition ? focalPosition : undefined,
       },
     })
     closeModal(editDrawerSlug)
   }
 
   const onDragEnd = React.useCallback(({ x, y }) => {
-    setPointPosition({ x, y })
+    setFocalPosition({ x, y })
     setCheckBounds(false)
   }, [])
 
@@ -104,7 +111,7 @@ export const EditUpload: React.FC<{
       ((boundsRect.left - containerRect.left + boundsRect.width / 2) / containerRect.width) * 100
     const yCenter =
       ((boundsRect.top - containerRect.top + boundsRect.height / 2) / containerRect.height) * 100
-    setPointPosition({ x: xCenter, y: yCenter })
+    setFocalPosition({ x: xCenter, y: yCenter })
   }
 
   const fileSrcToUse = imageCacheTag ? `${fileSrc}?${imageCacheTag}` : fileSrc
@@ -180,7 +187,7 @@ export const EditUpload: React.FC<{
                 checkBounds={showCrop ? checkBounds : false}
                 className={`${baseClass}__focalPoint`}
                 containerRef={focalWrapRef}
-                initialPosition={pointPosition}
+                initialPosition={focalPosition}
                 onDragEnd={onDragEnd}
                 setCheckBounds={showCrop ? setCheckBounds : false}
               >
@@ -251,13 +258,13 @@ export const EditUpload: React.FC<{
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="X %"
-                    onChange={(value) => fineTuneFocalPoint({ coordinate: 'x', value })}
-                    value={pointPosition.x.toFixed(0)}
+                    onChange={(value) => fineTuneFocalPosition({ coordinate: 'x', value })}
+                    value={focalPosition.x.toFixed(0)}
                   />
                   <Input
                     name="Y %"
-                    onChange={(value) => fineTuneFocalPoint({ coordinate: 'y', value })}
-                    value={pointPosition.y.toFixed(0)}
+                    onChange={(value) => fineTuneFocalPosition({ coordinate: 'y', value })}
+                    value={focalPosition.y.toFixed(0)}
                   />
                 </div>
               </div>

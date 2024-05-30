@@ -4,6 +4,7 @@ import { GraphQLClient } from 'graphql-request'
 import path from 'path'
 
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
+import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/express/types'
 
@@ -14,6 +15,7 @@ import { initTransaction } from '../../packages/payload/src/utilities/initTransa
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import removeFiles from '../helpers/removeFiles'
+import { MongooseAdapter } from '../../packages/db-mongodb/src'
 
 describe('database', () => {
   let serverURL
@@ -137,6 +139,59 @@ describe('database', () => {
         error = e
       }
       expect(error).toBeUndefined()
+    })
+  })
+
+  describe('schema', () => {
+    it('should use custom dbNames', () => {
+      expect(payload.db).toBeDefined()
+
+      if (payload.db.name === 'mongoose') {
+        // @ts-expect-error
+        const db: MongooseAdapter = payload.db
+
+        expect(db.collections['custom-schema'].modelName).toStrictEqual('customs')
+        expect(db.versions['custom-schema'].modelName).toStrictEqual('_customs_versions')
+        expect(db.versions.global.modelName).toStrictEqual('_customGlobal_versions')
+      } else {
+        // @ts-expect-error
+        const db: PostgresAdapter = payload.db
+
+        // collection
+        expect(db.tables.customs).toBeDefined()
+
+        // collection versions
+        expect(db.tables._customs_v).toBeDefined()
+
+        // collection relationships
+        expect(db.tables.customs_rels).toBeDefined()
+
+        // collection localized
+        expect(db.tables.customs_locales).toBeDefined()
+
+        // global
+        expect(db.tables.customGlobal).toBeDefined()
+        expect(db.tables._customGlobal_v).toBeDefined()
+
+        // select
+        expect(db.tables.customs_customSelect).toBeDefined()
+
+        // array
+        expect(db.tables.customArrays).toBeDefined()
+
+        // array localized
+        expect(db.tables.customArrays_locales).toBeDefined()
+
+        // blocks
+        expect(db.tables.customBlocks).toBeDefined()
+
+        // localized blocks
+        expect(db.tables.customBlocks_locales).toBeDefined()
+
+        // enum names
+        expect(db.enums.selectEnum).toBeDefined()
+        expect(db.enums.radioEnum).toBeDefined()
+      }
     })
   })
 

@@ -14,7 +14,8 @@ export const deleteMany: DeleteMany = async function deleteMany(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig = this.payload.collections[collection].config
-  const tableName = toSnakeCase(collection)
+
+  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   const result = await findMany({
     adapter: this,

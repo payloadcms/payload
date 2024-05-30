@@ -2,7 +2,11 @@
   "name": "@payloadcms/bundler-webpack",
   "version": "1.0.6",
   "description": "The officially supported Webpack bundler adapter for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/bundler-webpack"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": {
@@ -43,7 +47,7 @@
     "webpack": "^5.78.0",
     "webpack-bundle-analyzer": "^4.8.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-middleware": "6.0.1",
+    "webpack-dev-middleware": "6.1.2",
     "webpack-hot-middleware": "^2.25.3"
   },
   "devDependencies": {

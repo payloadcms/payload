@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import type express from 'express'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
@@ -18,6 +17,8 @@ export type FileSizes = {
 export type FileData = {
   filename: string
   filesize: number
+  focalX?: number
+  focalY?: number
   height: number
   mimeType: string
   sizes: FileSizes
@@ -74,6 +75,12 @@ export type IncomingUploadType = {
   adminThumbnail?: GetAdminThumbnail | string
   crop?: boolean
   disableLocalStorage?: boolean
+  /**
+   * Accepts existing headers and can filter/modify them.
+   *
+   * Useful for adding custom headers to fetch from external providers.
+   */
+  externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   filesRequiredOnCreate?: boolean
   focalPoint?: boolean
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
@@ -115,4 +122,17 @@ export type File = {
 export type FileToSave = {
   buffer: Buffer
   path: string
+}
+
+export type UploadEdits = {
+  crop?: {
+    height?: number
+    width?: number
+    x?: number
+    y?: number
+  }
+  focalPoint?: {
+    x?: number
+    y?: number
+  }
 }

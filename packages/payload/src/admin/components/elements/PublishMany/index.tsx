@@ -18,7 +18,7 @@ import './index.scss'
 const baseClass = 'publish-many'
 
 const PublishMany: React.FC<Props> = (props) => {
-  const { collection: { labels: { plural }, slug, versions } = {}, resetParams } = props
+  const { collection: { slug, labels: { plural }, versions } = {}, resetParams } = props
 
   const {
     routes: { api },
@@ -27,7 +27,7 @@ const PublishMany: React.FC<Props> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation('version')
-  const { count, getQueryParams, selectAll } = useSelection()
+  const { getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
 
   const collectionPermissions = permissions?.collections?.[slug]
@@ -41,9 +41,11 @@ const PublishMany: React.FC<Props> = (props) => {
 
   const handlePublish = useCallback(() => {
     setSubmitted(true)
-    requests
+    void requests
       .patch(
-        `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}`,
+        `${serverURL}${api}/${slug}${getQueryParams({
+          _status: { not_equals: 'published' },
+        })}&draft=true`,
         {
           body: JSON.stringify({
             _status: 'published',

@@ -45,7 +45,6 @@ type Args = {
   locales: {
     [locale: string]: Record<string, unknown>
   }
-  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   /**
    * This is the name of the parent table
@@ -58,6 +57,7 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  texts: Record<string, unknown>[]
 }
 
 export const traverseFields = ({
@@ -73,7 +73,6 @@ export const traverseFields = ({
   fields,
   forcedLocale,
   locales,
-  texts,
   numbers,
   parentTableName,
   path,
@@ -81,6 +80,7 @@ export const traverseFields = ({
   relationshipsToDelete,
   row,
   selects,
+  texts,
 }: Args) => {
   fields.forEach((field) => {
     let columnName = ''
@@ -94,7 +94,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${parentTableName}_${columnName}`
+      const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
@@ -111,12 +111,12 @@ export const traverseFields = ({
                 data: localeData,
                 field,
                 locale: localeKey,
-                texts,
                 numbers,
                 path,
                 relationships,
                 relationshipsToDelete,
                 selects,
+                texts,
               })
 
               arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -132,12 +132,12 @@ export const traverseFields = ({
           blocksToDelete,
           data: data[field.name],
           field,
-          texts,
           numbers,
           path,
           relationships,
           relationshipsToDelete,
           selects,
+          texts,
         })
 
         arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -163,12 +163,12 @@ export const traverseFields = ({
                 data: localeData,
                 field,
                 locale: localeKey,
-                texts,
                 numbers,
                 path,
                 relationships,
                 relationshipsToDelete,
                 selects,
+                texts,
               })
             }
           })
@@ -181,12 +181,12 @@ export const traverseFields = ({
           blocksToDelete,
           data: fieldData,
           field,
-          texts,
           numbers,
           path,
           relationships,
           relationshipsToDelete,
           selects,
+          texts,
         })
       }
 
@@ -210,7 +210,6 @@ export const traverseFields = ({
               fields: field.fields,
               forcedLocale: localeKey,
               locales,
-              texts,
               numbers,
               parentTableName,
               path: `${path || ''}${field.name}.`,
@@ -218,6 +217,7 @@ export const traverseFields = ({
               relationshipsToDelete,
               row,
               selects,
+              texts,
             })
           })
         } else {
@@ -233,7 +233,6 @@ export const traverseFields = ({
             fieldPrefix: `${fieldName}_`,
             fields: field.fields,
             locales,
-            texts,
             numbers,
             parentTableName,
             path: `${path || ''}${field.name}.`,
@@ -241,6 +240,7 @@ export const traverseFields = ({
             relationshipsToDelete,
             row,
             selects,
+            texts,
           })
         }
       }
@@ -267,7 +267,6 @@ export const traverseFields = ({
                   fields: tab.fields,
                   forcedLocale: localeKey,
                   locales,
-                  texts,
                   numbers,
                   parentTableName,
                   path: `${path || ''}${tab.name}.`,
@@ -275,6 +274,7 @@ export const traverseFields = ({
                   relationshipsToDelete,
                   row,
                   selects,
+                  texts,
                 })
               })
             } else {
@@ -290,7 +290,6 @@ export const traverseFields = ({
                 fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
                 fields: tab.fields,
                 locales,
-                texts,
                 numbers,
                 parentTableName,
                 path: `${path || ''}${tab.name}.`,
@@ -298,6 +297,7 @@ export const traverseFields = ({
                 relationshipsToDelete,
                 row,
                 selects,
+                texts,
               })
             }
           }
@@ -314,7 +314,6 @@ export const traverseFields = ({
             fieldPrefix,
             fields: tab.fields,
             locales,
-            texts,
             numbers,
             parentTableName,
             path,
@@ -322,6 +321,7 @@ export const traverseFields = ({
             relationshipsToDelete,
             row,
             selects,
+            texts,
           })
         }
       })
@@ -340,7 +340,6 @@ export const traverseFields = ({
         fieldPrefix,
         fields: field.fields,
         locales,
-        texts,
         numbers,
         parentTableName,
         path,
@@ -348,6 +347,7 @@ export const traverseFields = ({
         relationshipsToDelete,
         row,
         selects,
+        texts,
       })
     }
 
@@ -458,7 +458,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'select' && field.hasMany) {
-      const selectTableName = `${parentTableName}_${columnName}`
+      const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) selects[selectTableName] = []
 
       if (field.localized) {

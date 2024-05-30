@@ -9,12 +9,12 @@ import React, {
 } from 'react'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { Field } from '../../../../fields/config/types'
 import type { Props as CellProps } from '../../views/collections/List/Cell/types'
 import type { ListPreferences } from '../../views/collections/List/types'
 import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
+import { type Field, fieldHasSubFields } from '../../../../fields/config/types'
 import { usePreferences } from '../../utilities/Preferences'
 import formatFields from '../../views/collections/List/formatFields'
 import buildColumns from './buildColumns'
@@ -33,6 +33,19 @@ export const TableColumnContext = createContext<ITableColumns>({} as ITableColum
 
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
 
+const filterTableFields = (fields: Field[]): Field[] => {
+  return fields.reduce((acc, field) => {
+    if (fieldHasSubFields(field)) {
+      field = {
+        ...field,
+        fields: filterTableFields(field.fields),
+      }
+    }
+    if (!field.admin?.disableListColumn) acc.push(field)
+    return acc
+  }, [])
+}
+
 export const TableColumnsProvider: React.FC<{
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
@@ -50,9 +63,10 @@ export const TableColumnsProvider: React.FC<{
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
   const [formattedFields] = useState<Field[]>(() => formatFields(collection))
+  const filteredFields = filterTableFields(formattedFields)
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
-    const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
+    const initialColumns = getInitialColumnState(filteredFields, useAsTitle, defaultColumns)
 
     return buildColumns({
       cellProps,
@@ -77,13 +91,14 @@ export const TableColumnsProvider: React.FC<{
 
         const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
         prevCollection.current = collection.slug
-        const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
+        const initialColumns = getInitialColumnState(filteredFields, useAsTitle, defaultColumns)
         const newCols = currentPreferences?.columns || initialColumns
 
         dispatchTableColumns({
+          type: 'set',
           payload: {
             cellProps,
-            collection: { ...collection, fields: formatFields(collection) },
+            collection: { ...collection, fields: filteredFields },
             columns: newCols.map((column) => {
               // 'string' is for backwards compatibility
               // the preference used to be stored as an array of strings
@@ -96,14 +111,13 @@ export const TableColumnsProvider: React.FC<{
               return column
             }),
           },
-          type: 'set',
         })
 
         hasInitialized.current = true
       }
     }
 
-    sync()
+    void sync()
   }, [
     preferenceKey,
     setPreference,
@@ -113,7 +127,7 @@ export const TableColumnsProvider: React.FC<{
     defaultColumns,
     collection,
     cellProps,
-    formattedFields,
+    filteredFields,
   ])
 
   // /////////////////////////////////////
@@ -133,6 +147,7 @@ export const TableColumnsProvider: React.FC<{
   const setActiveColumns = useCallback(
     (columns: string[]) => {
       dispatchTableColumns({
+        type: 'set',
         payload: {
           // onSelect,
           cellProps,
@@ -142,7 +157,6 @@ export const TableColumnsProvider: React.FC<{
             active: true,
           })),
         },
-        type: 'set',
       })
     },
     [collection, cellProps],
@@ -153,13 +167,13 @@ export const TableColumnsProvider: React.FC<{
       const { fromIndex, toIndex } = args
 
       dispatchTableColumns({
+        type: 'move',
         payload: {
           cellProps,
           collection: { ...collection, fields: formatFields(collection) },
           fromIndex,
           toIndex,
         },
-        type: 'move',
       })
     },
     [collection, cellProps],
@@ -168,12 +182,12 @@ export const TableColumnsProvider: React.FC<{
   const toggleColumn = useCallback(
     (column: string) => {
       dispatchTableColumns({
+        type: 'toggle',
         payload: {
           cellProps,
           collection: { ...collection, fields: formatFields(collection) },
           column,
         },
-        type: 'toggle',
       })
     },
     [collection, cellProps],

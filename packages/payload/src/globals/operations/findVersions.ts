@@ -97,6 +97,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
               // Patch globalType onto version doc
               globalType: globalConfig.slug,
             },
+            draft: undefined,
             fallbackLocale,
             findMany: true,
             global: globalConfig,

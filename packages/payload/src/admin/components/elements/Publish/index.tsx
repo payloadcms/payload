@@ -9,11 +9,16 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 
-export type CustomPublishButtonProps = React.ComponentType<
+export type CustomPublishButtonType = React.ComponentType<
   DefaultPublishButtonProps & {
     DefaultButton: React.ComponentType<DefaultPublishButtonProps>
   }
 >
+/**
+ * @deprecated Use `CustomPublishButtonType` instead - renamed from `CustomPublishButtonProps`
+ */
+export type CustomPublishButtonProps = CustomPublishButtonType
+
 export type DefaultPublishButtonProps = {
   canPublish: boolean
   disabled: boolean
@@ -38,7 +43,7 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
 }
 
 type Props = {
-  CustomComponent?: CustomPublishButtonProps
+  CustomComponent?: CustomPublishButtonType
 }
 
 export const Publish: React.FC<Props> = ({ CustomComponent }) => {

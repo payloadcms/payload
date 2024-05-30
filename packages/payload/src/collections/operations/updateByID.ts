@@ -131,6 +131,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth: 0,
       doc: docWithLocales,
+      draft: draftArg,
       fallbackLocale: null,
       global: null,
       locale,
@@ -147,6 +148,8 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data,
+      operation: 'update',
+      originalDoc,
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -241,7 +244,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       global: null,
       operation: 'update',
       req,
-      skipValidation: shouldSaveDraft || data._status === 'draft',
+      skipValidation: Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
     })
 
     // /////////////////////////////////////
@@ -262,7 +265,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Update
     // /////////////////////////////////////
 
-    if (!shouldSaveDraft) {
+    if (!shouldSaveDraft || data._status === 'published') {
       result = await req.payload.db.updateOne({
         id,
         collection: collectionConfig.slug,
@@ -300,6 +303,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      draft: draftArg,
       fallbackLocale,
       global: null,
       locale,

@@ -112,6 +112,7 @@ async function findVersionByID<T extends TypeWithID = any>(
       currentDepth,
       depth,
       doc: result.version,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,

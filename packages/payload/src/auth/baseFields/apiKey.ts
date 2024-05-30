@@ -20,7 +20,6 @@ export default [
         Field: () => null,
       },
     },
-    defaultValue: false,
     label: labels['authentication:enableAPIKey'],
   },
   {
@@ -46,15 +45,18 @@ export default [
     hidden: true,
     hooks: {
       beforeValidate: [
-        async ({ data, req, value }) => {
+        ({ data, req, value }) => {
+          if (data.apiKey === false || data.apiKey === null) {
+            return null
+          }
+          if (data.enableAPIKey === false || data.enableAPIKey === null) {
+            return null
+          }
           if (data.apiKey) {
             return crypto
               .createHmac('sha1', req.payload.secret)
               .update(data.apiKey as string)
               .digest('hex')
-          }
-          if (data.enableAPIKey === false) {
-            return null
           }
           return value
         },

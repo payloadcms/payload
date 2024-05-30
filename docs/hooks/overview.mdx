@@ -36,7 +36,7 @@ If your Hook simply performs a side-effect, such as updating a CRM, it might be 
 
 #### Server-only execution
 
-Payload Hooks are only triggered on the server. You can safely [remove your hooks](/docs/admin/webpack#aliasing-server-only-modules) from your Admin panel's client-side code by customizing the Webpack config, which not only keeps your Admin bundles' filesize small but also ensures that any server-side only code does not cause problems within browser environments.
+Payload Hooks are only triggered on the server. You can safely [remove your hooks](/docs/admin/excluding-server-code#aliasing-server-only-modules) from your Admin panel's client-side code by customizing the Webpack config, which not only keeps your Admin bundles' filesize small but also ensures that any server-side only code does not cause problems within browser environments.
 
 ## Hook Types
 

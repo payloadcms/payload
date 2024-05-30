@@ -3,9 +3,9 @@ import type { FeatureProvider } from '../types'
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { RelationshipNode } from './nodes/RelationshipNode'
-import { relationshipPopulationPromise } from './populationPromise'
+import { relationshipPopulationPromiseHOC } from './populationPromise'
 
-export type RelationshipFeatureProps =
+export type ExclusiveRelationshipFeatureProps =
   | {
       /**
        * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
@@ -27,15 +27,23 @@ export type RelationshipFeatureProps =
       enabledCollections?: string[]
     }
 
+export type RelationshipFeatureProps = ExclusiveRelationshipFeatureProps & {
+  /**
+   * Sets a maximum population depth for this relationship, regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   */
+  maxDepth?: number
+}
+
 export const RelationshipFeature = (props?: RelationshipFeatureProps): FeatureProvider => {
   return {
     feature: () => {
       return {
         nodes: [
           {
-            node: RelationshipNode,
-            populationPromises: [relationshipPopulationPromise],
             type: RelationshipNode.getType(),
+            node: RelationshipNode,
+            populationPromises: [relationshipPopulationPromiseHOC(props)],
             // TODO: Add validation similar to upload
           },
         ],
@@ -55,7 +63,7 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
             position: 'normal',
           },
         ],
-        props: props,
+        props,
         slashMenu: {
           options: [
             {

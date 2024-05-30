@@ -35,7 +35,7 @@ const Users: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
-      defaultValue: 'user',
+      defaultValue: ['user'],
       hasMany: true,
       label: 'Role',
       options: ['admin', 'user'],

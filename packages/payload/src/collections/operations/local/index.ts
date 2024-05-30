@@ -1,4 +1,5 @@
 import auth from '../../../auth/operations/local'
+import count from './count'
 import create from './create'
 import deleteLocal from './delete'
 import find from './find'
@@ -10,6 +11,7 @@ import update from './update'
 
 export default {
   auth,
+  count,
   create,
   deleteLocal,
   find,

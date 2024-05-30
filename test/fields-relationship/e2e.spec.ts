@@ -358,6 +358,65 @@ describe('fields - relationship', () => {
     await expect(options).toContainText('truth')
   })
 
+  test('should use filterOptions in the list view where builder', async () => {
+    const relationOneDoc = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'include',
+      },
+    })
+    const relationOneMiss = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'ignored',
+      },
+    })
+
+    await page.goto(url.list)
+
+    // expand the filter options
+    await page.locator('.list-controls__toggle-where').click()
+
+    // click add filter
+    await page.locator('.where-builder__add-first-filter').click()
+
+    // select the "Relationship Many Filtered" field
+    await page.locator('.condition__field .rs__control').click()
+    const options = page.locator('.rs__option')
+    await options.locator('text=Relationship Many Filtered').click()
+
+    // select the equals operator
+    await page.locator('.condition__operator .rs__control').click()
+    const operatorOptions = page.locator('.rs__option')
+    await operatorOptions.locator('text=equals').click()
+
+    // open the value dropdown
+    await page.locator('.condition__value .rs__control').click()
+
+    // expect that relation-one has the option of the document id
+    const valueOptions = page.locator('.rs__option')
+
+    await expect(valueOptions.locator(`text=${relationOneDoc.id}`)).toHaveCount(1)
+    await expect(valueOptions.locator(`text=${relationOneMiss.id}`)).toHaveCount(0)
+
+    // enter something in search
+    await page
+      .locator('.condition__value .rs__input')
+      .fill(relationOneDoc.id.toString().slice(0, 5))
+
+    // remove focus
+    await page.locator('.condition__value .rs__input').blur()
+
+    // open the value dropdown
+    await page.locator('.condition__value .rs__control').click()
+
+    // expect that relation-one has the option of the document id
+    const valueOptionsWithSearch = page.locator('.rs__option')
+
+    await expect(valueOptionsWithSearch.locator(`text=${relationOneDoc.id}`)).toHaveCount(1)
+    await expect(valueOptionsWithSearch.locator(`text=${relationOneMiss.id}`)).toHaveCount(0)
+  })
+
   test('should open document drawer from read-only relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
 

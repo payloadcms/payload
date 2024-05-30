@@ -26,7 +26,7 @@ export type DefaultEditViewProps = CollectionEditViewProps & {
 }
 
 const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
-  const { i18n } = useTranslation('general')
+  const { i18n, t } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
   const {
@@ -115,7 +115,7 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
             name={`collection-edit--${
               typeof collection?.labels?.singular === 'string'
                 ? collection.labels.singular
-                : 'document'
+                : t('document')
             }`}
             type="withoutNav"
           />

@@ -10,7 +10,7 @@ import { withSession } from './withSession'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { locale, req = {} as PayloadRequest, slug, where },
+  { slug, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.globals
   const options = {

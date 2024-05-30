@@ -30,6 +30,7 @@ It's often best practice to write your Collections in separate files and then im
 | **`typescript`**  | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
 | **`defaultSort`** | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
 | **`custom`**      | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                |
+| **`dbName`**      | Custom table or collection name depending on the database adapter. Auto-generated from slug if not defined.
 
 _\* An asterisk denotes that a property is required._
 
@@ -59,7 +60,8 @@ export const Orders: CollectionConfig = {
 #### More collection config examples
 
 You can find an assortment
-of [example collection configs](https://github.com/payloadcms/public-demo/tree/master/src/payload/collections) in the Public
+of [example collection configs](https://github.com/payloadcms/public-demo/tree/master/src/payload/collections) in the
+Public
 Demo source code on GitHub.
 
 ### Admin options

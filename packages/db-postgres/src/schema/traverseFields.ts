@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
+import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { Field, TabAsField } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
@@ -9,6 +9,7 @@ import {
   PgUUIDBuilder,
   PgVarcharBuilder,
   boolean,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -23,10 +24,12 @@ import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types'
+import type { BaseExtraConfig } from './build'
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
+import { createTableName } from './createTableName'
 import { idToUUID } from './idToUUID'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
@@ -53,6 +56,7 @@ type Args = {
   rootRelationsToBuild?: Map<string, string>
   rootTableIDColType: string
   rootTableName: string
+  versions: boolean
 }
 
 type Result = {
@@ -86,7 +90,9 @@ export const traverseFields = ({
   rootRelationsToBuild,
   rootTableIDColType,
   rootTableName,
+  versions,
 }: Args): Result => {
+  const throwValidationError = true
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
   let hasManyTextField: 'index' | boolean = false
@@ -217,7 +223,14 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = `enum_${newTableName}_${toSnakeCase(field.name)}`
+        const enumName = createTableName({
+          adapter,
+          config: field,
+          parentTableName: newTableName,
+          prefix: `enum_${newTableName}_`,
+          target: 'enumName',
+          throwValidationError,
+        })
 
         adapter.enums[enumName] = pgEnum(
           enumName,
@@ -231,20 +244,27 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = `${newTableName}_${toSnakeCase(field.name)}`
+          const selectTableName = createTableName({
+            adapter,
+            config: field,
+            parentTableName: newTableName,
+            prefix: `${newTableName}_`,
+            throwValidationError,
+          })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
-            parent: parentIDColumnMap[parentIDColType]('parent_id')
-              .references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' })
-              .notNull(),
+            parent: parentIDColumnMap[parentIDColType]('parent_id').notNull(),
             value: adapter.enums[enumName]('value'),
           }
 
-          const baseExtraConfig: Record<
-            string,
-            (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-          > = {
+          const baseExtraConfig: BaseExtraConfig = {
             orderIdx: (cols) => index(`${selectTableName}_order_idx`).on(cols.order),
+            parentFk: (cols) =>
+              foreignKey({
+                name: `${selectTableName}_parent_fk`,
+                columns: [cols.parent],
+                foreignColumns: [adapter.tables[parentTableName].id],
+              }),
             parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
           }
 
@@ -266,6 +286,7 @@ export const traverseFields = ({
             disableUnique,
             fields: [],
             tableName: selectTableName,
+            versions,
           })
 
           relationsToBuild.set(fieldName, selectTableName)
@@ -296,19 +317,28 @@ export const traverseFields = ({
       case 'array': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
+        const arrayTableName = createTableName({
+          adapter,
+          config: field,
+          parentTableName: newTableName,
+          prefix: `${newTableName}_`,
+          throwValidationError,
+          versionsCustomName: versions,
+        })
+
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
-          _parentID: parentIDColumnMap[parentIDColType]('_parent_id')
-            .references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' })
-            .notNull(),
+          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').notNull(),
         }
 
-        const baseExtraConfig: Record<
-          string,
-          (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-        > = {
+        const baseExtraConfig: BaseExtraConfig = {
           _orderIdx: (cols) => index(`${arrayTableName}_order_idx`).on(cols._order),
+          _parentIDFk: (cols) =>
+            foreignKey({
+              name: `${arrayTableName}_parent_id_fk`,
+              columns: [cols['_parentID']],
+              foreignColumns: [adapter.tables[parentTableName].id],
+            }).onDelete('cascade'),
           _parentIDIdx: (cols) => index(`${arrayTableName}_parent_id_idx`).on(cols._parentID),
         }
 
@@ -334,6 +364,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           tableName: arrayTableName,
+          versions,
         })
 
         if (subHasManyTextField) {
@@ -356,7 +387,7 @@ export const traverseFields = ({
           }
 
           if (hasLocalesTable(field.fields)) {
-            result._locales = many(adapter.tables[`${arrayTableName}_locales`])
+            result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`])
           }
 
           subRelationsToBuild.forEach((val, key) => {
@@ -375,22 +406,30 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
-          const blockTableName = `${rootTableName}_blocks_${toSnakeCase(block.slug)}`
+          const blockTableName = createTableName({
+            adapter,
+            config: block,
+            parentTableName: rootTableName,
+            prefix: `${rootTableName}_blocks_`,
+            throwValidationError,
+            versionsCustomName: versions,
+          })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
               _order: integer('_order').notNull(),
-              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id')
-                .references(() => adapter.tables[rootTableName].id, { onDelete: 'cascade' })
-                .notNull(),
+              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id').notNull(),
               _path: text('_path').notNull(),
             }
 
-            const baseExtraConfig: Record<
-              string,
-              (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-            > = {
+            const baseExtraConfig: BaseExtraConfig = {
               _orderIdx: (cols) => index(`${blockTableName}_order_idx`).on(cols._order),
               _parentIDIdx: (cols) => index(`${blockTableName}_parent_id_idx`).on(cols._parentID),
+              _parentIdFk: (cols) =>
+                foreignKey({
+                  name: `${blockTableName}_parent_id_fk`,
+                  columns: [cols._parentID],
+                  foreignColumns: [adapter.tables[rootTableName].id],
+                }).onDelete('cascade'),
               _pathIdx: (cols) => index(`${blockTableName}_path_idx`).on(cols._path),
             }
 
@@ -416,6 +455,7 @@ export const traverseFields = ({
               rootTableIDColType,
               rootTableName,
               tableName: blockTableName,
+              versions,
             })
 
             if (subHasManyTextField) {
@@ -439,7 +479,9 @@ export const traverseFields = ({
                 }
 
                 if (hasLocalesTable(block.fields)) {
-                  result._locales = many(adapter.tables[`${blockTableName}_locales`])
+                  result._locales = many(
+                    adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
+                  )
                 }
 
                 subRelationsToBuild.forEach((val, key) => {
@@ -451,15 +493,15 @@ export const traverseFields = ({
             )
 
             adapter.relations[`relations_${blockTableName}`] = blockTableRelations
-          } else if (process.env.NODE_ENV !== 'production') {
+          } else if (process.env.NODE_ENV !== 'production' && !versions) {
             validateExistingBlockIsIdentical({
               block,
               localized: field.localized,
               rootTableName,
               table: adapter.tables[blockTableName],
+              tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
-
           rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 
@@ -498,6 +540,7 @@ export const traverseFields = ({
             rootRelationsToBuild,
             rootTableIDColType,
             rootTableName,
+            versions,
           })
 
           if (groupHasLocalizedField) hasLocalizedField = true
@@ -540,6 +583,7 @@ export const traverseFields = ({
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          versions,
         })
 
         if (groupHasLocalizedField) hasLocalizedField = true
@@ -583,6 +627,7 @@ export const traverseFields = ({
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          versions,
         })
 
         if (tabHasLocalizedField) hasLocalizedField = true
@@ -619,13 +664,14 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          newTableName: parentTableName,
+          newTableName,
           parentTableName,
           relationsToBuild,
           relationships,
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          versions,
         })
 
         if (rowHasLocalizedField) hasLocalizedField = true

@@ -18,6 +18,11 @@ export type UploadFeatureProps = {
       fields: Field[]
     }
   }
+  /**
+   * Sets a maximum population depth for this upload (not the fields for this upload), regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   */
+  maxDepth?: number
 }
 
 /**
@@ -33,13 +38,26 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
       return {
         nodes: [
           {
+            type: UploadNode.getType(),
             converters: {
               html: {
                 converter: async ({ node }) => {
-                  const uploadDocument: any = await payload.findByID({
-                    id: node.value.id,
-                    collection: node.relationTo,
-                  })
+                  let uploadDocument: any
+                  try {
+                    uploadDocument = await payload.findByID({
+                      id: node.value.id,
+                      collection: node.relationTo,
+                    })
+                  } catch (ignored) {
+                    // eslint-disable-next-line no-console
+                    console.error(
+                      'Lexical upload node HTML converter: error fetching upload file',
+                      ignored,
+                      'Node:',
+                      node,
+                    )
+                    return `<img />`
+                  }
                   const url: string = getAbsoluteURL(uploadDocument?.url as string)
 
                   /**
@@ -92,7 +110,6 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             },
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
-            type: UploadNode.getType(),
             validations: [uploadValidation()],
           },
         ],
@@ -104,7 +121,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             position: 'normal',
           },
         ],
-        props: props,
+        props,
         slashMenu: {
           options: [
             {

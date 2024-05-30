@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Field, SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -14,14 +14,16 @@ import {
 } from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
 import { deepCopyObject, getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { ElementProps } from '..'
 import type { UploadFeatureProps } from '../..'
+import type { BlocksFeatureProps } from '../../../Blocks'
 import type { UploadData, UploadNode } from '../../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
+import { transformInputFormSchema } from '../../../Blocks/utils/transformInputFormSchema'
 
 /**
  * This handles the extra fields, e.g. captions or alt text, which are
@@ -49,18 +51,23 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const { closeModal } = useModal()
   const { getDocPreferences } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  const fieldSchemaUnsanitized = (
-    editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
-  )?.collections?.[relatedCollection.slug]?.fields
+
   const config = useConfig()
 
-  // Sanitize custom fields here
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  const fieldSchema = sanitizeFields({
-    config: config,
-    fields: fieldSchemaUnsanitized,
-    validRelationships,
-  })
+  const fieldSchema = useMemo(() => {
+    const fieldSchemaUnSanitized = (
+      editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
+    )?.collections?.[relatedCollection.slug]?.fields
+
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    // Sanitize custom fields here
+    return sanitizeFields({
+      config,
+      fields: fieldSchemaUnSanitized,
+      requireFieldLevelRichTextEditor: true,
+      validRelationships,
+    })
+  }, [config, editorConfig?.resolvedFeatureMap, relatedCollection.slug])
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -82,19 +89,11 @@ export const ExtraFieldsUploadDrawer: React.FC<
   )
 
   useEffect(() => {
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fieldSchema = sanitizeFields({
-      config: config,
-      fields: fieldSchemaUnsanitized,
-      validRelationships,
-    })
-
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         config,
-        data: deepCopyObject(fields || {}),
+        data: fields ? deepCopyObject(fields) : {},
         fieldSchema,
         locale,
         operation: 'update',
@@ -105,8 +104,10 @@ export const ExtraFieldsUploadDrawer: React.FC<
       setInitialState(state)
     }
 
-    void awaitInitialState()
-  }, [user, locale, t, getDocPreferences, fields, fieldSchemaUnsanitized, config])
+    if (fieldSchema) {
+      void awaitInitialState()
+    }
+  }, [user, locale, t, getDocPreferences, fields, fieldSchema, config])
 
   return (
     <Drawer

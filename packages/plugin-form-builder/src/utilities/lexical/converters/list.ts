@@ -40,7 +40,7 @@ export const ListItemHTMLConverter: HTMLConverter<any> = {
           tabIndex=${-1}
           value=${node?.value}
       >
-          {serializedChildren}
+          ${childrenText}
           </li>`
     } else {
       return `<li value=${node?.value}>${childrenText}</li>`

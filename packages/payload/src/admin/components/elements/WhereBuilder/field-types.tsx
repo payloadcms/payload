@@ -77,6 +77,15 @@ const contains = {
   value: 'contains',
 }
 
+const filterOperators = (operators, hasMany = false) => {
+  if (hasMany) {
+    return operators.filter(
+      (operator) => operator.value !== 'equals' && operator.value !== 'not_equals',
+    )
+  }
+  return operators
+}
+
 const fieldTypeConditions = {
   checkbox: {
     component: 'Text',
@@ -100,7 +109,7 @@ const fieldTypeConditions = {
   },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
+    operators: (hasMany) => filterOperators([...base, ...numeric], hasMany),
   },
   point: {
     component: 'Point',
@@ -120,11 +129,11 @@ const fieldTypeConditions = {
   },
   select: {
     component: 'Select',
-    operators: [...base],
+    operators: (hasMany) => filterOperators([...base], hasMany),
   },
   text: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: (hasMany) => filterOperators([...base, like, contains], hasMany),
   },
   textarea: {
     component: 'Text',

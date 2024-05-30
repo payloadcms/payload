@@ -1,0 +1,40 @@
+{
+  "name": "@payloadcms/plugin-relationship-object-ids",
+  "version": "0.0.4",
+  "homepage:": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-relationship-object-ids"
+  },
+  "description": "A Payload plugin to store all relationship IDs as ObjectIDs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "author": "dev@payloadcms.com",
+  "license": "MIT",
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "mongoose": "6.12.3"
+  },
+  "files": [
+    "dist",
+    "*.js",
+    "*.d.ts",
+    "!.prettierrc.js"
+  ],
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*",
+    "webpack": "^5.78.0"
+  }
+}

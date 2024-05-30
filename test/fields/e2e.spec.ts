@@ -64,6 +64,74 @@ describe('fields', () => {
       await expect(textCell).toHaveText(textDoc.text)
     })
 
+    test('should not display field in list view column selector if admin.disableListColumn is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
+    })
+
+    test('should display field in list view filter selector if admin.disableListColumn is true and admin.disableListFilter is false', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+      const initialFieldOptions = initialField.locator('.rs__option')
+
+      // Get all text contents of options
+      const optionsTexts = await initialFieldOptions.allTextContents()
+
+      // Check if any option text contains "Disable List Column Text"
+      const containsText = optionsTexts.some((text) => text.includes('Disable List Column Text'))
+
+      // Assert that at least one option contains the desired text
+      expect(containsText).toBeTruthy()
+    })
+
+    test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Filter Text" is present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Filter Text'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should not display field in list view filter condition selector if admin.disableListFilter is true', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+      const initialFieldOptions = initialField.locator('.rs__option')
+
+      // Get all text contents of options
+      const optionsTexts = await initialFieldOptions.allTextContents()
+
+      // Check if any option text contains "Disable List Filter Text"
+      const containsText = optionsTexts.some((text) => text.includes('Disable List Filter Text'))
+
+      // Assert that none of the options contain the desired text
+      expect(containsText).toBeFalsy()
+    })
+
     test('should display i18n label in cells when missing field data', async () => {
       await page.goto(url.list)
       const textCell = page.locator('.row-1 .cell-i18nText')
@@ -354,6 +422,29 @@ describe('fields', () => {
 
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText('One')
+    })
+
+    test('should not allow filtering by hasMany field / equals / not equals', async () => {
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Select Has Many').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+
+      await expect(dropdownOperatorOptions.locator('text=equals')).toBeHidden()
+      await expect(dropdownOperatorOptions.locator('text=not equals')).toBeHidden()
     })
   })
 
@@ -673,6 +764,22 @@ describe('fields', () => {
         })
       })
     })
+
+    describe('admin.isSortable: false', () => {
+      beforeAll(async () => {
+        await page.goto(url.create)
+      })
+
+      test('the move action should be hidden', async () => {
+        await expect(page.locator('#field-disableSort .array-actions__action-chevron')).toHaveCount(
+          0,
+        )
+      })
+
+      test('the drag handle should be hidden', async () => {
+        await expect(page.locator('#field-disableSort .collapsible__drag')).toHaveCount(0)
+      })
+    })
   })
 
   describe('array', () => {
@@ -815,6 +922,23 @@ describe('fields', () => {
         ).toHaveValue(`${assertGroupText3} duplicate`)
       })
     })
+
+    describe('admin.isSortable: false', () => {
+      beforeAll(async () => {
+        await page.goto(url.create)
+      })
+
+      test('the move action should be hidden', async () => {
+        await expect(page.locator('#field-disableSort .array-actions__action-chevron')).toHaveCount(
+          0,
+        )
+      })
+
+      test('the drag handle should be hidden', async () => {
+        await expect(page.locator('#field-disableSort .collapsible__drag')).toHaveCount(0)
+      })
+    })
+
     test('should bulk update', async () => {
       await Promise.all([
         payload.create({
@@ -1020,7 +1144,7 @@ describe('fields', () => {
 
         // Fill values and click Confirm
         await editLinkModal.locator('#field-text').fill('link text')
-        await editLinkModal.locator('label[for="field-linkType-custom"]').click()
+        await editLinkModal.locator('label[for="field-linkType-custom-2"]').click()
         await editLinkModal.locator('#field-url').fill('')
         await wait(200)
         await editLinkModal.locator('button[type="submit"]').click()
@@ -1043,7 +1167,7 @@ describe('fields', () => {
 
         // Fill values and click Confirm
         await editLinkModal.locator('#field-text').fill('link text')
-        await editLinkModal.locator('label[for="field-linkType-custom"]').click()
+        await editLinkModal.locator('label[for="field-linkType-custom-2"]').click()
         await editLinkModal.locator('#field-url').fill('https://payloadcms.com')
         await wait(200)
         await editLinkModal.locator('button[type="submit"]').click()
@@ -1069,7 +1193,7 @@ describe('fields', () => {
 
         // Fill values and click Confirm
         await editLinkModal.locator('#field-text').fill('link text')
-        await editLinkModal.locator('label[for="field-linkType-internal"]').click()
+        await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
         await editLinkModal.locator('#field-doc .rs__control').click()
         await page.keyboard.type('dev@')
         await editLinkModal
@@ -1142,7 +1266,7 @@ describe('fields', () => {
         const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]')
         await expect(editLinkModal).toBeVisible()
 
-        await editLinkModal.locator('label[for="field-linkType-internal"]').click()
+        await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
         await editLinkModal.locator('.relationship__wrap .rs__control').click()
 
         const menu = page.locator('.relationship__wrap .rs__menu')
@@ -1935,6 +2059,31 @@ describe('fields', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'row-fields')
+    })
+
+    test('should not display field in list view column selector if admin.disableListColumn is true', async () => {
+      await page.goto(url.create)
+      const idInput = page.locator('input#field-id')
+      await idInput.fill('000')
+      const titleInput = page.locator('input#field-title')
+      await titleInput.fill('Row 000')
+      const disableListColumnText = page.locator('input#field-disableListColumnText')
+      await disableListColumnText.fill('Disable List Column Text')
+      await page.locator('#action-save').click()
+      await wait(200)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
     })
 
     test('should show row fields as table columns', async () => {

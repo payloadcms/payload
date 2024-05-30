@@ -153,13 +153,14 @@ Here's an overview of all the included features:
 | **`HeadingFeature`**           | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                   |
 | **`AlignFeature`**             | Yes                 | Allows you to align text left, centered and right                                                                                                                                      |
 | **`IndentFeature`**            | Yes                 | Allows you to indent text with the tab key                                                                                                                                             |
-| **`UnorderedListFeature`**      | Yes                 | Adds unordered lists (ul)                                                                                                                                                              |
+| **`UnorderedListFeature`**     | Yes                 | Adds unordered lists (ul)                                                                                                                                                              |
 | **`OrderedListFeature`**       | Yes                 | Adds ordered lists (ol)                                                                                                                                                                |
 | **`CheckListFeature`**         | Yes                 | Adds checklists                                                                                                                                                                        |
 | **`LinkFeature`**              | Yes                 | Allows you to create internal and external links                                                                                                                                       |
 | **`RelationshipFeature`**      | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                         |
 | **`BlockQuoteFeature`**        | Yes                 | Allows you to create block-level quotes                                                                                                                                                |
 | **`UploadFeature`**            | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                    |
+| **`HorizontalRuleFeature`**    | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                      |
 | **`BlocksFeature`**            | No                  | Allows you to use Payload's [Blocks Field](/docs/fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
 | **`TreeViewFeature`**          | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                   |
 
@@ -176,7 +177,7 @@ Next, take a look at the [features we've already built](https://github.com/paylo
 Lexical saves data in JSON, but can also generate its HTML representation via two main methods:
 
 1. **Outputting HTML from the Collection:** Create a new field in your collection to convert saved JSON content to HTML. Payload generates and outputs the HTML for use in your frontend.
-2. **Generating HTML on the Frontend:** Convert JSON to HTML on-demand, either in your frontend or elsewhere.
+2. **Generating HTML on any server** Convert JSON to HTML on-demand on the server.
 
 The editor comes with built-in HTML serializers, simplifying the process of converting JSON to HTML.
 
@@ -202,7 +203,8 @@ const Pages: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          // The HTMLConverter Feature is the feature which manages the HTML serializers. If you do not pass any arguments to it, it will use the default serializers.
+          // The HTMLConverter Feature is the feature which manages the HTML serializers.
+          // If you do not pass any arguments to it, it will use the default serializers.
           HTMLConverterFeature({}),
         ],
       }),
@@ -213,7 +215,7 @@ const Pages: CollectionConfig = {
 ```
 The `lexicalHTML()` function creates a new field that automatically converts the referenced lexical richText field into HTML through an afterRead hook.
 
-#### Generating HTML in the Frontend:
+#### Generating HTML anywhere on the server:
 
 If you wish to convert JSON to HTML ad-hoc, use this code snippet:
 

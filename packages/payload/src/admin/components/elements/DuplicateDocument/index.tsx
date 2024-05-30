@@ -17,7 +17,7 @@ import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
+const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
   const { push } = useHistory()
   const modified = useFormModified()
   const { toggleModal } = useModal()
@@ -31,12 +31,15 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
     routes: { admin },
   } = useConfig()
   const [hasClicked, setHasClicked] = useState<boolean>(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const { i18n, t } = useTranslation('general')
 
   const modalSlug = `duplicate-${id}`
 
   const handleClick = useCallback(
     async (override = false) => {
+      if (isSubmitting) return
+      setIsSubmitting(true)
       setHasClicked(true)
 
       if (modified && !override) {
@@ -136,7 +139,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       if (localeErrors.length > 0) {
         toast.error(
           `
-          ${t('error:localesNotSaved', { count: localeErrors.length })}
+          ${t('error:localesNotSaved_other', { count: localeErrors.length })}
           ${localeErrors.join(', ')}
           `,
           { autoClose: 5000 },
@@ -144,6 +147,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       }
 
       setModified(false)
+      setIsSubmitting(false)
 
       setTimeout(() => {
         push({
@@ -170,13 +174,17 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
   )
 
   const confirm = useCallback(async () => {
-    setHasClicked(false)
     await handleClick(true)
+    setHasClicked(false)
   }, [handleClick])
 
   return (
     <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
+      <PopupList.Button
+        disabled={isSubmitting}
+        id="action-duplicate"
+        onClick={() => handleClick(false)}
+      >
         {t('duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
