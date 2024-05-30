@@ -91,6 +91,19 @@ Note: Collection slugs must be formatted in kebab-case
       },
     },
     {
+      operation: "Count",
+      method: "GET",
+      path: "/api/{collection-slug}/count",
+      description: "Count the documents",
+      example: {
+        slug: "count",
+        req: true,
+        res: {
+         totalDocs: 10
+        },
+      },
+    },
+    {
       operation: "Create",
       method: "POST",
       path: "/api/{collection-slug}",

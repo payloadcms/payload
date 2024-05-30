@@ -7,7 +7,16 @@ import removeFiles from '../helpers/removeFiles'
 import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
-import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug, versionSlug } from './shared'
+import {
+  audioSlug,
+  cropOnlySlug,
+  enlargeSlug,
+  focalOnlySlug,
+  mediaSlug,
+  reduceSlug,
+  relationSlug,
+  versionSlug,
+} from './shared'
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 
@@ -136,7 +145,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'crop-only',
+      slug: cropOnlySlug,
       fields: [],
       upload: {
         focalPoint: false,
@@ -163,7 +172,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'focal-only',
+      slug: focalOnlySlug,
       fields: [],
       upload: {
         crop: false,
@@ -187,6 +196,17 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: './focal-only',
         staticURL: '/focal-only',
+      },
+    },
+    {
+      slug: 'focal-no-sizes',
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: true,
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './focal-no-sizes',
+        staticURL: '/focal-no-sizes',
       },
     },
     {

@@ -21,6 +21,7 @@ export const getBaseFields = (
   config: Config,
   enabledCollections: false | string[],
   disabledCollections: false | string[],
+  maxDepth?: number,
 ): Field[] => {
   let enabledRelations: string[]
 
@@ -48,12 +49,13 @@ export const getBaseFields = (
   const baseFields = [
     {
       name: 'text',
+      type: 'text',
       label: translations['fields:textToDisplay'],
       required: true,
-      type: 'text',
     },
     {
       name: 'fields',
+      type: 'group',
       admin: {
         style: {
           borderBottom: 0,
@@ -65,6 +67,7 @@ export const getBaseFields = (
       fields: [
         {
           name: 'linkType',
+          type: 'radio',
           admin: {
             description: translations['fields:chooseBetweenCustomTextOrDocument'],
           },
@@ -77,13 +80,12 @@ export const getBaseFields = (
             },
           ],
           required: true,
-          type: 'radio',
         },
         {
           name: 'url',
+          type: 'text',
           label: translations['fields:enterURL'],
           required: true,
-          type: 'text',
           validate: (value: string) => {
             if (value && !validateUrl(value)) {
               return 'Invalid URL'
@@ -91,7 +93,6 @@ export const getBaseFields = (
           },
         },
       ] as Field[],
-      type: 'group',
     },
   ]
 
@@ -113,6 +114,7 @@ export const getBaseFields = (
         },
       },
       // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
+      type: 'relationship',
       filterOptions:
         !enabledCollections && !disabledCollections
           ? ({ relationTo, user }) => {
@@ -123,16 +125,16 @@ export const getBaseFields = (
             }
           : null,
       label: translations['fields:chooseDocumentToLink'],
+      maxDepth,
       relationTo: enabledRelations,
       required: true,
-      type: 'relationship',
     })
   }
 
   baseFields[1].fields.push({
     name: 'newTab',
-    label: translations['fields:openInNewTab'],
     type: 'checkbox',
+    label: translations['fields:openInNewTab'],
   })
 
   return baseFields as Field[]

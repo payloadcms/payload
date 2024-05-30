@@ -7,6 +7,7 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
 import { connect } from './connect'
+import { count } from './count'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
 import { createGlobalVersion } from './createGlobalVersion'
@@ -40,18 +41,18 @@ import { updateVersion } from './updateVersion'
 export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
+  const postgresIDType = args.idType || 'serial'
+  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
-    const idType = args.idType || 'serial'
+
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
-
-      // Postgres-specific
-      blockTableNames: {},
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
-      idType,
+      idType: postgresIDType,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       pgSchema: undefined,
@@ -63,6 +64,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       schema: {},
       schemaName: args.schemaName,
       sessions: {},
+      tableNameMap: new Map<string, string>(),
       tables: {},
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -70,15 +72,13 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       beginTransaction,
       commitTransaction,
       connect,
+      count,
       create,
       createGlobal,
       createGlobalVersion,
       createMigration,
       createVersion,
-      /**
-       * This represents how a default ID is treated in Payload as were a field type
-       */
-      defaultIDType: idType === 'serial' ? 'number' : 'text',
+      defaultIDType: payloadIDType,
       deleteMany,
       deleteOne,
       deleteVersions,

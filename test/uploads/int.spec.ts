@@ -10,7 +10,7 @@ import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import configPromise from './config'
-import { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
+import { enlargeSlug, focalOnlySlug, mediaSlug, reduceSlug, relationSlug } from './shared'
 
 const stat = promisify(fs.stat)
 
@@ -53,6 +53,8 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.mimeType).toEqual('image/png')
+        expect(doc.focalX).toEqual(50)
+        expect(doc.focalY).toEqual(50)
         expect(sizes.maintainedAspectRatio.url).toContain('/media/image')
         expect(sizes.maintainedAspectRatio.url).toContain('.png')
         expect(sizes.maintainedAspectRatio.width).toEqual(1024)
@@ -280,6 +282,75 @@ describe('Collections - Uploads', () => {
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+    })
+  })
+
+  describe('focal point', () => {
+    let file
+
+    beforeAll(async () => {
+      // Create image
+      const filePath = path.resolve(__dirname, './image.png')
+      file = await getFileByPath(filePath)
+      file.name = 'focal.png'
+    })
+
+    it('should be able to set focal point through local API', async () => {
+      const doc = await payload.create({
+        collection: focalOnlySlug,
+        data: {
+          focalX: 5,
+          focalY: 5,
+        },
+        file,
+      })
+
+      expect(doc.focalX).toEqual(5)
+      expect(doc.focalY).toEqual(5)
+
+      const updatedFocal = await payload.update({
+        collection: focalOnlySlug,
+        id: doc.id,
+        data: {
+          focalX: 10,
+          focalY: 10,
+        },
+      })
+
+      expect(updatedFocal.focalX).toEqual(10)
+      expect(updatedFocal.focalY).toEqual(10)
+
+      const updateWithoutFocal = await payload.update({
+        collection: focalOnlySlug,
+        id: doc.id,
+        data: {},
+      })
+
+      // Expect focal point to be the same
+      expect(updateWithoutFocal.focalX).toEqual(10)
+      expect(updateWithoutFocal.focalY).toEqual(10)
+    })
+
+    it('should default focal point to 50, 50', async () => {
+      const doc = await payload.create({
+        collection: focalOnlySlug,
+        data: {
+          // No focal point
+        },
+        file,
+      })
+
+      expect(doc.focalX).toEqual(50)
+      expect(doc.focalY).toEqual(50)
+
+      const updateWithoutFocal = await payload.update({
+        collection: focalOnlySlug,
+        id: doc.id,
+        data: {},
+      })
+
+      expect(updateWithoutFocal.focalX).toEqual(50)
+      expect(updateWithoutFocal.focalY).toEqual(50)
     })
   })
 

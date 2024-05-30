@@ -61,7 +61,7 @@ export const transformBlocks = ({
 
     if (field.localized && locale) newRow.row._locale = locale
 
-    const blockTableName = `${baseTableName}_blocks_${blockType}`
+    const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
 
     const hasUUID = adapter.tables[blockTableName]._uuid
 

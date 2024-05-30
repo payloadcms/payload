@@ -158,6 +158,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,

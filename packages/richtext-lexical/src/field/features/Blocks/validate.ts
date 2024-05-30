@@ -24,12 +24,17 @@ export const blockValidationHOC = (
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
     const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
     blocks.forEach((block) => {
-      block.fields = sanitizeFields({
-        config: payloadConfig,
-        fields: block.fields,
-        requireFieldLevelRichTextEditor: true,
-        validRelationships,
-      })
+      // @ts-expect-error
+      if (!block._sanitized) {
+        block.fields = sanitizeFields({
+          config: payloadConfig,
+          fields: block.fields,
+          requireFieldLevelRichTextEditor: true,
+          validRelationships,
+        })
+        // @ts-expect-error
+        block._sanitized = true
+      }
     })
 
     // find block

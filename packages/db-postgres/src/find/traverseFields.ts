@@ -2,11 +2,10 @@
 import type { Field } from 'payload/types'
 
 import { fieldAffectsData, tabHasName } from 'payload/types'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types'
 import type { Result } from './buildFindManyArgs'
-
-import { getTableName } from '../schema/getTableName'
 
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>
@@ -79,20 +78,11 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = getTableName({
-            adapter,
-            config: field,
-            parentTableName: currentTableName,
-            prefix: `${currentTableName}_${path}`,
-          })
+          const arrayTableName = adapter.tableNameMap.get(
+            `${currentTableName}_${path}${toSnakeCase(field.name)}`,
+          )
 
-          const arrayTableNameWithLocales = getTableName({
-            adapter,
-            config: field,
-            locales: true,
-            parentTableName: currentTableName,
-            prefix: `${currentTableName}_${path}`,
-          })
+          const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
           if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
@@ -142,15 +132,13 @@ export const traverseFields = ({
                 with: {},
               }
 
-              const tableName = getTableName({
-                adapter,
-                config: block,
-                parentTableName: topLevelTableName,
-                prefix: `${topLevelTableName}_blocks_`,
-              })
+              const tableName = adapter.tableNameMap.get(
+                `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+              )
 
-              if (adapter.tables[`${tableName}${adapter.localesSuffix}`])
+              if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
                 withBlock.with._locales = _locales
+              }
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({

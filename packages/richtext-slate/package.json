@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "description": "The officially supported Slate richtext adapter for Payload",
   "repository": {
     "type": "git",
@@ -24,7 +24,6 @@
     "@faceless-ui/modal": "2.0.1",
     "i18next": "22.5.1",
     "is-hotkey": "0.2.0",
-    "react": "18.2.0",
     "react-i18next": "11.18.6",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
@@ -38,7 +37,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.3.0"
+    "payload": "^2.3.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "exports": {
     ".": {

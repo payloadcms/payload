@@ -47,7 +47,7 @@
     "webpack": "^5.78.0",
     "webpack-bundle-analyzer": "^4.8.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-middleware": "6.0.1",
+    "webpack-dev-middleware": "6.1.2",
     "webpack-hot-middleware": "^2.25.3"
   },
   "devDependencies": {

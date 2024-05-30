@@ -3,6 +3,8 @@ export {
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Count,
+  CountArgs,
   Create,
   CreateArgs,
   CreateGlobal,

@@ -139,7 +139,7 @@ const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
       if (localeErrors.length > 0) {
         toast.error(
           `
-          ${t('error:localesNotSaved', { count: localeErrors.length })}
+          ${t('error:localesNotSaved_other', { count: localeErrors.length })}
           ${localeErrors.join(', ')}
           `,
           { autoClose: 5000 },

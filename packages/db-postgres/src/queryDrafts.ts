@@ -2,26 +2,20 @@ import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 
 import { type QueryDrafts, combineQueries } from 'payload/database'
 import { buildVersionCollectionFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
+
+import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './schema/getTableName'
 
-export const queryDrafts: QueryDrafts = async function queryDrafts({
-  collection,
-  limit,
-  locale,
-  page = 1,
-  pagination,
-  req = {} as PayloadRequest,
-  sort,
-  where,
-}) {
+export const queryDrafts: QueryDrafts = async function queryDrafts(
+  this: PostgresAdapter,
+  { collection, limit, locale, page = 1, pagination, req = {} as PayloadRequest, sort, where },
+) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName({
-    adapter: this,
-    config: collectionConfig,
-    versions: true,
-  })
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
+  )
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)

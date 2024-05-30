@@ -224,14 +224,14 @@ export const upsertRow = async <T extends TypeWithID>({
 
     if (operation === 'update') {
       for (const blockName of rowToInsert.blocksToDelete) {
-        const blockTableName = adapter.blockTableNames[`${tableName}.${blockName}`]
+        const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
         const blockTable = adapter.tables[blockTableName]
         await db.delete(blockTable).where(eq(blockTable._parentID, insertedRow.id))
       }
     }
 
     for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
-      const blockTableName = adapter.blockTableNames[`${tableName}.${blockName}`]
+      const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
       insertedBlockRows[blockName] = await db
         .insert(adapter.tables[blockTableName])
         .values(blockRows.map(({ row }) => row))

@@ -52,14 +52,14 @@ jobs:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
-        
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
@@ -69,7 +69,7 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
@@ -82,7 +82,7 @@ jobs:
       - run: pnpm run build
 
       - name: Cache build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -108,19 +108,19 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -193,19 +193,19 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -234,19 +234,19 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -278,19 +278,19 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -319,19 +319,19 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -361,10 +361,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0

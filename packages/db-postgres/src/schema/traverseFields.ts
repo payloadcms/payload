@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
+import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { Field, TabAsField } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
@@ -9,6 +9,7 @@ import {
   PgUUIDBuilder,
   PgVarcharBuilder,
   boolean,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -23,11 +24,12 @@ import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types'
+import type { BaseExtraConfig } from './build'
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
-import { getTableName } from './getTableName'
+import { createTableName } from './createTableName'
 import { idToUUID } from './idToUUID'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
@@ -221,14 +223,13 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = getTableName({
+        const enumName = createTableName({
           adapter,
           config: field,
           parentTableName: newTableName,
           prefix: `enum_${newTableName}_`,
           target: 'enumName',
           throwValidationError,
-          versions,
         })
 
         adapter.enums[enumName] = pgEnum(
@@ -243,27 +244,27 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = getTableName({
+          const selectTableName = createTableName({
             adapter,
             config: field,
             parentTableName: newTableName,
             prefix: `${newTableName}_`,
             throwValidationError,
-            versions,
           })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
-            parent: parentIDColumnMap[parentIDColType]('parent_id')
-              .references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' })
-              .notNull(),
+            parent: parentIDColumnMap[parentIDColType]('parent_id').notNull(),
             value: adapter.enums[enumName]('value'),
           }
 
-          const baseExtraConfig: Record<
-            string,
-            (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-          > = {
+          const baseExtraConfig: BaseExtraConfig = {
             orderIdx: (cols) => index(`${selectTableName}_order_idx`).on(cols.order),
+            parentFk: (cols) =>
+              foreignKey({
+                name: `${selectTableName}_parent_fk`,
+                columns: [cols.parent],
+                foreignColumns: [adapter.tables[parentTableName].id],
+              }),
             parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
           }
 
@@ -316,25 +317,28 @@ export const traverseFields = ({
       case 'array': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        const arrayTableName = getTableName({
+        const arrayTableName = createTableName({
           adapter,
           config: field,
           parentTableName: newTableName,
           prefix: `${newTableName}_`,
           throwValidationError,
+          versionsCustomName: versions,
         })
+
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
-          _parentID: parentIDColumnMap[parentIDColType]('_parent_id')
-            .references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' })
-            .notNull(),
+          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').notNull(),
         }
 
-        const baseExtraConfig: Record<
-          string,
-          (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-        > = {
+        const baseExtraConfig: BaseExtraConfig = {
           _orderIdx: (cols) => index(`${arrayTableName}_order_idx`).on(cols._order),
+          _parentIDFk: (cols) =>
+            foreignKey({
+              name: `${arrayTableName}_parent_id_fk`,
+              columns: [cols['_parentID']],
+              foreignColumns: [adapter.tables[parentTableName].id],
+            }).onDelete('cascade'),
           _parentIDIdx: (cols) => index(`${arrayTableName}_parent_id_idx`).on(cols._parentID),
         }
 
@@ -402,28 +406,30 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
-          const blockTableName = getTableName({
+          const blockTableName = createTableName({
             adapter,
             config: block,
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
             throwValidationError,
+            versionsCustomName: versions,
           })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
               _order: integer('_order').notNull(),
-              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id')
-                .references(() => adapter.tables[rootTableName].id, { onDelete: 'cascade' })
-                .notNull(),
+              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id').notNull(),
               _path: text('_path').notNull(),
             }
 
-            const baseExtraConfig: Record<
-              string,
-              (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-            > = {
+            const baseExtraConfig: BaseExtraConfig = {
               _orderIdx: (cols) => index(`${blockTableName}_order_idx`).on(cols._order),
               _parentIDIdx: (cols) => index(`${blockTableName}_parent_id_idx`).on(cols._parentID),
+              _parentIdFk: (cols) =>
+                foreignKey({
+                  name: `${blockTableName}_parent_id_fk`,
+                  columns: [cols._parentID],
+                  foreignColumns: [adapter.tables[rootTableName].id],
+                }).onDelete('cascade'),
               _pathIdx: (cols) => index(`${blockTableName}_path_idx`).on(cols._path),
             }
 
@@ -496,7 +502,6 @@ export const traverseFields = ({
               tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
-          adapter.blockTableNames[`${rootTableName}.${toSnakeCase(block.slug)}`] = blockTableName
           rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 
@@ -659,7 +664,7 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          newTableName: parentTableName,
+          newTableName,
           parentTableName,
           relationsToBuild,
           relationships,

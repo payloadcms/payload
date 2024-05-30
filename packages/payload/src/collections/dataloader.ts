@@ -54,6 +54,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        draft,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -65,6 +66,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        draft,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -100,6 +102,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        draft,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -109,6 +112,7 @@ const batchAndLoadDocs =
         currentDepth,
         depth,
         disableErrors: true,
+        draft,
         fallbackLocale,
         locale,
         overrideAccess: Boolean(overrideAccess),
@@ -136,6 +140,7 @@ const batchAndLoadDocs =
           fallbackLocale,
           overrideAccess,
           showHiddenFields,
+          draft,
         ])
         const docsIndex = keys.findIndex((key) => key === docKey)
 

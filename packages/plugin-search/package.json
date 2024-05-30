@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "homepage:": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -40,8 +40,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/react": "18.0.21",
-    "payload": "workspace:*",
-    "react": "^18.0.0"
+    "payload": "workspace:*"
   },
   "exports": {
     ".": {

@@ -7,7 +7,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../../types'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
-import { getTableName } from '../../schema/getTableName'
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { transformArray } from './array'
 import { transformBlocks } from './blocks'
@@ -89,18 +88,13 @@ export const traverseFields = ({
     let fieldData: unknown
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${getTableName({
-        adapter,
-        config: field,
-        // do not pass columnPrefix here because it is required and custom dbNames also need it
-        prefix: '',
-      })}`
+      columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
       fieldName = `${fieldPrefix || ''}${field.name}`
       fieldData = data[field.name]
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${parentTableName}_${columnName}`
+      const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
@@ -153,8 +147,8 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
-        blocksToDelete.add(getTableName({ adapter, config: block }))
+      field.blocks.forEach(({ slug }) => {
+        blocksToDelete.add(toSnakeCase(slug))
       })
 
       if (field.localized) {
@@ -464,7 +458,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'select' && field.hasMany) {
-      const selectTableName = `${parentTableName}_${columnName}`
+      const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) selects[selectTableName] = []
 
       if (field.localized) {
@@ -494,11 +488,7 @@ export const traverseFields = ({
     }
 
     if (fieldAffectsData(field)) {
-      const valuesToTransform: {
-        localeKey?: string
-        ref: unknown
-        value: unknown
-      }[] = []
+      const valuesToTransform: { localeKey?: string; ref: unknown; value: unknown }[] = []
 
       if (field.localized) {
         if (typeof fieldData === 'object' && fieldData !== null) {

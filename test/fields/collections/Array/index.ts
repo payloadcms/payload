@@ -155,6 +155,21 @@ const ArrayFields: CollectionConfig = {
       minRows: 2,
       type: 'array',
     },
+    {
+      name: 'disableSort',
+      defaultValue: arrayDefaultValue,
+      admin: {
+        isSortable: false,
+      },
+      fields: [
+        {
+          name: 'text',
+          required: true,
+          type: 'text',
+        },
+      ],
+      type: 'array',
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,

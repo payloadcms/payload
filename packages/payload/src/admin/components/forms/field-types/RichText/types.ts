@@ -51,6 +51,7 @@ type RichTextAdapterBase<
     context: RequestContext
     currentDepth?: number
     depth: number
+    draft: boolean
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     findMany: boolean
     flattenLocales: boolean

@@ -9,7 +9,6 @@ import { fieldAffectsData } from '../../../../fields/config/types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import Chevron from '../../icons/Chevron'
 import { useSearchParams } from '../../utilities/SearchParams'
-import Button from '../Button'
 import ColumnSelector from '../ColumnSelector'
 import DeleteMany from '../DeleteMany'
 import EditMany from '../EditMany'
@@ -50,6 +49,8 @@ export const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 
+  const hasWhereParam = React.useRef(Boolean(params?.where))
+
   const [textFieldsToBeSearched, setFieldsToBeSearched] = useState(
     getTextFieldsToBeSearched(listSearchableFields, fields),
   )
@@ -64,6 +65,15 @@ export const ListControls: React.FC<Props> = (props) => {
   React.useEffect(() => {
     setFieldsToBeSearched(getTextFieldsToBeSearched(listSearchableFields, fields))
   }, [listSearchableFields, fields])
+
+  React.useEffect(() => {
+    if (hasWhereParam.current && !params?.where) {
+      setVisibleDrawer(undefined)
+      hasWhereParam.current = false
+    } else if (params?.where) {
+      hasWhereParam.current = true
+    }
+  }, [setVisibleDrawer, params?.where])
 
   return (
     <div className={baseClass}>
@@ -136,7 +146,7 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          <ColumnSelector collection={collection} />
+          <ColumnSelector slug={collection.slug} />
         </AnimateHeight>
       )}
       <AnimateHeight
@@ -147,6 +157,7 @@ export const ListControls: React.FC<Props> = (props) => {
         <WhereBuilder
           collection={collection}
           handleChange={handleWhereChange}
+          key={String(hasWhereParam.current && !params?.where)}
           modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>

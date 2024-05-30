@@ -147,36 +147,36 @@ function FloatingSelectToolbar({
   anchorElem: HTMLElement
   editor: LexicalEditor
 }): JSX.Element {
-  const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
+  const floatingToolbarRef = useRef<HTMLDivElement | null>(null)
   const caretRef = useRef<HTMLDivElement | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
 
   const closeFloatingToolbar = useCallback(() => {
-    if (popupCharStylesEditorRef?.current) {
-      const isOpacityZero = popupCharStylesEditorRef.current.style.opacity === '0'
-      const isPointerEventsNone = popupCharStylesEditorRef.current.style.pointerEvents === 'none'
+    if (floatingToolbarRef?.current) {
+      const isOpacityZero = floatingToolbarRef.current.style.opacity === '0'
+      const isPointerEventsNone = floatingToolbarRef.current.style.pointerEvents === 'none'
 
       if (!isOpacityZero) {
-        popupCharStylesEditorRef.current.style.opacity = '0'
+        floatingToolbarRef.current.style.opacity = '0'
       }
       if (!isPointerEventsNone) {
-        popupCharStylesEditorRef.current.style.pointerEvents = 'none'
+        floatingToolbarRef.current.style.pointerEvents = 'none'
       }
     }
-  }, [popupCharStylesEditorRef])
+  }, [floatingToolbarRef])
 
   const mouseMoveListener = useCallback(
     (e: MouseEvent) => {
-      if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
-        const isOpacityZero = popupCharStylesEditorRef.current.style.opacity === '0'
-        const isPointerEventsNone = popupCharStylesEditorRef.current.style.pointerEvents === 'none'
+      if (floatingToolbarRef?.current && (e.buttons === 1 || e.buttons === 3)) {
+        const isOpacityZero = floatingToolbarRef.current.style.opacity === '0'
+        const isPointerEventsNone = floatingToolbarRef.current.style.pointerEvents === 'none'
         if (!isOpacityZero || !isPointerEventsNone) {
           // Check if the mouse is not over the popup
           const x = e.clientX
           const y = e.clientY
           const elementUnderMouse = document.elementFromPoint(x, y)
-          if (!popupCharStylesEditorRef.current.contains(elementUnderMouse)) {
+          if (!floatingToolbarRef.current.contains(elementUnderMouse)) {
             // Mouse is not over the target element => not a normal click, but probably a drag
             closeFloatingToolbar()
           }
@@ -187,15 +187,15 @@ function FloatingSelectToolbar({
   )
 
   const mouseUpListener = useCallback(() => {
-    if (popupCharStylesEditorRef?.current) {
-      if (popupCharStylesEditorRef.current.style.opacity !== '1') {
-        popupCharStylesEditorRef.current.style.opacity = '1'
+    if (floatingToolbarRef?.current) {
+      if (floatingToolbarRef.current.style.opacity !== '1') {
+        floatingToolbarRef.current.style.opacity = '1'
       }
-      if (popupCharStylesEditorRef.current.style.pointerEvents !== 'auto') {
-        popupCharStylesEditorRef.current.style.pointerEvents = 'auto'
+      if (floatingToolbarRef.current.style.pointerEvents !== 'auto') {
+        floatingToolbarRef.current.style.pointerEvents = 'auto'
       }
     }
-  }, [popupCharStylesEditorRef])
+  }, [floatingToolbarRef])
 
   useEffect(() => {
     document.addEventListener('mousemove', mouseMoveListener)
@@ -205,15 +205,14 @@ function FloatingSelectToolbar({
       document.removeEventListener('mousemove', mouseMoveListener)
       document.removeEventListener('mouseup', mouseUpListener)
     }
-  }, [popupCharStylesEditorRef, mouseMoveListener, mouseUpListener])
+  }, [floatingToolbarRef, mouseMoveListener, mouseUpListener])
 
   const updateTextFormatFloatingToolbar = useCallback(() => {
     const selection = $getSelection()
 
-    const popupCharStylesEditorElem = popupCharStylesEditorRef.current
     const nativeSelection = window.getSelection()
 
-    if (popupCharStylesEditorElem === null) {
+    if (floatingToolbarRef.current === null) {
       return
     }
 
@@ -227,17 +226,25 @@ function FloatingSelectToolbar({
     ) {
       const rangeRect = getDOMRangeRect(nativeSelection, rootElement)
 
-      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, 'center')
+      // Position floating toolbar
+      const offsetIfFlipped = setFloatingElemPosition(
+        rangeRect, // selection to position around
+        floatingToolbarRef.current, // what to position
+        anchorElem, // anchor elem
+        'center',
+      )
 
+      // Position caret
       if (caretRef.current) {
         setFloatingElemPosition(
           rangeRect, // selection to position around
           caretRef.current, // what to position
-          popupCharStylesEditorElem, // anchor elem
+          floatingToolbarRef.current, // anchor elem
           'center',
           10,
           5,
           true,
+          offsetIfFlipped,
         )
       }
     }
@@ -288,7 +295,7 @@ function FloatingSelectToolbar({
   }, [editor, updateTextFormatFloatingToolbar])
 
   return (
-    <div className="floating-select-toolbar-popup" ref={popupCharStylesEditorRef}>
+    <div className="floating-select-toolbar-popup" ref={floatingToolbarRef}>
       <div className="caret" ref={caretRef} />
       {editor.isEditable() && (
         <React.Fragment>

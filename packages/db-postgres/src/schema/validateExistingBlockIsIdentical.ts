@@ -28,7 +28,7 @@ const getFlattenedFieldNames = (
     }
 
     if (fieldHasSubFields(field)) {
-      fieldPrefix = 'name' in field ? `${prefix}${field.name}.` : prefix
+      fieldPrefix = 'name' in field ? `${prefix}${field.name}_` : prefix
       return [...fieldsToUse, ...getFlattenedFieldNames(field.fields, fieldPrefix)]
     }
 
@@ -36,7 +36,7 @@ const getFlattenedFieldNames = (
       return [
         ...fieldsToUse,
         ...field.tabs.reduce((tabFields, tab) => {
-          fieldPrefix = 'name' in tab ? `${prefix}.${tab.name}` : prefix
+          fieldPrefix = 'name' in tab ? `${prefix}_${tab.name}` : prefix
           return [
             ...tabFields,
             ...(tabHasName(tab)
@@ -51,7 +51,7 @@ const getFlattenedFieldNames = (
       return [
         ...fieldsToUse,
         {
-          name: `${fieldPrefix?.replace('.', '_') || ''}${field.name}`,
+          name: `${fieldPrefix}${field.name}`,
           localized: field.localized,
         },
       ]
@@ -69,6 +69,7 @@ export const validateExistingBlockIsIdentical = ({
   tableLocales,
 }: Args): void => {
   const fieldNames = getFlattenedFieldNames(block.fields)
+
   const missingField =
     // ensure every field from the config is in the matching table
     fieldNames.find(({ name, localized }) => {
@@ -84,7 +85,11 @@ export const validateExistingBlockIsIdentical = ({
 
   if (missingField) {
     throw new InvalidConfiguration(
-      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${typeof missingField === 'string' ? missingField : missingField.name}, while the other block does not.`,
+      `The table ${rootTableName} has multiple blocks with slug ${
+        block.slug
+      }, but the schemas do not match. One block includes the field ${
+        typeof missingField === 'string' ? missingField : missingField.name
+      }, while the other block does not.`,
     )
   }
 

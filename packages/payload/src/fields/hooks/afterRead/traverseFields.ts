@@ -11,6 +11,7 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
+  draft: boolean
   fallbackLocale: null | string
   fieldPromises: Promise<void>[]
   fields: (Field | TabAsField)[]
@@ -33,6 +34,7 @@ export const traverseFields = ({
   currentDepth,
   depth,
   doc,
+  draft,
   fallbackLocale,
   fieldPromises,
   fields,
@@ -56,6 +58,7 @@ export const traverseFields = ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         field,
         fieldPromises,

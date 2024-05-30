@@ -11,9 +11,10 @@ import sharp from 'sharp'
 import type { Collection } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
 import type { PayloadRequest } from '../express/types'
-import type { FileData, FileToSave, ProbedImageSize } from './types'
+import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types'
 
 import { FileUploadError, MissingFile } from '../errors'
+import FileRetrievalError from '../errors/FileRetrievalError'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
 import { getExternalFile } from './getExternalFile'
@@ -27,6 +28,8 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  operation: 'create' | 'update'
+  originalDoc?: T
   overwriteExistingFiles?: boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
@@ -41,6 +44,8 @@ export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   config,
   data,
+  operation,
+  originalDoc,
   overwriteExistingFiles,
   req,
   throwOnMissingFile,
@@ -53,10 +58,23 @@ export const generateFileData = async <T>({
   }
 
   let file = req.files?.file || undefined
-  const { uploadEdits } = req.query || {}
 
-  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
-    collectionConfig.upload
+  const uploadEdits = parseUploadEditsFromReqOrIncomingData({
+    data,
+    operation,
+    originalDoc,
+    req,
+  })
+
+  const {
+    disableLocalStorage,
+    focalPoint: focalPointEnabled,
+    formatOptions,
+    imageSizes,
+    resizeOptions,
+    staticDir,
+    trimOptions,
+  } = collectionConfig.upload
 
   let staticPath = staticDir
   if (staticDir.indexOf('/') !== 0) {
@@ -80,8 +98,10 @@ export const generateFileData = async <T>({
         })) as UploadedFile
         overwriteExistingFiles = true
       }
-    } catch (err) {
-      throw new FileUploadError(req.t)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        throw new FileRetrievalError(req.t, err.message)
+      }
     }
   }
 
@@ -231,9 +251,9 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (Array.isArray(imageSizes) && fileSupportsResize) {
+    if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}
-      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
+      const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
         dimensions: !cropData
           ? dimensions
@@ -247,13 +267,16 @@ export const generateFileData = async <T>({
         req,
         savedFilename: fsSafeName || file.name,
         staticPath,
+        uploadEdits,
       })
 
       fileData.sizes = sizeData
+      fileData.focalX = focalPoint?.x
+      fileData.focalY = focalPoint?.y
       filesToSave.push(...sizesToSave)
     }
   } catch (err) {
-    console.error(err)
+    req.payload.logger.error({ err, msg: 'Error uploading file' })
     throw new FileUploadError(req.t)
   }
 
@@ -266,4 +289,51 @@ export const generateFileData = async <T>({
     data: newData,
     files: filesToSave,
   }
+}
+
+/**
+ * Parse upload edits from req or incoming data
+ */
+function parseUploadEditsFromReqOrIncomingData(args: {
+  data: unknown
+  operation: 'create' | 'update'
+  originalDoc: unknown
+  req: PayloadRequest
+}): UploadEdits {
+  const { data, operation, originalDoc, req } = args
+
+  // Get intended focal point change from query string or incoming data
+  const {
+    uploadEdits = {},
+  }: {
+    uploadEdits?: UploadEdits
+  } = req.query || {}
+
+  if (uploadEdits.focalPoint) return uploadEdits
+
+  const incomingData = data as FileData
+  const origDoc = originalDoc as FileData
+
+  // If no change in focal point, return undefined.
+  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+    return undefined
+  }
+
+  if (incomingData.focalX && incomingData.focalY) {
+    uploadEdits.focalPoint = {
+      x: incomingData.focalX,
+      y: incomingData.focalY,
+    }
+    return uploadEdits
+  }
+
+  // If no focal point is set, default to center
+  if (operation === 'create') {
+    uploadEdits.focalPoint = {
+      x: 50,
+      y: 50,
+    }
+  }
+  return uploadEdits
 }

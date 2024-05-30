@@ -20,11 +20,16 @@ export interface Config {
     'doc-level-access': DocLevelAccess
     'hidden-fields': HiddenField
     'hidden-access': HiddenAccess
+    'hidden-access-count': HiddenAccessCount
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {}
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   roles?: ('admin' | 'user')[] | null
@@ -39,6 +44,10 @@ export interface User {
   lockUntil?: string | null
   password: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
 export interface Post {
   id: string
   restrictedField?: string | null
@@ -50,6 +59,10 @@ export interface Post {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unrestricted".
+ */
 export interface Unrestricted {
   id: string
   name?: string | null
@@ -57,24 +70,40 @@ export interface Unrestricted {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-restricted".
+ */
 export interface UserRestricted {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted".
+ */
 export interface Restricted {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-collection".
+ */
 export interface ReadOnlyCollection {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions".
+ */
 export interface RestrictedVersion {
   id: string
   name?: string | null
@@ -82,6 +111,10 @@ export interface RestrictedVersion {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sibling-data".
+ */
 export interface SiblingDatum {
   id: string
   array?:
@@ -94,12 +127,20 @@ export interface SiblingDatum {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rely-on-request-headers".
+ */
 export interface RelyOnRequestHeader {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "doc-level-access".
+ */
 export interface DocLevelAccess {
   id: string
   approvedForRemoval?: boolean | null
@@ -108,6 +149,10 @@ export interface DocLevelAccess {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-fields".
+ */
 export interface HiddenField {
   id: string
   title?: string | null
@@ -126,6 +171,10 @@ export interface HiddenField {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-access".
+ */
 export interface HiddenAccess {
   id: string
   title: string
@@ -133,6 +182,21 @@ export interface HiddenAccess {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-access-count".
+ */
+export interface HiddenAccessCount {
+  id: string
+  title: string
+  hidden?: boolean | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -152,6 +216,10 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null

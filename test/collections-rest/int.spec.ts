@@ -67,6 +67,15 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
     })
 
+    it('should count', async () => {
+      await createPost()
+      await createPost()
+      const { result, status } = await client.count()
+
+      expect(status).toEqual(200)
+      expect(result).toEqual({ totalDocs: 2 })
+    })
+
     it('should find where id', async () => {
       const post1 = await createPost()
       await createPost()
@@ -503,6 +512,26 @@ describe('collections-rest', () => {
           expect(status).toEqual(200)
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
+        })
+
+        it('should query LIKE by ID', async () => {
+          const post = await payload.create({
+            collection: slug,
+            data: {
+              title: 'find me buddy',
+            },
+          })
+
+          const { result, status } = await client.find<Post>({
+            query: {
+              id: {
+                like: post.id,
+              },
+            },
+          })
+
+          expect(status).toStrictEqual(200)
+          expect(result.totalDocs).toStrictEqual(1)
         })
       })
 
