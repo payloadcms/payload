@@ -4,12 +4,12 @@ import { type QueryDrafts, combineQueries } from 'payload/database'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   {
     collection,
     limit,

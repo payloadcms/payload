@@ -2,14 +2,14 @@ import type { UpdateOne } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export const updateOne: UpdateOne = async function updateOne(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { id, collection: collectionSlug, data, draft, locale, req, where: whereArg },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle

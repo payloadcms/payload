@@ -12,7 +12,7 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
@@ -20,7 +20,7 @@ import { parseError } from './utilities/parseError.js'
 
 const require = createRequire(import.meta.url)
 
-export async function migrate(this: PostgresAdapter): Promise<void> {
+export async function migrate(this: DrizzleAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 

@@ -1,3 +1,4 @@
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type {
   ColumnBaseConfig,
   ColumnDataType,
@@ -9,30 +10,14 @@ import type {
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
 import type {
   PgColumn,
-  PgEnum,
   PgSchema,
+  PgTableFn,
   PgTableWithColumns,
   PgTransaction,
 } from 'drizzle-orm/pg-core'
-import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Pool, PoolConfig } from 'pg'
+import type { BaseDatabaseAdapter, MigrationTemplateArgs } from 'payload/database'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
-
-export type Args = {
-  idType?: 'serial' | 'uuid'
-  localesSuffix?: string
-  logger?: DrizzleConfig['logger']
-  migrationDir?: string
-  pool: PoolConfig
-  push?: boolean
-  relationshipsSuffix?: string
-  schemaName?: string
-  versionsSuffix?: string
-}
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,
@@ -49,9 +34,6 @@ export type GenericTable = PgTableWithColumns<{
   name: string
   schema: undefined
 }>
-
-export type GenericEnum = PgEnum<[string, ...string[]]>
-
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type DrizzleTransaction = PgTransaction<
@@ -60,28 +42,32 @@ export type DrizzleTransaction = PgTransaction<
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
-export type PostgresAdapter = BaseDatabaseAdapter & {
+export type DrizzleAdapter = BaseDatabaseAdapter & {
+  defaultDrizzleSnapshot: DrizzleSnapshotJSON
   drizzle: DrizzleDB
-  enums: Record<string, GenericEnum>
+  enums: Record<string, unknown>
+  features: {
+    enum?: boolean
+    json?: boolean
+  }
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  idType: Args['idType']
+  getMigrationTemplate: (args: MigrationTemplateArgs) => string
+  // TODO: figure out the type for idType
+  idType: unknown
   initializing: Promise<void>
   localesSuffix?: string
   logger: DrizzleConfig['logger']
-  pgSchema?: { table: PgTableFn } | PgSchema
-  pool: Pool
-  poolOptions: Args['pool']
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-  schemaName?: Args['schemaName']
+  schema: Record<string, unknown>
+  schemaName?: string
   sessions: {
     [id: string]: {
       db: DrizzleTransaction
@@ -89,39 +75,8 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
       resolve: () => Promise<void>
     }
   }
+  tableFunction: PgSchema['table'] | PgTableFn
   tableNameMap: Map<string, string>
-  tables: Record<string, GenericTable | PgTableWithColumns<any>>
+  tables: Record<string, GenericTable>
   versionsSuffix?: string
-}
-
-export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
-
-export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
-
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
-
-declare module 'payload' {
-  export interface DatabaseAdapter
-    extends Omit<Args, 'migrationDir' | 'pool'>,
-      BaseDatabaseAdapter {
-    drizzle: DrizzleDB
-    enums: Record<string, GenericEnum>
-    fieldConstraints: Record<string, Record<string, string>>
-    localeSuffix?: string
-    pool: Pool
-    push: boolean
-    relations: Record<string, GenericRelation>
-    relationshipsSuffix?: string
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-    sessions: {
-      [id: string]: {
-        db: DrizzleTransaction
-        reject: () => Promise<void>
-        resolve: () => Promise<void>
-      }
-    }
-    tables: Record<string, GenericTable>
-    versionsSuffix?: string
-  }
 }

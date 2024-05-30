@@ -4,12 +4,12 @@ import type { PayloadRequestWithData } from 'payload/types'
 import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { collection, req = {} as PayloadRequestWithData, where },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle

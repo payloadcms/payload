@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { DrizzleDB } from '../types.js'
 
+// TODO: abstract this to adapter itself, might be PG-specific
 export const migrationTableExists = async (db: DrizzleDB): Promise<boolean> => {
   const queryRes = await db.execute(sql`SELECT to_regclass('public.payload_migrations');`)
 

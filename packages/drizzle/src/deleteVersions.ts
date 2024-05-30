@@ -5,12 +5,12 @@ import { inArray } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { collection, locale, req = {} as PayloadRequestWithData, where: where },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle

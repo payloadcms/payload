@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
+import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
 import path from 'path'
@@ -8,40 +8,10 @@ import { getPredefinedMigration } from 'payload/database'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
-import type { PostgresAdapter } from './types.js'
-
-const migrationTemplate = ({
-  downSQL,
-  imports,
-  upSQL,
-}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
-${imports ? `${imports}\n` : ''}
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-${upSQL}
-};
-
-export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
-${downSQL}
-};
-`
-
-const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
-  id: '00000000-0000-0000-0000-000000000000',
-  _meta: {
-    columns: {},
-    schemas: {},
-    tables: {},
-  },
-  dialect: 'postgresql',
-  enums: {},
-  prevId: '00000000-0000-0000-0000-00000000000',
-  schemas: {},
-  tables: {},
-  version: '6',
-})
+import type { DrizzleAdapter } from './types.js'
 
 export const createMigration: CreateMigration = async function createMigration(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { file, forceAcceptWarning, migrationName, payload },
 ) {
   const filename = fileURLToPath(import.meta.url)
@@ -74,7 +44,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
   const filePath = `${dir}/${fileName}`
 
-  let drizzleJsonBefore = getDefaultDrizzleSnapshot()
+  let drizzleJsonBefore = this.defaultDrizzleSnapshot
 
   if (!upSQL) {
     // Get latest migration snapshot
@@ -133,7 +103,7 @@ export const createMigration: CreateMigration = async function createMigration(
   // write migration
   fs.writeFileSync(
     `${filePath}.ts`,
-    migrationTemplate({
+    this.getMigrationTemplate({
       downSQL: downSQL || `  // Migration code`,
       imports,
       upSQL: upSQL || `  // Migration code`,

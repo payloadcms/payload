@@ -2,12 +2,12 @@ import type { FindGlobal } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { slug, locale, req, where },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)

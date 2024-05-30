@@ -19,6 +19,6 @@
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json", "../db-postgres/src/connect.ts"],
   "references": [{ "path": "../payload" }, { "path": "../translations" }]
 }

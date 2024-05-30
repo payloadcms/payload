@@ -9,7 +9,7 @@ import {
   readMigrationFiles,
 } from 'payload/database'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
@@ -17,7 +17,7 @@ import { parseError } from './utilities/parseError.js'
 /**
  * Run all migration down functions before running up
  */
-export async function migrateRefresh(this: PostgresAdapter) {
+export async function migrateRefresh(this: DrizzleAdapter) {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 

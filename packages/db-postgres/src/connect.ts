@@ -7,7 +7,7 @@ import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
-import { pushDevSchema } from './utilities/pushDevSchema.js'
+import { pushDevSchema } from '../../drizzle/src/utilities/pushDevSchema.js'
 
 const connectWithReconnect = async function ({
   adapter,

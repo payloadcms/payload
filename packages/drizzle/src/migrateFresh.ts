@@ -9,7 +9,7 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { parseError } from './utilities/parseError.js'
 
@@ -17,7 +17,7 @@ import { parseError } from './utilities/parseError.js'
  * Drop the current database and run all migrate up functions
  */
 export async function migrateFresh(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { forceAcceptWarning = false },
 ): Promise<void> {
   const { payload } = this

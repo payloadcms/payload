@@ -4,13 +4,13 @@ import type { PayloadRequestWithData, SanitizedGlobalConfig, TypeWithID } from '
 import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   {
     id,
     global,

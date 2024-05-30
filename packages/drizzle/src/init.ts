@@ -2,22 +2,16 @@
 import type { Init } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import { pgEnum } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { buildTable } from './schema/build.js'
 import { createTableName } from './schema/createTableName.js'
 
-export const init: Init = function init(this: PostgresAdapter) {
-  if (this.schemaName) {
-    this.pgSchema = pgSchema(this.schemaName)
-  } else {
-    this.pgSchema = { table: pgTable }
-  }
-
+export const init: Init = function init(this: DrizzleAdapter) {
   if (this.payload.config.localization) {
     this.enums.enum__locales = pgEnum(
       '_locales',

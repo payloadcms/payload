@@ -3,12 +3,12 @@ import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobal<T extends TypeWithID>(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { slug, data, req = {} as PayloadRequestWithData }: UpdateGlobalArgs,
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle

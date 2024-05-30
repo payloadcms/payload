@@ -4,12 +4,12 @@ import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 
 export const findVersions: FindVersions = async function findVersions(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   {
     collection,
     limit,

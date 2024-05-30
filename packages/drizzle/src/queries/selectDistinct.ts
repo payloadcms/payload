@@ -1,14 +1,14 @@
 import type { QueryPromise, SQL } from 'drizzle-orm'
 
 import type { ChainedMethods } from '../find/chainMethods.js'
-import type { DrizzleDB, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, DrizzleDB } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { chainMethods } from '../find/chainMethods.js'
 import { type GenericColumn } from '../types.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   chainedMethods?: ChainedMethods
   db: DrizzleDB
   joins: BuildQueryJoinAliases
