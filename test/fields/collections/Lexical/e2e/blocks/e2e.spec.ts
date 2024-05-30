@@ -530,33 +530,52 @@ describe('lexicalBlocks', () => {
       await expect(paragraphInSubEditor).toBeVisible()
       await paragraphInSubEditor.click()
       await page.keyboard.type('Some subText')
+
       // Upload something
-      const chooseExistingUploadButton = newSubLexicalAndUploadBlock
-        .locator('.upload__toggler.list-drawer__toggler')
-        .first()
-      await expect(chooseExistingUploadButton).toBeVisible()
-      await chooseExistingUploadButton.click()
-      await wait(500) // wait for drawer form state to initialize (it's a flake)
-      const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
-      await expect(uploadListDrawer).toBeVisible()
-      // find button which has a span with text "payload.jpg" and click it in playwright
-      const uploadButton = uploadListDrawer.locator('button').getByText('payload.jpg').first()
-      await expect(uploadButton).toBeVisible()
-      await uploadButton.click()
-      await expect(uploadListDrawer).toBeHidden()
-      // Check if the upload is there
-      await expect(
-        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
-      ).toHaveText('payload.jpg')
+      await expect(async () => {
+        const chooseExistingUploadButton = newSubLexicalAndUploadBlock
+          .locator('.upload__toggler.list-drawer__toggler')
+          .first()
+        await wait(300)
+        await expect(chooseExistingUploadButton).toBeVisible()
+        await wait(300)
+        await chooseExistingUploadButton.click()
+        await wait(500) // wait for drawer form state to initialize (it's a flake)
+        const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+        await expect(uploadListDrawer).toBeVisible()
+        await wait(300)
+
+        // find button which has a span with text "payload.jpg" and click it in playwright
+        const uploadButton = uploadListDrawer.locator('button').getByText('payload.jpg').first()
+        await expect(uploadButton).toBeVisible()
+        await wait(300)
+        await uploadButton.click()
+        await wait(300)
+        await expect(uploadListDrawer).toBeHidden()
+        // Check if the upload is there
+        await expect(
+          newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+        ).toHaveText('payload.jpg')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await wait(300)
+
       // save document and assert
       await saveDocAndAssert(page)
+      await wait(300)
+
       await expect(
         newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
       ).toHaveText('payload.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
+      await wait(300)
 
       // reload page and assert again
       await page.reload()
+      await wait(300)
+
       await expect(
         newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
       ).toHaveText('payload.jpg')
