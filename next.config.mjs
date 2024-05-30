@@ -9,15 +9,11 @@ const withBundleAnalyzer = bundleAnalyzer({
 // eslint-disable-next-line no-restricted-exports
 export default withBundleAnalyzer(
   withPayload({
-    reactStrictMode: false,
     eslint: {
       ignoreDuringBuilds: true,
     },
     typescript: {
       ignoreBuildErrors: true,
-    },
-    experimental: {
-      reactCompiler: false,
     },
     async redirects() {
       return [

@@ -17,6 +17,7 @@ import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
+import { Input } from './Input/index.js'
 import { MultiValue, generateMultiValueDraggableID } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
@@ -85,6 +86,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
           ClearIndicator,
           Control,
           DropdownIndicator,
+          Input,
           MultiValue,
           MultiValueLabel,
           MultiValueRemove,
@@ -157,6 +159,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         ClearIndicator,
         Control,
         DropdownIndicator,
+        Input,
         MultiValue,
         MultiValueLabel,
         MultiValueRemove,
