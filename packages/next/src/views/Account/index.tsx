@@ -1,10 +1,13 @@
 import type { ServerSideEditViewProps } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
-import { DocumentInfoProvider, FormQueryParamsProvider } from '@payloadcms/ui/client'
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
+import {
+  DocumentHeader,
+  DocumentInfoProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
+} from '@payloadcms/ui/client'
+import { RenderCustomComponent } from '@payloadcms/ui/server'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 

@@ -15,6 +15,11 @@
       "default": "./src/assets/index.ts",
       "types": "./src/assets/index.tsx"
     },
+    "./client": {
+      "import": "./src/exports/client/index.ts",
+      "require": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts"
+    },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
       "require": "./src/elements/*/index.tsx",
@@ -56,6 +61,11 @@
       "require": "./src/providers/*/index.tsx",
       "default": "./src/providers/*/index.tsx",
       "types": "./src/providers/*/index.tsx"
+    },
+    "./server": {
+      "import": "./src/exports/server/index.ts",
+      "require": "./src/exports/server/index.ts",
+      "types": "./src/exports/server/index.ts"
     },
     "./templates/*": {
       "import": "./src/templates/*/index.tsx",
@@ -158,16 +168,16 @@
   "publishConfig": {
     "exports": {
       "./assets/*": "./dist/assets/*",
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
-      },
       "./assets": {
         "import": "./dist/assets/index.js",
         "require": "./dist/assets/index.js",
         "default": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts"
+      },
+      "./client": {
+        "import": "./dist/exports/client/index.js",
+        "require": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",
@@ -210,6 +220,11 @@
         "require": "./dist/providers/*/index.js",
         "default": "./dist/providers/*/index.js",
         "types": "./dist/providers/*/index.d.ts"
+      },
+      "./server": {
+        "import": "./dist/exports/server/index.js",
+        "require": "./dist/exports/server/index.js",
+        "types": "./dist/exports/server/index.d.ts"
       },
       "./templates/*": {
         "import": "./dist/templates/*/index.js",
