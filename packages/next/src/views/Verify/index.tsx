@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload/types'
 
-import { Logo } from '@payloadcms/ui/graphics/Logo'
+import { Logo } from '@payloadcms/ui/server'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 

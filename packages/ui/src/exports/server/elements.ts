@@ -4,3 +4,4 @@ export { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 export type { StepNavItem } from '../../elements/StepNav/index.js'
 export type { Column } from '../../elements/Table/index.js'
 export { Translation } from '../../elements/Translation/index.js'
+export { WithServerSideProps } from '../../elements/WithServerSideProps/index.js'

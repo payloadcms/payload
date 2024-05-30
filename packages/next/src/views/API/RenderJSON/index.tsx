@@ -1,5 +1,5 @@
 'use client'
-import { ChevronIcon } from '@payloadcms/ui/icons/Chevron'
+import { ChevronIcon } from '@payloadcms/ui/server'
 import * as React from 'react'
 
 import './index.scss'

@@ -1,5 +1,15 @@
 export { FieldPropsProvider } from '../../forms/FieldPropsProvider/index.js'
-export { Form } from '../../forms/Form/index.js'
+export {
+  useAllFormFields,
+  useForm,
+  useFormFields,
+  useFormInitializing,
+  useFormModified,
+  useFormProcessing,
+  useFormSubmitted,
+  useWatchForm,
+} from '../../forms/Form/context.js'
+export { Form, type FormProps } from '../../forms/Form/index.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
 export { RowLabel } from '../../forms/RowLabel/index.js'

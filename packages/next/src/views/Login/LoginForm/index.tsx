@@ -8,12 +8,14 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { FormState, PayloadRequestWithData } from 'payload/types'
 
-import { Email } from '@payloadcms/ui/fields/Email'
-import { Password } from '@payloadcms/ui/fields/Password'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  EmailField,
+  Form,
+  FormSubmit,
+  PasswordField,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { email, password } from 'payload/fields/validations'
 
 import './index.scss'
@@ -60,7 +62,7 @@ export const LoginForm: React.FC<{
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
-        <Email
+        <EmailField
           autoComplete="email"
           label={t('general:email')}
           name="email"
@@ -77,7 +79,7 @@ export const LoginForm: React.FC<{
             })
           }
         />
-        <Password
+        <PasswordField
           autoComplete="off"
           label={t('general:password')}
           name="password"

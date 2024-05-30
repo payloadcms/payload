@@ -1,8 +1,6 @@
 'use client'
 
-import { RadioGroup } from '@payloadcms/ui/fields/RadioGroup'
-import { useTheme } from '@payloadcms/ui/providers/Theme'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { RadioGroupField, useTheme, useTranslation } from '@payloadcms/ui/client'
 import React, { useCallback } from 'react'
 
 export const ToggleTheme: React.FC = () => {
@@ -17,7 +15,7 @@ export const ToggleTheme: React.FC = () => {
   )
 
   return (
-    <RadioGroup
+    <RadioGroupField
       label={t('general:adminTheme')}
       name="theme"
       onChange={onChange}

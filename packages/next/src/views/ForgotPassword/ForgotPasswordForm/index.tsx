@@ -2,11 +2,7 @@
 
 import type { FormState, PayloadRequestWithData } from 'payload/types'
 
-import { Email } from '@payloadcms/ui/fields/Email'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
 import { email } from 'payload/fields/validations'
 import React, { Fragment, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -59,7 +55,7 @@ export const ForgotPasswordForm: React.FC = () => {
     >
       <h1>{t('authentication:forgotPassword')}</h1>
       <p>{t('authentication:forgotPasswordEmailInstructions')}</p>
-      <Email
+      <EmailField
         autoComplete="email"
         label={t('general:email')}
         name="email"

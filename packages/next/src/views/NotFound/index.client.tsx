@@ -1,9 +1,6 @@
 'use client'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Gutter } from '@payloadcms/ui/elements/Gutter'
-import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { Button, useConfig, useStepNav, useTranslation } from '@payloadcms/ui/client'
+import { Gutter } from '@payloadcms/ui/server'
 import LinkImport from 'next/link.js'
 import React, { useEffect } from 'react'
 
