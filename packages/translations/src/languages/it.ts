@@ -113,6 +113,7 @@ export const itTranslations: DefaultTranslationsObject = {
     unauthorized: 'Non autorizzato, devi essere loggato per effettuare questa richiesta.',
     unknown: 'Si è verificato un errore sconosciuto.',
     unspecific: 'Si è verificato un errore.',
+    userEmailAlreadyRegistered: "Un utente con l'email fornita è già registrato.",
     userLocked: 'Questo utente è bloccato a causa di troppi tentativi di accesso non riusciti.',
     valueMustBeUnique: 'Il valore deve essere univoco',
     verificationTokenInvalid: 'Il token di verifica non è valido.',

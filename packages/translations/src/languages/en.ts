@@ -110,6 +110,7 @@ export const enTranslations = {
     unauthorized: 'Unauthorized, you must be logged in to make this request.',
     unknown: 'An unknown error has occurred.',
     unspecific: 'An error has occurred.',
+    userEmailAlreadyRegistered: 'A user with the given email is already registered.',
     userLocked: 'This user is locked due to having too many failed login attempts.',
     valueMustBeUnique: 'Value must be unique',
     verificationTokenInvalid: 'Verification token is invalid.',

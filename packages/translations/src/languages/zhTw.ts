@@ -105,6 +105,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     unauthorized: '未經授權，您必須登錄才能提出這個請求。',
     unknown: '發生了一個未知的錯誤。',
     unspecific: '發生了一個錯誤。',
+    userEmailAlreadyRegistered: '給定電子郵件的用戶已經註冊。',
     userLocked: '該使用者由於有太多次失敗的登錄嘗試而被鎖定。',
     valueMustBeUnique: '數值必須是唯一的',
     verificationTokenInvalid: '驗證令牌無效。',
