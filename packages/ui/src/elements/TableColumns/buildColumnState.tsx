@@ -125,6 +125,7 @@ export const buildColumnState = (args: Args): Column[] => {
             : undefined
         }
         name={'name' in field ? field.name : undefined}
+        type={'type' in field ? field.type : undefined}
       />
     )
 

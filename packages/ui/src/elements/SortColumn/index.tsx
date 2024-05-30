@@ -8,6 +8,7 @@ export type SortColumnProps = {
   disable?: boolean
   label?: FieldBase['label']
   name: string
+  type?: string
 }
 
 import type { FieldBase } from 'payload/types'
@@ -20,7 +21,7 @@ import './index.scss'
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, Label, disable = false, label } = props
+  const { name, type, Label, disable = false, label } = props
   const { searchParams, stringifyParams } = useSearchParams()
   const router = useRouter()
   const { t } = useTranslation()
@@ -35,6 +36,8 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   const descClasses = [`${baseClass}__desc`]
   if (sort === desc) descClasses.push(`${baseClass}--active`)
+
+  const shouldRenderButtons = !disable && type !== 'array' && type !== 'group' && type !== 'blocks'
 
   const setSort = useCallback(
     (newSort) => {
@@ -53,7 +56,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   return (
     <div className={baseClass}>
       <span className={`${baseClass}__label`}>{Label}</span>
-      {!disable && (
+      {shouldRenderButtons && (
         <div className={`${baseClass}__buttons`}>
           <button
             aria-label={t('general:sortByLabelDirection', {
