@@ -489,6 +489,7 @@ export {
 } from './field/features/upload/nodes/UploadNode.js'
 
 export {
+  type EditorConfigContextType,
   EditorConfigProvider,
   useEditorConfigContext,
 } from './field/lexical/config/client/EditorConfigProvider.js'

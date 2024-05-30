@@ -8,6 +8,11 @@ type BaseArgs = {
   data: Record<string, unknown>
   db: DrizzleDB
   fields: Field[]
+  /**
+   * When true, skips reading the data back from the database and returns the input data
+   * @default false
+   */
+  ignoreResult?: boolean
   path?: string
   req: PayloadRequestWithData
   tableName: string

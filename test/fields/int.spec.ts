@@ -906,6 +906,37 @@ describe('Fields', () => {
         },
       })
     })
+
+    it('should query a subfield within a localized group', async () => {
+      const text = 'find this'
+      const hit = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          localizedGroup: {
+            text,
+          },
+        },
+      })
+      const miss = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          localizedGroup: {
+            text: 'do not find this',
+          },
+        },
+      })
+      const result = await payload.find({
+        collection: groupFieldsSlug,
+        where: {
+          'localizedGroup.text': { equals: text },
+        },
+      })
+
+      const resultIDs = result.docs.map(({ id }) => id)
+
+      expect(resultIDs).toContain(hit.id)
+      expect(resultIDs).not.toContain(miss.id)
+    })
   })
 
   describe('tabs', () => {

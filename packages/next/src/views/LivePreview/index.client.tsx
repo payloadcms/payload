@@ -10,8 +10,10 @@ import {
   type FormProps,
   OperationProvider,
   SetViewActions,
+  useAuth,
   useComponentMap,
   useConfig,
+  useDocumentEvents,
   useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui/client'
@@ -73,20 +75,27 @@ const PreviewView: React.FC<Props> = ({
 
   const operation = id ? 'update' : 'create'
 
+  const {
+    admin: { user: userSlug },
+  } = useConfig()
   const { t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
+  const { refreshCookieAsync, user } = useAuth()
+  const { reportUpdate } = useDocumentEvents()
 
   const onSave = useCallback(
     (json) => {
-      // reportUpdate({
-      //   id,
-      //   entitySlug: collectionConfig.slug,
-      //   updatedAt: json?.result?.updatedAt || new Date().toISOString(),
-      // })
+      reportUpdate({
+        id,
+        entitySlug: collectionSlug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
 
-      // if (auth && id === user.id) {
-      //   await refreshCookieAsync()
-      // }
+      // If we're editing the doc of the logged-in user,
+      // Refresh the cookie to get new permissions
+      if (user && collectionSlug === userSlug && id === user.id) {
+        void refreshCookieAsync()
+      }
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -95,12 +104,7 @@ const PreviewView: React.FC<Props> = ({
         })
       }
     },
-    [
-      id,
-      onSaveFromProps,
-      // refreshCookieAsync,
-      //  reportUpdate
-    ],
+    [collectionSlug, id, onSaveFromProps, refreshCookieAsync, reportUpdate, user, userSlug],
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
