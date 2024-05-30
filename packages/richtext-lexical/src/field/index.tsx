@@ -39,14 +39,19 @@ export const RichTextField: React.FC<
 
   let featureProviderComponents: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
     'features',
-  ) as GeneratedFeatureProviderComponent[] // TODO: Type better
+  ) as GeneratedFeatureProviderComponent[]
   // order by order
   featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
 
-  const featureComponentsWithFeaturesLength =
-    Array.from(richTextComponentMap.keys()).filter(
-      (key) => key.startsWith(`feature.`) && !key.includes('.fields.'),
-    ).length + featureProviderComponents.length
+  let featureProvidersAndComponentsToLoad = 0 // feature providers and components
+  for (const featureProvider of featureProviderComponents) {
+    const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
+      key.startsWith(`feature.${featureProvider.key}.components.`),
+    )
+
+    featureProvidersAndComponentsToLoad += 1
+    featureProvidersAndComponentsToLoad += featureComponentKeys.length
+  }
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
@@ -62,7 +67,7 @@ export const RichTextField: React.FC<
         }
       })
 
-      if (featureProvidersAndComponentsLoaded === featureComponentsWithFeaturesLength) {
+      if (featureProvidersAndComponentsLoaded === featureProvidersAndComponentsToLoad) {
         setFeatureProviders(featureProvidersLocal)
         setHasLoadedFeatures(true)
 
@@ -97,7 +102,7 @@ export const RichTextField: React.FC<
     featureProviders,
     finalSanitizedEditorConfig,
     lexicalEditorConfig,
-    featureComponentsWithFeaturesLength,
+    featureProvidersAndComponentsToLoad,
   ])
 
   if (!hasLoadedFeatures) {

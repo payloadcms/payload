@@ -238,6 +238,7 @@ export const mapFields = (args: {
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
+          schemaPath: path,
         }
 
         switch (field.type) {
@@ -788,6 +789,7 @@ export const mapFields = (args: {
       CustomField: null,
       cellComponentProps: {
         name: 'id',
+        schemaPath: 'id',
       },
       disableBulkEdit: true,
       fieldComponentProps: {

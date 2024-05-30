@@ -3,7 +3,6 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useTableCell } from '@payloadcms/ui/elements/Table'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
@@ -24,9 +23,12 @@ export const RichTextCell: React.FC<{
   const { admin, lexicalEditorConfig } = props
 
   const [preview, setPreview] = React.useState('Loading...')
-  const { schemaPath } = useFieldProps()
 
-  const { cellData, richTextComponentMap } = useTableCell()
+  const {
+    cellData,
+    cellProps: { schemaPath },
+    richTextComponentMap,
+  } = useTableCell()
 
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
@@ -36,21 +38,24 @@ export const RichTextCell: React.FC<{
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
 
-  let featureProviderComponents: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
-    'features',
-  ) as GeneratedFeatureProviderComponent[] // TODO: Type better
-  // order by order
-  featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
+  const featureProviderComponents: GeneratedFeatureProviderComponent[] = (
+    richTextComponentMap.get('features') as GeneratedFeatureProviderComponent[]
+  ).sort((a, b) => a.order - b.order) // order by order
 
-  const featureComponentsWithFeaturesLength =
-    Array.from(richTextComponentMap.keys()).filter(
-      (key) => key.startsWith(`feature.`) && !key.includes('.fields.'),
-    ).length + featureProviderComponents.length
+  let featureProvidersAndComponentsToLoad = 0 // feature providers and components
+  for (const featureProvider of featureProviderComponents) {
+    const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
+      key.startsWith(`feature.${featureProvider.key}.components.`),
+    )
+
+    featureProvidersAndComponentsToLoad += 1
+    featureProvidersAndComponentsToLoad += featureComponentKeys.length
+  }
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
       const featureProvidersLocal: FeatureProviderClient<unknown>[] = []
-      let featureProvidersAndComponentsLoaded = 0
+      let featureProvidersAndComponentsLoaded = 0 // feature providers and components only
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
@@ -61,7 +66,7 @@ export const RichTextCell: React.FC<{
         }
       })
 
-      if (featureProvidersAndComponentsLoaded === featureComponentsWithFeaturesLength) {
+      if (featureProvidersAndComponentsLoaded === featureProvidersAndComponentsToLoad) {
         setFeatureProviders(featureProvidersLocal)
         setHasLoadedFeatures(true)
 
@@ -89,6 +94,7 @@ export const RichTextCell: React.FC<{
     }
   }, [
     admin,
+    featureProviderComponents,
     hasLoadedFeatures,
     clientFunctions,
     schemaPath,
@@ -96,10 +102,14 @@ export const RichTextCell: React.FC<{
     featureProviders,
     finalSanitizedEditorConfig,
     lexicalEditorConfig,
-    featureComponentsWithFeaturesLength,
+    richTextComponentMap,
+    featureProvidersAndComponentsToLoad,
   ])
 
   useEffect(() => {
+    if (!hasLoadedFeatures) {
+      return
+    }
     let dataToUse = cellData
     if (dataToUse == null || !hasLoadedFeatures || !finalSanitizedEditorConfig) {
       setPreview('')
@@ -156,6 +166,7 @@ export const RichTextCell: React.FC<{
             const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
               key.startsWith(`feature.${featureProvider.key}.components.`),
             )
+
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
             })
