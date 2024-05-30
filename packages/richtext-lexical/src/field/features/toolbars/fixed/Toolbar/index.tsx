@@ -3,9 +3,10 @@ import type { LexicalEditor } from 'lexical'
 
 import { useScrollInfo } from '@faceless-ui/scroll-info'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import useThrottledEffect from '@payloadcms/ui/hooks/useThrottledEffect'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import * as React from 'react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import type { EditorConfigContextType } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
@@ -167,35 +168,39 @@ function FixedToolbar({
     return null
   }, [clientProps?.disableIfParentHasFixedToolbar, parentWithFixedToolbar])
 
-  useEffect(() => {
-    if (!parentToolbarElem) {
-      // this also checks for clientProps?.disableIfParentHasFixedToolbar indirectly, see the parentToolbarElem useMemo
-      return
-    }
-    const currentToolbarElem = currentToolbarRef.current
-    if (!currentToolbarElem) {
-      return
-    }
-
-    const currentRect = currentToolbarElem.getBoundingClientRect()
-    const parentRect = parentToolbarElem.getBoundingClientRect()
-
-    // we only need to check for vertical overlap
-    const overlapping = !(
-      currentRect.bottom < parentRect.top || currentRect.top > parentRect.bottom
-    )
-
-    if (overlapping) {
-      currentToolbarRef.current.className = 'fixed-toolbar fixed-toolbar--overlapping'
-      parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
-    } else {
-      if (!currentToolbarRef.current.classList.contains('fixed-toolbar--overlapping')) {
+  useThrottledEffect(
+    () => {
+      if (!parentToolbarElem) {
+        // this also checks for clientProps?.disableIfParentHasFixedToolbar indirectly, see the parentToolbarElem useMemo
         return
       }
-      currentToolbarRef.current.className = 'fixed-toolbar'
-      parentToolbarElem.className = 'fixed-toolbar'
-    }
-  }, [currentToolbarRef, parentToolbarElem, y])
+      const currentToolbarElem = currentToolbarRef.current
+      if (!currentToolbarElem) {
+        return
+      }
+
+      const currentRect = currentToolbarElem.getBoundingClientRect()
+      const parentRect = parentToolbarElem.getBoundingClientRect()
+
+      // we only need to check for vertical overlap
+      const overlapping = !(
+        currentRect.bottom < parentRect.top || currentRect.top > parentRect.bottom
+      )
+
+      if (overlapping) {
+        currentToolbarRef.current.className = 'fixed-toolbar fixed-toolbar--overlapping'
+        parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
+      } else {
+        if (!currentToolbarRef.current.classList.contains('fixed-toolbar--overlapping')) {
+          return
+        }
+        currentToolbarRef.current.className = 'fixed-toolbar'
+        parentToolbarElem.className = 'fixed-toolbar'
+      }
+    },
+    50,
+    [currentToolbarRef, parentToolbarElem, y],
+  )
 
   return (
     <div
