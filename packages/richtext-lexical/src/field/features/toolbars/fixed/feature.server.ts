@@ -4,7 +4,7 @@ import { FixedToolbarFeatureClientComponent } from './feature.client.js'
 
 export type FixedToolbarFeatureProps = {
   /**
-   * @default true
+   * @default false
    *
    * If this is enabled, the toolbar will apply to the focused editor, not the editor with the FixedToolbarFeature.
    *
@@ -12,7 +12,7 @@ export type FixedToolbarFeatureProps = {
    */
   applyToFocusedEditor?: boolean
   /**
-   * @default true
+   * @default false
    *
    * If there is a parent editor with a fixed toolbar, this will disable the toolbar for this editor.
    */
@@ -27,7 +27,7 @@ export const FixedToolbarFeature: FeatureProviderProviderServer<
     feature: () => {
       const sanitizedProps: FixedToolbarFeatureProps = {
         applyToFocusedEditor:
-          props?.applyToFocusedEditor === undefined ? true : props.applyToFocusedEditor,
+          props?.applyToFocusedEditor === undefined ? false : props.applyToFocusedEditor,
         disableIfParentHasFixedToolbar:
           props?.disableIfParentHasFixedToolbar === undefined
             ? false
