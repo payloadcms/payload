@@ -1,9 +1,11 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { LexicalEditor } from 'lexical'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useRef, useState } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../types.js'
 
@@ -11,46 +13,122 @@ import type { SanitizedClientEditorConfig } from '../types.js'
 function generateQuickGuid(): string {
   return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12)
 }
+
 export interface EditorConfigContextType {
+  // Editor focus handling
+  blurEditor: (editorContext: EditorConfigContextType) => void
+  childrenEditors: React.RefObject<Map<string, EditorConfigContextType>>
+  editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
+  editorContainerRef: React.RefObject<HTMLDivElement>
   field: FormFieldBase & {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }
+  // Editor focus handling
+  focusEditor: (editorContext: EditorConfigContextType) => void
+  focusedEditor: EditorConfigContextType | null
+  parentEditor: EditorConfigContextType
+  registerChild: (uuid: string, editorContext: EditorConfigContextType) => void
+  unregisterChild?: (uuid: string) => void
   uuid: string
 }
 
 const Context: React.Context<EditorConfigContextType> = createContext({
   editorConfig: null,
   field: null,
-  uuid: generateQuickGuid(),
+  uuid: null,
 })
 
 export const EditorConfigProvider = ({
   children,
   editorConfig,
+  editorContainerRef,
   fieldProps,
+  parentContext,
 }: {
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
+  editorContainerRef: React.RefObject<HTMLDivElement>
   fieldProps: FormFieldBase & {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }
+  parentContext?: EditorConfigContextType
 }): React.ReactNode => {
+  const [editor] = useLexicalComposerContext()
   // State to store the UUID
-  const [uuid, setUuid] = useState(generateQuickGuid())
+  const [uuid] = useState(generateQuickGuid())
 
-  // When the component mounts, generate a new UUID only once
-  useEffect(() => {
-    setUuid(generateQuickGuid())
-  }, [])
+  const childrenEditors = useRef<Map<string, EditorConfigContextType>>(new Map())
+  const [focusedEditor, setFocusedEditor] = useState<EditorConfigContextType | null>(null)
+  const focusHistory = useRef<Set<string>>(new Set())
 
   const editorContext = useMemo(
-    () => ({ editorConfig, field: fieldProps, uuid }),
-    [editorConfig, fieldProps, uuid],
+    () =>
+      ({
+        blurEditor: (editorContext: EditorConfigContextType) => {
+          //setFocusedEditor(null) // Clear focused editor
+          focusHistory.current.clear() // Reset focus history when focus is lost
+        },
+        childrenEditors,
+        editor,
+        editorConfig,
+        editorContainerRef,
+        field: fieldProps,
+        focusEditor: (editorContext: EditorConfigContextType) => {
+          const editorUUID = editorContext.uuid
+
+          // Avoid recursion by checking if this editor is already focused in this cycle
+          if (focusHistory.current.has(editorUUID)) {
+            return
+          }
+
+          // Add this editor to the history to prevent future recursions in this cycle
+          focusHistory.current.add(editorUUID)
+          setFocusedEditor(editorContext)
+
+          // Propagate focus event to parent and children, ensuring they do not refocus this editor
+          if (parentContext?.uuid) {
+            parentContext.focusEditor(editorContext)
+          }
+          childrenEditors.current.forEach((childEditor, childUUID) => {
+            childEditor.focusEditor(editorContext)
+          })
+
+          focusHistory.current.clear()
+        },
+        focusedEditor,
+        parentEditor: parentContext,
+        registerChild: (childUUID, childEditorContext) => {
+          if (!childrenEditors.current.has(childUUID)) {
+            const newMap = new Map(childrenEditors.current)
+            newMap.set(childUUID, childEditorContext)
+            childrenEditors.current = newMap
+          }
+        },
+        unregisterChild: (childUUID) => {
+          if (childrenEditors.current.has(childUUID)) {
+            const newMap = new Map(childrenEditors.current)
+            newMap.delete(childUUID)
+            childrenEditors.current = newMap
+          }
+        },
+
+        uuid,
+      }) as EditorConfigContextType,
+    [
+      editor,
+      childrenEditors,
+      editorConfig,
+      editorContainerRef,
+      fieldProps,
+      focusedEditor,
+      parentContext,
+      uuid,
+    ],
   )
 
   return <Context.Provider value={editorContext}>{children}</Context.Provider>
