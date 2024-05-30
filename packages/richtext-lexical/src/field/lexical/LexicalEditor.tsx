@@ -100,19 +100,8 @@ export const LexicalEditor: React.FC<
 
   const ErrorBoundaryComponent = LexicalErrorBoundary.default || LexicalErrorBoundary
 
-  const childrenEditorsObject = Object.fromEntries(editorConfigContext.childrenEditors.current)
-  const focusedEditor = editorConfigContext.focusedEditor
-
   return (
     <React.Fragment>
-      <p>UUID: {editorConfigContext.uuid} </p>
-      <p>Parent UUID: {editorConfigContext.parentEditor?.uuid}</p>
-      <p>
-        Child UUIDs:{' '}
-        {(childrenEditorsObject && Object.keys(childrenEditorsObject).join(', ')) || 'None'}
-      </p>
-      <p>Focused editor: {focusedEditor && focusedEditor?.uuid}</p>
-
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'aboveContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />

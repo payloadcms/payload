@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.2",
+    "@faceless-ui/scroll-info": "1.3.0",
     "@lexical/headless": "0.15.0",
     "@lexical/link": "0.15.0",
     "@lexical/list": "0.15.0",
@@ -75,6 +76,7 @@
   },
   "peerDependencies": {
     "@faceless-ui/modal": "2.0.2",
+    "@faceless-ui/scroll-info": "1.3.0",
     "@lexical/headless": "0.15.0",
     "@lexical/link": "0.15.0",
     "@lexical/list": "0.15.0",

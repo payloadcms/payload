@@ -1,10 +1,11 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
+import { useScrollInfo } from '@faceless-ui/scroll-info'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import * as React from 'react'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import type { EditorConfigContextType } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
@@ -137,103 +138,64 @@ function FixedToolbar({
   clientProps,
   editor,
   editorConfig,
+  parentWithFixedToolbar,
 }: {
   anchorElem: HTMLElement
   clientProps?: FixedToolbarFeatureProps
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
+  parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
-  const toolbarRef = React.useRef<HTMLDivElement>(null)
+  const currentToolbarRef = React.useRef<HTMLDivElement>(null)
+
+  const { y } = useScrollInfo()
+
+  // Memoize the parent toolbar element
+  const parentToolbarElem = useMemo(() => {
+    if (!parentWithFixedToolbar || clientProps?.disableIfParentHasFixedToolbar) {
+      return null
+    }
+
+    const parentEditorElem = parentWithFixedToolbar.editorContainerRef.current
+    let sibling = parentEditorElem.previousElementSibling
+    while (sibling) {
+      if (sibling.classList.contains('fixed-toolbar')) {
+        return sibling
+      }
+      sibling = sibling.previousElementSibling
+    }
+    return null
+  }, [clientProps?.disableIfParentHasFixedToolbar, parentWithFixedToolbar])
 
   useEffect(() => {
-    if (clientProps?.disableIfParentHasFixedToolbar) {
-      // With disableIfParentHasFixedToolbar enabled, there will never be 2 overlapping fixed toolbars anyway
+    if (!parentToolbarElem) {
+      // this also checks for clientProps?.disableIfParentHasFixedToolbar indirectly, see the parentToolbarElem useMemo
+      return
+    }
+    const currentToolbarElem = currentToolbarRef.current
+    if (!currentToolbarElem) {
       return
     }
 
-    const docControls = document.querySelector('.doc-controls')
+    const currentRect = currentToolbarElem.getBoundingClientRect()
+    const parentRect = parentToolbarElem.getBoundingClientRect()
 
-    const cachedRef = toolbarRef.current
-    const observer = new IntersectionObserver(
-      ([e]) => {
-        if (e.intersectionRatio < 1) {
-          // check if you scrolled up (last window y is greater than current window y). If yes, return. // TODO
-
-          toolbarRef.current.className =
-            'fixed-toolbar lexical-fixed-toolbar-sticking-enabled lexical-fixed-toolbar-sticking'
-          // Remove lexical-fixed-toolbar-sticking-enabled class from all other dom elements which have it right now
-          const stickingElements = document.querySelectorAll(
-            '.lexical-fixed-toolbar-sticking-enabled',
-          )
-          stickingElements.forEach((element) => {
-            if (element !== toolbarRef.current) {
-              element.classList.remove('lexical-fixed-toolbar-sticking-enabled')
-            }
-          })
-        } else {
-          toolbarRef.current.className = 'fixed-toolbar'
-          // Add lexical-fixed-toolbar-sticking-enabled class back to all other dom elements which have lexical-fixed-toolbar-sticking
-          const stickingElements = document.querySelectorAll(
-            '.lexical-fixed-toolbar-sticking:not(.lexical-fixed-toolbar-sticking-enabled)',
-          )
-          stickingElements.forEach((element) => {
-            if (element !== toolbarRef.current) {
-              element.classList.add('lexical-fixed-toolbar-sticking-enabled')
-            }
-          })
-        }
-      },
-      {
-        root: null,
-        rootMargin: `-${docControls.getBoundingClientRect().height + toolbarRef.current.getBoundingClientRect().height}px 0px 1000000px 0px`,
-        threshold: [1],
-      },
+    // we only need to check for vertical overlap
+    const overlapping = !(
+      currentRect.bottom < parentRect.top || currentRect.top > parentRect.bottom
     )
 
-    // observer2 properly handles the case
-    // - when a child editor toolbar becomes unsticky due to scrolling down. This is not handled by observer1
-    // - when a child editor becomes sticky due to scrolling up. This is not handled by observer1
-    const observer2 = new IntersectionObserver(
-      ([e]) => {
-        if (e.intersectionRatio < 1) {
-          // Add lexical-fixed-toolbar-sticking-enabled class back to all other dom elements which have lexical-fixed-toolbar-sticking
-          const stickingElements = document.querySelectorAll(
-            '.lexical-fixed-toolbar-sticking:not(.lexical-fixed-toolbar-sticking-enabled)',
-          )
-          stickingElements.forEach((element) => {
-            if (element !== toolbarRef.current) {
-              element.classList.add('lexical-fixed-toolbar-sticking-enabled')
-            }
-          })
-        } else {
-          if (!toolbarRef.current.classList.contains('lexical-fixed-toolbar-sticking-enabled')) {
-            return
-          }
-
-          // Remove lexical-fixed-toolbar-sticking-enabled class from all other dom elements which have it right now
-          const stickingElements = document.querySelectorAll(
-            '.lexical-fixed-toolbar-sticking-enabled',
-          )
-          stickingElements.forEach((element) => {
-            if (element !== toolbarRef.current) {
-              element.classList.remove('lexical-fixed-toolbar-sticking-enabled')
-            }
-          })
-        }
-      },
-      {
-        root: null,
-        threshold: [1],
-      },
-    )
-
-    observer.observe(cachedRef)
-    observer2.observe(cachedRef)
-    return () => {
-      observer.unobserve(cachedRef)
-      observer2.unobserve(cachedRef)
+    if (overlapping) {
+      currentToolbarRef.current.className = 'fixed-toolbar fixed-toolbar--overlapping'
+      parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
+    } else {
+      if (!currentToolbarRef.current.classList.contains('fixed-toolbar--overlapping')) {
+        return
+      }
+      currentToolbarRef.current.className = 'fixed-toolbar'
+      parentToolbarElem.className = 'fixed-toolbar'
     }
-  }, [toolbarRef, clientProps?.disableIfParentHasFixedToolbar])
+  }, [currentToolbarRef, parentToolbarElem, y])
 
   return (
     <div
@@ -243,7 +205,7 @@ function FixedToolbar({
         // the parent editor will be focused, and the child editor will lose focus.
         event.stopPropagation()
       }}
-      ref={toolbarRef}
+      ref={currentToolbarRef}
     >
       {editor.isEditable() && (
         <React.Fragment>
@@ -310,5 +272,12 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
     return null
   }
 
-  return <FixedToolbar anchorElem={anchorElem} editor={editor} editorConfig={editorConfig} />
+  return (
+    <FixedToolbar
+      anchorElem={anchorElem}
+      editor={editor}
+      editorConfig={editorConfig}
+      parentWithFixedToolbar={parentWithFixedToolbar}
+    />
+  )
 }
