@@ -7,10 +7,10 @@ import React from 'react'
 import type { SelectFieldProps } from './index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../shared/FieldDescription/index.js'
+import { FieldError } from '../shared/FieldError/index.js'
+import { FieldLabel } from '../shared/FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 

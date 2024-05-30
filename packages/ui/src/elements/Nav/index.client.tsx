@@ -6,7 +6,7 @@ import React, { Fragment } from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
@@ -93,7 +93,7 @@ export const DefaultNavClient: React.FC = () => {
                   tabIndex={!navOpen ? -1 : undefined}
                 >
                   <span className={`${baseClass}__link-icon`}>
-                    <Chevron direction="right" />
+                    <ChevronIcon direction="right" />
                   </span>
                   <span className={`${baseClass}__link-label`}>{entityLabel}</span>
                 </LinkElement>

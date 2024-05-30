@@ -1,7 +1,7 @@
 'use client'
 import type { DropdownIndicatorProps } from 'react-select'
 
-import { Chevron } from '@payloadcms/ui/icons/Chevron'
+import { ChevronIcon } from '@payloadcms/ui/icons/Chevron'
 import React, { type JSX } from 'react'
 
 import type { Option as OptionType } from '../types.js'
@@ -28,7 +28,7 @@ export const DropdownIndicator: React.FC<
       }}
       type="button"
     >
-      <Chevron className={`${baseClass}__icon`} />
+      <ChevronIcon className={`${baseClass}__icon`} />
     </button>
   )
 }

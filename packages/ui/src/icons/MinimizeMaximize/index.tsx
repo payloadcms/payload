@@ -6,7 +6,7 @@ type Props = {
   className?: string
   isMinimized?: boolean
 }
-export const MinimizeMaximize: React.FC<Props> = ({ className, isMinimized }) => {
+export const MinimizeMaximizeIcon: React.FC<Props> = ({ className, isMinimized }) => {
   const classes = [
     baseClass,
     isMinimized ? `${baseClass}--minimized` : `${baseClass}--maximized`,

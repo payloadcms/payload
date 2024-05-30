@@ -2,7 +2,7 @@
 import type { EditViewProps } from 'payload/types'
 
 import { useDraggable } from '@dnd-kit/core'
-import { DragHandle } from '@payloadcms/ui/icons/DragHandle'
+import { DragHandleIcon } from '@payloadcms/ui/icons/DragHandle'
 import React from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'
@@ -40,7 +40,7 @@ const DraggableToolbar: React.FC<EditViewProps> = (props) => {
         ref={setNodeRef}
         type="button"
       >
-        <DragHandle />
+        <DragHandleIcon />
       </button>
       <ToolbarControls {...props} />
     </div>

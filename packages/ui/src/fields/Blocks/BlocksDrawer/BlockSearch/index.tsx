@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import { Search } from '../../../../graphics/Search/index.js'
+import { SearchIcon } from '../../../../icons/Search/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
 
@@ -22,7 +22,7 @@ export const BlockSearch: React.FC<{ setSearchTerm: (term: string) => void }> = 
         onChange={handleChange}
         placeholder={t('fields:searchForBlock')}
       />
-      <Search />
+      <SearchIcon />
     </div>
   )
 }

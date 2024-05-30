@@ -12,7 +12,7 @@ export type SortColumnProps = {
 
 import type { FieldBase } from 'payload/types'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
@@ -64,7 +64,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             onClick={() => setSort(asc)}
             type="button"
           >
-            <Chevron direction="up" />
+            <ChevronIcon direction="up" />
           </button>
           <button
             aria-label={t('general:sortByLabelDirection', {
@@ -75,7 +75,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             onClick={() => setSort(desc)}
             type="button"
           >
-            <Chevron />
+            <ChevronIcon />
           </button>
         </div>
       )}

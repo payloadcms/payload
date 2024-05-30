@@ -10,7 +10,7 @@ const css = `
   }
 `
 
-const PayloadLogo: React.FC = () => (
+export const PayloadLogo: React.FC = () => (
   <svg
     className="graphic-logo"
     fill="none"

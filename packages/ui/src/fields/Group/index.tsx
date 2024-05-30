@@ -9,7 +9,6 @@ import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import {
   useFormInitializing,
@@ -22,6 +21,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRow } from '../Row/provider.js'
 import { useTabs } from '../Tabs/provider.js'
+import { FieldDescription } from '../shared/FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider.js'

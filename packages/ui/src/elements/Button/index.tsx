@@ -3,12 +3,12 @@ import React, { Fragment, forwardRef, isValidElement } from 'react'
 
 import type { Props } from './types.js'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Edit } from '../../icons/Edit/index.js'
 import { LinkIcon } from '../../icons/Link/index.js'
-import { Plus } from '../../icons/Plus/index.js'
+import { PlusIcon } from '../../icons/Plus/index.js'
 import { Swap } from '../../icons/Swap/index.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 

@@ -3,9 +3,9 @@
 import type { EditViewProps } from 'payload/types'
 
 import { Popup, PopupList } from '@payloadcms/ui/elements/Popup'
-import { Chevron } from '@payloadcms/ui/icons/Chevron'
+import { ChevronIcon } from '@payloadcms/ui/icons/Chevron'
 import { LinkIcon } from '@payloadcms/ui/icons/Link'
-import { X } from '@payloadcms/ui/icons/X'
+import { XIcon } from '@payloadcms/ui/icons/X'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
@@ -36,7 +36,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                 {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
               </span>
               &nbsp;
-              <Chevron className={`${baseClass}__chevron`} />
+              <ChevronIcon className={`${baseClass}__chevron`} />
             </React.Fragment>
           }
           className={`${baseClass}__breakpoint`}
@@ -78,7 +78,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
       <div className={`${baseClass}__device-size`}>
         <PreviewFrameSizeInput axis="x" />
         <span className={`${baseClass}__size-divider`}>
-          <X />
+          <XIcon />
         </span>
         <PreviewFrameSizeInput axis="y" />
       </div>
@@ -87,7 +87,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           <React.Fragment>
             <span>{zoom * 100}%</span>
             &nbsp;
-            <Chevron className={`${baseClass}__chevron`} />
+            <ChevronIcon className={`${baseClass}__chevron`} />
           </React.Fragment>
         }
         className={`${baseClass}__zoom`}

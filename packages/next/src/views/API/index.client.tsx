@@ -5,7 +5,7 @@ import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
 import { NumberField as NumberInput } from '@payloadcms/ui/fields/Number'
 import { Form } from '@payloadcms/ui/forms/Form'
-import { MinimizeMaximize } from '@payloadcms/ui/icons/MinimizeMaximize'
+import { MinimizeMaximizeIcon } from '@payloadcms/ui/icons/MinimizeMaximize'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import { useConfig } from '@payloadcms/ui/providers/Config'
@@ -194,7 +194,7 @@ export const APIViewClient: React.FC = () => {
             onClick={() => setFullscreen(!fullscreen)}
             type="button"
           >
-            <MinimizeMaximize isMinimized={!fullscreen} />
+            <MinimizeMaximizeIcon isMinimized={!fullscreen} />
           </button>
         </div>
         <div className={`${baseClass}__results`}>

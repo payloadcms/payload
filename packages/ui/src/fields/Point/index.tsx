@@ -15,10 +15,10 @@ const baseClass = 'point'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../shared/FieldDescription/index.js'
+import { FieldError } from '../shared/FieldError/index.js'
+import { FieldLabel } from '../shared/FieldLabel/index.js'
 
 export type PointFieldProps = FormFieldBase & {
   name?: string

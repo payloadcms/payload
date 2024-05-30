@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const Plus: React.FC = () => (
+export const PlusIcon: React.FC = () => (
   <svg
     className="icon icon--plus"
     viewBox="0 0 25 25"
