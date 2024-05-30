@@ -31,7 +31,7 @@ export const getPredefinedMigration = async ({
       cleanPath = cleanPath.replaceAll('\\', '/')
       const moduleURL = pathToFileURL(cleanPath)
       try {
-        const { downSQL, imports, upSQL } = await import(moduleURL.href)
+        const { downSQL, imports, upSQL } = await eval(`import'${moduleURL.href}')`)
         return { downSQL, imports, upSQL }
       } catch (error) {
         payload.logger.error({
