@@ -1,7 +1,7 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
-import { useScrollInfo } from '@faceless-ui/scroll-info'
+import * as scrollInfoImport from '@faceless-ui/scroll-info'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import useThrottledEffect from '@payloadcms/ui/hooks/useThrottledEffect'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
@@ -147,6 +147,8 @@ function FixedToolbar({
   editorConfig: SanitizedClientEditorConfig
   parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
+  const { useScrollInfo } = scrollInfoImport
+
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
 
   const { y } = useScrollInfo()
