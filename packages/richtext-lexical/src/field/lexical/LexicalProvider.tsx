@@ -6,6 +6,7 @@ import type { LexicalEditor } from 'lexical'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
 import * as React from 'react'
+import { useMemo } from 'react'
 
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
@@ -29,19 +30,47 @@ export type LexicalProviderProps = {
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, onChange, path, readOnly } = props
-  let { value } = props
+  const { editorConfig, fieldProps, value, onChange, path, readOnly } = props
+
   const parentContext = useEditorConfigContext()
 
   const editorContainerRef = React.useRef<HTMLDivElement>(null)
 
-  const [initialConfig, setInitialConfig] = React.useState<InitialConfigType | null>(null)
 
-  // set lexical config in useEffect: // TODO: Is this the most performant way to do this? Prob not
-  React.useEffect(() => {
-    const newInitialConfig: InitialConfigType = {
+  const processedValue = useMemo(() => {
+    let processed = value
+    if (editorConfig?.features?.hooks?.load?.length) {
+      editorConfig.features.hooks.load.forEach((hook) => {
+        processed = hook({ incomingEditorState: processed })
+      })
+    }
+    return processed
+  }, [editorConfig, value])
+
+  // useMemo for the initialConfig that depends on readOnly and processedValue
+  const initialConfig = useMemo<InitialConfigType>(() => {
+    if (processedValue && typeof processedValue !== 'object') {
+      throw new Error(
+        'The value passed to the Lexical editor is not an object. This is not supported. Please remove the data from the field and start again. This is the value that was passed in: ' +
+          JSON.stringify(processedValue),
+      )
+    }
+
+    if (processedValue && Array.isArray(processedValue) && !('root' in processedValue)) {
+      throw new Error(
+        'You have tried to pass in data from the old, Slate editor, to the new, Lexical editor. This is not supported. There is no automatic conversion from Slate to Lexical data available yet (coming soon). Please remove the data from the field and start again.',
+      )
+    }
+
+    if (processedValue && 'jsonContent' in processedValue) {
+      throw new Error(
+        'You have tried to pass in data from payload-plugin-lexical. This is not supported. The data structure has changed in this editor, compared to the plugin, and there is no automatic conversion available yet (coming soon). Please remove the data from the field and start again.',
+      )
+    }
+
+    return {
       editable: readOnly !== true,
-      editorState: value != null ? JSON.stringify(value) : undefined,
+      editorState: processedValue != null ? JSON.stringify(processedValue) : undefined,
       namespace: editorConfig.lexical.namespace,
       nodes: [...getEnabledNodes({ editorConfig })],
       onError: (error: Error) => {
@@ -49,33 +78,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       },
       theme: editorConfig.lexical.theme,
     }
-    setInitialConfig(newInitialConfig)
-  }, [editorConfig, readOnly, value])
-
-  if (editorConfig?.features?.hooks?.load?.length) {
-    editorConfig.features.hooks.load.forEach((hook) => {
-      value = hook({ incomingEditorState: value })
-    })
-  }
-
-  if (value && typeof value !== 'object') {
-    throw new Error(
-      'The value passed to the Lexical editor is not an object. This is not supported. Please remove the data from the field and start again. This is the value that was passed in: ' +
-        JSON.stringify(value),
-    )
-  }
-
-  if (value && Array.isArray(value) && !('root' in value)) {
-    throw new Error(
-      'You have tried to pass in data from the old, Slate editor, to the new, Lexical editor. This is not supported. There is no automatic conversion from Slate to Lexical data available yet (coming soon). Please remove the data from the field and start again.',
-    )
-  }
-
-  if (value && 'jsonContent' in value) {
-    throw new Error(
-      'You have tried to pass in data from payload-plugin-lexical. This is not supported. The data structure has changed in this editor, compared to the plugin, and there is no automatic conversion available yet (coming soon). Please remove the data from the field and start again.',
-    )
-  }
+  }, [editorConfig, processedValue, readOnly])
 
   if (!initialConfig) {
     return <p>Loading...</p>

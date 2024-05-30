@@ -8,7 +8,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { TableCellProvider, useTableCell } from '../TableCellProvider/index.js'
+import { useTableCell } from '../TableCellProvider/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
 
@@ -17,13 +17,11 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const {
     name,
-    CellComponentOverride,
     className: classNameFromProps,
     fieldType,
     isFieldAffectingData,
     label,
     onClick: onClickFromProps,
-    richTextComponentMap,
   } = props
 
   const { i18n } = useTranslation()
@@ -77,7 +75,13 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   if (name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell cellData={`ID: ${cellData}`} name={name} nowrap rowData={rowData} />
+        <CodeCell
+          cellData={`ID: ${cellData}`}
+          name={name}
+          nowrap
+          rowData={rowData}
+          schemaPath={cellContext?.cellProps?.schemaPath}
+        />
       </WrapElement>
     )
   }
@@ -85,15 +89,9 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
     typeof cellData !== 'undefined' && cellComponents[fieldType]
 
-  let CellComponent: React.ReactNode =
-    cellData &&
-    (CellComponentOverride ? ( // CellComponentOverride is used for richText
-      <TableCellProvider richTextComponentMap={richTextComponentMap}>
-        {CellComponentOverride}
-      </TableCellProvider>
-    ) : null)
+  let CellComponent: React.ReactNode = null
 
-  if (!CellComponent && DefaultCellComponent) {
+  if (DefaultCellComponent) {
     CellComponent = (
       <DefaultCellComponent
         cellData={cellData}
@@ -102,7 +100,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
         {...props}
       />
     )
-  } else if (!CellComponent && !DefaultCellComponent) {
+  } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
     if (customCellContext.uploadConfig && isFieldAffectingData && name === 'filename') {
       const FileCellComponent = cellComponents.File
