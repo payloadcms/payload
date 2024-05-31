@@ -9,7 +9,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const componentWebpackConfig = {
-  entry: path.resolve(dirname, './src/index.ts'),
+  entry: {
+    server: path.resolve(dirname, './src/exports/server/index.ts'),
+    client: path.resolve(dirname, './src/exports/client/index.ts'),
+  },
   externals: [
     'react',
     'react-dom',
@@ -33,7 +36,12 @@ const componentWebpackConfig = {
                   jsc: {
                     experimental: {
                       plugins: [
-                        // clear the plugins used in .swcrc
+                        [
+                          'swc-plugin-transform-remove-imports',
+                          {
+                            test: '\\.(scss|css)$',
+                          },
+                        ],
                       ],
                     },
                     parser: {
@@ -43,23 +51,6 @@ const componentWebpackConfig = {
                   },
                 },
               },
-            ],
-          },
-          {
-            sideEffects: true,
-            test: /\.(scss|css)$/,
-            use: [
-              MiniCSSExtractPlugin.loader,
-              'css-loader',
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    plugins: ['postcss-preset-env'],
-                  },
-                },
-              },
-              'sass-loader',
             ],
           },
           {
@@ -78,24 +69,19 @@ const componentWebpackConfig = {
       new TerserJSPlugin({
         extractComments: false,
       }),
-      new OptimizeCSSAssetsPlugin({}),
     ],
   },
-  output: {
-    filename: 'index.js',
-    libraryTarget: 'commonjs2',
-    path: path.resolve(dirname, './dist/prod'),
-    publicPath: '/',
-  },
   plugins: [
-    new MiniCSSExtractPlugin({
-      filename: 'styles.css',
-      ignoreOrder: true,
-    }),
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
     }),
   ],
+  output: {
+    filename: '[name].js',
+    libraryTarget: 'commonjs2',
+    path: path.resolve(dirname, './dist'),
+    publicPath: '/',
+  },
   resolve: {
     extensionAlias: {
       '.js': ['.ts', '.tsx', '.js', '.scss', '.css'],

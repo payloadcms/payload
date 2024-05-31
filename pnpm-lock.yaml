@@ -1656,6 +1656,9 @@ importers:
       swc-loader:
         specifier: ^0.2.6
         version: 0.2.6(@swc/core@1.4.13)(webpack@5.91.0)
+      swc-plugin-transform-remove-imports:
+        specifier: ^1.12.1
+        version: 1.12.1
       terser-webpack-plugin:
         specifier: ^5.3.10
         version: 5.3.10(@swc/core@1.4.13)(esbuild@0.19.12)(webpack@5.91.0)
