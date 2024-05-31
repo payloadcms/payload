@@ -4,9 +4,9 @@ import type { ErrorProps } from 'payload/types'
 
 import React from 'react'
 
-import { Tooltip } from '../../../elements/Tooltip/index.js'
-import { useFieldProps } from '../../../forms/FieldPropsProvider/index.js'
-import { useFormFields, useFormSubmitted } from '../../../forms/Form/context.js'
+import { Tooltip } from '../../elements/Tooltip/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
 import './index.scss'
 
 const baseClass = 'field-error'

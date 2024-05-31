@@ -8,7 +8,7 @@ import React, { useCallback } from 'react'
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldLabel } from '../shared/FieldLabel/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -20,8 +20,8 @@ import type { FormFieldBase } from '../shared/index.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldDescription } from '../shared/FieldDescription/index.js'
-import { FieldError } from '../shared/FieldError/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type DateFieldProps = FormFieldBase & {
   date?: DateField['admin']['date']

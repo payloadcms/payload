@@ -5,9 +5,9 @@ import React from 'react'
 import type { TextAreaInputProps } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../shared/FieldDescription/index.js'
-import { FieldError } from '../shared/FieldError/index.js'
-import { FieldLabel } from '../shared/FieldLabel/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 

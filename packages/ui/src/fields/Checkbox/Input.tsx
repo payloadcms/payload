@@ -5,7 +5,7 @@ import React from 'react'
 
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
-import { FieldLabel } from '../shared/FieldLabel/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
   AfterInput?: React.ReactNode

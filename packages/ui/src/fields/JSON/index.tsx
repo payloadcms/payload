@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldLabel } from '../shared/FieldLabel/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -17,8 +17,8 @@ import type { JSONField as JSONFieldType } from 'payload/types'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { FieldDescription } from '../shared/FieldDescription/index.js'
-import { FieldError } from '../shared/FieldError/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']

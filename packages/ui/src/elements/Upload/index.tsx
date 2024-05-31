@@ -4,7 +4,7 @@ import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { FieldError } from '../../fields/shared/FieldError/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'

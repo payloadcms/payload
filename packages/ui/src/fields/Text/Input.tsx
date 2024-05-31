@@ -6,9 +6,9 @@ import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../shared/FieldDescription/index.js'
-import { FieldError } from '../shared/FieldError/index.js'
-import { FieldLabel } from '../shared/FieldLabel/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 

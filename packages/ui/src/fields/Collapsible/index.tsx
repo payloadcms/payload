@@ -24,7 +24,7 @@ import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/ty
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { FieldDescription } from '../shared/FieldDescription/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
