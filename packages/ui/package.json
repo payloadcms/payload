@@ -90,7 +90,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:webpack && pnpm build:types",
     "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
     "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
