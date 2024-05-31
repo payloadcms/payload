@@ -1,3 +1,4 @@
+export { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
 export type { Option } from '../../elements/ReactSelect/types.js'
 export { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
