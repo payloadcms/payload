@@ -1,5 +1,9 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical'
+import type {
+  EditorConfig as LexicalEditorConfig,
+  SerializedEditorState,
+  SerializedLexicalNode,
+} from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { withNullableJSONSchemaType } from 'payload/utilities'
@@ -29,6 +33,7 @@ import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { i18n } from './i18n.js'
 import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
+import { recurseNodeTree } from './recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
@@ -121,105 +126,276 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
-      i18n: featureI18n,
-      /* hooks: {
-        afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
-        afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
-        beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
-        beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
-        beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
-      },*/
-      /* // TODO: Figure out docWithLocales / originalSiblingDoc => node matching. Can't use indexes, as the order of nodes could technically change between hooks.
       hooks: {
         afterChange: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
-                if (afterChangeHooks?.has(node.type)) {
-                  for (const hook of afterChangeHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          async ({ context: _context, findMany, operation, overrideAccess, path, req, value }) => {
+            if (!finalSanitizedEditorConfig.features.hooks.afterChange.size) {
+              return value
+            }
+            const context: any = _context
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            /**
+             * Get the originalNodeIDMap from the beforeValidate hook, which is always run before this hook.
+             */
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = context.internal.lexical[path].originalNodeIDMap
+
+            recurseNodeTree({
+              nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
+              if (afterChangeHooks?.has(node.type)) {
+                for (const hook of afterChangeHooks.get(node.type)) {
+                  node = await hook({
+                    context,
+                    findMany,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    overrideAccess,
+                    req,
+                  })
+                }
+              }
+            }
 
             return value
           },
         ],
         afterRead: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
-                if (afterReadHooks?.has(node.type)) {
-                  for (const hook of afterReadHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          /**
+           * afterRead hooks do not receive the originalNode. Thus, they can run on all nodes, not just nodes with an ID.
+           */
+          async ({ context: context, findMany, operation, overrideAccess, req, value }) => {
+            if (!finalSanitizedEditorConfig.features.hooks.afterRead.size) {
+              return value
+            }
+            const flattenedNodes: SerializedLexicalNode[] = []
+
+            recurseNodeTree({
+              flattenedNodes,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            for (let node of flattenedNodes) {
+              const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
+              if (afterReadHooks?.has(node.type)) {
+                for (const hook of afterReadHooks.get(node.type)) {
+                  node = await hook({
+                    context,
+                    findMany,
+                    node,
+                    operation,
+                    originalNode: null,
+                    overrideAccess,
+                    req,
+                  })
+                }
+              }
+            }
 
             return value
           },
         ],
         beforeChange: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
-                if (beforeChangeHooks?.has(node.type)) {
-                  for (const hook of beforeChangeHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          async ({ context: _context, findMany, operation, overrideAccess, path, req, value }) => {
+            if (!finalSanitizedEditorConfig.features.hooks.beforeChange.size) {
+              return value
+            }
+            const context: any = _context
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            /**
+             * Get the originalNodeIDMap from the beforeValidate hook, which is always run before this hook.
+             */
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = context.internal.lexical[path].originalNodeIDMap
+
+            recurseNodeTree({
+              nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
+              if (beforeChangeHooks?.has(node.type)) {
+                for (const hook of beforeChangeHooks.get(node.type)) {
+                  node = await hook({
+                    context,
+                    findMany,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    overrideAccess,
+                    req,
+                  })
+                }
+              }
+            }
 
             return value
           },
         ],
         beforeDuplicate: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
-                if (beforeDuplicateHooks?.has(node.type)) {
-                  for (const hook of beforeDuplicateHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          async ({ context: _context, findMany, operation, overrideAccess, path, req, value }) => {
+            if (!finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size) {
+              return value
+            }
+            const context: any = _context
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            /**
+             * Get the originalNodeIDMap from the beforeValidate hook, which is always run before this hook.
+             */
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = context.internal.lexical[path].originalNodeIDMap
+
+            recurseNodeTree({
+              nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
+              if (beforeDuplicateHooks?.has(node.type)) {
+                for (const hook of beforeDuplicateHooks.get(node.type)) {
+                  node = await hook({
+                    context,
+                    findMany,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    overrideAccess,
+                    req,
+                  })
+                }
+              }
+            }
 
             return value
           },
         ],
         beforeValidate: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
-                if (beforeValidateHooks?.has(node.type)) {
-                  for (const hook of beforeValidateHooks.get(node.type)) {
-                    /**
-                     * We cannot pass the originalNode here, as there is no way to map one node to a previous one, as a previous originalNode might be in a different position
-                     */ /*
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+          async ({
+            context: _context,
+            findMany,
+            operation,
+            overrideAccess,
+            path,
+            previousValue,
+            req,
+            value,
+          }) => {
+            // return value if there are NO hooks
+            if (
+              !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
+              !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
+              !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
+              !finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size
+            ) {
+              return value
+            }
+
+            const context: any = _context
+            /**
+             * beforeValidate is the first field hook which runs. This is where we can create the node map, which can then be used in the other hooks.
+             *
+             */
+
+            /**
+             * flattenedNodes contains all nodes in the editor, in the order they appear in the editor. They will be used for the following hooks:
+             * - afterRead
+             *
+             * The other hooks require nodes to have IDs, which is why those are ran only from the nodeIDMap. They require IDs because they have both doc/siblingDoc and data/siblingData, and
+             * thus require a reliable way to match new node data to old node data. Given that node positions can change in between hooks, this is only reliably possible for nodes which are saved with
+             * an ID.
+             */
+            //const flattenedNodes: SerializedLexicalNode[] = []
+
+            /**
+             * Only nodes with id's (so, nodes with hooks added to them) will be added to the nodeIDMap. They will be used for the following hooks:
+             * - afterChange
+             * - beforeChange
+             * - beforeValidate
+             * - beforeDuplicate
+             *
+             * Other hooks are handled by the flattenedNodes. All nodes in the nodeIDMap are part of flattenedNodes.
+             */
+
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            recurseNodeTree({
+              nodeIDMap: originalNodeIDMap,
+              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            // Add to context, for other hooks to use
+            if (!context.internal) {
+              context.internal = {}
+            }
+            if (!context.internal.lexical) {
+              context.internal.lexical = {}
+            }
+            context.internal.lexical[path] = {
+              originalNodeIDMap,
+            }
+
+            /**
+             * Now that the maps for all hooks are set up, we can run the validate hook
+             */
+            if (!finalSanitizedEditorConfig.features.hooks.beforeValidate.size) {
+              return value
+            }
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+            recurseNodeTree({
+              //flattenedNodes,
+              nodeIDMap,
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
+              if (beforeValidateHooks?.has(node.type)) {
+                for (const hook of beforeValidateHooks.get(node.type)) {
+                  node = await hook({
+                    context,
+                    findMany,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    overrideAccess,
+                    req,
+                  })
                 }
               }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
+            }
 
-          return value
-        },
-      ],
-    },*/
+            return value
+          },
+        ],
+      },
+      i18n: featureI18n,
       outputSchema: ({
         collectionIDFieldTypes,
         config,

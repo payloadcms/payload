@@ -240,10 +240,12 @@ export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   context: RequestContext
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
-  /** The value of the field. */
+  /** The value of the node. */
   node?: T
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
+  /** The value of the node before any changes. Not available in afterRead hooks */
+  originalNode?: T
   overrideAccess?: boolean
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
