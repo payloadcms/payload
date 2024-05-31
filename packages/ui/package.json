@@ -146,6 +146,7 @@
     "babel-plugin-transform-remove-imports": "^1.7.1",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
+    "esbuild": "^0.21.4",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",

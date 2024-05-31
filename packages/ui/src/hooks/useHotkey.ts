@@ -110,7 +110,7 @@ export const useHotkey = (
       ) {
         // get the maximum edit depth by counting the number of open drawers. modalState is and object which contains the state of all drawers.
         const maxEditDepth =
-          Object.keys(modalState).filter((key) => modalState[key]?.isOpen)?.length + 1 ?? 1
+          Object.keys(modalState).filter((key) => modalState[key]?.isOpen)?.length + 1 || 1
 
         if (maxEditDepth !== editDepth) {
           // We only want to execute the hotkey from the most top-level drawer / edit depth.

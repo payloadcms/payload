@@ -1,0 +1,317 @@
+import { a as s, b as t, c as m, d as n } from './chunk-RD4BVJYH.js'
+import './chunk-DGJUBN33.js'
+var y = {
+    lessThanXSeconds: { one: 'bir saniyeden az', other: '{{count}} saniyeden az' },
+    xSeconds: { one: '1 saniye', other: '{{count}} saniye' },
+    halfAMinute: 'yar\u0131m dakika',
+    lessThanXMinutes: { one: 'bir dakikadan az', other: '{{count}} dakikadan az' },
+    xMinutes: { one: '1 dakika', other: '{{count}} dakika' },
+    aboutXHours: { one: 'yakla\u015F\u0131k 1 saat', other: 'yakla\u015F\u0131k {{count}} saat' },
+    xHours: { one: '1 saat', other: '{{count}} saat' },
+    xDays: { one: '1 g\xFCn', other: '{{count}} g\xFCn' },
+    aboutXWeeks: { one: 'yakla\u015F\u0131k 1 hafta', other: 'yakla\u015F\u0131k {{count}} hafta' },
+    xWeeks: { one: '1 hafta', other: '{{count}} hafta' },
+    aboutXMonths: { one: 'yakla\u015F\u0131k 1 ay', other: 'yakla\u015F\u0131k {{count}} ay' },
+    xMonths: { one: '1 ay', other: '{{count}} ay' },
+    aboutXYears: {
+      one: 'yakla\u015F\u0131k 1 y\u0131l',
+      other: 'yakla\u015F\u0131k {{count}} y\u0131l',
+    },
+    xYears: { one: '1 y\u0131l', other: '{{count}} y\u0131l' },
+    overXYears: { one: '1 y\u0131ldan fazla', other: '{{count}} y\u0131ldan fazla' },
+    almostXYears: { one: 'neredeyse 1 y\u0131l', other: 'neredeyse {{count}} y\u0131l' },
+  },
+  l = (a, r, i) => {
+    let e,
+      o = y[a]
+    return (
+      typeof o == 'string'
+        ? (e = o)
+        : r === 1
+          ? (e = o.one)
+          : (e = o.other.replace('{{count}}', r.toString())),
+      i?.addSuffix ? (i.comparison && i.comparison > 0 ? e + ' sonra' : e + ' \xF6nce') : e
+    )
+  }
+var f = { full: 'd MMMM y EEEE', long: 'd MMMM y', medium: 'd MMM y', short: 'dd.MM.yyyy' },
+  k = { full: 'HH:mm:ss zzzz', long: 'HH:mm:ss z', medium: 'HH:mm:ss', short: 'HH:mm' },
+  p = {
+    full: "{{date}} 'saat' {{time}}",
+    long: "{{date}} 'saat' {{time}}",
+    medium: '{{date}}, {{time}}',
+    short: '{{date}}, {{time}}',
+  },
+  d = {
+    date: s({ formats: f, defaultWidth: 'full' }),
+    time: s({ formats: k, defaultWidth: 'full' }),
+    dateTime: s({ formats: p, defaultWidth: 'full' }),
+  }
+var g = {
+    lastWeek: "'ge\xE7en hafta' eeee 'saat' p",
+    yesterday: "'d\xFCn saat' p",
+    today: "'bug\xFCn saat' p",
+    tomorrow: "'yar\u0131n saat' p",
+    nextWeek: "eeee 'saat' p",
+    other: 'P',
+  },
+  c = (a, r, i, e) => g[a]
+var b = {
+    narrow: ['M\xD6', 'MS'],
+    abbreviated: ['M\xD6', 'MS'],
+    wide: ['Milattan \xD6nce', 'Milattan Sonra'],
+  },
+  P = {
+    narrow: ['1', '2', '3', '4'],
+    abbreviated: ['1\xC7', '2\xC7', '3\xC7', '4\xC7'],
+    wide: [
+      '\u0130lk \xE7eyrek',
+      '\u0130kinci \xC7eyrek',
+      '\xDC\xE7\xFCnc\xFC \xE7eyrek',
+      'Son \xE7eyrek',
+    ],
+  },
+  M = {
+    narrow: ['O', '\u015E', 'M', 'N', 'M', 'H', 'T', 'A', 'E', 'E', 'K', 'A'],
+    abbreviated: [
+      'Oca',
+      '\u015Eub',
+      'Mar',
+      'Nis',
+      'May',
+      'Haz',
+      'Tem',
+      'A\u011Fu',
+      'Eyl',
+      'Eki',
+      'Kas',
+      'Ara',
+    ],
+    wide: [
+      'Ocak',
+      '\u015Eubat',
+      'Mart',
+      'Nisan',
+      'May\u0131s',
+      'Haziran',
+      'Temmuz',
+      'A\u011Fustos',
+      'Eyl\xFCl',
+      'Ekim',
+      'Kas\u0131m',
+      'Aral\u0131k',
+    ],
+  },
+  w = {
+    narrow: ['P', 'P', 'S', '\xC7', 'P', 'C', 'C'],
+    short: ['Pz', 'Pt', 'Sa', '\xC7a', 'Pe', 'Cu', 'Ct'],
+    abbreviated: ['Paz', 'Pzt', 'Sal', '\xC7ar', 'Per', 'Cum', 'Cts'],
+    wide: [
+      'Pazar',
+      'Pazartesi',
+      'Sal\u0131',
+      '\xC7ar\u015Famba',
+      'Per\u015Fembe',
+      'Cuma',
+      'Cumartesi',
+    ],
+  },
+  z = {
+    narrow: {
+      am: '\xF6\xF6',
+      pm: '\xF6s',
+      midnight: 'gy',
+      noon: '\xF6',
+      morning: 'sa',
+      afternoon: '\xF6s',
+      evening: 'ak',
+      night: 'ge',
+    },
+    abbreviated: {
+      am: '\xD6\xD6',
+      pm: '\xD6S',
+      midnight: 'gece yar\u0131s\u0131',
+      noon: '\xF6\u011Fle',
+      morning: 'sabah',
+      afternoon: '\xF6\u011Fleden sonra',
+      evening: 'ak\u015Fam',
+      night: 'gece',
+    },
+    wide: {
+      am: '\xD6.\xD6.',
+      pm: '\xD6.S.',
+      midnight: 'gece yar\u0131s\u0131',
+      noon: '\xF6\u011Fle',
+      morning: 'sabah',
+      afternoon: '\xF6\u011Fleden sonra',
+      evening: 'ak\u015Fam',
+      night: 'gece',
+    },
+  },
+  v = {
+    narrow: {
+      am: '\xF6\xF6',
+      pm: '\xF6s',
+      midnight: 'gy',
+      noon: '\xF6',
+      morning: 'sa',
+      afternoon: '\xF6s',
+      evening: 'ak',
+      night: 'ge',
+    },
+    abbreviated: {
+      am: '\xD6\xD6',
+      pm: '\xD6S',
+      midnight: 'gece yar\u0131s\u0131',
+      noon: '\xF6\u011Flen',
+      morning: 'sabahleyin',
+      afternoon: '\xF6\u011Fleden sonra',
+      evening: 'ak\u015Famleyin',
+      night: 'geceleyin',
+    },
+    wide: {
+      am: '\xF6.\xF6.',
+      pm: '\xF6.s.',
+      midnight: 'gece yar\u0131s\u0131',
+      noon: '\xF6\u011Flen',
+      morning: 'sabahleyin',
+      afternoon: '\xF6\u011Fleden sonra',
+      evening: 'ak\u015Famleyin',
+      night: 'geceleyin',
+    },
+  },
+  W = (a, r) => Number(a) + '.',
+  u = {
+    ordinalNumber: W,
+    era: t({ values: b, defaultWidth: 'wide' }),
+    quarter: t({ values: P, defaultWidth: 'wide', argumentCallback: (a) => Number(a) - 1 }),
+    month: t({ values: M, defaultWidth: 'wide' }),
+    day: t({ values: w, defaultWidth: 'wide' }),
+    dayPeriod: t({
+      values: z,
+      defaultWidth: 'wide',
+      formattingValues: v,
+      defaultFormattingWidth: 'wide',
+    }),
+  }
+var x = /^(\d+)(\.)?/i,
+  S = /\d+/i,
+  H = { narrow: /^(mö|ms)/i, abbreviated: /^(mö|ms)/i, wide: /^(milattan önce|milattan sonra)/i },
+  C = { any: [/(^mö|^milattan önce)/i, /(^ms|^milattan sonra)/i] },
+  D = {
+    narrow: /^[1234]/i,
+    abbreviated: /^[1234]ç/i,
+    wide: /^((i|İ)lk|(i|İ)kinci|üçüncü|son) çeyrek/i,
+  },
+  E = {
+    any: [/1/i, /2/i, /3/i, /4/i],
+    abbreviated: [/1ç/i, /2ç/i, /3ç/i, /4ç/i],
+    wide: [/^(i|İ)lk çeyrek/i, /(i|İ)kinci çeyrek/i, /üçüncü çeyrek/i, /son çeyrek/i],
+  },
+  F = {
+    narrow: /^[oşmnhtaek]/i,
+    abbreviated: /^(oca|şub|mar|nis|may|haz|tem|ağu|eyl|eki|kas|ara)/i,
+    wide: /^(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık)/i,
+  },
+  N = {
+    narrow: [/^o/i, /^ş/i, /^m/i, /^n/i, /^m/i, /^h/i, /^t/i, /^a/i, /^e/i, /^e/i, /^k/i, /^a/i],
+    any: [
+      /^o/i,
+      /^ş/i,
+      /^mar/i,
+      /^n/i,
+      /^may/i,
+      /^h/i,
+      /^t/i,
+      /^ağ/i,
+      /^ey/i,
+      /^ek/i,
+      /^k/i,
+      /^ar/i,
+    ],
+  },
+  V = {
+    narrow: /^[psçc]/i,
+    short: /^(pz|pt|sa|ça|pe|cu|ct)/i,
+    abbreviated: /^(paz|pzt|sal|çar|per|cum|cts)/i,
+    wide: /^(pazar(?!tesi)|pazartesi|salı|çarşamba|perşembe|cuma(?!rtesi)|cumartesi)/i,
+  },
+  X = {
+    narrow: [/^p/i, /^p/i, /^s/i, /^ç/i, /^p/i, /^c/i, /^c/i],
+    any: [/^pz/i, /^pt/i, /^sa/i, /^ça/i, /^pe/i, /^cu/i, /^ct/i],
+    wide: [
+      /^pazar(?!tesi)/i,
+      /^pazartesi/i,
+      /^salı/i,
+      /^çarşamba/i,
+      /^perşembe/i,
+      /^cuma(?!rtesi)/i,
+      /^cumartesi/i,
+    ],
+  },
+  A = {
+    narrow: /^(öö|ös|gy|ö|sa|ös|ak|ge)/i,
+    any: /^(ö\.?\s?[ös]\.?|öğleden sonra|gece yarısı|öğle|(sabah|öğ|akşam|gece)(leyin))/i,
+  },
+  L = {
+    any: {
+      am: /^ö\.?ö\.?/i,
+      pm: /^ö\.?s\.?/i,
+      midnight: /^(gy|gece yarısı)/i,
+      noon: /^öğ/i,
+      morning: /^sa/i,
+      afternoon: /^öğleden sonra/i,
+      evening: /^ak/i,
+      night: /^ge/i,
+    },
+  },
+  h = {
+    ordinalNumber: m({
+      matchPattern: x,
+      parsePattern: S,
+      valueCallback: function (a) {
+        return parseInt(a, 10)
+      },
+    }),
+    era: n({
+      matchPatterns: H,
+      defaultMatchWidth: 'wide',
+      parsePatterns: C,
+      defaultParseWidth: 'any',
+    }),
+    quarter: n({
+      matchPatterns: D,
+      defaultMatchWidth: 'wide',
+      parsePatterns: E,
+      defaultParseWidth: 'any',
+      valueCallback: (a) => a + 1,
+    }),
+    month: n({
+      matchPatterns: F,
+      defaultMatchWidth: 'wide',
+      parsePatterns: N,
+      defaultParseWidth: 'any',
+    }),
+    day: n({
+      matchPatterns: V,
+      defaultMatchWidth: 'wide',
+      parsePatterns: X,
+      defaultParseWidth: 'any',
+    }),
+    dayPeriod: n({
+      matchPatterns: A,
+      defaultMatchWidth: 'any',
+      parsePatterns: L,
+      defaultParseWidth: 'any',
+    }),
+  }
+var T = {
+    code: 'tr',
+    formatDistance: l,
+    formatLong: d,
+    formatRelative: c,
+    localize: u,
+    match: h,
+    options: { weekStartsOn: 1, firstWeekContainsDate: 1 },
+  },
+  $ = T
+export { $ as default, T as tr }

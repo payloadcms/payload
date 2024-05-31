@@ -1,5 +1,6 @@
-import * as Client from '@payloadcms/ui/client'
 import React from 'react'
+
+import * as Client from '../../../packages/ui/z/index.js'
 
 console.log('Client', Client)
 
