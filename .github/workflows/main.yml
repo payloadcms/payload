@@ -56,7 +56,8 @@ jobs:
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
-    if: github.event_name == 'pull_request'
+    if: >
+      github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'no-lint') && !contains(github.event.pull_request.title, 'skip-lint')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
