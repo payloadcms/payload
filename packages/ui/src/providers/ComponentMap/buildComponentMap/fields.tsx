@@ -75,7 +75,7 @@ export const mapFields = (args: {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let CustomFieldComponent: CustomComponent<FieldComponentProps> = field.admin?.components?.Field
 
-    const CustomCellComponent = field.admin?.components?.Cell
+    let CustomCellComponent = field.admin?.components?.Cell
 
     const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
 
@@ -238,6 +238,7 @@ export const mapFields = (args: {
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
+          schemaPath: path,
         }
 
         switch (field.type) {
@@ -588,9 +589,7 @@ export const mapFields = (args: {
             }
 
             if (RichTextCellComponent) {
-              cellComponentProps.CellComponentOverride = (
-                <WithServerSideProps Component={RichTextCellComponent} />
-              )
+              CustomCellComponent = RichTextCellComponent
             }
 
             fieldComponentProps = richTextField
@@ -788,6 +787,7 @@ export const mapFields = (args: {
       CustomField: null,
       cellComponentProps: {
         name: 'id',
+        schemaPath: 'id',
       },
       disableBulkEdit: true,
       fieldComponentProps: {

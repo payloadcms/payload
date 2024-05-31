@@ -1,16 +1,19 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
+import * as scrollInfoImport from '@faceless-ui/scroll-info'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import useThrottledEffect from '@payloadcms/ui/hooks/useThrottledEffect'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import * as React from 'react'
+import { useMemo } from 'react'
 
-import type { EditorFocusContextType } from '../../../../lexical/EditorFocusProvider.js'
+import type { EditorConfigContextType } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
 import type { PluginComponentWithAnchor } from '../../../types.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
+import type { FixedToolbarFeatureProps } from '../feature.server.js'
 
-import { useEditorFocus } from '../../../../lexical/EditorFocusProvider.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../shared/ToolbarDropdown/index.js'
@@ -133,13 +136,74 @@ function ToolbarGroupComponent({
 
 function FixedToolbar({
   anchorElem,
+  clientProps,
   editor,
   editorConfig,
+  parentWithFixedToolbar,
 }: {
   anchorElem: HTMLElement
+  clientProps?: FixedToolbarFeatureProps
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
+  parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
+  const { useScrollInfo } = scrollInfoImport
+
+  const currentToolbarRef = React.useRef<HTMLDivElement>(null)
+
+  const { y } = useScrollInfo()
+
+  // Memoize the parent toolbar element
+  const parentToolbarElem = useMemo(() => {
+    if (!parentWithFixedToolbar || clientProps?.disableIfParentHasFixedToolbar) {
+      return null
+    }
+
+    const parentEditorElem = parentWithFixedToolbar.editorContainerRef.current
+    let sibling = parentEditorElem.previousElementSibling
+    while (sibling) {
+      if (sibling.classList.contains('fixed-toolbar')) {
+        return sibling
+      }
+      sibling = sibling.previousElementSibling
+    }
+    return null
+  }, [clientProps?.disableIfParentHasFixedToolbar, parentWithFixedToolbar])
+
+  useThrottledEffect(
+    () => {
+      if (!parentToolbarElem) {
+        // this also checks for clientProps?.disableIfParentHasFixedToolbar indirectly, see the parentToolbarElem useMemo
+        return
+      }
+      const currentToolbarElem = currentToolbarRef.current
+      if (!currentToolbarElem) {
+        return
+      }
+
+      const currentRect = currentToolbarElem.getBoundingClientRect()
+      const parentRect = parentToolbarElem.getBoundingClientRect()
+
+      // we only need to check for vertical overlap
+      const overlapping = !(
+        currentRect.bottom < parentRect.top || currentRect.top > parentRect.bottom
+      )
+
+      if (overlapping) {
+        currentToolbarRef.current.className = 'fixed-toolbar fixed-toolbar--overlapping'
+        parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
+      } else {
+        if (!currentToolbarRef.current.classList.contains('fixed-toolbar--overlapping')) {
+          return
+        }
+        currentToolbarRef.current.className = 'fixed-toolbar'
+        parentToolbarElem.className = 'fixed-toolbar'
+      }
+    },
+    50,
+    [currentToolbarRef, parentToolbarElem, y],
+  )
+
   return (
     <div
       className="fixed-toolbar"
@@ -148,6 +212,7 @@ function FixedToolbar({
         // the parent editor will be focused, and the child editor will lose focus.
         event.stopPropagation()
       }}
+      ref={currentToolbarRef}
     >
       {editor.isEditable() && (
         <React.Fragment>
@@ -170,40 +235,56 @@ function FixedToolbar({
   )
 }
 
-const checkParentEditor = (editorFocus: EditorFocusContextType): boolean => {
-  if (editorFocus.parentEditorConfigContext?.editorConfig) {
-    if (
-      editorFocus.parentEditorConfigContext?.editorConfig.resolvedFeatureMap.has('toolbarFixed')
-    ) {
-      return true
+const getParentEditorWithFixedToolbar = (
+  editorConfigContext: EditorConfigContextType,
+): EditorConfigContextType | false => {
+  if (editorConfigContext.parentEditor?.editorConfig) {
+    if (editorConfigContext.parentEditor?.editorConfig.resolvedFeatureMap.has('toolbarFixed')) {
+      return editorConfigContext.parentEditor
     } else {
-      if (editorFocus.parentEditorFocus) {
-        return checkParentEditor(editorFocus.parentEditorFocus)
+      if (editorConfigContext.parentEditor) {
+        return getParentEditorWithFixedToolbar(editorConfigContext.parentEditor)
       }
     }
   }
   return false
 }
 
-export const FixedToolbarPlugin: PluginComponentWithAnchor<undefined> = ({ anchorElem }) => {
+export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeatureProps> = ({
+  anchorElem,
+  clientProps,
+}) => {
   const [currentEditor] = useLexicalComposerContext()
-  const { editorConfig: currentEditorConfig, uuid } = useEditorConfigContext()
+  const editorConfigContext = useEditorConfigContext()
 
-  const editorFocus = useEditorFocus()
-  const editor = editorFocus.focusedEditor || currentEditor
+  const { editorConfig: currentEditorConfig } = editorConfigContext
 
-  const editorConfig = editorFocus.focusedEditorConfigContext?.editorConfig || currentEditorConfig
+  const editor = clientProps.applyToFocusedEditor
+    ? editorConfigContext.focusedEditor?.editor || currentEditor
+    : currentEditor
 
-  // Check if there is a parent editor with a fixed toolbar already
-  const hasParentWithFixedToolbar = checkParentEditor(editorFocus)
+  const editorConfig = clientProps.applyToFocusedEditor
+    ? editorConfigContext.focusedEditor?.editorConfig || currentEditorConfig
+    : currentEditorConfig
 
-  if (hasParentWithFixedToolbar) {
-    return null
+  const parentWithFixedToolbar = getParentEditorWithFixedToolbar(editorConfigContext)
+
+  if (clientProps?.disableIfParentHasFixedToolbar) {
+    if (parentWithFixedToolbar) {
+      return null
+    }
   }
 
   if (!editorConfig?.features?.toolbarFixed?.groups?.length) {
     return null
   }
 
-  return <FixedToolbar anchorElem={anchorElem} editor={editor} editorConfig={editorConfig} />
+  return (
+    <FixedToolbar
+      anchorElem={anchorElem}
+      editor={editor}
+      editorConfig={editorConfig}
+      parentWithFixedToolbar={parentWithFixedToolbar}
+    />
+  )
 }
