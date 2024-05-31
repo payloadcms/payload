@@ -1,21 +1,20 @@
 import fse from 'fs-extra'
 import globby from 'globby'
-import { fileURLToPath } from 'node:url'
 import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
-import type { DbDetails } from '../types.js'
+import type { DbType, StorageAdapterType } from '../types.js'
 
 import { warning } from '../utils/log.js'
-import { dbReplacements } from './packages.js'
+import { dbReplacements, storageReplacements } from './replacements.js'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
-  dbDetails: DbDetails | undefined
+  dbType?: DbType
+  packageJsonName?: string
   projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
+  storageAdapter?: StorageAdapterType
 }): Promise<void> {
-  if (!args.dbDetails) {
+  if (!args.dbType) {
     return
   }
 
@@ -28,7 +27,7 @@ export async function configurePayloadConfig(args: {
     try {
       const packageObj = await fse.readJson(packageJsonPath)
 
-      const dbPackage = dbReplacements[args.dbDetails.type]
+      const dbPackage = dbReplacements[args.dbType]
 
       // Delete all other db adapters
       Object.values(dbReplacements).forEach((p) => {
@@ -39,6 +38,17 @@ export async function configurePayloadConfig(args: {
 
       // Set version of db adapter to match payload version
       packageObj.dependencies[dbPackage.packageName] = packageObj.dependencies['payload']
+
+      if (args.storageAdapter) {
+        const storagePackage = storageReplacements[args.storageAdapter]
+
+        // Set version of storage adapter to match payload version
+        packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
+      }
+
+      if (args.packageJsonName) {
+        packageObj.name = args.packageJsonName
+      }
 
       await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
     } catch (err: unknown) {
@@ -68,10 +78,12 @@ export async function configurePayloadConfig(args: {
     const configContent = fse.readFileSync(payloadConfigPath, 'utf-8')
     const configLines = configContent.split('\n')
 
-    const dbReplacement = dbReplacements[args.dbDetails.type]
+    const dbReplacement = dbReplacements[args.dbType]
 
     let dbConfigStartLineIndex: number | undefined
     let dbConfigEndLineIndex: number | undefined
+
+    let storageConfigLine: number | undefined
 
     configLines.forEach((l, i) => {
       if (l.includes('// database-adapter-import')) {
@@ -84,7 +96,25 @@ export async function configurePayloadConfig(args: {
       if (l.includes('// database-adapter-config-end')) {
         dbConfigEndLineIndex = i
       }
+
+      if (l.includes('// storage-adapter-placeholder')) {
+        storageConfigLine = i
+      }
     })
+
+    if (args.storageAdapter && storageConfigLine) {
+      const storageReplacement = storageReplacements[args.storageAdapter]
+
+      if (storageReplacement) {
+        configLines.splice(storageConfigLine, 0, ...storageReplacement.configReplacement)
+        configLines.splice(storageConfigLine + storageReplacement.configReplacement.length, 1)
+      }
+
+      // Prepend import statement to beginning of file
+      configLines.unshift(storageReplacement.importReplacement)
+      if (dbConfigStartLineIndex) dbConfigStartLineIndex += 1
+      if (dbConfigEndLineIndex) dbConfigEndLineIndex += 1
+    }
 
     if (!dbConfigStartLineIndex || !dbConfigEndLineIndex) {
       warning('Unable to update payload.config.ts with database adapter import')

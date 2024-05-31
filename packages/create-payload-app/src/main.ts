@@ -156,7 +156,7 @@ export class Main {
         }
 
         await configurePayloadConfig({
-          dbDetails,
+          dbType: dbDetails?.type,
           projectDirOrConfigPath: {
             payloadConfigPath: result.payloadConfigPath,
           },
