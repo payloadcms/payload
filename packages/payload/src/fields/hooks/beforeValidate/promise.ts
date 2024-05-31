@@ -242,6 +242,7 @@ export const promise = async <T>({
           overrideAccess,
           path: fieldPath,
           previousSiblingDoc: siblingDoc,
+          previousValue: siblingData[field.name],
           req,
           schemaPath: fieldSchemaPath,
           siblingData,
