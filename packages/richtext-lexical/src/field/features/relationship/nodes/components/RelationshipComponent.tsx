@@ -7,7 +7,7 @@ import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
-import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { usePayloadAPI } from '@payloadcms/ui/hooks/usePayloadAPI'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import {
