@@ -6,6 +6,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
 import getValueWithDefault from '../../getDefaultValue.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -23,6 +24,8 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequestWithData
   siblingData: Record<string, unknown>
   /**
@@ -48,10 +51,18 @@ export const promise = async <T>({
   global,
   operation,
   overrideAccess,
+  parentPath,
+  parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
+  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+    field,
+    parentPath,
+    parentSchemaPath,
+  })
+
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
@@ -229,8 +240,10 @@ export const promise = async <T>({
           operation,
           originalDoc: doc,
           overrideAccess,
+          path: fieldPath,
           previousSiblingDoc: siblingDoc,
           req,
+          schemaPath: fieldSchemaPath,
           siblingData,
           value: siblingData[field.name],
         })
@@ -288,7 +301,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: `${fieldPath}.`,
         req,
+        schemaPath: `${fieldSchemaPath}.`,
         siblingData: groupData,
         siblingDoc: groupDoc,
       })
@@ -301,7 +316,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row) => {
+        rows.forEach((row, i) => {
           promises.push(
             traverseFields({
               id,
@@ -313,7 +328,9 @@ export const promise = async <T>({
               global,
               operation,
               overrideAccess,
+              path: `${fieldPath}.${i}.`,
               req,
+              schemaPath: `${fieldSchemaPath}.`,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             }),
@@ -329,7 +346,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row) => {
+        rows.forEach((row, i) => {
           const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
           const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
@@ -348,7 +365,9 @@ export const promise = async <T>({
                 global,
                 operation,
                 overrideAccess,
+                path: `${fieldPath}.${i}.`,
                 req,
+                schemaPath: `${fieldSchemaPath}.`,
                 siblingData: row,
                 siblingDoc: rowSiblingDoc,
               }),
@@ -373,7 +392,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
       })
@@ -405,7 +426,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: tabHasName(field) ? `${fieldPath}.` : fieldPath,
         req,
+        schemaPath: tabHasName(field) ? `${fieldSchemaPath}.` : fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
       })
@@ -424,7 +447,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
       })

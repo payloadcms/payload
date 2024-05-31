@@ -6,6 +6,7 @@ import type { Operation, PayloadRequestWithData, RequestContext } from '../../..
 import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { beforeDuplicate } from './beforeDuplicate.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -23,7 +24,14 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: string
+  /**
+   * The parent's path. Should either be an empty string or end with a .
+   */
+  parentPath: string
+  /**
+   * The parent's schemaPath (path without indexes). Should either be an empty string or end with a .
+   */
+  parentSchemaPath: string
   req: PayloadRequestWithData
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
@@ -52,7 +60,8 @@ export const promise = async ({
   global,
   mergeLocaleActions,
   operation,
-  path,
+  parentPath,
+  parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
@@ -66,6 +75,12 @@ export const promise = async ({
   const { localization } = req.payload.config
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
+
+  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+    field,
+    parentPath,
+    parentSchemaPath,
+  })
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -88,9 +103,11 @@ export const promise = async ({
           global,
           operation,
           originalDoc: doc,
+          path: fieldPath,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
+          schemaPath: parentSchemaPath,
           siblingData,
           value: siblingData[field.name],
         })
@@ -127,7 +144,7 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: `${path}${field.name}`,
+          field: fieldPath,
           message: validationResult,
         })
       }
@@ -139,7 +156,9 @@ export const promise = async ({
       data,
       field,
       global: undefined,
+      path: fieldPath,
       req,
+      schemaPath: parentSchemaPath,
       siblingData,
       value: siblingData[field.name],
     }
@@ -225,8 +244,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path: `${path}${field.name}.`,
+        path: `${fieldPath}.`,
         req,
+        schemaPath: `${fieldSchemaPath}.`,
         siblingData: siblingData[field.name] as Record<string, unknown>,
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
         siblingDocWithLocales: siblingDocWithLocales[field.name] as Record<string, unknown>,
@@ -256,8 +276,9 @@ export const promise = async ({
               global,
               mergeLocaleActions,
               operation,
-              path: `${path}${field.name}.${i}.`,
+              path: `${fieldPath}.${i}.`,
               req,
+              schemaPath: `${fieldSchemaPath}.`,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
@@ -299,8 +320,9 @@ export const promise = async ({
                 global,
                 mergeLocaleActions,
                 operation,
-                path: `${path}${field.name}.${i}.`,
+                path: `${fieldPath}.${i}.`,
                 req,
+                schemaPath: `${fieldSchemaPath}.`,
                 siblingData: row,
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
@@ -331,8 +353,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
@@ -343,13 +366,11 @@ export const promise = async ({
     }
 
     case 'tab': {
-      let tabPath = path
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
       let tabSiblingDocWithLocales = siblingDocWithLocales
 
       if (tabHasName(field)) {
-        tabPath = `${path}${field.name}.`
         if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
         if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
         if (typeof siblingDocWithLocales[field.name] !== 'object')
@@ -373,8 +394,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path: tabPath,
+        path: tabHasName(field) ? `${fieldPath}.` : fieldPath,
         req,
+        schemaPath: tabHasName(field) ? `${fieldSchemaPath}.` : fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales,
@@ -398,8 +420,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,

@@ -77,8 +77,10 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     global,
     locale,
     overrideAccess,
+    path: '',
     populationPromises,
     req,
+    schemaPath: '',
     showHiddenFields,
     siblingDoc: doc,
   })

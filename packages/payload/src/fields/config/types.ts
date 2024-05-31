@@ -41,6 +41,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   overrideAccess?: boolean
+  /**
+   * The path of the field, e.g. "group.myArray.1.textField". The path is the path but with indexes and would be used in the context of field data, not field schemas.
+   */
+  path: string
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: TData
   /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
@@ -49,6 +53,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
+  /**
+   * The schemaPath of the field, e.g. "group.myArray.textField". The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
+   */
+  schemaPath: string
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<TSiblingData>
   /** The value of the field. */

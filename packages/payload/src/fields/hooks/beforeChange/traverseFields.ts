@@ -26,6 +26,7 @@ type Args = {
   operation: Operation
   path: string
   req: PayloadRequestWithData
+  schemaPath: string
   siblingData: Record<string, unknown>
   /**
    * The original siblingData (not modified by any hooks)
@@ -61,6 +62,7 @@ export const traverseFields = async ({
   operation,
   path,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -83,7 +85,8 @@ export const traverseFields = async ({
         global,
         mergeLocaleActions,
         operation,
-        path,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         req,
         siblingData,
         siblingDoc,

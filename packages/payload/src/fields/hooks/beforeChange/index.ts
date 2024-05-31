@@ -61,6 +61,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     operation,
     path: '',
     req,
+    schemaPath: '',
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
