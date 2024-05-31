@@ -12,7 +12,7 @@ import { buildTable } from './schema/build.js'
 import { createTableName } from './schema/createTableName.js'
 
 export const init: Init = function init(this: DrizzleAdapter) {
-  if (this.payload.config.localization) {
+  if (this.payload.config.localization && this.enums) {
     this.enums.enum__locales = pgEnum(
       '_locales',
       this.payload.config.localization.locales.map(({ code }) => code) as [string, ...string[]],

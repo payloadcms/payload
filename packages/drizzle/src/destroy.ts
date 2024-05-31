@@ -4,7 +4,7 @@ import type { DrizzleAdapter } from './types.js'
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export const destroy: Destroy = async function destroy(this: DrizzleAdapter) {
-  this.enums = {}
+  if (this.enums) this.enums = {}
   this.schema = {}
   this.tables = {}
   this.relations = {}

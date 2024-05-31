@@ -34,7 +34,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import { pgSchema, pgTable, varchar } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -67,8 +67,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       drizzle: undefined,
       enums: {},
       features: {
-        enum: true,
         json: true,
+      },
+      fieldColumnMap: {
+        text: varchar,
       },
       fieldConstraints: {},
       getMigrationTemplate,

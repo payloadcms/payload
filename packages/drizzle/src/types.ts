@@ -1,6 +1,8 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type {
+  Column,
   ColumnBaseConfig,
+  ColumnBuilder,
   ColumnDataType,
   DrizzleConfig,
   ExtractTablesWithRelations,
@@ -10,12 +12,16 @@ import type {
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
 import type {
   PgColumn,
+  PgColumnBuilder,
+  PgColumnBuilderBase,
   PgSchema,
   PgTableFn,
   PgTableWithColumns,
   PgTransaction,
 } from 'drizzle-orm/pg-core'
 import type { BaseDatabaseAdapter, MigrationTemplateArgs } from 'payload/database'
+
+import { Field, FieldAffectingData } from 'payload/types'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
@@ -34,6 +40,7 @@ export type GenericTable = PgTableWithColumns<{
   name: string
   schema: undefined
 }>
+
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type DrizzleTransaction = PgTransaction<
@@ -42,13 +49,29 @@ export type DrizzleTransaction = PgTransaction<
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
+type FieldColumnMapKey =
+  | 'checkbox'
+  | 'date'
+  | 'email'
+  | 'json'
+  | 'number'
+  | 'radio'
+  | 'richText'
+  | 'select'
+  | 'text'
+  | 'textarea'
+
 export type DrizzleAdapter = BaseDatabaseAdapter & {
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   drizzle: DrizzleDB
-  enums: Record<string, unknown>
+  enums?: Record<string, unknown>
   features: {
-    enum?: boolean
     json?: boolean
+  }
+  fieldColumnMap: {
+    postgres: {
+      [K in FieldColumnMapKey]: typeof PgColumnBuilder
+    }
   }
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
