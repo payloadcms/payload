@@ -5,20 +5,20 @@ import { sql } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { ChainedMethods } from './find/chainMethods.js'
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { chainMethods } from './find/chainMethods.js'
 import buildQuery from './queries/buildQuery.js'
 
 export const count: Count = async function count(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { collection, locale, req, where: whereArg },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.drizzle
   const table = this.tables[tableName]
 
   const { joins, where } = await buildQuery({

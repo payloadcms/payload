@@ -2,12 +2,12 @@ import type { Create } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
 
 export const create: Create = async function create(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   { collection: collectionSlug, data, req },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle

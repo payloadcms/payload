@@ -3,10 +3,10 @@ import type { DBIdentifierName } from 'payload/database'
 import { APIError } from 'payload/errors'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter } from './types.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   /** The collection, global or field config **/
   config: {
     dbName?: DBIdentifierName

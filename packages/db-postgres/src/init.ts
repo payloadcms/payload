@@ -6,13 +6,13 @@ import { pgEnum } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from './types.js'
+import type { PostgresAdapter } from './types.js'
 
+import { createTableName } from '../../drizzle/src/createTableName.js'
 import { buildTable } from './schema/build.js'
-import { createTableName } from './schema/createTableName.js'
 
-export const init: Init = function init(this: DrizzleAdapter) {
-  if (this.payload.config.localization && this.enums) {
+export const init: Init = function init(this: PostgresAdapter) {
+  if (this.payload.config.localization) {
     this.enums.enum__locales = pgEnum(
       '_locales',
       this.payload.config.localization.locales.map(({ code }) => code) as [string, ...string[]],

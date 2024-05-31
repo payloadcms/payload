@@ -3,14 +3,12 @@ import type { Block, Field } from 'payload/types'
 import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 
-import type { GenericTable } from '../types.js'
-
 type Args = {
   block: Block
   localized: boolean
   rootTableName: string
-  table: GenericTable
-  tableLocales?: GenericTable
+  table: Record<string, unknown>
+  tableLocales?: Record<string, unknown>
 }
 
 const getFlattenedFieldNames = (

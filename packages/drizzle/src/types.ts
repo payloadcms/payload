@@ -1,29 +1,28 @@
+import type { Client } from '@libsql/client'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type {
   Column,
   ColumnBaseConfig,
   ColumnBuilder,
+  ColumnBuilderBase,
+  ColumnBuilderBaseConfig,
   ColumnDataType,
   DrizzleConfig,
   ExtractTablesWithRelations,
   Relation,
   Relations,
+  Table,
 } from 'drizzle-orm'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
-import type {
-  PgColumn,
-  PgColumnBuilder,
-  PgColumnBuilderBase,
-  PgSchema,
-  PgTableFn,
-  PgTableWithColumns,
-  PgTransaction,
-} from 'drizzle-orm/pg-core'
+import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
 import type { BaseDatabaseAdapter, MigrationTemplateArgs } from 'payload/database'
 
-import { Field, FieldAffectingData } from 'payload/types'
+export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
-export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
+export type SQLiteDB = LibSQLDatabase<
+  Record<string, unknown> & Record<string, GenericRelation | GenericTable>
+>
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,
@@ -34,7 +33,7 @@ export type GenericColumns = {
   [x: string]: GenericColumn
 }
 
-export type GenericTable = PgTableWithColumns<{
+export type GenericTable = PgTable<{
   columns: GenericColumns
   dialect: string
   name: string
@@ -49,29 +48,12 @@ export type DrizzleTransaction = PgTransaction<
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
-type FieldColumnMapKey =
-  | 'checkbox'
-  | 'date'
-  | 'email'
-  | 'json'
-  | 'number'
-  | 'radio'
-  | 'richText'
-  | 'select'
-  | 'text'
-  | 'textarea'
-
 export type DrizzleAdapter = BaseDatabaseAdapter & {
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
-  drizzle: DrizzleDB
+  drizzle: PostgresDB | SQLiteDB
   enums?: Record<string, unknown>
   features: {
     json?: boolean
-  }
-  fieldColumnMap: {
-    postgres: {
-      [K in FieldColumnMapKey]: typeof PgColumnBuilder
-    }
   }
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
@@ -98,8 +80,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
       resolve: () => Promise<void>
     }
   }
-  tableFunction: PgSchema['table'] | PgTableFn
   tableNameMap: Map<string, string>
-  tables: Record<string, GenericTable>
+  tables: Record<string, any>
   versionsSuffix?: string
 }

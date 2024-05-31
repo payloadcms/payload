@@ -35,7 +35,7 @@ import {
 } from '@payloadcms/drizzle'
 import { createDatabaseAdapter } from 'payload/database'
 
-import type { Args, PostgresAdapter } from './types.js'
+import type { Args, SQLiteAdapter } from './types.js'
 
 import { connect } from './connect.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
@@ -46,7 +46,7 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export { sql } from 'drizzle-orm'
 
-export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
+export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 
@@ -60,7 +60,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       rejectInitializing = rej
     })
 
-    return createDatabaseAdapter<PostgresAdapter>({
+    return createDatabaseAdapter<SQLiteAdapter>({
       name: 'postgres',
       defaultDrizzleSnapshot,
       drizzle: undefined,

@@ -9,6 +9,7 @@ import type {
 } from 'drizzle-orm/pg-core'
 import type { Field } from 'payload/types'
 
+import { createTableName } from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
 import {
   foreignKey,
@@ -22,9 +23,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter, GenericColumns, GenericTable, IDType } from '../types.js'
+import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.js'
 
-import { createTableName } from './createTableName.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
@@ -37,7 +37,7 @@ export type BaseExtraConfig = Record<
 export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
 
 type Args = {
-  adapter: DrizzleAdapter
+  adapter: PostgresAdapter
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: BaseExtraConfig
   buildNumbers?: boolean
@@ -148,7 +148,7 @@ export const buildTable = ({
       .notNull()
   }
 
-  const table = adapter.tableFunction(tableName, columns, (cols) => {
+  const table = adapter.pgSchema.table(tableName, columns, (cols) => {
     const extraConfig = Object.entries(baseExtraConfig).reduce((config, [key, func]) => {
       config[key] = func(cols)
       return config
@@ -170,7 +170,7 @@ export const buildTable = ({
     localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').notNull()
 
-    localesTable = adapter.tableFunction(localeTableName, localesColumns, (cols) => {
+    localesTable = adapter.pgSchema.table(localeTableName, localesColumns, (cols) => {
       return Object.entries(localesIndexes).reduce(
         (acc, [colName, func]) => {
           acc[colName] = func(cols)
@@ -236,7 +236,7 @@ export const buildTable = ({
         columns.locale = adapter.enums.enum__locales('locale')
       }
 
-      textsTable = adapter.tableFunction(textsTableName, columns, (cols) => {
+      textsTable = adapter.pgSchema.table(textsTableName, columns, (cols) => {
         const config: Record<string, ForeignKeyBuilder | IndexBuilder> = {
           orderParentIdx: index(`${textsTableName}_order_parent_idx`).on(cols.order, cols.parent),
           parentFk: foreignKey({
@@ -285,7 +285,7 @@ export const buildTable = ({
         columns.locale = adapter.enums.enum__locales('locale')
       }
 
-      numbersTable = adapter.tableFunction(numbersTableName, columns, (cols) => {
+      numbersTable = adapter.pgSchema.table(numbersTableName, columns, (cols) => {
         const config: Record<string, ForeignKeyBuilder | IndexBuilder> = {
           orderParentIdx: index(`${numbersTableName}_order_parent_idx`).on(cols.order, cols.parent),
           parentFk: foreignKey({
@@ -361,7 +361,7 @@ export const buildTable = ({
           }).onDelete('cascade')
       })
 
-      relationshipsTable = adapter.tableFunction(
+      relationshipsTable = adapter.pgSchema.table(
         relationshipsTableName,
         relationshipColumns,
         (cols) => {

@@ -1,46 +1,43 @@
 import type { Payload } from 'payload'
 import type { DatabaseAdapterObj } from 'payload/database'
 
-import {
-  beginTransaction,
-  commitTransaction,
-  count,
-  create,
-  createGlobal,
-  createGlobalVersion,
-  createMigration,
-  createVersion,
-  deleteMany,
-  deleteOne,
-  deleteVersions,
-  destroy,
-  find,
-  findGlobal,
-  findGlobalVersions,
-  findMigrationDir,
-  findOne,
-  findVersions,
-  migrate,
-  migrateDown,
-  migrateFresh,
-  migrateRefresh,
-  migrateReset,
-  migrateStatus,
-  queryDrafts,
-  rollbackTransaction,
-  updateGlobal,
-  updateGlobalVersion,
-  updateOne,
-  updateVersion,
-} from '@payloadcms/drizzle'
+import fs from 'fs'
+import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
-import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
-import { getMigrationTemplate } from './getMigrationTemplate.js'
+import { count } from './count.js'
+import { create } from './create.js'
+import { createGlobal } from './createGlobal.js'
+import { createGlobalVersion } from './createGlobalVersion.js'
+import { createMigration } from './createMigration.js'
+import { createVersion } from './createVersion.js'
+import { deleteMany } from './deleteMany.js'
+import { deleteOne } from './deleteOne.js'
+import { deleteVersions } from './deleteVersions.js'
+import { destroy } from './destroy.js'
+import { find } from './find.js'
+import { findGlobal } from './findGlobal.js'
+import { findGlobalVersions } from './findGlobalVersions.js'
+import { findOne } from './findOne.js'
+import { findVersions } from './findVersions.js'
 import { init } from './init.js'
+import { migrate } from './migrate.js'
+import { migrateDown } from './migrateDown.js'
+import { migrateFresh } from './migrateFresh.js'
+import { migrateRefresh } from './migrateRefresh.js'
+import { migrateReset } from './migrateReset.js'
+import { migrateStatus } from './migrateStatus.js'
+import { queryDrafts } from './queryDrafts.js'
+import { beginTransaction } from './transactions/beginTransaction.js'
+import { commitTransaction } from './transactions/commitTransaction.js'
+import { rollbackTransaction } from './transactions/rollbackTransaction.js'
+import { updateOne } from './update.js'
+import { updateGlobal } from './updateGlobal.js'
+import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateVersion } from './updateVersion.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -62,14 +59,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
-      defaultDrizzleSnapshot,
       drizzle: undefined,
       enums: {},
-      features: {
-        json: true,
-      },
       fieldConstraints: {},
-      getMigrationTemplate,
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
@@ -131,4 +123,43 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     defaultIDType: payloadIDType,
     init: adapter,
   }
+}
+
+/**
+ * Attempt to find migrations directory.
+ *
+ * Checks for the following directories in order:
+ * - `migrationDir` argument from Payload config
+ * - `src/migrations`
+ * - `dist/migrations`
+ * - `migrations`
+ *
+ * Defaults to `src/migrations`
+ *
+ * @param migrationDir
+ * @returns
+ */
+function findMigrationDir(migrationDir?: string): string {
+  const cwd = process.cwd()
+  const srcDir = path.resolve(cwd, 'src/migrations')
+  const distDir = path.resolve(cwd, 'dist/migrations')
+  const relativeMigrations = path.resolve(cwd, 'migrations')
+
+  // Use arg if provided
+  if (migrationDir) return migrationDir
+
+  // Check other common locations
+  if (fs.existsSync(srcDir)) {
+    return srcDir
+  }
+
+  if (fs.existsSync(distDir)) {
+    return distDir
+  }
+
+  if (fs.existsSync(relativeMigrations)) {
+    return relativeMigrations
+  }
+
+  return srcDir
 }

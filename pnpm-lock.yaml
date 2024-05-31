@@ -382,6 +382,9 @@ importers:
       '@libsql/client':
         specifier: ^0.5.2
         version: 0.5.6
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:../drizzle
       console-table-printer:
         specifier: 2.11.2
         version: 2.11.2
@@ -410,6 +413,80 @@ importers:
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
+      '@types/to-snake-case':
+        specifier: 1.0.0
+        version: 1.0.0
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
+  packages/db-sqlite:
+    dependencies:
+      '@libsql/client':
+        specifier: ^0.5.2
+        version: 0.5.6
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:../drizzle
+      console-table-printer:
+        specifier: 2.11.2
+        version: 2.11.2
+      drizzle-kit:
+        specifier: 0.21.4
+        version: 0.21.4
+      drizzle-orm:
+        specifier: 0.30.10
+        version: 0.30.10(@libsql/client@0.5.6)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-f994737d14-20240522)(types-react@19.0.0-beta.2)
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
+      to-snake-case:
+        specifier: 1.0.0
+        version: 1.0.0
+      uuid:
+        specifier: 9.0.0
+        version: 9.0.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
+      '@types/to-snake-case':
+        specifier: 1.0.0
+        version: 1.0.0
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
+  packages/drizzle:
+    dependencies:
+      '@libsql/client':
+        specifier: ^0.5.2
+        version: 0.5.6
+      console-table-printer:
+        specifier: 2.11.2
+        version: 2.11.2
+      drizzle-kit:
+        specifier: 0.21.4
+        version: 0.21.4
+      drizzle-orm:
+        specifier: 0.30.10
+        version: 0.30.10(@libsql/client@0.5.6)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-f994737d14-20240522)(types-react@19.0.0-beta.2)
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
+      to-snake-case:
+        specifier: 1.0.0
+        version: 1.0.0
+      uuid:
+        specifier: 9.0.0
+        version: 9.0.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0

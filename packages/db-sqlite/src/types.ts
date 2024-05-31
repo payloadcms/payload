@@ -1,30 +1,30 @@
+import type { Client, Config } from '@libsql/client'
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type {
-  ColumnBaseConfig,
-  ColumnDataType,
-  DrizzleConfig,
-  Relation,
-  Relations,
-} from 'drizzle-orm'
-import type { PgColumn, PgEnum, PgSchema, PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { PgTableFn } from 'drizzle-orm/pg-core/table'
+import type { SQLiteColumn, SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
-import type { Pool, PoolConfig } from 'pg'
+
+import {
+  type ColumnBaseConfig,
+  type ColumnDataType,
+  type DrizzleConfig,
+  type Relation,
+  type Relations,
+} from 'drizzle-orm'
 
 export type Args = {
+  client: Config
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
-  pool: PoolConfig
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
   versionsSuffix?: string
 }
 
-export type GenericColumn = PgColumn<
+export type GenericColumn = SQLiteColumn<
   ColumnBaseConfig<ColumnDataType, string>,
   Record<string, unknown>
 >
@@ -33,19 +33,17 @@ export type GenericColumns = {
   [x: string]: GenericColumn
 }
 
-export type GenericTable = PgTableWithColumns<{
+export type GenericTable = SQLiteTableWithColumns<{
   columns: GenericColumns
   dialect: string
   name: string
   schema: string
 }>
 
-export type GenericEnum = PgEnum<[string, ...string[]]>
-
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
-export type PostgresAdapter = DrizzleAdapter & {
-  enums: Record<string, GenericEnum>
+export type SQLiteAdapter = DrizzleAdapter & {
+  client: Client
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
@@ -55,14 +53,11 @@ export type PostgresAdapter = DrizzleAdapter & {
   initializing: Promise<void>
   localesSuffix?: string
   logger: DrizzleConfig['logger']
-  pgSchema?: { table: PgTableFn } | PgSchema
-  pool: Pool
-  poolOptions: Args['pool']
   push: boolean
   rejectInitializing: () => void
   relationshipsSuffix?: string
   resolveInitializing: () => void
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  schema: Record<string, GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
@@ -78,7 +73,6 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
-    enums: Record<string, GenericEnum>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
      * Used for returning properly formed errors from unique fields
@@ -88,15 +82,11 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
-    pgSchema?: { table: PgTableFn } | PgSchema
-    pool: Pool
-    poolOptions: Args['pool']
     push: boolean
     rejectInitializing: () => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-    schemaName?: Args['schemaName']
+    schema: Record<string, GenericRelation | GenericTable>
     tableNameMap: Map<string, string>
     versionsSuffix?: string
   }
