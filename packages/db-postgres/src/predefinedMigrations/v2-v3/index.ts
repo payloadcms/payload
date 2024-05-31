@@ -20,7 +20,7 @@ const require = createRequire(import.meta.url)
 type Args = {
   debug?: boolean
   payload: Payload
-  req: PayloadRequestWithData
+  req?: Partial<PayloadRequestWithData>
 }
 
 /**
