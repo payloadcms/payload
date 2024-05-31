@@ -2,31 +2,16 @@
 
 import { getTranslation } from '@payloadcms/translations'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 
 import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Context, useStepNav } from './context.js'
+import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'step-nav'
-
-const StepNavProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const [stepNav, setStepNav] = useState([])
-
-  return (
-    <Context.Provider
-      value={{
-        setStepNav,
-        stepNav,
-      }}
-    >
-      {children}
-    </Context.Provider>
-  )
-}
 
 const StepNav: React.FC<{
   Link?: React.ComponentType
