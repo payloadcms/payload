@@ -1,5 +1,3 @@
-import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin'
-import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
 import TerserJSPlugin from 'terser-webpack-plugin'
 import { fileURLToPath } from 'url'
@@ -77,13 +75,17 @@ const componentWebpackConfig = {
     //   raw: true,
     //   include: 'client',
     // }),
-    new webpack.optimize.LimitChunkCountPlugin({
-      maxChunks: 1,
-    }),
+    // new webpack.optimize.LimitChunkCountPlugin({
+    //   maxChunks: 1,
+    // }),
   ],
+  experiments: {
+    outputModule: true,
+  },
   output: {
     filename: '[name].js',
-    libraryTarget: 'commonjs2',
+    libraryTarget: 'module',
+    libraryExport: 'named',
     path: path.resolve(dirname, './dist'),
     publicPath: '/',
   },
