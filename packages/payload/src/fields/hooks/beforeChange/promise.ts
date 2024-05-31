@@ -157,6 +157,8 @@ export const promise = async ({
       field,
       global: undefined,
       path: fieldPath,
+      previousSiblingDoc: siblingDoc,
+      previousValue: siblingDoc[field.name],
       req,
       schemaPath: parentSchemaPath,
       siblingData,
