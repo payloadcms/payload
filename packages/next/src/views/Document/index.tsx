@@ -2,12 +2,13 @@ import type { EditViewComponent } from 'payload/config'
 import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
-import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
-import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
+} from '@payloadcms/ui/client'
+import { DocumentHeader, RenderCustomComponent } from '@payloadcms/ui/server'
 import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'

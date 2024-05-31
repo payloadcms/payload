@@ -1,5 +1,3 @@
-import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin'
-import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
 import TerserJSPlugin from 'terser-webpack-plugin'
 import { fileURLToPath } from 'url'
@@ -9,7 +7,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const componentWebpackConfig = {
-  entry: path.resolve(dirname, './src/index.ts'),
+  entry: {
+    server: path.resolve(dirname, './src/exports/server/index.ts'),
+    client: path.resolve(dirname, './src/exports/client/index.ts'),
+  },
   externals: [
     'react',
     'react-dom',
@@ -33,7 +34,12 @@ const componentWebpackConfig = {
                   jsc: {
                     experimental: {
                       plugins: [
-                        // clear the plugins used in .swcrc
+                        [
+                          'swc-plugin-transform-remove-imports',
+                          {
+                            test: '\\.(scss|css)$',
+                          },
+                        ],
                       ],
                     },
                     parser: {
@@ -43,23 +49,6 @@ const componentWebpackConfig = {
                   },
                 },
               },
-            ],
-          },
-          {
-            sideEffects: true,
-            test: /\.(scss|css)$/,
-            use: [
-              MiniCSSExtractPlugin.loader,
-              'css-loader',
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    plugins: ['postcss-preset-env'],
-                  },
-                },
-              },
-              'sass-loader',
             ],
           },
           {
@@ -78,24 +67,28 @@ const componentWebpackConfig = {
       new TerserJSPlugin({
         extractComments: false,
       }),
-      new OptimizeCSSAssetsPlugin({}),
     ],
   },
+  plugins: [
+    // new webpack.BannerPlugin({
+    //   banner: "'use client';",
+    //   raw: true,
+    //   include: 'client',
+    // }),
+    // new webpack.optimize.LimitChunkCountPlugin({
+    //   maxChunks: 1,
+    // }),
+  ],
+  experiments: {
+    outputModule: true,
+  },
   output: {
-    filename: 'index.js',
-    libraryTarget: 'commonjs2',
-    path: path.resolve(dirname, './dist/prod'),
+    filename: '[name].js',
+    libraryTarget: 'module',
+    libraryExport: 'named',
+    path: path.resolve(dirname, './dist'),
     publicPath: '/',
   },
-  plugins: [
-    new MiniCSSExtractPlugin({
-      filename: 'styles.css',
-      ignoreOrder: true,
-    }),
-    new webpack.optimize.LimitChunkCountPlugin({
-      maxChunks: 1,
-    }),
-  ],
   resolve: {
     extensionAlias: {
       '.js': ['.ts', '.tsx', '.js', '.scss', '.css'],

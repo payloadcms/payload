@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import type { DocumentDrawerProps } from './types.js'
 
 import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -100,7 +100,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               onClick={() => toggleModal(drawerSlug)}
               type="button"
             >
-              <X />
+              <XIcon />
             </button>
           </div>
           <DocumentTitle />

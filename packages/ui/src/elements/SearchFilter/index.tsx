@@ -14,7 +14,7 @@ export type SearchFilterProps = {
 import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
-import { Search } from '../../icons/Search/index.js'
+import { SearchIcon } from '../../icons/Search/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
@@ -93,7 +93,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
         type="text"
         value={search || ''}
       />
-      <Search />
+      <SearchIcon />
     </div>
   )
 }

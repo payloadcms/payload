@@ -30,12 +30,11 @@ export type LexicalProviderProps = {
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, value, onChange, path, readOnly } = props
+  const { editorConfig, fieldProps, onChange, path, readOnly, value } = props
 
   const parentContext = useEditorConfigContext()
 
   const editorContainerRef = React.useRef<HTMLDivElement>(null)
-
 
   const processedValue = useMemo(() => {
     let processed = value

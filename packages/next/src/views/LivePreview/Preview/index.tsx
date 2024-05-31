@@ -2,9 +2,7 @@
 
 import type { EditViewProps } from 'payload/types'
 
-import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
-import { useAllFormFields } from '@payloadcms/ui/forms/Form'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
+import { ShimmerEffect, useAllFormFields, useDocumentEvents } from '@payloadcms/ui/client'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import React, { useEffect } from 'react'
 

@@ -1,5 +1,4 @@
-import type { TabsFieldProps } from '@payloadcms/ui/fields/Tabs'
-import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { MappedField, TabsFieldProps } from '@payloadcms/ui/client'
 
 import React from 'react'
 

@@ -1,6 +1,6 @@
 'use client'
 import type { LivePreviewConfig } from 'payload/config'
-import type { ClientFieldConfig, Field } from 'payload/types'
+import type { ClientFieldConfig } from 'payload/types'
 
 import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/utilities'

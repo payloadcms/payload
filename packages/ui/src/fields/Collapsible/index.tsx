@@ -23,8 +23,8 @@ import type { FieldPermissions } from 'payload/auth'
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap

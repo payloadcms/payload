@@ -12,7 +12,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -202,7 +202,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   onClick={() => closeModal(drawerSlug)}
                   type="button"
                 >
-                  <X />
+                  <XIcon />
                 </button>
               </div>
               <Form

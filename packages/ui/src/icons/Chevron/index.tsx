@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const Chevron: React.FC<{
+export const ChevronIcon: React.FC<{
   className?: string
   direction?: 'down' | 'left' | 'right' | 'up'
   size?: 'large' | 'small'

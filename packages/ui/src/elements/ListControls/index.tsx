@@ -12,7 +12,7 @@ const AnimateHeight = (AnimateHeightImport.default ||
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -113,7 +113,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 className={`${baseClass}__toggle-columns ${
                   visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
                 }`}
-                icon={<Chevron />}
+                icon={<ChevronIcon />}
                 onClick={() =>
                   setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                 }
@@ -128,7 +128,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-where ${
                 visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
               }`}
-              icon={<Chevron />}
+              icon={<ChevronIcon />}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
             >
@@ -139,7 +139,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 aria-controls={`${baseClass}-sort`}
                 aria-expanded={visibleDrawer === 'sort'}
                 className={`${baseClass}__toggle-sort`}
-                icon={<Chevron />}
+                icon={<ChevronIcon />}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                 pillStyle="light"
               >

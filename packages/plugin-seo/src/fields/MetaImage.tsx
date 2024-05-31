@@ -3,8 +3,8 @@
 import type { UploadInputProps } from '@payloadcms/ui/fields/Upload'
 import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
 
+import { FieldLabel } from '@payloadcms/ui/fields/FieldLabel'
 import { UploadInput } from '@payloadcms/ui/fields/Upload'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'
 import { useConfig } from '@payloadcms/ui/providers/Config'

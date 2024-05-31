@@ -43,8 +43,8 @@ import type {
   ReducedBlock,
 } from './types.js'
 
+import { FieldDescription } from '../../../fields/FieldDescription/index.js'
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
-import { FieldDescription } from '../../../forms/FieldDescription/index.js'
 
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated

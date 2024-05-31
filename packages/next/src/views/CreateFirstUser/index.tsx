@@ -1,6 +1,6 @@
 import type { AdminViewProps, Field } from 'payload/types'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { buildStateFromSchema } from '@payloadcms/ui/client'
 import React from 'react'
 
 import { CreateFirstUserClient } from './index.client.js'

@@ -8,9 +8,9 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
-import usePayloadAPI from '../../hooks/usePayloadAPI.js'
-import { X } from '../../icons/X/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -244,7 +244,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               }}
               type="button"
             >
-              <X />
+              <XIcon />
             </button>
           </div>
           {selectedCollectionConfig?.admin?.description && (

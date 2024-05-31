@@ -4,8 +4,8 @@ import type { FieldDescriptionProps } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldProps } from '../FieldPropsProvider/index.js'
 import './index.scss'
 
 const baseClass = 'field-description'
