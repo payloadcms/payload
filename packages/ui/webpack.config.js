@@ -72,6 +72,11 @@ const componentWebpackConfig = {
     ],
   },
   plugins: [
+    // new webpack.BannerPlugin({
+    //   banner: "'use client';",
+    //   raw: true,
+    //   include: 'client',
+    // }),
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
     }),
