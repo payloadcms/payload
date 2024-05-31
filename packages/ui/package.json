@@ -84,7 +84,8 @@
       "require": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./scss/app.scss": "./src/scss/app.scss"
+    "./scss/app.scss": "./src/scss/app.scss",
+    "./styles.css": "./src/styles.css"
   },
   "files": [
     "dist"
@@ -248,7 +249,8 @@
         "require": "./dist/scss/styles.scss",
         "default": "./dist/scss/styles.scss"
       },
-      "./scss/app.scss": "./dist/scss/app.scss"
+      "./scss/app.scss": "./dist/scss/app.scss",
+      "./styles.css": "./dist/styles.css"
     }
   },
   "overrides": {
