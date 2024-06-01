@@ -99,8 +99,11 @@ export const promise = async ({
           collection,
           context,
           data,
+          docWithLocales,
+          duplicate,
           field,
           global,
+          mergeLocaleActions,
           operation,
           originalDoc: doc,
           path: fieldPath,
@@ -109,6 +112,8 @@ export const promise = async ({
           req,
           schemaPath: parentSchemaPath,
           siblingData,
+          siblingDocWithLocales,
+          skipValidation,
           value: siblingData[field.name],
         })
 
@@ -154,6 +159,7 @@ export const promise = async ({
       collection,
       context,
       data,
+      docWithLocales,
       field,
       global: undefined,
       path: fieldPath,
@@ -162,6 +168,7 @@ export const promise = async ({
       req,
       schemaPath: parentSchemaPath,
       siblingData,
+      siblingDocWithLocales,
       value: siblingData[field.name],
     }
 

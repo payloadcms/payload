@@ -45,7 +45,7 @@ type Args = {
  * - Execute field hooks
  * - Validate data
  * - Transform data for storage
- * - Unflatten locales
+ * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
 export const traverseFields = async ({
   id,

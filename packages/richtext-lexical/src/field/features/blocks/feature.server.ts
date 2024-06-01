@@ -3,7 +3,15 @@ import type { Block, BlockField, Field } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { baseBlockFields, sanitizeFields } from 'payload/config'
-import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
+import {
+  afterChangeTraverseFields,
+  afterReadTraverseFields,
+  beforeChangeTraverseFields,
+  beforeValidateTraverseFields,
+  deepCopyObject,
+  fieldsToJSONSchema,
+  formatLabels,
+} from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
@@ -114,69 +122,165 @@ export const BlocksFeature: FeatureProviderProviderServer<
         i18n,
         nodes: [
           createNode({
-            /* // TODO: Implement these hooks once docWithLocales / originalSiblingDoc => node matching has been figured out
             hooks: {
-              beforeChange: [
-                async ({ context, findMany, node, operation, overrideAccess, req }) => {
+              afterChange: [
+                async ({ context, node, operation, originalNode, req }) => {
                   const blockType = node.fields.blockType
 
                   const block = deepCopyObject(
                     props.blocks.find((block) => block.slug === blockType),
                   )
 
+                  await afterChangeTraverseFields({
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: originalNode.fields,
+                    fields: block.fields,
+                    global: null,
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    previousDoc: originalNode.fields,
+                    previousSiblingDoc: originalNode.fields,
+                    req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    siblingData: node.fields,
+                    siblingDoc: originalNode.fields,
+                  })
+
+                  return node
+                },
+              ],
+              afterRead: [
+                ({
+                  context,
+                  draft,
+                  fallbackLocale,
+                  findMany,
+                  flattenLocales,
+                  locale,
+                  node,
+                  overrideAccess,
+                  req,
+                  showHiddenFields,
+                  triggerAccessControl,
+                  triggerHooks,
+                }) => {
+                  const blockType = node.fields.blockType
+
+                  const block = deepCopyObject(
+                    props.blocks.find((block) => block.slug === blockType),
+                  )
+
+                  const fieldPromises = []
+                  const populationPromises = []
+
+                  afterReadTraverseFields({
+                    collection: null,
+                    context,
+                    currentDepth: 0, // Population happens within populationPromises, not here, so that graphQL population works. depth 0 disables population TODO: Maybe this could be consolidated
+                    depth: 0, // Population happens within populationPromises, not here, so that graphQL population works. depth 0 disables population TODO: Maybe this could be consolidated
+                    doc: node.fields,
+                    draft,
+                    fallbackLocale,
+                    fieldPromises,
+                    fields: block.fields,
+                    findMany,
+                    flattenLocales,
+                    global: null,
+                    locale,
+                    overrideAccess,
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    populationPromises,
+                    req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    showHiddenFields,
+                    siblingDoc: node.fields,
+                    triggerAccessControl,
+                    triggerHooks,
+                  })
+                  //await Promise.all(fieldPromises) // TODO: (not 100% sure on this). Do NOT await fieldPromises here. They will be added to the fieldPromises array of the document containing this richText field, and awaited there, on the document-level.
+
+                  return node
+                },
+              ],
+              beforeChange: [
+                async ({
+                  context,
+                  duplicate,
+                  mergeLocaleActions,
+                  node,
+                  operation,
+                  originalNode,
+                  originalNodeWithLocales,
+                  req,
+                  skipValidation,
+                }) => {
+                  const blockType = node.fields.blockType
+
+                  const block = deepCopyObject(
+                    props.blocks.find((block) => block.slug === blockType),
+                  )
+                  const errors: { field: string; message: string }[] = []
 
                   await beforeChangeTraverseFields({
                     id: null,
                     collection: null,
                     context,
                     data: node.fields,
-                    doc: node.fields,
-                    fields: sanitizedBlock.fields,
+                    doc: originalNode.fields,
+                    docWithLocales: originalNodeWithLocales?.fields ?? {},
+                    duplicate,
+                    errors,
+                    fields: block.fields,
                     global: null,
-                    mergeLocaleActions: [],
+                    mergeLocaleActions,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
-                    overrideAccess,
-                    path: '',
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
                     req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
                     siblingData: node.fields,
-                    siblingDoc: node.fields,
+                    siblingDoc: originalNode.fields,
+                    siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
+                    skipValidation,
                   })
-
 
                   return node
                 },
               ],
+
               beforeValidate: [
-                async ({ context, findMany, node, operation, overrideAccess, req }) => {
+                async ({ context, node, operation, originalNode, overrideAccess, req }) => {
                   const blockType = node.fields.blockType
 
                   const block = deepCopyObject(
                     props.blocks.find((block) => block.slug === blockType),
                   )
 
-
-
                   await beforeValidateTraverseFields({
                     id: null,
                     collection: null,
                     context,
                     data: node.fields,
-                    doc: node.fields,
-                    fields: sanitizedBlock.fields,
+                    doc: originalNode.fields,
+                    fields: block.fields,
                     global: null,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
                     overrideAccess,
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
                     req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
                     siblingData: node.fields,
-                    siblingDoc: node.fields,
+                    siblingDoc: originalNode.fields,
                   })
 
                   return node
                 },
               ],
-            },*/
+            },
             node: BlockNode,
             populationPromises: [blockPopulationPromiseHOC(props)],
             validations: [blockValidationHOC(props)],

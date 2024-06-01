@@ -24,7 +24,6 @@ export const afterChange = async <T extends Record<string, unknown>>({
   collection,
   context,
   data,
-
   doc: incomingDoc,
   global,
   operation,

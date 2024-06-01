@@ -128,7 +128,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }),
       hooks: {
         afterChange: [
-          async ({ context: _context, findMany, operation, overrideAccess, path, req, value }) => {
+          async ({ context: _context, operation, path, req, value }) => {
             if (!finalSanitizedEditorConfig.features.hooks.afterChange.size) {
               return value
             }
@@ -156,11 +156,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 for (const hook of afterChangeHooks.get(node.type)) {
                   node = await hook({
                     context,
-                    findMany,
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
-                    overrideAccess,
                     req,
                   })
                 }
@@ -174,7 +172,20 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           /**
            * afterRead hooks do not receive the originalNode. Thus, they can run on all nodes, not just nodes with an ID.
            */
-          async ({ context: context, findMany, operation, overrideAccess, req, value }) => {
+          async ({
+            context: context,
+            draft,
+            fallbackLocale,
+            findMany,
+            flattenLocales,
+            locale,
+            overrideAccess,
+            req,
+            showHiddenFields,
+            triggerAccessControl,
+            triggerHooks,
+            value,
+          }) => {
             if (!finalSanitizedEditorConfig.features.hooks.afterRead.size) {
               return value
             }
@@ -191,12 +202,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 for (const hook of afterReadHooks.get(node.type)) {
                   node = await hook({
                     context,
+                    draft,
+                    fallbackLocale,
                     findMany,
+                    flattenLocales,
+                    locale,
                     node,
-                    operation,
-                    originalNode: null,
                     overrideAccess,
                     req,
+                    showHiddenFields,
+                    triggerAccessControl,
+                    triggerHooks,
                   })
                 }
               }
@@ -206,7 +222,18 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeChange: [
-          async ({ context: _context, findMany, operation, overrideAccess, path, req, value }) => {
+          async ({
+            context: _context,
+            duplicate,
+            field,
+            mergeLocaleActions,
+            operation,
+            path,
+            req,
+            siblingDocWithLocales,
+            skipValidation,
+            value,
+          }) => {
             if (!finalSanitizedEditorConfig.features.hooks.beforeChange.size) {
               return value
             }
@@ -222,10 +249,23 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               [key: string]: SerializedLexicalNode
             } = context.internal.lexical[path].originalNodeIDMap
 
+            const originalNodeWithLocalesIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
             recurseNodeTree({
               nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            if (siblingDocWithLocales?.[field.name]) {
+              recurseNodeTree({
+                nodeIDMap: originalNodeWithLocalesIDMap,
+                nodes:
+                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root?.children ??
+                  [],
+              })
+            }
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
@@ -234,12 +274,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 for (const hook of beforeChangeHooks.get(node.type)) {
                   node = await hook({
                     context,
-                    findMany,
+                    duplicate,
+                    mergeLocaleActions,
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
-                    overrideAccess,
+                    originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     req,
+                    skipValidation,
                   })
                 }
               }
@@ -249,7 +291,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeDuplicate: [
-          async ({ context: _context, findMany, operation, overrideAccess, path, req, value }) => {
+          async ({ context: _context, path, req, value }) => {
             if (!finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size) {
               return value
             }
@@ -277,11 +319,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 for (const hook of beforeDuplicateHooks.get(node.type)) {
                   node = await hook({
                     context,
-                    findMany,
                     node,
-                    operation,
                     originalNode: originalNodeIDMap[id],
-                    overrideAccess,
                     req,
                   })
                 }
@@ -292,16 +331,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeValidate: [
-          async ({
-            context: _context,
-            findMany,
-            operation,
-            overrideAccess,
-            path,
-            previousValue,
-            req,
-            value,
-          }) => {
+          async ({ context, operation, overrideAccess, path, previousValue, req, value }) => {
             // return value if there are NO hooks
             if (
               !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
@@ -312,7 +342,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               return value
             }
 
-            const context: any = _context
             /**
              * beforeValidate is the first field hook which runs. This is where we can create the node map, which can then be used in the other hooks.
              *
@@ -351,10 +380,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             if (!context.internal) {
               context.internal = {}
             }
-            if (!context.internal.lexical) {
-              context.internal.lexical = {}
+            if (!(context as any).internal.lexical) {
+              ;(context as any).internal.lexical = {}
             }
-            context.internal.lexical[path] = {
+            ;(context as any).internal.lexical[path] = {
               originalNodeIDMap,
             }
 
@@ -380,7 +409,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 for (const hook of beforeValidateHooks.get(node.type)) {
                   node = await hook({
                     context,
-                    findMany,
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
@@ -628,6 +656,17 @@ export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.s
 export type { ToolbarGroup, ToolbarGroupItem } from './field/features/toolbars/types.js'
 export { createNode } from './field/features/typeUtilities.js'
 export type {
+  AfterChangeNodeHook,
+  AfterChangeNodeHookArgs,
+  AfterReadNodeHook,
+  AfterReadNodeHookArgs,
+  BaseNodeHookArgs,
+  BeforeChangeNodeHook,
+  BeforeChangeNodeHookArgs,
+  BeforeDuplicateNodeHook,
+  BeforeDuplicateNodeHookArgs,
+  BeforeValidateNodeHook,
+  BeforeValidateNodeHookArgs,
   ClientComponentProps,
   ClientFeature,
   ClientFeatureProviderMap,
@@ -635,8 +674,6 @@ export type {
   FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
-  FieldNodeHook,
-  FieldNodeHookArgs,
   NodeValidation,
   NodeWithHooks,
   PluginComponent,

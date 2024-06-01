@@ -30,12 +30,36 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
+  /**
+   * The original data with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
+   */
+  docWithLocales?: Record<string, unknown>
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  draft?: boolean
+  /** Only available in `beforeChange` field hooks */
+  duplicate?: boolean
+  /**
+   * The fallbackLocale. Only available in `afterRead` hooks.
+   */
+  fallbackLocale?: string
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  flattenLocales?: boolean
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: SanitizedGlobalConfig | null
+  /**
+   * The requested locale. Only available in `afterRead` hooks.
+   */
+  locale?: string
+  /** Only available in `beforeChange` field hooks */
+  mergeLocaleActions?: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -57,8 +81,26 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The schemaPath of the field, e.g. "group.myArray.textField". The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
    */
   schemaPath: string
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  showHiddenFields?: boolean
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<TSiblingData>
+  /**
+   * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
+   */
+  siblingDocWithLocales?: Record<string, unknown>
+  /** Only available in `beforeChange` field hooks */
+  skipValidation?: boolean
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  triggerAccessControl?: boolean
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  triggerHooks?: boolean
   /** The value of the field. */
   value?: TValue
 }
