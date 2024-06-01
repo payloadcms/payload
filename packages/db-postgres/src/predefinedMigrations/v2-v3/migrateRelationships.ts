@@ -17,7 +17,7 @@ type Args = {
   isVersions: boolean
   pathsToQuery: PathsToQuery
   payload: Payload
-  req: PayloadRequestWithData
+  req?: Partial<PayloadRequestWithData>
   tableName: string
 }
 
@@ -88,7 +88,7 @@ export const migrateRelationships = async ({
       globalSlug,
       isVersions,
       payload,
-      req,
+      req: req as PayloadRequestWithData,
       tableName,
     })
   }
