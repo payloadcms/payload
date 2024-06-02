@@ -77,7 +77,7 @@ export const promise = async ({
           req,
           schemaPath: fieldSchemaPath,
           siblingData,
-          value: siblingData[field.name],
+          value: siblingDoc[field.name],
         })
 
         if (hookedValue !== undefined) {

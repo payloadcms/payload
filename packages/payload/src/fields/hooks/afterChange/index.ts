@@ -8,7 +8,13 @@ import { traverseFields } from './traverseFields.js'
 type Args<T> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
+  /**
+   * The data before hooks
+   */
   data: Record<string, unknown> | T
+  /**
+   * The data after hooks
+   */
   doc: Record<string, unknown> | T
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
