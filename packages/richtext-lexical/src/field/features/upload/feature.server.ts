@@ -186,7 +186,15 @@ export const UploadFeature: FeatureProviderProviderServer<
             graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
             hooks: {
               afterChange: [
-                async ({ context, node, operation, originalNode, req }) => {
+                async ({
+                  context,
+                  node,
+                  operation,
+                  originalNode,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
+                  req,
+                }) => {
                   const collection = req.payload.collections[node?.relationTo]
 
                   if (collection) {
@@ -205,11 +213,11 @@ export const UploadFeature: FeatureProviderProviderServer<
                         global: null,
                         operation:
                           operation === 'create' || operation === 'update' ? operation : 'update',
-                        path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        path: parentRichTextFieldPath,
                         previousDoc: originalNode.fields,
                         previousSiblingDoc: originalNode.fields,
                         req,
-                        schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        schemaPath: parentRichTextFieldSchemaPath,
                         siblingData: node.fields,
                         siblingDoc: originalNode.fields,
                       })
@@ -232,6 +240,8 @@ export const UploadFeature: FeatureProviderProviderServer<
                   locale,
                   node,
                   overrideAccess,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
                   populationPromises,
                   req,
                   showHiddenFields,
@@ -262,10 +272,10 @@ export const UploadFeature: FeatureProviderProviderServer<
                         global: null,
                         locale,
                         overrideAccess,
-                        path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        path: parentRichTextFieldPath,
                         populationPromises,
                         req,
-                        schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        schemaPath: parentRichTextFieldSchemaPath,
                         showHiddenFields,
                         siblingDoc: node.fields,
                         triggerAccessControl,
@@ -287,6 +297,8 @@ export const UploadFeature: FeatureProviderProviderServer<
                   operation,
                   originalNode,
                   originalNodeWithLocales,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
                   req,
                   skipValidation,
                 }) => {
@@ -313,9 +325,9 @@ export const UploadFeature: FeatureProviderProviderServer<
                         mergeLocaleActions,
                         operation:
                           operation === 'create' || operation === 'update' ? operation : 'update',
-                        path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        path: parentRichTextFieldPath,
                         req,
-                        schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        schemaPath: parentRichTextFieldSchemaPath,
                         siblingData: node.fields,
                         siblingDoc: originalNode.fields,
                         siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
@@ -329,7 +341,16 @@ export const UploadFeature: FeatureProviderProviderServer<
               ],
 
               beforeValidate: [
-                async ({ context, node, operation, originalNode, overrideAccess, req }) => {
+                async ({
+                  context,
+                  node,
+                  operation,
+                  originalNode,
+                  overrideAccess,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
+                  req,
+                }) => {
                   const collection = req.payload.collections[node?.relationTo]
 
                   if (collection) {
@@ -350,9 +371,9 @@ export const UploadFeature: FeatureProviderProviderServer<
                         operation:
                           operation === 'create' || operation === 'update' ? operation : 'update',
                         overrideAccess,
-                        path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        path: parentRichTextFieldPath,
                         req,
-                        schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                        schemaPath: parentRichTextFieldSchemaPath,
                         siblingData: node.fields,
                         siblingDoc: originalNode.fields,
                       })

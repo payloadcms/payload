@@ -93,6 +93,13 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
       })
       props.fields = sanitizedFields
 
+      // the text field is not included in the node data.
+      // Thus, for tasks like validation, we do not want to pass it a text field in the schema which will never have data.
+      // Otherwise, it will cause a validation error (field is required).
+      const sanitizedFieldsWithoutText = deepCopyObject(sanitizedFields).filter(
+        (field) => field.name !== 'text',
+      )
+
       return {
         ClientComponent: LinkFeatureClientComponent,
         clientFeatureProps: {
@@ -156,7 +163,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
             },
             node: AutoLinkNode,
             // Since AutoLinkNodes are just internal links, they need no hooks or graphQL population promises
-            validations: [linkValidation(props)],
+            validations: [linkValidation(props, sanitizedFieldsWithoutText)],
           }),
           createNode({
             converters: {
@@ -188,21 +195,29 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
             graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
             hooks: {
               afterChange: [
-                async ({ context, node, operation, originalNode, req }) => {
+                async ({
+                  context,
+                  node,
+                  operation,
+                  originalNode,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
+                  req,
+                }) => {
                   await afterChangeTraverseFields({
                     collection: null,
                     context,
                     data: node.fields,
                     doc: originalNode.fields,
-                    fields: sanitizedFields,
+                    fields: sanitizedFieldsWithoutText,
                     global: null,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: parentRichTextFieldPath,
                     previousDoc: originalNode.fields,
                     previousSiblingDoc: originalNode.fields,
                     req,
-                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: parentRichTextFieldSchemaPath,
                     siblingData: node.fields,
                     siblingDoc: originalNode.fields,
                   })
@@ -223,6 +238,8 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   locale,
                   node,
                   overrideAccess,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
                   populationPromises,
                   req,
                   showHiddenFields,
@@ -238,16 +255,16 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     draft,
                     fallbackLocale,
                     fieldPromises,
-                    fields: sanitizedFields,
+                    fields: sanitizedFieldsWithoutText,
                     findMany,
                     flattenLocales,
                     global: null,
                     locale,
                     overrideAccess,
-                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: parentRichTextFieldPath,
                     populationPromises,
                     req,
-                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: parentRichTextFieldSchemaPath,
                     showHiddenFields,
                     siblingDoc: node.fields,
                     triggerAccessControl,
@@ -267,6 +284,8 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   operation,
                   originalNode,
                   originalNodeWithLocales,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
                   req,
                   skipValidation,
                 }) => {
@@ -279,40 +298,50 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     docWithLocales: originalNodeWithLocales?.fields ?? {},
                     duplicate,
                     errors,
-                    fields: sanitizedFields,
+                    fields: sanitizedFieldsWithoutText,
                     global: null,
                     mergeLocaleActions,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: parentRichTextFieldPath,
                     req,
-                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: parentRichTextFieldSchemaPath,
                     siblingData: node.fields,
                     siblingDoc: originalNode.fields,
                     siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
                     skipValidation,
                   })
+                  console.log('After beforeChange', deepCopyObject(node.fields))
 
                   return node
                 },
               ],
 
               beforeValidate: [
-                async ({ context, node, operation, originalNode, overrideAccess, req }) => {
+                async ({
+                  context,
+                  node,
+                  operation,
+                  originalNode,
+                  overrideAccess,
+                  parentRichTextFieldPath,
+                  parentRichTextFieldSchemaPath,
+                  req,
+                }) => {
                   await beforeValidateTraverseFields({
                     id: null,
                     collection: null,
                     context,
                     data: node.fields,
                     doc: originalNode.fields,
-                    fields: sanitizedFields,
+                    fields: sanitizedFieldsWithoutText,
                     global: null,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
                     overrideAccess,
-                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: parentRichTextFieldPath,
                     req,
-                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: parentRichTextFieldSchemaPath,
                     siblingData: node.fields,
                     siblingDoc: originalNode.fields,
                   })
@@ -322,7 +351,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
               ],
             },
             node: LinkNode,
-            validations: [linkValidation(props)],
+            validations: [linkValidation(props, sanitizedFieldsWithoutText)],
           }),
         ],
         serverFeatureProps: props,
