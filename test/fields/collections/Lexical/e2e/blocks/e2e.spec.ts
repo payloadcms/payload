@@ -910,10 +910,8 @@ describe('lexicalBlocks', () => {
       await wait(300)
 
       await page.click('#action-save', { delay: 100 })
-      await wait(300)
 
-      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
-      await wait(300)
+      await expect(page.locator('.Toastify')).toContainText('The following fields are invalid')
 
       const requiredTooltip = conditionalArrayBlock
         .locator('.tooltip-content:has-text("This field is required.")')
