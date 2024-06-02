@@ -1,5 +1,5 @@
 import type { Config, SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, FieldAffectingData } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
@@ -52,7 +52,12 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    * A function or array defining additional fields for the link feature. These will be
    * displayed in the link editor drawer.
    */
-  fields?: ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[]) | Field[]
+  fields?:
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldAffectingData[]
+      }) => (Field | FieldAffectingData)[])
+    | Field[]
   /**
    * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
    * This behaves exactly like the maxDepth properties of relationship and upload fields.
