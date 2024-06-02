@@ -18,9 +18,9 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  path: string
+  path: (number | string)[]
   req: PayloadRequestWithData
-  schemaPath: string
+  schemaPath: string[]
   siblingData: Record<string, unknown>
   /**
    * The original siblingData (not modified by any hooks)

@@ -163,7 +163,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       },
       hooks: {
         afterChange: [
-          async ({ context: _context, operation, path, req, value }) => {
+          async ({ context: _context, operation, path, req, schemaPath, value }) => {
             if (!finalSanitizedEditorConfig.features.hooks.afterChange.size) {
               return value
             }
@@ -177,7 +177,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context.internal.lexical[path].originalNodeIDMap
+            } = context.internal.lexical[path.join('.')].originalNodeIDMap
 
             recurseNodeTree({
               nodeIDMap,
@@ -194,6 +194,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
                     req,
                   })
                 }
@@ -218,8 +220,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             flattenLocales,
             locale,
             overrideAccess,
+            path,
             populationPromises,
             req,
+            schemaPath,
             showHiddenFields,
             triggerAccessControl,
             triggerHooks,
@@ -251,6 +255,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     locale,
                     node,
                     overrideAccess,
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
                     populationPromises,
                     req,
                     showHiddenFields,
@@ -274,6 +280,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             operation,
             path,
             req,
+            schemaPath,
             siblingDocWithLocales,
             skipValidation,
             value,
@@ -291,7 +298,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context.internal.lexical[path].originalNodeIDMap
+            } = context.internal.lexical[path.join('.')].originalNodeIDMap
 
             const originalNodeWithLocalesIDMap: {
               [key: string]: SerializedLexicalNode
@@ -325,6 +332,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     operation,
                     originalNode: originalNodeIDMap[id],
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
                     req,
                     skipValidation,
                   })
@@ -336,7 +345,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeDuplicate: [
-          async ({ context: _context, path, req, value }) => {
+          async ({ context: _context, path, req, schemaPath, value }) => {
             if (!finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size) {
               return value
             }
@@ -350,7 +359,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context.internal.lexical[path].originalNodeIDMap
+            } = context.internal.lexical[path.join('.')].originalNodeIDMap
 
             recurseNodeTree({
               nodeIDMap,
@@ -366,6 +375,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     context,
                     node,
                     originalNode: originalNodeIDMap[id],
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
                     req,
                   })
                 }
@@ -376,7 +387,16 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeValidate: [
-          async ({ context, operation, overrideAccess, path, previousValue, req, value }) => {
+          async ({
+            context,
+            operation,
+            overrideAccess,
+            path,
+            previousValue,
+            req,
+            schemaPath,
+            value,
+          }) => {
             // return value if there are NO hooks
             if (
               !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
@@ -428,7 +448,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             if (!(context as any).internal.lexical) {
               ;(context as any).internal.lexical = {}
             }
-            ;(context as any).internal.lexical[path] = {
+            ;(context as any).internal.lexical[path.join('.')] = {
               originalNodeIDMap,
             }
 
@@ -458,6 +478,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     operation,
                     originalNode: originalNodeIDMap[id],
                     overrideAccess,
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
                     req,
                   })
                 }

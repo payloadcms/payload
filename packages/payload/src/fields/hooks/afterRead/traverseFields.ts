@@ -23,10 +23,10 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: null | string
   overrideAccess: boolean
-  path: string
+  path: (number | string)[]
   populationPromises: Promise<void>[]
   req: PayloadRequestWithData
-  schemaPath: string
+  schemaPath: string[]
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
   triggerAccessControl?: boolean

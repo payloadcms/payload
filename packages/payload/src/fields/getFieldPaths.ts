@@ -8,11 +8,11 @@ export function getFieldPaths({
   parentSchemaPath,
 }: {
   field: Field | TabAsField
-  parentPath: string
-  parentSchemaPath: string
+  parentPath: (number | string)[]
+  parentSchemaPath: string[]
 }): {
-  path: string
-  schemaPath: string
+  path: (number | string)[]
+  schemaPath: string[]
 } {
   if (field.type === 'tabs' || field.type === 'row' || field.type === 'collapsible') {
     return {
@@ -22,8 +22,8 @@ export function getFieldPaths({
   } else if (field.type === 'tab') {
     if (tabHasName(field)) {
       return {
-        path: `${parentPath}${field.name}`,
-        schemaPath: `${parentSchemaPath}${field.name}`,
+        path: [...parentPath, field.name],
+        schemaPath: [...parentSchemaPath, field.name],
       }
     } else {
       return {
@@ -32,8 +32,8 @@ export function getFieldPaths({
       }
     }
   }
-  const path = parentPath ? `${parentPath}${field.name}` : field.name
-  const schemaPath = parentSchemaPath ? `${parentSchemaPath}.${field.name}` : field.name
+  const path = parentPath?.length ? [...parentPath, field.name] : [field.name]
+  const schemaPath = parentSchemaPath?.length ? [...parentSchemaPath, field.name] : [field.name]
 
   return { path, schemaPath }
 }

@@ -319,6 +319,8 @@ export type BaseNodeHookArgs<T extends SerializedLexicalNode> = {
   context: RequestContext
   /** The value of the node. */
   node: T
+  parentRichTextFieldPath: (number | string)[]
+  parentRichTextFieldSchemaPath: string[]
   /** The payload request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
 }

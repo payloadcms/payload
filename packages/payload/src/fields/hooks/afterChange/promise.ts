@@ -17,13 +17,13 @@ type Args = {
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
   /**
-   * The parent's path. Should either be an empty string or end with a .
+   * The parent's path
    */
-  parentPath: string
+  parentPath: (number | string)[]
   /**
-   * The parent's schemaPath (path without indexes). Should either be an empty string or end with a .
+   * The parent's schemaPath (path without indexes).
    */
-  parentSchemaPath: string
+  parentSchemaPath: string[]
   previousDoc: Record<string, unknown>
   previousSiblingDoc: Record<string, unknown>
   req: PayloadRequestWithData
@@ -98,11 +98,11 @@ export const promise = async ({
         fields: field.fields,
         global,
         operation,
-        path: `${fieldPath}.`,
+        path: fieldPath,
         previousDoc,
         previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
         req,
-        schemaPath: `${fieldSchemaPath}.`,
+        schemaPath: fieldSchemaPath,
         siblingData: (siblingData?.[field.name] as Record<string, unknown>) || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
       })
@@ -125,11 +125,11 @@ export const promise = async ({
               fields: field.fields,
               global,
               operation,
-              path: `${fieldPath}.${i}.`,
+              path: [...fieldPath, i],
               previousDoc,
               previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
               req,
-              schemaPath: `${fieldSchemaPath}.`,
+              schemaPath: fieldSchemaPath,
               siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
             }),
@@ -158,12 +158,12 @@ export const promise = async ({
                 fields: block.fields,
                 global,
                 operation,
-                path: `${fieldPath}.${i}.`,
+                path: [...fieldPath, i],
                 previousDoc,
                 previousSiblingDoc:
                   previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
                 req,
-                schemaPath: `${fieldSchemaPath}.`,
+                schemaPath: fieldSchemaPath,
                 siblingData: siblingData?.[field.name]?.[i] || {},
                 siblingDoc: { ...row } || {},
               }),
@@ -217,11 +217,11 @@ export const promise = async ({
         fields: field.fields,
         global,
         operation,
-        path: tabHasName(field) ? `${fieldPath}.` : fieldPath,
+        path: fieldPath,
         previousDoc,
         previousSiblingDoc: tabPreviousSiblingDoc,
         req,
-        schemaPath: tabHasName(field) ? `${fieldSchemaPath}.` : fieldSchemaPath,
+        schemaPath: fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
       })

@@ -24,8 +24,8 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  parentPath: string
-  parentSchemaPath: string
+  parentPath: (number | string)[]
+  parentSchemaPath: string[]
   req: PayloadRequestWithData
   siblingData: Record<string, unknown>
   /**
@@ -302,9 +302,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        path: `${fieldPath}.`,
+        path: fieldPath,
         req,
-        schemaPath: `${fieldSchemaPath}.`,
+        schemaPath: fieldSchemaPath,
         siblingData: groupData,
         siblingDoc: groupDoc,
       })
@@ -329,9 +329,9 @@ export const promise = async <T>({
               global,
               operation,
               overrideAccess,
-              path: `${fieldPath}.${i}.`,
+              path: [...fieldPath, i],
               req,
-              schemaPath: `${fieldSchemaPath}.`,
+              schemaPath: fieldSchemaPath,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             }),
@@ -366,9 +366,9 @@ export const promise = async <T>({
                 global,
                 operation,
                 overrideAccess,
-                path: `${fieldPath}.${i}.`,
+                path: [...fieldPath, i],
                 req,
-                schemaPath: `${fieldSchemaPath}.`,
+                schemaPath: fieldSchemaPath,
                 siblingData: row,
                 siblingDoc: rowSiblingDoc,
               }),
@@ -427,9 +427,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        path: tabHasName(field) ? `${fieldPath}.` : fieldPath,
+        path: fieldPath,
         req,
-        schemaPath: tabHasName(field) ? `${fieldSchemaPath}.` : fieldSchemaPath,
+        schemaPath: fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
       })

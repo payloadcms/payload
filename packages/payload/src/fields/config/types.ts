@@ -82,9 +82,9 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   originalDoc?: TData
   overrideAccess?: boolean
   /**
-   * The path of the field, e.g. "group.myArray.1.textField". The path is the path but with indexes and would be used in the context of field data, not field schemas.
+   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
-  path: string
+  path: (number | string)[]
   /**
    *  Only available in `afterRead` field hooks.
    */
@@ -98,9 +98,9 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
   /**
-   * The schemaPath of the field, e.g. "group.myArray.textField". The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
+   * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
    */
-  schemaPath: string
+  schemaPath: string[]
   /**
    * Only available in `afterRead` hooks.
    */

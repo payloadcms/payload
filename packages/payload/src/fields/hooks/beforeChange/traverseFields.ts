@@ -24,9 +24,9 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: string
+  path: (number | string)[]
   req: PayloadRequestWithData
-  schemaPath: string
+  schemaPath: string[]
   siblingData: Record<string, unknown>
   /**
    * The original siblingData (not modified by any hooks)

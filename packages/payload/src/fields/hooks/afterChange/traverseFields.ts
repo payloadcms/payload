@@ -13,11 +13,11 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
-  path: string
+  path: (number | string)[]
   previousDoc: Record<string, unknown>
   previousSiblingDoc: Record<string, unknown>
   req: PayloadRequestWithData
-  schemaPath: string
+  schemaPath: string[]
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
 }

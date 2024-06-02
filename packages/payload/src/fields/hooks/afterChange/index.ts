@@ -40,11 +40,11 @@ export const afterChange = async <T extends Record<string, unknown>>({
     fields: collection?.fields || global?.fields,
     global,
     operation,
-    path: '',
+    path: [],
     previousDoc,
     previousSiblingDoc: previousDoc,
     req,
-    schemaPath: '',
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
   })

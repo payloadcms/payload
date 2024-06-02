@@ -29,13 +29,13 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   /**
-   * The parent's path. Should either be an empty string or end with a .
+   * The parent's path.
    */
-  parentPath: string
+  parentPath: (number | string)[]
   /**
-   * The parent's schemaPath (path without indexes). Should either be an empty string or end with a .
+   * The parent's schemaPath (path without indexes).
    */
-  parentSchemaPath: string
+  parentSchemaPath: string[]
   populationPromises: Promise<void>[]
   req: PayloadRequestWithData
   showHiddenFields: boolean
@@ -336,10 +336,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
-        path: `${fieldPath}.`,
+        path: fieldPath,
         populationPromises,
         req,
-        schemaPath: `${fieldSchemaPath}.`,
+        schemaPath: fieldSchemaPath,
         showHiddenFields,
         siblingDoc: groupDoc,
         triggerAccessControl,
@@ -369,10 +369,10 @@ export const promise = async ({
             global,
             locale,
             overrideAccess,
-            path: `${fieldPath}.${i}.`,
+            path: [...fieldPath, i],
             populationPromises,
             req,
-            schemaPath: `${fieldSchemaPath}.`,
+            schemaPath: fieldSchemaPath,
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
@@ -398,10 +398,10 @@ export const promise = async ({
                 global,
                 locale,
                 overrideAccess,
-                path: `${fieldPath}.${i}.`,
+                path: [...fieldPath, i],
                 populationPromises,
                 req,
-                schemaPath: `${fieldSchemaPath}.`,
+                schemaPath: fieldSchemaPath,
                 showHiddenFields,
                 siblingDoc: row || {},
                 triggerAccessControl,
@@ -439,10 +439,10 @@ export const promise = async ({
               global,
               locale,
               overrideAccess,
-              path: `${fieldPath}.${i}.`,
+              path: [...fieldPath, i],
               populationPromises,
               req,
-              schemaPath: `${fieldSchemaPath}.`,
+              schemaPath: fieldSchemaPath,
               showHiddenFields,
               siblingDoc: row || {},
               triggerAccessControl,
@@ -472,10 +472,10 @@ export const promise = async ({
                   global,
                   locale,
                   overrideAccess,
-                  path: `${fieldPath}.${i}.`,
+                  path: [...fieldPath, i],
                   populationPromises,
                   req,
-                  schemaPath: `${fieldSchemaPath}.`,
+                  schemaPath: fieldSchemaPath,
                   showHiddenFields,
                   siblingDoc: row || {},
                   triggerAccessControl,
@@ -544,10 +544,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
-        path: tabHasName(field) ? `${fieldPath}.` : fieldPath,
+        path: fieldPath,
         populationPromises,
         req,
-        schemaPath: tabHasName(field) ? `${fieldSchemaPath}.` : fieldSchemaPath,
+        schemaPath: fieldSchemaPath,
         showHiddenFields,
         siblingDoc: tabDoc,
         triggerAccessControl,

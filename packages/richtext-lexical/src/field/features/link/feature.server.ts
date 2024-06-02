@@ -198,11 +198,11 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     global: null,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     previousDoc: originalNode.fields,
                     previousSiblingDoc: originalNode.fields,
                     req,
-                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     siblingData: node.fields,
                     siblingDoc: originalNode.fields,
                   })
@@ -244,10 +244,10 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     global: null,
                     locale,
                     overrideAccess,
-                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     populationPromises,
                     req,
-                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     showHiddenFields,
                     siblingDoc: node.fields,
                     triggerAccessControl,
@@ -284,9 +284,9 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     mergeLocaleActions,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     req,
-                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     siblingData: node.fields,
                     siblingDoc: originalNode.fields,
                     siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
@@ -310,9 +310,9 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
                     overrideAccess,
-                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    path: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     req,
-                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    schemaPath: [], // This is fine since we are treating lexical block fields as isolated / on its own
                     siblingData: node.fields,
                     siblingDoc: originalNode.fields,
                   })
