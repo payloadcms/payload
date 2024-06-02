@@ -12,6 +12,10 @@ export const recurseNodeTree = ({
   }
   nodes: SerializedLexicalNode[]
 }): void => {
+  if (!nodes?.length) {
+    return
+  }
+
   for (const node of nodes) {
     if (flattenedNodes) {
       flattenedNodes.push(node)

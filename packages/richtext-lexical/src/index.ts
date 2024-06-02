@@ -177,7 +177,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context.internal.lexical[path.join('.')].originalNodeIDMap
+            } = context?.internal?.lexical?.[path.join('.')]?.originalNodeIDMap
+
+            if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
+              return value
+            }
 
             recurseNodeTree({
               nodeIDMap,
@@ -288,6 +292,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             if (!finalSanitizedEditorConfig.features.hooks.beforeChange.size) {
               return value
             }
+
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
@@ -298,7 +303,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context.internal.lexical[path.join('.')].originalNodeIDMap
+            } = context?.internal?.lexical?.[path.join('.')]?.originalNodeIDMap
+
+            if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
+              return value
+            }
 
             const originalNodeWithLocalesIDMap: {
               [key: string]: SerializedLexicalNode
@@ -359,7 +368,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context.internal.lexical[path.join('.')].originalNodeIDMap
+            } = context?.internal?.lexical?.[path.join('.')]?.originalNodeIDMap
+
+            if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
+              return value
+            }
 
             recurseNodeTree({
               nodeIDMap,
