@@ -11,6 +11,7 @@ import type {
 } from 'lexical'
 
 import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
+import ObjectID from 'bson-objectid'
 import {
   $applyNodeReplacement,
   $createTextNode,
@@ -29,8 +30,10 @@ const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', '
 /** @noInheritDoc */
 export class LinkNode extends ElementNode {
   __fields: LinkFields
+  __id: string
 
   constructor({
+    id,
     fields = {
       doc: null,
       linkType: 'custom',
@@ -40,14 +43,17 @@ export class LinkNode extends ElementNode {
     key,
   }: {
     fields: LinkFields
+    id: string
     key?: NodeKey
   }) {
     super(key)
     this.__fields = fields
+    this.__id = id
   }
 
   static clone(node: LinkNode): LinkNode {
     return new LinkNode({
+      id: node.__id,
       fields: node.__fields,
       key: node.__key,
     })
@@ -76,7 +82,13 @@ export class LinkNode extends ElementNode {
       serializedNode.version = 2
     }
 
+    if (serializedNode.version === 2 && !serializedNode.id) {
+      serializedNode.id = new ObjectID.default().toHexString()
+      serializedNode.version = 3
+    }
+
     const node = $createLinkNode({
+      id: serializedNode.id,
       fields: serializedNode.fields,
     })
     node.setFormat(serializedNode.format)
@@ -115,12 +127,17 @@ export class LinkNode extends ElementNode {
   }
 
   exportJSON(): SerializedLinkNode {
-    return {
+    const returnObject: SerializedLinkNode = {
       ...super.exportJSON(),
       type: this.getType(),
       fields: this.getFields(),
-      version: 2,
+      version: 3,
     }
+    const id = this.getID()
+    if (id) {
+      returnObject.id = id
+    }
+    return returnObject
   }
 
   extractWithChild(
@@ -144,6 +161,10 @@ export class LinkNode extends ElementNode {
 
   getFields(): LinkFields {
     return this.getLatest().__fields
+  }
+
+  getID(): string {
+    return this.getLatest().__id
   }
 
   insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNodeType | null {
@@ -216,6 +237,7 @@ function $convertAnchorElement(domNode: Node): DOMConversionOutput {
     const content = domNode.textContent
     if (content !== null && content !== '') {
       node = $createLinkNode({
+        id: new ObjectID.default().toHexString(),
         fields: {
           doc: null,
           linkType: 'custom',
@@ -228,8 +250,13 @@ function $convertAnchorElement(domNode: Node): DOMConversionOutput {
   return { node }
 }
 
-export function $createLinkNode({ fields }: { fields: LinkFields }): LinkNode {
-  return $applyNodeReplacement(new LinkNode({ fields }))
+export function $createLinkNode({ id, fields }: { fields: LinkFields; id?: string }): LinkNode {
+  return $applyNodeReplacement(
+    new LinkNode({
+      id: id ?? new ObjectID.default().toHexString(),
+      fields,
+    }),
+  )
 }
 
 export function $isLinkNode(node: LexicalNode | null | undefined): node is LinkNode {
@@ -349,8 +376,6 @@ export function $toggleLink(payload: LinkPayload): void {
     })
   }
 }
-/** @deprecated renamed to {@link $toggleLink} by @lexical/eslint-plugin rules-of-lexical */
-export const toggleLink = $toggleLink
 
 function $getLinkAncestor(node: LexicalNode): LinkNode | null {
   return $getAncestor(node, (ancestor) => $isLinkNode(ancestor)) as LinkNode

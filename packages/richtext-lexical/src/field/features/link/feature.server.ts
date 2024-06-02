@@ -3,7 +3,13 @@ import type { Field } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
-import { deepCopyObject } from 'payload/utilities'
+import {
+  afterChangeTraverseFields,
+  afterReadTraverseFields,
+  beforeChangeTraverseFields,
+  beforeValidateTraverseFields,
+  deepCopyObject,
+} from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'
@@ -11,12 +17,12 @@ import type { ClientProps } from './feature.client.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
 import { LinkFeatureClientComponent } from './feature.client.js'
+import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
 import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
-import { linkPopulationPromiseHOC } from './populationPromise.js'
 import { linkValidation } from './validate.js'
 
 export type ExclusiveLinkCollectionsProps =
@@ -143,15 +149,8 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                 nodeTypes: [AutoLinkNode.getType()],
               },
             },
-            hooks: {
-              afterRead: [
-                ({ node }) => {
-                  return node
-                },
-              ],
-            },
             node: AutoLinkNode,
-            populationPromises: [linkPopulationPromiseHOC(props)],
+            // Since AutoLinkNodes are just internal links, they need no hooks or graphQL population promises
             validations: [linkValidation(props)],
           }),
           createNode({
@@ -181,8 +180,143 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                 nodeTypes: [LinkNode.getType()],
               },
             },
+            graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
+            hooks: {
+              afterChange: [
+                async ({ context, node, operation, originalNode, req }) => {
+                  await afterChangeTraverseFields({
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: originalNode.fields,
+                    fields: sanitizedFields,
+                    global: null,
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    previousDoc: originalNode.fields,
+                    previousSiblingDoc: originalNode.fields,
+                    req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    siblingData: node.fields,
+                    siblingDoc: originalNode.fields,
+                  })
+
+                  return node
+                },
+              ],
+              afterRead: [
+                ({
+                  context,
+                  currentDepth,
+                  depth,
+                  draft,
+                  fallbackLocale,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  locale,
+                  node,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  showHiddenFields,
+                  triggerAccessControl,
+                  triggerHooks,
+                }) => {
+                  afterReadTraverseFields({
+                    collection: null,
+                    context,
+                    currentDepth,
+                    depth,
+                    doc: node.fields,
+                    draft,
+                    fallbackLocale,
+                    fieldPromises,
+                    fields: sanitizedFields,
+                    findMany,
+                    flattenLocales,
+                    global: null,
+                    locale,
+                    overrideAccess,
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    populationPromises,
+                    req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    showHiddenFields,
+                    siblingDoc: node.fields,
+                    triggerAccessControl,
+                    triggerHooks,
+                  })
+
+                  return node
+                },
+              ],
+              beforeChange: [
+                async ({
+                  context,
+                  duplicate,
+                  errors,
+                  mergeLocaleActions,
+                  node,
+                  operation,
+                  originalNode,
+                  originalNodeWithLocales,
+                  req,
+                  skipValidation,
+                }) => {
+                  await beforeChangeTraverseFields({
+                    id: null,
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: originalNode.fields,
+                    docWithLocales: originalNodeWithLocales?.fields ?? {},
+                    duplicate,
+                    errors,
+                    fields: sanitizedFields,
+                    global: null,
+                    mergeLocaleActions,
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    siblingData: node.fields,
+                    siblingDoc: originalNode.fields,
+                    siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
+                    skipValidation,
+                  })
+
+                  return node
+                },
+              ],
+
+              beforeValidate: [
+                async ({ context, node, operation, originalNode, overrideAccess, req }) => {
+                  await beforeValidateTraverseFields({
+                    id: null,
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: originalNode.fields,
+                    fields: sanitizedFields,
+                    global: null,
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    overrideAccess,
+                    path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    req,
+                    schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                    siblingData: node.fields,
+                    siblingDoc: originalNode.fields,
+                  })
+
+                  return node
+                },
+              ],
+            },
             node: LinkNode,
-            populationPromises: [linkPopulationPromiseHOC(props)],
             validations: [linkValidation(props)],
           }),
         ],

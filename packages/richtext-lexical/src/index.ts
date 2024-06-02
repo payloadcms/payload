@@ -32,7 +32,7 @@ import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { i18n } from './i18n.js'
-import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
+import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { recurseNodeTree } from './recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
@@ -126,6 +126,41 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
+      graphQLPopulationPromises({
+        context,
+        currentDepth,
+        depth,
+        draft,
+        field,
+        fieldPromises,
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        showHiddenFields,
+        siblingDoc,
+      }) {
+        // check if there are any features with nodes which have populationPromises for this field
+        if (finalSanitizedEditorConfig?.features?.graphQLPopulationPromises?.size) {
+          populateLexicalPopulationPromises({
+            context,
+            currentDepth: currentDepth ?? 0,
+            depth,
+            draft,
+            editorPopulationPromises: finalSanitizedEditorConfig.features.graphQLPopulationPromises,
+            field,
+            fieldPromises,
+            findMany,
+            flattenLocales,
+            overrideAccess,
+            populationPromises,
+            req,
+            showHiddenFields,
+            siblingDoc,
+          })
+        }
+      },
       hooks: {
         afterChange: [
           async ({ context: _context, operation, path, req, value }) => {
@@ -174,12 +209,16 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
            */
           async ({
             context: context,
+            currentDepth,
+            depth,
             draft,
             fallbackLocale,
+            fieldPromises,
             findMany,
             flattenLocales,
             locale,
             overrideAccess,
+            populationPromises,
             req,
             showHiddenFields,
             triggerAccessControl,
@@ -202,13 +241,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 for (const hook of afterReadHooks.get(node.type)) {
                   node = await hook({
                     context,
+                    currentDepth,
+                    depth,
                     draft,
                     fallbackLocale,
+                    fieldPromises,
                     findMany,
                     flattenLocales,
                     locale,
                     node,
                     overrideAccess,
+                    populationPromises,
                     req,
                     showHiddenFields,
                     triggerAccessControl,
@@ -225,6 +268,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           async ({
             context: _context,
             duplicate,
+            errors,
             field,
             mergeLocaleActions,
             operation,
@@ -275,6 +319,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   node = await hook({
                     context,
                     duplicate,
+                    errors,
                     mergeLocaleActions,
                     node,
                     operation,
@@ -500,41 +545,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         }
 
         return outputSchema
-      },
-      populationPromises({
-        context,
-        currentDepth,
-        depth,
-        draft,
-        field,
-        fieldPromises,
-        findMany,
-        flattenLocales,
-        overrideAccess,
-        populationPromises,
-        req,
-        showHiddenFields,
-        siblingDoc,
-      }) {
-        // check if there are any features with nodes which have populationPromises for this field
-        if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
-          populateLexicalPopulationPromises({
-            context,
-            currentDepth,
-            depth,
-            draft,
-            editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
-            field,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            overrideAccess,
-            populationPromises,
-            req,
-            showHiddenFields,
-            siblingDoc,
-          })
-        }
       },
       validate: richTextValidateHOC({
         editorConfig: finalSanitizedEditorConfig,
@@ -772,6 +782,6 @@ export {
   addSwipeUpListener,
 } from './field/lexical/utils/swipe.js'
 export { sanitizeUrl, validateUrl } from './field/lexical/utils/url.js'
-export { defaultRichTextValue } from './populate/defaultValue.js'
+export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'

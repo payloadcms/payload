@@ -2,7 +2,7 @@ import type { PopulationPromise } from '../types.js'
 import type { RelationshipFeatureProps } from './feature.server.js'
 import type { SerializedRelationshipNode } from './nodes/RelationshipNode.js'
 
-import { populate } from '../../../populate/populate.js'
+import { populate } from '../../../populateGraphQL/populate.js'
 
 export const relationshipPopulationPromiseHOC = (
   props: RelationshipFeatureProps,
@@ -11,7 +11,6 @@ export const relationshipPopulationPromiseHOC = (
     currentDepth,
     depth,
     draft,
-    field,
     node,
     overrideAccess,
     populationPromises,
@@ -36,7 +35,6 @@ export const relationshipPopulationPromiseHOC = (
             data: node,
             depth: populateDepth,
             draft,
-            field,
             key: 'value',
             overrideAccess,
             req,

@@ -21,20 +21,11 @@ export const LexicalLocalizedFields: CollectionConfig = {
       localized: true,
     },
     {
-      name: 'lexicalSimple',
+      name: 'lexicalBlocksSubLocalized',
       type: 'richText',
-      localized: true,
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
-      }),
-    },
-    {
-      name: 'lexicalBlocksLocalized',
       admin: {
-        description: 'Localized field with localized block subfields',
+        description: 'Non-localized field with localized block subfields',
       },
-      type: 'richText',
-      localized: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
@@ -61,11 +52,20 @@ export const LexicalLocalizedFields: CollectionConfig = {
       }),
     },
     {
-      name: 'lexicalBlocksSubLocalized',
+      name: 'lexicalSimple',
       type: 'richText',
+      localized: true,
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [...defaultFeatures],
+      }),
+    },
+    {
+      name: 'lexicalBlocksLocalized',
       admin: {
-        description: 'Non-localized field with localized block subfields',
+        description: 'Localized field with localized block subfields',
       },
+      type: 'richText',
+      localized: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,

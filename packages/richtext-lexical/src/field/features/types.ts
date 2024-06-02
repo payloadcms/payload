@@ -25,6 +25,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context,
   currentDepth,
   depth,
+  draft,
   editorPopulationPromises,
   field,
   fieldPromises,
@@ -237,8 +238,20 @@ export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extend
     } & ClientFeatureProps
 
 export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  currentDepth: number
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  depth: number
   draft: boolean
   fallbackLocale: string
+  /**
+   *  Only available in `afterRead` field hooks.
+   */
+  fieldPromises: Promise<void>[]
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany: boolean
   flattenLocales: boolean
@@ -247,6 +260,10 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    */
   locale: string
   overrideAccess: boolean
+  /**
+   *  Only available in `afterRead` field hooks.
+   */
+  populationPromises: Promise<void>[]
   /**
    * Only available in `afterRead` hooks.
    */
@@ -277,6 +294,10 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   duplicate: boolean
+  /**
+   * Only available in `beforeChange` hooks.
+   */
+  errors: { field: string; message: string }[]
   mergeLocaleActions: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
@@ -327,6 +348,9 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   converters?: {
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
+  graphQLPopulationPromises?: Array<
+    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+  >
   hooks?: {
     afterChange?: Array<AfterChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
     afterRead?: Array<AfterReadNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
@@ -342,9 +366,6 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     >
   }
   node: Klass<T> | LexicalNodeReplacement
-  populationPromises?: Array<
-    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-  >
   validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
 }
 
@@ -524,6 +545,7 @@ export type SanitizedServerFeatures = Required<
   }
   /**  The node types mapped to their hooks */
 
+  graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
   hooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
@@ -534,7 +556,6 @@ export type SanitizedServerFeatures = Required<
     beforeDuplicate?: Map<string, Array<BeforeDuplicateNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
-  populationPromises: Map<string, Array<PopulationPromise>>
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
 }

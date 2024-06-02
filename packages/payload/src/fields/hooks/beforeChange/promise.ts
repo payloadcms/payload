@@ -101,6 +101,7 @@ export const promise = async ({
           data,
           docWithLocales,
           duplicate,
+          errors,
           field,
           global,
           mergeLocaleActions,

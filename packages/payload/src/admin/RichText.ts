@@ -32,6 +32,27 @@ type RichTextAdapterBase<
     schemaMap: Map<string, Field[]>
     schemaPath: string
   }) => Map<string, Field[]>
+  /**
+   * Like an afterRead hook, but runs only for the GraphQL resolver. For populating data, this should be used, as afterRead hooks do not have a depth in graphQL.
+   *
+   * To populate stuff / resolve field hooks, mutate the incoming populationPromises or fieldPromises array. They will then be awaited in the correct order within payload itself.
+   * @param data
+   */
+  graphQLPopulationPromises?: (data: {
+    context: RequestContext
+    currentDepth?: number
+    depth: number
+    draft: boolean
+    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    fieldPromises: Promise<void>[]
+    findMany: boolean
+    flattenLocales: boolean
+    overrideAccess?: boolean
+    populationPromises: Promise<void>[]
+    req: PayloadRequestWithData
+    showHiddenFields: boolean
+    siblingDoc: Record<string, unknown>
+  }) => void
   hooks?: FieldBase['hooks']
   i18n?: Partial<GenericLanguages>
   outputSchema?: ({
@@ -50,27 +71,6 @@ type RichTextAdapterBase<
     interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
-  /**
-   * Like an afterRead hook, but runs for both afterRead AND in the GraphQL resolver. For populating data, this should be used.
-   *
-   * To populate stuff / resolve field hooks, mutate the incoming populationPromises or fieldPromises array. They will then be awaited in the correct order within payload itself.
-   * @param data
-   */
-  populationPromises?: (data: {
-    context: RequestContext
-    currentDepth?: number
-    depth: number
-    draft: boolean
-    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
-    fieldPromises: Promise<void>[]
-    findMany: boolean
-    flattenLocales: boolean
-    overrideAccess?: boolean
-    populationPromises: Promise<void>[]
-    req: PayloadRequestWithData
-    showHiddenFields: boolean
-    siblingDoc: Record<string, unknown>
-  }) => void
   validate: Validate<
     Value,
     Value,

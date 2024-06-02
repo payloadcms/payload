@@ -18,9 +18,9 @@ import type { BlocksFeatureClientProps } from './feature.client.js'
 
 import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
+import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { BlockNode } from './nodes/BlocksNode.js'
-import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
@@ -122,6 +122,7 @@ export const BlocksFeature: FeatureProviderProviderServer<
         i18n,
         nodes: [
           createNode({
+            graphQLPopulationPromises: [blockPopulationPromiseHOC(props)],
             hooks: {
               afterChange: [
                 async ({ context, node, operation, originalNode, req }) => {
@@ -155,13 +156,17 @@ export const BlocksFeature: FeatureProviderProviderServer<
               afterRead: [
                 ({
                   context,
+                  currentDepth,
+                  depth,
                   draft,
                   fallbackLocale,
+                  fieldPromises,
                   findMany,
                   flattenLocales,
                   locale,
                   node,
                   overrideAccess,
+                  populationPromises,
                   req,
                   showHiddenFields,
                   triggerAccessControl,
@@ -173,14 +178,11 @@ export const BlocksFeature: FeatureProviderProviderServer<
                     props.blocks.find((block) => block.slug === blockType),
                   )
 
-                  const fieldPromises = []
-                  const populationPromises = []
-
                   afterReadTraverseFields({
                     collection: null,
                     context,
-                    currentDepth: 0, // Population happens within populationPromises, not here, so that graphQL population works. depth 0 disables population TODO: Maybe this could be consolidated
-                    depth: 0, // Population happens within populationPromises, not here, so that graphQL population works. depth 0 disables population TODO: Maybe this could be consolidated
+                    currentDepth,
+                    depth,
                     doc: node.fields,
                     draft,
                     fallbackLocale,
@@ -200,7 +202,7 @@ export const BlocksFeature: FeatureProviderProviderServer<
                     triggerAccessControl,
                     triggerHooks,
                   })
-                  //await Promise.all(fieldPromises) // TODO: (not 100% sure on this). Do NOT await fieldPromises here. They will be added to the fieldPromises array of the document containing this richText field, and awaited there, on the document-level.
+                  //await Promise.all(fieldPromises) // TODO: (not 100% sure on this, maybe we should create our own promise arrays and await them here). // END TODO. Do NOT await fieldPromises here. They will be added to the fieldPromises array of the document containing this richText field, and awaited there, on the document-level.
 
                   return node
                 },
@@ -209,6 +211,7 @@ export const BlocksFeature: FeatureProviderProviderServer<
                 async ({
                   context,
                   duplicate,
+                  errors,
                   mergeLocaleActions,
                   node,
                   operation,
@@ -222,7 +225,6 @@ export const BlocksFeature: FeatureProviderProviderServer<
                   const block = deepCopyObject(
                     props.blocks.find((block) => block.slug === blockType),
                   )
-                  const errors: { field: string; message: string }[] = []
 
                   await beforeChangeTraverseFields({
                     id: null,
@@ -282,7 +284,6 @@ export const BlocksFeature: FeatureProviderProviderServer<
               ],
             },
             node: BlockNode,
-            populationPromises: [blockPopulationPromiseHOC(props)],
             validations: [blockValidationHOC(props)],
           }),
         ],

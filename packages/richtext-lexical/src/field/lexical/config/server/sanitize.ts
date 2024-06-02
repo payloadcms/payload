@@ -17,6 +17,7 @@ export const sanitizeServerFeatures = (
       modifyOutputSchemas: [],
     },
 
+    graphQLPopulationPromises: new Map(),
     hooks: {
       afterChange: new Map(),
       afterRead: new Map(),
@@ -27,7 +28,6 @@ export const sanitizeServerFeatures = (
     i18n: {},
     markdownTransformers: [],
     nodes: [],
-    populationPromises: new Map(),
 
     validations: new Map(),
   }
@@ -56,8 +56,8 @@ export const sanitizeServerFeatures = (
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
       feature.nodes.forEach((node) => {
         const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
-        if (node?.populationPromises?.length) {
-          sanitized.populationPromises.set(nodeType, node.populationPromises)
+        if (node?.graphQLPopulationPromises?.length) {
+          sanitized.graphQLPopulationPromises.set(nodeType, node.graphQLPopulationPromises)
         }
         if (node?.validations?.length) {
           sanitized.validations.set(nodeType, node.validations)

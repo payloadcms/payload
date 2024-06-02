@@ -17,11 +17,12 @@ export const recurseNodeTree = ({
       flattenedNodes.push(node)
     }
     if (nodeIDMap) {
-      if ('id' in node && node.id) {
+      if (node && 'id' in node && node.id) {
         nodeIDMap[node.id as string] = node
       } else if (
         'fields' in node &&
         typeof node.fields === 'object' &&
+        node.fields &&
         'id' in node.fields &&
         node?.fields?.id
       ) {

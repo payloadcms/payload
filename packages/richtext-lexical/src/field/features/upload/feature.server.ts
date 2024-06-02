@@ -3,15 +3,21 @@ import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/typ
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
+import {
+  afterChangeTraverseFields,
+  afterReadTraverseFields,
+  beforeChangeTraverseFields,
+  beforeValidateTraverseFields,
+} from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
 import { createNode } from '../typeUtilities.js'
 import { UploadFeatureClientComponent } from './feature.client.js'
+import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { UploadNode } from './nodes/UploadNode.js'
-import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
@@ -177,8 +183,187 @@ export const UploadFeature: FeatureProviderProviderServer<
                 nodeTypes: [UploadNode.getType()],
               },
             },
+            graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
+            hooks: {
+              afterChange: [
+                async ({ context, node, operation, originalNode, req }) => {
+                  const collection = req.payload.collections[node?.relationTo]
+
+                  if (collection) {
+                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                    if (Array.isArray(collectionFieldSchema)) {
+                      if (!collectionFieldSchema?.length) {
+                        return
+                      }
+                      await afterChangeTraverseFields({
+                        collection: null,
+                        context,
+                        data: node.fields,
+                        doc: originalNode.fields,
+                        fields: collectionFieldSchema,
+                        global: null,
+                        operation:
+                          operation === 'create' || operation === 'update' ? operation : 'update',
+                        path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        previousDoc: originalNode.fields,
+                        previousSiblingDoc: originalNode.fields,
+                        req,
+                        schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        siblingData: node.fields,
+                        siblingDoc: originalNode.fields,
+                      })
+                    }
+                  }
+
+                  return node
+                },
+              ],
+              afterRead: [
+                ({
+                  context,
+                  currentDepth,
+                  depth,
+                  draft,
+                  fallbackLocale,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  locale,
+                  node,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  showHiddenFields,
+                  triggerAccessControl,
+                  triggerHooks,
+                }) => {
+                  const collection = req.payload.collections[node?.relationTo]
+
+                  if (collection) {
+                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                    if (Array.isArray(collectionFieldSchema)) {
+                      if (!collectionFieldSchema?.length) {
+                        return node
+                      }
+                      afterReadTraverseFields({
+                        collection: null,
+                        context,
+                        currentDepth,
+                        depth,
+                        doc: node.fields,
+                        draft,
+                        fallbackLocale,
+                        fieldPromises,
+                        fields: collectionFieldSchema,
+                        findMany,
+                        flattenLocales,
+                        global: null,
+                        locale,
+                        overrideAccess,
+                        path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        populationPromises,
+                        req,
+                        schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        showHiddenFields,
+                        siblingDoc: node.fields,
+                        triggerAccessControl,
+                        triggerHooks,
+                      })
+                    }
+                  }
+
+                  return node
+                },
+              ],
+              beforeChange: [
+                async ({
+                  context,
+                  duplicate,
+                  errors,
+                  mergeLocaleActions,
+                  node,
+                  operation,
+                  originalNode,
+                  originalNodeWithLocales,
+                  req,
+                  skipValidation,
+                }) => {
+                  const collection = req.payload.collections[node?.relationTo]
+
+                  if (collection) {
+                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                    if (Array.isArray(collectionFieldSchema)) {
+                      if (!collectionFieldSchema?.length) {
+                        return node
+                      }
+                      await beforeChangeTraverseFields({
+                        id: null,
+                        collection: null,
+                        context,
+                        data: node.fields,
+                        doc: originalNode.fields,
+                        docWithLocales: originalNodeWithLocales?.fields ?? {},
+                        duplicate,
+                        errors,
+                        fields: collectionFieldSchema,
+                        global: null,
+                        mergeLocaleActions,
+                        operation:
+                          operation === 'create' || operation === 'update' ? operation : 'update',
+                        path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        req,
+                        schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        siblingData: node.fields,
+                        siblingDoc: originalNode.fields,
+                        siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
+                        skipValidation,
+                      })
+                    }
+                  }
+
+                  return node
+                },
+              ],
+
+              beforeValidate: [
+                async ({ context, node, operation, originalNode, overrideAccess, req }) => {
+                  const collection = req.payload.collections[node?.relationTo]
+
+                  if (collection) {
+                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                    if (Array.isArray(collectionFieldSchema)) {
+                      if (!collectionFieldSchema?.length) {
+                        return node
+                      }
+                      await beforeValidateTraverseFields({
+                        id: null,
+                        collection: null,
+                        context,
+                        data: node.fields,
+                        doc: originalNode.fields,
+                        fields: collectionFieldSchema,
+                        global: null,
+                        operation:
+                          operation === 'create' || operation === 'update' ? operation : 'update',
+                        overrideAccess,
+                        path: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        req,
+                        schemaPath: '', // This is fine since we are treating lexical block fields as isolated / on its own
+                        siblingData: node.fields,
+                        siblingDoc: originalNode.fields,
+                      })
+                    }
+                  }
+
+                  return node
+                },
+              ],
+            },
             node: UploadNode,
-            populationPromises: [uploadPopulationPromiseHOC(props)],
             validations: [uploadValidation(props)],
           }),
         ],

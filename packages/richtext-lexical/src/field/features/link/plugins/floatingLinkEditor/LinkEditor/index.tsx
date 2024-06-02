@@ -50,7 +50,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { i18n, t } = useTranslation()
 
-  const [stateData, setStateData] = useState<{} | (LinkFields & { text: string })>({})
+  const [stateData, setStateData] = useState<{} | (LinkFields & { id?: string; text: string })>({})
 
   const { closeModal, isModalOpen, toggleModal } = useModal()
   const editDepth = useEditDepth()
@@ -116,6 +116,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       newTab: undefined,
       url: '',
       ...focusLinkParent.getFields(),
+      id: focusLinkParent.getID(),
       text: focusLinkParent.getTextContent(),
     }
 
