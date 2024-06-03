@@ -1,8 +1,8 @@
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter } from '../types.js'
 
-export const createMigrationTable = async (adapter: PostgresAdapter): Promise<void> => {
+export const createMigrationTable = async (adapter: DrizzleAdapter): Promise<void> => {
   const prependSchema = adapter.schemaName ? `"${adapter.schemaName}".` : ''
 
   await adapter.drizzle.execute(

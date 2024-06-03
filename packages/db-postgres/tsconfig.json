@@ -24,8 +24,8 @@
     "src/**/*.spec.tsx"
   ],
   "include": [
-    "src"
-, "../drizzle/src/createTableName.ts"  ],
+    "src/**/*.ts",
+  ],
   "references": [
     {
       "path": "../payload"

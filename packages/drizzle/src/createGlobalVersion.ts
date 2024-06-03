@@ -6,12 +6,12 @@ import { type CreateGlobalVersionArgs } from 'payload/database'
 import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
 
 export async function createGlobalVersion<T extends TypeWithID>(
-  this: PostgresAdapter,
+  this: DrizzleAdapter,
   {
     autosave,
     globalSlug,
@@ -19,7 +19,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     versionData,
   }: CreateGlobalVersionArgs,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[req.transactionID].db
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
   const tableName = this.tableNameMap.get(`_${toSnakeCase(global.slug)}${this.versionsSuffix}`)
@@ -39,13 +39,15 @@ export async function createGlobalVersion<T extends TypeWithID>(
   })
 
   const table = this.tables[tableName]
-
   if (global.versions.drafts) {
-    await db.execute(sql`
-      UPDATE ${table}
-      SET latest = false
-      WHERE ${table.id} != ${result.id};
-    `)
+    await this.execute({
+      db,
+      sql: sql`
+          UPDATE ${table}
+          SET latest = false
+          WHERE ${table.id} != ${result.id};
+        `,
+    })
   }
 
   return result

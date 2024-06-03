@@ -1,10 +1,10 @@
 import { and, eq } from 'drizzle-orm'
 
-import type { DrizzleDB, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
 type Args = {
-  adapter: PostgresAdapter
-  db: DrizzleDB
+  adapter: DrizzleAdapter
+  db: DrizzleTransaction
   parentID: unknown
   tableName: string
 }

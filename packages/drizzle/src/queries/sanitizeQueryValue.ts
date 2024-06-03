@@ -2,10 +2,10 @@ import { APIError } from 'payload/errors'
 import { type Field, type TabAsField, fieldAffectsData } from 'payload/types'
 import { createArrayFromCommaDelineated } from 'payload/utilities'
 
-import type { PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter } from '../types.js'
 
 type SanitizeQueryValueArgs = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   field: Field | TabAsField
   operator: string
   relationOrPath: string

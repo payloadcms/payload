@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayRowToInsert } from '../transform/write/types.js'
-import type { DrizzleDB, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }[]
-  db: DrizzleDB
+  db: DrizzleTransaction
   parentRows: Record<string, unknown>[]
 }
 
@@ -67,7 +67,11 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
     // the nested arrays need the ID for the parentID foreign key
     let insertedRows: Args['parentRows']
     if (row.rows.length > 0) {
-      insertedRows = await db.insert(adapter.tables[tableName]).values(row.rows).returning()
+      insertedRows = await adapter.insert({
+        db,
+        tableName,
+        values: row.rows,
+      })
     }
 
     // Insert locale rows
@@ -81,10 +85,11 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
           return localeRow
         })
       }
-      await db
-        .insert(adapter.tables[`${tableName}${adapter.localesSuffix}`])
-        .values(row.locales)
-        .returning()
+      await adapter.insert({
+        db,
+        tableName: `${tableName}${adapter.localesSuffix}`,
+        values: row.locales,
+      })
     }
 
     // If there are sub arrays, call this function recursively

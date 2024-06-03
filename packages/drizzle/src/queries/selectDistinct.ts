@@ -1,7 +1,7 @@
 import type { QueryPromise, SQL } from 'drizzle-orm'
 
 import type { ChainedMethods } from '../find/chainMethods.js'
-import type { DrizzleAdapter, DrizzleDB } from '../types.js'
+import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { chainMethods } from '../find/chainMethods.js'
@@ -10,7 +10,7 @@ import { type GenericColumn } from '../types.js'
 type Args = {
   adapter: DrizzleAdapter
   chainedMethods?: ChainedMethods
-  db: DrizzleDB
+  db: DrizzleTransaction
   joins: BuildQueryJoinAliases
   selectFields: Record<string, GenericColumn>
   tableName: string

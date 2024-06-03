@@ -2,14 +2,14 @@
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, TypeWithID } from 'payload/types'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleAdapter } from '../../types.js'
 
 import { createBlocksMap } from '../../utilities/createBlocksMap.js'
 import { createPathMap } from '../../utilities/createRelationshipMap.js'
 import { traverseFields } from './traverseFields.js'
 
 type TransformArgs = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   config: SanitizedConfig
   data: Record<string, unknown>
   fallbackLocale?: false | string

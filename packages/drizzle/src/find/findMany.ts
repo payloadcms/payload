@@ -1,19 +1,18 @@
 import type { FindArgs } from 'payload/database'
 import type { Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
 
-import { inArray, sql } from 'drizzle-orm'
+import { inArray } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter } from '../types.js'
 import type { ChainedMethods } from './chainMethods.js'
 
 import buildQuery from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
-import { chainMethods } from './chainMethods.js'
 
 type Args = Omit<FindArgs, 'collection'> & {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   fields: Field[]
   tableName: string
 }
@@ -31,8 +30,7 @@ export const findMany = async function find({
   tableName,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
-  const table = adapter.tables[tableName]
+  const db = adapter.sessions[req.transactionID].db
 
   const limit = limitArg ?? 10
   let totalDocs: number
@@ -120,24 +118,13 @@ export const findMany = async function find({
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
   if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
-    const selectCountMethods: ChainedMethods = []
-    joins.forEach(({ condition, table }) => {
-      selectCountMethods.push({
-        args: [table, condition],
-        method: 'leftJoin',
-      })
+    const countResult = await this.countDistinct({
+      db,
+      joins,
+      tableName,
+      where,
     })
 
-    const countResult = await chainMethods({
-      methods: selectCountMethods,
-      query: db
-        .select({
-          count: sql<number>`count
-            (DISTINCT ${adapter.tables[tableName].id})`,
-        })
-        .from(table)
-        .where(where),
-    })
     totalDocs = Number(countResult[0].count)
     totalPages = typeof limit === 'number' && limit !== 0 ? Math.ceil(totalDocs / limit) : 1
     hasPrevPage = page > 1

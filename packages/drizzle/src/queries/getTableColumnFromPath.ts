@@ -11,7 +11,7 @@ import { flattenTopLevelFields } from 'payload/utilities'
 import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'
 
-import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 type Constraint = {
@@ -31,7 +31,7 @@ type TableColumn = {
 }
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   aliasTable?: GenericTable | PgTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string

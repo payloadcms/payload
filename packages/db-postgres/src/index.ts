@@ -38,9 +38,13 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { countDistinct } from './countDistinct.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
+import { deleteWhere } from './deleteWhere.js'
+import { execute } from './execute.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 import { init } from './init.js'
+import { insert } from './insert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -92,6 +96,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       commitTransaction,
       connect,
       count,
+      countDistinct,
       create,
       createGlobal,
       createGlobalVersion,
@@ -101,13 +106,16 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       deleteMany,
       deleteOne,
       deleteVersions,
+      deleteWhere,
       destroy,
+      execute,
       find,
       findGlobal,
       findGlobalVersions,
       findOne,
       findVersions,
       init,
+      insert,
       migrate,
       migrateDown,
       migrateFresh,

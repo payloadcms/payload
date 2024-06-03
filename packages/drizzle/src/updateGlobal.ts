@@ -11,7 +11,7 @@ export async function updateGlobal<T extends TypeWithID>(
   this: DrizzleAdapter,
   { slug, data, req = {} as PayloadRequestWithData }: UpdateGlobalArgs,
 ): Promise<T> {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[req.transactionID].db
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 

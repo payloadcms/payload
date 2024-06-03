@@ -4,7 +4,7 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
@@ -16,7 +16,7 @@ import { transformSelects } from './selects.js'
 import { transformTexts } from './texts.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }

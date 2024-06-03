@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayField } from 'payload/types'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   arrayTableName: string
   baseTableName: string
   blocks: {

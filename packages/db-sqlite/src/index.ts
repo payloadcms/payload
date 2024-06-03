@@ -38,9 +38,13 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, SQLiteAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { countDistinct } from './countDistinct.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
+import { deleteWhere } from './deleteWhere.js'
+import { execute } from './execute.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 import { init } from './init.js'
+import { insert } from './insert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -61,7 +65,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     })
 
     return createDatabaseAdapter<SQLiteAdapter>({
-      name: 'postgres',
+      name: 'sqlite',
+      client: undefined,
       defaultDrizzleSnapshot,
       drizzle: undefined,
       enums: {},
@@ -74,9 +79,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
-      pgSchema: undefined,
-      pool: undefined,
-      poolOptions: args.pool,
       push: args.push,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
@@ -92,6 +94,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       commitTransaction,
       connect,
       count,
+      countDistinct,
       create,
       createGlobal,
       createGlobalVersion,
@@ -101,13 +104,16 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       deleteMany,
       deleteOne,
       deleteVersions,
+      deleteWhere,
       destroy,
+      execute,
       find,
       findGlobal,
       findGlobalVersions,
       findOne,
       findVersions,
       init,
+      insert,
       migrate,
       migrateDown,
       migrateFresh,

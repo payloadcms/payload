@@ -1,12 +1,12 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, PayloadRequestWithData } from 'payload/types'
 
-import type { DrizzleAdapter, GenericColumn } from '../types.js'
+import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types.js'
 
 type BaseArgs = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
-  db: DrizzleAdapter['drizzle']
+  db: DrizzleTransaction
   fields: Field[]
   /**
    * When true, skips reading the data back from the database and returns the input data

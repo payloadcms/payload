@@ -1,22 +1,25 @@
-import type { Client } from '@libsql/client'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type {
-  Column,
   ColumnBaseConfig,
-  ColumnBuilder,
-  ColumnBuilderBase,
-  ColumnBuilderBaseConfig,
   ColumnDataType,
   DrizzleConfig,
   ExtractTablesWithRelations,
   Relation,
   Relations,
-  Table,
+  SQL,
+  TableRelationalConfig,
 } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
 import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
+import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
+import type { Result } from 'drizzle-orm/sqlite-core/session'
 import type { BaseDatabaseAdapter, MigrationTemplateArgs } from 'payload/database'
+
+import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
+export { BuildQueryJoinAliases }
+import type { ChainedMethods } from './find/chainMethods.js'
+export { ChainedMethods }
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -24,34 +27,58 @@ export type SQLiteDB = LibSQLDatabase<
   Record<string, unknown> & Record<string, GenericRelation | GenericTable>
 >
 
-export type GenericColumn = PgColumn<
-  ColumnBaseConfig<ColumnDataType, string>,
-  Record<string, unknown>
->
+type GenericPgColumn = PgColumn<ColumnBaseConfig<ColumnDataType, string>, Record<string, unknown>>
 
-export type GenericColumns = {
-  [x: string]: GenericColumn
+export type GenericColumns<T> = {
+  [x: string]: T
 }
 
-export type GenericTable = PgTable<{
-  columns: GenericColumns
+type GenericPgTable = PgTable<{
+  columns: GenericColumns<GenericPgColumn>
   dialect: string
   name: string
   schema: undefined
 }>
 
+type GenericSQLiteTable = SQLiteTable<{
+  columns: GenericColumns<SQLiteColumn>
+  dialect: string
+  name: string
+  schema: undefined
+}>
+
+export type GenericColumn = GenericPgColumn | SQLiteColumn
+
+export type GenericTable = GenericPgTable | GenericSQLiteTable
+
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
-export type DrizzleTransaction = PgTransaction<
+export type TransactionSQLite = SQLiteTransaction<
+  'async',
+  Result<'async', unknown>,
+  Record<string, unknown>,
+  { tsName: TableRelationalConfig }
+>
+export type TransactionPg = PgTransaction<
   NodePgQueryResultHKT,
   Record<string, unknown>,
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
+export type DrizzleTransaction = TransactionPg | TransactionSQLite
+
 export type DrizzleAdapter = BaseDatabaseAdapter & {
+  countDistinct: (args: {
+    db: DrizzleTransaction
+    joins: BuildQueryJoinAliases
+    tableName: string
+    where: SQL
+  }) => Promise<number>
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
+  deleteWhere: (args: { db: DrizzleTransaction; tableName: string; where: SQL }) => Promise<void>
   drizzle: PostgresDB | SQLiteDB
   enums?: Record<string, unknown>
+  execute: (args: { db: DrizzleTransaction; sql: SQL<unknown> }) => Promise<void>
   features: {
     json?: boolean
   }
@@ -64,6 +91,12 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   // TODO: figure out the type for idType
   idType: unknown
   initializing: Promise<void>
+  insert: (args: {
+    db: DrizzleTransaction
+    onConflictDoUpdate?: unknown
+    tableName: string
+    values: Record<string, unknown> | Record<string, unknown>[]
+  }) => Promise<Record<string, unknown>[]>
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   push: boolean

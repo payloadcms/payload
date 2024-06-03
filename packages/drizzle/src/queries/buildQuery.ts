@@ -4,7 +4,7 @@ import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
 
-import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { parseParams } from './parseParams.js'
@@ -17,7 +17,7 @@ export type BuildQueryJoinAliases = {
 }[]
 
 type BuildQueryArgs = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   fields: Field[]
   locale?: string
   sort?: string

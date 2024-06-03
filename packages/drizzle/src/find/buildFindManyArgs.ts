@@ -1,12 +1,12 @@
 import type { DBQueryConfig } from 'drizzle-orm'
 import type { Field } from 'payload/types'
 
-import type { PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter } from '../types.js'
 
 import { traverseFields } from './traverseFields.js'
 
 type BuildFindQueryArgs = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   depth: number
   fields: Field[]
   tableName: string

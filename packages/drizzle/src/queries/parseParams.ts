@@ -6,7 +6,7 @@ import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
@@ -17,7 +17,7 @@ import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   fields: Field[]
   joins: BuildQueryJoinAliases
   locale: string

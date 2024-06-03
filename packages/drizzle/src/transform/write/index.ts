@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
 import type { Field } from 'payload/types'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   data: Record<string, unknown>
   fields: Field[]
   path?: string

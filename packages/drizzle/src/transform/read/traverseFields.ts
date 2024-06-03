@@ -4,7 +4,7 @@ import type { Field, TabAsField } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
 import { transformHasManyNumber } from './hasManyNumber.js'
@@ -15,7 +15,7 @@ type TraverseFieldsArgs = {
   /**
    * The DB adapter
    */
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   /**
    * Pre-formatted blocks map
    */

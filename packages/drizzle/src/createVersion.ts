@@ -19,7 +19,7 @@ export async function createVersion<T extends TypeWithID>(
     versionData,
   }: CreateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[req.transactionID].db
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
 
@@ -46,12 +46,15 @@ export async function createVersion<T extends TypeWithID>(
   const table = this.tables[tableName]
 
   if (collection.versions.drafts) {
-    await db.execute(sql`
+    await this.execute({
+      db,
+      sql: sql`
       UPDATE ${table}
       SET latest = false
       WHERE ${table.id} != ${result.id}
         AND ${table.parent} = ${parent}
-    `)
+    `,
+    })
   }
 
   return result

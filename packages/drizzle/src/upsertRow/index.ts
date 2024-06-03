@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import type { PgTransaction } from 'drizzle-orm/pg-core'
 import type { TypeWithID } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
@@ -47,23 +48,26 @@ export const upsertRow = async <T extends TypeWithID>({
 
       if (id) {
         rowToInsert.row.id = id
-        ;[insertedRow] = await db
-          .insert(adapter.tables[tableName])
-          .values(rowToInsert.row)
-          .onConflictDoUpdate({ set: rowToInsert.row, target })
-          .returning()
+        ;[insertedRow] = await adapter.insert({
+          db,
+          onConflictDoUpdate: { set: rowToInsert.row, target },
+          tableName,
+          values: rowToInsert.row,
+        })
       } else {
-        ;[insertedRow] = await db
-          .insert(adapter.tables[tableName])
-          .values(rowToInsert.row)
-          .onConflictDoUpdate({ set: rowToInsert.row, target, where })
-          .returning()
+        ;[insertedRow] = await adapter.insert({
+          db,
+          onConflictDoUpdate: { set: rowToInsert.row, target, where },
+          tableName,
+          values: rowToInsert.row,
+        })
       }
     } else {
-      ;[insertedRow] = await db
-        .insert(adapter.tables[tableName])
-        .values(rowToInsert.row)
-        .returning()
+      ;[insertedRow] = await adapter.insert({
+        db,
+        tableName,
+        values: rowToInsert.row,
+      })
     }
 
     const localesToInsert: Record<string, unknown>[] = []
@@ -138,13 +142,22 @@ export const upsertRow = async <T extends TypeWithID>({
     // //////////////////////////////////
 
     if (localesToInsert.length > 0) {
+      const localeTableName = `${tableName}${adapter.localesSuffix}`
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
       if (operation === 'update') {
-        await db.delete(localeTable).where(eq(localeTable._parentID, insertedRow.id))
+        await adapter.deleteWhere({
+          db,
+          tableName: localeTableName,
+          where: eq(localeTable._parentID, insertedRow.id),
+        })
       }
 
-      await db.insert(localeTable).values(localesToInsert)
+      await adapter.insert({
+        db,
+        tableName: localeTableName,
+        values: localesToInsert,
+      })
     }
 
     // //////////////////////////////////
@@ -167,7 +180,11 @@ export const upsertRow = async <T extends TypeWithID>({
     }
 
     if (relationsToInsert.length > 0) {
-      await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert)
+      await adapter.insert({
+        db,
+        tableName: relationshipsTableName,
+        values: relationsToInsert,
+      })
     }
 
     // //////////////////////////////////
@@ -190,7 +207,11 @@ export const upsertRow = async <T extends TypeWithID>({
     }
 
     if (textsToInsert.length > 0) {
-      await db.insert(adapter.tables[textsTableName]).values(textsToInsert).returning()
+      await adapter.insert({
+        db,
+        tableName: textsTableName,
+        values: textsToInsert,
+      })
     }
 
     // //////////////////////////////////
@@ -213,7 +234,11 @@ export const upsertRow = async <T extends TypeWithID>({
     }
 
     if (numbersToInsert.length > 0) {
-      await db.insert(adapter.tables[numbersTableName]).values(numbersToInsert).returning()
+      await adapter.insert({
+        db,
+        tableName: numbersTableName,
+        values: numbersToInsert,
+      })
     }
 
     // //////////////////////////////////
@@ -226,16 +251,21 @@ export const upsertRow = async <T extends TypeWithID>({
       for (const blockName of rowToInsert.blocksToDelete) {
         const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
         const blockTable = adapter.tables[blockTableName]
-        await db.delete(blockTable).where(eq(blockTable._parentID, insertedRow.id))
+        await adapter.deleteWhere({
+          db,
+          tableName: blockTableName,
+          where: eq(blockTable._parentID, insertedRow.id),
+        })
       }
     }
 
     for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
       const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
-      insertedBlockRows[blockName] = await db
-        .insert(adapter.tables[blockTableName])
-        .values(blockRows.map(({ row }) => row))
-        .returning()
+      insertedBlockRows[blockName] = await adapter.insert({
+        db,
+        tableName: blockTableName,
+        values: blockRows.map(({ row }) => row),
+      })
 
       insertedBlockRows[blockName].forEach((row, i) => {
         blockRows[i].row = row
@@ -259,10 +289,11 @@ export const upsertRow = async <T extends TypeWithID>({
       }, [])
 
       if (blockLocaleRowsToInsert.length > 0) {
-        await db
-          .insert(adapter.tables[`${blockTableName}${adapter.localesSuffix}`])
-          .values(blockLocaleRowsToInsert)
-          .returning()
+        await adapter.insert({
+          db,
+          tableName: `${blockTableName}${adapter.localesSuffix}`,
+          values: blockLocaleRowsToInsert,
+        })
       }
 
       await insertArrays({
@@ -302,15 +333,24 @@ export const upsertRow = async <T extends TypeWithID>({
     for (const [selectTableName, tableRows] of Object.entries(selectsToInsert)) {
       const selectTable = adapter.tables[selectTableName]
       if (operation === 'update') {
-        await db.delete(selectTable).where(eq(selectTable.parent, insertedRow.id))
+        await adapter.deleteWhere({
+          db,
+          tableName: selectTableName,
+          where: eq(selectTable.parent, insertedRow.id),
+        })
       }
-      await db.insert(selectTable).values(tableRows).returning()
+      await adapter.insert({
+        db,
+        tableName: selectTableName,
+        values: tableRows,
+      })
     }
 
     // //////////////////////////////////
     // Error Handling
     // //////////////////////////////////
   } catch (error) {
+    // TODO: error handle for sqlite
     throw error.code === '23505'
       ? new ValidationError(
           [

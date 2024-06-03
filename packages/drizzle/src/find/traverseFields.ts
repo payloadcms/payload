@@ -4,12 +4,12 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 type TraverseFieldArgs = {
   _locales: Result
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   currentArgs: Result
   currentTableName: string
   depth?: number

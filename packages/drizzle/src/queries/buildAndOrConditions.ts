@@ -1,7 +1,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Where } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types.js'
+import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { parseParams } from './parseParams.js'
@@ -15,7 +15,7 @@ export async function buildAndOrConditions({
   tableName,
   where,
 }: {
-  adapter: PostgresAdapter
+  adapter: DrizzleAdapter
   collectionSlug?: string
   fields: Field[]
   globalSlug?: string

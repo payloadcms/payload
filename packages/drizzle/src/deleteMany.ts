@@ -12,7 +12,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
   { collection, req = {} as PayloadRequestWithData, where },
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[req.transactionID].db
   const collectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
@@ -36,6 +36,10 @@ export const deleteMany: DeleteMany = async function deleteMany(
   })
 
   if (ids.length > 0) {
-    await db.delete(this.tables[tableName]).where(inArray(this.tables[tableName].id, ids))
+    await this.deleteWhere({
+      db,
+      tableName,
+      where: inArray(this.tables[tableName].id, ids),
+    })
   }
 }
