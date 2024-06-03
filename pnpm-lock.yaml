@@ -824,6 +824,9 @@ importers:
       '@types/mkdirp':
         specifier: 1.0.2
         version: 1.0.2
+      '@types/nodemailer':
+        specifier: 6.4.14
+        version: 6.4.14
       '@types/pluralize':
         specifier: 0.0.33
         version: 0.0.33
