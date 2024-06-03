@@ -7,8 +7,19 @@ import './index.scss'
 
 const baseClass = 'condition-value-number'
 
-const NumberField: React.FC<Props> = ({ disabled, onChange, value }) => {
+const NumberField: React.FC<Props> = ({ disabled, onChange, operator, value }) => {
   const { t } = useTranslation('general')
+
+  const isMulti = ['in', 'not_in'].includes(operator)
+
+  let valueToRender
+
+  if (isMulti && Array.isArray(value)) {
+    valueToRender = value.map((val) => ({ label: val, value: val }))
+  } else if (value) {
+    valueToRender = { label: value, value }
+  }
+
   return (
     <input
       className={baseClass}
