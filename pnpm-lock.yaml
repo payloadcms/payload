@@ -875,6 +875,9 @@ importers:
       '@types/react-datepicker':
         specifier: 4.11.2
         version: 4.11.2(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       confusing-browser-globals:
         specifier: 1.0.11
         version: 1.0.11
