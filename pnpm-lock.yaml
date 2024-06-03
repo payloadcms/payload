@@ -1544,6 +1544,9 @@ importers:
       deep-equal:
         specifier: 2.2.2
         version: 2.2.2
+      esbuild-plugin-swc:
+        specifier: ^1.0.1
+        version: 1.0.1
       flatley:
         specifier: 5.2.0
         version: 5.2.0
@@ -10626,6 +10629,15 @@ packages:
       es5-ext: 0.10.64
       es6-iterator: 2.0.3
       es6-symbol: 3.1.4
+
+  /esbuild-plugin-swc@1.0.1:
+    resolution: {integrity: sha512-K/basZARuDSHH7Krr7FdzwZF4WRLTcZa4c0R2FPuXCyYdh2nZMDdi6SYuuDv0MzKQY+jm0Afl4gltLsBzPesiQ==}
+    dependencies:
+      '@swc/core': 1.4.13
+      deepmerge: 4.3.1
+    transitivePeerDependencies:
+      - '@swc/helpers'
+    dev: false
 
   /esbuild-register@3.5.0(esbuild@0.19.12):
     resolution: {integrity: sha512-+4G/XmakeBAsvJuDugJvtyF1x+XJT4FMocynNpxrvEBViirpfUn2PgNpCHedfWhF4WokNsO/OvMKrmJOIJsI5A==}

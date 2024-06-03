@@ -15,15 +15,15 @@ export default withBundleAnalyzer(
     typescript: {
       ignoreBuildErrors: true,
     },
-    async redirects() {
-      return [
-        {
-          destination: '/admin',
-          permanent: true,
-          source: '/',
-        },
-      ]
-    },
+    // async redirects() {
+    //   return [
+    //     {
+    //       destination: '/admin',
+    //       permanent: true,
+    //       source: '/',
+    //     },
+    //   ]
+    // },
     images: {
       domains: ['localhost'],
     },
