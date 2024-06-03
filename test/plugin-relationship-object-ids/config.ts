@@ -1,5 +1,8 @@
 import { relationshipsAsObjectID } from '@payloadcms/plugin-relationship-object-ids'
 import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { fileURLToPath } from 'node:url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
@@ -99,7 +102,7 @@ export default buildConfigWithDefaults({
       const upload = await payload.create({
         collection: 'uploads',
         data: {},
-        filePath: path.resolve(__dirname, './payload-logo.png'),
+        filePath: path.resolve(dirname, './payload-logo.png'),
       })
 
       await payload.create({

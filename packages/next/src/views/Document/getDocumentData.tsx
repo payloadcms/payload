@@ -1,3 +1,4 @@
+import type { Locale } from 'payload/config'
 import type {
   Data,
   PayloadRequestWithData,

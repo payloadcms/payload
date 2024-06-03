@@ -11,7 +11,7 @@ import type { ClientConfig, LanguageOptions } from 'payload/types'
 
 import { t } from '@payloadcms/translations'
 import { importDateFNSLocale } from '@payloadcms/translations'
-import enUS from 'date-fns/locale/en-US'
+import { enUS } from 'date-fns/locale/en-US'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { useRouteCache } from '../RouteCache/index.js'

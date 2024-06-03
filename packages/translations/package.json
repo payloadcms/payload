@@ -40,7 +40,7 @@
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "date-fns": "3.3.1",
-    "dotenv": "8.6.0",
+    "dotenv": "16.4.5",
     "prettier": "^3.0.3",
     "typescript": "5.4.5"
   },

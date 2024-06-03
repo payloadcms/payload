@@ -114,9 +114,9 @@
     "react-image-crop": "10.1.8",
     "react-select": "5.8.0",
     "react-toastify": "10.0.5",
-    "scheduler": "0.23.0",
-    "use-context-selector": "1.4.1",
-    "uuid": "9.0.1"
+    "scheduler": "0.25.0-rc-f994737d14-20240522",
+    "use-context-selector": "2.0.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",
@@ -130,7 +130,7 @@
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
-    "@types/uuid": "8.3.4",
+    "@types/uuid": "^9.0.8",
     "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "babel-plugin-transform-remove-imports": "^1.7.1",
     "css-loader": "^6.10.0",
@@ -138,8 +138,8 @@
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
-    "postcss-preset-env": "^9.5.0",
-    "sass-loader": "^14.1.1",
+    "postcss-preset-env": "^9.5.14",
+    "sass-loader": "14.2.1",
     "swc-loader": "^0.2.6",
     "swc-plugin-transform-remove-imports": "^1.12.1",
     "terser-webpack-plugin": "^5.3.10",
