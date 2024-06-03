@@ -893,9 +893,6 @@ importers:
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
-      file-loader:
-        specifier: 6.2.0
-        version: 6.2.0(webpack@5.91.0)
       form-data:
         specifier: 3.0.1
         version: 3.0.1
@@ -905,9 +902,6 @@ importers:
       graphql-http:
         specifier: ^1.22.0
         version: 1.22.0(graphql@16.8.1)
-      mini-css-extract-plugin:
-        specifier: 1.6.2
-        version: 1.6.2(webpack@5.91.0)
       nodemon:
         specifier: 3.0.3
         version: 3.0.3
@@ -11084,17 +11078,6 @@ packages:
     engines: {node: ^10.12.0 || >=12.0.0}
     dependencies:
       flat-cache: 3.2.0
-
-  /file-loader@6.2.0(webpack@5.91.0):
-    resolution: {integrity: sha512-qo3glqyTa61Ytg4u73GultjHGjdRyig3tG6lPtyX/jOEJvHif9uB0/OCI2Kif6ctF3caQTW2G5gym21oAsI4pw==}
-    engines: {node: '>= 10.13.0'}
-    peerDependencies:
-      webpack: ^4.0.0 || ^5.0.0
-    dependencies:
-      loader-utils: 2.0.4
-      schema-utils: 3.3.0
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
-    dev: true
 
   /file-type@16.5.4:
     resolution: {integrity: sha512-/yFHK0aGjFEgDJjEKP0pWCplsPFPhwyfwevf/pVxiN0tmE4L9LmwWxWukdJSHdoCli4VgQLehjJtwQBnqmsKcw==}
