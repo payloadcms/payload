@@ -130,7 +130,7 @@
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
-    "@types/uuid": "8.3.4",
+    "@types/uuid": "^9.0.8",
     "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "babel-plugin-transform-remove-imports": "^1.7.1",
     "css-loader": "^6.10.0",
