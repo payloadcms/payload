@@ -902,9 +902,6 @@ importers:
       graphql-http:
         specifier: ^1.22.0
         version: 1.22.0(graphql@16.8.1)
-      nodemon:
-        specifier: 3.0.3
-        version: 3.0.3
       object.assign:
         specifier: 4.1.4
         version: 4.1.4
