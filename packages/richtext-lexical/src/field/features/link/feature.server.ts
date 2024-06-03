@@ -207,19 +207,19 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   await afterChangeTraverseFields({
                     collection: null,
                     context,
-                    data: node.fields,
-                    doc: originalNode.fields,
+                    data: originalNode.fields,
+                    doc: node.fields,
                     fields: sanitizedFieldsWithoutText,
                     global: null,
                     operation:
                       operation === 'create' || operation === 'update' ? operation : 'update',
                     path: parentRichTextFieldPath,
-                    previousDoc: originalNode.fields,
-                    previousSiblingDoc: originalNode.fields,
+                    previousDoc: node.fields,
+                    previousSiblingDoc: node.fields,
                     req,
                     schemaPath: parentRichTextFieldSchemaPath,
-                    siblingData: node.fields,
-                    siblingDoc: originalNode.fields,
+                    siblingData: originalNode.fields,
+                    siblingDoc: node.fields,
                   })
 
                   return node
@@ -311,7 +311,6 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                     siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
                     skipValidation,
                   })
-                  console.log('After beforeChange', deepCopyObject(node.fields))
 
                   return node
                 },

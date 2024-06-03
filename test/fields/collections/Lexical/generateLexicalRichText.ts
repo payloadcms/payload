@@ -28,6 +28,7 @@ export function generateLexicalRichText() {
           format: '',
           type: 'upload',
           version: 2,
+          id: '665d105a91e1c337ba8308dd',
           fields: {
             caption: {
               root: {
@@ -152,7 +153,7 @@ export function generateLexicalRichText() {
           version: 2,
           fields: {
             id: '65298b2bdb4ef8c744a7faac',
-            blockName: 'Block Node, with Blocks Field, With RichText Field, With Relationship Node',
+            blockName: 'xaxaxaxa',
             blockType: 'subBlock',
             subBlocks: [
               {
