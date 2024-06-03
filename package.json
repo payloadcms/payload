@@ -113,7 +113,7 @@
     "concat-stream": "^2.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "dotenv": "8.6.0",
+    "dotenv": "16.4.5",
     "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
     "escape-html": "^1.0.3",

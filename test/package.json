@@ -47,7 +47,7 @@
     "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
-    "dotenv": "8.6.0",
+    "dotenv": "16.4.5",
     "eslint-plugin-payload": "workspace:*",
     "eslint-plugin-playwright": "1.5.3",
     "execa": "5.1.1",

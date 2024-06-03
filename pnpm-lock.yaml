@@ -9,7 +9,7 @@ overrides:
   '@types/react-dom': npm:types-react-dom@19.0.0-beta.2
   copyfiles: 2.4.1
   cross-env: 7.0.3
-  dotenv: 8.6.0
+  dotenv: 16.4.5
   drizzle-orm: 0.29.4
   graphql: ^16.8.1
   mongodb-memory-server: ^9.0
@@ -114,8 +114,8 @@ importers:
         specifier: 7.0.3
         version: 7.0.3
       dotenv:
-        specifier: 8.6.0
-        version: 8.6.0
+        specifier: 16.4.5
+        version: 16.4.5
       drizzle-kit:
         specifier: 0.20.14-1f2c838
         version: 0.20.14-1f2c838
@@ -712,6 +712,9 @@ importers:
 
   packages/payload:
     dependencies:
+      '@next/env':
+        specifier: ^15.0.0-rc.0
+        version: 15.0.0-rc.0
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -748,9 +751,6 @@ importers:
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
-      dotenv:
-        specifier: 8.6.0
-        version: 8.6.0
       file-type:
         specifier: 16.5.4
         version: 16.5.4
@@ -1163,9 +1163,6 @@ importers:
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
-      dotenv:
-        specifier: 8.6.0
-        version: 8.6.0
       jest:
         specifier: ^29.5.0
         version: 29.7.0(@types/node@20.12.5)(ts-node@10.9.1)
@@ -1500,8 +1497,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1
       dotenv:
-        specifier: 8.6.0
-        version: 8.6.0
+        specifier: 16.4.5
+        version: 16.4.5
       prettier:
         specifier: ^3.0.3
         version: 3.2.5
@@ -1777,8 +1774,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/create-payload-app
       dotenv:
-        specifier: 8.6.0
-        version: 8.6.0
+        specifier: 16.4.5
+        version: 16.4.5
       eslint-plugin-payload:
         specifier: workspace:*
         version: link:../packages/eslint-plugin-payload
@@ -8816,7 +8813,7 @@ packages:
       chokidar: 3.6.0
       confbox: 0.1.7
       defu: 6.1.4
-      dotenv: 8.6.0
+      dotenv: 16.4.5
       giget: 1.2.3
       jiti: 1.21.0
       mlly: 1.6.1
@@ -10016,9 +10013,10 @@ packages:
       is-obj: 2.0.0
     dev: false
 
-  /dotenv@8.6.0:
-    resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
-    engines: {node: '>=10'}
+  /dotenv@16.4.5:
+    resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
+    engines: {node: '>=12'}
+    dev: true
 
   /dreamopt@0.8.0:
     resolution: {integrity: sha512-vyJTp8+mC+G+5dfgsY+r3ckxlz+QMX40VjPQsZc5gxVAxLmi64TBoVkP54A/pRAXMXsbu2GMMBrZPxNv23waMg==}
