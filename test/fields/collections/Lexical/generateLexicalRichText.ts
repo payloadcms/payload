@@ -153,7 +153,7 @@ export function generateLexicalRichText() {
           version: 2,
           fields: {
             id: '65298b2bdb4ef8c744a7faac',
-            blockName: 'xaxaxaxa',
+            blockName: 'Block Node, with Blocks Field, With RichText Field, With Relationship Node',
             blockType: 'subBlock',
             subBlocks: [
               {

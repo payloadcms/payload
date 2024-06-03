@@ -52,14 +52,6 @@ export const LexicalLocalizedFields: CollectionConfig = {
       }),
     },
     {
-      name: 'lexicalSimple',
-      type: 'richText',
-      localized: true,
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
-      }),
-    },
-    {
       name: 'lexicalBlocksLocalized',
       admin: {
         description: 'Localized field with localized block subfields',
