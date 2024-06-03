@@ -55,6 +55,7 @@
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "10.0.5",
+    "sass": "1.77.4",
     "ws": "^8.16.0"
   },
   "devDependencies": {
@@ -70,7 +71,6 @@
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
     "postcss-preset-env": "^9.5.14",
-    "sass": "1.77.4",
     "sass-loader": "14.2.1",
     "swc-loader": "^0.2.6",
     "swc-plugin-transform-remove-imports": "^1.12.1",
