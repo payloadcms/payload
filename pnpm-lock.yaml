@@ -26,6 +26,9 @@ importers:
 
   .:
     devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.525.0
+        version: 3.550.0
       '@next/bundle-analyzer':
         specifier: ^14.1.0
         version: 14.1.4
@@ -271,8 +274,8 @@ importers:
         specifier: ^9.0.12
         version: 9.0.13
       '@types/jest':
-        specifier: ^27.0.3
-        version: 27.5.2
+        specifier: 29.5.12
+        version: 29.5.12
       '@types/node':
         specifier: 20.12.5
         version: 20.12.5
@@ -835,7 +838,7 @@ importers:
         version: 0.17.2
     devDependencies:
       '@types/jest':
-        specifier: ^29.5.1
+        specifier: 29.5.12
         version: 29.5.12
       '@types/nodemailer':
         specifier: 6.4.14
@@ -1026,7 +1029,7 @@ importers:
         specifier: ^4.17.9
         version: 4.17.21
       '@types/jest':
-        specifier: ^29.5.2
+        specifier: 29.5.12
         version: 29.5.12
       '@types/node':
         specifier: 20.12.5
@@ -1044,7 +1047,7 @@ importers:
         specifier: 7.0.3
         version: 7.0.3
       jest:
-        specifier: ^29.5.0
+        specifier: ^29.7.0
         version: 29.7.0(@types/node@20.12.5)(ts-node@10.9.1)
       nodemon:
         specifier: 3.0.3
@@ -6980,13 +6983,6 @@ packages:
     dependencies:
       '@types/istanbul-lib-report': 3.0.3
 
-  /@types/jest@27.5.2:
-    resolution: {integrity: sha512-mpT8LJJ4CMeeahobofYWIjFo0xonRS/HfxnVEPMPFSQdGUt1uHCnoPT7Zhb+sjDU2wz0oKV0OLUR0WzrHNgfeA==}
-    dependencies:
-      jest-matcher-utils: 27.5.1
-      pretty-format: 27.5.1
-    dev: true
-
   /@types/jest@29.5.12:
     resolution: {integrity: sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==}
     dependencies:
@@ -9596,11 +9592,6 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: true
 
-  /diff-sequences@27.5.1:
-    resolution: {integrity: sha512-k1gCAXAsNgLwEL+Y8Wvl+M6oEFj5bgazfZULpS5CneoPPXRaCCW7dm+q21Ky2VEE5X+VeRDBVg1Pcvvsr4TtNQ==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-    dev: true
-
   /diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -12196,16 +12187,6 @@ packages:
       - babel-plugin-macros
       - supports-color
 
-  /jest-diff@27.5.1:
-    resolution: {integrity: sha512-m0NvkX55LDt9T4mctTEgnZk3fmEg3NRYutvMPWM/0iPnkFj2wIeF45O1718cMSOFO1vINkqmxqD8vE37uTEbqw==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-    dependencies:
-      chalk: 4.1.2
-      diff-sequences: 27.5.1
-      jest-get-type: 27.5.1
-      pretty-format: 27.5.1
-    dev: true
-
   /jest-diff@29.7.0:
     resolution: {integrity: sha512-LMIgiIrhigmPrs03JHpxUh2yISK3vLFPkAodPeo0+BuF7wA2FoQbkEg1u8gBYBThncu7e1oEDUfIXVuTqLRUjw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -12265,11 +12246,6 @@ packages:
       jest-mock: 29.7.0
       jest-util: 29.7.0
 
-  /jest-get-type@27.5.1:
-    resolution: {integrity: sha512-2KY95ksYSaK7DMBWQn6dQz3kqAf3BB64y2udeG+hv4KfSOb9qwcYQstTJc1KCbsix+wLZWZYN8t7nwX3GOBLRw==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-    dev: true
-
   /jest-get-type@29.6.3:
     resolution: {integrity: sha512-zrteXnqYxfQh7l5FHyL38jL39di8H8rHoecLH3JNxH3BwOrBsNeabdap5e0I23lD4HHI8W5VFBZqG4Eaq5LNcw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -12298,16 +12274,6 @@ packages:
     dependencies:
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
-
-  /jest-matcher-utils@27.5.1:
-    resolution: {integrity: sha512-z2uTx/T6LBaCoNWNFWwChLBKYxTMcGBRjAt+2SbP929/Fflb9aa5LGma654Rz8z9HLxsrUaYzxE9T/EFIL/PAw==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-    dependencies:
-      chalk: 4.1.2
-      jest-diff: 27.5.1
-      jest-get-type: 27.5.1
-      pretty-format: 27.5.1
-    dev: true
 
   /jest-matcher-utils@29.7.0:
     resolution: {integrity: sha512-sBkD+Xi9DtcChsI3L3u0+N0opgPYnCRPtGcQYrgXmR+hmt/fYfWAL0xRXYU8eWOdfuLgBe0YCW3AFtnRLagq/g==}
