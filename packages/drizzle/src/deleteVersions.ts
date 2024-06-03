@@ -13,7 +13,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
   { collection, locale, req = {} as PayloadRequestWithData, where: where },
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[req.transactionID].db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(

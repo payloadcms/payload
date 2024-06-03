@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import type { PgTransaction } from 'drizzle-orm/pg-core'
 import type { TypeWithID } from 'payload/types'
 
 import { eq } from 'drizzle-orm'

@@ -2,6 +2,7 @@ import type { Client, Config } from '@libsql/client'
 import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
+  SQLiteDB,
   TransactionSQLite,
 } from '@payloadcms/drizzle/types'
 import type {
@@ -60,6 +61,7 @@ export type SQLiteAdapter = DrizzleAdapter & {
     where: SQL
   }) => Promise<number>
   deleteWhere: (args: { db: TransactionSQLite; tableName: string; where: SQL }) => Promise<void>
+  drizzle: SQLiteDB
   execute: (args: { db: TransactionSQLite; sql: SQL<unknown> }) => Promise<void>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
@@ -82,6 +84,13 @@ export type SQLiteAdapter = DrizzleAdapter & {
   resolveInitializing: () => void
   schema: Record<string, GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
+  sessions: {
+    [id: string]: {
+      db: TransactionSQLite
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
+    }
+  }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
   versionsSuffix?: string

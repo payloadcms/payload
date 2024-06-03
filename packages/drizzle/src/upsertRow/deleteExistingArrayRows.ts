@@ -19,5 +19,9 @@ export const deleteExistingArrayRows = async ({
 
   const whereConstraints = [eq(table._parentID, parentID)]
 
-  await db.delete(table).where(and(...whereConstraints))
+  await adapter.deleteWhere({
+    db,
+    tableName,
+    where: and(...whereConstraints),
+  })
 }

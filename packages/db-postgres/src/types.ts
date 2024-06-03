@@ -1,6 +1,7 @@
 import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
+  PostgresDB,
   TransactionPg,
 } from '@payloadcms/drizzle/types'
 import type {
@@ -65,6 +66,7 @@ export type PostgresAdapter = DrizzleAdapter & {
     where: SQL
   }) => Promise<number>
   deleteWhere: (args: { db: TransactionPg; tableName: string; where: SQL }) => Promise<void>
+  drizzle: PostgresDB
   enums: Record<string, GenericEnum>
   execute: (args: { db: TransactionPg; sql: SQL<unknown> }) => Promise<void>
   /**
@@ -91,6 +93,13 @@ export type PostgresAdapter = DrizzleAdapter & {
   resolveInitializing: () => void
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
+  sessions: {
+    [id: string]: {
+      db: TransactionPg
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
+    }
+  }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
   versionsSuffix?: string
