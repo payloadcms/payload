@@ -91,14 +91,13 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:esbuild && pnpm build:types",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
     "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
     "build:esbuild": "node bundle.js",
     "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:webpack": "webpack --config webpack.config.js && webpack --config webpack.scss.config.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -144,21 +143,14 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "@types/uuid": "8.3.4",
     "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
-    "babel-plugin-transform-remove-imports": "^1.7.1",
     "css-loader": "^6.10.0",
-    "css-minimizer-webpack-plugin": "^6.0.0",
     "esbuild": "^0.21.4",
-    "esbuild-plugin-swc": "^1.0.1",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
     "postcss-preset-env": "^9.5.0",
     "sass-loader": "^14.1.1",
-    "swc-loader": "^0.2.6",
-    "swc-plugin-transform-remove-imports": "^1.12.1",
-    "terser-webpack-plugin": "^5.3.10",
-    "webpack": "^5.78.0",
-    "webpack-cli": "^5.1.4"
+    "swc-loader": "^0.2.6"
   },
   "peerDependencies": {
     "next": "^15.0.0-rc.0",

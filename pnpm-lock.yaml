@@ -172,7 +172,7 @@ importers:
         version: 9.1.8
       next:
         specifier: 15.0.0-rc.0
-        version: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(sass@1.74.1)
+        version: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       node-mocks-http:
         specifier: ^1.14.1
         version: 1.14.1
@@ -1544,9 +1544,6 @@ importers:
       deep-equal:
         specifier: 2.2.2
         version: 2.2.2
-      esbuild-plugin-swc:
-        specifier: ^1.0.1
-        version: 1.0.1
       flatley:
         specifier: 5.2.0
         version: 5.2.0
@@ -1632,15 +1629,9 @@ importers:
       babel-plugin-react-compiler:
         specifier: 0.0.0-experimental-592953e-20240517
         version: 0.0.0-experimental-592953e-20240517
-      babel-plugin-transform-remove-imports:
-        specifier: ^1.7.1
-        version: 1.7.1(@babel/core@7.24.5)
       css-loader:
         specifier: ^6.10.0
         version: 6.11.0(webpack@5.91.0)
-      css-minimizer-webpack-plugin:
-        specifier: ^6.0.0
-        version: 6.0.0(esbuild@0.21.4)(webpack@5.91.0)
       esbuild:
         specifier: ^0.21.4
         version: 0.21.4
@@ -1662,18 +1653,6 @@ importers:
       swc-loader:
         specifier: ^0.2.6
         version: 0.2.6(@swc/core@1.4.13)(webpack@5.91.0)
-      swc-plugin-transform-remove-imports:
-        specifier: ^1.12.1
-        version: 1.12.1
-      terser-webpack-plugin:
-        specifier: ^5.3.10
-        version: 5.3.10(@swc/core@1.4.13)(esbuild@0.21.4)(webpack@5.91.0)
-      webpack:
-        specifier: ^5.78.0
-        version: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
-      webpack-cli:
-        specifier: ^5.1.4
-        version: 5.1.4(webpack@5.91.0)
 
   test:
     devDependencies:
@@ -8201,7 +8180,7 @@ packages:
       webpack: 5.x.x
       webpack-cli: 5.x.x
     dependencies:
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.91.0)
     dev: true
 
@@ -8212,7 +8191,7 @@ packages:
       webpack: 5.x.x
       webpack-cli: 5.x.x
     dependencies:
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.91.0)
     dev: true
 
@@ -8227,7 +8206,7 @@ packages:
       webpack-dev-server:
         optional: true
     dependencies:
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.91.0)
     dev: true
 
@@ -8736,14 +8715,6 @@ packages:
       pretty-format: 24.9.0
       zod: 3.22.4
       zod-validation-error: 2.1.0(zod@3.22.4)
-
-  /babel-plugin-transform-remove-imports@1.7.1(@babel/core@7.24.5):
-    resolution: {integrity: sha512-8V8G6zqLyAGUNuTHQPGF9b6WbaCqjtU2JYpnmUK9DU0uSQV4s8/sK31sxK6lg008WSBuRjzPoj2/E1eydhepew==}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.24.5
-    dev: true
 
   /babel-preset-current-node-syntax@1.0.1(@babel/core@7.24.5):
     resolution: {integrity: sha512-M7LQ0bxarkxQoN+vz5aJPsLBn77n8QgTFmo8WK0/44auK2xlCXrYcUxHFxgU7qW5Yzw/CjmLRK2uJzaCd7LvqQ==}
@@ -9634,7 +9605,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.38)
       postcss-value-parser: 4.2.0
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
     dev: true
 
   /css-minimizer-webpack-plugin@6.0.0(esbuild@0.19.12)(webpack@5.91.0):
@@ -9670,41 +9641,6 @@ packages:
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
       webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
-    dev: true
-
-  /css-minimizer-webpack-plugin@6.0.0(esbuild@0.21.4)(webpack@5.91.0):
-    resolution: {integrity: sha512-BLpR9CCDkKvhO3i0oZQgad6v9pCxUuhSc5RT6iUEy9M8hBXi4TJb5vqF2GQ2deqYHmRi3O6IR9hgAZQWg0EBwA==}
-    engines: {node: '>= 18.12.0'}
-    peerDependencies:
-      '@parcel/css': '*'
-      '@swc/css': '*'
-      clean-css: '*'
-      csso: '*'
-      esbuild: '*'
-      lightningcss: '*'
-      webpack: ^5.0.0
-    peerDependenciesMeta:
-      '@parcel/css':
-        optional: true
-      '@swc/css':
-        optional: true
-      clean-css:
-        optional: true
-      csso:
-        optional: true
-      esbuild:
-        optional: true
-      lightningcss:
-        optional: true
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
-      cssnano: 6.1.2(postcss@8.4.38)
-      esbuild: 0.21.4
-      jest-worker: 29.7.0
-      postcss: 8.4.38
-      schema-utils: 4.2.0
-      serialize-javascript: 6.0.2
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
     dev: true
 
   /css-prefers-color-scheme@9.0.1(postcss@8.4.38):
@@ -10629,15 +10565,6 @@ packages:
       es5-ext: 0.10.64
       es6-iterator: 2.0.3
       es6-symbol: 3.1.4
-
-  /esbuild-plugin-swc@1.0.1:
-    resolution: {integrity: sha512-K/basZARuDSHH7Krr7FdzwZF4WRLTcZa4c0R2FPuXCyYdh2nZMDdi6SYuuDv0MzKQY+jm0Afl4gltLsBzPesiQ==}
-    dependencies:
-      '@swc/core': 1.4.13
-      deepmerge: 4.3.1
-    transitivePeerDependencies:
-      - '@swc/helpers'
-    dev: false
 
   /esbuild-register@3.5.0(esbuild@0.19.12):
     resolution: {integrity: sha512-+4G/XmakeBAsvJuDugJvtyF1x+XJT4FMocynNpxrvEBViirpfUn2PgNpCHedfWhF4WokNsO/OvMKrmJOIJsI5A==}
@@ -13801,7 +13728,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-sources: 1.4.3
     dev: true
 
@@ -14120,7 +14047,6 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
-    dev: false
 
   /next@15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(sass@1.74.1):
     resolution: {integrity: sha512-IWcCvxUSCAuOK5gig4+9yiyt/dLKpIa+WT01Qcx4CBE4TtwJljyTDnCVVn64jDZ4qmSzsaEYXpb4DTI8qbk03A==}
@@ -14168,6 +14094,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    dev: false
 
   /node-abi@3.57.0:
     resolution: {integrity: sha512-Dp+A9JWxRaKuHP35H77I4kCKesDy5HUDEmScia2FyncMTOXASMyg251F5PhFoDA5uqBrDDffiLpbqnrZmNXW+g==}
@@ -15145,7 +15072,7 @@ packages:
       jiti: 1.21.0
       postcss: 8.4.38
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
     transitivePeerDependencies:
       - typescript
     dev: true
@@ -16405,7 +16332,7 @@ packages:
         optional: true
     dependencies:
       neo-async: 2.6.2
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)
     dev: true
 
   /sass@1.74.1:
@@ -17206,7 +17133,7 @@ packages:
     dependencies:
       '@swc/core': 1.4.13
       '@swc/counter': 0.1.3
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
     dev: true
 
   /swc-plugin-transform-remove-imports@1.12.1:
@@ -17373,7 +17300,7 @@ packages:
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.30.3
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)
     dev: true
 
   /terser@5.30.3:
@@ -17939,7 +17866,7 @@ packages:
       consola: 3.2.3
       effect: 3.1.5
       fast-check: 3.18.0
-      next: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(sass@1.74.1)
+      next: 15.0.0-rc.0(@babel/core@7.24.5)(@playwright/test@1.43.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       std-env: 3.7.0
 
   /uri-js@4.4.1:
@@ -18137,7 +18064,7 @@ packages:
       import-local: 3.1.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.4.13)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-merge: 5.10.0
     dev: true
 
@@ -18203,7 +18130,7 @@ packages:
       - uglify-js
     dev: true
 
-  /webpack@5.91.0(@swc/core@1.4.13)(esbuild@0.21.4)(webpack-cli@5.1.4):
+  /webpack@5.91.0(@swc/core@1.4.13)(esbuild@0.21.4):
     resolution: {integrity: sha512-rzVwlLeBWHJbmgTC/8TvAcu5vpJNII+MelQpylD4jNERPwpBJOE2lEcko1zJX3QJeLjTTAnQxn/OJ8bjDzVQaw==}
     engines: {node: '>=10.13.0'}
     hasBin: true
@@ -18236,7 +18163,6 @@ packages:
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.10(@swc/core@1.4.13)(esbuild@0.21.4)(webpack@5.91.0)
       watchpack: 2.4.1
-      webpack-cli: 5.1.4(webpack@5.91.0)
       webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
