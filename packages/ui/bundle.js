@@ -14,15 +14,17 @@ esbuild
     minify: true,
     outdir: 'dist',
     packages: 'external',
-    plugins: [sassPlugin({ css: 'external', filename: 'styles.css' })],
+    plugins: [sassPlugin({ css: 'external' })],
   })
   .then(() => {
+    fs.rename('dist/main.css', 'dist/styles.css', (err) => {
+      if (err) console.error(`Error while renaming main.css: ${err}`)
+      else console.log('main.css renamed to styles.css')
+    })
+
     fs.unlink('dist/main.js', (err) => {
-      if (err) {
-        console.error(`Error while deleting main.js: ${err}`)
-      } else {
-        console.log('main.js deleted successfully')
-      }
+      if (err) console.error(`Error while deleting main.js: ${err}`)
+      else console.log('main.js deleted successfully')
     })
   })
   .catch(() => process.exit(1))
