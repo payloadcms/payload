@@ -4547,68 +4547,49 @@
       "format": "esm"
     },
     "src/icons/Chevron/index.tsx": {
-      "bytes": 798,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 775,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/Edit/index.tsx": {
-      "bytes": 756,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 733,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/Link/index.tsx": {
-      "bytes": 596,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 573,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/Plus/index.tsx": {
-      "bytes": 389,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 366,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/Swap/index.tsx": {
-      "bytes": 521,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 498,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/X/index.tsx": {
-      "bytes": 478,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 455,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/Tooltip/index.tsx": {
-      "bytes": 2689,
+      "bytes": 2666,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/hooks/useIntersect.ts",
           "kind": "import-statement",
           "original": "../../hooks/useIntersect.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Button/index.tsx": {
-      "bytes": 3892,
+      "bytes": 3869,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -4645,8 +4626,7 @@
           "path": "src/elements/Tooltip/index.tsx",
           "kind": "import-statement",
           "original": "../Tooltip/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -4695,7 +4675,7 @@
       "format": "esm"
     },
     "src/elements/StayLoggedIn/index.tsx": {
-      "bytes": 1830,
+      "bytes": 1807,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -4727,8 +4707,7 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -12048,15 +12027,14 @@
       "format": "cjs"
     },
     "src/elements/Banner/index.tsx": {
-      "bytes": 1651,
+      "bytes": 1628,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/next@15.0.0-rc.0_@babel+core@7.24.5_@playwright+test@1.43.0_babel-plugin-react-compiler@0.0.0_iao4rxivci45ruvxgjinio5snm/node_modules/next/link.js",
           "kind": "import-statement",
           "original": "next/link.js"
         },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
@@ -12255,11 +12233,8 @@
       "format": "esm"
     },
     "src/elements/ErrorPill/index.tsx": {
-      "bytes": 888,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 865,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/forms/FieldPropsProvider/index.tsx": {
@@ -12402,7 +12377,7 @@
     },
     "src/utilities/generateFieldID.ts": { "bytes": 197, "imports": [], "format": "esm" },
     "src/fields/FieldDescription/index.tsx": {
-      "bytes": 1208,
+      "bytes": 1185,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -12419,13 +12394,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/FieldError/index.tsx": {
-      "bytes": 1363,
+      "bytes": 1340,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -12442,30 +12416,23 @@
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
           "original": "../../forms/Form/context.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/shared/index.tsx": { "bytes": 2192, "imports": [], "format": "esm" },
     "src/icons/Check/index.tsx": {
-      "bytes": 482,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 459,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/Line/index.tsx": {
-      "bytes": 275,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 252,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/fields/FieldLabel/index.tsx": {
-      "bytes": 1420,
+      "bytes": 1397,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -12497,8 +12464,7 @@
           "path": "src/utilities/generateFieldID.ts",
           "kind": "import-statement",
           "original": "../../utilities/generateFieldID.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -12525,7 +12491,7 @@
       "format": "esm"
     },
     "src/fields/Checkbox/index.tsx": {
-      "bytes": 3483,
+      "bytes": 3460,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -12577,8 +12543,7 @@
           "path": "src/fields/Checkbox/Input.tsx",
           "kind": "import-statement",
           "original": "./Input.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -12621,31 +12586,24 @@
     },
     "src/utilities/scrollToID.ts": { "bytes": 255, "imports": [], "format": "esm" },
     "src/icons/Copy/index.tsx": {
-      "bytes": 325,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 302,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/More/index.tsx": {
-      "bytes": 470,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 447,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/Popup/PopupButtonList/index.tsx": {
-      "bytes": 1888,
+      "bytes": 1865,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/next@15.0.0-rc.0_@babel+core@7.24.5_@playwright+test@1.43.0_babel-plugin-react-compiler@0.0.0_iao4rxivci45ruvxgjinio5snm/node_modules/next/link.js",
           "kind": "import-statement",
           "original": "next/link.js"
         },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
@@ -12734,15 +12692,12 @@
       "format": "cjs"
     },
     "src/elements/Popup/PopupTrigger/index.tsx": {
-      "bytes": 1065,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 1042,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/Popup/index.tsx": {
-      "bytes": 5782,
+      "bytes": 5759,
       "imports": [
         {
           "path": "src/elements/Popup/PopupButtonList/index.tsx",
@@ -12764,13 +12719,12 @@
           "path": "src/elements/Popup/PopupTrigger/index.tsx",
           "kind": "import-statement",
           "original": "./PopupTrigger/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/ArrayAction/index.tsx": {
-      "bytes": 3471,
+      "bytes": 3448,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -12812,8 +12766,7 @@
           "path": "src/elements/Popup/index.tsx",
           "kind": "import-statement",
           "original": "../Popup/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -12840,11 +12793,8 @@
       "format": "cjs"
     },
     "src/icons/DragHandle/index.tsx": {
-      "bytes": 660,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 637,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/Collapsible/provider.tsx": {
@@ -12853,7 +12803,7 @@
       "format": "esm"
     },
     "src/elements/Collapsible/index.tsx": {
-      "bytes": 3901,
+      "bytes": 3879,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -12876,7 +12826,6 @@
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Collapsible/provider.tsx",
           "kind": "import-statement",
@@ -12935,7 +12884,7 @@
       "format": "esm"
     },
     "src/forms/RenderFields/index.tsx": {
-      "bytes": 2861,
+      "bytes": 2838,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -12952,8 +12901,7 @@
           "path": "src/forms/RenderFields/RenderField.tsx",
           "kind": "import-statement",
           "original": "./RenderField.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -12987,7 +12935,7 @@
       "format": "esm"
     },
     "src/fields/Array/ArrayRow.tsx": {
-      "bytes": 4192,
+      "bytes": 4169,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -13029,13 +12977,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Array/index.tsx": {
-      "bytes": 10954,
+      "bytes": 10931,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -13142,17 +13089,13 @@
           "path": "src/fields/Array/ArrayRow.tsx",
           "kind": "import-statement",
           "original": "./ArrayRow.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Gutter/index.tsx": {
-      "bytes": 983,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 960,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/Drawer/useDrawerSlug.tsx": {
@@ -13173,7 +13116,7 @@
       "format": "esm"
     },
     "src/elements/Drawer/index.tsx": {
-      "bytes": 3883,
+      "bytes": 3860,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -13201,7 +13144,6 @@
           "kind": "import-statement",
           "original": "../Gutter/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Drawer/useDrawerSlug.tsx",
           "kind": "import-statement",
@@ -13211,7 +13153,7 @@
       "format": "esm"
     },
     "src/elements/Pill/index.tsx": {
-      "bytes": 3227,
+      "bytes": 3204,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/next@15.0.0-rc.0_@babel+core@7.24.5_@playwright+test@1.43.0_babel-plugin-react-compiler@0.0.0_iao4rxivci45ruvxgjinio5snm/node_modules/next/link.js",
@@ -13223,13 +13165,12 @@
           "path": "src/elements/DraggableSortable/useDraggableSortable/index.tsx",
           "kind": "import-statement",
           "original": "../DraggableSortable/useDraggableSortable/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/ThumbnailCard/index.tsx": {
-      "bytes": 1596,
+      "bytes": 1573,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -13246,8 +13187,7 @@
           "path": "src/utilities/formatDocTitle.ts",
           "kind": "import-statement",
           "original": "../../utilities/formatDocTitle.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -13474,15 +13414,12 @@
       "format": "esm"
     },
     "src/icons/Search/index.tsx": {
-      "bytes": 377,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 354,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/fields/Blocks/BlocksDrawer/BlockSearch/index.tsx": {
-      "bytes": 694,
+      "bytes": 671,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -13494,13 +13431,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Blocks/BlocksDrawer/index.tsx": {
-      "bytes": 3332,
+      "bytes": 3309,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -13537,8 +13473,7 @@
           "path": "src/fields/Blocks/BlocksDrawer/BlockSearch/index.tsx",
           "kind": "import-statement",
           "original": "./BlockSearch/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -13570,7 +13505,7 @@
       "format": "esm"
     },
     "src/fields/Blocks/SectionTitle/index.tsx": {
-      "bytes": 1325,
+      "bytes": 1302,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -13582,8 +13517,7 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -13640,7 +13574,7 @@
       "format": "esm"
     },
     "src/fields/Blocks/index.tsx": {
-      "bytes": 11578,
+      "bytes": 11555,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -13738,7 +13672,6 @@
           "kind": "import-statement",
           "original": "./BlocksDrawer/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
@@ -13768,15 +13701,14 @@
       "format": "esm"
     },
     "src/elements/ShimmerEffect/index.tsx": {
-      "bytes": 1647,
+      "bytes": 1624,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/hooks/useDelay.ts",
           "kind": "import-statement",
           "original": "../../hooks/useDelay.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -13937,7 +13869,7 @@
       "format": "esm"
     },
     "src/elements/CodeEditor/CodeEditor.tsx": {
-      "bytes": 1237,
+      "bytes": 1214,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@monaco-editor+react@4.5.1_monaco-editor@0.38.0_react-dom@19.0.0-rc-f994737d14-20240522_react_zxu2txstfticimlf3klbgzixdi/node_modules/@monaco-editor/react/dist/index.js",
@@ -13954,8 +13886,7 @@
           "path": "src/elements/ShimmerEffect/index.tsx",
           "kind": "import-statement",
           "original": "../ShimmerEffect/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -13977,7 +13908,7 @@
       "format": "esm"
     },
     "src/fields/Code/index.tsx": {
-      "bytes": 3103,
+      "bytes": 3080,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -14019,8 +13950,7 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -14061,7 +13991,7 @@
       "format": "esm"
     },
     "src/fields/Collapsible/index.tsx": {
-      "bytes": 5862,
+      "bytes": 5839,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -14119,7 +14049,6 @@
           "kind": "import-statement",
           "original": "../shared/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
@@ -14134,7 +14063,7 @@
       "format": "esm"
     },
     "src/fields/ConfirmPassword/index.tsx": {
-      "bytes": 1828,
+      "bytes": 1805,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -14166,8 +14095,7 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -20426,11 +20354,8 @@
       "format": "cjs"
     },
     "src/icons/Calendar/index.tsx": {
-      "bytes": 514,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 491,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/DatePicker/getFormattedLocale.ts": {
@@ -20439,7 +20364,7 @@
       "format": "esm"
     },
     "src/elements/DatePicker/DatePicker.tsx": {
-      "bytes": 3784,
+      "bytes": 3761,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -20471,8 +20396,7 @@
           "path": "src/elements/DatePicker/getFormattedLocale.ts",
           "kind": "import-statement",
           "original": "./getFormattedLocale.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -20494,7 +20418,7 @@
       "format": "esm"
     },
     "src/fields/DateTime/index.tsx": {
-      "bytes": 3387,
+      "bytes": 3364,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -20527,7 +20451,6 @@
           "kind": "import-statement",
           "original": "../shared/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
@@ -20552,7 +20475,7 @@
       "format": "esm"
     },
     "src/fields/Email/index.tsx": {
-      "bytes": 3113,
+      "bytes": 3090,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -20599,8 +20522,7 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -20620,7 +20542,7 @@
       "format": "esm"
     },
     "src/fields/Group/index.tsx": {
-      "bytes": 4300,
+      "bytes": 4278,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -20688,7 +20610,6 @@
           "kind": "import-statement",
           "original": "../shared/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/fields/Group/provider.tsx",
           "kind": "import-statement",
@@ -20698,7 +20619,7 @@
       "format": "esm"
     },
     "src/fields/JSON/index.tsx": {
-      "bytes": 4555,
+      "bytes": 4532,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -20726,7 +20647,6 @@
           "kind": "import-statement",
           "original": "../shared/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
@@ -22071,15 +21991,14 @@
       "format": "esm"
     },
     "src/elements/ReactSelect/ClearIndicator/index.tsx": {
-      "bytes": 855,
+      "bytes": 832,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/icons/X/index.tsx",
           "kind": "import-statement",
           "original": "../../../icons/X/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -22096,15 +22015,14 @@
       "format": "esm"
     },
     "src/elements/ReactSelect/DropdownIndicator/index.tsx": {
-      "bytes": 789,
+      "bytes": 766,
       "imports": [
         {
           "path": "src/icons/Chevron/index.tsx",
           "kind": "import-statement",
           "original": "@payloadcms/ui/icons/Chevron"
         },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
@@ -22121,7 +22039,7 @@
       "format": "esm"
     },
     "src/elements/ReactSelect/MultiValue/index.tsx": {
-      "bytes": 2114,
+      "bytes": 2091,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -22133,26 +22051,24 @@
           "path": "src/elements/DraggableSortable/useDraggableSortable/index.tsx",
           "kind": "import-statement",
           "original": "../../DraggableSortable/useDraggableSortable/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/ReactSelect/MultiValueLabel/index.tsx": {
-      "bytes": 832,
+      "bytes": 809,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/react-select.esm.js",
           "kind": "import-statement",
           "original": "react-select"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/ReactSelect/MultiValueRemove/index.tsx": {
-      "bytes": 1432,
+      "bytes": 1409,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -22169,8 +22085,7 @@
           "path": "src/elements/Tooltip/index.tsx",
           "kind": "import-statement",
           "original": "../../Tooltip/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -22187,20 +22102,19 @@
       "format": "esm"
     },
     "src/elements/ReactSelect/ValueContainer/index.tsx": {
-      "bytes": 722,
+      "bytes": 699,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/react-select.esm.js",
           "kind": "import-statement",
           "original": "react-select"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/ReactSelect/index.tsx": {
-      "bytes": 6220,
+      "bytes": 6197,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@dnd-kit+sortable@7.0.2_@dnd-kit+core@6.0.8_react@19.0.0-rc-f994737d14-20240522/node_modules/@dnd-kit/sortable/dist/index.js",
@@ -22282,13 +22196,12 @@
           "path": "src/elements/ReactSelect/ValueContainer/index.tsx",
           "kind": "import-statement",
           "original": "./ValueContainer/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Number/index.tsx": {
-      "bytes": 6956,
+      "bytes": 6933,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -22345,13 +22258,12 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Password/index.tsx": {
-      "bytes": 2455,
+      "bytes": 2432,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -22378,13 +22290,12 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Point/index.tsx": {
-      "bytes": 4668,
+      "bytes": 4645,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -22412,7 +22323,6 @@
           "kind": "import-statement",
           "original": "../shared/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
@@ -22460,7 +22370,7 @@
       "format": "esm"
     },
     "src/fields/RadioGroup/Radio/index.tsx": {
-      "bytes": 1406,
+      "bytes": 1383,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -22477,13 +22387,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/RadioGroup/index.tsx": {
-      "bytes": 4381,
+      "bytes": 4358,
       "imports": [
         {
           "path": "../payload/src/exports/types.ts",
@@ -22521,7 +22430,6 @@
           "kind": "import-statement",
           "original": "./Radio/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
@@ -22565,15 +22473,12 @@
       "format": "esm"
     },
     "src/elements/IDLabel/index.tsx": {
-      "bytes": 357,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 334,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/RenderTitle/index.tsx": {
-      "bytes": 1259,
+      "bytes": 1236,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -22585,8 +22490,7 @@
           "path": "src/elements/IDLabel/index.tsx",
           "kind": "import-statement",
           "original": "../IDLabel/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -22673,7 +22577,7 @@
       "format": "esm"
     },
     "src/elements/DocumentDrawer/index.tsx": {
-      "bytes": 3633,
+      "bytes": 3610,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -22710,13 +22614,12 @@
           "path": "src/elements/DocumentDrawer/DrawerContent.tsx",
           "kind": "import-statement",
           "original": "./DrawerContent.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Relationship/AddNew/index.tsx": {
-      "bytes": 6920,
+      "bytes": 6898,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -22764,7 +22667,6 @@
           "kind": "import-statement",
           "original": "../../../providers/Translation/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/fields/Relationship/AddNew/useRelatedCollections.ts",
           "kind": "import-statement",
@@ -22800,7 +22702,7 @@
       "format": "esm"
     },
     "src/fields/Relationship/select-components/MultiValueLabel/index.tsx": {
-      "bytes": 3145,
+      "bytes": 3122,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -22832,13 +22734,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Relationship/select-components/SingleValue/index.tsx": {
-      "bytes": 3102,
+      "bytes": 3079,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -22870,13 +22771,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Relationship/index.tsx": {
-      "bytes": 18408,
+      "bytes": 18386,
       "imports": [
         {
           "path": "../payload/src/exports/utilities.ts",
@@ -22969,7 +22869,6 @@
           "kind": "import-statement",
           "original": "./findOptionsByValue.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/fields/Relationship/optionsReducer.ts",
           "kind": "import-statement",
@@ -22990,7 +22889,7 @@
     },
     "src/fields/RichText/index.tsx": { "bytes": 414, "imports": [], "format": "esm" },
     "src/fields/Row/index.tsx": {
-      "bytes": 1197,
+      "bytes": 1175,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -23013,7 +22912,6 @@
           "kind": "import-statement",
           "original": "../shared/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/fields/Row/provider.tsx",
           "kind": "import-statement",
@@ -23023,7 +22921,7 @@
       "format": "esm"
     },
     "src/fields/Select/Input.tsx": {
-      "bytes": 3266,
+      "bytes": 3243,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23060,8 +22958,7 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23093,7 +22990,7 @@
       "format": "esm"
     },
     "src/fields/Tabs/Tab/index.tsx": {
-      "bytes": 1554,
+      "bytes": 1531,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23115,13 +23012,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Tabs/index.tsx": {
-      "bytes": 6297,
+      "bytes": 6275,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23184,7 +23080,6 @@
           "kind": "import-statement",
           "original": "./Tab/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/fields/Tabs/provider.tsx",
           "kind": "import-statement",
@@ -23194,7 +23089,7 @@
       "format": "esm"
     },
     "src/fields/Text/Input.tsx": {
-      "bytes": 3247,
+      "bytes": 3224,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23231,13 +23126,12 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Text/index.tsx": {
-      "bytes": 4464,
+      "bytes": 4441,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -23274,13 +23168,12 @@
           "path": "src/fields/Text/Input.tsx",
           "kind": "import-statement",
           "original": "./Input.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Textarea/Input.tsx": {
-      "bytes": 2329,
+      "bytes": 2306,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23312,13 +23205,12 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Textarea/index.tsx": {
-      "bytes": 2862,
+      "bytes": 2839,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23360,14 +23252,13 @@
           "path": "src/fields/Textarea/Input.tsx",
           "kind": "import-statement",
           "original": "./Input.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/UI/index.tsx": { "bytes": 84, "imports": [], "format": "esm" },
     "src/elements/Dropzone/index.tsx": {
-      "bytes": 3259,
+      "bytes": 3236,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -23379,8 +23270,7 @@
           "path": "src/elements/Button/index.tsx",
           "kind": "import-statement",
           "original": "../Button/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23390,7 +23280,7 @@
       "format": "esm"
     },
     "src/elements/EditUpload/index.tsx": {
-      "bytes": 13627,
+      "bytes": 13604,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -23427,13 +23317,12 @@
           "path": "src/elements/Button/index.tsx",
           "kind": "import-statement",
           "original": "../Button/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/CopyToClipboard/index.tsx": {
-      "bytes": 1529,
+      "bytes": 1506,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -23450,13 +23339,12 @@
           "path": "src/elements/Tooltip/index.tsx",
           "kind": "import-statement",
           "original": "../Tooltip/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/FileDetails/FileMeta/index.tsx": {
-      "bytes": 2021,
+      "bytes": 1998,
       "imports": [
         {
           "path": "../payload/src/exports/utilities.ts",
@@ -23483,21 +23371,19 @@
           "path": "src/elements/Tooltip/index.tsx",
           "kind": "import-statement",
           "original": "../../Tooltip/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/PreviewSizes/index.tsx": {
-      "bytes": 4222,
+      "bytes": 4199,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/FileDetails/FileMeta/index.tsx",
           "kind": "import-statement",
           "original": "../FileDetails/FileMeta/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23507,10 +23393,9 @@
       "format": "esm"
     },
     "src/elements/Thumbnail/index.tsx": {
-      "bytes": 1533,
+      "bytes": 1510,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/graphics/File/index.tsx",
           "kind": "import-statement",
@@ -23525,7 +23410,7 @@
       "format": "esm"
     },
     "src/elements/Upload/index.tsx": {
-      "bytes": 8882,
+      "bytes": 8859,
       "imports": [
         {
           "path": "../payload/src/exports/utilities.ts",
@@ -23607,13 +23492,12 @@
           "path": "src/elements/Thumbnail/index.tsx",
           "kind": "import-statement",
           "original": "../Thumbnail/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/FileDetails/index.tsx": {
-      "bytes": 2101,
+      "bytes": 2078,
       "imports": [
         {
           "path": "../payload/src/exports/utilities.ts",
@@ -23640,8 +23524,7 @@
           "path": "src/elements/FileDetails/FileMeta/index.tsx",
           "kind": "import-statement",
           "original": "./FileMeta/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23712,7 +23595,7 @@
       "format": "esm"
     },
     "src/elements/Loading/index.tsx": {
-      "bytes": 2979,
+      "bytes": 2956,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -23734,8 +23617,7 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23762,7 +23644,7 @@
       "format": "esm"
     },
     "src/elements/SelectAll/index.tsx": {
-      "bytes": 968,
+      "bytes": 945,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -23779,8 +23661,7 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23790,7 +23671,7 @@
       "format": "esm"
     },
     "src/elements/SelectRow/index.tsx": {
-      "bytes": 633,
+      "bytes": 610,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -23807,13 +23688,12 @@
           "path": "src/providers/Selection/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Selection/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/SortColumn/index.tsx": {
-      "bytes": 2388,
+      "bytes": 2365,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/next@15.0.0-rc.0_@babel+core@7.24.5_@playwright+test@1.43.0_babel-plugin-react-compiler@0.0.0_iao4rxivci45ruvxgjinio5snm/node_modules/next/navigation.js",
@@ -23835,17 +23715,13 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Table/DefaultCell/fields/Code/index.tsx": {
-      "bytes": 593,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 570,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/Table/DefaultCell/fields/Array/index.tsx": {
@@ -23883,15 +23759,14 @@
       "format": "esm"
     },
     "src/elements/Table/DefaultCell/fields/Checkbox/index.tsx": {
-      "bytes": 455,
+      "bytes": 432,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -23918,24 +23793,20 @@
       "format": "esm"
     },
     "src/elements/Table/DefaultCell/fields/File/index.tsx": {
-      "bytes": 890,
+      "bytes": 867,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Thumbnail/index.tsx",
           "kind": "import-statement",
           "original": "../../../../Thumbnail/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Table/DefaultCell/fields/JSON/index.tsx": {
-      "bytes": 422,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 399,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/utilities/canUseDOM.ts": { "bytes": 119, "imports": [], "format": "esm" },
@@ -23982,7 +23853,7 @@
       "format": "esm"
     },
     "src/elements/Table/DefaultCell/fields/Relationship/index.tsx": {
-      "bytes": 3787,
+      "bytes": 3764,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -24019,8 +23890,7 @@
           "path": "src/elements/Table/RelationshipProvider/index.tsx",
           "kind": "import-statement",
           "original": "../../../RelationshipProvider/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -24237,7 +24107,7 @@
       "format": "esm"
     },
     "src/elements/ViewDescription/index.tsx": {
-      "bytes": 1062,
+      "bytes": 1039,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -24249,8 +24119,7 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -24357,7 +24226,7 @@
       "format": "esm"
     },
     "src/elements/ListDrawer/index.tsx": {
-      "bytes": 3679,
+      "bytes": 3656,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -24389,13 +24258,12 @@
           "path": "src/elements/ListDrawer/DrawerContent.tsx",
           "kind": "import-statement",
           "original": "./DrawerContent.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Upload/Input.tsx": {
-      "bytes": 5800,
+      "bytes": 5777,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -24447,13 +24315,12 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../shared/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/fields/Upload/index.tsx": {
-      "bytes": 2594,
+      "bytes": 2571,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -24480,8 +24347,7 @@
           "path": "src/fields/Upload/Input.tsx",
           "kind": "import-statement",
           "original": "./Input.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -24774,7 +24640,7 @@
       "format": "esm"
     },
     "src/elements/StepNav/index.tsx": {
-      "bytes": 2330,
+      "bytes": 2308,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -24807,7 +24673,6 @@
           "kind": "import-statement",
           "original": "./context.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/StepNav/SetStepNav.tsx",
           "kind": "import-statement",
@@ -25087,28 +24952,24 @@
       "format": "esm"
     },
     "src/elements/Card/index.tsx": {
-      "bytes": 1128,
+      "bytes": 1105,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Button/index.tsx",
           "kind": "import-statement",
           "original": "../Button/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/templates/Minimal/index.tsx": {
-      "bytes": 624,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 601,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/elements/DeleteMany/index.tsx": {
-      "bytes": 4328,
+      "bytes": 4305,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -25180,13 +25041,12 @@
           "path": "src/elements/Pill/index.tsx",
           "kind": "import-statement",
           "original": "../Pill/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Autosave/index.tsx": {
-      "bytes": 4790,
+      "bytes": 4767,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -25233,8 +25093,7 @@
           "path": "src/utilities/reduceFieldsToValues.ts",
           "kind": "import-statement",
           "original": "../../utilities/reduceFieldsToValues.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -25244,7 +25103,7 @@
       "format": "esm"
     },
     "src/elements/DeleteDocument/index.tsx": {
-      "bytes": 4751,
+      "bytes": 4728,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -25311,13 +25170,12 @@
           "path": "src/elements/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/DuplicateDocument/index.tsx": {
-      "bytes": 4044,
+      "bytes": 4021,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -25379,8 +25237,7 @@
           "path": "src/elements/Popup/index.tsx",
           "kind": "import-statement",
           "original": "../Popup/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -25434,7 +25291,7 @@
       "format": "esm"
     },
     "src/forms/Submit/index.tsx": {
-      "bytes": 876,
+      "bytes": 853,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -25446,8 +25303,7 @@
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
           "original": "../Form/context.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -25568,7 +25424,7 @@
       "format": "esm"
     },
     "src/elements/Status/index.tsx": {
-      "bytes": 6615,
+      "bytes": 6592,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -25620,13 +25476,12 @@
           "path": "src/elements/Button/index.tsx",
           "kind": "import-statement",
           "original": "../Button/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/DocumentControls/index.tsx": {
-      "bytes": 8803,
+      "bytes": 8780,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -25703,13 +25558,12 @@
           "path": "src/elements/Status/index.tsx",
           "kind": "import-statement",
           "original": "../Status/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/DocumentFields/index.tsx": {
-      "bytes": 2676,
+      "bytes": 2653,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -25721,8 +25575,7 @@
           "path": "src/elements/Gutter/index.tsx",
           "kind": "import-statement",
           "original": "../Gutter/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -25960,7 +25813,7 @@
       "format": "esm"
     },
     "src/elements/FieldSelect/index.tsx": {
-      "bytes": 4943,
+      "bytes": 4920,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -25987,13 +25840,12 @@
           "path": "src/elements/ReactSelect/index.tsx",
           "kind": "import-statement",
           "original": "../ReactSelect/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/EditMany/index.tsx": {
-      "bytes": 8203,
+      "bytes": 8180,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -26090,13 +25942,12 @@
           "path": "src/elements/FieldSelect/index.tsx",
           "kind": "import-statement",
           "original": "../FieldSelect/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/GenerateConfirmation/index.tsx": {
-      "bytes": 2193,
+      "bytes": 2170,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -26133,8 +25984,7 @@
           "path": "src/elements/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -26151,7 +26001,7 @@
       "format": "esm"
     },
     "src/elements/ColumnSelector/index.tsx": {
-      "bytes": 2159,
+      "bytes": 2136,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -26183,13 +26033,12 @@
           "path": "src/elements/TableColumns/index.tsx",
           "kind": "import-statement",
           "original": "../TableColumns/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/PublishMany/index.tsx": {
-      "bytes": 4435,
+      "bytes": 4412,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -26261,13 +26110,12 @@
           "path": "src/elements/Pill/index.tsx",
           "kind": "import-statement",
           "original": "../Pill/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/SearchFilter/index.tsx": {
-      "bytes": 3078,
+      "bytes": 3055,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -26299,13 +26147,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/UnpublishMany/index.tsx": {
-      "bytes": 4397,
+      "bytes": 4374,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@2.0.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -26377,8 +26224,7 @@
           "path": "src/elements/Pill/index.tsx",
           "kind": "import-statement",
           "original": "../Pill/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -26400,15 +26246,14 @@
       "format": "esm"
     },
     "src/elements/WhereBuilder/Condition/Number/index.tsx": {
-      "bytes": 561,
+      "bytes": 538,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -26424,7 +26269,7 @@
       "format": "esm"
     },
     "src/elements/WhereBuilder/Condition/Relationship/index.tsx": {
-      "bytes": 10423,
+      "bytes": 10401,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/qs@6.11.2/node_modules/qs/lib/index.js",
@@ -26452,7 +26297,6 @@
           "kind": "import-statement",
           "original": "../../../ReactSelect/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/WhereBuilder/Condition/Relationship/optionsReducer.ts",
           "kind": "import-statement",
@@ -26484,20 +26328,19 @@
       "format": "esm"
     },
     "src/elements/WhereBuilder/Condition/Text/index.tsx": {
-      "bytes": 570,
+      "bytes": 547,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/WhereBuilder/Condition/index.tsx": {
-      "bytes": 6216,
+      "bytes": 6193,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -26544,8 +26387,7 @@
           "path": "src/elements/WhereBuilder/Condition/Text/index.tsx",
           "kind": "import-statement",
           "original": "./Text/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -26578,7 +26420,7 @@
       "format": "esm"
     },
     "src/elements/WhereBuilder/index.tsx": {
-      "bytes": 8492,
+      "bytes": 8470,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -26616,7 +26458,6 @@
           "kind": "import-statement",
           "original": "./Condition/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/WhereBuilder/reduceFieldMap.tsx",
           "kind": "import-statement",
@@ -26647,7 +26488,7 @@
       "format": "esm"
     },
     "src/elements/ListControls/index.tsx": {
-      "bytes": 7031,
+      "bytes": 7008,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+window-info@2.1.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
@@ -26739,13 +26580,12 @@
           "path": "src/elements/ListControls/getTextFieldsToBeSearched.ts",
           "kind": "import-statement",
           "original": "./getTextFieldsToBeSearched.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/ListSelection/index.tsx": {
-      "bytes": 1102,
+      "bytes": 1079,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -26757,8 +26597,7 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -26774,15 +26613,14 @@
       "format": "esm"
     },
     "src/elements/Pagination/ClickableArrow/index.tsx": {
-      "bytes": 796,
+      "bytes": 773,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/icons/Chevron/index.tsx",
           "kind": "import-statement",
           "original": "../../../icons/Chevron/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -26797,7 +26635,7 @@
       "format": "esm"
     },
     "src/elements/Pagination/index.tsx": {
-      "bytes": 3319,
+      "bytes": 3296,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -26814,8 +26652,7 @@
           "path": "src/elements/Pagination/Separator/index.tsx",
           "kind": "import-statement",
           "original": "./Separator/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -29192,7 +29029,7 @@
       "format": "esm"
     },
     "src/elements/PerPage/index.tsx": {
-      "bytes": 2205,
+      "bytes": 2182,
       "imports": [
         {
           "path": "../payload/src/exports/config.ts",
@@ -29219,13 +29056,12 @@
           "path": "src/elements/Popup/index.tsx",
           "kind": "import-statement",
           "original": "../Popup/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Table/index.tsx": {
-      "bytes": 2504,
+      "bytes": 2481,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -29242,8 +29078,7 @@
           "path": "src/elements/Table/TableCellProvider/index.tsx",
           "kind": "import-statement",
           "original": "./TableCellProvider/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -29813,11 +29648,8 @@
       "format": "esm"
     },
     "src/icons/CloseMenu/index.tsx": {
-      "bytes": 547,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 524,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/CodeBlock/index.tsx": {
@@ -29826,19 +29658,13 @@
       "format": "esm"
     },
     "src/icons/LogOut/index.tsx": {
-      "bytes": 433,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 410,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/Menu/index.tsx": {
-      "bytes": 462,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 439,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/icons/MinimizeMaximize/index.tsx": {
@@ -30028,15 +29854,14 @@
       "format": "esm"
     },
     "src/elements/DocumentHeader/Tabs/Tab/index.tsx": {
-      "bytes": 1770,
+      "bytes": 1747,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
           "kind": "import-statement",
           "original": "./TabLink.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -30085,7 +29910,7 @@
       "format": "esm"
     },
     "src/elements/DocumentHeader/Tabs/index.tsx": {
-      "bytes": 3879,
+      "bytes": 3857,
       "imports": [
         {
           "path": "../payload/src/exports/utilities.ts",
@@ -30113,7 +29938,6 @@
           "kind": "import-statement",
           "original": "./getViewConfig.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/DocumentHeader/Tabs/tabs/index.tsx",
           "kind": "import-statement",
@@ -30123,7 +29947,7 @@
       "format": "esm"
     },
     "src/elements/DocumentHeader/index.tsx": {
-      "bytes": 1329,
+      "bytes": 1306,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -30140,8 +29964,7 @@
           "path": "src/elements/DocumentHeader/Tabs/index.tsx",
           "kind": "import-statement",
           "original": "./Tabs/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -30177,11 +30000,8 @@
       "format": "esm"
     },
     "src/graphics/Account/Default/index.tsx": {
-      "bytes": 708,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+      "bytes": 685,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "../../node_modules/.pnpm/crypt@0.0.2/node_modules/crypt/crypt.js": {
@@ -30275,7 +30095,7 @@
       "format": "esm"
     },
     "src/elements/Hamburger/index.tsx": {
-      "bytes": 1729,
+      "bytes": 1706,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -30287,13 +30107,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Localizer/LocalizerLabel/index.tsx": {
-      "bytes": 1017,
+      "bytes": 994,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -30315,13 +30134,12 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../../providers/Translation/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Localizer/index.tsx": {
-      "bytes": 2391,
+      "bytes": 2368,
       "imports": [
         {
           "path": "../translations/src/exports/index.ts",
@@ -30373,13 +30191,12 @@
           "path": "src/elements/Localizer/LocalizerLabel/index.tsx",
           "kind": "import-statement",
           "original": "./LocalizerLabel/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/Nav/NavToggler/index.tsx": {
-      "bytes": 1503,
+      "bytes": 1480,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+window-info@2.1.2_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
@@ -30401,13 +30218,12 @@
           "path": "src/elements/Nav/context.tsx",
           "kind": "import-statement",
           "original": "../context.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/elements/AppHeader/index.tsx": {
-      "bytes": 3456,
+      "bytes": 3433,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/next@15.0.0-rc.0_@babel+core@7.24.5_@playwright+test@1.43.0_babel-plugin-react-compiler@0.0.0_iao4rxivci45ruvxgjinio5snm/node_modules/next/link.js",
@@ -30464,8 +30280,7 @@
           "path": "src/elements/StepNav/index.tsx",
           "kind": "import-statement",
           "original": "../StepNav/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -30514,15 +30329,14 @@
       "format": "esm"
     },
     "src/elements/Nav/NavWrapper/index.tsx": {
-      "bytes": 507,
+      "bytes": 484,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Nav/context.tsx",
           "kind": "import-statement",
           "original": "../context.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -30538,7 +30352,7 @@
       "format": "esm"
     },
     "src/elements/NavGroup/index.tsx": {
-      "bytes": 2648,
+      "bytes": 2625,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -30560,8 +30374,7 @@
           "path": "src/elements/Nav/context.tsx",
           "kind": "import-statement",
           "original": "../Nav/context.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -30623,7 +30436,7 @@
       "format": "esm"
     },
     "src/elements/Nav/index.tsx": {
-      "bytes": 2135,
+      "bytes": 2112,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -30641,7 +30454,6 @@
           "kind": "import-statement",
           "original": "./NavWrapper/index.js"
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/WithServerSideProps/index.tsx",
           "kind": "import-statement",
@@ -30673,20 +30485,19 @@
       "format": "esm"
     },
     "src/templates/Default/Wrapper/index.tsx": {
-      "bytes": 508,
+      "bytes": 485,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Nav/context.tsx",
           "kind": "import-statement",
           "original": "../../../elements/Nav/context.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
     "src/templates/Default/index.tsx": {
-      "bytes": 2230,
+      "bytes": 2207,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -30723,8 +30534,7 @@
           "path": "src/templates/Default/Wrapper/index.tsx",
           "kind": "import-statement",
           "original": "./Wrapper/index.js"
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -30772,11 +30582,11 @@
     }
   },
   "outputs": {
-    "dist/DatePicker-BV3RP5PO.js": {
+    "dist/DatePicker-OZBVJ6PQ.js": {
       "imports": [
         { "path": "dist/chunk-OZE4W2T5.js", "kind": "import-statement" },
-        { "path": "dist/chunk-7GPPKRSD.js", "kind": "import-statement" },
-        { "path": "dist/chunk-P7YEB42W.js", "kind": "import-statement" },
+        { "path": "dist/chunk-5VTXQHUO.js", "kind": "import-statement" },
+        { "path": "dist/chunk-TAEF6PMD.js", "kind": "import-statement" },
         { "path": "dist/chunk-FQU34KAG.js", "kind": "import-statement" },
         { "path": "dist/chunk-RD4BVJYH.js", "kind": "import-statement" },
         { "path": "dist/chunk-DGJUBN33.js", "kind": "import-statement" },
@@ -30795,8 +30605,7 @@
           "path": "react-datepicker/dist/react-datepicker.css",
           "kind": "import-statement",
           "external": true
-        },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        }
       ],
       "exports": ["default"],
       "entryPoint": "src/elements/DatePicker/DatePicker.tsx",
@@ -31722,10 +31531,10 @@
         "../../node_modules/.pnpm/react-datepicker@6.9.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-datepicker/dist/index.js": {
           "bytesInOutput": 107439
         },
-        "src/elements/DatePicker/DatePicker.tsx": { "bytesInOutput": 1674 },
+        "src/elements/DatePicker/DatePicker.tsx": { "bytesInOutput": 1653 },
         "src/elements/DatePicker/getFormattedLocale.ts": { "bytesInOutput": 67 }
       },
-      "bytes": 324196
+      "bytes": 324175
     },
     "dist/sv-M2TDVPPH.js": {
       "imports": [
@@ -31934,9 +31743,9 @@
       },
       "bytes": 6778
     },
-    "dist/CodeEditor-UAI4KS7F.js": {
+    "dist/CodeEditor-7GF3N34F.js": {
       "imports": [
-        { "path": "dist/chunk-ROIGO7FK.js", "kind": "import-statement" },
+        { "path": "dist/chunk-NOJZCQ5R.js", "kind": "import-statement" },
         { "path": "dist/chunk-DGJUBN33.js", "kind": "import-statement" },
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react", "kind": "require-call", "external": true },
@@ -31949,8 +31758,7 @@
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react", "kind": "require-call", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": ["default"],
       "entryPoint": "src/elements/CodeEditor/CodeEditor.tsx",
@@ -31991,9 +31799,9 @@
         "../../node_modules/.pnpm/@monaco-editor+react@4.5.1_monaco-editor@0.38.0_react-dom@19.0.0-rc-f994737d14-20240522_react_zxu2txstfticimlf3klbgzixdi/node_modules/@monaco-editor/react/dist/index.js": {
           "bytesInOutput": 7201
         },
-        "src/elements/CodeEditor/CodeEditor.tsx": { "bytesInOutput": 535 }
+        "src/elements/CodeEditor/CodeEditor.tsx": { "bytesInOutput": 514 }
       },
-      "bytes": 17510
+      "bytes": 17489
     },
     "dist/ko-YDG2QX3E.js": {
       "imports": [
@@ -32470,9 +32278,9 @@
     "dist/client.js": {
       "imports": [
         { "path": "dist/chunk-OZE4W2T5.js", "kind": "import-statement" },
-        { "path": "dist/chunk-ROIGO7FK.js", "kind": "import-statement" },
-        { "path": "dist/chunk-AN7KMEBG.js", "kind": "import-statement" },
-        { "path": "dist/chunk-P7YEB42W.js", "kind": "import-statement" },
+        { "path": "dist/chunk-NOJZCQ5R.js", "kind": "import-statement" },
+        { "path": "dist/chunk-GAGIYTZW.js", "kind": "import-statement" },
+        { "path": "dist/chunk-TAEF6PMD.js", "kind": "import-statement" },
         { "path": "dist/chunk-N2T43CBH.js", "kind": "import-statement" },
         { "path": "dist/chunk-FQU34KAG.js", "kind": "import-statement" },
         { "path": "dist/chunk-RD4BVJYH.js", "kind": "import-statement" },
@@ -32507,11 +32315,9 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -32524,68 +32330,45 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "crypto", "kind": "import-statement", "external": true },
         { "path": "crypto", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "dist/CodeEditor-UAI4KS7F.js", "kind": "dynamic-import" },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "dist/DatePicker-BV3RP5PO.js", "kind": "dynamic-import" },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
+        { "path": "dist/CodeEditor-7GF3N34F.js", "kind": "dynamic-import" },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "dist/DatePicker-OZBVJ6PQ.js", "kind": "dynamic-import" },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -32605,66 +32388,40 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react-dom", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -32672,125 +32429,78 @@
           "kind": "import-statement",
           "external": true
         },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
         "ActionsProvider",
@@ -33135,47 +32845,47 @@
         "src/providers/DocumentEvents/index.tsx": { "bytesInOutput": 267 },
         "src/providers/EditDepth/index.tsx": { "bytesInOutput": 156 },
         "src/providers/FieldComponents/index.tsx": { "bytesInOutput": 150 },
-        "src/fields/Array/index.tsx": { "bytesInOutput": 3953 },
-        "src/elements/Banner/index.tsx": { "bytesInOutput": 624 },
+        "src/fields/Array/index.tsx": { "bytesInOutput": 3932 },
+        "src/elements/Banner/index.tsx": { "bytesInOutput": 603 },
         "src/elements/DraggableSortable/DraggableSortableItem/index.tsx": { "bytesInOutput": 299 },
         "src/elements/DraggableSortable/useDraggableSortable/index.tsx": { "bytesInOutput": 300 },
         "src/elements/DraggableSortable/index.tsx": { "bytesInOutput": 727 },
-        "src/elements/ErrorPill/index.tsx": { "bytesInOutput": 411 },
+        "src/elements/ErrorPill/index.tsx": { "bytesInOutput": 390 },
         "src/forms/FieldPropsProvider/index.tsx": { "bytesInOutput": 425 },
         "src/forms/Form/context.ts": { "bytesInOutput": 254 },
         "../../node_modules/.pnpm/use-context-selector@1.4.1_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_scheduler@0.23.0/node_modules/use-context-selector/dist/index.modern.js": {
           "bytesInOutput": 1619
         },
         "src/forms/NullifyField/index.tsx": { "bytesInOutput": 606 },
-        "src/fields/Checkbox/index.tsx": { "bytesInOutput": 1140 },
+        "src/fields/Checkbox/index.tsx": { "bytesInOutput": 1119 },
         "src/forms/useField/index.tsx": { "bytesInOutput": 1584 },
         "src/providers/Operation/index.tsx": { "bytesInOutput": 161 },
         "src/forms/withCondition/index.tsx": { "bytesInOutput": 177 },
         "src/forms/withCondition/WatchCondition.tsx": { "bytesInOutput": 348 },
         "src/utilities/generateFieldID.ts": { "bytesInOutput": 82 },
-        "src/fields/FieldDescription/index.tsx": { "bytesInOutput": 398 },
-        "src/fields/FieldError/index.tsx": { "bytesInOutput": 418 },
+        "src/fields/FieldDescription/index.tsx": { "bytesInOutput": 377 },
+        "src/fields/FieldError/index.tsx": { "bytesInOutput": 397 },
         "src/fields/shared/index.tsx": { "bytesInOutput": 219 },
         "src/fields/Checkbox/Input.tsx": { "bytesInOutput": 736 },
-        "src/fields/FieldLabel/index.tsx": { "bytesInOutput": 416 },
+        "src/fields/FieldLabel/index.tsx": { "bytesInOutput": 395 },
         "src/utilities/scrollToID.ts": { "bytesInOutput": 135 },
-        "src/fields/Array/ArrayRow.tsx": { "bytesInOutput": 1344 },
-        "src/elements/ArrayAction/index.tsx": { "bytesInOutput": 1291 },
-        "src/elements/Collapsible/index.tsx": { "bytesInOutput": 1541 },
+        "src/fields/Array/ArrayRow.tsx": { "bytesInOutput": 1323 },
+        "src/elements/ArrayAction/index.tsx": { "bytesInOutput": 1270 },
+        "src/elements/Collapsible/index.tsx": { "bytesInOutput": 1520 },
         "src/elements/Collapsible/provider.tsx": { "bytesInOutput": 413 },
-        "src/forms/RenderFields/index.tsx": { "bytesInOutput": 1046 },
+        "src/forms/RenderFields/index.tsx": { "bytesInOutput": 1025 },
         "src/forms/RenderFields/RenderField.tsx": { "bytesInOutput": 600 },
         "src/fields/HiddenInput/index.tsx": { "bytesInOutput": 363 },
         "src/forms/RowLabel/index.tsx": { "bytesInOutput": 350 },
         "src/forms/RowLabel/Context/index.tsx": { "bytesInOutput": 257 },
-        "src/fields/Blocks/index.tsx": { "bytesInOutput": 4089 },
-        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1564 },
+        "src/fields/Blocks/index.tsx": { "bytesInOutput": 4068 },
+        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1543 },
         "src/elements/Drawer/useDrawerSlug.tsx": { "bytesInOutput": 99 },
         "src/fields/Blocks/BlockRow.tsx": { "bytesInOutput": 1529 },
-        "src/elements/Pill/index.tsx": { "bytesInOutput": 1249 },
+        "src/elements/Pill/index.tsx": { "bytesInOutput": 1228 },
         "src/fields/Blocks/RowActions.tsx": { "bytesInOutput": 571 },
-        "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1147 },
-        "src/elements/ThumbnailCard/index.tsx": { "bytesInOutput": 575 },
+        "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1126 },
+        "src/elements/ThumbnailCard/index.tsx": { "bytesInOutput": 554 },
         "src/graphics/DefaultBlockImage/index.tsx": { "bytesInOutput": 4641 },
         "../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/rng.js": {
           "bytesInOutput": 150
@@ -33192,25 +32902,25 @@
         "../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/index.js": {
           "bytesInOutput": 0
         },
-        "src/fields/Blocks/BlocksDrawer/BlockSearch/index.tsx": { "bytesInOutput": 306 },
-        "src/fields/Blocks/SectionTitle/index.tsx": { "bytesInOutput": 487 },
-        "src/fields/Code/index.tsx": { "bytesInOutput": 1051 },
+        "src/fields/Blocks/BlocksDrawer/BlockSearch/index.tsx": { "bytesInOutput": 285 },
+        "src/fields/Blocks/SectionTitle/index.tsx": { "bytesInOutput": 466 },
+        "src/fields/Code/index.tsx": { "bytesInOutput": 1030 },
         "src/elements/CodeEditor/index.tsx": { "bytesInOutput": 238 },
-        "src/fields/Collapsible/index.tsx": { "bytesInOutput": 1696 },
+        "src/fields/Collapsible/index.tsx": { "bytesInOutput": 1675 },
         "src/forms/WatchChildErrors/buildPathSegments.ts": { "bytesInOutput": 511 },
         "src/forms/WatchChildErrors/getFieldStateFromPaths.ts": { "bytesInOutput": 228 },
         "src/forms/WatchChildErrors/index.tsx": { "bytesInOutput": 174 },
-        "src/fields/ConfirmPassword/index.tsx": { "bytesInOutput": 759 },
-        "src/fields/DateTime/index.tsx": { "bytesInOutput": 1067 },
+        "src/fields/ConfirmPassword/index.tsx": { "bytesInOutput": 738 },
+        "src/fields/DateTime/index.tsx": { "bytesInOutput": 1046 },
         "src/elements/DatePicker/index.tsx": { "bytesInOutput": 198 },
-        "src/fields/Email/index.tsx": { "bytesInOutput": 1055 },
-        "src/fields/Group/index.tsx": { "bytesInOutput": 1223 },
+        "src/fields/Email/index.tsx": { "bytesInOutput": 1034 },
+        "src/fields/Group/index.tsx": { "bytesInOutput": 1202 },
         "src/fields/Row/provider.tsx": { "bytesInOutput": 164 },
         "src/fields/Tabs/provider.tsx": { "bytesInOutput": 164 },
         "src/fields/Group/provider.tsx": { "bytesInOutput": 166 },
-        "src/fields/JSON/index.tsx": { "bytesInOutput": 1640 },
-        "src/fields/Number/index.tsx": { "bytesInOutput": 2059 },
-        "src/elements/ReactSelect/index.tsx": { "bytesInOutput": 2492 },
+        "src/fields/JSON/index.tsx": { "bytesInOutput": 1619 },
+        "src/fields/Number/index.tsx": { "bytesInOutput": 2038 },
+        "src/elements/ReactSelect/index.tsx": { "bytesInOutput": 2471 },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/typeof.js": {
           "bytesInOutput": 259
         },
@@ -33364,24 +33074,24 @@
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/useCreatable-d97ef2c9.esm.js": {
           "bytesInOutput": 1763
         },
-        "src/elements/ReactSelect/ClearIndicator/index.tsx": { "bytesInOutput": 331 },
+        "src/elements/ReactSelect/ClearIndicator/index.tsx": { "bytesInOutput": 310 },
         "src/elements/ReactSelect/Control/index.tsx": { "bytesInOutput": 388 },
-        "src/elements/ReactSelect/DropdownIndicator/index.tsx": { "bytesInOutput": 275 },
+        "src/elements/ReactSelect/DropdownIndicator/index.tsx": { "bytesInOutput": 254 },
         "src/elements/ReactSelect/Input/index.tsx": { "bytesInOutput": 132 },
-        "src/elements/ReactSelect/MultiValue/index.tsx": { "bytesInOutput": 655 },
-        "src/elements/ReactSelect/MultiValueLabel/index.tsx": { "bytesInOutput": 272 },
-        "src/elements/ReactSelect/MultiValueRemove/index.tsx": { "bytesInOutput": 586 },
+        "src/elements/ReactSelect/MultiValue/index.tsx": { "bytesInOutput": 634 },
+        "src/elements/ReactSelect/MultiValueLabel/index.tsx": { "bytesInOutput": 251 },
+        "src/elements/ReactSelect/MultiValueRemove/index.tsx": { "bytesInOutput": 565 },
         "src/elements/ReactSelect/SingleValue/index.tsx": { "bytesInOutput": 223 },
-        "src/elements/ReactSelect/ValueContainer/index.tsx": { "bytesInOutput": 223 },
-        "src/fields/Password/index.tsx": { "bytesInOutput": 869 },
-        "src/fields/Point/index.tsx": { "bytesInOutput": 1729 },
+        "src/elements/ReactSelect/ValueContainer/index.tsx": { "bytesInOutput": 202 },
+        "src/fields/Password/index.tsx": { "bytesInOutput": 848 },
+        "src/fields/Point/index.tsx": { "bytesInOutput": 1708 },
         "../payload/src/exports/types.ts": { "bytesInOutput": 0 },
         "../payload/src/types/constants.ts": { "bytesInOutput": 173 },
-        "src/fields/RadioGroup/index.tsx": { "bytesInOutput": 1346 },
-        "src/fields/RadioGroup/Radio/index.tsx": { "bytesInOutput": 599 },
-        "src/fields/Relationship/index.tsx": { "bytesInOutput": 5169 },
-        "src/fields/Relationship/AddNew/index.tsx": { "bytesInOutput": 1942 },
-        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1276 },
+        "src/fields/RadioGroup/index.tsx": { "bytesInOutput": 1325 },
+        "src/fields/RadioGroup/Radio/index.tsx": { "bytesInOutput": 578 },
+        "src/fields/Relationship/index.tsx": { "bytesInOutput": 5148 },
+        "src/fields/Relationship/AddNew/index.tsx": { "bytesInOutput": 1921 },
+        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1255 },
         "src/fields/Relationship/AddNew/useRelatedCollections.ts": { "bytesInOutput": 152 },
         "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1398 },
         "src/providers/FormQueryParams/index.tsx": { "bytesInOutput": 667 },
@@ -33389,59 +33099,59 @@
         "src/fields/Relationship/findOptionsByValue.ts": { "bytesInOutput": 368 },
         "src/fields/Relationship/optionsReducer.ts": { "bytesInOutput": 1351 },
         "src/fields/Relationship/select-components/MultiValueLabel/index.tsx": {
-          "bytesInOutput": 1102
+          "bytesInOutput": 1081
         },
         "src/fields/Relationship/select-components/SingleValue/index.tsx": {
-          "bytesInOutput": 1151
+          "bytesInOutput": 1130
         },
         "src/fields/RichText/index.tsx": { "bytesInOutput": 16 },
-        "src/fields/Row/index.tsx": { "bytesInOutput": 464 },
+        "src/fields/Row/index.tsx": { "bytesInOutput": 443 },
         "src/fields/Select/index.tsx": { "bytesInOutput": 1125 },
-        "src/fields/Select/Input.tsx": { "bytesInOutput": 1135 },
-        "src/fields/Tabs/index.tsx": { "bytesInOutput": 1684 },
-        "src/fields/Tabs/Tab/index.tsx": { "bytesInOutput": 552 },
-        "src/fields/Text/index.tsx": { "bytesInOutput": 1413 },
-        "src/fields/Text/Input.tsx": { "bytesInOutput": 1313 },
-        "src/fields/Textarea/index.tsx": { "bytesInOutput": 1023 },
-        "src/fields/Textarea/Input.tsx": { "bytesInOutput": 1069 },
+        "src/fields/Select/Input.tsx": { "bytesInOutput": 1114 },
+        "src/fields/Tabs/index.tsx": { "bytesInOutput": 1663 },
+        "src/fields/Tabs/Tab/index.tsx": { "bytesInOutput": 531 },
+        "src/fields/Text/index.tsx": { "bytesInOutput": 1392 },
+        "src/fields/Text/Input.tsx": { "bytesInOutput": 1292 },
+        "src/fields/Textarea/index.tsx": { "bytesInOutput": 1002 },
+        "src/fields/Textarea/Input.tsx": { "bytesInOutput": 1048 },
         "src/fields/UI/index.tsx": { "bytesInOutput": 16 },
-        "src/fields/Upload/index.tsx": { "bytesInOutput": 905 },
-        "src/fields/Upload/Input.tsx": { "bytesInOutput": 1898 },
-        "src/elements/FileDetails/index.tsx": { "bytesInOutput": 798 },
-        "src/elements/Upload/index.tsx": { "bytesInOutput": 3432 },
-        "src/elements/Dropzone/index.tsx": { "bytesInOutput": 1646 },
-        "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5620 },
+        "src/fields/Upload/index.tsx": { "bytesInOutput": 884 },
+        "src/fields/Upload/Input.tsx": { "bytesInOutput": 1877 },
+        "src/elements/FileDetails/index.tsx": { "bytesInOutput": 777 },
+        "src/elements/Upload/index.tsx": { "bytesInOutput": 3411 },
+        "src/elements/Dropzone/index.tsx": { "bytesInOutput": 1625 },
+        "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5599 },
         "../../node_modules/.pnpm/react-image-crop@10.1.8_react@19.0.0-rc-f994737d14-20240522/node_modules/react-image-crop/dist/index.js": {
           "bytesInOutput": 13459
         },
-        "src/elements/PreviewSizes/index.tsx": { "bytesInOutput": 1760 },
-        "src/elements/FileDetails/FileMeta/index.tsx": { "bytesInOutput": 812 },
-        "src/elements/CopyToClipboard/index.tsx": { "bytesInOutput": 660 },
-        "src/elements/Thumbnail/index.tsx": { "bytesInOutput": 556 },
+        "src/elements/PreviewSizes/index.tsx": { "bytesInOutput": 1739 },
+        "src/elements/FileDetails/FileMeta/index.tsx": { "bytesInOutput": 791 },
+        "src/elements/CopyToClipboard/index.tsx": { "bytesInOutput": 639 },
+        "src/elements/Thumbnail/index.tsx": { "bytesInOutput": 535 },
         "src/graphics/File/index.tsx": { "bytesInOutput": 432 },
-        "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1279 },
+        "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1258 },
         "src/elements/ListDrawer/DrawerContent.tsx": { "bytesInOutput": 3251 },
         "src/providers/ListInfo/index.tsx": { "bytesInOutput": 154 },
         "src/providers/ListQuery/index.tsx": { "bytesInOutput": 1577 },
-        "src/elements/Loading/index.tsx": { "bytesInOutput": 1208 },
+        "src/elements/Loading/index.tsx": { "bytesInOutput": 1187 },
         "src/elements/LoadingOverlay/index.tsx": { "bytesInOutput": 840 },
         "src/elements/LoadingOverlay/reducer.ts": { "bytesInOutput": 445 },
         "src/elements/TableColumns/index.tsx": { "bytesInOutput": 1297 },
         "src/elements/TableColumns/buildColumnState.tsx": { "bytesInOutput": 1867 },
-        "src/elements/SelectAll/index.tsx": { "bytesInOutput": 397 },
+        "src/elements/SelectAll/index.tsx": { "bytesInOutput": 376 },
         "src/providers/Selection/index.tsx": { "bytesInOutput": 1225 },
-        "src/elements/SelectRow/index.tsx": { "bytesInOutput": 238 },
+        "src/elements/SelectRow/index.tsx": { "bytesInOutput": 217 },
         "src/elements/Table/TableCellProvider/index.tsx": { "bytesInOutput": 296 },
-        "src/elements/SortColumn/index.tsx": { "bytesInOutput": 1052 },
+        "src/elements/SortColumn/index.tsx": { "bytesInOutput": 1031 },
         "src/elements/Table/DefaultCell/index.tsx": { "bytesInOutput": 1223 },
-        "src/elements/Table/DefaultCell/fields/Code/index.tsx": { "bytesInOutput": 249 },
+        "src/elements/Table/DefaultCell/fields/Code/index.tsx": { "bytesInOutput": 228 },
         "src/elements/Table/DefaultCell/fields/Array/index.tsx": { "bytesInOutput": 172 },
         "src/elements/Table/DefaultCell/fields/Blocks/index.tsx": { "bytesInOutput": 534 },
-        "src/elements/Table/DefaultCell/fields/Checkbox/index.tsx": { "bytesInOutput": 197 },
+        "src/elements/Table/DefaultCell/fields/Checkbox/index.tsx": { "bytesInOutput": 176 },
         "src/elements/Table/DefaultCell/fields/Date/index.tsx": { "bytesInOutput": 184 },
-        "src/elements/Table/DefaultCell/fields/File/index.tsx": { "bytesInOutput": 409 },
-        "src/elements/Table/DefaultCell/fields/JSON/index.tsx": { "bytesInOutput": 224 },
-        "src/elements/Table/DefaultCell/fields/Relationship/index.tsx": { "bytesInOutput": 1227 },
+        "src/elements/Table/DefaultCell/fields/File/index.tsx": { "bytesInOutput": 388 },
+        "src/elements/Table/DefaultCell/fields/JSON/index.tsx": { "bytesInOutput": 203 },
+        "src/elements/Table/DefaultCell/fields/Relationship/index.tsx": { "bytesInOutput": 1206 },
         "src/utilities/canUseDOM.ts": { "bytesInOutput": 77 },
         "src/elements/Table/RelationshipProvider/index.tsx": { "bytesInOutput": 991 },
         "src/elements/Table/RelationshipProvider/reducer.ts": { "bytesInOutput": 429 },
@@ -33451,28 +33161,28 @@
         "src/elements/TableColumns/columnReducer.ts": { "bytesInOutput": 468 },
         "src/elements/TableColumns/filterFields.tsx": { "bytesInOutput": 336 },
         "src/elements/TableColumns/getInitialColumns.ts": { "bytesInOutput": 518 },
-        "src/elements/ViewDescription/index.tsx": { "bytesInOutput": 264 },
+        "src/elements/ViewDescription/index.tsx": { "bytesInOutput": 243 },
         "src/fields/index.tsx": { "bytesInOutput": 255 },
         "src/providers/Params/index.tsx": { "bytesInOutput": 200 },
         "src/providers/Root/index.tsx": { "bytesInOutput": 1443 },
         "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 172 },
         "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 172 },
         "src/exports/client/elements.ts": { "bytesInOutput": 50 },
-        "src/elements/Card/index.tsx": { "bytesInOutput": 497 },
-        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1611 },
-        "src/elements/DocumentControls/index.tsx": { "bytesInOutput": 3452 },
-        "src/elements/Autosave/index.tsx": { "bytesInOutput": 1359 },
-        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1669 },
-        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1570 },
+        "src/elements/Card/index.tsx": { "bytesInOutput": 476 },
+        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1590 },
+        "src/elements/DocumentControls/index.tsx": { "bytesInOutput": 3431 },
+        "src/elements/Autosave/index.tsx": { "bytesInOutput": 1338 },
+        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1648 },
+        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1549 },
         "src/elements/PreviewButton/index.tsx": { "bytesInOutput": 266 },
         "src/elements/PreviewButton/usePreviewURL.tsx": { "bytesInOutput": 718 },
         "src/elements/PublishButton/index.tsx": { "bytesInOutput": 451 },
-        "src/forms/Submit/index.tsx": { "bytesInOutput": 313 },
+        "src/forms/Submit/index.tsx": { "bytesInOutput": 292 },
         "src/elements/SaveButton/index.tsx": { "bytesInOutput": 446 },
         "src/elements/SaveDraftButton/index.tsx": { "bytesInOutput": 884 },
-        "src/elements/Status/index.tsx": { "bytesInOutput": 2754 },
-        "src/elements/DocumentFields/index.tsx": { "bytesInOutput": 1079 },
-        "src/elements/EditMany/index.tsx": { "bytesInOutput": 3129 },
+        "src/elements/Status/index.tsx": { "bytesInOutput": 2733 },
+        "src/elements/DocumentFields/index.tsx": { "bytesInOutput": 1058 },
+        "src/elements/EditMany/index.tsx": { "bytesInOutput": 3108 },
         "src/forms/Form/index.tsx": { "bytesInOutput": 6108 },
         "src/forms/Form/errorMessages.ts": { "bytesInOutput": 66 },
         "src/forms/Form/fieldReducer.ts": { "bytesInOutput": 3375 },
@@ -33483,42 +33193,42 @@
         "src/forms/Form/mergeServerFormState.ts": { "bytesInOutput": 504 },
         "src/utilities/arraysHaveSameStrings.ts": { "bytesInOutput": 151 },
         "src/forms/Form/mergeErrorPaths.ts": { "bytesInOutput": 234 },
-        "src/elements/FieldSelect/index.tsx": { "bytesInOutput": 1940 },
+        "src/elements/FieldSelect/index.tsx": { "bytesInOutput": 1919 },
         "src/forms/Form/createNestedFieldPath.ts": { "bytesInOutput": 89 },
-        "src/elements/GenerateConfirmation/index.tsx": { "bytesInOutput": 975 },
+        "src/elements/GenerateConfirmation/index.tsx": { "bytesInOutput": 954 },
         "src/elements/HydrateClientUser/index.tsx": { "bytesInOutput": 149 },
-        "src/elements/ListControls/index.tsx": { "bytesInOutput": 2451 },
-        "src/elements/ColumnSelector/index.tsx": { "bytesInOutput": 774 },
-        "src/elements/PublishMany/index.tsx": { "bytesInOutput": 1674 },
-        "src/elements/SearchFilter/index.tsx": { "bytesInOutput": 1034 },
-        "src/elements/UnpublishMany/index.tsx": { "bytesInOutput": 1669 },
-        "src/elements/WhereBuilder/index.tsx": { "bytesInOutput": 2588 },
-        "src/elements/WhereBuilder/Condition/index.tsx": { "bytesInOutput": 2092 },
+        "src/elements/ListControls/index.tsx": { "bytesInOutput": 2430 },
+        "src/elements/ColumnSelector/index.tsx": { "bytesInOutput": 753 },
+        "src/elements/PublishMany/index.tsx": { "bytesInOutput": 1653 },
+        "src/elements/SearchFilter/index.tsx": { "bytesInOutput": 1013 },
+        "src/elements/UnpublishMany/index.tsx": { "bytesInOutput": 1648 },
+        "src/elements/WhereBuilder/index.tsx": { "bytesInOutput": 2567 },
+        "src/elements/WhereBuilder/Condition/index.tsx": { "bytesInOutput": 2071 },
         "src/elements/RenderCustomClientComponent/index.tsx": { "bytesInOutput": 168 },
         "src/elements/WhereBuilder/Condition/Date/index.tsx": { "bytesInOutput": 222 },
-        "src/elements/WhereBuilder/Condition/Number/index.tsx": { "bytesInOutput": 276 },
-        "src/elements/WhereBuilder/Condition/Relationship/index.tsx": { "bytesInOutput": 2942 },
+        "src/elements/WhereBuilder/Condition/Number/index.tsx": { "bytesInOutput": 255 },
+        "src/elements/WhereBuilder/Condition/Relationship/index.tsx": { "bytesInOutput": 2921 },
         "src/elements/WhereBuilder/Condition/Relationship/optionsReducer.ts": {
           "bytesInOutput": 705
         },
         "src/elements/WhereBuilder/Condition/Select/index.tsx": { "bytesInOutput": 754 },
-        "src/elements/WhereBuilder/Condition/Text/index.tsx": { "bytesInOutput": 282 },
+        "src/elements/WhereBuilder/Condition/Text/index.tsx": { "bytesInOutput": 261 },
         "src/elements/WhereBuilder/field-types.tsx": { "bytesInOutput": 1310 },
         "src/elements/WhereBuilder/reduceFieldMap.tsx": { "bytesInOutput": 349 },
         "src/elements/WhereBuilder/transformWhereQuery.ts": { "bytesInOutput": 129 },
         "src/elements/WhereBuilder/validateWhereQuery.ts": { "bytesInOutput": 304 },
         "src/elements/ListControls/getTextFieldsToBeSearched.ts": { "bytesInOutput": 81 },
-        "src/elements/ListSelection/index.tsx": { "bytesInOutput": 538 },
+        "src/elements/ListSelection/index.tsx": { "bytesInOutput": 517 },
         "src/elements/Modal/index.tsx": { "bytesInOutput": 17 },
-        "src/elements/Pagination/index.tsx": { "bytesInOutput": 1020 },
-        "src/elements/Pagination/ClickableArrow/index.tsx": { "bytesInOutput": 324 },
+        "src/elements/Pagination/index.tsx": { "bytesInOutput": 999 },
+        "src/elements/Pagination/ClickableArrow/index.tsx": { "bytesInOutput": 303 },
         "src/elements/Pagination/Page/index.tsx": { "bytesInOutput": 316 },
         "src/elements/Pagination/Separator/index.tsx": { "bytesInOutput": 102 },
         "../payload/src/auth/defaultAccess.ts": { "bytesInOutput": 29 },
         "../payload/src/collections/config/defaults.ts": { "bytesInOutput": 542 },
         "../payload/src/exports/config.ts": { "bytesInOutput": 0 },
-        "src/elements/PerPage/index.tsx": { "bytesInOutput": 822 },
-        "src/elements/Table/index.tsx": { "bytesInOutput": 790 },
+        "src/elements/PerPage/index.tsx": { "bytesInOutput": 801 },
+        "src/elements/Table/index.tsx": { "bytesInOutput": 769 },
         "src/exports/client/forms.ts": { "bytesInOutput": 0 },
         "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
           "bytesInOutput": 1183
@@ -33533,7 +33243,7 @@
         "src/forms/buildStateFromSchema/index.tsx": { "bytesInOutput": 339 },
         "src/exports/client/fields.ts": { "bytesInOutput": 0 }
       },
-      "bytes": 489815
+      "bytes": 487757
     },
     "dist/chunk-OZE4W2T5.js": {
       "imports": [{ "path": "dist/chunk-DGJUBN33.js", "kind": "import-statement" }],
@@ -33581,37 +33291,30 @@
       },
       "bytes": 20716
     },
-    "dist/chunk-ROIGO7FK.js": {
+    "dist/chunk-NOJZCQ5R.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": ["a", "b", "c", "d", "e", "f"],
       "inputs": {
         "src/hooks/useDelay.ts": { "bytesInOutput": 253 },
-        "src/elements/ShimmerEffect/index.tsx": { "bytesInOutput": 673 },
+        "src/elements/ShimmerEffect/index.tsx": { "bytesInOutput": 652 },
         "src/providers/Theme/index.tsx": { "bytesInOutput": 1189 }
       },
-      "bytes": 2166
+      "bytes": 2145
     },
     "dist/server.js": {
       "imports": [
-        { "path": "dist/chunk-7GPPKRSD.js", "kind": "import-statement" },
-        { "path": "dist/chunk-AN7KMEBG.js", "kind": "import-statement" },
-        { "path": "dist/chunk-P7YEB42W.js", "kind": "import-statement" },
+        { "path": "dist/chunk-5VTXQHUO.js", "kind": "import-statement" },
+        { "path": "dist/chunk-GAGIYTZW.js", "kind": "import-statement" },
+        { "path": "dist/chunk-TAEF6PMD.js", "kind": "import-statement" },
         { "path": "dist/chunk-N2T43CBH.js", "kind": "import-statement" },
         { "path": "dist/chunk-FQU34KAG.js", "kind": "import-statement" },
         { "path": "dist/chunk-RD4BVJYH.js", "kind": "import-statement" },
         { "path": "dist/chunk-DGJUBN33.js", "kind": "import-statement" },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -33620,38 +33323,27 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
         "CalendarIcon",
@@ -33693,60 +33385,57 @@
         },
         "../../node_modules/.pnpm/md5@2.3.0/node_modules/md5/md5.js": { "bytesInOutput": 3374 },
         "src/exports/server/icons.ts": { "bytesInOutput": 0 },
-        "src/icons/CloseMenu/index.tsx": { "bytesInOutput": 440 },
+        "src/icons/CloseMenu/index.tsx": { "bytesInOutput": 419 },
         "src/icons/CodeBlock/index.tsx": { "bytesInOutput": 554 },
-        "src/icons/LogOut/index.tsx": { "bytesInOutput": 423 },
-        "src/icons/Menu/index.tsx": { "bytesInOutput": 441 },
+        "src/icons/LogOut/index.tsx": { "bytesInOutput": 402 },
+        "src/icons/Menu/index.tsx": { "bytesInOutput": 420 },
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 830 },
         "src/exports/server/index.ts": { "bytesInOutput": 0 },
         "src/exports/server/graphics.ts": { "bytesInOutput": 0 },
         "src/graphics/Logo/index.tsx": { "bytesInOutput": 3804 },
         "src/elements/RenderCustomComponent/index.tsx": { "bytesInOutput": 242 },
         "src/elements/WithServerSideProps/index.tsx": { "bytesInOutput": 170 },
-        "src/elements/DocumentHeader/index.tsx": { "bytesInOutput": 401 },
-        "src/elements/DocumentHeader/Tabs/index.tsx": { "bytesInOutput": 1330 },
+        "src/elements/DocumentHeader/index.tsx": { "bytesInOutput": 380 },
+        "src/elements/DocumentHeader/Tabs/index.tsx": { "bytesInOutput": 1309 },
         "src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx": { "bytesInOutput": 111 },
-        "src/elements/DocumentHeader/Tabs/Tab/index.tsx": { "bytesInOutput": 749 },
+        "src/elements/DocumentHeader/Tabs/Tab/index.tsx": { "bytesInOutput": 728 },
         "src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx": { "bytesInOutput": 742 },
         "src/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.tsx": { "bytesInOutput": 262 },
         "src/elements/DocumentHeader/Tabs/tabs/index.tsx": { "bytesInOutput": 961 },
         "src/elements/DocumentHeader/Tabs/getCustomViews.ts": { "bytesInOutput": 546 },
         "src/elements/DocumentHeader/Tabs/getViewConfig.ts": { "bytesInOutput": 382 },
         "src/exports/server/elements.ts": { "bytesInOutput": 0 },
-        "src/templates/Default/index.tsx": { "bytesInOutput": 848 },
-        "src/elements/AppHeader/index.tsx": { "bytesInOutput": 1567 },
+        "src/templates/Default/index.tsx": { "bytesInOutput": 827 },
+        "src/elements/AppHeader/index.tsx": { "bytesInOutput": 1546 },
         "src/graphics/Account/index.tsx": { "bytesInOutput": 238 },
-        "src/graphics/Account/Default/index.tsx": { "bytesInOutput": 569 },
+        "src/graphics/Account/Default/index.tsx": { "bytesInOutput": 548 },
         "src/graphics/Account/Gravatar/index.tsx": { "bytesInOutput": 52 },
-        "src/elements/Hamburger/index.tsx": { "bytesInOutput": 950 },
-        "src/elements/Localizer/LocalizerLabel/index.tsx": { "bytesInOutput": 465 },
-        "src/elements/Localizer/index.tsx": { "bytesInOutput": 685 },
-        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 502 },
-        "src/elements/Nav/index.tsx": { "bytesInOutput": 959 },
+        "src/elements/Hamburger/index.tsx": { "bytesInOutput": 929 },
+        "src/elements/Localizer/LocalizerLabel/index.tsx": { "bytesInOutput": 444 },
+        "src/elements/Localizer/index.tsx": { "bytesInOutput": 664 },
+        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 481 },
+        "src/elements/Nav/index.tsx": { "bytesInOutput": 938 },
         "src/elements/Logout/index.tsx": { "bytesInOutput": 447 },
         "src/elements/Nav/NavHamburger/index.tsx": { "bytesInOutput": 236 },
-        "src/elements/Nav/NavWrapper/index.tsx": { "bytesInOutput": 264 },
+        "src/elements/Nav/NavWrapper/index.tsx": { "bytesInOutput": 243 },
         "src/elements/Nav/index.client.tsx": { "bytesInOutput": 983 },
         "src/utilities/groupNavItems.ts": { "bytesInOutput": 467 },
-        "src/elements/NavGroup/index.tsx": { "bytesInOutput": 1070 },
+        "src/elements/NavGroup/index.tsx": { "bytesInOutput": 1049 },
         "src/templates/Default/NavHamburger/index.tsx": { "bytesInOutput": 115 },
-        "src/templates/Default/Wrapper/index.tsx": { "bytesInOutput": 210 },
+        "src/templates/Default/Wrapper/index.tsx": { "bytesInOutput": 189 },
         "src/exports/server/templates.ts": { "bytesInOutput": 0 }
       },
-      "bytes": 29211
+      "bytes": 28854
     },
-    "dist/chunk-7GPPKRSD.js": {
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true }
-      ],
+    "dist/chunk-5VTXQHUO.js": {
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "exports": ["a"],
-      "inputs": { "src/icons/Calendar/index.tsx": { "bytesInOutput": 528 } },
-      "bytes": 544
+      "inputs": { "src/icons/Calendar/index.tsx": { "bytesInOutput": 507 } },
+      "bytes": 523
     },
-    "dist/chunk-AN7KMEBG.js": {
+    "dist/chunk-GAGIYTZW.js": {
       "imports": [
-        { "path": "dist/chunk-P7YEB42W.js", "kind": "import-statement" },
+        { "path": "dist/chunk-TAEF6PMD.js", "kind": "import-statement" },
         { "path": "dist/chunk-N2T43CBH.js", "kind": "import-statement" },
         { "path": "dist/chunk-FQU34KAG.js", "kind": "import-statement" },
         { "path": "dist/chunk-DGJUBN33.js", "kind": "import-statement" },
@@ -33781,25 +33470,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -33808,37 +33478,34 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
@@ -34375,13 +34042,13 @@
         },
         "src/hooks/useDebounce.ts": { "bytesInOutput": 166 },
         "src/hooks/useIntersect.ts": { "bytesInOutput": 416 },
-        "src/icons/Chevron/index.tsx": { "bytesInOutput": 478 },
-        "src/icons/Edit/index.tsx": { "bytesInOutput": 645 },
-        "src/icons/Link/index.tsx": { "bytesInOutput": 552 },
-        "src/icons/Plus/index.tsx": { "bytesInOutput": 367 },
-        "src/icons/Swap/index.tsx": { "bytesInOutput": 546 },
-        "src/elements/Tooltip/index.tsx": { "bytesInOutput": 970 },
-        "src/elements/Button/index.tsx": { "bytesInOutput": 1770 },
+        "src/icons/Chevron/index.tsx": { "bytesInOutput": 457 },
+        "src/icons/Edit/index.tsx": { "bytesInOutput": 624 },
+        "src/icons/Link/index.tsx": { "bytesInOutput": 531 },
+        "src/icons/Plus/index.tsx": { "bytesInOutput": 346 },
+        "src/icons/Swap/index.tsx": { "bytesInOutput": 525 },
+        "src/elements/Tooltip/index.tsx": { "bytesInOutput": 949 },
+        "src/elements/Button/index.tsx": { "bytesInOutput": 1749 },
         "src/providers/Config/index.tsx": { "bytesInOutput": 158 },
         "src/providers/SearchParams/index.tsx": { "bytesInOutput": 557 },
         "src/providers/Auth/index.tsx": { "bytesInOutput": 3243 },
@@ -34391,7 +34058,7 @@
         "../../node_modules/.pnpm/clsx@2.1.0/node_modules/clsx/dist/clsx.mjs": {
           "bytesInOutput": 372
         },
-        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 810 },
+        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 789 },
         "src/utilities/api.ts": { "bytesInOutput": 754 },
         "src/providers/Preferences/index.tsx": { "bytesInOutput": 1390 },
         "src/providers/Locale/index.tsx": { "bytesInOutput": 668 },
@@ -34509,21 +34176,21 @@
         "src/utilities/isEditing.ts": { "bytesInOutput": 59 },
         "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 186 },
         "src/providers/EntityVisibility/index.tsx": { "bytesInOutput": 334 },
-        "src/icons/Check/index.tsx": { "bytesInOutput": 422 },
-        "src/icons/Line/index.tsx": { "bytesInOutput": 258 },
-        "src/icons/Copy/index.tsx": { "bytesInOutput": 322 },
-        "src/icons/More/index.tsx": { "bytesInOutput": 431 },
-        "src/elements/Popup/PopupButtonList/index.tsx": { "bytesInOutput": 745 },
-        "src/elements/Popup/index.tsx": { "bytesInOutput": 2136 },
-        "src/elements/Popup/PopupTrigger/index.tsx": { "bytesInOutput": 431 },
-        "src/icons/DragHandle/index.tsx": { "bytesInOutput": 657 },
-        "src/elements/Gutter/index.tsx": { "bytesInOutput": 390 },
-        "src/icons/Search/index.tsx": { "bytesInOutput": 353 },
+        "src/icons/Check/index.tsx": { "bytesInOutput": 401 },
+        "src/icons/Line/index.tsx": { "bytesInOutput": 237 },
+        "src/icons/Copy/index.tsx": { "bytesInOutput": 301 },
+        "src/icons/More/index.tsx": { "bytesInOutput": 410 },
+        "src/elements/Popup/PopupButtonList/index.tsx": { "bytesInOutput": 724 },
+        "src/elements/Popup/index.tsx": { "bytesInOutput": 2115 },
+        "src/elements/Popup/PopupTrigger/index.tsx": { "bytesInOutput": 410 },
+        "src/icons/DragHandle/index.tsx": { "bytesInOutput": 636 },
+        "src/elements/Gutter/index.tsx": { "bytesInOutput": 369 },
+        "src/icons/Search/index.tsx": { "bytesInOutput": 332 },
         "src/graphics/Icon/index.tsx": { "bytesInOutput": 426 },
         "src/elements/StepNav/context.tsx": { "bytesInOutput": 212 },
         "src/elements/StepNav/SetStepNav.tsx": { "bytesInOutput": 111 },
-        "src/elements/StepNav/index.tsx": { "bytesInOutput": 982 },
-        "src/templates/Minimal/index.tsx": { "bytesInOutput": 299 },
+        "src/elements/StepNav/index.tsx": { "bytesInOutput": 961 },
+        "src/templates/Minimal/index.tsx": { "bytesInOutput": 278 },
         "src/elements/Translation/index.tsx": { "bytesInOutput": 517 },
         "../payload/src/uploads/isImage.ts": { "bytesInOutput": 116 },
         "../payload/src/utilities/isNumber.ts": { "bytesInOutput": 93 },
@@ -34537,13 +34204,13 @@
         "../payload/src/fields/getDefaultValue.ts": { "bytesInOutput": 144 },
         "../payload/src/exports/utilities.ts": { "bytesInOutput": 0 },
         "../payload/src/uploads/formatFilesize.ts": { "bytesInOutput": 206 },
-        "src/elements/RenderTitle/index.tsx": { "bytesInOutput": 422 },
-        "src/elements/IDLabel/index.tsx": { "bytesInOutput": 193 },
+        "src/elements/RenderTitle/index.tsx": { "bytesInOutput": 401 },
+        "src/elements/IDLabel/index.tsx": { "bytesInOutput": 172 },
         "src/elements/Nav/context.tsx": { "bytesInOutput": 735 }
       },
-      "bytes": 231403
+      "bytes": 230941
     },
-    "dist/chunk-P7YEB42W.js": {
+    "dist/chunk-TAEF6PMD.js": {
       "imports": [
         { "path": "dist/chunk-FQU34KAG.js", "kind": "import-statement" },
         { "path": "dist/chunk-DGJUBN33.js", "kind": "import-statement" },
@@ -34552,7 +34219,6 @@
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "./index.scss", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "dist/ar-HY2DZD74.js", "kind": "dynamic-import" },
         { "path": "dist/az-5JRANPRT.js", "kind": "dynamic-import" },
@@ -34701,7 +34367,7 @@
         "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js": {
           "bytesInOutput": 134
         },
-        "src/icons/X/index.tsx": { "bytesInOutput": 420 },
+        "src/icons/X/index.tsx": { "bytesInOutput": 399 },
         "src/providers/RouteCache/index.tsx": { "bytesInOutput": 346 },
         "../translations/src/importDateFNSLocale.ts": { "bytesInOutput": 1537 },
         "../translations/src/exports/index.ts": { "bytesInOutput": 0 },
@@ -34712,7 +34378,7 @@
         "../translations/src/utilities/init.ts": { "bytesInOutput": 1504 },
         "src/providers/Translation/index.tsx": { "bytesInOutput": 804 }
       },
-      "bytes": 46265
+      "bytes": 46244
     },
     "dist/ar-HY2DZD74.js": {
       "imports": [

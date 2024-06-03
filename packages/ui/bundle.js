@@ -1,6 +1,5 @@
 import * as esbuild from 'esbuild'
 import fs from 'fs'
-import { swcPlugin } from 'esbuild-plugin-swc'
 import path from 'path'
 import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
@@ -14,7 +13,6 @@ let result = await esbuild.build({
   bundle: true,
   platform: 'node',
   format: 'esm',
-  // outfile: 'out.js',
   outdir: 'dist',
   splitting: true,
   external: ['*.scss', '*.css', 'react', 'react-dom'],
@@ -22,35 +20,17 @@ let result = await esbuild.build({
   metafile: true,
   tsconfig: path.resolve(dirname, './tsconfig.json'),
   plugins: [
-    // {
-    //   name: 'resolve-ts',
-    //   setup(build) {
-    //     build.onResolve({ filter: /.*/ }, (args) => {
-    //       if (args.kind === 'entry-point') return
-    //       let path = args.path
-    //       if (!path.endsWith('.js')) path += '.js'
-    //       return { path, external: true }
-    //     })
-    //   },
-    // },
-    // swcPlugin({
-    //   jsc: {
-    //     experimental: {
-    //       plugins: [
-    //         [
-    //           'swc-plugin-transform-remove-imports',
-    //           {
-    //             test: '\\.(scss|css)$',
-    //           },
-    //         ],
-    //       ],
-    //     },
-    //     parser: {
-    //       syntax: 'typescript',
-    //       tsx: true,
-    //     },
-    //   },
-    // }),
+    {
+      name: 'remove-scss-imports',
+      setup(build) {
+        build.onLoad({ filter: /.*/ }, async (args) => {
+          if (args.path.includes('node_modules') || !args.path.includes(dirname)) return
+          const contents = await fs.promises.readFile(args.path, 'utf8')
+          const newContents = contents.replace(/import\s+.*\.scss';?[\r\n\s]*/g, '')
+          return { contents: newContents, loader: 'default' }
+        })
+      },
+    },
   ],
   // banner: "'use client'\n\n",
 })
