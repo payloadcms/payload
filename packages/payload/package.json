@@ -116,8 +116,6 @@
     "@types/body-parser": "1.19.2",
     "@types/compression": "1.7.2",
     "@types/express-fileupload": "1.4.1",
-    "@types/express-rate-limit": "5.1.3",
-    "@types/express-serve-static-core": "4.17.35",
     "@types/hapi__joi": "17.1.9",
     "@types/ignore-styles": "5.0.0",
     "@types/joi": "14.3.4",
