@@ -26,9 +26,6 @@ importers:
 
   .:
     devDependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.525.0
-        version: 3.550.0
       '@jest/globals':
         specifier: 29.7.0
         version: 29.7.0
