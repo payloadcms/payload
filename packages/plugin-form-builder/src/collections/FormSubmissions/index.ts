@@ -95,7 +95,7 @@ export const generateSubmissionCollection = (
     fields:
       formConfig?.formSubmissionOverrides?.fields &&
       typeof formConfig?.formSubmissionOverrides?.fields === 'function'
-        ? formConfig?.formSubmissionOverrides?.fields({ defaultFields })
+        ? formConfig.formSubmissionOverrides.fields({ defaultFields })
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),

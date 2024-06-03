@@ -230,8 +230,8 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
       ...(formConfig?.formOverrides?.admin || {}),
     },
     fields:
-      formConfig?.formOverrides.fields && typeof formConfig?.formOverrides.fields === 'function'
-        ? formConfig?.formOverrides.fields({ defaultFields })
+      formConfig?.formOverrides?.fields && typeof formConfig?.formOverrides?.fields === 'function'
+        ? formConfig.formOverrides.fields({ defaultFields })
         : defaultFields,
   }
 
