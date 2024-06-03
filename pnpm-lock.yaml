@@ -29,6 +29,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.525.0
         version: 3.550.0
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
       '@next/bundle-analyzer':
         specifier: ^14.1.0
         version: 14.1.4
@@ -49,7 +52,7 @@ importers:
         version: 0.2.36(@swc/core@1.4.13)
       '@testing-library/jest-dom':
         specifier: 6.4.2
-        version: 6.4.2(@types/jest@29.5.12)(jest@29.7.0)
+        version: 6.4.2(@jest/globals@29.7.0)(@types/jest@29.5.12)(jest@29.7.0)
       '@testing-library/react':
         specifier: 14.2.1
         version: 14.2.1(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
@@ -6735,7 +6738,7 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@testing-library/jest-dom@6.4.2(@types/jest@29.5.12)(jest@29.7.0):
+  /@testing-library/jest-dom@6.4.2(@jest/globals@29.7.0)(@types/jest@29.5.12)(jest@29.7.0):
     resolution: {integrity: sha512-CzqH0AFymEMG48CpzXFriYYkOjk6ZGPCLMhW9e9jg3KMCn5OfJecF8GtGW7yGfR/IgCe3SX8BSwjdzI6BBbZLw==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
     peerDependencies:
@@ -6758,6 +6761,7 @@ packages:
     dependencies:
       '@adobe/css-tools': 4.3.3
       '@babel/runtime': 7.24.4
+      '@jest/globals': 29.7.0
       '@types/jest': 29.5.12
       aria-query: 5.3.0
       chalk: 3.0.0

@@ -5,6 +5,7 @@ import { createProject } from './create-project.js'
 import { dbReplacements } from './packages.js'
 import { getValidTemplates } from './templates.js'
 import globby from 'globby'
+import { jest } from '@jest/globals'
 
 import tempDirectory from 'temp-dir'
 
