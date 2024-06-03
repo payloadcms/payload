@@ -4,19 +4,21 @@ import fs from 'fs'
 import path from 'path'
 
 /**
- * Try to find user's .env and load it
+ * Try to find user's env file and load it. Supports both .env and .env.local
  */
-export function loadEnv() {
-  const envPath = findUp.sync('.env')
+const envFiles = ['.env', '.env.local']
 
-  if (envPath) {
-    dotenv.config({ path: envPath })
-  } else {
-    const cwdPath = path.resolve(process.cwd(), '.env')
-    if (fs.existsSync(cwdPath)) {
-      dotenv.config({
-        path: cwdPath,
-      })
+export function loadEnv() {
+  for (const file of envFiles) {
+    const filePath = findUp.sync(file)
+    if (filePath) {
+      dotenv.config({ path: filePath })
+    } else {
+      // If the file is not found via findUp, check the current working directory
+      const cwdPath = path.resolve(process.cwd(), file)
+      if (fs.existsSync(cwdPath)) {
+        dotenv.config({ path: cwdPath })
+      }
     }
   }
 }
