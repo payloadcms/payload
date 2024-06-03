@@ -575,6 +575,14 @@ describe('lexicalBlocks', () => {
       // reload page and assert again
       await page.reload()
       await wait(300)
+      await newSubLexicalAndUploadBlock.scrollIntoViewIfNeeded()
+      await expect(newSubLexicalAndUploadBlock).toBeVisible()
+      await newSubLexicalAndUploadBlock
+        .locator('.field-type.upload .file-meta__url a')
+        .scrollIntoViewIfNeeded()
+      await expect(
+        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+      ).toBeVisible()
 
       await expect(
         newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
