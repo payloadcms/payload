@@ -116,7 +116,7 @@
     "react-toastify": "10.0.5",
     "scheduler": "0.23.0",
     "use-context-selector": "1.4.1",
-    "uuid": "9.0.1"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",
