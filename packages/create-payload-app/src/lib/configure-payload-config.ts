@@ -10,6 +10,9 @@ import { dbReplacements, storageReplacements } from './replacements.js'
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
   dbType?: DbType
+  envNames?: {
+    dbUri: string
+  }
   packageJsonName?: string
   projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
   storageAdapter?: StorageAdapterType
@@ -116,15 +119,14 @@ export async function configurePayloadConfig(args: {
       if (dbConfigEndLineIndex) dbConfigEndLineIndex += 1
     }
 
-    if (!dbConfigStartLineIndex || !dbConfigEndLineIndex) {
-      warning('Unable to update payload.config.ts with database adapter import')
-    } else {
-      // Replaces lines between `// database-adapter-config-start` and `// database-adapter-config-end`
+    if (dbConfigStartLineIndex && dbConfigEndLineIndex) {
       configLines.splice(
         dbConfigStartLineIndex,
         dbConfigEndLineIndex - dbConfigStartLineIndex + 1,
-        ...dbReplacement.configReplacement,
+        ...dbReplacement.configReplacement(args.envNames?.dbUri),
       )
+    } else {
+      warning('Unable to update payload.config.ts with database adapter import')
     }
 
     fse.writeFileSync(payloadConfigPath, configLines.join('\n'))

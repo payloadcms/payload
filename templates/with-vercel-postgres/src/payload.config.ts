@@ -18,14 +18,14 @@ export default buildConfig({
     user: Users.slug,
   },
   collections: [Users, Media],
-  editor: lexicalEditor({}),
+  editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || '',
+      connectionString: process.env.POSTGRES_URL || '',
     },
   }),
 

@@ -124,7 +124,7 @@ describe('createProject', () => {
 
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement.join('\n'))
+        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
       })
     })
   })

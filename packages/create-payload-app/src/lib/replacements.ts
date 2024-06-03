@@ -1,16 +1,16 @@
 import type { DbType, StorageAdapterType } from '../types.js'
 
 type DbAdapterReplacement = {
-  configReplacement: string[]
+  configReplacement: (envName?: string) => string[]
   importReplacement: string
   packageName: string
 }
 
 const mongodbReplacement: DbAdapterReplacement = {
   // Replacement between `// database-adapter-config-start` and `// database-adapter-config-end`
-  configReplacement: [
+  configReplacement: (envName = 'DATABASE_URI') => [
     '  db: mongooseAdapter({',
-    "    url: process.env.DATABASE_URI || '',",
+    `    url: process.env.${envName} || '',`,
     '  }),',
   ],
   importReplacement: "import { mongooseAdapter } from '@payloadcms/db-mongodb'",
@@ -18,10 +18,10 @@ const mongodbReplacement: DbAdapterReplacement = {
 }
 
 const postgresReplacement: DbAdapterReplacement = {
-  configReplacement: [
+  configReplacement: (envName = 'DATABASE_URI') => [
     '  db: postgresAdapter({',
     '    pool: {',
-    "      connectionString: process.env.DATABASE_URI || '',",
+    `      connectionString: process.env.${envName} || '',`,
     '    },',
     '  }),',
   ],
