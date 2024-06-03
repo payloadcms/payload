@@ -1,11 +1,13 @@
 import React from 'react'
 
-import * as Client from '../../../packages/ui/z/index.js'
-
-console.log('Client', Client)
+import { Button } from '../../../packages/ui/dist/client.js'
 
 export const Page = () => {
-  return <div>{/* <Button /> */}</div>
+  return (
+    <div>
+      <Button label="What's up" />
+    </div>
+  )
 }
 
 export default Page

@@ -13,7 +13,7 @@ esbuild
     bundle: true,
     minify: true,
     outdir: 'dist',
-    external: ['payload'],
+    packages: 'external',
     plugins: [sassPlugin({ css: 'external', filename: 'styles.css' })],
   })
   .then(() => {
@@ -39,7 +39,8 @@ let result = await esbuild
     format: 'esm',
     outdir: 'dist',
     splitting: true,
-    external: ['*.scss', '*.css', 'react', 'react-dom'],
+    external: ['*.scss', '*.css'],
+    packages: 'external',
     minify: true,
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
