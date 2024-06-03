@@ -1,6 +1,6 @@
 import nextEnvImport from '@next/env'
 const { loadEnvConfig } = nextEnvImport
-import findUp from 'find-up'
+import { findUpStop, findUpSync } from 'find-up'
 
 /**
  * Try to find user's env files and load it. Uses the same algorithm next.js uses to parse env files, meaning this also supports .env.local, .env.development, .env.production, etc.
@@ -15,10 +15,10 @@ export function loadEnv(path?: string) {
 
   if (!loadedEnvFiles?.length) {
     // use findUp to find the env file. So, run loadEnvConfig for every directory upwards
-    findUp.sync((dir) => {
+    findUpSync((dir) => {
       const { loadedEnvFiles } = loadEnvConfig(dir, true)
       if (loadedEnvFiles?.length) {
-        return findUp.stop
+        return findUpStop
       }
     })
   }
