@@ -727,9 +727,6 @@ importers:
       '@swc/core':
         specifier: ^1.4.13
         version: 1.4.13
-      '@types/probe-image-size':
-        specifier: ^7.2.4
-        version: 7.2.4
       ajv:
         specifier: ^8.12.0
         version: 8.12.0
@@ -7269,12 +7266,6 @@ packages:
       - supports-color
     dev: true
 
-  /@types/needle@3.3.0:
-    resolution: {integrity: sha512-UFIuc1gdyzAqeVUYpSL+cliw2MmU/ZUhVZKE7Zo4wPbgc8hbljeKSnn6ls6iG8r5jpegPXLUIhJ+Wb2kLVs8cg==}
-    dependencies:
-      '@types/node': 20.12.5
-    dev: false
-
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
@@ -7350,13 +7341,6 @@ packages:
 
   /@types/prettier@2.7.3:
     resolution: {integrity: sha512-+68kP9yzs4LMp7VNh8gdzMSPZFL44MLGqiHWvttYJe+6qnuVr4Ek9wSBQoveqY/r+LwjCcU29kNVkidwim+kYA==}
-    dev: false
-
-  /@types/probe-image-size@7.2.4:
-    resolution: {integrity: sha512-HVqYj3L+D+S/6qpQRv5qMxrD/5pglzZuhP7ZIqgVSZ+Ck4z1TCFkNIRG8WesFueQTqWFTSgkkAl6f8lwxFPQSw==}
-    dependencies:
-      '@types/needle': 3.3.0
-      '@types/node': 20.12.5
     dev: false
 
   /@types/prompts@2.4.9:
