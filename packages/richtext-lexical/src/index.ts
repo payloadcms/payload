@@ -193,6 +193,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
               if (afterChangeHooks?.has(node.type)) {
                 for (const hook of afterChangeHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(afterChange) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
+                  }
                   node = await hook({
                     context,
                     node,
@@ -285,6 +296,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             path,
             req,
             schemaPath,
+            siblingData,
             siblingDocWithLocales,
             skipValidation,
             value,
@@ -332,6 +344,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
               if (beforeChangeHooks?.has(node.type)) {
                 for (const hook of beforeChangeHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(beforeChange) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
+                  }
                   node = await hook({
                     context,
                     duplicate,
@@ -348,6 +371,38 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
+            }
+
+            /**
+             * within the beforeChange hook, id's may be re-generated.
+             * Example:
+             * 1. Seed data contains IDs for block feature blocks.
+             * 2. Those are used in beforeValidate
+             * 3. in beforeChange, those IDs are regenerated, because you cannot provide IDs during document creation. See baseIDField beforeChange hook for reasoning
+             * 4. Thus, in order for all post-beforeChange hooks to receive the correct ID, we need to update the originalNodeIDMap with the new ID's, by regenerating the nodeIDMap.
+             * The reason this is not generated for every hook, is to save on performance. We know we only really have to generate it in beforeValidate, which is the first hook,
+             * and in beforeChange, which is where modifications to the provided IDs can occur.
+             */
+            const newOriginalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            const previousValue = siblingData[field.name]
+
+            recurseNodeTree({
+              nodeIDMap: newOriginalNodeIDMap,
+              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            if (!context.internal) {
+              // Add to context, for other hooks to use
+              context.internal = {}
+            }
+            if (!context.internal.lexical) {
+              context.internal.lexical = {}
+            }
+            context.internal.lexical[path.join('.')] = {
+              originalNodeIDMap: newOriginalNodeIDMap,
             }
 
             return value
@@ -384,6 +439,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
               if (beforeDuplicateHooks?.has(node.type)) {
                 for (const hook of beforeDuplicateHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(beforeDuplicate) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
+                  }
                   node = await hook({
                     context,
                     node,
@@ -454,8 +520,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
             })
 
-            // Add to context, for other hooks to use
             if (!context.internal) {
+              // Add to context, for other hooks to use
               context.internal = {}
             }
             if (!(context as any).internal.lexical) {
@@ -485,6 +551,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
               if (beforeValidateHooks?.has(node.type)) {
                 for (const hook of beforeValidateHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(beforeValidate) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
+                  }
                   node = await hook({
                     context,
                     node,
