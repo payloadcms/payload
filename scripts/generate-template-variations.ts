@@ -50,7 +50,7 @@ async function main() {
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
-          'https://github.com/payloadcms/vercel-deploy-payload-postgres' +
+          `https://github.com/payloadcms/payload/templates/${dirname}` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
@@ -69,7 +69,7 @@ async function main() {
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
-          'https://github.com/payloadcms/vercel-deploy-payload-postgres' +
+          `https://github.com/payloadcms/payload/templates/${dirname}` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
