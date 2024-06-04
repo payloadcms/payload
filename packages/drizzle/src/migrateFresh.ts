@@ -46,10 +46,7 @@ export async function migrateFresh(
     msg: `Dropping database.`,
   })
 
-  await this.drizzle.execute(
-    sql.raw(`drop schema ${this.schemaName || 'public'} cascade;
-  create schema ${this.schemaName || 'public'};`),
-  )
+  await this.dropTables({ adapter: this })
 
   const migrationFiles = await readMigrationFiles({ payload })
   payload.logger.debug({

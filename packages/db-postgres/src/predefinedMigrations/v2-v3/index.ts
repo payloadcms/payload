@@ -1,4 +1,3 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'

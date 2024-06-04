@@ -2,6 +2,7 @@ import type { Client, Config } from '@libsql/client'
 import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
+  PostgresDB,
   SQLiteDB,
   TransactionSQLite,
 } from '@payloadcms/drizzle/types'
@@ -10,6 +11,7 @@ import type {
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
 } from 'drizzle-orm/sqlite-core'
+import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
 
@@ -17,6 +19,7 @@ import {
   type ColumnBaseConfig,
   type ColumnDataType,
   type DrizzleConfig,
+  QueryPromise,
   type Relation,
   type Relations,
   type SQL,
@@ -62,12 +65,19 @@ export type SQLiteAdapter = DrizzleAdapter & {
   }) => Promise<number>
   deleteWhere: (args: { db: TransactionSQLite; tableName: string; where: SQL }) => Promise<void>
   drizzle: SQLiteDB
-  execute: (args: { db: TransactionSQLite; sql: SQL<unknown> }) => Promise<void>
+  dropTables: (args: { adapter: SQLiteAdapter }) => Promise<void>
+  execute: (args: {
+    db?: TransactionSQLite
+    drizzle?: PostgresDB
+    raw?: string
+    sql?: SQL<unknown>
+  }) => SQLiteRaw<Record<string, unknown>>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  generateDrizzleJSON: (args: { schema: Record<string, GenericRelation | GenericTable> }) => unknown
   idType: Args['idType']
   initializing: Promise<void>
   insert: (args: {

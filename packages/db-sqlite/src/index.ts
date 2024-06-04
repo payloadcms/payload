@@ -41,7 +41,9 @@ import { connect } from './connect.js'
 import { countDistinct } from './countDistinct.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { deleteWhere } from './deleteWhere.js'
+import { dropTables } from './dropTables.js'
 import { execute } from './execute.js'
+import { generateDrizzleJSON } from './generateDrizzleJSON.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 import { init } from './init.js'
 import { insert } from './insert.js'
@@ -106,12 +108,14 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       deleteVersions,
       deleteWhere,
       destroy,
+      dropTables,
       execute,
       find,
       findGlobal,
       findGlobalVersions,
       findOne,
       findVersions,
+      generateDrizzleJSON,
       init,
       insert,
       migrate,

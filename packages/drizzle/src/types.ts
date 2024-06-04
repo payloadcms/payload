@@ -17,8 +17,10 @@ import type { Result } from 'drizzle-orm/sqlite-core/session'
 import type { BaseDatabaseAdapter, MigrationTemplateArgs } from 'payload/database'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
+
 export { BuildQueryJoinAliases }
 import type { ChainedMethods } from './find/chainMethods.js'
+
 export { ChainedMethods }
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
@@ -77,8 +79,14 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: (args: { db: DrizzleTransaction; tableName: string; where: SQL }) => Promise<void>
   drizzle: PostgresDB | SQLiteDB
+  dropTables: (args: { adapter: DrizzleAdapter }) => Promise<void>
   enums?: Record<string, unknown>
-  execute: (args: { db: DrizzleTransaction; sql: SQL<unknown> }) => Promise<void>
+  execute: (args: {
+    db?: DrizzleTransaction
+    drizzle?: PostgresDB | SQLiteDB
+    raw?: string
+    sql?: SQL<unknown>
+  }) => Promise<{ rows: Record<string, unknown> }>
   features: {
     json?: boolean
   }
@@ -87,6 +95,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  generateDrizzleJSON: (args: { schema: Record<string, unknown> }) => unknown
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
   // TODO: figure out the type for idType
   idType: unknown

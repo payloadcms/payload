@@ -32,7 +32,7 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
   let latestBatch = 0
   let migrationsInDB = []
 
-  const hasMigrationTable = await migrationTableExists(this.drizzle)
+  const hasMigrationTable = await migrationTableExists(this)
 
   if (hasMigrationTable) {
     ;({ docs: migrationsInDB } = await payload.find({
@@ -85,15 +85,13 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
-  const { generateDrizzleJson } = require('drizzle-kit/payload')
-
   const start = Date.now()
   const req = { payload } as PayloadRequestWithData
+  const adapter = payload.db as DrizzleAdapter
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
-  const pgAdapter = payload.db
-  const drizzleJSON = generateDrizzleJson(pgAdapter.schema)
+  const drizzleJSON = adapter.generateDrizzleJSON({ schema: adapter.schema })
 
   try {
     await initTransaction(req)

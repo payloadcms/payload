@@ -1,12 +1,26 @@
-import { sql } from 'drizzle-orm'
+import type { DrizzleAdapter } from '../types.js'
 
-import type { DrizzleDB } from '../types.js'
+export const migrationTableExists = async (adapter: DrizzleAdapter): Promise<boolean> => {
+  let statement
 
-// TODO: abstract this to adapter itself, might be PG-specific
-export const migrationTableExists = async (db: DrizzleDB): Promise<boolean> => {
-  const queryRes = await db.execute(sql`SELECT to_regclass('public.payload_migrations');`)
+  if (adapter.name === 'postgres') {
+    const prependSchema = adapter.schemaName ? `"${adapter.schemaName}".` : ''
+    statement = `SELECT to_regclass('${prependSchema}."payload_migrations"') exists;`
+  }
 
-  // Returns table name 'payload_migrations' or null
-  const exists = queryRes.rows?.[0]?.to_regclass === 'payload_migrations'
-  return exists
+  if (adapter.name === 'sqlite') {
+    statement = `
+      SELECT name exists
+      FROM sqlite_master
+      WHERE type = 'table'
+        AND name = 'payload_migrations';`
+  }
+
+  const result = await adapter.execute({
+    drizzle: adapter.drizzle,
+    sql: statement,
+  })
+
+  // @ts-expect-error
+  return result.rows[0]?.exists
 }

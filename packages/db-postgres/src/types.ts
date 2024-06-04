@@ -19,12 +19,11 @@ import type {
   PgSchema,
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
+import type { PgRaw } from 'drizzle-orm/pg-core/query-builders/raw'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
-import type { Pool, PoolConfig } from 'pg'
-
-import { DrizzleTransaction } from '@payloadcms/drizzle/types'
+import type { Pool, PoolConfig, QueryResult } from 'pg'
 
 export type Args = {
   idType?: 'serial' | 'uuid'
@@ -67,13 +66,22 @@ export type PostgresAdapter = DrizzleAdapter & {
   }) => Promise<number>
   deleteWhere: (args: { db: TransactionPg; tableName: string; where: SQL }) => Promise<void>
   drizzle: PostgresDB
+  dropTables: (args: { adapter: PostgresAdapter }) => Promise<void>
   enums: Record<string, GenericEnum>
-  execute: (args: { db: TransactionPg; sql: SQL<unknown> }) => Promise<void>
+  execute: (args: {
+    db?: TransactionPg
+    drizzle?: PostgresDB
+    raw?: string
+    sql?: SQL<unknown>
+  }) => PgRaw<QueryResult<Record<string, unknown>>>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  generateDrizzleJSON: (args: {
+    schema: Record<string, GenericRelation | GenericTable>
+  }) => PgSchema
   idType: Args['idType']
   initializing: Promise<void>
   insert: (args: {
