@@ -62,6 +62,11 @@
     "@types/webpack-hot-middleware": "2.25.6",
     "payload": "workspace:*"
   },
+  "resolutions": {
+    "ajv": "8.14.0",
+    "webpack-dev-middleware/**/ajv": "8.14.0",
+    "css-minimizer-webpack-plugin/**/ajv": "8.14.0"
+  },
   "peerDependencies": {
     "payload": "^2.0.0",
     "ajv": "8.14.0"

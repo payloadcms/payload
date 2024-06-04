@@ -209,6 +209,11 @@
     "vite": "^4.4.9",
     "webpack": "^5.78.0"
   },
+  "resolutions": {
+    "ajv": "8.14.0",
+    "webpack-dev-middleware/**/ajv": "8.14.0",
+    "css-minimizer-webpack-plugin/**/ajv": "8.14.0"
+  },
   "overrides": {
     "ajv": "8.14.0",
     "css-minimizer-webpack-plugin": {
