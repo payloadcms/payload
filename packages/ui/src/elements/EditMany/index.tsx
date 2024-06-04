@@ -161,7 +161,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     [serverURL, apiRoute, slug],
   )
 
-  if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
+  if (count === 0 || selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null
   }
 

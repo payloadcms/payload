@@ -108,7 +108,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     clearRouteCache,
   ])
 
-  if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
+  if (count === 0 || selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null
   }
 
