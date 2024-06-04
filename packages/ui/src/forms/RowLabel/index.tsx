@@ -2,7 +2,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { RowLabelProps } from './types.js'
-export type { RowLabelProps } from './types.js'
+export type { RowLabelProps }
 
 import { RowLabelProvider } from '../RowLabel/Context/index.js'
 
