@@ -31,14 +31,11 @@ export const getPredefinedMigration = async ({
       cleanPath = cleanPath.replaceAll('\\', '/')
       const moduleURL = pathToFileURL(cleanPath)
       try {
-        const { downSQL, imports, upSQL } = await eval(`import'${moduleURL.href}')`)
+        const { downSQL, imports, upSQL } = await eval(`import('${moduleURL.href}')`)
         return { downSQL, imports, upSQL }
       } catch (error) {
-        payload.logger.error({
-          error,
-          msg: `Error loading predefined migration ${migrationName}`,
-        })
-        process.exit(1)
+        payload.logger.error(`Error loading predefined migration ${migrationName}`)
+        throw error
       }
     } else {
       payload.logger.error({
