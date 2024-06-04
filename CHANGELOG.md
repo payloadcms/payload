@@ -1,3 +1,22 @@
+## [2.19.0](https://github.com/payloadcms/payload/compare/v2.18.3...v2.19.0) (2024-06-04)
+
+
+### Features
+
+* **translations:** update Turkish translations ([#5738](https://github.com/payloadcms/payload/issues/5738)) ([4fddea8](https://github.com/payloadcms/payload/commit/4fddea86ebd5f21705be2310f8b7053d31109189))
+
+
+### Bug Fixes
+
+* adds new `userEmailAlreadyRegistered` translations ([#6549](https://github.com/payloadcms/payload/issues/6549)) ([56c6700](https://github.com/payloadcms/payload/commit/56c6700cf25570cc217e28dc69459a3b81adbced)), closes [#6535](https://github.com/payloadcms/payload/issues/6535)
+* adjusts sizing of remove/add buttons to be same size ([#6527](https://github.com/payloadcms/payload/issues/6527)) ([a352ebc](https://github.com/payloadcms/payload/commit/a352ebc5520bbd0f6a9caef068825976dba05ded)), closes [#6098](https://github.com/payloadcms/payload/issues/6098)
+* focalPoint undefined handling ([#6552](https://github.com/payloadcms/payload/issues/6552)) ([fcfc3c5](https://github.com/payloadcms/payload/commit/fcfc3c593f69f63c51f8aa09973fcacbfbe04952))
+* pagination on polymorphic relationship field requesting entries with page parameter set to NaN ([#5366](https://github.com/payloadcms/payload/issues/5366)) ([547acfe](https://github.com/payloadcms/payload/commit/547acfe876bdf0df2ce808941f72b690c9dbcae3))
+* safely evaluates `field.admin` in WhereBuilder ([#6534](https://github.com/payloadcms/payload/issues/6534)) ([4f9d78d](https://github.com/payloadcms/payload/commit/4f9d78df5e38f3f70852bb6de47cff619f57c648))
+* separate sort and search fields when looking up relationship. ([#5964](https://github.com/payloadcms/payload/issues/5964)) ([c009219](https://github.com/payloadcms/payload/commit/c0092191a6ded1098a94d9f48918ab79171e5e32)), closes [#4815](https://github.com/payloadcms/payload/issues/4815) [#5222](https://github.com/payloadcms/payload/issues/5222)
+* ui field validation error with `admin.disableListColumn` property ([#6530](https://github.com/payloadcms/payload/issues/6530)) ([eeddece](https://github.com/payloadcms/payload/commit/eeddeceda988d7a4ce8ad31d3036a4ee84aceec3)), closes [#6521](https://github.com/payloadcms/payload/issues/6521)
+* **ui:** blocks browser save dialog from opening when hotkey used with no changes ([#6365](https://github.com/payloadcms/payload/issues/6365)) ([8f03cd7](https://github.com/payloadcms/payload/commit/8f03cd7c789eda7613ddced0d45a32afe49b1e01)), closes [#214](https://github.com/payloadcms/payload/issues/214)
+
 ## [2.18.3](https://github.com/payloadcms/payload/compare/v2.18.2...v2.18.3) (2024-05-17)
 
 
