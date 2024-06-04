@@ -2,6 +2,7 @@
 import type { OptionObject } from 'payload/types'
 
 import {
+  Gutter,
   SetViewActions,
   useComponentMap,
   useConfig,
@@ -9,7 +10,6 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { Gutter } from '@payloadcms/ui/server'
 import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import React, { useState } from 'react'
 

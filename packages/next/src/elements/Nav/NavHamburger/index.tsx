@@ -1,8 +1,8 @@
 'use client'
+import { Hamburger } from '@payloadcms/ui/client'
 import React from 'react'
 
-import { Hamburger } from '../../Hamburger/index.js'
-import { useNav } from '../context.js'
+import { useNav } from '../../../../../ui/src/elements/Nav/context.js'
 
 export const NavHamburger: React.FC<{
   baseClass?: string

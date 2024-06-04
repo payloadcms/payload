@@ -1,7 +1,6 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Modal, Pill, useConfig, useModal, useTranslation } from '@payloadcms/ui/client'
-import { MinimalTemplate } from '@payloadcms/ui/server'
 import { requests } from '@payloadcms/ui/utilities/api'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
@@ -9,6 +8,7 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
+import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 // import { requests } from '../../../../api'
 import './index.scss'
 

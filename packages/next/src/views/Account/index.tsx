@@ -7,7 +7,7 @@ import {
   HydrateClientUser,
 } from '@payloadcms/ui/client'
 import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { RenderCustomComponent } from '@payloadcms/ui/server'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 

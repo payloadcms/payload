@@ -67,12 +67,6 @@
       "require": "./src/exports/server/index.ts",
       "types": "./src/exports/server/index.ts"
     },
-    "./templates/*": {
-      "import": "./src/templates/*/index.tsx",
-      "require": "./src/templates/*/index.tsx",
-      "default": "./src/templates/*/index.tsx",
-      "types": "./src/templates/*/index.tsx"
-    },
     "./utilities/*": {
       "import": "./src/utilities/*.ts",
       "require": "./src/utilities/*.ts",
@@ -85,7 +79,7 @@
       "default": "./src/scss/styles.scss"
     },
     "./scss/app.scss": "./src/scss/app.scss",
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./dist/styles.css"
   },
   "files": [
     "dist"
@@ -223,12 +217,6 @@
         "import": "./dist/exports/server/index.js",
         "require": "./dist/exports/server/index.js",
         "types": "./dist/exports/server/index.d.ts"
-      },
-      "./templates/*": {
-        "import": "./dist/templates/*/index.js",
-        "require": "./dist/templates/*/index.js",
-        "default": "./dist/templates/*/index.js",
-        "types": "./dist/templates/*/index.d.ts"
       },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",

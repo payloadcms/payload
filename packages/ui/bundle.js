@@ -21,7 +21,7 @@ const removeCSSImports = {
 // Bundle only the .scss files into a single css file
 await esbuild
   .build({
-    entryPoints: ['src/exports/main.ts'],
+    entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
     outdir: 'dist',
@@ -29,12 +29,12 @@ await esbuild
     plugins: [sassPlugin({ css: 'external' })],
   })
   .then(() => {
-    fs.rename('dist/main.css', 'dist/styles.css', (err) => {
-      if (err) console.error(`Error while renaming main.css: ${err}`)
+    fs.rename('dist/index.css', 'dist/styles.css', (err) => {
+      if (err) console.error(`Error while renaming index.css: ${err}`)
     })
 
-    fs.unlink('dist/main.js', (err) => {
-      if (err) console.error(`Error while deleting main.js: ${err}`)
+    fs.unlink('dist/index.js', (err) => {
+      if (err) console.error(`Error while deleting index.js: ${err}`)
     })
 
     console.log('styles.css bundled successfully')
@@ -46,7 +46,6 @@ const result = await esbuild
   .build({
     entryPoints: {
       client: 'src/exports/client/index.ts',
-      server: 'src/exports/server/index.ts',
     },
     bundle: true,
     platform: 'node',
@@ -62,7 +61,7 @@ const result = await esbuild
     plugins: [removeCSSImports],
   })
   .then((res, err) => {
-    console.log('client.ts and server.ts bundled successfully')
+    console.log('client.ts bundled successfully')
     return res
   })
   .catch(() => process.exit(1))

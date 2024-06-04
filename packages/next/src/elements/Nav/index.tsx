@@ -1,15 +1,16 @@
 import type { ServerProps } from 'payload/config'
 
+import { Logout } from '@payloadcms/ui/client'
 import React from 'react'
 
-import { Logout } from '../Logout/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import './index.scss'
 
 const baseClass = 'nav'
 
-import { WithServerSideProps } from '../WithServerSideProps/index.js'
+import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
+
 import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = ServerProps
@@ -67,10 +68,8 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
         {Array.isArray(BeforeNavLinks) && BeforeNavLinks.map((Component) => Component)}
-
         <DefaultNavClient />
         {Array.isArray(AfterNavLinks) && AfterNavLinks.map((Component) => Component)}
-
         <div className={`${baseClass}__controls`}>
           <Logout />
         </div>

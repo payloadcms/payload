@@ -1,19 +1,22 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
+import {
+  ChevronIcon,
+  NavGroup,
+  useAuth,
+  useConfig,
+  useEntityVisibility,
+  useNav,
+  useTranslation,
+} from '@payloadcms/ui/client'
+import {
+  type EntityToGroup,
+  EntityType,
+  groupNavItems,
+} from '@payloadcms/ui/utilities/groupNavItems'
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
-
-import type { EntityToGroup } from '../../utilities/groupNavItems.js'
-
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
-import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { EntityType, groupNavItems } from '../../utilities/groupNavItems.js'
-import { NavGroup } from '../NavGroup/index.js'
-import { useNav } from './context.js'
 
 const baseClass = 'nav'
 

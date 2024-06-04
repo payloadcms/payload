@@ -1,7 +1,7 @@
 'use client'
+import { useNav } from '@payloadcms/ui/client'
 import React from 'react'
 
-import { useNav } from '../../../elements/Nav/context.js'
 import './index.scss'
 
 export const Wrapper: React.FC<{

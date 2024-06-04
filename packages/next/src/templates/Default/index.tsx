@@ -1,15 +1,11 @@
 import type { ServerProps } from 'payload/config'
 import type { VisibleEntities } from 'payload/types'
 
+import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui/client'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import React from 'react'
 
-import type { NavProps } from '../../elements/Nav/index.js'
-
-import { AppHeader } from '../../elements/AppHeader/index.js'
-import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
-import { DefaultNav } from '../../elements/Nav/index.js'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
+import { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 import './index.scss'

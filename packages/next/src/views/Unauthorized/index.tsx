@@ -1,7 +1,6 @@
 import type { AdminViewComponent } from 'payload/types'
 
-import { Button } from '@payloadcms/ui/client'
-import { Gutter } from '@payloadcms/ui/server'
+import { Button, Gutter } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'
 import React from 'react'
 

@@ -7,6 +7,7 @@ import {
   Button,
   DeleteMany,
   EditMany,
+  Gutter,
   ListControls,
   ListSelection,
   Pagination,
@@ -29,7 +30,6 @@ import {
   useTranslation,
   useWindowInfo,
 } from '@payloadcms/ui/client'
-import { Gutter } from '@payloadcms/ui/server'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
