@@ -12,8 +12,8 @@
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
   "devDependencies": {
-    "@lexical/headless": "0.15.0",
-    "@lexical/markdown": "0.15.0",
+    "@lexical/headless": "0.16.0",
+    "@lexical/markdown": "0.16.0",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
