@@ -331,6 +331,9 @@
         "unspecific": {
           "type": "string"
         },
+        "userEmailAlreadyRegistered": {
+          "type": "string"
+        },
         "userLocked": {
           "type": "string"
         },
@@ -373,6 +376,7 @@
         "unauthorized",
         "unknown",
         "unspecific",
+        "userEmailAlreadyRegistered",
         "unableToDeleteCount",
         "unableToUpdateCount",
         "userLocked",

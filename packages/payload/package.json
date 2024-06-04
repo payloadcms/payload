@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.16.1",
+  "version": "2.19.1",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -208,6 +208,29 @@
     "url-loader": "4.1.1",
     "vite": "^4.4.9",
     "webpack": "^5.78.0"
+  },
+  "resolutions": {
+    "ajv": "8.14.0",
+    "webpack-dev-middleware/**/ajv": "8.14.0",
+    "css-minimizer-webpack-plugin/**/ajv": "8.14.0"
+  },
+  "overrides": {
+    "ajv": "8.14.0",
+    "css-minimizer-webpack-plugin": {
+      "schema-utils": {
+        "ajv": "8.14.0"
+      }
+    }
+  },
+  "pnpm": {
+    "overrides": {
+      "ajv": "8.14.0",
+      "css-minimizer-webpack-plugin": {
+        "schema-utils": {
+          "ajv": "8.14.0"
+        }
+      }
+    }
   },
   "engines": {
     "node": ">=14"

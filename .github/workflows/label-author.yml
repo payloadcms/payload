@@ -1,0 +1,80 @@
+name: label-author
+
+on:
+  pull_request:
+    types: [opened]
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  debug-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: View context attributes
+        uses: actions/github-script@v7
+        with:
+          script: console.log(context)
+
+  label-created-by:
+    name: Label pr/issue on opening
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag with 'created-by'
+        uses: actions/github-script@v7
+        if: github.event.action == 'opened'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const payloadTeamUsernames = [
+              'denolfe',
+              'jmikrut',
+              'DanRibbens',
+              'jacobsfletch',
+              'JarrodMFlesch',
+              'AlessioGr',
+              'JessChowdhury',
+              'kendelljoseph',
+              'PatrikKozak',
+              'tylandavis',
+              'paulpopus',
+            ];
+
+            const type = context.payload.pull_request ? 'pull_request' : 'issue';
+
+            const isTeamMember = payloadTeamUsernames
+              .map(n => n.toLowerCase())
+              .includes(context.payload[type].user.login.toLowerCase());
+
+            if (isTeamMember) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['created-by: Payload team'],
+              });
+              console.log(`Added 'created-by: Payload team' label`);
+              return;
+            }
+
+            const association = context.payload[type].author_association;
+            let label = ''
+            if (association === 'MEMBER' || association === 'OWNER') {
+              label = 'created-by: Payload team';
+            } else if (association === 'CONTRIBUTOR') {
+              label = 'created-by: Contributor';
+            }
+
+            if (!label) return;
+
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [label],
+            });
+            console.log(`Added '${label}' label.`);

@@ -8,6 +8,7 @@ import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useEditDepth } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
+import { useOperation } from '../../utilities/OperationProvider'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 
 const baseClass = 'save-draft'
@@ -31,12 +32,13 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
   const editDepth = useEditDepth()
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     if (disabled) {
       return
     }
 
-    e.preventDefault()
-    e.stopPropagation()
     if (ref?.current) {
       ref.current.click()
     }
@@ -68,11 +70,13 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   } = useConfig()
   const { submit } = useForm()
   const { id, collection, global } = useDocumentInfo()
+  const operation = useOperation()
   const modified = useFormModified()
+
   const { code: locale } = useLocale()
   const { t } = useTranslation('version')
 
-  const canSaveDraft = modified
+  const canSaveDraft = operation === 'update' && modified
 
   const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`

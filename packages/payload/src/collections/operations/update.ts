@@ -157,6 +157,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data: bulkUpdateData,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
