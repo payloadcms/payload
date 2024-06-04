@@ -82,7 +82,7 @@
     "@payloadcms/translations": "workspace:*",
     "@swc-node/core": "^1.13.0",
     "@swc-node/sourcemap-support": "^0.5.0",
-    "ajv": "^8.12.0",
+    "ajv": "8.14.0",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
     "conf": "10.2.0",
