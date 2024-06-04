@@ -78,9 +78,6 @@
       "@payloadcms/ui/client": [
         "./packages/ui/dist/client.js"
       ],
-      "@payloadcms/ui/server": [
-        "./packages/ui/dist/server.js"
-      ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"
       ],

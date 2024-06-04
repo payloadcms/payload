@@ -2,9 +2,10 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
 
-import { DefaultTemplate, HydrateClientUser } from '@payloadcms/ui/client'
+import { HydrateClientUser } from '@payloadcms/ui/client'
 import React, { Fragment } from 'react'
 
+import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
