@@ -1,3 +1,4 @@
+'use client'
 export { ActionsProvider, SetViewActions, useActions } from '../../providers/Actions/index.js'
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider } from '../../providers/ClientFunction/index.js'

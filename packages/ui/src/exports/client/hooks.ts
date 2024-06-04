@@ -1,3 +1,4 @@
+'use client'
 export { useDebounce } from '../../hooks/useDebounce.js'
 export { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 export { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'

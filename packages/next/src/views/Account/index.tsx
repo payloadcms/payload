@@ -6,7 +6,8 @@ import {
   FormQueryParamsProvider,
   HydrateClientUser,
 } from '@payloadcms/ui/client'
-import { DocumentHeader, RenderCustomComponent } from '@payloadcms/ui/server'
+import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
+import { RenderCustomComponent } from '@payloadcms/ui/server'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 

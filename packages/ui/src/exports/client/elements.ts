@@ -1,3 +1,4 @@
+'use client'
 export { Button } from '../../elements/Button/index.js'
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible } from '../../elements/Collapsible/index.js'

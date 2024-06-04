@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
 
 import { HydrateClientUser } from '@payloadcms/ui/client'
-import { DefaultTemplate } from '@payloadcms/ui/server'
+import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
