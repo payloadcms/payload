@@ -1,5 +1,4 @@
-import { eq } from 'drizzle-orm'
-import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import { createRequire } from 'module'
 import prompts from 'prompts'
 
@@ -10,16 +9,16 @@ const require = createRequire(import.meta.url)
 /**
  * Pushes the development schema to the database using Drizzle.
  *
- * @param {PostgresAdapter} db - The PostgresAdapter instance connected to the database.
+ * @param {PostgresAdapter} adapter - The PostgresAdapter instance connected to the database.
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
-export const pushDevSchema = async (db: DrizzleAdapter) => {
+export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   const { pushSchema } = require('drizzle-kit/payload')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
-    db.schema,
-    db.drizzle,
+    adapter.schema,
+    adapter.drizzle,
   )
 
   if (warnings.length) {
@@ -54,30 +53,23 @@ export const pushDevSchema = async (db: DrizzleAdapter) => {
 
   await apply()
 
-  // Migration table def in order to use query using drizzle
-  const migrationsSchema = db.pgSchema.table('payload_migrations', {
-    name: varchar('name'),
-    batch: numeric('batch'),
-    created_at: timestamp('created_at'),
-    updated_at: timestamp('updated_at'),
+  const result = await adapter.execute({
+    drizzle: adapter.drizzle,
+    sql: sql`SELECT * FROM payload_migrations WHERE batch = '-1'`,
   })
 
-  const devPush = await db.drizzle
-    .select()
-    .from(migrationsSchema)
-    .where(eq(migrationsSchema.batch, '-1'))
+  const devPush = result.rows
+  const schema = adapter.schemaName ? `"${adapter.schemaName}".` : ''
 
   if (!devPush.length) {
-    await db.drizzle.insert(migrationsSchema).values({
-      name: 'dev',
-      batch: '-1',
+    await adapter.execute({
+      drizzle: adapter.drizzle,
+      sql: sql`insert into ${schema}payload_migrations (name, batch) values ('dev', '-1')`,
     })
   } else {
-    await db.drizzle
-      .update(migrationsSchema)
-      .set({
-        updated_at: new Date(),
-      })
-      .where(eq(migrationsSchema.batch, '-1'))
+    await adapter.execute({
+      drizzle: adapter.drizzle,
+      sql: sql`update ${schema}payload_migrations set updated_at = ${new Date()} where batch = '-1'`,
+    })
   }
 }
