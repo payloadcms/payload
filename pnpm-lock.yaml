@@ -1363,6 +1363,10 @@ importers:
         version: link:../payload
 
   packages/translations:
+    dependencies:
+      date-fns:
+        specifier: 3.3.1
+        version: 3.3.1
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1376,9 +1380,6 @@ importers:
       '@types/react-dom':
         specifier: npm:types-react-dom@19.0.0-beta.2
         version: /types-react-dom@19.0.0-beta.2
-      date-fns:
-        specifier: 3.3.1
-        version: 3.3.1
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
