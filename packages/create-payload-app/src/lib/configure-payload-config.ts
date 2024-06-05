@@ -46,8 +46,10 @@ export async function configurePayloadConfig(args: {
       if (args.storageAdapter) {
         const storagePackage = storageReplacements[args.storageAdapter]
 
-        // Set version of storage adapter to match payload version
-        packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
+        if (storagePackage?.packageName) {
+          // Set version of storage adapter to match payload version
+          packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
+        }
       }
 
       // Sharp provided by default, only remove if explicitly set to false
@@ -107,16 +109,18 @@ export async function configurePayloadConfig(args: {
     if (args.storageAdapter) {
       const replacement = storageReplacements[args.storageAdapter]
       configLines = replaceInConfigLines({
-        replacement: replacement?.configReplacement,
+        replacement: replacement.configReplacement,
         startMatch: '// storage-adapter-placeholder',
         lines: configLines,
       })
 
-      configLines = replaceInConfigLines({
-        replacement: [replacement.importReplacement],
-        startMatch: '// storage-adapter-import-placeholder',
-        lines: configLines,
-      })
+      if (replacement?.importReplacement) {
+        configLines = replaceInConfigLines({
+          replacement: [replacement.importReplacement],
+          startMatch: '// storage-adapter-import-placeholder',
+          lines: configLines,
+        })
+      }
     }
 
     // Sharp Replacement (provided by default, only remove if explicitly set to false)

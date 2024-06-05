@@ -16,6 +16,7 @@ import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { execSync } from 'child_process'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -90,7 +91,7 @@ async function main() {
       name: 'blank',
       dirname: 'blank',
       db: 'mongodb',
-      storage: 'disk',
+      storage: 'localDisk',
       sharp: true,
     },
     {
@@ -155,6 +156,11 @@ async function main() {
 
     console.log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
   }
+  // TODO: Run prettier manually on the generated files, husky blows up
+  console.log('Running prettier on generated files...')
+  execSync(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
+
+  console.log('Template generation complete!')
 }
 
 async function generateReadme({

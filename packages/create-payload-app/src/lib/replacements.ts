@@ -36,8 +36,8 @@ export const dbReplacements: Record<DbType, DbAdapterReplacement> = {
 
 type StorageAdapterReplacement = {
   configReplacement: string[]
-  importReplacement: string
-  packageName: string
+  importReplacement?: string
+  packageName?: string
 }
 
 const vercelBlobStorageReplacement: StorageAdapterReplacement = {
@@ -60,16 +60,15 @@ const payloadCloudReplacement: StorageAdapterReplacement = {
   packageName: '@payloadcms/plugin-cloud',
 }
 
+// Removes placeholders
 const diskReplacement: StorageAdapterReplacement = {
   configReplacement: [],
-  importReplacement: '',
-  packageName: '',
 }
 
 export const storageReplacements: Record<StorageAdapterType, StorageAdapterReplacement> = {
   payloadCloud: payloadCloudReplacement,
   vercelBlobStorage: vercelBlobStorageReplacement,
-  disk: diskReplacement,
+  localDisk: diskReplacement,
 }
 
 /**

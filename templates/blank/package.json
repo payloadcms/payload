@@ -24,8 +24,7 @@
     "payload": "beta",
     "react": "^19.0.0-rc-f994737d14-20240522",
     "react-dom": "^19.0.0-rc-f994737d14-20240522",
-    "sharp": "0.32.6",
-    "": "beta"
+    "sharp": "0.32.6"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
