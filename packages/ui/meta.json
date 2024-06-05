@@ -344,63 +344,49 @@
       ],
       "format": "esm"
     },
-    "src/exports/client/hooks.ts": {
-      "bytes": 682,
+    "src/graphics/Account/Default/index.tsx": {
+      "bytes": 685,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/graphics/Account/Gravatar/index.tsx": {
+      "bytes": 577,
       "imports": [
+        { "path": "md5", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         {
-          "path": "src/hooks/useDebounce.ts",
+          "path": "src/providers/Auth/index.tsx",
           "kind": "import-statement",
-          "original": "../../hooks/useDebounce.js"
+          "original": "../../../providers/Auth/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/graphics/Account/index.tsx": {
+      "bytes": 742,
+      "imports": [
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Auth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Auth/index.js"
         },
         {
-          "path": "src/hooks/useDebouncedCallback.ts",
+          "path": "src/providers/Config/index.tsx",
           "kind": "import-statement",
-          "original": "../../hooks/useDebouncedCallback.js"
+          "original": "../../providers/Config/index.js"
         },
         {
-          "path": "src/hooks/useDebouncedEffect.ts",
+          "path": "src/graphics/Account/Default/index.tsx",
           "kind": "import-statement",
-          "original": "../../hooks/useDebouncedEffect.js"
+          "original": "./Default/index.js"
         },
         {
-          "path": "src/hooks/useDelay.ts",
+          "path": "src/graphics/Account/Gravatar/index.tsx",
           "kind": "import-statement",
-          "original": "../../hooks/useDelay.js"
-        },
-        {
-          "path": "src/hooks/useDelayedRender.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useDelayedRender.js"
-        },
-        {
-          "path": "src/hooks/useHotkey.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useHotkey.js"
-        },
-        {
-          "path": "src/hooks/useIntersect.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useIntersect.js"
-        },
-        {
-          "path": "src/hooks/usePayloadAPI.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/usePayloadAPI.js"
-        },
-        {
-          "path": "src/hooks/useResize.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useResize.js"
-        },
-        {
-          "path": "src/hooks/useThrottledEffect.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useThrottledEffect.js"
-        },
-        {
-          "path": "src/hooks/useUseAsTitle.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useUseAsTitle.js"
+          "original": "./Gravatar/index.js"
         }
       ],
       "format": "esm"
@@ -439,19 +425,471 @@
       ],
       "format": "esm"
     },
-    "src/providers/ClientFunction/index.tsx": {
-      "bytes": 1980,
+    "src/elements/Hamburger/index.tsx": {
+      "bytes": 1706,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/icons/Chevron/index.tsx",
+          "kind": "import-statement",
+          "original": "../../icons/Chevron/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Localizer/LocalizerLabel/index.tsx": {
+      "bytes": 994,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/icons/Chevron/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../icons/Chevron/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../providers/Translation/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Popup/PopupButtonList/index.tsx": {
+      "bytes": 1865,
+      "imports": [
+        { "path": "next/link.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Popup/PopupTrigger/index.tsx": {
+      "bytes": 1042,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
-    "src/providers/DocumentEvents/index.tsx": {
-      "bytes": 684,
+    "src/elements/Popup/index.tsx": {
+      "bytes": 5759,
+      "imports": [
+        {
+          "path": "src/elements/Popup/PopupButtonList/index.tsx",
+          "kind": "import-statement",
+          "original": "./PopupButtonList/index.js"
+        },
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/hooks/useIntersect.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useIntersect.js"
+        },
+        {
+          "path": "src/elements/Popup/PopupTrigger/index.tsx",
+          "kind": "import-statement",
+          "original": "./PopupTrigger/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Localizer/index.tsx": {
+      "bytes": 2368,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/RouteCache/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/RouteCache/index.js"
+        },
+        {
+          "path": "src/providers/SearchParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/SearchParams/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Popup/index.tsx",
+          "kind": "import-statement",
+          "original": "../Popup/index.js"
+        },
+        {
+          "path": "src/elements/Popup/index.tsx",
+          "kind": "import-statement",
+          "original": "../Popup/index.js"
+        },
+        {
+          "path": "src/elements/Localizer/LocalizerLabel/index.tsx",
+          "kind": "import-statement",
+          "original": "./LocalizerLabel/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Nav/context.tsx": {
+      "bytes": 2865,
+      "imports": [
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "body-scroll-lock", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Preferences/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Preferences/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Nav/NavToggler/index.tsx": {
+      "bytes": 1480,
+      "imports": [
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Preferences/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../providers/Preferences/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Nav/context.tsx",
+          "kind": "import-statement",
+          "original": "../context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/graphics/Icon/index.tsx": {
+      "bytes": 571,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/StepNav/context.tsx": {
+      "bytes": 524,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/StepNav/SetStepNav.tsx": {
+      "bytes": 335,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/StepNav/context.tsx",
+          "kind": "import-statement",
+          "original": "./context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/StepNav/index.tsx": {
+      "bytes": 2367,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/ComponentMap/index.tsx",
+          "kind": "import-statement",
+          "original": "@payloadcms/ui/providers/ComponentMap"
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/graphics/Icon/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Icon/index.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/StepNav/context.tsx",
+          "kind": "import-statement",
+          "original": "./context.js"
+        },
+        {
+          "path": "src/elements/StepNav/SetStepNav.tsx",
+          "kind": "import-statement",
+          "original": "./SetStepNav.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/AppHeader/index.tsx": {
+      "bytes": 3433,
+      "imports": [
+        { "path": "next/link.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/graphics/Account/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Account/index.js"
+        },
+        {
+          "path": "src/providers/Actions/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Actions/index.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Hamburger/index.tsx",
+          "kind": "import-statement",
+          "original": "../Hamburger/index.js"
+        },
+        {
+          "path": "src/elements/Localizer/LocalizerLabel/index.tsx",
+          "kind": "import-statement",
+          "original": "../Localizer/LocalizerLabel/index.js"
+        },
+        {
+          "path": "src/elements/Localizer/index.tsx",
+          "kind": "import-statement",
+          "original": "../Localizer/index.js"
+        },
+        {
+          "path": "src/elements/Nav/NavToggler/index.tsx",
+          "kind": "import-statement",
+          "original": "../Nav/NavToggler/index.js"
+        },
+        {
+          "path": "src/elements/Nav/context.tsx",
+          "kind": "import-statement",
+          "original": "../Nav/context.js"
+        },
+        {
+          "path": "src/elements/StepNav/index.tsx",
+          "kind": "import-statement",
+          "original": "../StepNav/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Card/index.tsx": {
+      "bytes": 1105,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../Button/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/icons/DragHandle/index.tsx": {
+      "bytes": 637,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/Collapsible/provider.tsx": {
+      "bytes": 1062,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/Collapsible/index.tsx": {
+      "bytes": 3879,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-animate-height", "kind": "import-statement", "external": true },
+        {
+          "path": "src/icons/Chevron/index.tsx",
+          "kind": "import-statement",
+          "original": "../../icons/Chevron/index.js"
+        },
+        {
+          "path": "src/icons/DragHandle/index.tsx",
+          "kind": "import-statement",
+          "original": "../../icons/DragHandle/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Collapsible/provider.tsx",
+          "kind": "import-statement",
+          "original": "./provider.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/icons/Copy/index.tsx": {
+      "bytes": 302,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/CopyToClipboard/index.tsx": {
+      "bytes": 1506,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/icons/Copy/index.tsx",
+          "kind": "import-statement",
+          "original": "../../icons/Copy/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Tooltip/index.tsx",
+          "kind": "import-statement",
+          "original": "../Tooltip/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/providers/Selection/index.tsx": {
+      "bytes": 4127,
+      "imports": [
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../Locale/index.js"
+        },
+        {
+          "path": "src/providers/SearchParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../SearchParams/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DraggableSortable/useDraggableSortable/index.tsx": {
+      "bytes": 754,
+      "imports": [{ "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/Pill/index.tsx": {
+      "bytes": 3204,
+      "imports": [
+        { "path": "next/link.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/DraggableSortable/useDraggableSortable/index.tsx",
+          "kind": "import-statement",
+          "original": "../DraggableSortable/useDraggableSortable/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DeleteMany/index.tsx": {
+      "bytes": 4214,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Auth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Auth/index.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/RouteCache/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/RouteCache/index.js"
+        },
+        {
+          "path": "src/providers/SearchParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/SearchParams/index.js"
+        },
+        {
+          "path": "src/providers/Selection/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Selection/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/utilities/api.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/api.js"
+        },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../Button/index.js"
+        },
+        {
+          "path": "src/elements/Pill/index.tsx",
+          "kind": "import-statement",
+          "original": "../Pill/index.js"
+        }
+      ],
       "format": "esm"
     },
     "src/utilities/formatDate.ts": {
       "bytes": 677,
       "imports": [{ "path": "date-fns", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/forms/Form/context.ts": {
+      "bytes": 1999,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "use-context-selector", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/providers/DocumentEvents/index.tsx": {
+      "bytes": 684,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/utilities/formatDocTitle.ts": {
@@ -533,70 +971,677 @@
       ],
       "format": "esm"
     },
+    "src/elements/Autosave/index.tsx": {
+      "bytes": 4767,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/hooks/useDebounce.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useDebounce.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentEvents/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentEvents/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/utilities/formatDate.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/formatDate.js"
+        },
+        {
+          "path": "src/utilities/reduceFieldsToValues.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/reduceFieldsToValues.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Translation/index.tsx": {
+      "bytes": 1536,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/DeleteDocument/index.tsx": {
+      "bytes": 4637,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/utilities/api.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/api.js"
+        },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../Button/index.js"
+        },
+        {
+          "path": "src/elements/Popup/index.tsx",
+          "kind": "import-statement",
+          "original": "../Popup/index.js"
+        },
+        {
+          "path": "src/elements/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../Translation/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DuplicateDocument/index.tsx": {
+      "bytes": 3930,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/utilities/api.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/api.js"
+        },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../Button/index.js"
+        },
+        {
+          "path": "src/elements/Popup/index.tsx",
+          "kind": "import-statement",
+          "original": "../Popup/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Gutter/index.tsx": {
+      "bytes": 960,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/PreviewButton/usePreviewURL.tsx": {
+      "bytes": 2298,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/PreviewButton/index.tsx": {
+      "bytes": 757,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../Button/index.js"
+        },
+        {
+          "path": "src/elements/PreviewButton/usePreviewURL.tsx",
+          "kind": "import-statement",
+          "original": "./usePreviewURL.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/Submit/index.tsx": {
+      "bytes": 853,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/Button/index.js"
+        },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../Form/context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/PublishButton/index.tsx": {
+      "bytes": 1409,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/forms/Submit/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/Submit/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/providers/EditDepth/index.tsx": {
       "bytes": 392,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
-    "src/providers/EntityVisibility/index.tsx": {
-      "bytes": 1432,
+    "src/providers/Operation/index.tsx": {
+      "bytes": 481,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
-    "src/elements/Banner/index.tsx": {
-      "bytes": 1628,
-      "imports": [
-        { "path": "next/link.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true }
-      ],
-      "format": "esm"
-    },
-    "src/elements/DraggableSortable/useDraggableSortable/index.tsx": {
-      "bytes": 754,
-      "imports": [{ "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/DraggableSortable/DraggableSortableItem/index.tsx": {
-      "bytes": 803,
+    "src/elements/SaveButton/index.tsx": {
+      "bytes": 1510,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
-          "path": "src/elements/DraggableSortable/useDraggableSortable/index.tsx",
+          "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
-          "original": "../useDraggableSortable/index.js"
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/forms/Submit/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/Submit/index.js"
+        },
+        {
+          "path": "src/hooks/useHotkey.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useHotkey.js"
+        },
+        {
+          "path": "src/providers/EditDepth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EditDepth/index.js"
+        },
+        {
+          "path": "src/providers/Operation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Operation/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
         }
       ],
       "format": "esm"
     },
-    "src/elements/DraggableSortable/index.tsx": {
-      "bytes": 1546,
+    "src/elements/SaveDraftButton/index.tsx": {
+      "bytes": 2571,
       "imports": [
-        { "path": "@dnd-kit/core", "kind": "import-statement", "external": true },
-        { "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/forms/Submit/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/Submit/index.js"
+        },
+        {
+          "path": "src/hooks/useHotkey.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useHotkey.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/EditDepth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EditDepth/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Operation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Operation/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        }
       ],
       "format": "esm"
     },
-    "src/elements/ErrorPill/index.tsx": {
-      "bytes": 865,
+    "src/elements/Status/index.tsx": {
+      "bytes": 6477,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/utilities/api.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/api.js"
+        },
+        {
+          "path": "src/elements/Button/index.tsx",
+          "kind": "import-statement",
+          "original": "../Button/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DocumentControls/index.tsx": {
+      "bytes": 8780,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/ComponentMap/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/ComponentMap/index.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/utilities/formatDate.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/formatDate.js"
+        },
+        {
+          "path": "src/elements/Autosave/index.tsx",
+          "kind": "import-statement",
+          "original": "../Autosave/index.js"
+        },
+        {
+          "path": "src/elements/DeleteDocument/index.tsx",
+          "kind": "import-statement",
+          "original": "../DeleteDocument/index.js"
+        },
+        {
+          "path": "src/elements/DuplicateDocument/index.tsx",
+          "kind": "import-statement",
+          "original": "../DuplicateDocument/index.js"
+        },
+        {
+          "path": "src/elements/Gutter/index.tsx",
+          "kind": "import-statement",
+          "original": "../Gutter/index.js"
+        },
+        {
+          "path": "src/elements/Popup/index.tsx",
+          "kind": "import-statement",
+          "original": "../Popup/index.js"
+        },
+        {
+          "path": "src/elements/PreviewButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../PreviewButton/index.js"
+        },
+        {
+          "path": "src/elements/PublishButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../PublishButton/index.js"
+        },
+        {
+          "path": "src/elements/SaveButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../SaveButton/index.js"
+        },
+        {
+          "path": "src/elements/SaveDraftButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../SaveDraftButton/index.js"
+        },
+        {
+          "path": "src/elements/Status/index.tsx",
+          "kind": "import-statement",
+          "original": "../Status/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/Relationship/AddNew/useRelatedCollections.ts": {
+      "bytes": 626,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../providers/Config/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Drawer/useDrawerSlug.tsx": {
+      "bytes": 358,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/EditDepth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EditDepth/index.js"
+        },
+        {
+          "path": "src/elements/Drawer/index.tsx",
+          "kind": "import-statement",
+          "original": "./index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Drawer/index.tsx": {
+      "bytes": 3860,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/icons/X/index.tsx",
+          "kind": "import-statement",
+          "original": "../../icons/X/index.js"
+        },
+        {
+          "path": "src/providers/EditDepth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EditDepth/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Gutter/index.tsx",
+          "kind": "import-statement",
+          "original": "../Gutter/index.js"
+        },
+        {
+          "path": "src/elements/Drawer/useDrawerSlug.tsx",
+          "kind": "import-statement",
+          "original": "./useDrawerSlug.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/providers/FormQueryParams/index.tsx": {
+      "bytes": 1823,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../Locale/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/IDLabel/index.tsx": {
+      "bytes": 334,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/elements/RenderTitle/index.tsx": {
+      "bytes": 1236,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/elements/IDLabel/index.tsx",
+          "kind": "import-statement",
+          "original": "../IDLabel/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DocumentDrawer/DrawerContent.tsx": {
+      "bytes": 4116,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/fields/Relationship/AddNew/useRelatedCollections.ts",
+          "kind": "import-statement",
+          "original": "../../fields/Relationship/AddNew/useRelatedCollections.js"
+        },
+        {
+          "path": "src/icons/X/index.tsx",
+          "kind": "import-statement",
+          "original": "../../icons/X/index.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/ComponentMap/index.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/FormQueryParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/FormQueryParams/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Gutter/index.tsx",
+          "kind": "import-statement",
+          "original": "../Gutter/index.js"
+        },
+        {
+          "path": "src/elements/IDLabel/index.tsx",
+          "kind": "import-statement",
+          "original": "../IDLabel/index.js"
+        },
+        {
+          "path": "src/elements/RenderTitle/index.tsx",
+          "kind": "import-statement",
+          "original": "../RenderTitle/index.js"
+        },
+        {
+          "path": "src/elements/DocumentDrawer/index.tsx",
+          "kind": "import-statement",
+          "original": "./index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DocumentDrawer/index.tsx": {
+      "bytes": 3610,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/fields/Relationship/AddNew/useRelatedCollections.ts",
+          "kind": "import-statement",
+          "original": "../../fields/Relationship/AddNew/useRelatedCollections.js"
+        },
+        {
+          "path": "src/providers/EditDepth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EditDepth/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/elements/Drawer/index.tsx",
+          "kind": "import-statement",
+          "original": "../Drawer/index.js"
+        },
+        {
+          "path": "src/elements/DocumentDrawer/DrawerContent.tsx",
+          "kind": "import-statement",
+          "original": "./DrawerContent.js"
+        }
+      ],
       "format": "esm"
     },
     "src/forms/FieldPropsProvider/index.tsx": {
       "bytes": 1553,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/forms/Form/context.ts": {
-      "bytes": 1999,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "use-context-selector", "kind": "import-statement", "external": true }
-      ],
-      "format": "esm"
-    },
-    "src/providers/Operation/index.tsx": {
-      "bytes": 481,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
@@ -675,6 +1720,62 @@
           "original": "./WatchCondition.js"
         }
       ],
+      "format": "esm"
+    },
+    "src/fields/HiddenInput/index.tsx": {
+      "bytes": 1472,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/FieldPropsProvider/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/FieldPropsProvider/index.js"
+        },
+        {
+          "path": "src/forms/useField/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/useField/index.js"
+        },
+        {
+          "path": "src/forms/withCondition/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/withCondition/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Banner/index.tsx": {
+      "bytes": 1628,
+      "imports": [
+        { "path": "next/link.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DraggableSortable/DraggableSortableItem/index.tsx": {
+      "bytes": 803,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/DraggableSortable/useDraggableSortable/index.tsx",
+          "kind": "import-statement",
+          "original": "../useDraggableSortable/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/DraggableSortable/index.tsx": {
+      "bytes": 1546,
+      "imports": [
+        { "path": "@dnd-kit/core", "kind": "import-statement", "external": true },
+        { "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/elements/ErrorPill/index.tsx": {
+      "bytes": 865,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/utilities/generateFieldID.ts": { "bytes": 197, "imports": [], "format": "esm" },
@@ -879,50 +1980,9 @@
       "format": "esm"
     },
     "src/utilities/scrollToID.ts": { "bytes": 255, "imports": [], "format": "esm" },
-    "src/icons/Copy/index.tsx": {
-      "bytes": 302,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
     "src/icons/More/index.tsx": {
       "bytes": 447,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/Popup/PopupButtonList/index.tsx": {
-      "bytes": 1865,
-      "imports": [
-        { "path": "next/link.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Popup/PopupTrigger/index.tsx": {
-      "bytes": 1042,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/Popup/index.tsx": {
-      "bytes": 5759,
-      "imports": [
-        {
-          "path": "src/elements/Popup/PopupButtonList/index.tsx",
-          "kind": "import-statement",
-          "original": "./PopupButtonList/index.js"
-        },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/hooks/useIntersect.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useIntersect.js"
-        },
-        {
-          "path": "src/elements/Popup/PopupTrigger/index.tsx",
-          "kind": "import-statement",
-          "original": "./PopupTrigger/index.js"
-        }
-      ],
       "format": "esm"
     },
     "src/elements/ArrayAction/index.tsx": {
@@ -968,115 +2028,6 @@
           "path": "src/elements/Popup/index.tsx",
           "kind": "import-statement",
           "original": "../Popup/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/icons/DragHandle/index.tsx": {
-      "bytes": 637,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/Collapsible/provider.tsx": {
-      "bytes": 1062,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/Collapsible/index.tsx": {
-      "bytes": 3879,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-animate-height", "kind": "import-statement", "external": true },
-        {
-          "path": "src/icons/Chevron/index.tsx",
-          "kind": "import-statement",
-          "original": "../../icons/Chevron/index.js"
-        },
-        {
-          "path": "src/icons/DragHandle/index.tsx",
-          "kind": "import-statement",
-          "original": "../../icons/DragHandle/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Collapsible/provider.tsx",
-          "kind": "import-statement",
-          "original": "./provider.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/fields/HiddenInput/index.tsx": {
-      "bytes": 1472,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/FieldPropsProvider/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/FieldPropsProvider/index.js"
-        },
-        {
-          "path": "src/forms/useField/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/useField/index.js"
-        },
-        {
-          "path": "src/forms/withCondition/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/withCondition/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/RenderFields/RenderField.tsx": {
-      "bytes": 2736,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/fields/HiddenInput/index.tsx",
-          "kind": "import-statement",
-          "original": "../../fields/HiddenInput/index.js"
-        },
-        {
-          "path": "src/providers/FieldComponents/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/FieldComponents/index.js"
-        },
-        {
-          "path": "src/providers/Operation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Operation/index.js"
-        },
-        {
-          "path": "src/forms/FieldPropsProvider/index.tsx",
-          "kind": "import-statement",
-          "original": "../FieldPropsProvider/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/RenderFields/index.tsx": {
-      "bytes": 2838,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/hooks/useIntersect.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useIntersect.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/forms/RenderFields/RenderField.tsx",
-          "kind": "import-statement",
-          "original": "./RenderField.js"
         }
       ],
       "format": "esm"
@@ -1253,74 +2204,6 @@
           "path": "src/fields/Array/ArrayRow.tsx",
           "kind": "import-statement",
           "original": "./ArrayRow.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Gutter/index.tsx": {
-      "bytes": 960,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/Drawer/useDrawerSlug.tsx": {
-      "bytes": 358,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/EditDepth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EditDepth/index.js"
-        },
-        {
-          "path": "src/elements/Drawer/index.tsx",
-          "kind": "import-statement",
-          "original": "./index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Drawer/index.tsx": {
-      "bytes": 3860,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/icons/X/index.tsx",
-          "kind": "import-statement",
-          "original": "../../icons/X/index.js"
-        },
-        {
-          "path": "src/providers/EditDepth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EditDepth/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Gutter/index.tsx",
-          "kind": "import-statement",
-          "original": "../Gutter/index.js"
-        },
-        {
-          "path": "src/elements/Drawer/useDrawerSlug.tsx",
-          "kind": "import-statement",
-          "original": "./useDrawerSlug.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Pill/index.tsx": {
-      "bytes": 3204,
-      "imports": [
-        { "path": "next/link.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/elements/DraggableSortable/useDraggableSortable/index.tsx",
-          "kind": "import-statement",
-          "original": "../DraggableSortable/useDraggableSortable/index.js"
         }
       ],
       "format": "esm"
@@ -2537,156 +3420,6 @@
       ],
       "format": "esm"
     },
-    "src/fields/Relationship/AddNew/useRelatedCollections.ts": {
-      "bytes": 626,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../providers/Config/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/providers/FormQueryParams/index.tsx": {
-      "bytes": 1823,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../Locale/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/IDLabel/index.tsx": {
-      "bytes": 334,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/RenderTitle/index.tsx": {
-      "bytes": 1236,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/elements/IDLabel/index.tsx",
-          "kind": "import-statement",
-          "original": "../IDLabel/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/DocumentDrawer/DrawerContent.tsx": {
-      "bytes": 4116,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/fields/Relationship/AddNew/useRelatedCollections.ts",
-          "kind": "import-statement",
-          "original": "../../fields/Relationship/AddNew/useRelatedCollections.js"
-        },
-        {
-          "path": "src/icons/X/index.tsx",
-          "kind": "import-statement",
-          "original": "../../icons/X/index.js"
-        },
-        {
-          "path": "src/providers/ComponentMap/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ComponentMap/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/FormQueryParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/FormQueryParams/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Gutter/index.tsx",
-          "kind": "import-statement",
-          "original": "../Gutter/index.js"
-        },
-        {
-          "path": "src/elements/IDLabel/index.tsx",
-          "kind": "import-statement",
-          "original": "../IDLabel/index.js"
-        },
-        {
-          "path": "src/elements/RenderTitle/index.tsx",
-          "kind": "import-statement",
-          "original": "../RenderTitle/index.js"
-        },
-        {
-          "path": "src/elements/DocumentDrawer/index.tsx",
-          "kind": "import-statement",
-          "original": "./index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/DocumentDrawer/index.tsx": {
-      "bytes": 3610,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/fields/Relationship/AddNew/useRelatedCollections.ts",
-          "kind": "import-statement",
-          "original": "../../fields/Relationship/AddNew/useRelatedCollections.js"
-        },
-        {
-          "path": "src/providers/EditDepth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EditDepth/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Drawer/index.tsx",
-          "kind": "import-statement",
-          "original": "../Drawer/index.js"
-        },
-        {
-          "path": "src/elements/DocumentDrawer/DrawerContent.tsx",
-          "kind": "import-statement",
-          "original": "./DrawerContent.js"
-        }
-      ],
-      "format": "esm"
-    },
     "src/fields/Relationship/AddNew/index.tsx": {
       "bytes": 6898,
       "imports": [
@@ -3325,28 +4058,6 @@
       ],
       "format": "esm"
     },
-    "src/elements/CopyToClipboard/index.tsx": {
-      "bytes": 1506,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/icons/Copy/index.tsx",
-          "kind": "import-statement",
-          "original": "../../icons/Copy/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Tooltip/index.tsx",
-          "kind": "import-statement",
-          "original": "../Tooltip/index.js"
-        }
-      ],
-      "format": "esm"
-    },
     "src/elements/FileDetails/FileMeta/index.tsx": {
       "bytes": 1998,
       "imports": [
@@ -3593,24 +4304,6 @@
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/providers/Selection/index.tsx": {
-      "bytes": 4127,
-      "imports": [
-        { "path": "qs", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../Locale/index.js"
-        },
-        {
-          "path": "src/providers/SearchParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../SearchParams/index.js"
         }
       ],
       "format": "esm"
@@ -4410,255 +5103,14 @@
       ],
       "format": "esm"
     },
-    "src/providers/Params/index.tsx": {
-      "bytes": 712,
-      "imports": [
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Nav/context.tsx": {
-      "bytes": 2865,
-      "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "body-scroll-lock", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Preferences/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Preferences/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/graphics/Icon/index.tsx": {
-      "bytes": 571,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/StepNav/context.tsx": {
-      "bytes": 524,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/StepNav/SetStepNav.tsx": {
-      "bytes": 335,
+    "src/forms/RenderFields/RenderField.tsx": {
+      "bytes": 2736,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
-          "path": "src/elements/StepNav/context.tsx",
+          "path": "src/fields/HiddenInput/index.tsx",
           "kind": "import-statement",
-          "original": "./context.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/StepNav/index.tsx": {
-      "bytes": 2367,
-      "imports": [
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/ComponentMap/index.tsx",
-          "kind": "import-statement",
-          "original": "@payloadcms/ui/providers/ComponentMap"
-        },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/graphics/Icon/index.tsx",
-          "kind": "import-statement",
-          "original": "../../graphics/Icon/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/StepNav/context.tsx",
-          "kind": "import-statement",
-          "original": "./context.js"
-        },
-        {
-          "path": "src/elements/StepNav/SetStepNav.tsx",
-          "kind": "import-statement",
-          "original": "./SetStepNav.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/providers/Root/index.tsx": {
-      "bytes": 5303,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/elements/LoadingOverlay/index.tsx",
-          "kind": "import-statement",
-          "original": "../../elements/LoadingOverlay/index.js"
-        },
-        {
-          "path": "src/elements/Nav/context.tsx",
-          "kind": "import-statement",
-          "original": "../../elements/Nav/context.js"
-        },
-        {
-          "path": "src/elements/StayLoggedIn/index.tsx",
-          "kind": "import-statement",
-          "original": "../../elements/StayLoggedIn/index.js"
-        },
-        {
-          "path": "src/elements/StepNav/index.tsx",
-          "kind": "import-statement",
-          "original": "../../elements/StepNav/index.js"
-        },
-        {
-          "path": "src/providers/Actions/index.tsx",
-          "kind": "import-statement",
-          "original": "../Actions/index.js"
-        },
-        {
-          "path": "src/providers/Auth/index.tsx",
-          "kind": "import-statement",
-          "original": "../Auth/index.js"
-        },
-        {
-          "path": "src/providers/ClientFunction/index.tsx",
-          "kind": "import-statement",
-          "original": "../ClientFunction/index.js"
-        },
-        {
-          "path": "src/providers/ComponentMap/index.tsx",
-          "kind": "import-statement",
-          "original": "../ComponentMap/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentEvents/index.tsx",
-          "kind": "import-statement",
-          "original": "../DocumentEvents/index.js"
-        },
-        {
-          "path": "src/providers/FieldComponents/index.tsx",
-          "kind": "import-statement",
-          "original": "../FieldComponents/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../Locale/index.js"
-        },
-        {
-          "path": "src/providers/Params/index.tsx",
-          "kind": "import-statement",
-          "original": "../Params/index.js"
-        },
-        {
-          "path": "src/providers/Preferences/index.tsx",
-          "kind": "import-statement",
-          "original": "../Preferences/index.js"
-        },
-        {
-          "path": "src/providers/RouteCache/index.tsx",
-          "kind": "import-statement",
-          "original": "../RouteCache/index.js"
-        },
-        {
-          "path": "src/providers/SearchParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../SearchParams/index.js"
-        },
-        {
-          "path": "src/providers/Theme/index.tsx",
-          "kind": "import-statement",
-          "original": "../Theme/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/providers/ScrollInfo/index.tsx": {
-      "bytes": 405,
-      "imports": [
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true }
-      ],
-      "format": "esm"
-    },
-    "src/providers/WindowInfo/index.tsx": {
-      "bytes": 405,
-      "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true }
-      ],
-      "format": "esm"
-    },
-    "src/exports/client/providers.ts": {
-      "bytes": 2451,
-      "imports": [
-        {
-          "path": "src/providers/Actions/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Actions/index.js"
-        },
-        {
-          "path": "src/providers/Auth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Auth/index.js"
-        },
-        {
-          "path": "src/providers/ClientFunction/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ClientFunction/index.js"
-        },
-        {
-          "path": "src/providers/ClientFunction/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ClientFunction/index.js"
-        },
-        {
-          "path": "src/providers/ComponentMap/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ComponentMap/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentEvents/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentEvents/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/EditDepth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EditDepth/index.js"
-        },
-        {
-          "path": "src/providers/EntityVisibility/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EntityVisibility/index.js"
+          "original": "../../fields/HiddenInput/index.js"
         },
         {
           "path": "src/providers/FieldComponents/index.tsx",
@@ -4666,69 +5118,26 @@
           "original": "../../providers/FieldComponents/index.js"
         },
         {
-          "path": "src/providers/FormQueryParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/FormQueryParams/index.js"
-        },
-        {
-          "path": "src/providers/ListInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ListInfo/index.js"
-        },
-        {
-          "path": "src/providers/ListQuery/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ListQuery/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
           "path": "src/providers/Operation/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Operation/index.js"
         },
         {
-          "path": "src/providers/Params/index.tsx",
+          "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
-          "original": "../../providers/Params/index.js"
-        },
+          "original": "../FieldPropsProvider/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/RenderFields/index.tsx": {
+      "bytes": 2838,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
         {
-          "path": "src/providers/Preferences/index.tsx",
+          "path": "src/hooks/useIntersect.ts",
           "kind": "import-statement",
-          "original": "../../providers/Preferences/index.js"
-        },
-        {
-          "path": "src/providers/Root/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Root/index.js"
-        },
-        {
-          "path": "src/providers/RouteCache/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/RouteCache/index.js"
-        },
-        {
-          "path": "src/providers/ScrollInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ScrollInfo/index.js"
-        },
-        {
-          "path": "src/providers/SearchParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/SearchParams/index.js"
-        },
-        {
-          "path": "src/providers/Selection/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Selection/index.js"
-        },
-        {
-          "path": "src/providers/Theme/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Theme/index.js"
+          "original": "../../hooks/useIntersect.js"
         },
         {
           "path": "src/providers/Translation/index.tsx",
@@ -4736,748 +5145,9 @@
           "original": "../../providers/Translation/index.js"
         },
         {
-          "path": "src/providers/WindowInfo/index.tsx",
+          "path": "src/forms/RenderFields/RenderField.tsx",
           "kind": "import-statement",
-          "original": "../../providers/WindowInfo/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/graphics/Account/Default/index.tsx": {
-      "bytes": 685,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/graphics/Account/Gravatar/index.tsx": {
-      "bytes": 577,
-      "imports": [
-        { "path": "md5", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Auth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../providers/Auth/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/graphics/Account/index.tsx": {
-      "bytes": 742,
-      "imports": [
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Auth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Auth/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/graphics/Account/Default/index.tsx",
-          "kind": "import-statement",
-          "original": "./Default/index.js"
-        },
-        {
-          "path": "src/graphics/Account/Gravatar/index.tsx",
-          "kind": "import-statement",
-          "original": "./Gravatar/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Hamburger/index.tsx": {
-      "bytes": 1706,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/icons/Chevron/index.tsx",
-          "kind": "import-statement",
-          "original": "../../icons/Chevron/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Localizer/LocalizerLabel/index.tsx": {
-      "bytes": 994,
-      "imports": [
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/icons/Chevron/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../icons/Chevron/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Localizer/index.tsx": {
-      "bytes": 2368,
-      "imports": [
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/RouteCache/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/RouteCache/index.js"
-        },
-        {
-          "path": "src/providers/SearchParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/SearchParams/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Popup/index.tsx",
-          "kind": "import-statement",
-          "original": "../Popup/index.js"
-        },
-        {
-          "path": "src/elements/Popup/index.tsx",
-          "kind": "import-statement",
-          "original": "../Popup/index.js"
-        },
-        {
-          "path": "src/elements/Localizer/LocalizerLabel/index.tsx",
-          "kind": "import-statement",
-          "original": "./LocalizerLabel/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Nav/NavToggler/index.tsx": {
-      "bytes": 1480,
-      "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Preferences/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../providers/Preferences/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Nav/context.tsx",
-          "kind": "import-statement",
-          "original": "../context.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/AppHeader/index.tsx": {
-      "bytes": 3433,
-      "imports": [
-        { "path": "next/link.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/graphics/Account/index.tsx",
-          "kind": "import-statement",
-          "original": "../../graphics/Account/index.js"
-        },
-        {
-          "path": "src/providers/Actions/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Actions/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/elements/Hamburger/index.tsx",
-          "kind": "import-statement",
-          "original": "../Hamburger/index.js"
-        },
-        {
-          "path": "src/elements/Localizer/LocalizerLabel/index.tsx",
-          "kind": "import-statement",
-          "original": "../Localizer/LocalizerLabel/index.js"
-        },
-        {
-          "path": "src/elements/Localizer/index.tsx",
-          "kind": "import-statement",
-          "original": "../Localizer/index.js"
-        },
-        {
-          "path": "src/elements/Nav/NavToggler/index.tsx",
-          "kind": "import-statement",
-          "original": "../Nav/NavToggler/index.js"
-        },
-        {
-          "path": "src/elements/Nav/context.tsx",
-          "kind": "import-statement",
-          "original": "../Nav/context.js"
-        },
-        {
-          "path": "src/elements/StepNav/index.tsx",
-          "kind": "import-statement",
-          "original": "../StepNav/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Card/index.tsx": {
-      "bytes": 1105,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../Button/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/DeleteMany/index.tsx": {
-      "bytes": 4214,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Auth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Auth/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/RouteCache/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/RouteCache/index.js"
-        },
-        {
-          "path": "src/providers/SearchParams/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/SearchParams/index.js"
-        },
-        {
-          "path": "src/providers/Selection/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Selection/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/utilities/api.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/api.js"
-        },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../Button/index.js"
-        },
-        {
-          "path": "src/elements/Pill/index.tsx",
-          "kind": "import-statement",
-          "original": "../Pill/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Autosave/index.tsx": {
-      "bytes": 4767,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/hooks/useDebounce.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useDebounce.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentEvents/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentEvents/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/utilities/formatDate.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/formatDate.js"
-        },
-        {
-          "path": "src/utilities/reduceFieldsToValues.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/reduceFieldsToValues.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Translation/index.tsx": {
-      "bytes": 1536,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/elements/DeleteDocument/index.tsx": {
-      "bytes": 4637,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/utilities/api.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/api.js"
-        },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../Button/index.js"
-        },
-        {
-          "path": "src/elements/Popup/index.tsx",
-          "kind": "import-statement",
-          "original": "../Popup/index.js"
-        },
-        {
-          "path": "src/elements/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/DuplicateDocument/index.tsx": {
-      "bytes": 3930,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/utilities/api.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/api.js"
-        },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../Button/index.js"
-        },
-        {
-          "path": "src/elements/Popup/index.tsx",
-          "kind": "import-statement",
-          "original": "../Popup/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/PreviewButton/usePreviewURL.tsx": {
-      "bytes": 2298,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/PreviewButton/index.tsx": {
-      "bytes": 757,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../Button/index.js"
-        },
-        {
-          "path": "src/elements/PreviewButton/usePreviewURL.tsx",
-          "kind": "import-statement",
-          "original": "./usePreviewURL.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/Submit/index.tsx": {
-      "bytes": 853,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../../elements/Button/index.js"
-        },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../Form/context.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/PublishButton/index.tsx": {
-      "bytes": 1409,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/forms/Submit/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/Submit/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/SaveButton/index.tsx": {
-      "bytes": 1510,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/forms/Submit/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/Submit/index.js"
-        },
-        {
-          "path": "src/hooks/useHotkey.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useHotkey.js"
-        },
-        {
-          "path": "src/providers/EditDepth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EditDepth/index.js"
-        },
-        {
-          "path": "src/providers/Operation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Operation/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/SaveDraftButton/index.tsx": {
-      "bytes": 2571,
-      "imports": [
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/forms/Submit/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/Submit/index.js"
-        },
-        {
-          "path": "src/hooks/useHotkey.ts",
-          "kind": "import-statement",
-          "original": "../../hooks/useHotkey.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/EditDepth/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/EditDepth/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Operation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Operation/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/Status/index.tsx": {
-      "bytes": 6477,
-      "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/DocumentInfo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/DocumentInfo/index.js"
-        },
-        {
-          "path": "src/providers/Locale/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Locale/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/utilities/api.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/api.js"
-        },
-        {
-          "path": "src/elements/Button/index.tsx",
-          "kind": "import-statement",
-          "original": "../Button/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/elements/DocumentControls/index.tsx": {
-      "bytes": 8780,
-      "imports": [
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        {
-          "path": "src/providers/ComponentMap/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/ComponentMap/index.js"
-        },
-        {
-          "path": "src/providers/Config/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Config/index.js"
-        },
-        {
-          "path": "src/providers/Translation/index.tsx",
-          "kind": "import-statement",
-          "original": "../../providers/Translation/index.js"
-        },
-        {
-          "path": "src/utilities/formatDate.ts",
-          "kind": "import-statement",
-          "original": "../../utilities/formatDate.js"
-        },
-        {
-          "path": "src/elements/Autosave/index.tsx",
-          "kind": "import-statement",
-          "original": "../Autosave/index.js"
-        },
-        {
-          "path": "src/elements/DeleteDocument/index.tsx",
-          "kind": "import-statement",
-          "original": "../DeleteDocument/index.js"
-        },
-        {
-          "path": "src/elements/DuplicateDocument/index.tsx",
-          "kind": "import-statement",
-          "original": "../DuplicateDocument/index.js"
-        },
-        {
-          "path": "src/elements/Gutter/index.tsx",
-          "kind": "import-statement",
-          "original": "../Gutter/index.js"
-        },
-        {
-          "path": "src/elements/Popup/index.tsx",
-          "kind": "import-statement",
-          "original": "../Popup/index.js"
-        },
-        {
-          "path": "src/elements/PreviewButton/index.tsx",
-          "kind": "import-statement",
-          "original": "../PreviewButton/index.js"
-        },
-        {
-          "path": "src/elements/PublishButton/index.tsx",
-          "kind": "import-statement",
-          "original": "../PublishButton/index.js"
-        },
-        {
-          "path": "src/elements/SaveButton/index.tsx",
-          "kind": "import-statement",
-          "original": "../SaveButton/index.js"
-        },
-        {
-          "path": "src/elements/SaveDraftButton/index.tsx",
-          "kind": "import-statement",
-          "original": "../SaveDraftButton/index.js"
-        },
-        {
-          "path": "src/elements/Status/index.tsx",
-          "kind": "import-statement",
-          "original": "../Status/index.js"
+          "original": "./RenderField.js"
         }
       ],
       "format": "esm"
@@ -6501,9 +6171,303 @@
       ],
       "format": "esm"
     },
-    "src/exports/client/elements.ts": {
-      "bytes": 3770,
+    "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
+      "bytes": 3463,
       "imports": [
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts",
+          "kind": "import-statement",
+          "original": "./iterateFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts": {
+      "bytes": 677,
+      "imports": [
+        {
+          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts",
+          "kind": "import-statement",
+          "original": "./promise.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts": {
+      "bytes": 536,
+      "imports": [
+        {
+          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts",
+          "kind": "import-statement",
+          "original": "./iterateFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts": {
+      "bytes": 1000,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/forms/buildStateFromSchema/addFieldStatePromise.ts": {
+      "bytes": 16647,
+      "imports": [
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts",
+          "kind": "import-statement",
+          "original": "./getFilterOptionsQuery.js"
+        },
+        {
+          "path": "src/forms/buildStateFromSchema/iterateFields.ts",
+          "kind": "import-statement",
+          "original": "./iterateFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/buildStateFromSchema/iterateFields.ts": {
+      "bytes": 2973,
+      "imports": [
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        {
+          "path": "src/forms/buildStateFromSchema/addFieldStatePromise.ts",
+          "kind": "import-statement",
+          "original": "./addFieldStatePromise.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/forms/buildStateFromSchema/index.tsx": {
+      "bytes": 1465,
+      "imports": [
+        {
+          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts",
+          "kind": "import-statement",
+          "original": "./calculateDefaultValues/index.js"
+        },
+        {
+          "path": "src/forms/buildStateFromSchema/iterateFields.ts",
+          "kind": "import-statement",
+          "original": "./iterateFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/icons/CloseMenu/index.tsx": {
+      "bytes": 524,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/icons/CodeBlock/index.tsx": {
+      "bytes": 617,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/icons/Menu/index.tsx": {
+      "bytes": 439,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/icons/MinimizeMaximize/index.tsx": {
+      "bytes": 1131,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/ClientFunction/index.tsx": {
+      "bytes": 1980,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/EntityVisibility/index.tsx": {
+      "bytes": 1432,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/Params/index.tsx": {
+      "bytes": 712,
+      "imports": [
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/providers/Root/index.tsx": {
+      "bytes": 5303,
+      "imports": [
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/LoadingOverlay/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/LoadingOverlay/index.js"
+        },
+        {
+          "path": "src/elements/Nav/context.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/Nav/context.js"
+        },
+        {
+          "path": "src/elements/StayLoggedIn/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/StayLoggedIn/index.js"
+        },
+        {
+          "path": "src/elements/StepNav/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/StepNav/index.js"
+        },
+        {
+          "path": "src/providers/Actions/index.tsx",
+          "kind": "import-statement",
+          "original": "../Actions/index.js"
+        },
+        {
+          "path": "src/providers/Auth/index.tsx",
+          "kind": "import-statement",
+          "original": "../Auth/index.js"
+        },
+        {
+          "path": "src/providers/ClientFunction/index.tsx",
+          "kind": "import-statement",
+          "original": "../ClientFunction/index.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/index.tsx",
+          "kind": "import-statement",
+          "original": "../ComponentMap/index.js"
+        },
+        {
+          "path": "src/providers/Config/index.tsx",
+          "kind": "import-statement",
+          "original": "../Config/index.js"
+        },
+        {
+          "path": "src/providers/DocumentEvents/index.tsx",
+          "kind": "import-statement",
+          "original": "../DocumentEvents/index.js"
+        },
+        {
+          "path": "src/providers/FieldComponents/index.tsx",
+          "kind": "import-statement",
+          "original": "../FieldComponents/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../Locale/index.js"
+        },
+        {
+          "path": "src/providers/Params/index.tsx",
+          "kind": "import-statement",
+          "original": "../Params/index.js"
+        },
+        {
+          "path": "src/providers/Preferences/index.tsx",
+          "kind": "import-statement",
+          "original": "../Preferences/index.js"
+        },
+        {
+          "path": "src/providers/RouteCache/index.tsx",
+          "kind": "import-statement",
+          "original": "../RouteCache/index.js"
+        },
+        {
+          "path": "src/providers/SearchParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../SearchParams/index.js"
+        },
+        {
+          "path": "src/providers/Theme/index.tsx",
+          "kind": "import-statement",
+          "original": "../Theme/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../Translation/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/providers/ScrollInfo/index.tsx": {
+      "bytes": 405,
+      "imports": [
+        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/providers/WindowInfo/index.tsx": {
+      "bytes": 405,
+      "imports": [
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/exports/client/index.ts": {
+      "bytes": 11121,
+      "imports": [
+        {
+          "path": "src/hooks/useDebounce.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useDebounce.js"
+        },
+        {
+          "path": "src/hooks/useDebouncedCallback.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useDebouncedCallback.js"
+        },
+        {
+          "path": "src/hooks/useDebouncedEffect.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useDebouncedEffect.js"
+        },
+        {
+          "path": "src/hooks/useDelay.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useDelay.js"
+        },
+        {
+          "path": "src/hooks/useDelayedRender.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useDelayedRender.js"
+        },
+        {
+          "path": "src/hooks/useHotkey.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useHotkey.js"
+        },
+        {
+          "path": "src/hooks/useIntersect.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useIntersect.js"
+        },
+        {
+          "path": "src/hooks/usePayloadAPI.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/usePayloadAPI.js"
+        },
+        {
+          "path": "src/hooks/useResize.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useResize.js"
+        },
+        {
+          "path": "src/hooks/useThrottledEffect.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useThrottledEffect.js"
+        },
+        {
+          "path": "src/hooks/useUseAsTitle.ts",
+          "kind": "import-statement",
+          "original": "../../hooks/useUseAsTitle.js"
+        },
         {
           "path": "src/elements/AppHeader/index.tsx",
           "kind": "import-statement",
@@ -6764,165 +6728,7 @@
           "path": "src/fields/Blocks/SectionTitle/index.tsx",
           "kind": "import-statement",
           "original": "../../fields/Blocks/SectionTitle/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
-      "bytes": 3463,
-      "imports": [
-        { "path": "payload/types", "kind": "import-statement", "external": true },
-        { "path": "payload/utilities", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts",
-          "kind": "import-statement",
-          "original": "./iterateFields.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts": {
-      "bytes": 677,
-      "imports": [
-        {
-          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts",
-          "kind": "import-statement",
-          "original": "./promise.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts": {
-      "bytes": 536,
-      "imports": [
-        {
-          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts",
-          "kind": "import-statement",
-          "original": "./iterateFields.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts": {
-      "bytes": 1000,
-      "imports": [],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/addFieldStatePromise.ts": {
-      "bytes": 16647,
-      "imports": [
-        { "path": "bson-objectid", "kind": "import-statement", "external": true },
-        { "path": "payload/types", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts",
-          "kind": "import-statement",
-          "original": "./getFilterOptionsQuery.js"
         },
-        {
-          "path": "src/forms/buildStateFromSchema/iterateFields.ts",
-          "kind": "import-statement",
-          "original": "./iterateFields.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/iterateFields.ts": {
-      "bytes": 2973,
-      "imports": [
-        { "path": "payload/types", "kind": "import-statement", "external": true },
-        {
-          "path": "src/forms/buildStateFromSchema/addFieldStatePromise.ts",
-          "kind": "import-statement",
-          "original": "./addFieldStatePromise.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/forms/buildStateFromSchema/index.tsx": {
-      "bytes": 1465,
-      "imports": [
-        {
-          "path": "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts",
-          "kind": "import-statement",
-          "original": "./calculateDefaultValues/index.js"
-        },
-        {
-          "path": "src/forms/buildStateFromSchema/iterateFields.ts",
-          "kind": "import-statement",
-          "original": "./iterateFields.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/exports/client/forms.ts": {
-      "bytes": 935,
-      "imports": [
-        {
-          "path": "src/forms/FieldPropsProvider/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/FieldPropsProvider/index.js"
-        },
-        {
-          "path": "src/forms/FieldPropsProvider/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/FieldPropsProvider/index.js"
-        },
-        {
-          "path": "src/forms/Form/context.ts",
-          "kind": "import-statement",
-          "original": "../../forms/Form/context.js"
-        },
-        {
-          "path": "src/forms/Form/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/Form/index.js"
-        },
-        {
-          "path": "src/forms/NullifyField/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/NullifyField/index.js"
-        },
-        {
-          "path": "src/forms/RenderFields/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/RenderFields/index.js"
-        },
-        {
-          "path": "src/forms/RowLabel/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/RowLabel/index.js"
-        },
-        {
-          "path": "src/forms/Submit/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/Submit/index.js"
-        },
-        {
-          "path": "src/forms/WatchChildErrors/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/WatchChildErrors/index.js"
-        },
-        {
-          "path": "src/forms/buildStateFromSchema/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/buildStateFromSchema/index.js"
-        },
-        {
-          "path": "src/forms/useField/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/useField/index.js"
-        },
-        {
-          "path": "src/forms/withCondition/index.tsx",
-          "kind": "import-statement",
-          "original": "../../forms/withCondition/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/exports/client/fields.ts": {
-      "bytes": 1978,
-      "imports": [
         {
           "path": "src/fields/Array/index.tsx",
           "kind": "import-statement",
@@ -7062,33 +6868,77 @@
           "path": "src/fields/shared/index.tsx",
           "kind": "import-statement",
           "original": "../../fields/shared/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/icons/CloseMenu/index.tsx": {
-      "bytes": 524,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/icons/CodeBlock/index.tsx": {
-      "bytes": 617,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/icons/Menu/index.tsx": {
-      "bytes": 439,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/icons/MinimizeMaximize/index.tsx": {
-      "bytes": 1131,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
-    "src/exports/client/icons.ts": {
-      "bytes": 1028,
-      "imports": [
+        },
+        {
+          "path": "src/forms/FieldPropsProvider/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/FieldPropsProvider/index.js"
+        },
+        {
+          "path": "src/forms/FieldPropsProvider/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/FieldPropsProvider/index.js"
+        },
+        {
+          "path": "src/forms/Form/context.ts",
+          "kind": "import-statement",
+          "original": "../../forms/Form/context.js"
+        },
+        {
+          "path": "src/forms/Form/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/Form/index.js"
+        },
+        {
+          "path": "src/forms/NullifyField/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/NullifyField/index.js"
+        },
+        {
+          "path": "src/forms/RenderFields/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/RenderFields/index.js"
+        },
+        {
+          "path": "src/forms/RowLabel/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/RowLabel/index.js"
+        },
+        {
+          "path": "src/forms/Submit/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/Submit/index.js"
+        },
+        {
+          "path": "src/forms/WatchChildErrors/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/WatchChildErrors/index.js"
+        },
+        {
+          "path": "src/forms/buildStateFromSchema/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/buildStateFromSchema/index.js"
+        },
+        {
+          "path": "src/forms/useField/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/useField/index.js"
+        },
+        {
+          "path": "src/forms/withCondition/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/withCondition/index.js"
+        },
+        {
+          "path": "src/graphics/Account/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Account/index.js"
+        },
+        {
+          "path": "src/graphics/DefaultBlockImage/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/DefaultBlockImage/index.js"
+        },
         {
           "path": "src/icons/Calendar/index.tsx",
           "kind": "import-statement",
@@ -7178,63 +7028,136 @@
           "path": "src/icons/X/index.tsx",
           "kind": "import-statement",
           "original": "../../icons/X/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/exports/client/graphics.ts": {
-      "bytes": 136,
-      "imports": [
-        {
-          "path": "src/graphics/Account/index.tsx",
-          "kind": "import-statement",
-          "original": "../../graphics/Account/index.js"
         },
         {
-          "path": "src/graphics/DefaultBlockImage/index.tsx",
+          "path": "src/providers/Actions/index.tsx",
           "kind": "import-statement",
-          "original": "../../graphics/DefaultBlockImage/index.js"
-        }
-      ],
-      "format": "esm"
-    },
-    "src/exports/client/index.ts": {
-      "bytes": 213,
-      "imports": [
-        {
-          "path": "src/exports/client/hooks.ts",
-          "kind": "import-statement",
-          "original": "./hooks.js"
+          "original": "../../providers/Actions/index.js"
         },
         {
-          "path": "src/exports/client/providers.ts",
+          "path": "src/providers/Auth/index.tsx",
           "kind": "import-statement",
-          "original": "./providers.js"
+          "original": "../../providers/Auth/index.js"
         },
         {
-          "path": "src/exports/client/elements.ts",
+          "path": "src/providers/ClientFunction/index.tsx",
           "kind": "import-statement",
-          "original": "./elements.js"
+          "original": "../../providers/ClientFunction/index.js"
         },
         {
-          "path": "src/exports/client/forms.ts",
+          "path": "src/providers/ClientFunction/index.tsx",
           "kind": "import-statement",
-          "original": "./forms.js"
+          "original": "../../providers/ClientFunction/index.js"
         },
         {
-          "path": "src/exports/client/fields.ts",
+          "path": "src/providers/ComponentMap/index.tsx",
           "kind": "import-statement",
-          "original": "./fields.js"
+          "original": "../../providers/ComponentMap/index.js"
         },
         {
-          "path": "src/exports/client/icons.ts",
+          "path": "src/providers/Config/index.tsx",
           "kind": "import-statement",
-          "original": "./icons.js"
+          "original": "../../providers/Config/index.js"
         },
         {
-          "path": "src/exports/client/graphics.ts",
+          "path": "src/providers/DocumentEvents/index.tsx",
           "kind": "import-statement",
-          "original": "./graphics.js"
+          "original": "../../providers/DocumentEvents/index.js"
+        },
+        {
+          "path": "src/providers/DocumentInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/DocumentInfo/index.js"
+        },
+        {
+          "path": "src/providers/EditDepth/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EditDepth/index.js"
+        },
+        {
+          "path": "src/providers/EntityVisibility/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/EntityVisibility/index.js"
+        },
+        {
+          "path": "src/providers/FieldComponents/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/FieldComponents/index.js"
+        },
+        {
+          "path": "src/providers/FormQueryParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/FormQueryParams/index.js"
+        },
+        {
+          "path": "src/providers/ListInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/ListInfo/index.js"
+        },
+        {
+          "path": "src/providers/ListQuery/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/ListQuery/index.js"
+        },
+        {
+          "path": "src/providers/Locale/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Locale/index.js"
+        },
+        {
+          "path": "src/providers/Operation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Operation/index.js"
+        },
+        {
+          "path": "src/providers/Params/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Params/index.js"
+        },
+        {
+          "path": "src/providers/Preferences/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Preferences/index.js"
+        },
+        {
+          "path": "src/providers/Root/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Root/index.js"
+        },
+        {
+          "path": "src/providers/RouteCache/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/RouteCache/index.js"
+        },
+        {
+          "path": "src/providers/ScrollInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/ScrollInfo/index.js"
+        },
+        {
+          "path": "src/providers/SearchParams/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/SearchParams/index.js"
+        },
+        {
+          "path": "src/providers/Selection/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Selection/index.js"
+        },
+        {
+          "path": "src/providers/Theme/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Theme/index.js"
+        },
+        {
+          "path": "src/providers/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/Translation/index.js"
+        },
+        {
+          "path": "src/providers/WindowInfo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/WindowInfo/index.js"
         }
       ],
       "format": "esm"
@@ -7541,7 +7464,7 @@
     }
   },
   "outputs": {
-    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1167472 },
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1170646 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7599,41 +7522,13 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "date-fns", "kind": "import-statement", "external": true },
-        { "path": "flatley", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/link.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true },
-        { "path": "@dnd-kit/core", "kind": "import-statement", "external": true },
-        { "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "use-context-selector", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "md5", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7642,13 +7537,22 @@
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/link.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "body-scroll-lock", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7657,19 +7561,105 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "next/link.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "date-fns", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "use-context-selector", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "flatley", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/link.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@dnd-kit/core", "kind": "import-statement", "external": true },
+        { "path": "@dnd-kit/sortable", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7732,17 +7722,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react-select", "kind": "import-statement", "external": true },
@@ -7785,7 +7764,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
@@ -7801,8 +7779,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7829,70 +7805,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "body-scroll-lock", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "next/link.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "md5", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -7971,7 +7883,18 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true }
       ],
       "exports": [
         "Account",
@@ -8175,7 +8098,7 @@
         "src/elements/DatePicker/getFormattedLocale.ts": { "bytesInOutput": 83 },
         "src/elements/DatePicker/DatePicker.tsx": { "bytesInOutput": 1745 },
         "src/hooks/useDebounce.ts": { "bytesInOutput": 166 },
-        "src/exports/client/hooks.ts": { "bytesInOutput": 5 },
+        "src/exports/client/index.ts": { "bytesInOutput": 122 },
         "src/hooks/useDebouncedCallback.ts": { "bytesInOutput": 204 },
         "src/hooks/useDebouncedEffect.ts": { "bytesInOutput": 188 },
         "src/hooks/useDelayedRender.ts": { "bytesInOutput": 542 },
@@ -8201,37 +8124,83 @@
         "src/hooks/useThrottledEffect.ts": { "bytesInOutput": 238 },
         "src/utilities/flattenFieldMap.ts": { "bytesInOutput": 399 },
         "src/hooks/useUseAsTitle.ts": { "bytesInOutput": 77 },
-        "src/exports/client/index.ts": { "bytesInOutput": 0 },
+        "src/elements/AppHeader/index.tsx": { "bytesInOutput": 1591 },
+        "src/graphics/Account/index.tsx": { "bytesInOutput": 256 },
+        "src/graphics/Account/Default/index.tsx": { "bytesInOutput": 554 },
+        "src/graphics/Account/Gravatar/index.tsx": { "bytesInOutput": 61 },
         "src/providers/Actions/index.tsx": { "bytesInOutput": 358 },
         "src/providers/ComponentMap/index.tsx": { "bytesInOutput": 610 },
         "src/providers/Actions/SetViewActions/index.tsx": { "bytesInOutput": 131 },
-        "src/exports/client/providers.ts": { "bytesInOutput": 14 },
-        "src/providers/ClientFunction/index.tsx": { "bytesInOutput": 627 },
+        "src/elements/Hamburger/index.tsx": { "bytesInOutput": 964 },
+        "src/elements/Localizer/LocalizerLabel/index.tsx": { "bytesInOutput": 510 },
+        "src/elements/Localizer/index.tsx": { "bytesInOutput": 758 },
+        "src/elements/Popup/PopupButtonList/index.tsx": { "bytesInOutput": 719 },
+        "src/elements/Popup/index.tsx": { "bytesInOutput": 2145 },
+        "src/elements/Popup/PopupTrigger/index.tsx": { "bytesInOutput": 410 },
+        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 514 },
+        "src/elements/Nav/context.tsx": { "bytesInOutput": 783 },
+        "src/elements/StepNav/index.tsx": { "bytesInOutput": 1021 },
+        "src/graphics/Icon/index.tsx": { "bytesInOutput": 426 },
+        "src/elements/StepNav/context.tsx": { "bytesInOutput": 212 },
+        "src/elements/StepNav/SetStepNav.tsx": { "bytesInOutput": 111 },
+        "src/elements/Card/index.tsx": { "bytesInOutput": 475 },
+        "src/elements/Collapsible/index.tsx": { "bytesInOutput": 1528 },
+        "src/icons/DragHandle/index.tsx": { "bytesInOutput": 636 },
+        "src/elements/Collapsible/provider.tsx": { "bytesInOutput": 413 },
+        "src/elements/CopyToClipboard/index.tsx": { "bytesInOutput": 643 },
+        "src/icons/Copy/index.tsx": { "bytesInOutput": 301 },
+        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1737 },
+        "src/providers/Selection/index.tsx": { "bytesInOutput": 1219 },
+        "src/elements/Pill/index.tsx": { "bytesInOutput": 1232 },
+        "src/elements/DraggableSortable/useDraggableSortable/index.tsx": { "bytesInOutput": 320 },
+        "src/elements/DocumentControls/index.tsx": { "bytesInOutput": 3494 },
+        "src/utilities/formatDate.ts": { "bytesInOutput": 225 },
+        "src/elements/Autosave/index.tsx": { "bytesInOutput": 1341 },
+        "src/forms/Form/context.ts": { "bytesInOutput": 350 },
         "src/providers/DocumentEvents/index.tsx": { "bytesInOutput": 267 },
         "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 4496 },
         "src/utilities/formatDocTitle.ts": { "bytesInOutput": 450 },
-        "src/utilities/formatDate.ts": { "bytesInOutput": 225 },
         "src/utilities/getFormState.ts": { "bytesInOutput": 341 },
         "src/utilities/hasSavePermission.ts": { "bytesInOutput": 172 },
         "src/utilities/isEditing.ts": { "bytesInOutput": 59 },
         "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 187 },
+        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1791 },
+        "src/elements/Translation/index.tsx": { "bytesInOutput": 517 },
+        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1691 },
+        "src/elements/Gutter/index.tsx": { "bytesInOutput": 369 },
+        "src/elements/PreviewButton/index.tsx": { "bytesInOutput": 265 },
+        "src/elements/PreviewButton/usePreviewURL.tsx": { "bytesInOutput": 761 },
+        "src/elements/PublishButton/index.tsx": { "bytesInOutput": 455 },
+        "src/forms/Submit/index.tsx": { "bytesInOutput": 291 },
+        "src/elements/SaveButton/index.tsx": { "bytesInOutput": 450 },
         "src/providers/EditDepth/index.tsx": { "bytesInOutput": 156 },
-        "src/providers/EntityVisibility/index.tsx": { "bytesInOutput": 334 },
+        "src/providers/Operation/index.tsx": { "bytesInOutput": 161 },
+        "src/elements/SaveDraftButton/index.tsx": { "bytesInOutput": 887 },
+        "src/elements/Status/index.tsx": { "bytesInOutput": 2797 },
+        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1340 },
+        "src/fields/Relationship/AddNew/useRelatedCollections.ts": { "bytesInOutput": 151 },
+        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1573 },
+        "src/elements/Drawer/useDrawerSlug.tsx": { "bytesInOutput": 99 },
+        "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1465 },
+        "src/providers/FormQueryParams/index.tsx": { "bytesInOutput": 667 },
+        "src/elements/IDLabel/index.tsx": { "bytesInOutput": 172 },
+        "src/elements/RenderTitle/index.tsx": { "bytesInOutput": 401 },
+        "src/elements/DocumentFields/index.tsx": { "bytesInOutput": 1058 },
+        "src/forms/RenderFields/index.tsx": { "bytesInOutput": 1029 },
+        "src/forms/RenderFields/RenderField.tsx": { "bytesInOutput": 599 },
+        "src/fields/HiddenInput/index.tsx": { "bytesInOutput": 362 },
+        "src/forms/FieldPropsProvider/index.tsx": { "bytesInOutput": 424 },
+        "src/forms/useField/index.tsx": { "bytesInOutput": 1586 },
+        "src/forms/withCondition/index.tsx": { "bytesInOutput": 176 },
+        "src/forms/withCondition/WatchCondition.tsx": { "bytesInOutput": 348 },
         "src/providers/FieldComponents/index.tsx": { "bytesInOutput": 150 },
         "src/fields/Array/index.tsx": { "bytesInOutput": 3952 },
         "src/elements/Banner/index.tsx": { "bytesInOutput": 599 },
         "src/elements/DraggableSortable/DraggableSortableItem/index.tsx": { "bytesInOutput": 299 },
-        "src/elements/DraggableSortable/useDraggableSortable/index.tsx": { "bytesInOutput": 320 },
         "src/elements/DraggableSortable/index.tsx": { "bytesInOutput": 783 },
         "src/elements/ErrorPill/index.tsx": { "bytesInOutput": 390 },
-        "src/forms/FieldPropsProvider/index.tsx": { "bytesInOutput": 424 },
-        "src/forms/Form/context.ts": { "bytesInOutput": 350 },
         "src/forms/NullifyField/index.tsx": { "bytesInOutput": 609 },
         "src/fields/Checkbox/index.tsx": { "bytesInOutput": 1115 },
-        "src/forms/useField/index.tsx": { "bytesInOutput": 1586 },
-        "src/providers/Operation/index.tsx": { "bytesInOutput": 161 },
-        "src/forms/withCondition/index.tsx": { "bytesInOutput": 176 },
-        "src/forms/withCondition/WatchCondition.tsx": { "bytesInOutput": 348 },
         "src/utilities/generateFieldID.ts": { "bytesInOutput": 82 },
         "src/fields/FieldDescription/index.tsx": { "bytesInOutput": 440 },
         "src/fields/FieldError/index.tsx": { "bytesInOutput": 396 },
@@ -8243,25 +8212,11 @@
         "src/utilities/scrollToID.ts": { "bytesInOutput": 135 },
         "src/fields/Array/ArrayRow.tsx": { "bytesInOutput": 1387 },
         "src/elements/ArrayAction/index.tsx": { "bytesInOutput": 1279 },
-        "src/icons/Copy/index.tsx": { "bytesInOutput": 301 },
         "src/icons/More/index.tsx": { "bytesInOutput": 410 },
-        "src/elements/Popup/PopupButtonList/index.tsx": { "bytesInOutput": 719 },
-        "src/elements/Popup/index.tsx": { "bytesInOutput": 2145 },
-        "src/elements/Popup/PopupTrigger/index.tsx": { "bytesInOutput": 410 },
-        "src/elements/Collapsible/index.tsx": { "bytesInOutput": 1528 },
-        "src/icons/DragHandle/index.tsx": { "bytesInOutput": 636 },
-        "src/elements/Collapsible/provider.tsx": { "bytesInOutput": 413 },
-        "src/forms/RenderFields/index.tsx": { "bytesInOutput": 1029 },
-        "src/forms/RenderFields/RenderField.tsx": { "bytesInOutput": 599 },
-        "src/fields/HiddenInput/index.tsx": { "bytesInOutput": 362 },
         "src/forms/RowLabel/index.tsx": { "bytesInOutput": 410 },
         "src/forms/RowLabel/Context/index.tsx": { "bytesInOutput": 257 },
         "src/fields/Blocks/index.tsx": { "bytesInOutput": 4096 },
-        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1573 },
-        "src/elements/Gutter/index.tsx": { "bytesInOutput": 369 },
-        "src/elements/Drawer/useDrawerSlug.tsx": { "bytesInOutput": 99 },
         "src/fields/Blocks/BlockRow.tsx": { "bytesInOutput": 1593 },
-        "src/elements/Pill/index.tsx": { "bytesInOutput": 1232 },
         "src/fields/Blocks/RowActions.tsx": { "bytesInOutput": 592 },
         "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1213 },
         "src/elements/ThumbnailCard/index.tsx": { "bytesInOutput": 557 },
@@ -8301,12 +8256,6 @@
         "src/fields/RadioGroup/Radio/index.tsx": { "bytesInOutput": 642 },
         "src/fields/Relationship/index.tsx": { "bytesInOutput": 5208 },
         "src/fields/Relationship/AddNew/index.tsx": { "bytesInOutput": 1985 },
-        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1340 },
-        "src/fields/Relationship/AddNew/useRelatedCollections.ts": { "bytesInOutput": 151 },
-        "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1465 },
-        "src/providers/FormQueryParams/index.tsx": { "bytesInOutput": 667 },
-        "src/elements/IDLabel/index.tsx": { "bytesInOutput": 172 },
-        "src/elements/RenderTitle/index.tsx": { "bytesInOutput": 401 },
         "src/fields/Relationship/createRelationMap.ts": { "bytesInOutput": 519 },
         "src/fields/Relationship/findOptionsByValue.ts": { "bytesInOutput": 368 },
         "src/fields/Relationship/optionsReducer.ts": { "bytesInOutput": 1411 },
@@ -8335,7 +8284,6 @@
         "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5653 },
         "src/elements/PreviewSizes/index.tsx": { "bytesInOutput": 1739 },
         "src/elements/FileDetails/FileMeta/index.tsx": { "bytesInOutput": 843 },
-        "src/elements/CopyToClipboard/index.tsx": { "bytesInOutput": 643 },
         "src/elements/Thumbnail/index.tsx": { "bytesInOutput": 540 },
         "src/graphics/File/index.tsx": { "bytesInOutput": 432 },
         "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1278 },
@@ -8348,7 +8296,6 @@
         "src/elements/TableColumns/index.tsx": { "bytesInOutput": 1296 },
         "src/elements/TableColumns/buildColumnState.tsx": { "bytesInOutput": 1867 },
         "src/elements/SelectAll/index.tsx": { "bytesInOutput": 380 },
-        "src/providers/Selection/index.tsx": { "bytesInOutput": 1219 },
         "src/elements/SelectRow/index.tsx": { "bytesInOutput": 217 },
         "src/elements/Table/TableCellProvider/index.tsx": { "bytesInOutput": 296 },
         "src/elements/SortColumn/index.tsx": { "bytesInOutput": 1052 },
@@ -8372,39 +8319,6 @@
         "src/elements/TableColumns/getInitialColumns.ts": { "bytesInOutput": 518 },
         "src/elements/ViewDescription/index.tsx": { "bytesInOutput": 307 },
         "src/fields/index.tsx": { "bytesInOutput": 255 },
-        "src/providers/Params/index.tsx": { "bytesInOutput": 217 },
-        "src/providers/Root/index.tsx": { "bytesInOutput": 1601 },
-        "src/elements/Nav/context.tsx": { "bytesInOutput": 783 },
-        "src/elements/StepNav/index.tsx": { "bytesInOutput": 1021 },
-        "src/graphics/Icon/index.tsx": { "bytesInOutput": 426 },
-        "src/elements/StepNav/context.tsx": { "bytesInOutput": 212 },
-        "src/elements/StepNav/SetStepNav.tsx": { "bytesInOutput": 111 },
-        "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 202 },
-        "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 202 },
-        "src/elements/AppHeader/index.tsx": { "bytesInOutput": 1591 },
-        "src/graphics/Account/index.tsx": { "bytesInOutput": 256 },
-        "src/graphics/Account/Default/index.tsx": { "bytesInOutput": 554 },
-        "src/graphics/Account/Gravatar/index.tsx": { "bytesInOutput": 61 },
-        "src/elements/Hamburger/index.tsx": { "bytesInOutput": 964 },
-        "src/elements/Localizer/LocalizerLabel/index.tsx": { "bytesInOutput": 510 },
-        "src/elements/Localizer/index.tsx": { "bytesInOutput": 758 },
-        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 514 },
-        "src/exports/client/elements.ts": { "bytesInOutput": 93 },
-        "src/elements/Card/index.tsx": { "bytesInOutput": 475 },
-        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1737 },
-        "src/elements/DocumentControls/index.tsx": { "bytesInOutput": 3494 },
-        "src/elements/Autosave/index.tsx": { "bytesInOutput": 1341 },
-        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1791 },
-        "src/elements/Translation/index.tsx": { "bytesInOutput": 517 },
-        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1691 },
-        "src/elements/PreviewButton/index.tsx": { "bytesInOutput": 265 },
-        "src/elements/PreviewButton/usePreviewURL.tsx": { "bytesInOutput": 761 },
-        "src/elements/PublishButton/index.tsx": { "bytesInOutput": 455 },
-        "src/forms/Submit/index.tsx": { "bytesInOutput": 291 },
-        "src/elements/SaveButton/index.tsx": { "bytesInOutput": 450 },
-        "src/elements/SaveDraftButton/index.tsx": { "bytesInOutput": 887 },
-        "src/elements/Status/index.tsx": { "bytesInOutput": 2797 },
-        "src/elements/DocumentFields/index.tsx": { "bytesInOutput": 1058 },
         "src/elements/EditMany/index.tsx": { "bytesInOutput": 3219 },
         "src/forms/Form/index.tsx": { "bytesInOutput": 6182 },
         "src/forms/Form/errorMessages.ts": { "bytesInOutput": 66 },
@@ -8452,7 +8366,6 @@
         "src/elements/Pagination/Separator/index.tsx": { "bytesInOutput": 102 },
         "src/elements/PerPage/index.tsx": { "bytesInOutput": 904 },
         "src/elements/Table/index.tsx": { "bytesInOutput": 769 },
-        "src/exports/client/forms.ts": { "bytesInOutput": 0 },
         "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
           "bytesInOutput": 1303
         },
@@ -8464,13 +8377,16 @@
         "src/forms/buildStateFromSchema/addFieldStatePromise.ts": { "bytesInOutput": 5937 },
         "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts": { "bytesInOutput": 244 },
         "src/forms/buildStateFromSchema/index.tsx": { "bytesInOutput": 339 },
-        "src/exports/client/fields.ts": { "bytesInOutput": 0 },
-        "src/exports/client/icons.ts": { "bytesInOutput": 10 },
         "src/icons/CloseMenu/index.tsx": { "bytesInOutput": 419 },
         "src/icons/CodeBlock/index.tsx": { "bytesInOutput": 554 },
         "src/icons/Menu/index.tsx": { "bytesInOutput": 425 },
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 },
-        "src/exports/client/graphics.ts": { "bytesInOutput": 0 }
+        "src/providers/ClientFunction/index.tsx": { "bytesInOutput": 627 },
+        "src/providers/EntityVisibility/index.tsx": { "bytesInOutput": 334 },
+        "src/providers/Params/index.tsx": { "bytesInOutput": 217 },
+        "src/providers/Root/index.tsx": { "bytesInOutput": 1601 },
+        "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 202 },
+        "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 202 }
       },
       "bytes": 255876
     },
