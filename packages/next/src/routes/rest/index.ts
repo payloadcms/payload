@@ -134,6 +134,20 @@ const handleCustomEndpoints = ({
   if (endpoints && endpoints.length > 0) {
     let handlerParams = {}
     const { pathname } = payloadRequest
+
+    /*
+     * This makes sure the next.js basePath property is supported. If basePath is used, payload config.routes.api should be set to it. This makes all outgoing frontend request
+     * target the correct API endpoint starting with basePath.
+     *
+     * The incoming request (here) will not include the basePath though, it's as if it's not there. Since we are adding the basePath to the pathPrefix below though (payloadRequest.payload.config.routes.api) we need the
+     * pathname to be adjusted to include the basePath which next.js strips from the request.
+     */
+    let adjustedPathname = pathname
+
+    if (process.env.NEXT_PUBLIC_BASE_PATH) {
+      adjustedPathname = process.env.NEXT_PUBLIC_BASE_PATH + pathname
+    }
+
     const pathPrefix =
       payloadRequest.payload.config.routes.api + (entitySlug ? `/${entitySlug}` : '')
 
@@ -142,7 +156,8 @@ const handleCustomEndpoints = ({
         const pathMatchFn = match(`${pathPrefix}${endpoint.path}`, {
           decode: decodeURIComponent,
         })
-        const tempParams = pathMatchFn(pathname)
+
+        const tempParams = pathMatchFn(adjustedPathname)
         if (tempParams) {
           handlerParams = tempParams.params
           return true
@@ -241,6 +256,7 @@ export const GET =
           entitySlug: slug1,
           payloadRequest: req,
         })
+
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
