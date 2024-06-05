@@ -6,7 +6,7 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui/client'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
+import { RenderCustomComponent } from '@payloadcms/ui/server'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig } from 'payload/config'
 import { type AdminViewProps } from 'payload/types'
