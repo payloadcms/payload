@@ -6411,7 +6411,7 @@
       "format": "esm"
     },
     "src/exports/client/index.ts": {
-      "bytes": 11142,
+      "bytes": 11208,
       "imports": [
         {
           "path": "src/hooks/useDebounce.ts",
@@ -7155,6 +7155,11 @@
           "original": "../../providers/Translation/index.js"
         },
         {
+          "path": "src/elements/Translation/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/Translation/index.js"
+        },
+        {
           "path": "src/providers/WindowInfo/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/WindowInfo/index.js"
@@ -7464,7 +7469,7 @@
     }
   },
   "outputs": {
-    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1170668 },
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1170735 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
@@ -8017,6 +8022,7 @@
         "ThemeProvider",
         "Thumbnail",
         "Tooltip",
+        "Translation",
         "TranslationProvider",
         "UIField",
         "UnpublishMany",
@@ -8388,7 +8394,7 @@
         "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 202 },
         "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 202 }
       },
-      "bytes": 255876
+      "bytes": 255894
     },
     "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 235427 },
     "dist/server.js": {

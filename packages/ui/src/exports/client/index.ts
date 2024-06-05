@@ -193,4 +193,5 @@ export { SearchParamsProvider, useSearchParams } from '../../providers/SearchPar
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 export { type Theme, ThemeProvider, defaultTheme, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
+export { Translation } from '../../elements/Translation/index.js'
 export { WindowInfoProvider, useWindowInfo } from '../../providers/WindowInfo/index.js'
