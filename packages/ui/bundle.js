@@ -60,6 +60,7 @@ const result = await esbuild
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [removeCSSImports],
+    sourcemap: true,
   })
   .then((res, err) => {
     console.log('client.ts and server.ts bundled successfully')

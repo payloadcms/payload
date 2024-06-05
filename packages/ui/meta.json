@@ -4455,7 +4455,7 @@
       "format": "esm"
     },
     "src/elements/StepNav/index.tsx": {
-      "bytes": 2308,
+      "bytes": 2367,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         {
@@ -7373,7 +7373,7 @@
       "format": "esm"
     },
     "src/exports/server/utilities.ts": {
-      "bytes": 615,
+      "bytes": 871,
       "imports": [
         {
           "path": "src/utilities/buildComponentMap.ts",
@@ -7401,6 +7401,16 @@
           "original": "../../utilities/findLocaleFromCode.js"
         },
         {
+          "path": "src/utilities/formatDate.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/formatDate.js"
+        },
+        {
+          "path": "src/utilities/formatDocTitle.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/formatDocTitle.js"
+        },
+        {
           "path": "src/utilities/getFormState.ts",
           "kind": "import-statement",
           "original": "../../utilities/getFormState.js"
@@ -7409,6 +7419,16 @@
           "path": "src/utilities/groupNavItems.ts",
           "kind": "import-statement",
           "original": "../../utilities/groupNavItems.js"
+        },
+        {
+          "path": "src/utilities/hasSavePermission.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/hasSavePermission.js"
+        },
+        {
+          "path": "src/utilities/isEditing.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/isEditing.js"
         },
         {
           "path": "src/utilities/reduceFieldsToValues.ts",
@@ -7431,6 +7451,7 @@
     }
   },
   "outputs": {
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1167447 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
@@ -8357,8 +8378,9 @@
         "src/icons/Menu/index.tsx": { "bytesInOutput": 425 },
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 }
       },
-      "bytes": 255785
+      "bytes": 255820
     },
+    "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 227501 },
     "dist/server.js": {
       "imports": [
         { "path": "payload/types", "kind": "import-statement", "external": true },
@@ -8437,8 +8459,12 @@
         "buildFieldSchemaMap",
         "buildFormState",
         "findLocaleFromCode",
+        "formatDate",
+        "formatDocTitle",
         "getFormState",
         "groupNavItems",
+        "hasSavePermission",
+        "isEditing",
         "mapFields",
         "reduceFieldsToValues",
         "traverseFields"
@@ -8469,9 +8495,11 @@
         "src/utilities/api.ts": { "bytesInOutput": 19 },
         "src/providers/SearchParams/index.tsx": { "bytesInOutput": 191 },
         "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 216 },
-        "src/utilities/formatDocTitle.ts": { "bytesInOutput": 59 },
-        "src/utilities/formatDate.ts": { "bytesInOutput": 61 },
+        "src/utilities/formatDocTitle.ts": { "bytesInOutput": 450 },
+        "src/utilities/formatDate.ts": { "bytesInOutput": 151 },
         "src/utilities/getFormState.ts": { "bytesInOutput": 341 },
+        "src/utilities/hasSavePermission.ts": { "bytesInOutput": 172 },
+        "src/utilities/isEditing.ts": { "bytesInOutput": 59 },
         "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 187 },
         "src/providers/Locale/index.tsx": { "bytesInOutput": 105 },
         "src/utilities/findLocaleFromCode.ts": { "bytesInOutput": 84 },
@@ -8505,7 +8533,7 @@
         "src/utilities/groupNavItems.ts": { "bytesInOutput": 599 },
         "src/exports/server/index.ts": { "bytesInOutput": 0 }
       },
-      "bytes": 41548
+      "bytes": 42373
     }
   }
 }
