@@ -36,13 +36,6 @@ type MOVE = {
 
 export type Action = MOVE | SET | TOGGLE
 
-const getFieldLabel = (field: Field): string => {
-  if ('label' in field) {
-    return field.label as string
-  }
-  return ''
-}
-
 const filterDisabledColumns = (
   columns: Pick<Column, 'accessor' | 'active'>[],
   collection: SanitizedCollectionConfig,
@@ -58,7 +51,7 @@ const filterDisabledColumns = (
             Heading: null as React.ReactNode,
             renderCell: () => null,
           },
-          label: getFieldLabel(field) || col.accessor,
+          label: 'label' in field ? field.label : col.accessor,
         } as Column
       }
       return null
