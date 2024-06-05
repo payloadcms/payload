@@ -144,8 +144,8 @@ const handleCustomEndpoints = ({
      */
     let adjustedPathname = pathname
 
-    if (process.env.NEXT_PUBLIC_BASE_PATH) {
-      adjustedPathname = process.env.NEXT_PUBLIC_BASE_PATH + pathname
+    if (process.env.NEXT_BASE_PATH) {
+      adjustedPathname = process.env.NEXT_BASE_PATH + pathname
     }
 
     const pathPrefix =

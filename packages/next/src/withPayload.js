@@ -103,7 +103,7 @@ export const withPayload = (nextConfig = {}) => {
   }
 
   if (nextConfig.basePath) {
-    toReturn.env.NEXT_PUBLIC_BASE_PATH = nextConfig.basePath
+    toReturn.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 
   return toReturn
