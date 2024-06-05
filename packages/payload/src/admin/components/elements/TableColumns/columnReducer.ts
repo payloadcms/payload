@@ -1,7 +1,9 @@
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Field } from '../../../../fields/config/types'
 import type { Props as CellProps } from '../../views/collections/List/Cell/types'
 import type { Column } from '../Table/types'
 
+import { fieldAffectsData } from '../../../../fields/config/types'
 import buildColumns from './buildColumns'
 
 type TOGGLE = {
@@ -34,26 +36,57 @@ type MOVE = {
 
 export type Action = MOVE | SET | TOGGLE
 
+const getFieldLabel = (field: Field): string => {
+  if ('label' in field) {
+    return field.label as string
+  }
+  return ''
+}
+
+const filterDisabledColumns = (
+  columns: Pick<Column, 'accessor' | 'active'>[],
+  collection: SanitizedCollectionConfig,
+): Column[] => {
+  return columns
+    .map((col) => {
+      const field = collection.fields.find((f) => fieldAffectsData(f) && f.name === col.accessor)
+      if (field && !field.admin?.disableListColumn) {
+        return {
+          ...col,
+          name: col.accessor,
+          components: {
+            Heading: null as React.ReactNode,
+            renderCell: () => null,
+          },
+          label: getFieldLabel(field) || col.accessor,
+        } as Column
+      }
+      return null
+    })
+    .filter((col) => col !== null)
+}
+
 export const columnReducer = (state: Column[], action: Action): Column[] => {
   switch (action.type) {
     case 'toggle': {
       const { cellProps, collection, column } = action.payload
 
       const withToggledColumn = state.map((col) => {
-        if (col.name === column) {
+        if (col.accessor === column) {
           return {
             ...col,
             active: !col.active,
           }
         }
-
         return col
       })
+
+      const filteredColumns = filterDisabledColumns(withToggledColumn, collection)
 
       return buildColumns({
         cellProps,
         collection,
-        columns: withToggledColumn,
+        columns: filteredColumns,
       })
     }
     case 'move': {
@@ -63,19 +96,23 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
       withMovedColumn.splice(toIndex, 0, columnToMove)
 
+      const filteredColumns = filterDisabledColumns(withMovedColumn, collection)
+
       return buildColumns({
         cellProps,
         collection,
-        columns: withMovedColumn,
+        columns: filteredColumns,
       })
     }
     case 'set': {
       const { cellProps, collection, columns } = action.payload
 
+      const filteredColumns = filterDisabledColumns(columns, collection)
+
       return buildColumns({
         cellProps,
         collection,
-        columns,
+        columns: filteredColumns,
       })
     }
     default:

@@ -4,6 +4,10 @@ import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fie
 
 const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] =>
   fields.reduce((remaining, field) => {
+    if (field.admin?.disableListColumn) {
+      return remaining
+    }
+
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }

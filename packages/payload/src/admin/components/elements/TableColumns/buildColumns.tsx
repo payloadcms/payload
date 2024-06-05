@@ -4,7 +4,7 @@ import type { SanitizedCollectionConfig } from '../../../../collections/config/t
 import type { Props as CellProps } from '../../views/collections/List/Cell/types'
 import type { Column } from '../Table/types'
 
-import { fieldIsPresentationalOnly } from '../../../../fields/config/types'
+import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types'
 import flattenFields from '../../../../utilities/flattenTopLevelFields'
 import Cell from '../../views/collections/List/Cell'
 import SelectAll from '../../views/collections/List/SelectAll'
@@ -31,51 +31,61 @@ const buildColumns = ({
   })
 
   const firstActiveColumn = sortedFields.find(
-    (field) => columns.find((column) => column.accessor === field.name)?.active,
+    (field) =>
+      fieldAffectsData(field) && columns.find((column) => column.accessor === field.name)?.active,
   )
 
   let colIndex = -1
-  const cols: Column[] = sortedFields.map((field) => {
-    const isActive = columns.find((column) => column.accessor === field.name)?.active || false
-    const isFirstActive = firstActiveColumn?.name === field.name
-    if (isActive) {
-      colIndex += 1
-    }
-    const props = cellProps?.[colIndex] || {}
-    return {
-      name: field.name,
-      accessor: field.name,
-      active: isActive,
-      components: {
-        Heading: (
-          <SortColumn
-            disable={
-              ('disableSort' in field && Boolean(field.disableSort)) ||
-              fieldIsPresentationalOnly(field) ||
-              undefined
-            }
-            label={field.label || field.name}
-            name={field.name}
-          />
-        ),
-        renderCell: (rowData, cellData) => {
-          return (
-            <Cell
-              cellData={cellData}
-              colIndex={colIndex}
-              collection={collection}
-              field={field}
-              key={JSON.stringify(cellData)}
-              link={isFirstActive}
-              rowData={rowData}
-              {...props}
+  const cols: Column[] = sortedFields
+    .map((field) => {
+      if (!fieldAffectsData(field)) {
+        return null
+      }
+      const isActive = columns.find((column) => column.accessor === field.name)?.active || false
+      const isFirstActive = firstActiveColumn?.name === field.name
+      if (isActive) {
+        colIndex += 1
+      }
+      const props = cellProps?.[colIndex] || {}
+      return {
+        name: field.name,
+        accessor: field.name,
+        active: isActive,
+        components: {
+          Heading: (
+            <SortColumn
+              disable={
+                ('disableSort' in field && Boolean(field.disableSort)) ||
+                fieldIsPresentationalOnly(field) ||
+                undefined
+              }
+              label={field.label || field.name}
+              name={field.name}
             />
-          )
+          ),
+          renderCell: (rowData, cellData) => {
+            return (
+              <Cell
+                cellData={cellData}
+                colIndex={colIndex}
+                collection={collection}
+                field={field}
+                key={JSON.stringify(cellData)}
+                link={isFirstActive}
+                rowData={rowData}
+                {...props}
+              />
+            )
+          },
         },
-      },
-      label: field.label,
-    }
-  })
+        label: field.label,
+      }
+    })
+    .filter((col) => col !== null)
+    .filter((col) => {
+      const field = collection.fields.find((f) => fieldAffectsData(f) && f.name === col.accessor)
+      return field && !field.admin?.disableListColumn
+    }) as Column[]
 
   if (cellProps?.[0]?.link !== false) {
     cols.unshift({

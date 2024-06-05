@@ -14,7 +14,7 @@ import type { ListPreferences } from '../../views/collections/List/types'
 import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
-import { type Field, fieldHasSubFields } from '../../../../fields/config/types'
+import { type Field, fieldAffectsData, fieldHasSubFields } from '../../../../fields/config/types'
 import { usePreferences } from '../../utilities/Preferences'
 import formatFields from '../../views/collections/List/formatFields'
 import buildColumns from './buildColumns'
@@ -41,7 +41,7 @@ const filterTableFields = (fields: Field[]): Field[] => {
         fields: filterTableFields(field.fields),
       }
     }
-    if (!field.admin?.disableListColumn) acc.push(field)
+    if (fieldAffectsData(field) && !field.admin?.disableListColumn) acc.push(field)
     return acc
   }, [])
 }
@@ -65,16 +65,21 @@ export const TableColumnsProvider: React.FC<{
   const [formattedFields] = useState<Field[]>(() => formatFields(collection))
   const filteredFields = filterTableFields(formattedFields)
 
-  const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
+  const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, [], () => {
     const initialColumns = getInitialColumnState(filteredFields, useAsTitle, defaultColumns)
 
     return buildColumns({
       cellProps,
       collection,
-      columns: initialColumns.map((column) => ({
-        accessor: column,
-        active: true,
-      })),
+      columns: initialColumns
+        .map((column) => ({
+          accessor: column,
+          active: true,
+        }))
+        .filter((col) => {
+          const field = formattedFields.find((f) => fieldAffectsData(f) && f.name === col.accessor)
+          return field && !field.admin?.disableListColumn
+        }),
     })
   })
 
@@ -99,17 +104,24 @@ export const TableColumnsProvider: React.FC<{
           payload: {
             cellProps,
             collection: { ...collection, fields: filteredFields },
-            columns: newCols.map((column) => {
-              // 'string' is for backwards compatibility
-              // the preference used to be stored as an array of strings
-              if (typeof column === 'string') {
-                return {
-                  accessor: column,
-                  active: true,
+            columns: newCols
+              .map((column) => {
+                // 'string' is for backwards compatibility
+                // the preference used to be stored as an array of strings
+                if (typeof column === 'string') {
+                  return {
+                    accessor: column,
+                    active: true,
+                  }
                 }
-              }
-              return column
-            }),
+                return column
+              })
+              .filter((col) => {
+                const field = formattedFields.find(
+                  (f) => fieldAffectsData(f) && f.name === col.accessor,
+                )
+                return field && !field.admin?.disableListColumn
+              }),
           },
         })
 
@@ -128,6 +140,7 @@ export const TableColumnsProvider: React.FC<{
     collection,
     cellProps,
     filteredFields,
+    formattedFields,
   ])
 
   // /////////////////////////////////////
@@ -146,20 +159,25 @@ export const TableColumnsProvider: React.FC<{
 
   const setActiveColumns = useCallback(
     (columns: string[]) => {
+      const filteredColumns = columns.filter((column) => {
+        const field = formattedFields.find((f) => fieldAffectsData(f) && f.name === column)
+        return field && !field.admin?.disableListColumn
+      })
+
       dispatchTableColumns({
         type: 'set',
         payload: {
           // onSelect,
           cellProps,
           collection: { ...collection, fields: formatFields(collection) },
-          columns: columns.map((column) => ({
+          columns: filteredColumns.map((column) => ({
             accessor: column,
             active: true,
           })),
         },
       })
     },
-    [collection, cellProps],
+    [collection, cellProps, formattedFields],
   )
 
   const moveColumn = useCallback(
@@ -181,16 +199,19 @@ export const TableColumnsProvider: React.FC<{
 
   const toggleColumn = useCallback(
     (column: string) => {
-      dispatchTableColumns({
-        type: 'toggle',
-        payload: {
-          cellProps,
-          collection: { ...collection, fields: formatFields(collection) },
-          column,
-        },
-      })
+      const field = formattedFields.find((f) => fieldAffectsData(f) && f.name === column)
+      if (field && !field.admin?.disableListColumn) {
+        dispatchTableColumns({
+          type: 'toggle',
+          payload: {
+            cellProps,
+            collection: { ...collection, fields: formatFields(collection) },
+            column,
+          },
+        })
+      }
     },
-    [collection, cellProps],
+    [collection, cellProps, formattedFields],
   )
 
   return (
