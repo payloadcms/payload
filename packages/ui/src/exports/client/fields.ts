@@ -1,4 +1,3 @@
-'use client'
 export { ArrayField } from '../../fields/Array/index.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { Checkbox as CheckboxField } from '../../fields/Checkbox/index.js'

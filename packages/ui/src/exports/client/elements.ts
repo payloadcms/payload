@@ -1,4 +1,3 @@
-'use client'
 export { AppHeader } from '../../elements/AppHeader/index.js'
 export { Button } from '../../elements/Button/index.js'
 export { Card } from '../../elements/Card/index.js'

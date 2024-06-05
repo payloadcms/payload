@@ -345,7 +345,7 @@
       "format": "esm"
     },
     "src/exports/client/hooks.ts": {
-      "bytes": 695,
+      "bytes": 682,
       "imports": [
         {
           "path": "src/hooks/useDebounce.ts",
@@ -4608,7 +4608,7 @@
       "format": "esm"
     },
     "src/exports/client/providers.ts": {
-      "bytes": 2464,
+      "bytes": 2451,
       "imports": [
         {
           "path": "src/providers/Actions/index.tsx",
@@ -6502,7 +6502,7 @@
       "format": "esm"
     },
     "src/exports/client/elements.ts": {
-      "bytes": 3783,
+      "bytes": 3770,
       "imports": [
         {
           "path": "src/elements/AppHeader/index.tsx",
@@ -6855,7 +6855,7 @@
       "format": "esm"
     },
     "src/exports/client/forms.ts": {
-      "bytes": 948,
+      "bytes": 935,
       "imports": [
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
@@ -6921,7 +6921,7 @@
       "format": "esm"
     },
     "src/exports/client/fields.ts": {
-      "bytes": 1991,
+      "bytes": 1978,
       "imports": [
         {
           "path": "src/fields/Array/index.tsx",
@@ -7182,8 +7182,39 @@
       ],
       "format": "esm"
     },
+    "src/graphics/Logo/index.tsx": {
+      "bytes": 3439,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/exports/client/graphics.ts": {
+      "bytes": 254,
+      "imports": [
+        {
+          "path": "src/graphics/Account/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Account/index.js"
+        },
+        {
+          "path": "src/graphics/DefaultBlockImage/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/DefaultBlockImage/index.js"
+        },
+        {
+          "path": "src/graphics/Icon/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Icon/index.js"
+        },
+        {
+          "path": "src/graphics/Logo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Logo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/exports/client/index.ts": {
-      "bytes": 183,
+      "bytes": 213,
       "imports": [
         {
           "path": "src/exports/client/hooks.ts",
@@ -7214,6 +7245,11 @@
           "path": "src/exports/client/icons.ts",
           "kind": "import-statement",
           "original": "./icons.js"
+        },
+        {
+          "path": "src/exports/client/graphics.ts",
+          "kind": "import-statement",
+          "original": "./graphics.js"
         }
       ],
       "format": "esm"
@@ -7378,8 +7414,13 @@
       "format": "esm"
     },
     "src/exports/server/utilities.ts": {
-      "bytes": 871,
+      "bytes": 921,
       "imports": [
+        {
+          "path": "src/utilities/api.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/api.js"
+        },
         {
           "path": "src/utilities/buildComponentMap.ts",
           "kind": "import-statement",
@@ -7456,7 +7497,7 @@
     }
   },
   "outputs": {
-    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1167514 },
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1171527 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7886,9 +7927,11 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
+        "Account",
         "ActionsProvider",
         "AppHeader",
         "ArrayField",
@@ -7913,6 +7956,7 @@
         "CopyIcon",
         "CopyToClipboard",
         "DateTimeField",
+        "DefaultBlockImage",
         "DeleteMany",
         "DocumentControls",
         "DocumentEventsProvider",
@@ -7966,6 +8010,8 @@
         "Pagination",
         "ParamsProvider",
         "PasswordField",
+        "PayloadIcon",
+        "PayloadLogo",
         "PerPage",
         "Pill",
         "PlusIcon",
@@ -8382,13 +8428,16 @@
         "src/icons/CloseMenu/index.tsx": { "bytesInOutput": 419 },
         "src/icons/CodeBlock/index.tsx": { "bytesInOutput": 554 },
         "src/icons/Menu/index.tsx": { "bytesInOutput": 425 },
-        "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 }
+        "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 },
+        "src/exports/client/graphics.ts": { "bytesInOutput": 0 },
+        "src/graphics/Logo/index.tsx": { "bytesInOutput": 3505 }
       },
-      "bytes": 255838
+      "bytes": 259417
     },
-    "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 227501 },
+    "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 228736 },
     "dist/server.js": {
       "imports": [
+        { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "payload/types", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -8422,7 +8471,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -8473,10 +8521,13 @@
         "isEditing",
         "mapFields",
         "reduceFieldsToValues",
+        "requests",
         "traverseFields"
       ],
       "entryPoint": "src/exports/server/index.ts",
       "inputs": {
+        "src/utilities/api.ts": { "bytesInOutput": 751 },
+        "src/exports/server/utilities.ts": { "bytesInOutput": 0 },
         "src/providers/ComponentMap/buildComponentMap/fields.tsx": { "bytesInOutput": 10293 },
         "src/fields/FieldDescription/index.tsx": { "bytesInOutput": 436 },
         "src/forms/FieldPropsProvider/index.tsx": { "bytesInOutput": 179 },
@@ -8498,7 +8549,6 @@
         "src/hooks/useIntersect.ts": { "bytesInOutput": 416 },
         "src/providers/Config/index.tsx": { "bytesInOutput": 92 },
         "src/hooks/useDebounce.ts": { "bytesInOutput": 50 },
-        "src/utilities/api.ts": { "bytesInOutput": 19 },
         "src/providers/SearchParams/index.tsx": { "bytesInOutput": 191 },
         "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 216 },
         "src/utilities/formatDocTitle.ts": { "bytesInOutput": 450 },
@@ -8521,7 +8571,6 @@
         "src/elements/ViewDescription/index.tsx": { "bytesInOutput": 303 },
         "src/providers/ComponentMap/buildComponentMap/actions.tsx": { "bytesInOutput": 564 },
         "src/providers/ComponentMap/buildComponentMap/globals.tsx": { "bytesInOutput": 1504 },
-        "src/exports/server/utilities.ts": { "bytesInOutput": 0 },
         "src/utilities/buildFieldSchemaMap/traverseFields.ts": { "bytesInOutput": 1033 },
         "src/utilities/buildFieldSchemaMap/index.ts": { "bytesInOutput": 317 },
         "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
@@ -8539,7 +8588,7 @@
         "src/utilities/groupNavItems.ts": { "bytesInOutput": 599 },
         "src/exports/server/index.ts": { "bytesInOutput": 0 }
       },
-      "bytes": 42373
+      "bytes": 43120
     }
   }
 }

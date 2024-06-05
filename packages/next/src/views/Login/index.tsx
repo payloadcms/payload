@@ -1,10 +1,10 @@
 import type { AdminViewProps } from 'payload/types'
 
 import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
-import { Logo } from '@payloadcms/ui/graphics/Logo'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
+import { Logo } from '../../elements/Logo/index.js'
 import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
 
