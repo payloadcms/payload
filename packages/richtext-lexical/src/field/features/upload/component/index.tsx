@@ -5,14 +5,16 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
-import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
-import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import {
+  Button,
+  DrawerToggler,
+  useConfig,
+  useDocumentDrawer,
+  useDrawerSlug,
+  usePayloadAPI,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { File } from '@payloadcms/ui/graphics/File'
-import { usePayloadAPI } from '@payloadcms/ui/hooks/usePayloadAPI'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import {
   $getNodeByKey,
   $getSelection,

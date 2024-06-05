@@ -5,14 +5,16 @@ import type { ClientCollectionConfig, FormState } from 'payload/types'
 import * as facelessUIImport from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
-import { Drawer } from '@payloadcms/ui/elements/Drawer'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  Drawer,
+  Form,
+  FormSubmit,
+  RenderFields,
+  useConfig,
+  useDocumentInfo,
+  useFieldProps,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { $getNodeByKey } from 'lexical'
 import { deepCopyObject } from 'payload/utilities'

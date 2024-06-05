@@ -3,7 +3,7 @@ import type { LexicalCommand } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useConfig } from '@payloadcms/ui/client'
 import {
   $getPreviousSelection,
   $getSelection,

@@ -7,10 +7,7 @@ import * as facelessUIImport from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui/client'
 import { $isLineBreakNode } from 'lexical'
 import {
   $getSelection,

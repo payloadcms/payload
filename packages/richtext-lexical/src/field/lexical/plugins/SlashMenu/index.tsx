@@ -2,7 +2,7 @@
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useTranslation } from '@payloadcms/ui/client'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -58,7 +58,7 @@ function SlashMenuItem({
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       ref={item.ref}
-      role="item"
+      role="option"
       tabIndex={-1}
       type="button"
     >

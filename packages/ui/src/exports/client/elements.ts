@@ -53,3 +53,5 @@ const { toast } =
   reactToastifyImport && 'toast' in reactToastifyImport ? reactToastifyImport : { toast: undefined }
 export { toast }
 export { Upload } from '../../elements/Upload/index.js'
+export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
+export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'

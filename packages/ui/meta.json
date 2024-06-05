@@ -4608,7 +4608,7 @@
       "format": "esm"
     },
     "src/exports/client/providers.ts": {
-      "bytes": 2365,
+      "bytes": 2464,
       "imports": [
         {
           "path": "src/providers/Actions/index.tsx",
@@ -4619,6 +4619,11 @@
           "path": "src/providers/Auth/index.tsx",
           "kind": "import-statement",
           "original": "../../providers/Auth/index.js"
+        },
+        {
+          "path": "src/providers/ClientFunction/index.tsx",
+          "kind": "import-statement",
+          "original": "../../providers/ClientFunction/index.js"
         },
         {
           "path": "src/providers/ClientFunction/index.tsx",
@@ -6497,7 +6502,7 @@
       "format": "esm"
     },
     "src/exports/client/elements.ts": {
-      "bytes": 3571,
+      "bytes": 3717,
       "imports": [
         {
           "path": "src/elements/AppHeader/index.tsx",
@@ -6744,6 +6749,16 @@
           "path": "src/elements/Upload/index.tsx",
           "kind": "import-statement",
           "original": "../../elements/Upload/index.js"
+        },
+        {
+          "path": "src/fields/Blocks/BlocksDrawer/index.tsx",
+          "kind": "import-statement",
+          "original": "../../fields/Blocks/BlocksDrawer/index.js"
+        },
+        {
+          "path": "src/fields/Blocks/SectionTitle/index.tsx",
+          "kind": "import-statement",
+          "original": "../../fields/Blocks/SectionTitle/index.js"
         }
       ],
       "format": "esm"
@@ -6835,8 +6850,13 @@
       "format": "esm"
     },
     "src/exports/client/forms.ts": {
-      "bytes": 876,
+      "bytes": 948,
       "imports": [
+        {
+          "path": "src/forms/FieldPropsProvider/index.tsx",
+          "kind": "import-statement",
+          "original": "../../forms/FieldPropsProvider/index.js"
+        },
         {
           "path": "src/forms/FieldPropsProvider/index.tsx",
           "kind": "import-statement",
@@ -7631,6 +7651,7 @@
         "AppHeader",
         "ArrayField",
         "AuthProvider",
+        "BlocksDrawer",
         "BlocksField",
         "Button",
         "CalendarIcon",
@@ -7724,6 +7745,7 @@
         "ScrollInfoProvider",
         "SearchIcon",
         "SearchParamsProvider",
+        "SectionTitle",
         "Select",
         "SelectField",
         "SelectionProvider",
@@ -7756,8 +7778,10 @@
         "formatDrawerSlug",
         "toast",
         "useActions",
+        "useAddClientFunction",
         "useAllFormFields",
         "useAuth",
+        "useClientFunctions",
         "useComponentMap",
         "useConfig",
         "useDebounce",
@@ -7773,6 +7797,7 @@
         "useEntityVisibility",
         "useField",
         "useFieldComponents",
+        "useFieldProps",
         "useForm",
         "useFormFields",
         "useFormInitializing",
@@ -7851,7 +7876,7 @@
         "src/providers/ComponentMap/index.tsx": { "bytesInOutput": 610 },
         "src/providers/Actions/SetViewActions/index.tsx": { "bytesInOutput": 131 },
         "src/exports/client/providers.ts": { "bytesInOutput": 14 },
-        "src/providers/ClientFunction/index.tsx": { "bytesInOutput": 452 },
+        "src/providers/ClientFunction/index.tsx": { "bytesInOutput": 627 },
         "src/providers/DocumentEvents/index.tsx": { "bytesInOutput": 267 },
         "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 4496 },
         "src/utilities/formatDocTitle.ts": { "bytesInOutput": 450 },
@@ -8116,7 +8141,7 @@
         "src/icons/Menu/index.tsx": { "bytesInOutput": 425 },
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 }
       },
-      "bytes": 255501
+      "bytes": 255785
     }
   }
 }

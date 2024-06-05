@@ -1,5 +1,6 @@
 'use client'
 export { FieldPropsProvider } from '../../forms/FieldPropsProvider/index.js'
+export { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 export {
   useAllFormFields,
   useForm,

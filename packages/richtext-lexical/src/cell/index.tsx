@@ -3,8 +3,7 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import type { CellComponentProps } from 'payload/types'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { useTableCell } from '@payloadcms/ui/elements/Table'
-import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
+import { useClientFunctions, useTableCell } from '@payloadcms/ui/client'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
