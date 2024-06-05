@@ -46,6 +46,10 @@ const buildColumns = ({
       name: field.name,
       accessor: field.name,
       active: isActive,
+      admin: {
+        disableListColumn: field.admin?.disableListColumn,
+        disableListFilter: 'disableListFilter' in field.admin && field.admin?.disableListFilter,
+      },
       components: {
         Heading: (
           <SortColumn
