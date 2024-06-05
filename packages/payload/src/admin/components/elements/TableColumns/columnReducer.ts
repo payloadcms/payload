@@ -1,5 +1,4 @@
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { Field } from '../../../../fields/config/types'
 import type { Props as CellProps } from '../../views/collections/List/Cell/types'
 import type { Column } from '../Table/types'
 
