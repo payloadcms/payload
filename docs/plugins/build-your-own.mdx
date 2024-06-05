@@ -63,14 +63,14 @@ In the [Payload plugin template](https://github.com/payloadcms/payload-plugin-te
 2. /src folder - everything related to the plugin
 3. /dev folder - sanitized test project for development
 
-### Root
+### The root folder
 
 In the root folder, you will see various files related to the configuration of the plugin. We set up our environment in a similar manner in Payload core and across other projects. The only two files you need to modify are:
 
 - **README**.md - This contains instructions on how to use the template. When you are ready, update this to contain instructions on how to use your Plugin.
 - **package**.json - Contains necessary scripts and dependencies. Overwrite the metadata in this file to describe your Plugin.
 
-### Dev
+### The dev folder
 
 The purpose of the **dev** folder is to provide a sanitized local Payload project. so you can run and test your plugin while you are actively developing it.
 
@@ -159,7 +159,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
 ```
 
-### Src
+## Overview of the src folder
 
 Now that we have our environment setup and dev project ready to go - it&apos;s time to build the plugin!
 
@@ -272,22 +272,22 @@ If possible, include [JSDoc comments](https://www.typescriptlang.org/docs/handbo
 
 In addition to the setup covered above, here are other best practices to follow:
 
-#### Providing an enable / disable option:
+### Providing an enable / disable option
 
 For a better user experience, provide a way to disable the plugin without uninstalling it. This is especially important if your plugin adds additional webpack aliases, this will allow you to still let the webpack run to prevent errors.
 
-#### Include tests in your GitHub CI workflow:
+### Include tests in your GitHub CI workflow
 
 If you&apos;ve configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs)
 
-#### Publish your finished plugin to NPM:
+### Publish your finished plugin to NPM
 
 The best way to share and allow others to use your plugin once it is complete is to publish an NPM package. This process is straightforward and well documented, find out more about [creating and publishing a NPM package here](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
 
-#### Add payload-plugin topic tag:
+### Add payload-plugin topic tag
 
 Apply the tag **payload-plugin** to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing payload plugins](https://github.com/topics/payload-plugin).
 
-#### Use [Semantic Versioning](https://semver.org/) (SemVer):
+### Use Semantic Versioning (SemVer)
 
-With the SemVer system you release version numbers that reflect the nature of changes (major, minor, patch). Ensure all major versions reference their Payload compatibility.
+With the [Semantic Versioning](https://semver.org/) (SemVer) system you release version numbers that reflect the nature of changes (major, minor, patch). Ensure all major versions reference their Payload compatibility.

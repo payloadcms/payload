@@ -22,7 +22,7 @@ To swap in your own React component, first, consult the list of available compon
 You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
 
 | Path                  | Description                                                                                                                                                                                               |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                       |
 | **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
 | **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
@@ -461,7 +461,7 @@ Your custom view components will be given all the props that a React Router `<Ro
   have certain access rights, you should handle that within your view component yourself.
 </Banner>
 
-### Example
+#### Example
 
 You can find examples of custom views in the [Payload source code `/test/admin/components/views` folder](https://github.com/payloadcms/payload/tree/main/test/admin/components/views). There, you'll find two custom views:
 
@@ -511,7 +511,7 @@ These are the props that will be passed to your custom Cell to use in your own c
 | **`cellData`**   | The data for the field that the cell represents.                  |
 | **`rowData`**    | An object with all the field values for the row.                  |
 
-### Example
+#### Example
 
 ```tsx
 import React from 'react'
@@ -562,7 +562,7 @@ These are the props that will be passed to your custom Label.
 | **`label`**    | Label value provided in field, it can be used with i18n.         |
 | **`required`** | A boolean value that represents if the field is required or not. |
 
-### Example
+#### Example
 
 ```tsx
 'use client'
@@ -604,7 +604,7 @@ These are the props that will be passed to your custom Error.
 | **`message`**   | The error message.                                            |
 | **`showError`** | A boolean value that represents if the error should be shown. |
 
-### Example
+#### Example
 
 ```tsx
 import React from 'react'
@@ -627,7 +627,7 @@ const CustomError: React.FC<Props> = (props) => {
 
 With these properties you can add multiple components before and after the input element. For example, you can add an absolutely positioned button to clear the current field value.
 
-### Example
+#### Example
 
 ```tsx
 import React from 'react'

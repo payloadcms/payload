@@ -79,7 +79,7 @@ export const createStripeSubscription = async ({ data, operation }) => {
 
 **As-is, this collection will prevent your Admin panel from bundling or loading correctly, because Stripe relies on some Node-only packages.**
 
-## How to fix this
+## How to exclude server-only code
 
 You need to make sure that you use `alias`es to tell your bundler to import "safe" files vs. attempting to import any server-side code that you need to get rid of. Depending on your bundler (Webpack, Vite, etc.) the steps involved may be slightly different.
 

@@ -177,7 +177,7 @@ const headlessEditor = createHeadlessEditor({
 })
 ```
 
-## Getting the editor config
+### Getting the editor config
 
 As you can see, you need to provide an editor config in order to create a headless editor. This is because the editor config is used to determine which nodes & features are enabled, and which converters are used.
 
@@ -195,7 +195,7 @@ yourEditorConfig.features = [
 ]
 ```
 
-## Getting the editor config from an existing field
+### Getting the editor config from an existing field
 
 If you have access to the sanitized collection config, you can get access to the lexical sanitized editor config & features, as every lexical richText field returns it. Here is an example how you can get it from another field's afterRead hook:
 
