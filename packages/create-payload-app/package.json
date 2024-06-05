@@ -10,10 +10,24 @@
   "license": "MIT",
   "type": "module",
   "exports": {
+    "./types": {
+      "import": "./src/types.ts",
+      "require": "./src/types.ts"
+    },
     "./commands": {
       "import": "./src/lib/init-next.ts",
       "require": "./src/lib/init-next.ts",
       "types": "./src/lib/init-next.ts"
+    },
+    "./lib/*": {
+      "import": "./src/lib/*",
+      "require": "./src/lib/*",
+      "types": "./src/lib/*"
+    },
+    "./utils/*": {
+      "import": "./src/utils/*",
+      "require": "./src/utils/*",
+      "types": "./src/utils/*"
     }
   },
   "bin": {

@@ -2,7 +2,7 @@ import fse from 'fs-extra'
 import path from 'path'
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { createProject } from './create-project.js'
-import { dbReplacements } from './packages.js'
+import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
 import globby from 'globby'
 import { jest } from '@jest/globals'
@@ -125,7 +125,7 @@ describe('createProject', () => {
 
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement.join('\n'))
+        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
       })
     })
   })

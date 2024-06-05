@@ -76,3 +76,5 @@ export type NextAppDetails = {
 }
 
 export type NextConfigType = 'cjs' | 'esm'
+
+export type StorageAdapterType = 'payloadCloud' | 'vercelBlobStorage' | 'localDisk'
