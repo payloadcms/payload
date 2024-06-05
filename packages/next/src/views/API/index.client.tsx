@@ -5,6 +5,7 @@ import {
   CopyToClipboard,
   Form,
   Gutter,
+  MinimizeMaximizeIcon,
   NumberField as NumberInput,
   SetViewActions,
   useComponentMap,
@@ -13,7 +14,6 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { MinimizeMaximizeIcon } from '@payloadcms/ui/icons/MinimizeMaximize'
 import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'
