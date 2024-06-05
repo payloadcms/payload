@@ -16,6 +16,31 @@ const baseRules = {
       type: 'natural',
       order: 'asc',
       'partition-by-comment': true,
+      'partition-by-new-line': true,
+      groups: ['top', 'unknown'],
+      'custom-groups': {
+        top: ['_id', 'id', 'name', 'slug', 'type'],
+      },
+    },
+  ],
+  'perfectionist/sort-object-types': [
+    'error',
+    {
+      type: 'natural',
+      order: 'asc',
+      'partition-by-new-line': true,
+      groups: ['top', 'unknown'],
+      'custom-groups': {
+        top: ['_id', 'id', 'name', 'slug', 'type'],
+      },
+    },
+  ],
+  'perfectionist/sort-interfaces': [
+    'error',
+    {
+      type: 'natural',
+      order: 'asc',
+      'partition-by-new-line': true,
       groups: ['top', 'unknown'],
       'custom-groups': {
         top: ['_id', 'id', 'name', 'slug', 'type'],
