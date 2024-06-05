@@ -10,6 +10,9 @@ export const withPayload = (nextConfig = {}) => {
     )
   }
 
+  /**
+   * @type {import('next').NextConfig}
+   */
   const toReturn = {
     ...nextConfig,
     env: {
