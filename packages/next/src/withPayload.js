@@ -10,8 +10,14 @@ export const withPayload = (nextConfig = {}) => {
     )
   }
 
-  return {
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const toReturn = {
     ...nextConfig,
+    env: {
+      ...(nextConfig?.env || {}),
+    },
     experimental: {
       ...(nextConfig?.experimental || {}),
       outputFileTracingExcludes: {
@@ -98,6 +104,12 @@ export const withPayload = (nextConfig = {}) => {
       }
     },
   }
+
+  if (nextConfig.basePath) {
+    toReturn.env.NEXT_BASE_PATH = nextConfig.basePath
+  }
+
+  return toReturn
 }
 
 export default withPayload
