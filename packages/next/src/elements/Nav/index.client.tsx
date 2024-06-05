@@ -1,5 +1,7 @@
 'use client'
 
+import type { EntityToGroup } from '@payloadcms/ui/utilities/groupNavItems'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   ChevronIcon,
@@ -10,11 +12,7 @@ import {
   useNav,
   useTranslation,
 } from '@payloadcms/ui/client'
-import {
-  type EntityToGroup,
-  EntityType,
-  groupNavItems,
-} from '@payloadcms/ui/utilities/groupNavItems'
+import { EntityType, groupNavItems } from '@payloadcms/ui/server'
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 

@@ -6,8 +6,10 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { hasSavePermission as getHasSavePermission } from '@payloadcms/ui/utilities/hasSavePermission'
-import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
+import {
+  hasSavePermission as getHasSavePermission,
+  isEditing as getIsEditing,
+} from '@payloadcms/ui/server'
 import { docAccessOperation, docAccessOperationGlobal } from 'payload/operations'
 
 export const getDocumentPermissions = async (args: {

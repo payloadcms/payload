@@ -3,7 +3,7 @@ import type { AdminViewProps } from 'payload/types'
 
 import { HydrateClientUser } from '@payloadcms/ui/client'
 import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { EntityType, groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
+import { EntityType, groupNavItems } from '@payloadcms/ui/server'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 

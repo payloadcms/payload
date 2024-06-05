@@ -22,7 +22,7 @@ import {
   useFormSubmitted,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { getFormState } from '@payloadcms/ui/server'
 import { v4 as uuid } from 'uuid'
 
 import type { ClientComponentProps } from '../../types.js'

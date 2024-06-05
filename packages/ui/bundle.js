@@ -46,6 +46,7 @@ const result = await esbuild
   .build({
     entryPoints: {
       client: 'src/exports/client/index.ts',
+      server: 'src/exports/server/index.ts',
     },
     bundle: true,
     platform: 'node',
@@ -61,7 +62,7 @@ const result = await esbuild
     plugins: [removeCSSImports],
   })
   .then((res, err) => {
-    console.log('client.ts bundled successfully')
+    console.log('client.ts and server.ts bundled successfully')
     return res
   })
   .catch(() => process.exit(1))

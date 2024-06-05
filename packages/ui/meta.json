@@ -7212,6 +7212,222 @@
         }
       ],
       "format": "esm"
+    },
+    "src/providers/ComponentMap/buildComponentMap/fields.tsx": {
+      "bytes": 28444,
+      "imports": [
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/fields/FieldDescription/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../fields/FieldDescription/index.js"
+        },
+        {
+          "path": "src/fields/HiddenInput/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../fields/HiddenInput/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/WithServerSideProps/index.tsx": {
+      "bytes": 652,
+      "imports": [
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/providers/ComponentMap/buildComponentMap/actions.tsx": {
+      "bytes": 1548,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/ComponentMap/buildComponentMap/collections.tsx": {
+      "bytes": 6213,
+      "imports": [
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/ViewDescription/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../elements/ViewDescription/index.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/actions.tsx",
+          "kind": "import-statement",
+          "original": "./actions.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/fields.tsx",
+          "kind": "import-statement",
+          "original": "./fields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/providers/ComponentMap/buildComponentMap/globals.tsx": {
+      "bytes": 4274,
+      "imports": [
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/ViewDescription/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../elements/ViewDescription/index.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/actions.tsx",
+          "kind": "import-statement",
+          "original": "./actions.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/fields.tsx",
+          "kind": "import-statement",
+          "original": "./fields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/providers/ComponentMap/buildComponentMap/index.tsx": {
+      "bytes": 2837,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/WithServerSideProps/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../elements/WithServerSideProps/index.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/collections.tsx",
+          "kind": "import-statement",
+          "original": "./collections.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/globals.tsx",
+          "kind": "import-statement",
+          "original": "./globals.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/buildComponentMap.ts": {
+      "bytes": 245,
+      "imports": [
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/fields.tsx",
+          "kind": "import-statement",
+          "original": "../providers/ComponentMap/buildComponentMap/fields.js"
+        },
+        {
+          "path": "src/providers/ComponentMap/buildComponentMap/index.tsx",
+          "kind": "import-statement",
+          "original": "../providers/ComponentMap/buildComponentMap/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/buildFieldSchemaMap/traverseFields.ts": {
+      "bytes": 2454,
+      "imports": [{ "path": "payload/types", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/utilities/buildFieldSchemaMap/index.ts": {
+      "bytes": 923,
+      "imports": [
+        {
+          "path": "src/utilities/buildFieldSchemaMap/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./traverseFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/buildFormState.ts": {
+      "bytes": 5988,
+      "imports": [
+        {
+          "path": "src/forms/buildStateFromSchema/index.tsx",
+          "kind": "import-statement",
+          "original": "@payloadcms/ui/forms/buildStateFromSchema"
+        },
+        {
+          "path": "src/utilities/reduceFieldsToValues.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/ui/utilities/reduceFieldsToValues"
+        },
+        {
+          "path": "src/utilities/buildFieldSchemaMap/index.ts",
+          "kind": "import-statement",
+          "original": "./buildFieldSchemaMap/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/groupNavItems.ts": {
+      "bytes": 1974,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/exports/server/utilities.ts": {
+      "bytes": 615,
+      "imports": [
+        {
+          "path": "src/utilities/buildComponentMap.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/buildComponentMap.js"
+        },
+        {
+          "path": "src/utilities/buildFieldSchemaMap/index.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/buildFieldSchemaMap/index.js"
+        },
+        {
+          "path": "src/utilities/buildFieldSchemaMap/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/buildFieldSchemaMap/traverseFields.js"
+        },
+        {
+          "path": "src/utilities/buildFormState.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/buildFormState.js"
+        },
+        {
+          "path": "src/utilities/findLocaleFromCode.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/findLocaleFromCode.js"
+        },
+        {
+          "path": "src/utilities/getFormState.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/getFormState.js"
+        },
+        {
+          "path": "src/utilities/groupNavItems.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/groupNavItems.js"
+        },
+        {
+          "path": "src/utilities/reduceFieldsToValues.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/reduceFieldsToValues.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/exports/server/index.ts": {
+      "bytes": 39,
+      "imports": [
+        {
+          "path": "src/exports/server/utilities.ts",
+          "kind": "import-statement",
+          "original": "../server/utilities.js"
+        }
+      ],
+      "format": "esm"
     }
   },
   "outputs": {
@@ -8142,6 +8358,154 @@
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 }
       },
       "bytes": 255785
+    },
+    "dist/server.js": {
+      "imports": [
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "date-fns/locale/en-US", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "next/navigation.js", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "date-fns", "kind": "import-statement", "external": true },
+        { "path": "flatley", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "deep-equal", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "use-context-selector", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "payload/types", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+      ],
+      "exports": [
+        "EntityType",
+        "buildComponentMap",
+        "buildFieldSchemaMap",
+        "buildFormState",
+        "findLocaleFromCode",
+        "getFormState",
+        "groupNavItems",
+        "mapFields",
+        "reduceFieldsToValues",
+        "traverseFields"
+      ],
+      "entryPoint": "src/exports/server/index.ts",
+      "inputs": {
+        "src/providers/ComponentMap/buildComponentMap/fields.tsx": { "bytesInOutput": 10293 },
+        "src/fields/FieldDescription/index.tsx": { "bytesInOutput": 436 },
+        "src/forms/FieldPropsProvider/index.tsx": { "bytesInOutput": 179 },
+        "src/providers/Translation/index.tsx": { "bytesInOutput": 418 },
+        "src/providers/RouteCache/index.tsx": { "bytesInOutput": 196 },
+        "src/fields/HiddenInput/index.tsx": { "bytesInOutput": 362 },
+        "src/forms/useField/index.tsx": { "bytesInOutput": 1583 },
+        "src/hooks/useThrottledEffect.ts": { "bytesInOutput": 238 },
+        "src/providers/Auth/index.tsx": { "bytesInOutput": 304 },
+        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 108 },
+        "src/elements/Button/index.tsx": { "bytesInOutput": 1720 },
+        "src/icons/Chevron/index.tsx": { "bytesInOutput": 457 },
+        "src/icons/Edit/index.tsx": { "bytesInOutput": 624 },
+        "src/icons/Link/index.tsx": { "bytesInOutput": 531 },
+        "src/icons/Plus/index.tsx": { "bytesInOutput": 346 },
+        "src/icons/Swap/index.tsx": { "bytesInOutput": 525 },
+        "src/icons/X/index.tsx": { "bytesInOutput": 399 },
+        "src/elements/Tooltip/index.tsx": { "bytesInOutput": 940 },
+        "src/hooks/useIntersect.ts": { "bytesInOutput": 416 },
+        "src/providers/Config/index.tsx": { "bytesInOutput": 92 },
+        "src/hooks/useDebounce.ts": { "bytesInOutput": 50 },
+        "src/utilities/api.ts": { "bytesInOutput": 19 },
+        "src/providers/SearchParams/index.tsx": { "bytesInOutput": 191 },
+        "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 216 },
+        "src/utilities/formatDocTitle.ts": { "bytesInOutput": 59 },
+        "src/utilities/formatDate.ts": { "bytesInOutput": 61 },
+        "src/utilities/getFormState.ts": { "bytesInOutput": 341 },
+        "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 187 },
+        "src/providers/Locale/index.tsx": { "bytesInOutput": 105 },
+        "src/utilities/findLocaleFromCode.ts": { "bytesInOutput": 84 },
+        "src/providers/Preferences/index.tsx": { "bytesInOutput": 148 },
+        "src/providers/Operation/index.tsx": { "bytesInOutput": 92 },
+        "src/forms/Form/context.ts": { "bytesInOutput": 326 },
+        "src/forms/withCondition/index.tsx": { "bytesInOutput": 176 },
+        "src/forms/withCondition/WatchCondition.tsx": { "bytesInOutput": 348 },
+        "src/utilities/buildComponentMap.ts": { "bytesInOutput": 0 },
+        "src/providers/ComponentMap/buildComponentMap/index.tsx": { "bytesInOutput": 1071 },
+        "src/elements/WithServerSideProps/index.tsx": { "bytesInOutput": 241 },
+        "src/providers/ComponentMap/buildComponentMap/collections.tsx": { "bytesInOutput": 2248 },
+        "src/elements/ViewDescription/index.tsx": { "bytesInOutput": 303 },
+        "src/providers/ComponentMap/buildComponentMap/actions.tsx": { "bytesInOutput": 564 },
+        "src/providers/ComponentMap/buildComponentMap/globals.tsx": { "bytesInOutput": 1504 },
+        "src/exports/server/utilities.ts": { "bytesInOutput": 0 },
+        "src/utilities/buildFieldSchemaMap/traverseFields.ts": { "bytesInOutput": 1033 },
+        "src/utilities/buildFieldSchemaMap/index.ts": { "bytesInOutput": 317 },
+        "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
+          "bytesInOutput": 1297
+        },
+        "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts": {
+          "bytesInOutput": 179
+        },
+        "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts": { "bytesInOutput": 120 },
+        "src/forms/buildStateFromSchema/iterateFields.ts": { "bytesInOutput": 783 },
+        "src/forms/buildStateFromSchema/addFieldStatePromise.ts": { "bytesInOutput": 5932 },
+        "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts": { "bytesInOutput": 244 },
+        "src/forms/buildStateFromSchema/index.tsx": { "bytesInOutput": 338 },
+        "src/utilities/buildFormState.ts": { "bytesInOutput": 1982 },
+        "src/utilities/groupNavItems.ts": { "bytesInOutput": 599 },
+        "src/exports/server/index.ts": { "bytesInOutput": 0 }
+      },
+      "bytes": 41548
     }
   }
 }

@@ -5,8 +5,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { buildFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig

@@ -10,6 +10,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
+import type { StepNavItem } from './types.js'
 
 const baseClass = 'step-nav'
 
@@ -78,4 +79,4 @@ const StepNav: React.FC<{
   )
 }
 
-export { StepNav, StepNavProvider, useStepNav }
+export { StepNav, StepNavItem, StepNavProvider, useStepNav }

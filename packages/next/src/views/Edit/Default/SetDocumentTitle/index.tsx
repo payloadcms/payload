@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload/types'
 
 import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui/client'
-import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
+import { formatDocTitle } from '@payloadcms/ui/server'
 import { useEffect, useRef } from 'react'
 
 export const SetDocumentTitle: React.FC<{

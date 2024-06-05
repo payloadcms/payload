@@ -1,4 +1,5 @@
 'use client'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { LivePreviewConfig } from 'payload/config'
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
@@ -7,7 +8,6 @@ import {
   DocumentControls,
   DocumentFields,
   Form,
-  type FormProps,
   OperationProvider,
   SetViewActions,
   useAuth,
@@ -17,7 +17,7 @@ import {
   useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { getFormState } from '@payloadcms/ui/server'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'

@@ -10,7 +10,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
+import { formatDate } from '@payloadcms/ui/server'
 import React, { useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'

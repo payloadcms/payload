@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { InitPageResult, PayloadRequestWithData, VisibleEntities } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
-import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
+import { findLocaleFromCode } from '@payloadcms/ui/server'
 import { headers as getHeaders } from 'next/headers.js'
 import { parseCookies } from 'payload/auth'
 import { createLocalReq, isEntityHidden } from 'payload/utilities'

@@ -1,7 +1,7 @@
 import type { Config } from 'payload/config'
 import type { Block, BlockField, Field } from 'payload/types'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
+import { traverseFields } from '@payloadcms/ui/server'
 import { baseBlockFields, sanitizeFields } from 'payload/config'
 import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 

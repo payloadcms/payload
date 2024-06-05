@@ -15,7 +15,7 @@ import {
   useFieldProps,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { getFormState } from '@payloadcms/ui/server'
 import { $getNodeByKey } from 'lexical'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'

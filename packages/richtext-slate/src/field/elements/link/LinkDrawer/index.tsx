@@ -14,7 +14,7 @@ import {
   useHotkey,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { getFormState } from '@payloadcms/ui/server'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'

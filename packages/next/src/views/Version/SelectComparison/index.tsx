@@ -9,7 +9,7 @@ import {
   useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
+import { formatDate } from '@payloadcms/ui/server'
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 
