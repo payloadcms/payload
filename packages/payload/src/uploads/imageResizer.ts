@@ -1,8 +1,6 @@
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
-import fileType from 'file-type'
-const { fromBuffer } = fileType
-
+import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
 import sanitize from 'sanitize-filename'
 
@@ -343,7 +341,7 @@ export async function resizeAndTransformImageSizes({
         req.payloadUploadSizes[imageResizeConfig.name] = bufferData
       }
 
-      const mimeInfo = await fromBuffer(bufferData)
+      const mimeInfo = await fileTypeFromBuffer(bufferData)
 
       const imageNameWithDimensions = createImageName(
         sanitizedImage.name,

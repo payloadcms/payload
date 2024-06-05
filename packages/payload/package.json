@@ -89,7 +89,7 @@
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
     "deepmerge": "4.3.1",
-    "file-type": "16.5.4",
+    "file-type": "17.1.6",
     "find-up": "7.0.0",
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
