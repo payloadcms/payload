@@ -78,6 +78,26 @@ describe('fields', () => {
       ).toBeHidden()
     })
 
+    test('should not display admin.disableListColumn true field in list view column selector if toggling other fields', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Click another field in column selector
+      const updatedAtButton = page.locator(`.column-selector .column-selector__column`, {
+        hasText: exactText('Updated At'),
+      })
+      await updatedAtButton.click()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
+    })
+
     test('should display field in list view filter selector if admin.disableListColumn is true and admin.disableListFilter is false', async () => {
       await page.goto(url.list)
       await page.locator('.list-controls__toggle-where').click()

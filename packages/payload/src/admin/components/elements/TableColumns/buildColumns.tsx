@@ -42,10 +42,18 @@ const buildColumns = ({
       colIndex += 1
     }
     const props = cellProps?.[colIndex] || {}
+
+    const disableListFilter =
+      field.admin && 'disableListFilter' in field.admin ? field.admin.disableListFilter : false
+
     return {
       name: field.name,
       accessor: field.name,
       active: isActive,
+      admin: {
+        disableListColumn: field.admin?.disableListColumn,
+        disableListFilter,
+      },
       components: {
         Heading: (
           <SortColumn
