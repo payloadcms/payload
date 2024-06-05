@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload/types'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
+import { WithServerSideProps } from '@payloadcms/ui/server'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 

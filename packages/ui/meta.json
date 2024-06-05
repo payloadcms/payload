@@ -7182,13 +7182,8 @@
       ],
       "format": "esm"
     },
-    "src/graphics/Logo/index.tsx": {
-      "bytes": 3439,
-      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
-      "format": "esm"
-    },
     "src/exports/client/graphics.ts": {
-      "bytes": 254,
+      "bytes": 136,
       "imports": [
         {
           "path": "src/graphics/Account/index.tsx",
@@ -7199,16 +7194,6 @@
           "path": "src/graphics/DefaultBlockImage/index.tsx",
           "kind": "import-statement",
           "original": "../../graphics/DefaultBlockImage/index.js"
-        },
-        {
-          "path": "src/graphics/Icon/index.tsx",
-          "kind": "import-statement",
-          "original": "../../graphics/Icon/index.js"
-        },
-        {
-          "path": "src/graphics/Logo/index.tsx",
-          "kind": "import-statement",
-          "original": "../../graphics/Logo/index.js"
         }
       ],
       "format": "esm"
@@ -7484,20 +7469,79 @@
       ],
       "format": "esm"
     },
+    "src/graphics/Logo/index.tsx": {
+      "bytes": 3439,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/exports/server/graphics.ts": {
+      "bytes": 118,
+      "imports": [
+        {
+          "path": "src/graphics/Icon/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Icon/index.js"
+        },
+        {
+          "path": "src/graphics/Logo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Logo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/RenderCustomComponent/index.tsx": {
+      "bytes": 1166,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/WithServerSideProps/index.tsx",
+          "kind": "import-statement",
+          "original": "../WithServerSideProps/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/exports/server/elements.ts": {
+      "bytes": 168,
+      "imports": [
+        {
+          "path": "src/elements/RenderCustomComponent/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/RenderCustomComponent/index.js"
+        },
+        {
+          "path": "src/elements/WithServerSideProps/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/WithServerSideProps/index.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/exports/server/index.ts": {
-      "bytes": 39,
+      "bytes": 91,
       "imports": [
         {
           "path": "src/exports/server/utilities.ts",
           "kind": "import-statement",
-          "original": "../server/utilities.js"
+          "original": "./utilities.js"
+        },
+        {
+          "path": "src/exports/server/graphics.ts",
+          "kind": "import-statement",
+          "original": "./graphics.js"
+        },
+        {
+          "path": "src/exports/server/elements.ts",
+          "kind": "import-statement",
+          "original": "./elements.js"
         }
       ],
       "format": "esm"
     }
   },
   "outputs": {
-    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1171527 },
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1167472 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7927,7 +7971,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
@@ -8010,8 +8053,6 @@
         "Pagination",
         "ParamsProvider",
         "PasswordField",
-        "PayloadIcon",
-        "PayloadLogo",
         "PerPage",
         "Pill",
         "PlusIcon",
@@ -8429,12 +8470,11 @@
         "src/icons/CodeBlock/index.tsx": { "bytesInOutput": 554 },
         "src/icons/Menu/index.tsx": { "bytesInOutput": 425 },
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 },
-        "src/exports/client/graphics.ts": { "bytesInOutput": 0 },
-        "src/graphics/Logo/index.tsx": { "bytesInOutput": 3505 }
+        "src/exports/client/graphics.ts": { "bytesInOutput": 0 }
       },
-      "bytes": 259417
+      "bytes": 255876
     },
-    "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 228736 },
+    "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 235427 },
     "dist/server.js": {
       "imports": [
         { "path": "qs", "kind": "import-statement", "external": true },
@@ -8505,10 +8545,17 @@
         { "path": "payload/types", "kind": "import-statement", "external": true },
         { "path": "bson-objectid", "kind": "import-statement", "external": true },
         { "path": "payload/types", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
         "EntityType",
+        "PayloadIcon",
+        "PayloadLogo",
+        "RenderCustomComponent",
+        "WithServerSideProps",
         "buildComponentMap",
         "buildFieldSchemaMap",
         "buildFormState",
@@ -8580,15 +8627,20 @@
           "bytesInOutput": 179
         },
         "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts": { "bytesInOutput": 120 },
-        "src/forms/buildStateFromSchema/iterateFields.ts": { "bytesInOutput": 783 },
-        "src/forms/buildStateFromSchema/addFieldStatePromise.ts": { "bytesInOutput": 5932 },
+        "src/forms/buildStateFromSchema/iterateFields.ts": { "bytesInOutput": 784 },
+        "src/forms/buildStateFromSchema/addFieldStatePromise.ts": { "bytesInOutput": 5937 },
         "src/forms/buildStateFromSchema/getFilterOptionsQuery.ts": { "bytesInOutput": 244 },
-        "src/forms/buildStateFromSchema/index.tsx": { "bytesInOutput": 338 },
+        "src/forms/buildStateFromSchema/index.tsx": { "bytesInOutput": 339 },
         "src/utilities/buildFormState.ts": { "bytesInOutput": 1982 },
         "src/utilities/groupNavItems.ts": { "bytesInOutput": 599 },
-        "src/exports/server/index.ts": { "bytesInOutput": 0 }
+        "src/exports/server/index.ts": { "bytesInOutput": 0 },
+        "src/graphics/Icon/index.tsx": { "bytesInOutput": 426 },
+        "src/exports/server/graphics.ts": { "bytesInOutput": 0 },
+        "src/graphics/Logo/index.tsx": { "bytesInOutput": 3493 },
+        "src/elements/RenderCustomComponent/index.tsx": { "bytesInOutput": 245 },
+        "src/exports/server/elements.ts": { "bytesInOutput": 0 }
       },
-      "bytes": 43120
+      "bytes": 47381
     }
   }
 }

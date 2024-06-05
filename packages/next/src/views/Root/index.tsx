@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
+import { WithServerSideProps } from '@payloadcms/ui/server'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
