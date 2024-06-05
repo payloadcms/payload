@@ -27,6 +27,7 @@ type TemplateVariations = {
   dirname: string
   db: DbType
   storage: StorageAdapterType
+  sharp: boolean
   vercelDeployButtonLink?: string
   envNames?: {
     dbUri: string
@@ -41,16 +42,20 @@ main().catch((error) => {
 async function main() {
   const templatesDir = path.resolve(dirname, '../templates')
 
+  // WARNING: This will need to be updated when this merges into main
+  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/beta/templates`
+
   const variations: TemplateVariations[] = [
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
       db: 'postgres',
       storage: 'vercelBlobStorage',
+      sharp: false,
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
-          `https://github.com/payloadcms/payload/templates/${dirname}` +
+          `${templateRepoUrlBase}/${dirname}` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
@@ -66,10 +71,11 @@ async function main() {
       dirname: 'with-vercel-mongodb',
       db: 'mongodb',
       storage: 'vercelBlobStorage',
+      sharp: false,
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
-          `https://github.com/payloadcms/payload/templates/${dirname}` +
+          `${templateRepoUrlBase}/${dirname}` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
@@ -81,17 +87,33 @@ async function main() {
       },
     },
     {
+      name: 'blank',
+      dirname: 'blank',
+      db: 'mongodb',
+      storage: 'disk',
+      sharp: true,
+    },
+    {
       name: 'payload-cloud-mongodb-template',
       dirname: 'with-payload-cloud',
       db: 'mongodb',
       storage: 'payloadCloud',
+      sharp: true,
     },
   ]
 
-  for (const { name, dirname, db, storage, vercelDeployButtonLink, envNames } of variations) {
+  for (const {
+    name,
+    dirname,
+    db,
+    storage,
+    vercelDeployButtonLink,
+    envNames,
+    sharp,
+  } of variations) {
     console.log(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
-    copyRecursiveSync(path.join(templatesDir, 'blank-3.0'), destDir)
+    copyRecursiveSync(path.join(templatesDir, '_template'), destDir)
     console.log(`Generated ${name} in ${destDir}`)
 
     // Configure payload config
@@ -100,6 +122,7 @@ async function main() {
       packageJsonName: name,
       projectDirOrConfigPath: { projectDir: destDir },
       storageAdapter: storage,
+      sharp,
       envNames,
     })
 
@@ -148,10 +171,11 @@ async function generateReadme({
 }) {
   let header = `# ${name}\n`
   if (vercelDeployButtonLink) {
-    header += `[![Deploy with Vercel](https://vercel.com/button)](${vercelDeployButtonLink})\n`
+    header += `\n[![Deploy with Vercel](https://vercel.com/button)](${vercelDeployButtonLink})`
   }
 
   const readmeContent = `${header}
+
 ${description}
 
 ## Attributes

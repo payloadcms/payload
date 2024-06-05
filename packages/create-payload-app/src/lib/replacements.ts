@@ -60,7 +60,38 @@ const payloadCloudReplacement: StorageAdapterReplacement = {
   packageName: '@payloadcms/plugin-cloud',
 }
 
+const diskReplacement: StorageAdapterReplacement = {
+  configReplacement: [],
+  importReplacement: '',
+  packageName: '',
+}
+
 export const storageReplacements: Record<StorageAdapterType, StorageAdapterReplacement> = {
   payloadCloud: payloadCloudReplacement,
   vercelBlobStorage: vercelBlobStorageReplacement,
+  disk: diskReplacement,
+}
+
+/**
+ * Generic config replacement
+ */
+type ConfigReplacement = {
+  configReplacement: {
+    match: string
+    replacement: string
+  }
+  importReplacement: string
+  packageName: string
+}
+
+export const configReplacements: Record<string, ConfigReplacement> = {
+  sharp: {
+    // Replacement of `sharp, // Now optional`
+    configReplacement: {
+      match: 'sharp,',
+      replacement: '  // sharp,',
+    },
+    importReplacement: "import sharp from 'sharp'",
+    packageName: 'sharp',
+  },
 }

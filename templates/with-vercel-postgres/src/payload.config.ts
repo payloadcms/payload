@@ -5,8 +5,6 @@ import path from 'path'
 import { buildConfig } from 'payload/config'
 import { fileURLToPath } from 'url'
 
-// import sharp from 'sharp'
-
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 
@@ -28,16 +26,6 @@ export default buildConfig({
       connectionString: process.env.POSTGRES_URL || '',
     },
   }),
-
-  // Sharp is now an optional dependency -
-  // if you want to resize images, crop, set focal point, etc.
-  // make sure to install it and pass it to the config.
-
-  // This is temporary - we may make an adapter pattern
-  // for this before reaching 3.0 stable
-
-  // sharp,
-
   plugins: [
     vercelBlobStorage({
       collections: {

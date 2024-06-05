@@ -5,7 +5,7 @@ import path from 'path'
 import type { DbType, StorageAdapterType } from '../types.js'
 
 import { warning } from '../utils/log.js'
-import { dbReplacements, storageReplacements } from './replacements.js'
+import { configReplacements, dbReplacements, storageReplacements } from './replacements.js'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
@@ -16,6 +16,7 @@ export async function configurePayloadConfig(args: {
   packageJsonName?: string
   projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
   storageAdapter?: StorageAdapterType
+  sharp?: boolean
 }): Promise<void> {
   if (!args.dbType) {
     return
@@ -49,6 +50,11 @@ export async function configurePayloadConfig(args: {
         packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
       }
 
+      // Sharp provided by default, only remove if explicitly set to false
+      if (args.sharp === false) {
+        delete packageObj.dependencies['sharp']
+      }
+
       if (args.packageJsonName) {
         packageObj.name = args.packageJsonName
       }
@@ -79,54 +85,52 @@ export async function configurePayloadConfig(args: {
     }
 
     const configContent = fse.readFileSync(payloadConfigPath, 'utf-8')
-    const configLines = configContent.split('\n')
+    let configLines = configContent.split('\n')
 
+    // DB Replacement
     const dbReplacement = dbReplacements[args.dbType]
 
-    let dbConfigStartLineIndex: number | undefined
-    let dbConfigEndLineIndex: number | undefined
-
-    let storageConfigLine: number | undefined
-
-    configLines.forEach((l, i) => {
-      if (l.includes('// database-adapter-import')) {
-        configLines[i] = dbReplacement.importReplacement
-      }
-
-      if (l.includes('// database-adapter-config-start')) {
-        dbConfigStartLineIndex = i
-      }
-      if (l.includes('// database-adapter-config-end')) {
-        dbConfigEndLineIndex = i
-      }
-
-      if (l.includes('// storage-adapter-placeholder')) {
-        storageConfigLine = i
-      }
+    configLines = replaceInConfigLines({
+      replacement: dbReplacement.configReplacement(args.envNames?.dbUri),
+      startMatch: `// database-adapter-config-start`,
+      endMatch: `// database-adapter-config-end`,
+      lines: configLines,
     })
 
-    if (args.storageAdapter && storageConfigLine) {
-      const storageReplacement = storageReplacements[args.storageAdapter]
+    configLines = replaceInConfigLines({
+      replacement: [dbReplacement.importReplacement],
+      startMatch: '// database-adapter-import',
+      lines: configLines,
+    })
 
-      if (storageReplacement) {
-        configLines.splice(storageConfigLine, 0, ...storageReplacement.configReplacement)
-        configLines.splice(storageConfigLine + storageReplacement.configReplacement.length, 1)
-      }
+    // Storage Adapter Replacement
+    if (args.storageAdapter) {
+      const replacement = storageReplacements[args.storageAdapter]
+      configLines = replaceInConfigLines({
+        replacement: replacement?.configReplacement,
+        startMatch: '// storage-adapter-placeholder',
+        lines: configLines,
+      })
 
-      // Prepend import statement to beginning of file
-      configLines.unshift(storageReplacement.importReplacement)
-      if (dbConfigStartLineIndex) dbConfigStartLineIndex += 1
-      if (dbConfigEndLineIndex) dbConfigEndLineIndex += 1
+      configLines = replaceInConfigLines({
+        replacement: [replacement.importReplacement],
+        startMatch: '// storage-adapter-import-placeholder',
+        lines: configLines,
+      })
     }
 
-    if (dbConfigStartLineIndex && dbConfigEndLineIndex) {
-      configLines.splice(
-        dbConfigStartLineIndex,
-        dbConfigEndLineIndex - dbConfigStartLineIndex + 1,
-        ...dbReplacement.configReplacement(args.envNames?.dbUri),
-      )
-    } else {
-      warning('Unable to update payload.config.ts with database adapter import')
+    // Sharp Replacement (provided by default, only remove if explicitly set to false)
+    if (args.sharp === false) {
+      configLines = replaceInConfigLines({
+        replacement: [],
+        startMatch: 'sharp,',
+        lines: configLines,
+      })
+      configLines = replaceInConfigLines({
+        replacement: [],
+        startMatch: "import sharp from 'sharp'",
+        lines: configLines,
+      })
     }
 
     fse.writeFileSync(payloadConfigPath, configLines.join('\n'))
@@ -135,4 +139,31 @@ export async function configurePayloadConfig(args: {
       `Unable to update payload.config.ts with plugins: ${err instanceof Error ? err.message : ''}`,
     )
   }
+}
+
+function replaceInConfigLines({
+  replacement,
+  startMatch,
+  endMatch,
+  lines,
+}: {
+  replacement: string[]
+  startMatch: string
+  /** Optional endMatch to replace multiple lines */
+  endMatch?: string
+  lines: string[]
+}) {
+  if (!replacement) {
+    return lines
+  }
+
+  const startIndex = lines.findIndex((l) => l.includes(startMatch))
+  const endIndex = endMatch ? lines.findIndex((l) => l.includes(endMatch)) : startIndex
+
+  if (startIndex === -1 || endIndex === -1) {
+    return lines
+  }
+
+  lines.splice(startIndex, endIndex - startIndex + 1, ...replacement)
+  return lines
 }

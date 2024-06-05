@@ -1,5 +1,5 @@
 {
-  "name": "payload-vercel-mongodb-template",
+  "name": "blank",
   "version": "1.0.0",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
@@ -24,7 +24,8 @@
     "payload": "beta",
     "react": "^19.0.0-rc-f994737d14-20240522",
     "react-dom": "^19.0.0-rc-f994737d14-20240522",
-    "@payloadcms/storage-vercel-blob": "beta"
+    "sharp": "0.32.6",
+    "": "beta"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
