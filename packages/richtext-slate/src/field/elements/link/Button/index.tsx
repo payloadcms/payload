@@ -3,11 +3,7 @@
 import type { FormState } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useConfig, useDrawerSlug, useFieldProps, useTranslation } from '@payloadcms/ui/client'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import React, { Fragment, useState } from 'react'
