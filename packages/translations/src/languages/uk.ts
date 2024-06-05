@@ -296,6 +296,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     contains: 'містить',
     equals: 'дорівнює',
     exists: 'існує',
+    intersects: 'перетинається',
     isGreaterThan: 'більше ніж',
     isGreaterThanOrEqualTo: 'більше або дорівнює',
     isIn: 'є в',
@@ -305,6 +306,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'не дорівнює',
     isNotIn: 'не в',
     near: 'поруч',
+    within: 'в межах',
   },
   upload: {
     crop: 'Обрізати',

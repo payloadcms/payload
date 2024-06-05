@@ -292,6 +292,7 @@ export const thTranslations: DefaultTranslationsObject = {
     contains: 'มี',
     equals: 'เท่ากับ',
     exists: 'มีอยู่',
+    intersects: 'ตัดกัน',
     isGreaterThan: 'มากกว่า',
     isGreaterThanOrEqualTo: 'มากกว่าหรือเท่ากับ',
     isIn: 'อยู่ใน',
@@ -301,6 +302,7 @@ export const thTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'ไม่เท่ากับ',
     isNotIn: 'ไม่ได้อยู่ใน',
     near: 'ใกล้',
+    within: 'ภายใน',
   },
   upload: {
     crop: 'พืชผล',

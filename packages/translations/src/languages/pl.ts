@@ -296,6 +296,7 @@ export const plTranslations: DefaultTranslationsObject = {
     contains: 'zawiera',
     equals: 'równe',
     exists: 'istnieje',
+    intersects: 'przecina się',
     isGreaterThan: 'jest większy niż',
     isGreaterThanOrEqualTo: 'jest większe lub równe',
     isIn: 'jest w',
@@ -305,6 +306,7 @@ export const plTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nie jest równe',
     isNotIn: 'nie ma go w',
     near: 'blisko',
+    within: 'w ciągu',
   },
   upload: {
     crop: 'Przytnij',

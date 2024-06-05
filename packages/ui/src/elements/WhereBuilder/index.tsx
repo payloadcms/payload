@@ -8,7 +8,6 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { useTableColumns } from '../TableColumns/index.js'
 import { Condition } from './Condition/index.js'
 import './index.scss'
 import { reduceFieldMap } from './reduceFieldMap.js'
@@ -24,15 +23,14 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel } = props
+  const { collectionPluralLabel, fieldMap } = props
   const { i18n, t } = useTranslation()
-  const { columns } = useTableColumns()
 
-  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap(columns, i18n))
+  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap(fieldMap, i18n))
 
   useEffect(() => {
-    setReducedColumns(reduceFieldMap(columns, i18n))
-  }, [columns, i18n])
+    setReducedColumns(reduceFieldMap(fieldMap, i18n))
+  }, [fieldMap, i18n])
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
@@ -72,7 +70,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       if (validateWhereQuery(whereFromSearch)) {
         return whereFromSearch.or
       }
-
       // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
       const transformedWhere = transformWhereQuery(whereFromSearch)
 

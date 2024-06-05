@@ -295,6 +295,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     contains: 'съдържа',
     equals: 'е равно на',
     exists: 'съществува',
+    intersects: 'пресича',
     isGreaterThan: 'е по-голямо от',
     isGreaterThanOrEqualTo: 'е по-голямо от или равно на',
     isIn: 'е в',
@@ -304,6 +305,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'не е равно на',
     isNotIn: 'не е в',
     near: 'близко',
+    within: 'в рамките на',
   },
   upload: {
     crop: 'Изрязване',

@@ -299,6 +299,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     contains: 'содержит',
     equals: 'равно',
     exists: 'существует',
+    intersects: 'пересекает',
     isGreaterThan: 'больше чем',
     isGreaterThanOrEqualTo: 'больше или равно',
     isIn: 'находится',
@@ -308,6 +309,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'не равно',
     isNotIn: 'нет в',
     near: 'рядом',
+    within: 'в пределах',
   },
   upload: {
     crop: 'Обрезать',

@@ -299,6 +299,7 @@ export const roTranslations: DefaultTranslationsObject = {
     contains: 'conține',
     equals: 'egal cu',
     exists: 'există',
+    intersects: 'se intersectează',
     isGreaterThan: 'este mai mare decât',
     isGreaterThanOrEqualTo: 'este mai mare sau egal cu',
     isIn: 'este în',
@@ -308,6 +309,7 @@ export const roTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nu este egal cu',
     isNotIn: 'nu este în',
     near: 'în apropiere de',
+    within: 'înăuntru',
   },
   upload: {
     crop: 'Cultură',

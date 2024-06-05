@@ -294,6 +294,7 @@ export const viTranslations: DefaultTranslationsObject = {
     contains: 'có chứa',
     equals: 'bằng',
     exists: 'tồn tại',
+    intersects: 'giao nhau',
     isGreaterThan: 'lớn hơn',
     isGreaterThanOrEqualTo: 'lớn hơn hoặc bằng',
     isIn: 'có trong',
@@ -303,6 +304,7 @@ export const viTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'không bằng',
     isNotIn: 'không có trong',
     near: 'gần',
+    within: 'trong',
   },
   upload: {
     crop: 'Mùa vụ',
