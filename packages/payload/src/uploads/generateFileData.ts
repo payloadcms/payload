@@ -1,7 +1,6 @@
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
-import fileType from 'file-type'
-const { fromBuffer } = fileType
+import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import sanitize from 'sanitize-filename'
@@ -161,7 +160,7 @@ export const generateFileData = async <T>({
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = await fromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
+      ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
       fileData.filesize = fileBuffer.info.size
