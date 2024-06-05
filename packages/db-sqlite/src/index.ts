@@ -52,7 +52,7 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export { sql } from 'drizzle-orm'
 
-export function postgresAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
+export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 

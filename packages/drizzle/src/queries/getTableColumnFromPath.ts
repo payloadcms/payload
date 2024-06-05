@@ -1,22 +1,24 @@
 /* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
+import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload/types'
 
 import { and, eq, like, sql } from 'drizzle-orm'
-import { alias } from 'drizzle-orm/pg-core'
 import { APIError } from 'payload/errors'
 import { fieldAffectsData, tabHasName } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
 import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'
 
-import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
+import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
+
+import { getTableAlias } from './getTableAlias.js'
 
 type Constraint = {
   columnName: string
-  table: GenericTable | PgTableWithColumns<any>
+  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   value: unknown
 }
 
@@ -27,12 +29,12 @@ type TableColumn = {
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
-  table: GenericTable | PgTableWithColumns<any>
+  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
 }
 
 type Args = {
   adapter: DrizzleAdapter
-  aliasTable?: GenericTable | PgTableWithColumns<any>
+  aliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string
   constraintPath?: string
@@ -349,8 +351,8 @@ export const getTableColumnFromPath = ({
             newTableName = adapter.tableNameMap.get(
               `${tableName}_blocks_${toSnakeCase(block.slug)}`,
             )
-            const newAliasTableName = toSnakeCase(uuid())
-            const newAliasTable = alias(adapter.tables[newTableName], newAliasTableName)
+
+            const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
 
             joins.push({
               condition: eq(adapter.tables[tableName].id, newAliasTable._parentID),
@@ -449,11 +451,10 @@ export const getTableColumnFromPath = ({
         if (Array.isArray(field.relationTo) || (field.type === 'relationship' && field.hasMany)) {
           let relationshipFields
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
-          const aliasRelationshipTableName = uuid()
-          const aliasRelationshipTable = alias(
-            adapter.tables[relationTableName],
-            aliasRelationshipTableName,
-          )
+          const {
+            newAliasTable: aliasRelationshipTable,
+            newAliasTableName: aliasRelationshipTableName,
+          } = getTableAlias({ adapter, tableName: relationTableName })
 
           // Join in the relationships table
           if (locale && field.localized && adapter.payload.config.localization) {
@@ -495,7 +496,7 @@ export const getTableColumnFromPath = ({
             // parent to relationship join table
             relationshipFields = relationshipConfig.fields
 
-            newAliasTable = alias(adapter.tables[newTableName], toSnakeCase(uuid()))
+            const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
 
             joins.push({
               condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),
@@ -566,15 +567,14 @@ export const getTableColumnFromPath = ({
           const newTableName = adapter.tableNameMap.get(
             toSnakeCase(adapter.payload.collections[field.relationTo].config.slug),
           )
-          const aliasTableName = uuid()
-          const newAliasTable = alias(adapter.tables[newTableName], aliasTableName)
+          const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
 
           if (field.localized && adapter.payload.config.localization) {
-            const aliasLocaleTableName = uuid()
-            const aliasLocaleTable = alias(
-              adapter.tables[`${rootTableName}${adapter.localesSuffix}`],
-              aliasLocaleTableName,
-            )
+            const { newAliasTable: aliasLocaleTable } = getTableAlias({
+              adapter,
+              tableName: `${rootTableName}${adapter.localesSuffix}`,
+            })
+
             joins.push({
               condition: and(
                 eq(aliasLocaleTable._parentID, adapter.tables[rootTableName].id),

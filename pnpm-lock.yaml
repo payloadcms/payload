@@ -465,6 +465,12 @@ importers:
       '@libsql/client':
         specifier: ^0.5.2
         version: 0.5.6
+      '@payloadcms/db-postgres':
+        specifier: workspace:*
+        version: link:../db-postgres
+      '@payloadcms/db-sqlite':
+        specifier: workspace:*
+        version: link:../db-sqlite
       console-table-printer:
         specifier: 2.11.2
         version: 2.11.2

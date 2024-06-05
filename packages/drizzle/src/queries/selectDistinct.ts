@@ -1,7 +1,14 @@
 import type { QueryPromise, SQL } from 'drizzle-orm'
+import type { SQLiteColumn } from 'drizzle-orm/sqlite-core'
 
 import type { ChainedMethods } from '../find/chainMethods.js'
-import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
+import type {
+  DrizzleAdapter,
+  DrizzleTransaction,
+  GenericPgColumn,
+  TransactionPg,
+  TransactionSQLite,
+} from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { chainMethods } from '../find/chainMethods.js'
@@ -41,9 +48,23 @@ export const selectDistinct = ({
       })
     })
 
+    let query
+    const table = adapter.tables[tableName]
+
+    if (adapter.name === 'postgres') {
+      query = (db as TransactionPg)
+        .selectDistinct(selectFields as Record<string, GenericPgColumn>)
+        .from(table)
+    }
+    if (adapter.name === 'sqlite') {
+      query = (db as TransactionSQLite)
+        .selectDistinct(selectFields as Record<string, SQLiteColumn>)
+        .from(table)
+    }
+
     return chainMethods({
       methods: chainedMethods,
-      query: db.selectDistinct(selectFields).from(adapter.tables[tableName]),
+      query,
     })
   }
 }

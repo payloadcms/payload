@@ -29,7 +29,10 @@ export type SQLiteDB = LibSQLDatabase<
   Record<string, unknown> & Record<string, GenericRelation | GenericTable>
 >
 
-type GenericPgColumn = PgColumn<ColumnBaseConfig<ColumnDataType, string>, Record<string, unknown>>
+export type GenericPgColumn = PgColumn<
+  ColumnBaseConfig<ColumnDataType, string>,
+  Record<string, unknown>
+>
 
 export type GenericColumns<T> = {
   [x: string]: T
