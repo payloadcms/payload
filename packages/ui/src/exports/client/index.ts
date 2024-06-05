@@ -1,5 +1,8 @@
 /* eslint-disable perfectionist/sort-exports */
 'use client'
+
+// IMPORTANT: this file cannot use any wildcard exports because it is wrapped in a `use client` boundary
+
 // hooks
 export { useDebounce } from '../../hooks/useDebounce.js'
 export { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
