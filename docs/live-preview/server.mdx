@@ -18,7 +18,7 @@ Server-side Live Preview works by making a roundtrip to the server every time yo
 
 If your front-end application is built with [React](#react), you can use the `RefreshRouteOnChange` function that Payload provides. In the future, all other major frameworks like Vue and Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own router refresh component](#building-your-own-router-refresh-component) for more information.
 
-### React
+## React
 
 If your front-end application is built with [React](https://react.dev) or [Next.js](https://nextjs.org), you can use the `RefreshRouteOnSave` component that Payload provides.
 
@@ -157,7 +157,7 @@ export const RefreshRouteOnSave: React.FC<{
 
 ## Troubleshooting
 
-#### Updates do not appear as fast as client-side Live Preview
+### Updates do not appear as fast as client-side Live Preview
 
 If you are noticing that updates feel less snappy than client-side Live Preview (i.e. the `useLivePreview` hook), this is because of how the two differ in how they work—instead of emitting events against form state as you type, server-side Live Preview refreshes the route after a new document is saved. You can use autosave to mimic this effect. Try decreasing the value of `versions.autoSave.interval` to make the experience feel more responsive:
 

@@ -9,7 +9,7 @@ keywords: localization, internationalization, i18n, config, configuration, docum
 Payload features deep field-based localization support. Maintaining as many locales as you need is easy. All
 localization support is opt-in by default. To do so, follow the two steps below.
 
-### Enabling in the Payload config
+## Enabling in the Payload config
 
 Add the `localization` property to your Payload config to enable localization project-wide. You'll need to provide a
 list of all locales that you'd like to support as well as set a few other options.
@@ -103,7 +103,7 @@ right-to-left), and `fallbackLocale` property. The locale codes do not need to b
 to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter
 language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
 
-### Locale Properties:
+## Locale Object Properties
 
 | Option               | Description                                                                                                                    |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -125,7 +125,7 @@ Boolean enabling "fallback" locale functionality. If a document is requested in 
 localized value corresponding to the requested locale, then if this property is enabled, the document will automatically
 fall back to the fallback locale value. If this property is not enabled, the value will not be populated.
 
-### Field by field localization
+## Field by field localization
 
 Payload localization works on a **field** level—not a document level. In addition to configuring the base Payload config
 to support localization, you need to specify each field that you would like to localize.
@@ -166,12 +166,12 @@ and `block`s.
   strategy.
 </Banner>
 
-### Retrieving localized docs
+## Retrieving localized docs
 
 When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be
 used.
 
-##### REST API
+#### REST API
 
 REST API locale functionality relies on URL query parameters.
 
@@ -190,7 +190,7 @@ valid locale as provided to your base Payload config, or `'null'`, `'false'`, or
 fetch('https://localhost:3000/api/pages?locale=es&fallback-locale=none');
 ```
 
-##### GraphQL API
+#### GraphQL API
 
 In the GraphQL API, you can specify `locale` and `fallbackLocale` args to all relevant queries and mutations.
 
@@ -218,7 +218,7 @@ query {
   arguments in nested related document queries.
 </Banner>
 
-##### Local API
+#### Local API
 
 You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options`
 argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid
