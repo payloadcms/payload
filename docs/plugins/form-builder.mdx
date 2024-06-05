@@ -23,7 +23,7 @@ Forms can be as simple or complex as you need, from a basic contact form, to a m
   with as much detail as possible.
 </Banner>
 
-##### Core Features
+## Core Features
 
 - Build completely dynamic forms directly from the admin panel for a variety of use cases
 - Render forms on your front-end using your own UI components and match your brand's design system
@@ -64,9 +64,9 @@ const config = buildConfig({
 export default config
 ```
 
-### Options
+## Options
 
-#### `fields` (option)
+### `fields` (option)
 
 The `fields` property is an object of field types to allow your admin editors to build forms with. To override default settings, pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) _keyed to the block's slug_. See [Fields](#fields) for more details.
 
@@ -89,7 +89,7 @@ formBuilder({
 })
 ```
 
-#### `redirectRelationships`
+### `redirectRelationships`
 
 The `redirectRelationships` property is an array of collection slugs that, when enabled, are populated as options in the form's `redirect` field. This field is used to redirect the user to a dedicated confirmation page upon form submission (optional).
 
@@ -101,7 +101,7 @@ formBuilder({
 })
 ```
 
-#### `beforeEmail`
+### `beforeEmail`
 
 The `beforeEmail` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called just after emails are prepared, but before they are sent. This is a great place to inject your own HTML template to add custom styles.
 
@@ -119,7 +119,7 @@ formBuilder({
 })
 ```
 
-#### `formOverrides`
+### `formOverrides`
 
 Override anything on the `forms` collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formOverrides` property.
 
@@ -143,7 +143,7 @@ formBuilder({
 })
 ```
 
-#### `formSubmissionOverrides`
+### `formSubmissionOverrides`
 
 Override anything on the `form-submissions` collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formSubmissionOverrides` property.
 
@@ -166,7 +166,7 @@ formBuilder({
 })
 ```
 
-#### `handlePayment`
+### `handlePayment`
 
 The `handlePayment` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called upon form submission. You can integrate into any third-party payment processing API here to accept payment based on form input. You can use the `getPaymentTotal` function to calculate the total cost after all conditions have been applied. This is only applicable if the form has enabled the `payment` field.
 
@@ -206,7 +206,7 @@ Each field represents a form input. To override default settings pass either a b
   of a collection_ which are set via `formOverrides.fields`.
 </Banner>
 
-#### Text
+### Text
 
 Maps to a `text` input in your front-end. Used to collect a simple string.
 
@@ -218,7 +218,7 @@ Maps to a `text` input in your front-end. Used to collect a simple string.
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
-#### Textarea
+### Textarea
 
 Maps to a `textarea` input on your front-end. Used to collect a multi-line string.
 
@@ -230,7 +230,7 @@ Maps to a `textarea` input on your front-end. Used to collect a multi-line strin
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
-#### Select
+### Select
 
 Maps to a `select` input on your front-end. Used to display a list of options.
 
@@ -243,7 +243,7 @@ Maps to a `select` input on your front-end. Used to display a list of options.
 | `required`     | checkbox | Whether or not the field is required when submitted.     |
 | `options`      | array    | An array of objects with `label` and `value` properties. |
 
-#### Email (field)
+### Email (field)
 
 Maps to a `text` input with type `email` on your front-end. Used to collect an email address.
 
@@ -255,7 +255,7 @@ Maps to a `text` input with type `email` on your front-end. Used to collect an e
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
-#### State
+### State
 
 Maps to a `select` input on your front-end. Used to collect a US state.
 
@@ -267,7 +267,7 @@ Maps to a `select` input on your front-end. Used to collect a US state.
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
-#### Country
+### Country
 
 Maps to a `select` input on your front-end. Used to collect a country.
 
@@ -279,7 +279,7 @@ Maps to a `select` input on your front-end. Used to collect a country.
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
-#### Checkbox
+### Checkbox
 
 Maps to a `checkbox` input on your front-end. Used to collect a boolean value.
 
@@ -291,7 +291,7 @@ Maps to a `checkbox` input on your front-end. Used to collect a boolean value.
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
-#### Number
+### Number
 
 Maps to a `number` input on your front-end. Used to collect a number.
 
@@ -303,7 +303,7 @@ Maps to a `number` input on your front-end. Used to collect a number.
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |     | `defaultValue` | number | The default value of the field. |
 
-#### Message
+### Message
 
 Maps to a `RichText` component on your front-end. Used to display an arbitrary message to the user anywhere in the form.
 
@@ -311,7 +311,7 @@ Maps to a `RichText` component on your front-end. Used to display an arbitrary m
 | --------- | -------- | ----------------------------------- |
 | `message` | richText | The message to display on the form. |
 
-#### Payment
+### Payment
 
 Add this field to your form if it should collect payment. Upon submission, the `handlePayment` callback is executed with the form and submission data. You can use this to integrate with any third-party payment processing API.
 
@@ -324,7 +324,7 @@ Add this field to your form if it should collect payment. Upon submission, the `
 | `required`        | checkbox | Whether or not the field is required when submitted.                              |
 | `priceConditions` | array    | An array of objects that define the price conditions. See below for more details. |
 
-##### Price Conditions
+#### Price Conditions
 
 Each of the `priceConditions` are executed by the `getPaymentTotal` utility that this plugin provides. You can call this function in your `handlePayment` callback to dynamically calculate the total price of a form upon submission based on the user's input. For example, you could create a price condition that says "if the user selects 'yes' for this checkbox, add $10 to the total price".
 
@@ -337,7 +337,7 @@ Each of the `priceConditions` are executed by the `getPaymentTotal` utility that
 | `valueType`        | string       | The type of value to use to determine the price. |
 | `value`            | string       | The value to use to determine the price.         |
 
-#### Field Overrides
+### Field Overrides
 
 You can provide your own custom fields by passing a new [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) object into `fields`. You can override or extend any existing fields by first importing the `fields` from the plugin:
 
@@ -392,7 +392,7 @@ The [Examples Directory](https://github.com/payloadcms/payload/tree/main/example
 
 Below are some common troubleshooting tips. To help other developers, please contribute to this section as you troubleshoot your own application.
 
-##### SendGrid 403 Forbidden Error
+#### SendGrid 403 Forbidden Error
 
 - If you are using [SendGrid Link Branding](https://docs.sendgrid.com/ui/account-and-settings/how-to-set-up-link-branding) to remove the "via sendgrid.net" part of your email, you must also setup [Domain Authentication](https://docs.sendgrid.com/ui/account-and-settings/how-to-set-up-domain-authentication). This means you can only send emails from an address on this domain — so the `from` addresses in your form submission emails **_cannot_** be anything other than `something@your_domain.com`. This means that from `{{email}}` will not work, but `website@your_domain.com` will. You can still send the form's email address in the body of the email.
 

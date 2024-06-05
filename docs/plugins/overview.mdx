@@ -27,7 +27,7 @@ Writing plugins is no more complex than writing regular JavaScript. If you know 
 - Integrate all `upload`-enabled collections with a third-party file host like S3 or Cloudinary
 - Add custom endpoints or GraphQL queries / mutations with any type of custom functionality that you can think of
 
-### How to install plugins
+## How to install plugins
 
 The base Payload config allows for a `plugins` property which takes an `array` of [`Plugins`](https://github.com/payloadcms/payload/blob/main/packages/payload/src/config/types.ts).
 
@@ -82,7 +82,7 @@ const config = buildConfig({
 export default config
 ```
 
-#### When Plugins are initialized
+### When Plugins are initialized
 
 Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and had default options merged in.
 
@@ -142,7 +142,7 @@ const addLastModified: Plugin = (incomingConfig: Config): Config => {
 export default addLastModified
 ```
 
-### Available Plugins
+## Available Plugins
 
 You can discover existing plugins by browsing the `payload-plugin` topic on [GitHub](https://github.com/topics/payload-plugin).
 

@@ -35,7 +35,7 @@ It's often best practice to write your Collections in separate files and then im
 
 _\* An asterisk denotes that a property is required._
 
-#### Simple collection example
+### Simple collection example
 
 ```ts
 import { CollectionConfig } from 'payload/types'
@@ -58,13 +58,13 @@ export const Orders: CollectionConfig = {
 }
 ```
 
-#### More collection config examples
+### More collection config examples
 
 You can find an assortment
 of [example collection configs](https://github.com/payloadcms/public-demo/tree/master/src/payload/collections) in the Public
 Demo source code on GitHub.
 
-### Admin options
+## Admin options
 
 You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin`
 property on a collection's config.
@@ -87,7 +87,7 @@ property on a collection's config.
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |
 | **`pagination`**             | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                              |
 
-### Preview
+## Preview
 
 Collection `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend
 of your app to preview data.
@@ -126,7 +126,7 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-### Pagination
+## Pagination
 
 Here are a few options that you can specify options for pagination on a collection-by-collection basis:
 
@@ -135,23 +135,23 @@ Here are a few options that you can specify options for pagination on a collecti
 | `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
 | `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List view. |
 
-### Access control
+## Access control
 
 You can specify extremely granular access control (what users can do with documents in a collection) on a collection by
 collection basis. To learn more, go to the [Access Control](/docs/access-control/overview) docs.
 
-### Hooks
+## Hooks
 
 Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a
 collection by collection basis. To learn more, go to the [Hooks](/docs/hooks/overview) documentation.
 
-### Field types
+## Field types
 
 Collections support all field types that Payload has to offer—including simple fields like text and checkboxes all the
 way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more
 about field types.
 
-### List Searchable Fields
+## List Searchable Fields
 
 In the List view, there is a "search" box that allows you to quickly find a document with a search. By default, it
 searches on the ID field. If you have `admin.useAsTitle` defined, the list search will use that field. However, you can
@@ -169,7 +169,7 @@ those three fields plus the ID field.
   so your admin queries can remain performant.
 </Banner>
 
-### TypeScript
+## TypeScript
 
 You can import collection types as follows:
 

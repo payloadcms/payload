@@ -49,7 +49,7 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 
 _\* An asterisk denotes that a property is required._
 
-#### Simple example
+### Simple example
 
 ```ts
 import { buildConfig } from 'payload/config'
@@ -106,11 +106,11 @@ export default buildConfig({
 })
 ```
 
-#### Full example config
+### Full example config
 
 You can see a full [example config](https://github.com/payloadcms/public-demo/blob/master/src/payload/payload.config.ts) in the Public Demo source code on GitHub.
 
-### Using environment variables in your config
+## Using environment variables in your config
 
 We suggest using the `dotenv` package to handle environment variables alongside of Payload. All that's necessary to do is to require the package as high up in your application as possible (for example, at the top of your `server.js` file), and ensure that it can find an `.env` file that you create.
 
@@ -142,7 +142,7 @@ project-name
   can access it. [Click here](/docs/admin/webpack#admin-environment-vars) for more info.
 </Banner>
 
-### Customizing & Automating Config Location Detection
+## Customizing & Automating Config Location Detection
 
 Payload is designed to automatically locate your configuration file. By default, it will first look in the root of your current working directory for a file named `payload.config.js` or `payload.config.ts` if you're using TypeScript.
 
@@ -152,7 +152,7 @@ In production mode, Payload will first attempt to find the config file in the ou
 
 Please ensure your `tsconfig.json` is properly configured if you want Payload to accurately auto-detect your configuration file location. If `tsconfig.json` does not exist or doesn't specify `rootDir` or `outDir`, Payload will default to the current working directory.
 
-#### Overriding the Config Location
+### Overriding the Config Location
 
 In addition to the above automated detection, you can specify your own location for the Payload config file. This is done by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory. This can be useful in situations where your Payload config is not in a standard location, or you wish to switch between multiple configurations.
 
@@ -168,11 +168,11 @@ In addition to the above automated detection, you can specify your own location 
 
 When `PAYLOAD_CONFIG_PATH` is set, Payload will use this path to load the configuration, bypassing all automated detection.
 
-### Developing within the Config
+## Developing within the Config
 
 Payload comes with `isomorphic-fetch` installed which means that even in Node, you can use the `fetch` API just as you would within the browser. No need to import `axios` or similar, unless you want to!
 
-### TypeScript
+## TypeScript
 
 You can import config types as follows:
 
@@ -190,7 +190,7 @@ import { SanitizedConfig } from 'payload/config'
 // Generally, this is only used internally by Payload.
 ```
 
-### Telemetry
+## Telemetry
 
 Payload collects **completely anonymous** telemetry data about general usage. This data is super important to us and helps us accurately understand how we're growing and what we can do to build the software into everything that it can possibly be. The telemetry that we collect also help us demonstrate our growth in an accurate manner, which helps us as we seek investment to build and scale our team. If we can accurately demonstrate our growth, we can more effectively continue to support Payload as free and open-source software. To opt out of telemetry, you can pass `telemetry: false` within your Payload config.
 

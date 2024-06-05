@@ -8,7 +8,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 Payload provides a variety of powerful hooks that can be used within your own React components. With them, you can interface with Payload itself and build just about any type of complex customization you can think of—directly in familiar React code.
 
-### useField
+## useField
 
 The `useField` hook is used internally within every applicable Payload field component, and it manages sending and receiving a field's state from its parent form.
 
@@ -52,7 +52,7 @@ const {
 // The rest of your component goes here
 ```
 
-### useFormFields
+## useFormFields
 
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
 
@@ -81,7 +81,7 @@ const MyComponent: React.FC = () => {
 }
 ```
 
-### useAllFormFields
+## useAllFormFields
 
 **To retrieve more than one field**, you can use the `useAllFormFields` hook. Your component will re-render when _any_ field changes, so use this hook only if you absolutely need to. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
 
@@ -109,7 +109,7 @@ const ExampleComponent: React.FC = () => {
 };
 ```
 
-##### Updating other fields' values
+#### Updating other fields' values
 
 If you are building a custom component, then you should use `setValue` which is returned from the `useField` hook to programmatically set your field's value. But if you're looking to update _another_ field's value, you can use `dispatchFields` returned from `useFormFields`.
 
@@ -128,7 +128,7 @@ You can send the following actions to the `dispatchFields` function.
 
 To see types for each action supported within the `dispatchFields` hook, check out the Form types [here](https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/components/forms/Form/types.ts).
 
-### useForm
+## useForm
 
 The `useForm` hook can be used to interact with the form itself, and sends back many methods that can be used to reactively fetch form state without causing rerenders within your components each time a field is changed. This is useful if you have action-based callbacks that your components fire, and need to interact with form state _based on a user action_.
 
@@ -635,7 +635,7 @@ export const CustomArrayManager = () => {
   ]}
 />
 
-### useCollapsible
+## useCollapsible
 
 The `useCollapsible` hook allows you to control parent collapsibles:
 
@@ -667,7 +667,7 @@ const CustomComponent: React.FC = () => {
 }
 ```
 
-### useDocumentInfo
+## useDocumentInfo
 
 The `useDocumentInfo` hook provides lots of information about the document currently being edited, including the following:
 
@@ -707,7 +707,7 @@ const LinkFromCategoryToPosts: React.FC = () => {
 }
 ```
 
-### useLocale
+## useLocale
 
 In any custom component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
@@ -728,7 +728,7 @@ const Greeting: React.FC = () => {
 }
 ```
 
-### useAuth
+## useAuth
 
 Useful to retrieve info about the currently logged in user as well as methods for interacting with it. It sends back an object with the following properties:
 
@@ -755,7 +755,7 @@ const Greeting: React.FC = () => {
 }
 ```
 
-### useConfig
+## useConfig
 
 Used to easily fetch the full Payload config.
 
@@ -771,7 +771,7 @@ const MyComponent: React.FC = () => {
 }
 ```
 
-### useEditDepth
+## useEditDepth
 
 Sends back how many editing levels "deep" the current component is. Edit depth is relevant while adding new documents / editing documents in modal windows and other cases.
 
@@ -787,11 +787,11 @@ const MyComponent: React.FC = () => {
 }
 ```
 
-### usePreferences
+## usePreferences
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).
 
-### useTheme
+## useTheme
 
 Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
 
@@ -819,7 +819,7 @@ const MyComponent: React.FC = () => {
 }
 ```
 
-### useTableColumns
+## useTableColumns
 
 Returns methods to manipulate table columns
 
@@ -843,7 +843,7 @@ const MyComponent: React.FC = () => {
 }
 ```
 
-### useDocumentEvents
+## useDocumentEvents
 
 The `useDocumentEvents` hook provides a way of subscribing to cross-document events, such as updates made to nested documents within a drawer. This hook will report document events that are outside the scope of the document currently being edited. This hook provides the following:
 

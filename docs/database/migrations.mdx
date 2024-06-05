@@ -24,7 +24,7 @@ Ensure you have an npm script called "payload" in your `package.json` file.
   because Payload should not be globally installed on your system.
 </Banner>
 
-### Migration file contents
+## Migration file contents
 
 Payload stores all created migrations in a folder that you can specify. By default, migrations are stored
 in `./src/migrations`.
@@ -53,7 +53,7 @@ export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 }
 ```
 
-### Migrations Directory
+## Migrations Directory
 
 Each DB adapter has an optional property `migrationDir` where you can override where you want your migrations to be
 stored/read. If this is not specified, Payload will check the default and possibly make a best effort to find your
@@ -65,7 +65,7 @@ adapter.
 
 ## Commands
 
-### Migrate
+## Migrate
 
 The `migrate` command will run any migrations that have not yet been run.
 
@@ -73,7 +73,7 @@ The `migrate` command will run any migrations that have not yet been run.
 npm run payload migrate
 ```
 
-### Create
+## Create
 
 Create a new migration file in the migrations directory. You can optionally name the migration that will be created. By
 default, migrations will be named using a timestamp.
@@ -82,7 +82,7 @@ default, migrations will be named using a timestamp.
 npm run payload migrate:create optional-name-here
 ```
 
-### Status
+## Status
 
 The `migrate:status` command will check the status of migrations and output a table of which migrations have been run,
 and which migrations have not yet run.
@@ -93,7 +93,7 @@ and which migrations have not yet run.
 npm run payload migrate:status
 ```
 
-### Down
+## Down
 
 Roll back the last batch of migrations.
 
@@ -101,7 +101,7 @@ Roll back the last batch of migrations.
 npm run payload migrate:down
 ```
 
-### Refresh
+## Refresh
 
 Roll back all migrations that have been run, and run them again.
 
@@ -109,7 +109,7 @@ Roll back all migrations that have been run, and run them again.
 npm run payload migrate:refresh
 ```
 
-### Reset
+## Reset
 
 Roll back all migrations.
 
@@ -117,7 +117,7 @@ Roll back all migrations.
 npm run payload migrate:reset
 ```
 
-### Fresh
+## Fresh
 
 Drops all entities from the database and re-runs all migrations from scratch.
 

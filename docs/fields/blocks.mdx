@@ -26,7 +26,7 @@ keywords: blocks, fields, config, configuration, documentation, Content Manageme
 - A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
 - Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
 
-### Field config
+## Field config
 
 | Option             | Description                                                                                                                                                                                                                                                                        |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -49,7 +49,7 @@ keywords: blocks, fields, config, configuration, documentation, Content Manageme
 
 _\* An asterisk denotes that a property is required._
 
-### Admin Config
+## Admin Config
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
 
@@ -58,7 +58,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | **`initCollapsed`**    | Set the initial collapsed state |
 | **`isSortable`**       | Disable order sorting by setting this value to `false` |
 
-### Block configs
+## Block configs
 
 Blocks are defined as separate configs of their own.
 
@@ -84,7 +84,7 @@ Blocks are defined as separate configs of their own.
 | **`dbName`**               | Custom table name for this block type when using SQL database adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.
 | **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
 
-#### Auto-generated data per block
+### Auto-generated data per block
 
 In addition to the field data that you define on each block, Payload will store two additional properties on each block:
 
@@ -96,7 +96,7 @@ The `blockType` is saved as the slug of the block that has been selected.
 
 The Admin panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability.
 
-### Example
+## Example
 
 `collections/ExampleCollection.js`
 
@@ -139,7 +139,7 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
-### TypeScript
+## TypeScript
 
 As you build your own Block configs, you might want to store them in separate files but retain typing accordingly. To do so, you can import and use Payload's `Block` type:
 
