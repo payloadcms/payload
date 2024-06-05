@@ -1,6 +1,6 @@
 import type { PayloadRequestWithData } from 'payload/types'
 
-import { PayloadIcon } from '@payloadcms/ui/client'
+import { PayloadIcon } from '@payloadcms/ui/server'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
 import { NextResponse } from 'next/server.js'
