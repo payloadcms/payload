@@ -1,22 +1,4 @@
-/**
- * Ignores all ESM packages that make Jest mad.
- *
- * "Jest encountered an unexpected token"
- *
- * Direct packages:
- * - file-type
- */
-const esModules = [
-  // file-type and all dependencies: https://github.com/sindresorhus/file-type
-  'file-type',
-  'strtok3',
-  'readable-web-to-node-stream',
-  'token-types',
-  'peek-readable',
-].join('|')
-
-/** @type {import('jest').Config} */
-const baseJestConfig = {
+/** @type {import('jest').Config} */ const baseJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],
   moduleNameMapper: {
@@ -31,10 +13,6 @@ const baseJestConfig = {
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
-  transformIgnorePatterns: [
-    `/node_modules/(?!.pnpm)(?!(${esModules})/)`,
-    `/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
-  ],
   verbose: true,
 }
 
