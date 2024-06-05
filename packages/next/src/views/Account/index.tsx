@@ -6,11 +6,11 @@ import {
   FormQueryParamsProvider,
   HydrateClientUser,
 } from '@payloadcms/ui/client'
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { EditView } from '../Edit/index.js'

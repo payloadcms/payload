@@ -6502,7 +6502,7 @@
       "format": "esm"
     },
     "src/exports/client/elements.ts": {
-      "bytes": 3717,
+      "bytes": 3783,
       "imports": [
         {
           "path": "src/elements/AppHeader/index.tsx",
@@ -6685,6 +6685,11 @@
           "original": "../../elements/ReactSelect/index.js"
         },
         {
+          "path": "src/elements/RenderTitle/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/RenderTitle/index.js"
+        },
+        {
           "path": "src/elements/ShimmerEffect/index.tsx",
           "kind": "import-statement",
           "original": "../../elements/ShimmerEffect/index.js"
@@ -6739,12 +6744,12 @@
           "kind": "import-statement",
           "original": "../../elements/Tooltip/index.js"
         },
+        { "path": "react-toastify", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/UnpublishMany/index.tsx",
           "kind": "import-statement",
           "original": "../../elements/UnpublishMany/index.js"
         },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/Upload/index.tsx",
           "kind": "import-statement",
@@ -7451,7 +7456,7 @@
     }
   },
   "outputs": {
-    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1167447 },
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1167514 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7974,6 +7979,7 @@
         "RelationshipField",
         "RelationshipProvider",
         "RenderFields",
+        "RenderTitle",
         "RichTextField",
         "RootProvider",
         "RouteCacheProvider",
@@ -8378,7 +8384,7 @@
         "src/icons/Menu/index.tsx": { "bytesInOutput": 425 },
         "src/icons/MinimizeMaximize/index.tsx": { "bytesInOutput": 844 }
       },
-      "bytes": 255820
+      "bytes": 255838
     },
     "dist/server.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 227501 },
     "dist/server.js": {

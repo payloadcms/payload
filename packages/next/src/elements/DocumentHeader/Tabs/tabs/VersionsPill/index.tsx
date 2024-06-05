@@ -1,7 +1,7 @@
 'use client'
+import { useDocumentInfo } from '@payloadcms/ui/client'
 import React, { Fragment } from 'react'
 
-import { useDocumentInfo } from '../../../../../providers/DocumentInfo/index.js'
 import { baseClass } from '../../Tab/index.js'
 
 export const VersionsPill: React.FC = () => {

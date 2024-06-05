@@ -8,7 +8,6 @@ import {
   FormQueryParamsProvider,
   HydrateClientUser,
 } from '@payloadcms/ui/client'
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import { isEditing as getIsEditing } from '@payloadcms/ui/server'
 import { notFound, redirect } from 'next/navigation.js'
@@ -16,6 +15,7 @@ import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'

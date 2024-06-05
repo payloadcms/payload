@@ -1,11 +1,10 @@
 'use client'
 import type { SanitizedConfig } from 'payload/types'
 
+import { useSearchParams } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'
 import { useParams, usePathname } from 'next/navigation.js'
 import React from 'react'
-
-import { useSearchParams } from '../../../../providers/SearchParams/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
