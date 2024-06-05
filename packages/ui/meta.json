@@ -6411,7 +6411,7 @@
       "format": "esm"
     },
     "src/exports/client/index.ts": {
-      "bytes": 11121,
+      "bytes": 11142,
       "imports": [
         {
           "path": "src/hooks/useDebounce.ts",
@@ -7464,7 +7464,7 @@
     }
   },
   "outputs": {
-    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1170646 },
+    "dist/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 1170668 },
     "dist/client.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
