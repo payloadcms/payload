@@ -55,6 +55,8 @@ import {
   disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftWithMaxCollectionSlug,
+  draftWithMaxGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
 
@@ -352,6 +354,37 @@ describe('versions', () => {
       expect(href).toBe(`${pathname}/versions`)
     })
 
+    test('global — respects max number of versions', async () => {
+      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
+      await page.goto(global.global(draftWithMaxGlobalSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('initial title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(titleFieldInitial).toHaveValue('initial title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('updated title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(titleFieldUpdated).toHaveValue('updated title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
+    })
+
     test('global — has versions route', async () => {
       const global = new AdminUrlUtil(serverURL, globalSlug)
       const versionsURL = `${global.global(globalSlug)}/versions`
@@ -534,6 +567,37 @@ describe('versions', () => {
       await expect(page.locator('.rs__option')).toHaveCount(1)
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
+    })
+
+    test('collection — respects max number of versions', async () => {
+      const collection = new AdminUrlUtil(serverURL, draftWithMaxCollectionSlug)
+      await page.goto(collection.collection(draftWithMaxCollectionSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('initial title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(titleFieldInitial).toHaveValue('initial title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('updated title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(titleFieldUpdated).toHaveValue('updated title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
     })
   })
 })
