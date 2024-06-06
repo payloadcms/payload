@@ -268,6 +268,9 @@ export const richText: Validate<object, unknown, unknown, RichTextField> = async
   value,
   options,
 ) => {
+  if (!options?.editor) {
+    throw new Error('richText field has no editor property.')
+  }
   if (typeof options?.editor === 'function') {
     throw new Error('Attempted to access unsanitized rich text editor.')
   }

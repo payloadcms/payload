@@ -101,7 +101,7 @@ export default joi.object({
   defaultMaxTextLength: joi.number(),
   editor: joi
     .object()
-    .required()
+    .optional()
     .keys({
       CellComponent: componentSchema.optional(),
       FieldComponent: componentSchema.optional(),
