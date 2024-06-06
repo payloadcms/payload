@@ -233,7 +233,7 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('properly measures iframe and displays size', async () => {
+  test('device — properly measures size', async () => {
     await page.goto(pagesURLUtil.create)
     await page.waitForURL(pagesURLUtil.create)
     await page.locator('#field-title').fill('Title 3')
@@ -282,7 +282,7 @@ describe('Live Preview', () => {
     })
   })
 
-  test('resizes iframe to specified breakpoint', async () => {
+  test('device — resizes to specified breakpoint', async () => {
     await page.goto(pagesURLUtil.create)
     await page.waitForURL(pagesURLUtil.create)
     await page.locator('#field-title').fill('Title 4')
@@ -353,7 +353,7 @@ describe('Live Preview', () => {
     })
   })
 
-  test('centers device when smaller than frame despite zoom', async () => {
+  test('device — centers device when smaller than frame despite zoom', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
     await selectLivePreviewBreakpoint(page, mobileBreakpoint.label)
     await ensureDeviceIsCentered(page)
@@ -364,7 +364,7 @@ describe('Live Preview', () => {
     expect(true).toBeTruthy()
   })
 
-  test('left-aligns device when larger than frame despite zoom', async () => {
+  test('device — left-aligns device when larger than frame despite zoom', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
     await selectLivePreviewBreakpoint(page, desktopBreakpoint.label)
     await ensureDeviceIsLeftAligned(page)
