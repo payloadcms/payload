@@ -135,6 +135,26 @@ const WhereBuilder: React.FC<Props> = (props) => {
         or: [...conditions, ...paramsToKeep],
       }
 
+      const filteredQuery = {
+        or: newWhereQuery.or.map((orCondition) => {
+          const andConditions = (orCondition.and || []).map((andCondition) => {
+            const filteredCondition = {}
+            Object.entries(andCondition).forEach(([fieldName, fieldValue]) => {
+              Object.entries(fieldValue).forEach(([operatorKey, operatorValue]) => {
+                filteredCondition[fieldName] = {}
+                filteredCondition[fieldName][operatorKey] = !operatorValue
+                  ? undefined
+                  : operatorValue
+              })
+            })
+            return filteredCondition
+          })
+          return {
+            and: andConditions,
+          }
+        }),
+      }
+
       if (handleChange) handleChange(newWhereQuery as Where)
 
       const hasExistingConditions =
@@ -149,7 +169,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             {
               ...currentParams,
               page: 1,
-              where: newWhereQuery,
+              where: filteredQuery,
             },
             { addQueryPrefix: true },
           ),
