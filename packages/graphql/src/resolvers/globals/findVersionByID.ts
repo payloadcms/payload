@@ -1,6 +1,11 @@
-import type { Document, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
+import type { PayloadRequest } from 'payload/types'
 
 import { findVersionByIDOperationGlobal } from 'payload/operations'
+import {
+  type Document,
+  type PayloadRequestWithData,
+  type SanitizedGlobalConfig,
+} from 'payload/types'
 import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
@@ -20,15 +25,21 @@ export type Resolver = (
 
 export default function findVersionByIDResolver(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty<PayloadRequest>(req, 'locale')
+    req = isolateObjectProperty<PayloadRequest>(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
+
+    context.req = req
 
     const options = {
       id: args.id,
       depth: 0,
-      draft: args.draft,
       globalConfig,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await findVersionByIDOperationGlobal(options)

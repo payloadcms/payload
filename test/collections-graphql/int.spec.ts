@@ -1117,6 +1117,63 @@ describe('collections-graphql', () => {
     expect(queriedDoc.media.title).toEqual('example')
   })
 
+  it('should cascade draft arg with globals', async () => {
+    // publish relationship doc
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      draft: false,
+      data: {
+        title: 'published relationship',
+      },
+    })
+
+    // save draft version relationship doc
+    await payload.update({
+      collection: 'cyclical-relationship',
+      id: newDoc.id,
+      draft: true,
+      data: {
+        title: 'draft relationship',
+      },
+    })
+
+    // update global (published data)
+    await payload.updateGlobal({
+      slug: 'global-1',
+      data: {
+        title: 'published title',
+        relationship: newDoc.id,
+      },
+    })
+
+    // update global (draft data)
+    await payload.updateGlobal({
+      slug: 'global-1',
+      draft: true,
+      data: {
+        title: 'draft title',
+      },
+    })
+
+    const query = `{
+      Global1(draft: true) {
+        title
+        relationship {
+          title
+        }
+      }
+    }`
+    const res1 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query }),
+      })
+      .then((res) => res.json())
+
+    const queriedGlobal = res1.data.Global1
+    expect(queriedGlobal.title).toEqual('draft title')
+    expect(queriedGlobal.relationship.title).toEqual('draft relationship')
+  })
+
   describe('Error Handler', () => {
     it('should return have an array of errors when making a bad request', async () => {
       const query = `query {

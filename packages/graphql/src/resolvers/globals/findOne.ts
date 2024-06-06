@@ -1,23 +1,39 @@
-import type { Document, SanitizedGlobalConfig } from 'payload/types'
+import type { PayloadRequest } from 'payload/types'
 
 import { findOneOperation } from 'payload/operations'
+import { type Document, type SanitizedGlobalConfig } from 'payload/types'
 import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
   return async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty<PayloadRequest>(req, 'locale')
+    req = isolateObjectProperty<PayloadRequest>(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
-    const { slug } = globalConfig
+    if (!req.query) req.query = {}
+
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+          ? true
+          : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
-      slug,
+      slug: globalConfig.slug,
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await findOneOperation(options)
