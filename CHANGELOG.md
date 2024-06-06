@@ -1,3 +1,12 @@
+## [2.19.2](https://github.com/payloadcms/payload/compare/v2.19.1...v2.19.2) (2024-06-06)
+
+
+### Bug Fixes
+
+* cascade draft arg when querying globals with graphql ([#6651](https://github.com/payloadcms/payload/issues/6651)) ([ac8c209](https://github.com/payloadcms/payload/commit/ac8c2096af641a6886e4543ee65c9790e45f080f))
+* filtered out `disableListColumn` fields reappeared after toggling other fields ([#6636](https://github.com/payloadcms/payload/issues/6636)) ([626be15](https://github.com/payloadcms/payload/commit/626be155784dda181276bb87617433822a0accf3))
+* resizing animated images ([#6621](https://github.com/payloadcms/payload/issues/6621)) ([67c0b0e](https://github.com/payloadcms/payload/commit/67c0b0e6e0b5b190f6a916b59ba02f8c18479e18)), closes [#2181](https://github.com/payloadcms/payload/issues/2181) [#6146](https://github.com/payloadcms/payload/issues/6146)
+
 ## [2.19.1](https://github.com/payloadcms/payload/compare/v2.19.0...v2.19.1) (2024-06-04)
 
 
