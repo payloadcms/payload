@@ -8,7 +8,9 @@ import type { ViewDescriptionProps } from '../../../elements/ViewDescription/ind
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { GlobalComponentMap } from './types.js'
 
-import { ViewDescription } from '../../../elements/ViewDescription/index.js'
+// Need to import from client barrel file
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { ViewDescription } from '../../../exports/client/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 

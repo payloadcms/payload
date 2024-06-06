@@ -167,9 +167,9 @@
         "types": "./dist/assets/index.d.ts"
       },
       "./client": {
-        "import": "./dist/client.js",
-        "require": "./dist/client.js",
-        "types": "./dist/client.d.ts"
+        "import": "./dist/exports/client/index.js",
+        "require": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",
@@ -214,9 +214,9 @@
         "types": "./dist/providers/*/index.d.ts"
       },
       "./server": {
-        "import": "./dist/server.js",
-        "require": "./dist/server.js",
-        "types": "./dist/server.d.ts"
+        "import": "./dist/exports/server/index.js",
+        "require": "./dist/exports/server/index.js",
+        "types": "./dist/exports/server/index.d.ts"
       },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",

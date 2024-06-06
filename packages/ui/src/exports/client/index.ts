@@ -14,6 +14,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
+export { ViewDescription } from '../../elements/ViewDescription/index.js'
 export { AppHeader } from '../../elements/AppHeader/index.js'
 export { Button } from '../../elements/Button/index.js'
 export { Card } from '../../elements/Card/index.js'
@@ -74,6 +75,7 @@ export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 
 // fields
+export { HiddenInput } from '../../fields/HiddenInput/index.js'
 export { ArrayField } from '../../fields/Array/index.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { Checkbox as CheckboxField } from '../../fields/Checkbox/index.js'

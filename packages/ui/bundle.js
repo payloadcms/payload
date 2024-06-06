@@ -45,13 +45,13 @@ await esbuild
 const result = await esbuild
   .build({
     entryPoints: {
-      client: 'src/exports/client/index.ts',
-      server: 'src/exports/server/index.ts',
+      'client/index': 'src/exports/client/index.ts',
+      'server/index': 'src/exports/server/index.ts',
     },
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: 'dist',
+    outdir: 'dist/exports',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
     external: ['*.scss', '*.css'],
