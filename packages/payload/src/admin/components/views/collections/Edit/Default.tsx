@@ -46,7 +46,6 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   } = props
 
   const { setViewActions } = useActions()
-
   const { reportUpdate } = useDocumentEvents()
 
   const { auth } = collection
