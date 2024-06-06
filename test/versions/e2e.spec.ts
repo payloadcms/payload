@@ -355,13 +355,20 @@ describe('versions', () => {
     })
 
     test('global — respects max number of versions', async () => {
+      const maxOneGlobal = await payload.updateGlobal({
+        slug: draftWithMaxGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+
       const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
       await page.goto(global.global(draftWithMaxGlobalSlug))
 
       const titleFieldInitial = page.locator('#field-title')
-      await titleFieldInitial.fill('initial title')
+      await titleFieldInitial.fill('updated title')
       await waitForAutoSaveToRunAndComplete(page)
-      await expect(titleFieldInitial).toHaveValue('initial title')
+      await expect(titleFieldInitial).toHaveValue('updated title')
 
       const versionsTab = page.locator('.doc-tab', {
         hasText: '1',
@@ -372,9 +379,9 @@ describe('versions', () => {
       expect(versionsTab).toBeTruthy()
 
       const titleFieldUpdated = page.locator('#field-title')
-      await titleFieldUpdated.fill('updated title')
+      await titleFieldUpdated.fill('latest title')
       await waitForAutoSaveToRunAndComplete(page)
-      await expect(titleFieldUpdated).toHaveValue('updated title')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
 
       const versionsTabUpdated = page.locator('.doc-tab', {
         hasText: '1',
@@ -570,8 +577,17 @@ describe('versions', () => {
     })
 
     test('collection — respects max number of versions', async () => {
+      const maxOneCollection = await payload.create({
+        collection: draftWithMaxCollectionSlug,
+        data: {
+          title: 'initial title',
+          description: 'some description',
+        },
+        draft: true,
+      })
+
       const collection = new AdminUrlUtil(serverURL, draftWithMaxCollectionSlug)
-      await page.goto(collection.collection(draftWithMaxCollectionSlug))
+      await page.goto(collection.edit(maxOneCollection.id))
 
       const titleFieldInitial = page.locator('#field-title')
       await titleFieldInitial.fill('initial title')

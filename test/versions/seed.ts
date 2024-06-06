@@ -5,7 +5,7 @@ import type { DraftPost } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { titleToDelete } from './shared.js'
-import { draftCollectionSlug, draftWithMaxCollectionSlug, draftWithMaxGlobalSlug } from './slugs.js'
+import { draftCollectionSlug } from './slugs.js'
 
 export async function seed(_payload: Payload, parallel: boolean = false) {
   const blocksField: DraftPost['blocksField'] = [
@@ -69,29 +69,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       overrideAccess: true,
     })
   }
-
-  const { id: maxOneDraftId } = await _payload.create({
-    collection: draftWithMaxCollectionSlug,
-    data: {
-      blocksField,
-      description: 'Description',
-      radio: 'test',
-      title: 'Title With Many Versions',
-    },
-    depth: 0,
-    overrideAccess: true,
-    draft: true,
-  })
-
-  await _payload.update({
-    id: maxOneDraftId,
-    collection: draftWithMaxCollectionSlug,
-    data: {
-      title: `Title With Max Versions Updated`,
-    },
-    depth: 0,
-    overrideAccess: true,
-  })
 
   await _payload.create({
     collection: draftCollectionSlug,
