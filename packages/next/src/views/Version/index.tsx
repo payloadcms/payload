@@ -5,6 +5,7 @@ import type { Document, EditViewComponent } from 'payload/types'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
+import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 
 export const VersionView: EditViewComponent = async (props) => {
@@ -31,6 +32,8 @@ export const VersionView: EditViewComponent = async (props) => {
   let doc: Document
   let publishedDoc: Document
   let mostRecentDoc: Document
+  let latestPublishedVersion = null
+  let latestDraftVersion = null
 
   if (collectionSlug) {
     // /collections/:slug/:id/versions/:versionID
@@ -66,6 +69,11 @@ export const VersionView: EditViewComponent = async (props) => {
         overrideAccess: false,
         user,
       })
+
+      if (collectionConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')
+        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'collection')
+      }
     } catch (error) {
       return notFound()
     }
@@ -103,6 +111,11 @@ export const VersionView: EditViewComponent = async (props) => {
         overrideAccess: false,
         user,
       })
+
+      if (globalConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'global')
+        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'global')
+      }
     } catch (error) {
       return notFound()
     }
@@ -125,6 +138,8 @@ export const VersionView: EditViewComponent = async (props) => {
       doc={doc}
       docPermissions={docPermissions}
       initialComparisonDoc={mostRecentDoc}
+      latestDraftVersion={latestDraftVersion}
+      latestPublishedVersion={latestPublishedVersion}
       localeOptions={localeOptions}
       mostRecentDoc={mostRecentDoc}
       publishedDoc={publishedDoc}

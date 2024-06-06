@@ -28,6 +28,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   docPermissions,
   initialComparisonDoc,
+  latestDraftVersion,
+  latestPublishedVersion,
   localeOptions,
   mostRecentDoc,
   publishedDoc,
@@ -129,6 +131,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         <div className={`${baseClass}__controls`}>
           <SelectComparison
             baseURL={compareBaseURL}
+            latestDraftVersion={latestDraftVersion}
+            latestPublishedVersion={latestPublishedVersion}
             onChange={setCompareValue}
             parentID={id}
             publishedDoc={publishedDoc}

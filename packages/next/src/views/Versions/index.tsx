@@ -9,6 +9,7 @@ import React from 'react'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
+import { getLatestVersion } from './getLatestVersion.js'
 import { VersionsViewClient } from './index.client.js'
 import './index.scss'
 
@@ -40,6 +41,8 @@ export const VersionsView: EditViewComponent = async (props) => {
 
   let versionsData: PaginatedDocs
   let limitToUse = isNumber(limit) ? Number(limit) : undefined
+  let latestPublishedVersion = null
+  let latestDraftVersion = null
 
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
@@ -58,6 +61,15 @@ export const VersionsView: EditViewComponent = async (props) => {
           },
         },
       })
+      if (collectionConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion(payload, collectionSlug, 'draft', 'collection')
+        latestPublishedVersion = await getLatestVersion(
+          payload,
+          collectionSlug,
+          'published',
+          'collection',
+        )
+      }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
     }
@@ -75,6 +87,11 @@ export const VersionsView: EditViewComponent = async (props) => {
         sort: sort as string,
         user,
       })
+
+      if (globalConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion(payload, globalSlug, 'draft', 'global')
+        latestPublishedVersion = await getLatestVersion(payload, globalSlug, 'published', 'global')
+      }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
     }
@@ -83,6 +100,11 @@ export const VersionsView: EditViewComponent = async (props) => {
       return notFound()
     }
   }
+  const fetchURL = collectionSlug
+    ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
+    : globalSlug
+      ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
+      : ''
 
   const columns = buildVersionColumns({
     collectionConfig,
@@ -90,13 +112,9 @@ export const VersionsView: EditViewComponent = async (props) => {
     docID: id,
     globalConfig,
     i18n,
+    latestDraftVersion,
+    latestPublishedVersion,
   })
-
-  const fetchURL = collectionSlug
-    ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
-    : globalSlug
-      ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
-      : ''
 
   return (
     <React.Fragment>

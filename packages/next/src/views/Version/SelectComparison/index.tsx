@@ -2,6 +2,7 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
 
+import { Pill } from '@payloadcms/ui/elements/Pill'
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { fieldBaseClass } from '@payloadcms/ui/fields/shared'
 import { useConfig } from '@payloadcms/ui/providers/Config'
@@ -13,6 +14,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
 
+import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
 import { mostRecentVersionOption, publishedVersionOption } from '../shared.js'
 import './index.scss'
 
@@ -23,14 +25,28 @@ const maxResultsPerRequest = 10
 const baseOptions = [mostRecentVersionOption]
 
 export const SelectComparison: React.FC<Props> = (props) => {
-  const { baseURL, onChange, parentID, publishedDoc, value, versionID } = props
+  const {
+    baseURL,
+    latestDraftVersion,
+    latestPublishedVersion,
+    onChange,
+    parentID,
+    publishedDoc,
+    value,
+    versionID,
+  } = props
 
   const {
     admin: { dateFormat },
   } = useConfig()
 
   const { docConfig } = useDocumentInfo()
-  const [options, setOptions] = useState(baseOptions)
+  const [options, setOptions] = useState<
+    {
+      label: React.ReactNode | string
+      value: string
+    }[]
+  >(baseOptions)
   const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [errorLoading, setErrorLoading] = useState('')
   const { i18n, t } = useTranslation()
@@ -84,13 +100,44 @@ export const SelectComparison: React.FC<Props> = (props) => {
 
       if (response.ok) {
         const data: PaginatedDocs = await response.json()
+
         if (data.docs.length > 0) {
-          setOptions((existingOptions) => [
-            ...existingOptions,
-            ...data.docs.map((doc) => ({
-              label: formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat }),
+          const versionInfo = {
+            draft: {
+              currentLabel: t('version:currentDraft'),
+              latestVersion: latestDraftVersion,
+              pillStyle: undefined,
+              previousLabel: t('version:draft'),
+            },
+            published: {
+              currentLabel: t('version:currentPublishedVersion'),
+              latestVersion: latestPublishedVersion,
+              pillStyle: 'success',
+              previousLabel: t('version:previouslyPublished'),
+            },
+          }
+
+          const additionalOptions = data.docs.map((doc) => {
+            const status = doc.version._status
+            const { currentLabel, latestVersion, pillStyle, previousLabel } =
+              versionInfo[status] || {}
+
+            return {
+              label: (
+                <div>
+                  {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
+                  &nbsp;&nbsp;
+                  {renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)}
+                </div>
+              ),
               value: doc.id,
-            })),
+            }
+          })
+
+          setOptions((existingOptions) => [
+            ...(publishedDoc?._status === 'published' ? [publishedVersionOption] : []),
+            ...existingOptions,
+            ...additionalOptions,
           ])
 
           if (!data.hasNextPage) {
@@ -102,12 +149,29 @@ export const SelectComparison: React.FC<Props> = (props) => {
         setErrorLoading(t('error:unspecific'))
       }
     },
-    [dateFormat, baseURL, parentID, versionID, t, i18n, docConfig.versions?.drafts],
+    [
+      dateFormat,
+      baseURL,
+      parentID,
+      versionID,
+      t,
+      i18n,
+      docConfig.versions?.drafts,
+      latestDraftVersion,
+      latestPublishedVersion,
+      publishedDoc?._status,
+    ],
   )
 
   useEffect(() => {
     void getResults({ lastLoadedPage: 1 })
   }, [getResults])
+
+  const filteredOptions = options.filter(
+    (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
+  )
+
+  console.log('filteredOptions', filteredOptions)
 
   return (
     <div
@@ -124,10 +188,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
           onMenuScrollToBottom={() => {
             void getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
-          options={[
-            ...(publishedDoc?._status === 'published' ? [publishedVersionOption] : []),
-            ...options,
-          ]}
+          options={filteredOptions}
           placeholder={t('version:selectVersionToCompare')}
           value={value}
         />
