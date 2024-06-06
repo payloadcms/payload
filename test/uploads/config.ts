@@ -485,11 +485,6 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
         },
-        {
-          type: 'upload',
-          relationTo: cropOnlySlug,
-          name: 'test',
-        },
       ],
       upload: true,
       versions: {
