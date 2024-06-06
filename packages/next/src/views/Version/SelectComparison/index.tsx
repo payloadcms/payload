@@ -171,8 +171,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
     (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
   )
 
-  console.log('filteredOptions', filteredOptions)
-
   return (
     <div
       className={[fieldBaseClass, baseClass, errorLoading && 'error-loading']
