@@ -355,7 +355,7 @@ describe('versions', () => {
     })
 
     test('global — respects max number of versions', async () => {
-      const maxOneGlobal = await payload.updateGlobal({
+      await payload.updateGlobal({
         slug: draftWithMaxGlobalSlug,
         data: {
           title: 'initial title',
@@ -367,7 +367,7 @@ describe('versions', () => {
 
       const titleFieldInitial = page.locator('#field-title')
       await titleFieldInitial.fill('updated title')
-      await waitForAutoSaveToRunAndComplete(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await expect(titleFieldInitial).toHaveValue('updated title')
 
       const versionsTab = page.locator('.doc-tab', {
@@ -380,7 +380,7 @@ describe('versions', () => {
 
       const titleFieldUpdated = page.locator('#field-title')
       await titleFieldUpdated.fill('latest title')
-      await waitForAutoSaveToRunAndComplete(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await expect(titleFieldUpdated).toHaveValue('latest title')
 
       const versionsTabUpdated = page.locator('.doc-tab', {
@@ -591,7 +591,7 @@ describe('versions', () => {
 
       const titleFieldInitial = page.locator('#field-title')
       await titleFieldInitial.fill('initial title')
-      await waitForAutoSaveToRunAndComplete(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await expect(titleFieldInitial).toHaveValue('initial title')
 
       const versionsTab = page.locator('.doc-tab', {
@@ -604,7 +604,7 @@ describe('versions', () => {
 
       const titleFieldUpdated = page.locator('#field-title')
       await titleFieldUpdated.fill('updated title')
-      await waitForAutoSaveToRunAndComplete(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await expect(titleFieldUpdated).toHaveValue('updated title')
 
       const versionsTabUpdated = page.locator('.doc-tab', {
