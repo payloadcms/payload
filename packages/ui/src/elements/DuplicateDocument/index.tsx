@@ -2,7 +2,7 @@
 
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
@@ -27,8 +27,6 @@ export type Props = {
 }
 
 export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
-  const { Modal, useModal } = facelessUIImport
-
   const router = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
