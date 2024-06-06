@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.41",
+  "version": "3.0.0-beta.42",
   "private": true,
   "type": "module",
   "scripts": {
