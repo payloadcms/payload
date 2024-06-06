@@ -57,43 +57,55 @@ export type GenericEnum = PgEnum<[string, ...string[]]>
 
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
+export type CountDistinct = (args: {
+  db: PostgresDB | TransactionPg
+  joins: BuildQueryJoinAliases
+  tableName: string
+  where: SQL
+}) => Promise<number>
+
+export type DeleteWhere = (args: {
+  db: PostgresDB | TransactionPg
+  tableName: string
+  where: SQL
+}) => Promise<void>
+
+export type DropTables = (args: { adapter: PostgresAdapter }) => Promise<void>
+
+export type Execute = (args: {
+  db?: PostgresDB | TransactionPg
+  drizzle?: PostgresDB
+  raw?: string
+  sql?: SQL<unknown>
+}) => PgRaw<QueryResult<Record<string, unknown>>>
+
+export type GenerateDrizzleJSON = (args: {
+  schema: Record<string, GenericRelation | GenericTable>
+}) => PgSchema
+
+export type Insert = (args: {
+  db: PostgresDB | TransactionPg
+  onConflictDoUpdate?: PgInsertOnConflictDoUpdateConfig<any>
+  tableName: string
+  values: Record<string, unknown> | Record<string, unknown>[]
+}) => Promise<Record<string, unknown>[]>
+
 export type PostgresAdapter = DrizzleAdapter & {
-  countDistinct: (args: {
-    db: PostgresDB | TransactionPg
-    joins: BuildQueryJoinAliases
-    tableName: string
-    where: SQL
-  }) => Promise<number>
-  deleteWhere: (args: {
-    db: PostgresDB | TransactionPg
-    tableName: string
-    where: SQL
-  }) => Promise<void>
+  countDistinct: CountDistinct
+  deleteWhere: DeleteWhere
   drizzle: PostgresDB
-  dropTables: (args: { adapter: PostgresAdapter }) => Promise<void>
+  dropTables: DropTables
   enums: Record<string, GenericEnum>
-  execute: (args: {
-    db?: PostgresDB | TransactionPg
-    drizzle?: PostgresDB
-    raw?: string
-    sql?: SQL<unknown>
-  }) => PgRaw<QueryResult<Record<string, unknown>>>
+  execute: Execute
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  generateDrizzleJSON: (args: {
-    schema: Record<string, GenericRelation | GenericTable>
-  }) => PgSchema
+  generateDrizzleJSON: GenerateDrizzleJSON
   idType: Args['idType']
   initializing: Promise<void>
-  insert: (args: {
-    db: PostgresDB | TransactionPg
-    onConflictDoUpdate?: PgInsertOnConflictDoUpdateConfig<any>
-    tableName: string
-    values: Record<string, unknown> | Record<string, unknown>[]
-  }) => Promise<Record<string, unknown>[]>
+  insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   pgSchema?: { table: PgTableFn } | PgSchema

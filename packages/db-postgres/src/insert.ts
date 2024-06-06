@@ -1,6 +1,6 @@
-import type { PostgresAdapter } from './types.js'
+import type { Insert } from './types.js'
 
-export const insert: PostgresAdapter['insert'] = async function insert({
+export const insert: Insert = async function insert({
   db,
   onConflictDoUpdate,
   tableName,

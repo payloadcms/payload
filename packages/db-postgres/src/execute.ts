@@ -1,13 +1,8 @@
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from './types.js'
+import type { Execute } from './types.js'
 
-export const execute: PostgresAdapter['execute'] = function execute({
-  db,
-  drizzle,
-  raw,
-  sql: statement,
-}) {
+export const execute: Execute = function execute({ db, drizzle, raw, sql: statement }) {
   const executeFrom = db ?? drizzle
 
   if (raw) {
