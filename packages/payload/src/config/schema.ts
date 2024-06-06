@@ -190,6 +190,7 @@ export default joi.object({
   telemetry: joi.boolean(),
   typescript: joi.object({
     declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
+    generateTypesOnStartup: joi.boolean(),
     outputFile: joi.string(),
   }),
   upload: joi.object(),
