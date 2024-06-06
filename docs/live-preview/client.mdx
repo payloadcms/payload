@@ -282,3 +282,11 @@ const { data } = useLivePreview<PageType>({
   depth: 1, // Ensure this matches the depth of your initial request
 })
 ```
+
+### Iframe refuses to connect
+
+If your front-end application has set a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (CSP) that blocks the Admin Panel from loading your front-end application, the iframe will not be able to load your site. To resolve this, you can whitelist the Admin Panel's domain in your CSP by setting the `frame-ancestors` directive:
+
+```plaintext
+frame-ancestors: "self" localhost:* https://your-site.com;
+```
