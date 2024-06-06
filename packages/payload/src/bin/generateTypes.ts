@@ -6,9 +6,10 @@ import type { SanitizedConfig } from '../config/types.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import Logger from '../utilities/logger.js'
 
-export async function generateTypes(config: SanitizedConfig): Promise<void> {
+export async function generateTypes(config: SanitizedConfig, outPath?: string): Promise<void> {
   const logger = Logger()
-  const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
+  console.log({ outPath })
+  const outputFile = outPath || process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
   logger.info('Compiling TS types for Collections and Globals...')
 
