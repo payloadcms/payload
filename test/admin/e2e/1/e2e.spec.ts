@@ -619,14 +619,14 @@ describe('admin1', () => {
   })
 
   describe('form state', () => {
-    test('collection — should re-enable fields after saving as completed', async () => {
+    test('collection — should re-enable fields after save', async () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await expect(page.locator('#field-title')).toBeEnabled()
     })
 
-    test('global — should re-enable fields after saving as completed', async () => {
+    test('global — should re-enable fields after save', async () => {
       await page.goto(globalURL.global(globalSlug))
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
