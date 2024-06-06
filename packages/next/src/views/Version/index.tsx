@@ -121,6 +121,15 @@ export const VersionView: EditViewComponent = async (props) => {
     }
   }
 
+  const publishedNewerThanDraft = latestPublishedVersion.updatedAt > latestDraftVersion.updatedAt
+
+  if (publishedNewerThanDraft) {
+    latestDraftVersion = {
+      id: '',
+      updatedAt: '',
+    }
+  }
+
   const localeOptions: OptionObject[] =
     localization &&
     localization?.locales &&
@@ -138,8 +147,8 @@ export const VersionView: EditViewComponent = async (props) => {
       doc={doc}
       docPermissions={docPermissions}
       initialComparisonDoc={mostRecentDoc}
-      latestDraftVersion={latestDraftVersion}
-      latestPublishedVersion={latestPublishedVersion}
+      latestDraftVersion={latestDraftVersion.id}
+      latestPublishedVersion={latestPublishedVersion.id}
       localeOptions={localeOptions}
       mostRecentDoc={mostRecentDoc}
       publishedDoc={publishedDoc}

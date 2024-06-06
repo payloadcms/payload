@@ -106,14 +106,23 @@ export const VersionsView: EditViewComponent = async (props) => {
       ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
       : ''
 
+  const publishedNewerThanDraft = latestPublishedVersion.updatedAt > latestDraftVersion.updatedAt
+
+  if (publishedNewerThanDraft) {
+    latestDraftVersion = {
+      id: '',
+      updatedAt: '',
+    }
+  }
+
   const columns = buildVersionColumns({
     collectionConfig,
     config,
     docID: id,
     globalConfig,
     i18n,
-    latestDraftVersion,
-    latestPublishedVersion,
+    latestDraftVersion: latestDraftVersion.id,
+    latestPublishedVersion: latestPublishedVersion.id,
   })
 
   return (

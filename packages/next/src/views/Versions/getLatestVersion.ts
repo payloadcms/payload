@@ -22,7 +22,10 @@ export async function getLatestVersion(payload, slug, status, type = 'collection
             ...sharedOptions,
           })
 
-    return response.docs[0]?.id
+    return {
+      id: response.docs[0].id,
+      updatedAt: response.docs[0].updatedAt,
+    }
   } catch (e) {
     console.error(e)
   }
