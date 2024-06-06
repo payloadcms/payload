@@ -79,7 +79,6 @@ export const DeviceContainer: React.FC<{
       ref={outerFrameRef}
       style={{
         height: '100%',
-        outline: `1px solid ${deviceIsLargerThanFrame ? 'red' : 'green'}`,
         width: '100%',
       }}
     >
