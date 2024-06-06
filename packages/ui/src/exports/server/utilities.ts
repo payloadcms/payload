@@ -1,5 +1,5 @@
 export { requests } from '../../utilities/api.js'
-export { buildComponentMap, mapFields } from '../../utilities/buildComponentMap.js'
+//export { buildComponentMap, mapFields } from '../../utilities/buildComponentMap.js'
 export { buildFieldSchemaMap } from '../../utilities/buildFieldSchemaMap/index.js'
 export { traverseFields } from '../../utilities/buildFieldSchemaMap/traverseFields.js'
 export { buildFormState } from '../../utilities/buildFormState.js'

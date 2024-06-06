@@ -85,7 +85,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
+    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
     "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
     "build:esbuild": "node bundle.js",
     "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
