@@ -53,7 +53,7 @@ const result = await esbuild
     format: 'esm',
     outdir: 'dist',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    // splitting: true,
+    splitting: true,
     external: ['*.scss', '*.css'],
     packages: 'external',
     minify: true,
