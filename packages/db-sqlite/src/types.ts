@@ -19,7 +19,6 @@ import {
   type ColumnBaseConfig,
   type ColumnDataType,
   type DrizzleConfig,
-  QueryPromise,
   type Relation,
   type Relations,
   type SQL,
