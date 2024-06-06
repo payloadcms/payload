@@ -59,17 +59,19 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   })
 
   const devPush = result.rows
-  const schema = adapter.schemaName ? `"${adapter.schemaName}".` : ''
+  const table = adapter.schemaName
+    ? `"${adapter.schemaName}"."payload_migrations"`
+    : '"payload_migrations"'
 
   if (!devPush.length) {
     await adapter.execute({
       drizzle: adapter.drizzle,
-      sql: sql`insert into ${schema}payload_migrations (name, batch) values ('dev', '-1')`,
+      raw: `INSERT INTO ${table} (name, batch) VALUES ('dev', '-1')`,
     })
   } else {
     await adapter.execute({
       drizzle: adapter.drizzle,
-      sql: sql`update ${schema}payload_migrations set updated_at = ${new Date()} where batch = '-1'`,
+      raw: `UPDATE ${table} SET updated_at = ${new Date()} WHERE batch = '-1'`,
     })
   }
 }

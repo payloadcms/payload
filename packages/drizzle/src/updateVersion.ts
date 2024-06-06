@@ -20,7 +20,7 @@ export async function updateVersion<T extends TypeWithID>(
     where: whereArg,
   }: UpdateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID].db
+  const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = this.tableNameMap.get(

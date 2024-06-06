@@ -74,18 +74,22 @@ export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
 export type DrizzleAdapter = BaseDatabaseAdapter & {
   countDistinct: (args: {
-    db: DrizzleTransaction
+    db: DrizzleTransaction | PostgresDB | SQLiteDB
     joins: BuildQueryJoinAliases
     tableName: string
     where: SQL
   }) => Promise<number>
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
-  deleteWhere: (args: { db: DrizzleTransaction; tableName: string; where: SQL }) => Promise<void>
+  deleteWhere: (args: {
+    db: DrizzleTransaction | PostgresDB | SQLiteDB
+    tableName: string
+    where: SQL
+  }) => Promise<void>
   drizzle: PostgresDB | SQLiteDB
   dropTables: (args: { adapter: DrizzleAdapter }) => Promise<void>
   enums?: Record<string, unknown>
   execute: (args: {
-    db?: DrizzleTransaction
+    db?: DrizzleTransaction | PostgresDB | SQLiteDB
     drizzle?: PostgresDB | SQLiteDB
     raw?: string
     sql?: SQL<unknown>
@@ -104,7 +108,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   idType: unknown
   initializing: Promise<void>
   insert: (args: {
-    db: DrizzleTransaction
+    db: DrizzleTransaction | PostgresDB | SQLiteDB
     onConflictDoUpdate?: unknown
     tableName: string
     values: Record<string, unknown> | Record<string, unknown>[]
@@ -120,7 +124,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   schemaName?: string
   sessions: {
     [id: string]: {
-      db: DrizzleTransaction
+      db: DrizzleTransaction | PostgresDB | SQLiteDB
       reject: () => Promise<void>
       resolve: () => Promise<void>
     }

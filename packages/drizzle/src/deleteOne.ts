@@ -15,7 +15,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
   { collection: collectionSlug, req = {} as PayloadRequestWithData, where: whereArg },
 ) {
-  const db = this.sessions[req.transactionID].db
+  const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))

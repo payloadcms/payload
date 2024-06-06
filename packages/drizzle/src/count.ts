@@ -15,7 +15,7 @@ export const count: Count = async function count(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  const db = this.sessions[req.transactionID].db
+  const db = this.sessions[req.transactionID]?.db || this.drizzle
 
   const { joins, where } = await buildQuery({
     adapter: this,

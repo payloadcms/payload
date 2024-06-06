@@ -13,6 +13,6 @@ export const execute: PostgresAdapter['execute'] = function execute({
   if (raw) {
     return executeFrom.execute(sql.raw(raw))
   } else {
-    return executeFrom.execute(statement)
+    return executeFrom.execute(sql`${statement}`)
   }
 }

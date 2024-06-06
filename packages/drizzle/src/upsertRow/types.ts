@@ -6,7 +6,7 @@ import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types
 type BaseArgs = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
-  db: DrizzleTransaction
+  db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   fields: Field[]
   /**
    * When true, skips reading the data back from the database and returns the input data

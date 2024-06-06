@@ -59,17 +59,21 @@ export type GenericRelation = Relations<string, Record<string, Relation<string>>
 
 export type PostgresAdapter = DrizzleAdapter & {
   countDistinct: (args: {
-    db: TransactionPg
+    db: PostgresDB | TransactionPg
     joins: BuildQueryJoinAliases
     tableName: string
     where: SQL
   }) => Promise<number>
-  deleteWhere: (args: { db: TransactionPg; tableName: string; where: SQL }) => Promise<void>
+  deleteWhere: (args: {
+    db: PostgresDB | TransactionPg
+    tableName: string
+    where: SQL
+  }) => Promise<void>
   drizzle: PostgresDB
   dropTables: (args: { adapter: PostgresAdapter }) => Promise<void>
   enums: Record<string, GenericEnum>
   execute: (args: {
-    db?: TransactionPg
+    db?: PostgresDB | TransactionPg
     drizzle?: PostgresDB
     raw?: string
     sql?: SQL<unknown>
@@ -85,7 +89,7 @@ export type PostgresAdapter = DrizzleAdapter & {
   idType: Args['idType']
   initializing: Promise<void>
   insert: (args: {
-    db: TransactionPg
+    db: PostgresDB | TransactionPg
     onConflictDoUpdate?: PgInsertOnConflictDoUpdateConfig<any>
     tableName: string
     values: Record<string, unknown> | Record<string, unknown>[]
@@ -103,7 +107,7 @@ export type PostgresAdapter = DrizzleAdapter & {
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
-      db: TransactionPg
+      db: PostgresDB | TransactionPg
       reject: () => Promise<void>
       resolve: () => Promise<void>
     }

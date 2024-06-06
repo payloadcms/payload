@@ -17,7 +17,7 @@ import { type GenericColumn } from '../types.js'
 type Args = {
   adapter: DrizzleAdapter
   chainedMethods?: ChainedMethods
-  db: DrizzleTransaction
+  db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   joins: BuildQueryJoinAliases
   selectFields: Record<string, GenericColumn>
   tableName: string

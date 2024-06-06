@@ -4,7 +4,7 @@ import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  db: DrizzleTransaction
+  db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   localeColumnName?: string
   parentColumnName?: string
   parentID: unknown

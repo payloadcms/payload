@@ -18,7 +18,7 @@ export const migrationTableExists = async (adapter: DrizzleAdapter): Promise<boo
 
   const result = await adapter.execute({
     drizzle: adapter.drizzle,
-    sql: statement,
+    raw: statement,
   })
 
   // @ts-expect-error

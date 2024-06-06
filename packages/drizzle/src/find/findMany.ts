@@ -30,7 +30,7 @@ export const findMany = async function find({
   tableName,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions[req.transactionID].db
+  const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
 
   const limit = limitArg ?? 10
   let totalDocs: number
@@ -117,8 +117,8 @@ export const findMany = async function find({
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
-  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
-    const countResult = await this.countDistinct({
+  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : false)) {
+    const countResult = await adapter.countDistinct({
       db,
       joins,
       tableName,

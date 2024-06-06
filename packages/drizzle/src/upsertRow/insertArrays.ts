@@ -7,7 +7,7 @@ type Args = {
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }[]
-  db: DrizzleTransaction
+  db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   parentRows: Record<string, unknown>[]
 }
 
