@@ -590,9 +590,9 @@ describe('versions', () => {
       await page.goto(collection.edit(maxOneCollection.id))
 
       const titleFieldInitial = page.locator('#field-title')
-      await titleFieldInitial.fill('initial title')
+      await titleFieldInitial.fill('updated title')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(titleFieldInitial).toHaveValue('initial title')
+      await expect(titleFieldInitial).toHaveValue('updated title')
 
       const versionsTab = page.locator('.doc-tab', {
         hasText: '1',
@@ -603,9 +603,9 @@ describe('versions', () => {
       expect(versionsTab).toBeTruthy()
 
       const titleFieldUpdated = page.locator('#field-title')
-      await titleFieldUpdated.fill('updated title')
+      await titleFieldUpdated.fill('latest title')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(titleFieldUpdated).toHaveValue('updated title')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
 
       const versionsTabUpdated = page.locator('.doc-tab', {
         hasText: '1',
