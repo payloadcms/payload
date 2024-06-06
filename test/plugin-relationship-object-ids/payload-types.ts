@@ -8,13 +8,10 @@
 
 export interface Config {
   collections: {
+    uploads: Upload;
+    pages: Page;
     posts: Post;
-    point: Point;
-    relation: Relation;
-    dummy: Dummy;
-    'custom-id': CustomId;
-    'custom-id-number': CustomIdNumber;
-    'error-on-hooks': ErrorOnHook;
+    relations: Relation;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -27,112 +24,72 @@ export interface Config {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: string;
-  title?: string | null;
-  description?: string | null;
-  number?: number | null;
-  fakeLocalization?: string | null;
-  relationField?: (string | null) | Relation;
-  relationHasManyField?: (string | Relation)[] | null;
-  relationMultiRelationTo?:
-    | ({
-        relationTo: 'relation';
-        value: string | Relation;
-      } | null)
-    | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
-      } | null);
-  relationMultiRelationToHasMany?:
-    | (
-        | {
-            relationTo: 'relation';
-            value: string | Relation;
-          }
-        | {
-            relationTo: 'dummy';
-            value: string | Dummy;
-          }
-      )[]
-    | null;
-  restrictedField?: string | null;
-  D1?: {
-    D2?: {
-      D3?: {
-        D4?: string | null;
-      };
-    };
-  };
+  title: string;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
+ * via the `definition` "relations".
  */
 export interface Relation {
   id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
- */
-export interface Dummy {
-  id: string;
-  title?: string | null;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "point".
- */
-export interface Point {
-  id: string;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  point?: [number, number] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id".
- */
-export interface CustomId {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id-number".
- */
-export interface CustomIdNumber {
-  id: number;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "error-on-hooks".
- */
-export interface ErrorOnHook {
-  id: string;
-  text?: string | null;
-  errorBeforeChange?: boolean | null;
-  errorAfterDelete?: boolean | null;
+  hasOne?: (string | null) | Post;
+  hasOnePoly?:
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null);
+  hasMany?: (string | Post)[] | null;
+  hasManyPoly?:
+    | (
+        | {
+            relationTo: 'pages';
+            value: string | Page;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  upload?: string | Upload | null;
   updatedAt: string;
   createdAt: string;
 }

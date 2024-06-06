@@ -20,7 +20,7 @@ export interface Config {
     'collection-2': Collection2;
     videos: Video;
     podcasts: Podcast;
-    mixedMedia: MixedMedia;
+    'mixed-media': MixedMedia;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -217,7 +217,7 @@ export interface Podcast {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "mixedMedia".
+ * via the `definition` "mixed-media".
  */
 export interface MixedMedia {
   id: string;

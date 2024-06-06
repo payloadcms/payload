@@ -1555,6 +1555,9 @@ importers:
 
   test:
     devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.525.0
+        version: 3.550.0
       '@lexical/headless':
         specifier: 0.16.0
         version: 0.16.0
