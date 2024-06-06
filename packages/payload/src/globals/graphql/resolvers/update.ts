@@ -29,8 +29,8 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
+    req = isolateObjectProperty<PayloadRequest>(req, 'locale')
+    req = isolateObjectProperty<PayloadRequest>(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     if (!req.query) req.query = {}
