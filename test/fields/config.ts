@@ -1,4 +1,13 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import type { CollectionConfig } from 'payload/types'
+
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import ArrayFields from './collections/Array/index.js'
@@ -45,6 +54,10 @@ export const collectionSlugs: CollectionConfig[] = [
         name: 'canViewConditionalField',
         type: 'checkbox',
         defaultValue: true,
+      },
+      {
+        name: 'asdf',
+        type: 'text',
       },
     ],
   },
@@ -100,5 +113,8 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await clearAndSeedEverything(payload)
     }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

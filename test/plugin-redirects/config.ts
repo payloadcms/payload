@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -29,4 +33,7 @@ export default buildConfigWithDefaults({
       collections: ['pages'],
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

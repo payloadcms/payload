@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -454,5 +458,8 @@ export default buildConfigWithDefaults({
     })
 
     console.log('SEED COMPLETE')
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

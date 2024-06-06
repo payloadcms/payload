@@ -164,6 +164,7 @@ export async function buildConfigWithDefaults(
       declare: {
         ignoreTSError: true,
       },
+      ...testConfig?.typescript,
     },
     ...testConfig,
     i18n: {

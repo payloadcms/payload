@@ -261,6 +261,7 @@ export interface LexicalLocalizedField {
 export interface User {
   id: string;
   canViewConditionalField?: boolean | null;
+  asdf?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -838,6 +839,9 @@ export interface GroupField {
         id?: string | null;
       }[]
     | null;
+  localizedGroup?: {
+    text?: string | null;
+  };
   potentiallyEmptyGroup?: {
     text?: string | null;
   };
@@ -1420,6 +1424,5 @@ export interface LexicalBlocksRadioButtonsBlock {
 
 
 declare module 'payload' {
-  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
