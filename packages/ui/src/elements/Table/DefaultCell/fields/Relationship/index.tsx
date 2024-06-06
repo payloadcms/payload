@@ -37,7 +37,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
   useEffect(() => {
-    if (cellData && isAboveViewport && !hasRequested) {
+    if ((cellData || typeof cellData === 'number') && isAboveViewport && !hasRequested) {
       const formattedValues: Value[] = []
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData]
       arrayCellData

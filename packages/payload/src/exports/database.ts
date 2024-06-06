@@ -53,7 +53,7 @@ export type {
   UpdateVersionArgs,
 } from '../database/types.js'
 
-export * from '../database/queryValidation/types.js'
+export type * from '../database/queryValidation/types.js'
 
 export { combineQueries } from '../database/combineQueries.js'
 

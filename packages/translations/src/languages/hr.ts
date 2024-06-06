@@ -111,6 +111,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     unauthorized: 'Neovlašten, morate biti prijavljeni da biste uputili ovaj zahtjev.',
     unknown: 'Došlo je do nepoznate pogreške.',
     unspecific: 'Došlo je do pogreške.',
+    userEmailAlreadyRegistered: 'Korisnik s navedenom e-poštom je već registriran.',
     userLocked: 'Ovaj korisnik je zaključan zbog previše neuspješnih pokušaja prijave.',
     valueMustBeUnique: 'Vrijednost mora biti jedinstvena.',
     verificationTokenInvalid: 'Verifikacijski token je nevaljan.',

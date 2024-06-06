@@ -107,6 +107,7 @@ export const heTranslations: DefaultTranslationsObject = {
     unauthorized: 'אין הרשאה, עליך להתחבר כדי לבצע בקשה זו.',
     unknown: 'אירעה שגיאה לא ידועה.',
     unspecific: 'אירעה שגיאה.',
+    userEmailAlreadyRegistered: 'משתמש עם האימייל הנתון כבר רשום.',
     userLocked: 'המשתמש נעול עקב מספר נסיונות התחברות כושלים.',
     valueMustBeUnique: 'הערך חייב להיות ייחודי',
     verificationTokenInvalid: 'טוקן אימות אינו תקין.',

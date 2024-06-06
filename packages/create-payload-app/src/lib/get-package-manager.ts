@@ -1,5 +1,5 @@
-// @ts-expect-error no types
-import { detect } from 'detect-package-manager'
+import execa from 'execa'
+import fse from 'fs-extra'
 
 import type { CliArgs, PackageManager } from '../types.js'
 
@@ -9,22 +9,36 @@ export async function getPackageManager(args: {
 }): Promise<PackageManager> {
   const { cliArgs, projectDir } = args
 
-  if (!cliArgs) {
-    const detected = await detect({ cwd: projectDir })
-    return detected || 'npm'
-  }
+  try {
+    // Check for yarn.lock, package-lock.json, or pnpm-lock.yaml
+    let detected: PackageManager = 'npm'
+    if (
+      cliArgs?.['--use-pnpm'] ||
+      fse.existsSync(`${projectDir}/pnpm-lock.yaml`) ||
+      (await commandExists('pnpm'))
+    ) {
+      detected = 'pnpm'
+    } else if (
+      cliArgs?.['--use-yarn'] ||
+      fse.existsSync(`${projectDir}/yarn.lock`) ||
+      (await commandExists('yarn'))
+    ) {
+      detected = 'yarn'
+    } else if (cliArgs?.['--use-npm'] || fse.existsSync(`${projectDir}/package-lock.json`)) {
+      detected = 'npm'
+    }
 
-  let packageManager: PackageManager = 'npm'
-
-  if (cliArgs['--use-npm']) {
-    packageManager = 'npm'
-  } else if (cliArgs['--use-yarn']) {
-    packageManager = 'yarn'
-  } else if (cliArgs['--use-pnpm']) {
-    packageManager = 'pnpm'
-  } else {
-    const detected = await detect({ cwd: projectDir })
-    packageManager = detected || 'npm'
+    return detected
+  } catch (error) {
+    return 'npm'
   }
-  return packageManager
+}
+
+async function commandExists(command: string): Promise<boolean> {
+  try {
+    await execa.command(`command -v ${command}`)
+    return true
+  } catch {
+    return false
+  }
 }

@@ -108,6 +108,7 @@ export const thTranslations: DefaultTranslationsObject = {
     unauthorized: 'คุณไม่ได้รับอนุญาต กรุณาเข้าสู่ระบบเพื่อทำคำขอนี้',
     unknown: 'เกิดปัญหาบางอย่างที่ไม่ทราบสาเหตุ',
     unspecific: 'เกิดปัญหาบางอย่าง',
+    userEmailAlreadyRegistered: 'ผู้ใช้ที่มีอีเมลดังกล่าวได้ลงทะเบียนแล้ว',
     userLocked: 'บัญชีนี้ถูกล็อกเนื่องจากมีการพยายามเข้าสู่ระบบมากเกินไป',
     valueMustBeUnique: 'ค่าต้องไม่ซ้ำกับเอกสารอื่น',
     verificationTokenInvalid: 'Token ยืนยันตัวตนไม่ถูกต้อง',

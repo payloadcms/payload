@@ -82,7 +82,7 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     // This is to trigger changes when the debounced value changes
     if (
-      internalField.value &&
+      (internalField?.value || typeof internalField?.value === 'number') &&
       internalOperatorOption &&
       ![null, undefined].includes(debouncedValue)
     ) {
@@ -130,12 +130,12 @@ export const Condition: React.FC<Props> = (props) => {
                 setInternalQueryValue(undefined)
               }}
               options={fields}
-              value={fields.find((field) => internalField.value === field.value) || fields[0]}
+              value={fields.find((field) => internalField?.value === field.value) || fields[0]}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!internalField.value}
+              disabled={!internalField?.value && typeof internalField?.value !== 'number'}
               isClearable={false}
               onChange={(operator) => {
                 setInternalOperatorOption(operator.value)

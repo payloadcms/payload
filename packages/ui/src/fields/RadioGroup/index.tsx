@@ -68,9 +68,10 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const {
+    formInitializing,
+    formProcessing,
     path,
     setValue,
     showError,
@@ -79,6 +80,8 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const value = valueFromContext || valueFromProps
 
@@ -90,7 +93,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        readOnly && `${baseClass}--read-only`,
+        disabled && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -132,13 +135,13 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
                       onChangeFromProps(optionValue)
                     }
 
-                    if (!readOnly) {
+                    if (!disabled) {
                       setValue(optionValue)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
-                  readOnly={readOnly}
+                  readOnly={disabled}
                   uuid={uuid}
                 />
               </li>

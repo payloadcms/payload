@@ -4,8 +4,20 @@
  * @returns {import('next').NextConfig}
  * */
 export const withPayload = (nextConfig = {}) => {
-  return {
+  if (nextConfig.experimental?.staleTimes?.dynamic) {
+    console.warn(
+      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This may cause stale data to load in the Admin Panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
+    )
+  }
+
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const toReturn = {
     ...nextConfig,
+    env: {
+      ...(nextConfig?.env || {}),
+    },
     experimental: {
       ...(nextConfig?.experimental || {}),
       outputFileTracingExcludes: {
@@ -92,6 +104,12 @@ export const withPayload = (nextConfig = {}) => {
       }
     },
   }
+
+  if (nextConfig.basePath) {
+    toReturn.env.NEXT_BASE_PATH = nextConfig.basePath
+  }
+
+  return toReturn
 }
 
 export default withPayload

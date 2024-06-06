@@ -19,13 +19,6 @@ export const SSR: CollectionConfig = {
     update: () => true,
     delete: () => true,
   },
-  versions: {
-    drafts: {
-      autosave: {
-        interval: 375,
-      },
-    },
-  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],

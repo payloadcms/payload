@@ -76,7 +76,6 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   } = props
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -118,6 +117,8 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const {
     errorPaths,
+    formInitializing,
+    formProcessing,
     path,
     permissions,
     rows = [],
@@ -130,6 +131,8 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {
@@ -201,7 +204,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
-  const showRequired = readOnly && rows.length === 0
+  const showRequired = disabled && rows.length === 0
 
   return (
     <div
@@ -274,7 +277,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                 errorPath.startsWith(`${path}.${i}`),
               ).length
               return (
-                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
@@ -291,7 +294,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                       moveRow={moveRow}
                       path={path}
                       permissions={permissions}
-                      readOnly={readOnly}
+                      readOnly={disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
@@ -327,7 +330,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
+      {!disabled && !hasMaxRows && (
         <Fragment>
           <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
             <Button

@@ -9,7 +9,6 @@ import { FormBlock } from '../../blocks/Form'
 import { MediaBlock } from '../../blocks/MediaBlock'
 import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
-import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidatePage } from './hooks/revalidatePage'
@@ -75,7 +74,6 @@ export const Pages: CollectionConfig = {
   ],
   hooks: {
     afterChange: [revalidatePage],
-    afterRead: [populateArchiveBlock],
     beforeChange: [populatePublishedAt],
   },
   versions: {

@@ -11,7 +11,7 @@ export const LinkToDoc: CustomComponent<UIField> = () => {
   const { custom } = useFieldProps()
   const { isTestKey, nameOfIDField, stripeResourceType } = custom
 
-  const field = useFormFields(([fields]) => fields[nameOfIDField])
+  const field = useFormFields(([fields]) => (fields && fields?.[nameOfIDField]) || null)
   const { value: stripeID } = field || {}
 
   const stripeEnv = isTestKey ? 'test/' : ''

@@ -2,6 +2,7 @@ import type { FeatureProviderProviderServer } from '../types.js'
 
 import { createNode } from '../typeUtilities.js'
 import { RelationshipFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { RelationshipNode } from './nodes/RelationshipNode.js'
 import { relationshipPopulationPromiseHOC } from './populationPromise.js'
 
@@ -46,6 +47,7 @@ export const RelationshipFeature: FeatureProviderProviderServer<
       return {
         ClientComponent: RelationshipFeatureClientComponent,
         clientFeatureProps: props,
+        i18n,
         nodes: [
           createNode({
             node: RelationshipNode,

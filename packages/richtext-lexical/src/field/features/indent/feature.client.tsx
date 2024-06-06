@@ -31,7 +31,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return false
       },
       key: 'indentDecrease',
-      label: `Decrease Indent`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:indent:decreaseLabel')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined)
       },
@@ -41,7 +43,9 @@ const toolbarGroups: ToolbarGroup[] = [
       ChildComponent: IndentIncreaseIcon,
       isActive: () => false,
       key: 'indentIncrease',
-      label: `Increase Indent`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:indent:increaseLabel')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined)
       },

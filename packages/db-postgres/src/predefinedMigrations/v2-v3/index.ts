@@ -20,7 +20,7 @@ const require = createRequire(import.meta.url)
 type Args = {
   debug?: boolean
   payload: Payload
-  req: PayloadRequestWithData
+  req?: Partial<PayloadRequestWithData>
 }
 
 /**
@@ -39,28 +39,28 @@ type Args = {
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as PostgresAdapter
-  const db = adapter.sessions[req.transactionID].db
+  const db = adapter.sessions[req.transactionID]?.db
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
   const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
   const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
 
-  // Get latest migration snapshot
-  const latestSnapshot = fs
+  // Get the previous migration snapshot
+  const previousSnapshot = fs
     .readdirSync(dir)
-    .filter((file) => file.endsWith('.json'))
+    .filter((file) => file.endsWith('.json') && !file.endsWith('relationships_v2_v3.json'))
     .sort()
     .reverse()?.[0]
 
-  if (!latestSnapshot) {
+  if (!previousSnapshot) {
     throw new Error(
       `No previous migration schema file found! A prior migration from v2 is required to migrate to v3.`,
     )
   }
 
   const drizzleJsonBefore = JSON.parse(
-    fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
+    fs.readFileSync(`${dir}/${previousSnapshot}`, 'utf8'),
   ) as DrizzleSnapshotJSON
 
   const generatedSQL = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)

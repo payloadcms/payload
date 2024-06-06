@@ -1,7 +1,7 @@
 import type { Config } from 'payload/config'
 import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
-import { traverseFields } from '@payloadcms/next/utilities'
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
 
 import type { FeatureProviderProviderServer } from '../types.js'
@@ -9,6 +9,7 @@ import type { UploadFeaturePropsClient } from './feature.client.js'
 
 import { createNode } from '../typeUtilities.js'
 import { UploadFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { UploadNode } from './nodes/UploadNode.js'
 import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
@@ -94,6 +95,7 @@ export const UploadFeature: FeatureProviderProviderServer<
 
           return schemaMap
         },
+        i18n,
         nodes: [
           createNode({
             converters: {

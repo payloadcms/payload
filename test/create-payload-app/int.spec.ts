@@ -30,7 +30,7 @@ describe('create-payload-app', () => {
     const projectDir = tempy.directory()
     beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
-        fs.rmdirSync(projectDir, { recursive: true })
+        fs.rmSync(projectDir, { recursive: true })
       }
 
       // Create dir for Next.js project
@@ -57,7 +57,7 @@ describe('create-payload-app', () => {
 
     afterEach(() => {
       if (fs.existsSync(projectDir)) {
-        fs.rmdirSync(projectDir, { recursive: true })
+        fs.rmSync(projectDir, { recursive: true })
       }
     })
 

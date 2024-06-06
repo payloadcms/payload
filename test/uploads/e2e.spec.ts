@@ -254,7 +254,7 @@ describe('uploads', () => {
     )
   })
 
-  test('Should render adminThumbnail when using a function', async () => {
+  test('should render adminThumbnail when using a function', async () => {
     await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
@@ -267,7 +267,7 @@ describe('uploads', () => {
     )
   })
 
-  test('Should render adminThumbnail when using a specific size', async () => {
+  test('should render adminThumbnail when using a specific size', async () => {
     await page.goto(adminThumbnailSizeURL.list)
     await page.waitForURL(adminThumbnailSizeURL.list)
 
@@ -280,7 +280,7 @@ describe('uploads', () => {
     await expect(audioUploadImage).toBeVisible()
   })
 
-  test('Should detect correct mimeType', async () => {
+  test('should detect correct mimeType', async () => {
     await page.goto(mediaURL.create)
     await page.waitForURL(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))

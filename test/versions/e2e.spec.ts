@@ -26,6 +26,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -162,31 +163,19 @@ describe('versions', () => {
       const title = 'autosave title'
       const description = 'autosave description'
       await page.goto(autosaveURL.create)
-
-      // fill the fields
+      // gets redirected from /create to /slug/id due to autosave
+      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
+      await wait(500)
+      await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill(title)
+      await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill(description)
-
-      // wait for autosave
       await waitForAutoSaveToRunAndComplete(page)
-
-      // go to list
       await page.goto(autosaveURL.list)
-
-      // expect the status to be draft
       await expect(findTableCell(page, '_status', title)).toContainText('Draft')
-
-      // select the row
-      // await page.locator('.row-1 .select-row__checkbox').click()
       await selectTableRow(page, title)
-
-      // click the publish many
       await page.locator('.publish-many__toggle').click()
-
-      // confirm the dialog
       await page.locator('#confirm-publish').click()
-
-      // expect the status to be published
       await expect(findTableCell(page, '_status', title)).toContainText('Published')
     })
 
@@ -278,21 +267,19 @@ describe('versions', () => {
 
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
-
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
         })
         .first()
-
       expect(linkToDoc).toBeTruthy()
       await linkToDoc.click()
-
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-
+      const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
+      await versionsPill.waitFor({ state: 'visible' })
       const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
       expect(versionCount).toBe('11')
     })
@@ -322,32 +309,21 @@ describe('versions', () => {
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
       await page.waitForURL(url.create)
-
-      // publish a doc
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
-
-      // save a draft
       await page.locator('#field-title').fill('v2')
       await saveDocAndAssert(page, '#action-save-draft')
-
-      // go to versions list view
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
-      await page.waitForURL(`${savedDocURL}/versions`)
-
-      // select the first version (row 2)
+      await page.waitForURL(new RegExp(`${savedDocURL}/versions`))
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
-
-      // restore doc
+      await page.waitForURL(new RegExp(`${savedDocURL}/versions/${versionID}`))
       await page.locator('.pill.restore-version').click()
       await page.locator('button:has-text("Confirm")').click()
-      await page.waitForURL(savedDocURL)
-
+      await page.waitForURL(new RegExp(savedDocURL))
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
@@ -385,16 +361,12 @@ describe('versions', () => {
 
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
-      // fill out global title and wait for autosave
       await page.goto(url.global(autoSaveGlobalSlug))
       await page.waitForURL(`**/${autoSaveGlobalSlug}`)
       const titleField = page.locator('#field-title')
-
       await titleField.fill('global title')
       await waitForAutoSaveToRunAndComplete(page)
       await expect(titleField).toHaveValue('global title')
-
-      // refresh the page and ensure value autosaved
       await page.goto(url.global(autoSaveGlobalSlug))
       await expect(page.locator('#field-title')).toHaveValue('global title')
     })
@@ -405,41 +377,25 @@ describe('versions', () => {
       const englishTitle = 'english title'
       const spanishTitle = 'spanish title'
       const newDescription = 'new description'
-
       await page.goto(autosaveURL.create)
       // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(`${autosaveURL.list}/**`)
-      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
+      await wait(500)
       const titleField = page.locator('#field-title')
-      const descriptionField = page.locator('#field-description')
-
-      // fill out en doc
+      await expect(titleField).toBeEnabled()
       await titleField.fill(englishTitle)
+      const descriptionField = page.locator('#field-description')
+      await expect(descriptionField).toBeEnabled()
       await descriptionField.fill('description')
       await waitForAutoSaveToRunAndComplete(page)
-
-      // change locale to spanish
       await changeLocale(page, es)
-      // set localized title field
       await titleField.fill(spanishTitle)
       await waitForAutoSaveToRunAndComplete(page)
-
-      // change locale back to en
       await changeLocale(page, en)
-      // verify en loads its own title
       await expect(titleField).toHaveValue(englishTitle)
-      // change non-localized description field
       await descriptionField.fill(newDescription)
       await waitForAutoSaveToRunAndComplete(page)
-
-      // change locale to spanish
       await changeLocale(page, es)
-
-      // reload page in spanish
-      // title should not be english title
-      // description should be new description
       await page.reload()
       await expect(titleField).toHaveValue(spanishTitle)
       await expect(descriptionField).toHaveValue(newDescription)
@@ -487,41 +443,30 @@ describe('versions', () => {
     })
 
     test('collection — autosave should only update the current document', async () => {
-      // create and save first doc
       await page.goto(autosaveURL.create)
-      // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
-      await page.waitForURL(`${autosaveURL.list}/**`)
-      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      }) // Make sure this doesnt match for list view and /create view, but ONLY for the ID edit view
-
+      // gets redirected from /create to /slug/id due to autosave
+      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
+      await wait(500)
+      await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
+      await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
-
-      // create and save second doc
       await page.goto(autosaveURL.create)
-      // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
-      await page.waitForURL(`${autosaveURL.list}/**`)
-      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
-
+      // gets redirected from /create to /slug/id due to autosave
+      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
-
+      await wait(500)
+      await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
+      await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
-      // publish changes
       await saveDocAndAssert(page)
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
-
-      // update second doc and wait for autosave
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
-
-      // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
       const secondRowLink = page.locator('tbody tr:nth-child(2) .cell-title a')
       const docURL = await secondRowLink.getAttribute('href')

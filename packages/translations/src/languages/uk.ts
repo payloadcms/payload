@@ -111,6 +111,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     unauthorized: 'Немає доступу, ви повинні увійти, щоб виконати цей запит.',
     unknown: 'Виникла невідома помилка.',
     unspecific: 'Виникла помилка.',
+    userEmailAlreadyRegistered: 'Користувач із вказаною електронною поштою вже зареєстрований.',
     userLocked: 'Цей користувач заблокований через велику кількість невдалих спроб входу.',
     valueMustBeUnique: 'Значення має бути унікальним.',
     verificationTokenInvalid: 'Токен верифікації недійсний.',

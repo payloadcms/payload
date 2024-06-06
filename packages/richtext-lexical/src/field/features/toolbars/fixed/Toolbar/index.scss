@@ -44,6 +44,13 @@ html[data-theme='dark'] {
   }
 }
 
+.fixed-toolbar.fixed-toolbar--hide {
+  visibility: hidden; // Still needs to take up space so content does not jump, thus we cannot use display: none
+  // make sure you cant interact with it
+  pointer-events: none;
+  user-select: none;
+}
+
 .fixed-toolbar {
   @include blur-bg(var(--theme-elevation-0));
   display: flex;
@@ -72,7 +79,7 @@ html[data-theme='dark'] {
     .divider {
       width: 1px;
       height: 15px;
-      background-color: var(--color-base-100);
+      background-color: var(--theme-elevation-100);
       margin: 0 6.25px;
     }
   }

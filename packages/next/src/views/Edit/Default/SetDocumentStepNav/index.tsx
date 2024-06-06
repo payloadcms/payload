@@ -24,7 +24,7 @@ export const SetDocumentStepNav: React.FC<{
 
   const view: string | undefined = props?.view || undefined
 
-  const { isEditing, title } = useDocumentInfo()
+  const { isEditing, isInitializing, title } = useDocumentInfo()
   const { isEntityVisible } = useEntityVisibility()
   const isVisible = isEntityVisible({ collectionSlug, globalSlug })
 
@@ -41,38 +41,41 @@ export const SetDocumentStepNav: React.FC<{
   useEffect(() => {
     const nav: StepNavItem[] = []
 
-    if (collectionSlug) {
-      nav.push({
-        label: getTranslation(pluralLabel, i18n),
-        url: isVisible ? `${admin}/collections/${collectionSlug}` : undefined,
-      })
-
-      if (isEditing) {
+    if (!isInitializing) {
+      if (collectionSlug) {
         nav.push({
-          label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
-          url: isVisible ? `${admin}/collections/${collectionSlug}/${id}` : undefined,
+          label: getTranslation(pluralLabel, i18n),
+          url: isVisible ? `${admin}/collections/${collectionSlug}` : undefined,
         })
-      } else {
+
+        if (isEditing) {
+          nav.push({
+            label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
+            url: isVisible ? `${admin}/collections/${collectionSlug}/${id}` : undefined,
+          })
+        } else {
+          nav.push({
+            label: t('general:createNew'),
+          })
+        }
+      } else if (globalSlug) {
         nav.push({
-          label: t('general:createNew'),
+          label: title,
+          url: isVisible ? `${admin}/globals/${globalSlug}` : undefined,
         })
       }
-    } else if (globalSlug) {
-      nav.push({
-        label: title,
-        url: isVisible ? `${admin}/globals/${globalSlug}` : undefined,
-      })
-    }
 
-    if (view) {
-      nav.push({
-        label: view,
-      })
-    }
+      if (view) {
+        nav.push({
+          label: view,
+        })
+      }
 
-    if (drawerDepth <= 1) setStepNav(nav)
+      if (drawerDepth <= 1) setStepNav(nav)
+    }
   }, [
     setStepNav,
+    isInitializing,
     isEditing,
     pluralLabel,
     id,

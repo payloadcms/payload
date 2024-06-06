@@ -28,12 +28,12 @@ export const consolidateHTMLConverters = ({
   editorConfig,
 }: {
   editorConfig: SanitizedServerEditorConfig
-}) => {
+}): HTMLConverter[] => {
   const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
   const htmlConverterFeatureProps: HTMLConverterFeatureProps =
     htmlConverterFeature?.serverFeatureProps
 
-  const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
+  const defaultConvertersWithConvertersFromFeatures = [...defaultHTMLConverters]
 
   for (const converter of editorConfig.features.converters.html) {
     defaultConvertersWithConvertersFromFeatures.push(converter)
@@ -48,7 +48,33 @@ export const consolidateHTMLConverters = ({
       : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
         defaultConvertersWithConvertersFromFeatures
 
-  return finalConverters
+  // filter converters by nodeTypes. The last converter in the list wins. If there are multiple converters for the same nodeType, the last one will be used and the node types will be removed from
+  // previous converters. If previous converters do not have any nodeTypes left, they will be removed from the list.
+  // This guarantees that user-added converters which are added after the default ones will always have precedence
+  const foundNodeTypes: string[] = []
+  const filteredConverters: HTMLConverter[] = []
+  for (const converter of finalConverters.reverse()) {
+    if (!converter.nodeTypes?.length) {
+      continue
+    }
+    const newConverter: HTMLConverter = {
+      converter: converter.converter,
+      nodeTypes: [...converter.nodeTypes],
+    }
+    newConverter.nodeTypes = newConverter.nodeTypes.filter((nodeType) => {
+      if (foundNodeTypes.includes(nodeType)) {
+        return false
+      }
+      foundNodeTypes.push(nodeType)
+      return true
+    })
+
+    if (newConverter.nodeTypes.length) {
+      filteredConverters.push(newConverter)
+    }
+  }
+
+  return filteredConverters
 }
 
 export const lexicalHTML: (

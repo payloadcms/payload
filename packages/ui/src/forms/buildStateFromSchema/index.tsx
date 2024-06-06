@@ -41,8 +41,9 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       id,
       data: fullData,
       fields: fieldSchema,
-      req,
+      locale: req.locale,
       siblingData: fullData,
+      user: req.user,
     })
 
     await iterateFields({

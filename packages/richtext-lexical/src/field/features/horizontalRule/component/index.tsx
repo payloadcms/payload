@@ -4,7 +4,7 @@ import type { NodeKey } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
-import { mergeRegister } from '@lexical/utils'
+import { addClassNamesToElement, mergeRegister, removeClassNamesFromElement } from '@lexical/utils'
 import {
   $getNodeByKey,
   $getSelection,
@@ -17,6 +17,8 @@ import {
 import { useCallback, useEffect } from 'react'
 
 import { $isHorizontalRuleNode } from '../nodes/HorizontalRuleNode.js'
+
+const isSelectedClassName = 'selected'
 
 /**
  * React component rendered in the lexical editor, WITHIN the hr element created by createDOM of the HorizontalRuleNode.
@@ -69,7 +71,11 @@ export function HorizontalRuleComponent({ nodeKey }: { nodeKey: NodeKey }) {
   useEffect(() => {
     const hrElem = editor.getElementByKey(nodeKey)
     if (hrElem !== null) {
-      hrElem.className = isSelected ? 'selected' : ''
+      if (isSelected) {
+        addClassNamesToElement(hrElem, isSelectedClassName)
+      } else {
+        removeClassNamesFromElement(hrElem, isSelectedClassName)
+      }
     }
   }, [editor, isSelected, nodeKey])
 

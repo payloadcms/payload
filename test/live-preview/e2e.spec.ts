@@ -14,7 +14,13 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { mobileBreakpoint, pagesSlug, renderedPageTitleID, ssrPagesSlug } from './shared.js'
+import {
+  mobileBreakpoint,
+  pagesSlug,
+  renderedPageTitleID,
+  ssrAutosavePagesSlug,
+  ssrPagesSlug,
+} from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -25,7 +31,8 @@ describe('Live Preview', () => {
   let serverURL: string
 
   let pagesURLUtil: AdminUrlUtil
-  let ssrPostsURLUtil: AdminUrlUtil
+  let ssrPagesURLUtil: AdminUrlUtil
+  let ssrAutosavePostsURLUtil: AdminUrlUtil
 
   const goToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
     await page.goto(urlUtil.list)
@@ -51,7 +58,8 @@ describe('Live Preview', () => {
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
-    ssrPostsURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
+    ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
+    ssrAutosavePostsURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -120,8 +128,38 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('collection — re-render iframe server-side when autosave is made', async () => {
-    await goToCollectionPreview(page, ssrPostsURLUtil)
+  test('collection ssr — re-render iframe when save is made', async () => {
+    await goToCollectionPreview(page, ssrPagesURLUtil)
+
+    const titleField = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
+    await expect(titleField).toBeVisible()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
+
+    // Forces the test to wait for the Next.js route to render before we try editing a field
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
+
+    const newTitleValue = 'SSR Home (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await saveDocAndAssert(page)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('collection ssr — re-render iframe when autosave is made', async () => {
+    await goToCollectionPreview(page, ssrAutosavePostsURLUtil)
 
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()

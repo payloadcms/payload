@@ -72,9 +72,9 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
 
 const PasswordToConfirm = () => {
   const { t } = useTranslation()
-  const { value: confirmValue } = useFormFields(([fields]) => {
-    return fields['confirm-password']
-  })
+  const { value: confirmValue } = useFormFields(
+    ([fields]) => (fields && fields?.['confirm-password']) || null,
+  )
 
   const validate = React.useCallback(
     (value: string) => {

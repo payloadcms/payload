@@ -4,6 +4,6 @@ import type { DefaultCellComponentProps } from 'payload/types'
 import React from 'react'
 
 export const TextareaCell: React.FC<DefaultCellComponentProps<string>> = ({ cellData }) => {
-  const textToShow = cellData?.length > 100 ? `${cellData.substr(0, 100)}\u2026` : cellData
+  const textToShow = cellData?.length > 100 ? `${cellData.substring(0, 100)}\u2026` : cellData
   return <span>{textToShow}</span>
 }

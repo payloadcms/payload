@@ -41,5 +41,6 @@
       "source.fixAll.eslint": "explicit"
     }
   },
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--experimental-vm-modules --no-deprecation\" node 'node_modules/jest/bin/jest.js'"
 }

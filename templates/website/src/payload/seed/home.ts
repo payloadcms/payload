@@ -543,7 +543,7 @@ export const home: Partial<Page> = {
               direction: 'ltr',
               format: '',
               indent: 0,
-              tag: 'h4',
+              tag: 'h3',
               version: 1,
             },
             {
@@ -608,7 +608,7 @@ export const home: Partial<Page> = {
               direction: 'ltr',
               format: '',
               indent: 0,
-              tag: 'h4',
+              tag: 'h3',
               version: 1,
             },
             {

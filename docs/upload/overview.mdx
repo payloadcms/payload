@@ -27,7 +27,7 @@ _Admin panel screenshot depicting a Media Collection with Upload enabled_
 1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
 
-### Enabling Uploads
+## Enabling Uploads
 
 Every Payload Collection can opt-in to supporting Uploads by specifying the `upload` property on the Collection's config to either `true` or to an object containing `upload` options.
 
@@ -38,7 +38,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
   </strong> on that collection.
 </Banner>
 
-### Collection Upload Options
+## Collection Upload Options
 
 | Option                         | Description                                                                                                                                                                                                      |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -104,7 +104,7 @@ export const Media: CollectionConfig = {
 }
 ```
 
-### Payload-wide Upload Options
+## Payload-wide Upload Options
 
 Payload relies on the [`express-fileupload`](https://www.npmjs.com/package/express-fileupload) package to manage file uploads in Express. In addition to the Upload options specifiable on a Collection by Collection basis, you can also control the `express-fileupload` options by passing your base Payload config an `upload` property containing an object supportive of all `express-fileupload` properties which use `Busboy` under the hood. [Click here](https://github.com/mscdex/busboy#api) for more documentation about what you can control.
 
@@ -134,7 +134,7 @@ export default buildConfig({
 })
 ```
 
-### Image Sizes
+## Image Sizes
 
 If you specify an array of `imageSizes` to your `upload` config, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.
 
@@ -142,13 +142,13 @@ The Payload Admin panel will also automatically display all available files, inc
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
 
-##### Accessing the resized images in hooks
+#### Accessing the resized images in hooks
 
 All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
 
 The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
 
-##### Handling Image Enlargement
+#### Handling Image Enlargement
 
 When an uploaded image is smaller than the defined image size, we have 3 options:
 
@@ -163,7 +163,7 @@ When an uploaded image is smaller than the defined image size, we have 3 options
   image size. Use the `withoutEnlargement` prop to change this.
 </Banner>
 
-### Crop and Focal Point Selector
+## Crop and Focal Point Selector
 
 This feature is only available for image file types.
 
@@ -173,7 +173,7 @@ Image cropping occurs before any resizing, the resized images will therefore be 
 
 If no resizing options are specified (`imageSizes` or `resizeOptions`), the focal point selector will not be displayed.
 
-### Disabling Local Upload Storage
+## Disabling Local Upload Storage
 
 If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.
 
@@ -186,7 +186,7 @@ If you are using a plugin to send your files off to a third-party file storage h
   provide your own admin thumbnail using <strong>upload.adminThumbnail</strong>.
 </Banner>
 
-### Admin Thumbnails
+## Admin Thumbnails
 
 You can specify how Payload retrieves admin thumbnails for your upload-enabled Collections. This property accepts two different configurations:
 
@@ -220,7 +220,7 @@ export const Media: CollectionConfig = {
   the default generic file thumbnail instead.
 </Banner>
 
-### MimeTypes
+## MimeTypes
 
 Specifying the `mimeTypes` property can restrict what files are allowed from the user's file picker. This accepts an array of strings, which can be any valid mimetype or mimetype wildcards
 
@@ -241,7 +241,7 @@ export const Media: CollectionConfig = {
 }
 ```
 
-### Uploading Files
+## Uploading Files
 
 <Banner type="warning">
   <strong>Important:</strong>
@@ -256,6 +256,6 @@ Send your request as a `multipart/form-data` request, using [`FormData`](https:/
 
 [Here is a walkthrough](https://muffinman.io/blog/uploading-files-using-fetch-multipart-form-data/) detailing how to upload files as `multipart/form-data` using React.
 
-### Access Control
+## Access Control
 
 All files that are uploaded to each Collection automatically support the `read` [Access Control](/docs/access-control/overview) function from the Collection itself. You can use this to control who should be allowed to see your uploads, and who should not.

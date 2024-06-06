@@ -4,6 +4,8 @@ export const tenantsSlug = 'tenants'
 
 export const ssrPagesSlug = 'ssr'
 
+export const ssrAutosavePagesSlug = 'ssr-autosave'
+
 export const postsSlug = 'posts'
 
 export const mobileBreakpoint = {

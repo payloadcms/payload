@@ -73,16 +73,17 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+
   const onChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!disabled) {
         let newValue
         if (!selectedOption) {
           newValue = null
@@ -103,7 +104,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, hasMany, setValue, onChangeFromProps],
+    [disabled, hasMany, setValue, onChangeFromProps],
   )
 
   return (
@@ -125,7 +126,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
       onChange={onChange}
       options={options}
       path={path}
-      readOnly={readOnly}
+      readOnly={disabled}
       required={required}
       showError={showError}
       style={style}

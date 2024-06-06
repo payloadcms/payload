@@ -110,6 +110,7 @@ export const svTranslations: DefaultTranslationsObject = {
     unauthorized: 'Obehörig, du måste vara inloggad för att göra denna begäran.',
     unknown: 'Ett okänt fel har uppstått.',
     unspecific: 'Ett fel har uppstått.',
+    userEmailAlreadyRegistered: 'En användare med den angivna e-postadressen är redan registrerad.',
     userLocked: 'Den här användaren är låst på grund av för många misslyckade inloggningsförsök.',
     valueMustBeUnique: 'Värdet måste vara unikt',
     verificationTokenInvalid: 'Verifieringstoken är ogiltig.',

@@ -109,6 +109,7 @@ export const faTranslations: DefaultTranslationsObject = {
     unauthorized: 'درخواست نامعتبر، جهت فرستادن این درخواست باید وارد شوید.',
     unknown: 'یک خطای ناشناخته رخ داد.',
     unspecific: 'خطایی رخ داد.',
+    userEmailAlreadyRegistered: 'کاربری با ایمیل داده شده قبلاً ثبت نام کرده است.',
     userLocked: 'این کاربر به دلیل تلاش های زیاد برای ورود ناموفق قفل شده است.',
     valueMustBeUnique: 'مقدار باید منحصر به فرد باشد',
     verificationTokenInvalid: 'ژتون تأیید نامعتبر است.',

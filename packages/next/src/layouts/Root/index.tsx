@@ -57,11 +57,13 @@ export const RootLayout = async ({
   })
 
   const payload = await getPayloadHMR({ config })
+
   const i18n: I18nClient = await initI18n({
     config: config.i18n,
     context: 'client',
     language: languageCode,
   })
+
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)

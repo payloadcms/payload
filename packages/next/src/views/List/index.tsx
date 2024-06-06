@@ -13,7 +13,6 @@ import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
 
-import { UnauthorizedView } from '../Unauthorized/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
@@ -41,7 +40,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   const collectionSlug = collectionConfig?.slug
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
-    return <UnauthorizedView initPageResult={initPageResult} searchParams={searchParams} />
+    notFound()
   }
 
   let listPreferences: ListPreferences

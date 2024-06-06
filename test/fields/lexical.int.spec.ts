@@ -220,6 +220,62 @@ describe('Lexical', () => {
       expect((uploadNode.value.media as any).filename).toStrictEqual('payload.png')
     })
   })
+
+  it('ensure link nodes convert to markdown', async () => {
+    const newLexicalDoc = await payload.create({
+      collection: lexicalFieldsSlug,
+      data: {
+        title: 'Lexical Markdown Test',
+        lexicalWithBlocks: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                children: [
+                  {
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'link to payload',
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    type: 'autolink',
+                    version: 2,
+                    fields: {
+                      linkType: 'custom',
+                      url: 'https://payloadcms.com',
+                    },
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+      },
+    })
+
+    expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
+      '[link to payload](https://payloadcms.com)',
+    )
+  })
+
   describe('converters and migrations', () => {
     it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
       const lexicalDoc: LexicalMigrateField = (

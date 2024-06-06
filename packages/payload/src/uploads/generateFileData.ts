@@ -1,7 +1,6 @@
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
-import fileType from 'file-type'
-const { fromBuffer } = fileType
+import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import sanitize from 'sanitize-filename'
@@ -114,7 +113,7 @@ export const generateFileData = async <T>({
   let newData = data
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp'
+  const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -128,7 +127,7 @@ export const generateFileData = async <T>({
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
+      Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 
@@ -161,7 +160,7 @@ export const generateFileData = async <T>({
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = await fromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
+      ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
       fileData.filesize = fileBuffer.info.size
@@ -202,6 +201,7 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData && sharp) {
+      const metadata = await sharpFile.metadata()
       const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file, sharp })
 
       filesToSave.push({
@@ -215,7 +215,7 @@ export const generateFileData = async <T>({
         size: info.size,
       }
       fileData.width = info.width
-      fileData.height = info.height
+      fileData.height = fileIsAnimated ? info.height / metadata.pages : info.height
       fileData.filesize = info.size
 
       if (file.tempFilePath) {

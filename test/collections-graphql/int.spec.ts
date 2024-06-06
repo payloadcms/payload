@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { mapAsync } from 'payload/utilities'
@@ -15,6 +16,9 @@ const title = 'title'
 
 let restClient: NextRESTClient
 let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
@@ -1077,7 +1081,7 @@ describe('collections-graphql', () => {
   })
 
   it('should query upload enabled docs', async () => {
-    const file = await getFileByPath(path.resolve(__dirname, '../uploads/test-image.jpg'))
+    const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
 
     const mediaDoc = await payload.create({
       collection: 'media',
@@ -1190,7 +1194,7 @@ describe('collections-graphql', () => {
       expect(errors[1].path[0]).toEqual('test3')
       expect(errors[1].extensions.name).toEqual('ValidationError')
       expect(errors[1].extensions.data[0].message).toEqual(
-        'A user with the given email is already registered',
+        'A user with the given email is already registered.',
       )
       expect(errors[1].extensions.data[0].field).toEqual('email')
 
