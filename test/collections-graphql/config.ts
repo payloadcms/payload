@@ -380,6 +380,29 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
+  globals: [
+    {
+      slug: 'global-1',
+      access: {
+        read: openAccess.read,
+        update: openAccess.update,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          name: 'relationship',
+          type: 'relationship',
+          relationTo: 'cyclical-relationship',
+        },
+      ],
+      versions: {
+        drafts: true,
+      },
+    },
+  ],
   graphQL: {
     queries: (GraphQL) => {
       return {
