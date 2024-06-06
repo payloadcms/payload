@@ -991,7 +991,7 @@ describe('collections-graphql', () => {
         collection: 'cyclical-relationship',
         draft: false,
         data: {
-          title: '1',
+          title: 'published relationship',
         },
       })
 
@@ -1001,7 +1001,7 @@ describe('collections-graphql', () => {
         id: newDoc.id,
         draft: true,
         data: {
-          title: '2',
+          title: 'draft relationship',
         },
       })
 
@@ -1035,7 +1035,7 @@ describe('collections-graphql', () => {
 
       const queriedGlobal = response.Global1
       expect(queriedGlobal.title).toEqual('draft title')
-      expect(queriedGlobal.relationship.title).toEqual('2')
+      expect(queriedGlobal.relationship.title).toEqual('draft relationship')
     })
   })
 
