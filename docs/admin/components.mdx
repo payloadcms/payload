@@ -17,12 +17,12 @@ To swap in your own React component, first, consult the list of available compon
   normally accepts.
 </Banner>
 
-### Base Component Overrides
+## Base Component Overrides
 
 You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
 
 | Path                  | Description                                                                                                                                                                                               |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                       |
 | **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
 | **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
@@ -73,7 +73,7 @@ export default buildConfig({
 })
 ```
 
-#### Views
+### Views
 
 You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views by default, all of which can be overridden:
 
@@ -111,7 +111,7 @@ For more granular control, pass a configuration object instead. Each view corres
 
 _\* An asterisk denotes that a property is required._
 
-#### Adding new views
+### Adding new views
 
 To add a _new_ view to the Admin Panel, simply add another key to the `views` object with at least a `path` and `Component` property. For example:
 
@@ -145,7 +145,7 @@ _For more examples regarding how to customize components, look at the following 
 
 For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component).
 
-### Collections
+## Collections
 
 You can override components on a collection-by-collection basis via the `admin.components` property.
 
@@ -221,7 +221,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-#### Collection views
+### Collection views
 
 To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views by default, all of which can be overridden:
 
@@ -297,7 +297,7 @@ Here's an example of how you can customize nested views within the `Edit` view i
 
 You can also add _new_ tabs to the `Edit` view by adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
 
-### Globals
+## Globals
 
 As with Collections, you can override components on a global-by-global basis via the `admin.components` property.
 
@@ -309,7 +309,7 @@ As with Collections, you can override components on a global-by-global basis via
 | **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 | **`views`**                    | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
 
-#### Global views
+### Global views
 
 To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views by default, all of which can be overridden:
 
@@ -378,7 +378,7 @@ Here's how you can customize nested views within the `Edit` view in Globals, inc
 
 You can also add _new_ tabs to the `Edit` view by adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
 
-### Custom Tabs
+## Custom Tabs
 
 You can easily swap individual collection or global edit views. To do this, pass an _object_ to the `admin.components.views.Edit` property of the config. Payload renders the following views by default, all of which can be overridden:
 
@@ -445,7 +445,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-### Building a custom view component
+## Building a custom view component
 
 Your custom view components will be given all the props that a React Router `<Route />` typically would receive, as well as two props from Payload:
 
@@ -470,7 +470,7 @@ You can find examples of custom views in the [Payload source code `/test/admin/c
 
 To see how to pass in your custom views to create custom views of your own, take a look at the `admin.components.views` property of the [Payload test admin config](https://github.com/payloadcms/payload/blob/main/test/admin/config.ts).
 
-### Fields
+## Fields
 
 All Payload fields support the ability to swap in your own React components. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
 
@@ -531,7 +531,7 @@ const CustomCell: React.FC<Props> = (props) => {
 
 When writing your own custom components you can make use of a number of hooks to set data, get reactive changes to other fields, get the id of the document or interact with a context from a custom provider.
 
-### Sending and receiving values from the form
+## Sending and receiving values from the form
 
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
@@ -669,7 +669,7 @@ As your admin customizations gets more complex you may want to share state betwe
   component for the admin UI to show
 </Banner>
 
-### Styling Custom Components
+## Styling Custom Components
 
 Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling, so it blends more thoroughly into the existing admin UI.
 
@@ -679,7 +679,7 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 @import '~payload/scss';
 ```
 
-### Getting the current language
+## Getting the current language
 
 When developing custom components you can support multiple languages to be consistent with Payload's i18n support. The best way to do this is to add your translation resources to the [i18n configuration](https://payloadcms.com/docs/configuration/i18n) and import `useTranslation` from `@payloadcms/ui/providers/Translation` in your components.
 
@@ -703,7 +703,7 @@ const CustomComponent: React.FC = () => {
 }
 ```
 
-### Getting the current locale
+## Getting the current locale
 
 In any custom component you can get the selected locale with `useLocale` hook. `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 

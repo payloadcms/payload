@@ -26,6 +26,15 @@ export type UploadData = {
   value: number | string
 }
 
+function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
+  return (
+    img.parentElement != null &&
+    img.parentElement.tagName === 'LI' &&
+    img.previousSibling === null &&
+    img.getAttribute('aria-roledescription') === 'checkbox'
+  )
+}
+
 function $convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput | null {
   if (
     domNode.hasAttribute('data-lexical-upload-relation-to') &&
@@ -44,6 +53,10 @@ function $convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput |
       })
       return { node }
     }
+  }
+  const img = domNode
+  if (img.src.startsWith('file:///') || isGoogleDocCheckboxImg(img)) {
+    return null
   }
   // TODO: Auto-upload functionality here!
   //}

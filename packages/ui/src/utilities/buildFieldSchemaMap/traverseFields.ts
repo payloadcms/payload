@@ -1,6 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Field, SanitizedConfig } from 'payload/types'
 
+import { MissingEditorProp } from 'payload/errors'
 import { tabHasName } from 'payload/types'
 
 import type { FieldSchemaMap } from './types.js'
@@ -68,6 +69,9 @@ export const traverseFields = ({
         break
 
       case 'richText':
+        if (!field?.editor) {
+          throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+        }
         if (typeof field.editor === 'function') {
           throw new Error('Attempted to access unsanitized rich text editor.')
         }

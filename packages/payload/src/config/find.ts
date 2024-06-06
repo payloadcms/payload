@@ -1,4 +1,4 @@
-import findUp from 'find-up'
+import { findUpSync, pathExistsSync } from 'find-up'
 import fs from 'fs'
 import path from 'path'
 
@@ -13,7 +13,7 @@ const getTSConfigPaths = (): {
   rootPath?: string
   srcPath?: string
 } => {
-  const tsConfigPath = findUp.sync('tsconfig.json')
+  const tsConfigPath = findUpSync('tsconfig.json')
 
   if (!tsConfigPath) {
     return {
@@ -79,17 +79,17 @@ export const findConfig = (): string => {
   for (const searchPath of searchPaths) {
     if (!searchPath) continue
 
-    const configPath = findUp.sync(
+    const configPath = findUpSync(
       (dir) => {
         const tsPath = path.join(dir, 'payload.config.ts')
-        const hasTS = findUp.sync.exists(tsPath)
+        const hasTS = pathExistsSync(tsPath)
 
         if (hasTS) {
           return tsPath
         }
 
         const jsPath = path.join(dir, 'payload.config.js')
-        const hasJS = findUp.sync.exists(jsPath)
+        const hasJS = pathExistsSync(jsPath)
 
         if (hasJS) {
           return jsPath
@@ -108,13 +108,13 @@ export const findConfig = (): string => {
   // If no config file is found in the directories defined by tsconfig.json,
   // try searching in the 'src' and 'dist' directory as a last resort, as they are most commonly used
   if (process.env.NODE_ENV === 'production') {
-    const distConfigPath = findUp.sync(['payload.config.js', 'payload.config.ts'], {
+    const distConfigPath = findUpSync(['payload.config.js', 'payload.config.ts'], {
       cwd: path.resolve(process.cwd(), 'dist'),
     })
 
     if (distConfigPath) return distConfigPath
   } else {
-    const srcConfigPath = findUp.sync(['payload.config.js', 'payload.config.ts'], {
+    const srcConfigPath = findUpSync(['payload.config.js', 'payload.config.ts'], {
       cwd: path.resolve(process.cwd(), 'src'),
     })
 

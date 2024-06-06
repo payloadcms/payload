@@ -10,13 +10,13 @@ Payload has a Webpack (v5) bundler that you can build the Admin panel with. For 
 
 Out of the box, the Webpack bundler supports common functionalities such as SCSS and Typescript, but there are many cases where you may need to add support for additional functionalities.
 
-#### Installation
+## Installation
 
 ```bash
 yarn add @payloadcms/bundler-webpack
 ```
 
-#### Import the bundler
+### Import the bundler
 
 ```ts
 // payload.config.ts
@@ -33,7 +33,7 @@ export default buildConfig({
 })
 ```
 
-### Extending Webpack
+## Extending Webpack
 
 If you need to extend the Webpack config, you can do so by passing a function to the `admin.webpack` property on your Payload config.
 The function will receive the Webpack config as an argument and should return the modified config.

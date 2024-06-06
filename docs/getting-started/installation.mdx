@@ -6,7 +6,7 @@ desc: To quickly get started with Payload, simply run npx create-payload-app or 
 keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-#### Software Requirements
+## Software Requirements
 
 Payload requires the following software:
 
@@ -48,7 +48,7 @@ Write the above code into your newly created config file. This baseline config w
 
 Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
 
-### Server
+## Server
 
 Now that you've got a baseline Payload config, it's time to initialize Payload. It requires an Express server that you provide, so if you're not familiar with how to set up a baseline Express server, please read up on exactly what Express is and why to use it. Express' own [Documentation](https://expressjs.com/en/starter/hello-world.html) is a good place to start. Otherwise, follow along below for how to build your own Express server to use with Payload.
 
@@ -100,54 +100,54 @@ PAYLOAD_SECRET=your-payload-secret
 
 Here is a list of all properties available to pass through `payload.init`:
 
-##### secret
+#### secret
 
 **Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
 
 Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
 
-##### config
+#### config
 
 Allows you to pass your config directly to the onInit function. The config passed here should match the payload.config file.
 
-##### disableOnInit
+#### disableOnInit
 
 A boolean that disables running your `onInit` function when Payload starts up.
 
-##### disableDBConnect
+#### disableDBConnect
 
 A boolean that disables the database connection when Payload starts up.
 
-##### email
+#### email
 
 An object used to configure SMTP. [Read more](/docs/email/overview).
 
-##### express
+#### express
 
 This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
 
-##### local
+#### local
 
 A boolean that when set to `true` tells Payload to start in local-only mode which will bypass setting up API routes. When set to `true`, `express` is not required. This is useful when running scripts that need to use Payload's [local-api](/docs/local-api/overview).
 
-##### loggerDestination
+#### loggerDestination
 
 Specify destination stream for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=pino-destination) for more info on what is available.
 
-##### loggerOptions
+#### loggerOptions
 
 Specify options for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=options) for more info on what is available.
 
-##### onInit
+#### onInit
 
 A function that is called immediately following startup that receives the Payload instance as it's only argument.
 
-### Test it out
+## Test it out
 
 After you've gotten this far, it's time to boot up Payload. Start your project in your application's folder to get going.
 
 After it starts, you can go to `http://localhost:3000/admin` to create your first Payload user!
 
-### Docker
+## Docker
 
 Looking to deploy Payload with Docker? New projects with `create-payload-app` come with a Dockerfile and docker-compose.yml file ready to go. Examples of these files can be seen in our [Deployment docs](/docs/production/deployment#docker).

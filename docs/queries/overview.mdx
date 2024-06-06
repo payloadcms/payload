@@ -11,12 +11,13 @@ Payload provides an extremely granular querying language through all APIs. Each 
 <Banner>
   <strong>
     Here, "querying" relates to filtering or searching through documents within a Collection.
-  </strong>{' '}
+  </strong>
+
   You can build queries to pass to Find operations as well as to [restrict which documents certain
   users can access](/docs/access-control/overview) via access control functions.
 </Banner>
 
-### Simple queries
+## Simple queries
 
 For example, say you have a collection as follows:
 
@@ -52,7 +53,7 @@ const query = {
 
 The above example demonstrates a simple query but you can get much more complex.
 
-### Operators
+## Operators
 
 | Operator             | Description                                                                                                                                                                       |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -77,7 +78,7 @@ The above example demonstrates a simple query but you can get much more complex.
   </strong> to a field's config which will speed up searches using that field immensely.
 </Banner>
 
-### And / Or Logic
+## And / Or Logic
 
 In addition to defining simple queries, you can join multiple queries together using simple AND / OR logic. Let's take the above `Post` collection for example and write a more complex query using AND / OR:
 
@@ -111,7 +112,7 @@ const query = {
 
 Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is set to false.
 
-### Nested properties
+## Nested properties
 
 When working with nested properties, which can happen when using relational fields, it is possible to use the dot notation to access the nested property. For example, when working with a `Song` collection that has a `artists` field which is related to an `Artists` collection using the `name: 'artists'`. You can access a property within the collection `Artists` like so:
 
@@ -124,7 +125,7 @@ const query = {
 }
 ```
 
-### GraphQL Find Queries
+## GraphQL Find Queries
 
 All GraphQL `find` queries support the `where` argument, which accepts queries exactly as detailed above.
 
@@ -141,7 +142,7 @@ query {
 }
 ```
 
-### REST Queries
+## REST Queries
 
 With the REST API, you can use the full power of Payload queries as well but they become a bit more unwieldy the more complex that they get.
 
@@ -177,7 +178,7 @@ const getPosts = async () => {
 }
 ```
 
-### Local API Queries
+## Local API Queries
 
 The Local API's `find` operation accepts an object exactly how you write it. For example:
 

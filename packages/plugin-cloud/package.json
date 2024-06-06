@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-cloud",
-  "version": "3.0.0-beta.39",
+  "version": "3.0.0-beta.42",
   "description": "The official Payload Cloud plugin",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -41,7 +41,7 @@
     "resend": "^0.17.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.1",
+    "@types/jest": "29.5.12",
     "@types/nodemailer": "6.4.14",
     "payload": "workspace:*",
     "ts-jest": "^29.1.0"

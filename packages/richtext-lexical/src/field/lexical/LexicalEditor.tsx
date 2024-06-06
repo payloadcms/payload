@@ -1,6 +1,6 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary.js'
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
@@ -98,8 +98,6 @@ export const LexicalEditor: React.FC<
     }
   }, [isSmallWidthViewport])
 
-  const ErrorBoundaryComponent = LexicalErrorBoundary.default || LexicalErrorBoundary
-
   return (
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
@@ -116,8 +114,7 @@ export const LexicalEditor: React.FC<
           }
         })}
         <RichTextPlugin
-          //@ts-expect-error ts being dumb
-          ErrorBoundary={ErrorBoundaryComponent}
+          ErrorBoundary={LexicalErrorBoundary}
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef}>

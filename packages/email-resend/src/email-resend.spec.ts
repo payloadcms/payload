@@ -1,5 +1,6 @@
 import { resendAdapter } from './index.js'
 import { Payload } from 'payload/types'
+import { jest } from '@jest/globals'
 
 describe('email-resend', () => {
   const defaultFromAddress = 'dev@payloadcms.com'
