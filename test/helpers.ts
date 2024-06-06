@@ -101,6 +101,13 @@ export const selectTableRow = async (page: Page, title: string): Promise<void> =
   expect(await page.locator(selector).isChecked()).toBe(true)
 }
 
+export async function navigateToListCellLink(page: Page, selector = '.cell-id') {
+  const cellLink = page.locator(`${selector} a`).first()
+  const linkURL = await cellLink.getAttribute('href')
+  await cellLink.click()
+  await page.waitForURL(`**${linkURL}`)
+}
+
 export const findTableCell = async (
   page: Page,
   fieldName: string,
