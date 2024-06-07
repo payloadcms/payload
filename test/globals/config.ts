@@ -19,6 +19,13 @@ const access = {
 }
 
 export default buildConfigWithDefaults({
+  collections: [
+    {
+      slug: 'media',
+      upload: true,
+      fields: [],
+    },
+  ],
   globals: [
     {
       access,
@@ -30,6 +37,11 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
+        },
+        {
+          name: 'media',
+          type: 'upload',
+          relationTo: 'media',
         },
       ],
       slug,

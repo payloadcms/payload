@@ -12,6 +12,7 @@ import {
   cropOnlySlug,
   enlargeSlug,
   focalOnlySlug,
+  globalWithMedia,
   mediaSlug,
   reduceSlug,
   relationSlug,
@@ -489,6 +490,18 @@ export default buildConfigWithDefaults({
       versions: {
         drafts: true,
       },
+    },
+  ],
+  globals: [
+    {
+      slug: globalWithMedia,
+      fields: [
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: cropOnlySlug,
+        },
+      ],
     },
   ],
   onInit: async (payload) => {
