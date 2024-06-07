@@ -268,22 +268,16 @@ const DocumentInfo: React.FC<Props> = ({
 
   const action: string = React.useMemo(() => {
     const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
-    if (uploadEdits) {
-      const paramsWithEdits = QueryString.stringify(
-        {
-          depth: 0,
-          'fallback-locale': 'null',
-          locale: code,
-          ...(uploadEdits ? { uploadEdits } : {}),
-        },
-        {
-          addQueryPrefix: true,
-        },
-      )
-      return `${docURL}${paramsWithEdits}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale: code,
+      uploadEdits: uploadEdits || undefined,
     }
 
-    return docURL
+    return `${docURL}${QueryString.stringify(params, {
+      addQueryPrefix: true,
+    })}`
   }, [baseURL, code, pluralType, id, slug, uploadEdits])
 
   const value: ContextType = {
