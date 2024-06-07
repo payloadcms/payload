@@ -83,7 +83,6 @@ export const withPayload = (nextConfig = {}) => {
           'drizzle-kit/payload',
           'sharp',
           'libsql',
-          'json-schema-to-typescript',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),

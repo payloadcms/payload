@@ -33,6 +33,8 @@ export default withBundleAnalyzer(
         '.js': ['.ts', '.tsx', '.js', '.jsx'],
         '.mjs': ['.mts', '.mjs'],
       }
+      webpackConfig.externals = ['prettier']
+
       return webpackConfig
     },
   }),
