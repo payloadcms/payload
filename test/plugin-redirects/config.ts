@@ -27,6 +27,17 @@ export default buildConfigWithDefaults({
   plugins: [
     redirectsPlugin({
       collections: ['pages'],
+      overrides: {
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              type: 'text',
+              name: 'customField',
+            },
+          ]
+        },
+      },
     }),
   ],
 })
