@@ -118,7 +118,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   // drizzle: LibSQLDatabase<Record<string, unknown>> | PostgresDB
   drizzle: LibSQLDatabase | PostgresDB
   dropTables: DropTables
-  enums?: Record<string, unknown>
+  enums?: Record<string, unknown> | never
   execute: Execute
   features: {
     json?: boolean

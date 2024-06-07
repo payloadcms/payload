@@ -12,11 +12,12 @@ import { createTableName } from '../../drizzle/src/createTableName.js'
 import { buildTable } from './schema/build.js'
 
 export const init: Init = function init(this: SQLiteAdapter) {
+  let locales: [string, ...string[]] | undefined
   if (this.payload.config.localization) {
-    this.enums.enum__locales = pgEnum(
-      '_locales',
-      this.payload.config.localization.locales.map(({ code }) => code) as [string, ...string[]],
-    )
+    locales = this.payload.config.localization.locales.map(({ code }) => code) as [
+      string,
+      ...string[],
+    ]
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
@@ -42,6 +43,7 @@ export const init: Init = function init(this: SQLiteAdapter) {
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.fields,
+      locales,
       tableName,
       timestamps: collection.timestamps,
       versions: false,
@@ -58,6 +60,7 @@ export const init: Init = function init(this: SQLiteAdapter) {
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
+        locales,
         tableName: versionsTableName,
         timestamps: true,
         versions: true,
@@ -73,6 +76,7 @@ export const init: Init = function init(this: SQLiteAdapter) {
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
       fields: global.fields,
+      locales,
       tableName,
       timestamps: false,
       versions: false,
@@ -92,6 +96,7 @@ export const init: Init = function init(this: SQLiteAdapter) {
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
+        locales,
         tableName: versionsTableName,
         timestamps: true,
         versions: true,

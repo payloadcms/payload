@@ -19,15 +19,14 @@ export const connect: Connect = async function connect(
   this.schema = {
     ...this.tables,
     ...this.relations,
-    ...this.enums,
   }
 
   try {
     if (!this.client) {
-      this.client = createClient({ authToken: 'DATABASE_AUTH_TOKEN', url: 'DATABASE_URL' })
+      this.client = createClient(this.clientConfig)
     }
 
-    const logger = this.logger || false
+    const logger = this.logger || false || true
     this.drizzle = drizzle(this.client, { logger, schema: this.schema }) as LibSQLDatabase
 
     if (!hotReload) {
@@ -38,7 +37,7 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    this.payload.logger.error(`Error: cannot connect to SQLite. Details: ${err.message}`, err)
     if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
     process.exit(1)
   }

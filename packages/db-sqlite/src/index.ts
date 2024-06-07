@@ -69,9 +69,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       client: undefined,
+      clientConfig: args.client,
       defaultDrizzleSnapshot,
       drizzle: undefined,
-      enums: {},
       features: {
         json: true,
       },

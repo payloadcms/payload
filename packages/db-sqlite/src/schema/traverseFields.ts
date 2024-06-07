@@ -1,6 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
+import type { Relation, Writable } from 'drizzle-orm'
+import type {
+  IndexBuilder,
+  SQLiteColumnBuilder,
+  SQLiteTextBuilderInitial,
+} from 'drizzle-orm/sqlite-core'
 import type { Field, TabAsField } from 'payload/types'
 
 import {
@@ -9,21 +13,11 @@ import {
   validateExistingBlockIsIdentical,
 } from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
-import {
-  PgNumericBuilder,
-  PgUUIDBuilder,
-  PgVarcharBuilder,
-  boolean,
-  foreignKey,
-  index,
-  integer,
-  jsonb,
-  numeric,
-  pgEnum,
-  text,
-  timestamp,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { foreignKey, index } from 'drizzle-orm/sqlite-core'
+import { integer } from 'drizzle-orm/sqlite-core'
+import { numeric, text } from 'drizzle-orm/sqlite-core'
+import { SQLiteTextBuilder } from 'drizzle-orm/sqlite-core'
+import { SQLiteIntegerBuilder, SQLiteNumericBuilder } from 'drizzle-orm/sqlite-core'
 import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
@@ -33,27 +27,28 @@ import type { BaseExtraConfig, RelationMap } from './build.js'
 
 import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
+import { getIDColumn } from './getIDColumn.js'
 import { idToUUID } from './idToUUID.js'
-import { parentIDColumnMap } from './parentIDColumnMap.js'
 
 type Args = {
   adapter: SQLiteAdapter
   columnPrefix?: string
-  columns: Record<string, PgColumnBuilder>
+  columns: Record<string, SQLiteColumnBuilder>
   disableNotNull: boolean
   disableUnique?: boolean
   fieldPrefix?: string
   fields: (Field | TabAsField)[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  localesColumns: Record<string, PgColumnBuilder>
+  locales: [string, ...string[]]
+  localesColumns: Record<string, SQLiteColumnBuilder>
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
   parentTableName: string
   relationsToBuild: RelationMap
   relationships: Set<string>
   rootRelationsToBuild?: RelationMap
-  rootTableIDColType: string
+  rootTableIDColType: IDType
   rootTableName: string
   versions: boolean
 }
@@ -77,6 +72,7 @@ export const traverseFields = ({
   fields,
   forceLocalized,
   indexes,
+  locales,
   localesColumns,
   localesIndexes,
   newTableName,
@@ -97,9 +93,9 @@ export const traverseFields = ({
   let hasLocalizedManyNumberField = false
 
   let parentIDColType: IDType = 'integer'
-  if (columns.id instanceof PgUUIDBuilder) parentIDColType = 'uuid'
-  if (columns.id instanceof PgNumericBuilder) parentIDColType = 'numeric'
-  if (columns.id instanceof PgVarcharBuilder) parentIDColType = 'varchar'
+  if (columns.id instanceof SQLiteIntegerBuilder) parentIDColType = 'integer'
+  if (columns.id instanceof SQLiteNumericBuilder) parentIDColType = 'numeric'
+  if (columns.id instanceof SQLiteTextBuilder) parentIDColType = 'text'
 
   fields.forEach((field) => {
     if ('name' in field && field.name === 'id') return
@@ -166,18 +162,18 @@ export const traverseFields = ({
 
           if (field.unique) {
             throw new InvalidConfiguration(
-              'Unique is not supported in Postgres for hasMany text fields.',
+              'Unique is not supported in SQLite for hasMany text fields.',
             )
           }
         } else {
-          targetTable[fieldName] = varchar(columnName)
+          targetTable[fieldName] = text(columnName)
         }
         break
       }
       case 'email':
       case 'code':
       case 'textarea': {
-        targetTable[fieldName] = varchar(columnName)
+        targetTable[fieldName] = text(columnName)
         break
       }
 
@@ -206,16 +202,12 @@ export const traverseFields = ({
 
       case 'richText':
       case 'json': {
-        targetTable[fieldName] = jsonb(columnName)
+        targetTable[fieldName] = text(columnName, { mode: 'json' })
         break
       }
 
       case 'date': {
-        targetTable[fieldName] = timestamp(columnName, {
-          mode: 'string',
-          precision: 3,
-          withTimezone: true,
-        })
+        targetTable[fieldName] = text(columnName)
         break
       }
 
@@ -225,25 +217,13 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = createTableName({
-          adapter,
-          config: field,
-          parentTableName: newTableName,
-          prefix: `enum_${newTableName}_`,
-          target: 'enumName',
-          throwValidationError,
-        })
+        const options = field.options.map((option) => {
+          if (optionIsObject(option)) {
+            return option.value
+          }
 
-        adapter.enums[enumName] = pgEnum(
-          enumName,
-          field.options.map((option) => {
-            if (optionIsObject(option)) {
-              return option.value
-            }
-
-            return option
-          }) as [string, ...string[]],
-        )
+          return option
+        }) as [string, ...string[]]
 
         if (field.type === 'select' && field.hasMany) {
           const selectTableName = createTableName({
@@ -254,10 +234,10 @@ export const traverseFields = ({
             throwValidationError,
             versionsCustomName: versions,
           })
-          const baseColumns: Record<string, PgColumnBuilder> = {
+          const baseColumns: Record<string, SQLiteColumnBuilder> = {
             order: integer('order').notNull(),
-            parent: parentIDColumnMap[parentIDColType]('parent_id').notNull(),
-            value: adapter.enums[enumName]('value'),
+            parent: getIDColumn({ name: 'parent_id', type: parentIDColType, notNull: true }),
+            value: text('value', { enum: options }),
           }
 
           const baseExtraConfig: BaseExtraConfig = {
@@ -272,7 +252,7 @@ export const traverseFields = ({
           }
 
           if (field.localized) {
-            baseColumns.locale = adapter.enums.enum__locales('locale').notNull()
+            baseColumns.locale = text('locale', { enum: locales }).notNull()
             baseExtraConfig.localeIdx = (cols) =>
               index(`${selectTableName}_locale_idx`).on(cols.locale)
           }
@@ -311,13 +291,13 @@ export const traverseFields = ({
             }),
           )
         } else {
-          targetTable[fieldName] = adapter.enums[enumName](fieldName)
+          targetTable[fieldName] = text(fieldName, { enum: options })
         }
         break
       }
 
       case 'checkbox': {
-        targetTable[fieldName] = boolean(columnName)
+        targetTable[fieldName] = integer(columnName, { mode: 'boolean' })
         break
       }
 
@@ -333,9 +313,9 @@ export const traverseFields = ({
           versionsCustomName: versions,
         })
 
-        const baseColumns: Record<string, PgColumnBuilder> = {
+        const baseColumns: Record<string, SQLiteColumnBuilder> = {
           _order: integer('_order').notNull(),
-          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').notNull(),
+          _parentID: getIDColumn({ name: '_parent_id', type: parentIDColType, notNull: true }),
         }
 
         const baseExtraConfig: BaseExtraConfig = {
@@ -350,7 +330,7 @@ export const traverseFields = ({
         }
 
         if (field.localized && adapter.payload.config.localization) {
-          baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
+          baseColumns._locale = text('_locale', { enum: locales }).notNull()
           baseExtraConfig._localeIdx = (cols) =>
             index(`${arrayTableName}_locale_idx`).on(cols._locale)
         }
@@ -443,9 +423,13 @@ export const traverseFields = ({
             versionsCustomName: versions,
           })
           if (!adapter.tables[blockTableName]) {
-            const baseColumns: Record<string, PgColumnBuilder> = {
+            const baseColumns: Record<string, SQLiteColumnBuilder> = {
               _order: integer('_order').notNull(),
-              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id').notNull(),
+              _parentID: getIDColumn({
+                name: '_parent_id',
+                type: rootTableIDColType,
+                notNull: true,
+              }),
               _path: text('_path').notNull(),
             }
 
@@ -462,7 +446,7 @@ export const traverseFields = ({
             }
 
             if (field.localized && adapter.payload.config.localization) {
-              baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
+              baseColumns._locale = text('_locale', { enum: locales }).notNull()
               baseExtraConfig._localeIdx = (cols) =>
                 index(`${blockTableName}_locale_idx`).on(cols._locale)
             }
@@ -574,6 +558,7 @@ export const traverseFields = ({
             fields: field.fields,
             forceLocalized,
             indexes,
+            locales,
             localesColumns,
             localesIndexes,
             newTableName,
@@ -614,6 +599,7 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,
+          locales,
           localesColumns,
           localesIndexes,
           newTableName: `${parentTableName}_${columnName}`,
@@ -655,6 +641,7 @@ export const traverseFields = ({
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           forceLocalized,
           indexes,
+          locales,
           localesColumns,
           localesIndexes,
           newTableName,
@@ -696,6 +683,7 @@ export const traverseFields = ({
           fields: field.fields,
           forceLocalized,
           indexes,
+          locales,
           localesColumns,
           localesIndexes,
           newTableName,
@@ -730,18 +718,18 @@ export const traverseFields = ({
           const tableName = adapter.tableNameMap.get(toSnakeCase(field.relationTo))
 
           // get the id type of the related collection
-          let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
+          let colType: IDType = 'integer'
           const relatedCollectionCustomID = relationshipConfig.fields.find(
             (field) => fieldAffectsData(field) && field.name === 'id',
           )
           if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
-          if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
+          if (relatedCollectionCustomID?.type === 'text') colType = 'text'
 
           // make the foreign key column for relationship using the correct id column type
-          targetTable[fieldName] = parentIDColumnMap[colType](`${columnName}_id`).references(
-            () => adapter.tables[tableName].id,
-            { onDelete: 'set null' },
-          )
+          targetTable[fieldName] = getIDColumn({
+            name: `${columnName}_id`,
+            type: colType,
+          }).references(() => adapter.tables[tableName].id, { onDelete: 'set null' })
 
           // add relationship to table
           relationsToBuild.set(fieldName, {

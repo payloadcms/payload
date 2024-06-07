@@ -16,7 +16,6 @@ import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
 
 import {
-  type ColumnBaseConfig,
   type ColumnDataType,
   type DrizzleConfig,
   type Relation,
@@ -37,8 +36,19 @@ export type Args = {
 }
 
 export type GenericColumn = SQLiteColumn<
-  ColumnBaseConfig<ColumnDataType, string>,
-  Record<string, unknown>
+  {
+    baseColumn: never
+    columnType: string
+    data: unknown
+    dataType: ColumnDataType
+    driverParam: unknown
+    enumValues: string[]
+    hasDefault: false
+    name: string
+    notNull: false
+    tableName: string
+  },
+  object
 >
 
 export type GenericColumns = {
@@ -89,6 +99,7 @@ export type Insert = (args: {
 
 export type SQLiteAdapter = DrizzleAdapter & {
   client: Client
+  clientConfig: Args['client']
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
@@ -124,7 +135,7 @@ export type SQLiteAdapter = DrizzleAdapter & {
   versionsSuffix?: string
 }
 
-export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
+export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
 export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }

@@ -1647,6 +1647,9 @@ importers:
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:../packages/db-postgres
+      '@payloadcms/db-sqlite':
+        specifier: workspace:*
+        version: link:../packages/db-sqlite
       '@payloadcms/drizzle':
         specifier: workspace:*
         version: link:../packages/drizzle

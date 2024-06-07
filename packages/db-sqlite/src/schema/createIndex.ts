@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { index, uniqueIndex } from 'drizzle-orm/pg-core'
+import { index, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 import type { GenericColumn } from '../types.js'
 

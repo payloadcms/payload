@@ -35,12 +35,11 @@
     "mock.js"
   ],
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types && pnpm renamePredefinedMigrations",
+    "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "@libsql/client": "^0.5.2",

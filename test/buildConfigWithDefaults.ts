@@ -2,6 +2,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -35,6 +36,10 @@ import sharp from 'sharp'
 import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
+
+process.env.PAYLOAD_DATABASE = 'sqlite'
+process.env.SQLITE_URL = 'file:C:/code/payload-v3/sqlite.db'
+
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 export async function buildConfigWithDefaults(
@@ -63,6 +68,9 @@ export async function buildConfigWithDefaults(
       pool: {
         connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
       },
+    }),
+    sqlite: sqliteAdapter({
+      client: { url: process.env.SQLITE_URL },
     }),
     supabase: postgresAdapter({
       pool: {

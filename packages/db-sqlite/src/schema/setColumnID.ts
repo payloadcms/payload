@@ -1,13 +1,17 @@
-import type { PgColumnBuilder } from 'drizzle-orm/pg-core'
+import type { SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
 
-import { numeric, serial, uuid, varchar } from 'drizzle-orm/pg-core'
+import { integer, numeric, text } from 'drizzle-orm/sqlite-core'
 import { type Field, fieldAffectsData } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
 
 import type { IDType, SQLiteAdapter } from '../types.js'
 
-type Args = { adapter: SQLiteAdapter; columns: Record<string, PgColumnBuilder>; fields: Field[] }
-export const setColumnID = ({ adapter, columns, fields }: Args): IDType => {
+type Args = {
+  adapter: SQLiteAdapter
+  columns: Record<string, SQLiteColumnBuilder>
+  fields: Field[]
+}
+export const setColumnID = ({ columns, fields }: Args): IDType => {
   const idField = flattenTopLevelFields(fields).find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
@@ -18,16 +22,11 @@ export const setColumnID = ({ adapter, columns, fields }: Args): IDType => {
     }
 
     if (idField.type === 'text') {
-      columns.id = varchar('id').primaryKey()
-      return 'varchar'
+      columns.id = text('id').primaryKey()
+      return 'text'
     }
   }
 
-  if (adapter.idType === 'uuid') {
-    columns.id = uuid('id').defaultRandom().primaryKey()
-    return 'uuid'
-  }
-
-  columns.id = serial('id').primaryKey()
+  columns.id = integer('id').primaryKey()
   return 'integer'
 }
