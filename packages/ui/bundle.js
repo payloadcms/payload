@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { sassPlugin } from 'esbuild-sass-plugin'
+import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
 const removeCSSImports = {
   name: 'remove-css-imports',
@@ -42,10 +43,60 @@ await esbuild
   .catch(() => process.exit(1))
 
 // Bundle `client.ts`
-const result = await esbuild
+const resultClient = await esbuild
   .build({
     entryPoints: {
       'client/index': 'src/exports/client/index.ts',
+      //'server/index': 'src/exports/server/index.ts',
+    },
+    bundle: true,
+    platform: 'browser',
+    format: 'esm',
+    outdir: 'dist/exports',
+    // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
+    splitting: true,
+    external: [
+      '*.scss',
+      '*.css',
+      'qs',
+      '@dnd-kit/core',
+      '@payloadcms/graphql',
+      '@payloadcms/translations',
+      'deep-equal',
+      'react-toastify',
+
+      //'side-channel',
+      'payload',
+      'payload/*',
+      'react',
+      'react-dom',
+      'next',
+      '@faceless-ui',
+      '@faceless-ui/*',
+      'react-animate-height',
+      'crypto',
+    ],
+    //packages: 'external',
+    minify: true, // TODO: set to true later. false ust for testing
+    metafile: true,
+    tsconfig: path.resolve(dirname, './tsconfig.json'),
+    plugins: [
+      removeCSSImports,
+      /*commonjs({
+        ignore: ['date-fns', '@floating-ui/react'],
+      }),*/
+    ],
+    sourcemap: true,
+  })
+  .then((res, err) => {
+    console.log('client.ts and server.ts bundled successfully')
+    return res
+  })
+  .catch(() => process.exit(1))
+
+const resultServer = await esbuild
+  .build({
+    entryPoints: {
       'server/index': 'src/exports/server/index.ts',
     },
     bundle: true,
@@ -55,11 +106,11 @@ const result = await esbuild
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
     external: ['*.scss', '*.css'],
-    packages: 'external',
-    minify: true,
+    //packages: 'external',
+    minify: true, // TODO: set to true later. false ust for testing
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
-    plugins: [removeCSSImports],
+    plugins: [removeCSSImports, commonjs()],
     sourcemap: true,
   })
   .then((res, err) => {
@@ -68,4 +119,5 @@ const result = await esbuild
   })
   .catch(() => process.exit(1))
 
-fs.writeFileSync('meta.json', JSON.stringify(result.metafile))
+fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))

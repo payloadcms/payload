@@ -129,6 +129,7 @@
     "@babel/preset-env": "^7.24.5",
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",

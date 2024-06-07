@@ -76,7 +76,7 @@
         "./packages/ui/src/utilities/*.ts"
       ],
       "@payloadcms/ui/client": [
-        "./packages/ui/src/client.js"
+        "./packages/ui/dist/exports/client/index.js"
       ],
       "@payloadcms/ui/server": [
         "./packages/ui/src/server.js"
