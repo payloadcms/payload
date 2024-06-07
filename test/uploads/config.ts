@@ -11,8 +11,10 @@ import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
   audioSlug,
+  cropOnlySlug,
   enlargeSlug,
   focalNoSizesSlug,
+  globalWithMediaSlug,
   mediaSlug,
   reduceSlug,
   relationSlug,
@@ -132,7 +134,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'crop-only',
+      slug: cropOnlySlug,
       fields: [],
       upload: {
         focalPoint: false,
@@ -460,6 +462,18 @@ export default buildConfigWithDefaults({
       versions: {
         drafts: true,
       },
+    },
+  ],
+  globals: [
+    {
+      slug: globalWithMediaSlug,
+      fields: [
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: cropOnlySlug,
+        },
+      ],
     },
   ],
   onInit: async (payload) => {

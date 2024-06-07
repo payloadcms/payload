@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -23,6 +22,7 @@ import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
   audioSlug,
+  globalWithMediaSlug,
   mediaSlug,
   relationSlug,
 } from './shared.js'
@@ -39,6 +39,7 @@ let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
+let globalWithMediaURL: string
 
 describe('uploads', () => {
   let page: Page
@@ -56,6 +57,7 @@ describe('uploads', () => {
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
+    globalWithMediaURL = new AdminUrlUtil(serverURL, globalWithMediaURL).global(globalWithMediaSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -371,6 +373,19 @@ describe('uploads', () => {
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
       expect(redDoc.filesize).toEqual(1207)
+    })
+  })
+
+  describe('globals', () => {
+    test('should be able to crop media from a global', async () => {
+      await page.goto(globalWithMediaURL)
+      await page.click('.upload__toggler.doc-drawer__toggler')
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+      await page.click('.file-field__edit')
+      await page.click('.btn.edit-upload__save')
+      await saveDocAndAssert(page, '.drawer__content #action-save')
+      await saveDocAndAssert(page)
+      await expect(page.locator('.thumbnail img')).toBeVisible()
     })
   })
 })
