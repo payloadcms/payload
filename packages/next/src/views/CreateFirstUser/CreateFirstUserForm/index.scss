@@ -1,0 +1,12 @@
+.create-first-user__form {
+  &__inputWrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+    margin-bottom: calc(var(--base) / 4);
+  }
+
+  > form > .field-type {
+    margin-bottom: var(--base);
+  }
+}

@@ -1,5 +1,8 @@
 .create-first-user {
-  > form > .field-type {
-    margin-bottom: var(--base);
+  &__brand {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: calc(var(--base) * 2);
   }
 }

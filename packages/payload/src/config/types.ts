@@ -485,6 +485,10 @@ export type Config = {
        */
       actions?: CustomComponent[]
       /**
+       * Add custom components after the create firsst user form
+       */
+      afterCreateFirstUser?: CustomComponent[]
+      /**
        * Add custom components after the collection overview
        */
       afterDashboard?: CustomComponent[]
@@ -496,6 +500,10 @@ export type Config = {
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
+      /**
+       * Add custom components before the create first user form
+       */
+      beforeCreateFirstUser?: Custom
       /**
        * Add custom components before the collection overview
        */
