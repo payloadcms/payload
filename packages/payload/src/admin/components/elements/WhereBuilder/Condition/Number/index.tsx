@@ -9,7 +9,7 @@ import './index.scss'
 const baseClass = 'condition-value-number'
 
 const NumberField: React.FC<Props> = ({ disabled, onChange, operator, value }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const isMulti = ['in', 'not_in'].includes(operator)
 
@@ -64,7 +64,7 @@ const NumberField: React.FC<Props> = ({ disabled, onChange, operator, value }) =
       numberOnly
       onChange={onSelect}
       options={[]}
-      placeholder={t('enterAValue')}
+      placeholder={t('general:enterAValue')}
       value={valueToRender || []}
     />
   ) : (
@@ -72,7 +72,7 @@ const NumberField: React.FC<Props> = ({ disabled, onChange, operator, value }) =
       className={baseClass}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={t('enterAValue')}
+      placeholder={t('general:enterAValue')}
       type="number"
       value={value as number}
     />

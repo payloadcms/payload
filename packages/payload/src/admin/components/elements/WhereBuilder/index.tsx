@@ -34,7 +34,7 @@ const reduceFields = (fields, i18n) =>
       }
 
       const operatorKeys = new Set()
-      const filteredOperators = operators.reduce((acc, operator) => {
+      const reducedOperators = operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           return [
@@ -52,7 +52,7 @@ const reduceFields = (fields, i18n) =>
         label: getTranslation(field.label || field.name, i18n),
         value: field.name,
         ...fieldTypes[field.type],
-        operators: filteredOperators,
+        operators: reducedOperators,
         props: {
           ...field,
         },
@@ -135,19 +135,19 @@ const WhereBuilder: React.FC<Props> = (props) => {
         or: [...conditions, ...paramsToKeep],
       }
 
-      const filteredQuery = {
+      const reducedQuery = {
         or: newWhereQuery.or.map((orCondition) => {
           const andConditions = (orCondition.and || []).map((andCondition) => {
-            const filteredCondition = {}
+            const reducedCondition = {}
             Object.entries(andCondition).forEach(([fieldName, fieldValue]) => {
               Object.entries(fieldValue).forEach(([operatorKey, operatorValue]) => {
-                filteredCondition[fieldName] = {}
-                filteredCondition[fieldName][operatorKey] = !operatorValue
+                reducedCondition[fieldName] = {}
+                reducedCondition[fieldName][operatorKey] = !operatorValue
                   ? undefined
                   : operatorValue
               })
             })
-            return filteredCondition
+            return reducedCondition
           })
           return {
             and: andConditions,
@@ -169,7 +169,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             {
               ...currentParams,
               page: 1,
-              where: filteredQuery,
+              where: reducedQuery,
             },
             { addQueryPrefix: true },
           ),

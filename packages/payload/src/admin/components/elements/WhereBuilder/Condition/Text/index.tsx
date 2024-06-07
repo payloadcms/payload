@@ -9,7 +9,7 @@ import './index.scss'
 const baseClass = 'condition-value-text'
 
 const Text: React.FC<Props> = ({ disabled, onChange, operator, value }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const isMulti = ['in', 'not_in'].includes(operator)
 
@@ -63,7 +63,7 @@ const Text: React.FC<Props> = ({ disabled, onChange, operator, value }) => {
       isSortable
       onChange={onSelect}
       options={[]}
-      placeholder={t('enterAValue')}
+      placeholder={t('general:enterAValue')}
       value={valueToRender || []}
     />
   ) : (
@@ -71,7 +71,7 @@ const Text: React.FC<Props> = ({ disabled, onChange, operator, value }) => {
       className={baseClass}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={t('enterAValue')}
+      placeholder={t('general:enterAValue')}
       type="text"
       value={value || ''}
     />
