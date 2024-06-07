@@ -179,18 +179,18 @@ export const Autosave: React.FC<Props> = ({
       void autosave()
     }
   }, [
-    i18n,
-    debouncedFields,
-    modified,
-    serverURL,
     api,
     collection,
-    globalDoc,
-    reportUpdate,
-    id,
-    getVersions,
-    setSubmitted,
     dispatchFields,
+    getVersions,
+    globalDoc,
+    i18n,
+    id,
+    modified,
+    reportUpdate,
+    serverURL,
+    setSubmitted,
+    versionsConfig?.drafts,
   ])
 
   useEffect(() => {
