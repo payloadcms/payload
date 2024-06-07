@@ -1,5 +1,5 @@
 import type { UploadedFile } from 'express-fileupload'
-import type { OutputInfo } from 'sharp'
+import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
@@ -217,7 +217,7 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
  *
  * The image will be resized according to the provided
  * resize config. If no image sizes are requested, the resolved data will be empty.
- * For every image that dos not need to be resized, an result object with `null`
+ * For every image that does not need to be resized, a result object with `null`
  * parameters will be returned.
  *
  * @param resizeConfig - the resize config
@@ -252,7 +252,13 @@ export default async function resizeAndTransformImageSizes({
   // Nothing to resize here so return as early as possible
   if (!imageSizes) return defaultResult
 
-  const sharpBase = sharp(file.tempFilePath || file.data).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  // Determine if the file is animated
+  const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const sharpOptions: SharpOptions = {}
+
+  if (fileIsAnimated) sharpOptions.animated = true
+
+  const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
@@ -267,6 +273,8 @@ export default async function resizeAndTransformImageSizes({
 
       const imageToResize = sharpBase.clone()
       let resized = imageToResize
+
+      const metadata = await sharpBase.metadata()
 
       if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
         const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
@@ -289,14 +297,18 @@ export default async function resizeAndTransformImageSizes({
         const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
 
         const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
-        const maxOffsetY = scaledImageInfo.height - safeResizeHeight
+
+        const maxOffsetY = fileIsAnimated
+          ? resizeHeight - safeResizeHeight
+          : scaledImageInfo.height - safeResizeHeight
+
         const topFocalEdge = Math.round(
           scaledImageInfo.height * (incomingFocalPoint.y / 100) - safeResizeHeight / 2,
         )
         const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
 
         // extract the focal area from the scaled image
-        resized = scaledImage.extract({
+        resized = (fileIsAnimated ? imageToResize : scaledImage).extract({
           height: safeResizeHeight,
           left: safeOffsetX,
           top: safeOffsetY,
@@ -350,7 +362,7 @@ export default async function resizeAndTransformImageSizes({
         name: imageResizeConfig.name,
         filename: imageNameWithDimensions,
         filesize: size,
-        height,
+        height: fileIsAnimated ? height / metadata.pages : height,
         mimeType: mimeInfo?.mime || mimeType,
         sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,

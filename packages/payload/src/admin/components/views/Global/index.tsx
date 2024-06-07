@@ -27,8 +27,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { permissions, user } = useAuth()
   const [initialState, setInitialState] = useState<Fields>()
   const [updatedAt, setUpdatedAt] = useState<string>()
-  const { docPermissions, getDocPermissions, getDocPreferences, getVersions, preferencesKey } =
-    useDocumentInfo()
+  const {
+    action,
+    docPermissions,
+    getDocPermissions,
+    getDocPreferences,
+    getVersions,
+    preferencesKey,
+  } = useDocumentInfo()
   const { getPreference } = usePreferences()
   const { t } = useTranslation()
   const config = useConfig()
@@ -49,8 +55,8 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
-      getVersions()
-      getDocPermissions()
+      void getVersions()
+      void getDocPermissions()
       setUpdatedAt(json?.result?.updatedAt)
 
       const preferences = await getDocPreferences()
@@ -109,7 +115,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       setInitialState(state)
     }
 
-    if (dataToRender) awaitInitialState()
+    if (dataToRender) void awaitInitialState()
   }, [
     dataToRender,
     fields,
@@ -125,7 +131,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const isLoading = !initialState || !docPermissions || isLoadingData
 
   const componentProps: DefaultGlobalViewProps = {
-    action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
+    action,
     apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
       global.versions?.drafts ? '&draft=true' : ''
     }`,

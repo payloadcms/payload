@@ -5,7 +5,14 @@ import { expect, test } from '@playwright/test'
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { mobileBreakpoint } from './shared'
+import {
+  ensureDeviceIsCentered,
+  ensureDeviceIsLeftAligned,
+  goToCollectionLivePreview,
+  selectLivePreviewBreakpoint,
+  selectLivePreviewZoom,
+} from './helpers'
+import { desktopBreakpoint, mobileBreakpoint } from './shared'
 import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test
@@ -215,5 +222,35 @@ describe('Live Preview', () => {
     const heightInputValue = await heightInput.getAttribute('value')
     const height = parseInt(heightInputValue)
     expect(height).toBe(mobileBreakpoint.height)
+  })
+
+  test('device — centers device when smaller than frame despite zoom', async () => {
+    await goToCollectionLivePreview(page, url)
+    await selectLivePreviewBreakpoint(page, mobileBreakpoint.label)
+    await ensureDeviceIsCentered(page)
+    await selectLivePreviewZoom(page, '75%')
+    await ensureDeviceIsCentered(page)
+    await selectLivePreviewZoom(page, '50%')
+    await ensureDeviceIsCentered(page)
+    await selectLivePreviewZoom(page, '125%')
+    await ensureDeviceIsCentered(page)
+    await selectLivePreviewZoom(page, '200%')
+    await ensureDeviceIsCentered(page)
+    expect(true).toBeTruthy()
+  })
+
+  test('device — left-aligns device when larger than frame despite zoom', async () => {
+    await goToCollectionLivePreview(page, url)
+    await selectLivePreviewBreakpoint(page, desktopBreakpoint.label)
+    await ensureDeviceIsLeftAligned(page)
+    await selectLivePreviewZoom(page, '75%')
+    await ensureDeviceIsLeftAligned(page)
+    await selectLivePreviewZoom(page, '50%')
+    await ensureDeviceIsLeftAligned(page)
+    await selectLivePreviewZoom(page, '125%')
+    await ensureDeviceIsLeftAligned(page)
+    await selectLivePreviewZoom(page, '200%')
+    await ensureDeviceIsLeftAligned(page)
+    expect(true).toBeTruthy()
   })
 })
