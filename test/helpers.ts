@@ -180,11 +180,20 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   await expect(page.locator('.Toastify')).toContainText('successfully')
 }
 
-export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
+export async function saveDocAndAssert(
+  page: Page,
+  selector = '#action-save',
+  expectation: 'error' | 'success' = 'success',
+): Promise<void> {
   await wait(500) // TODO: Fix this
   await page.click(selector, { delay: 100 })
-  await expect(page.locator('.Toastify')).toContainText('successfully')
-  await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+
+  if (expectation === 'success') {
+    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+  } else {
+    await expect(page.locator('.Toastify .Toastify__toast--error')).toBeVisible()
+  }
 }
 
 export async function openNav(page: Page): Promise<void> {

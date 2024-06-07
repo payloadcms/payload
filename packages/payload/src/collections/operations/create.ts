@@ -203,7 +203,10 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
       global: null,
       operation: 'create',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////
