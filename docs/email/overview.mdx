@@ -6,19 +6,19 @@ desc: Payload uses an adapter pattern to enable email functionality. Set up emai
 keywords: email, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-### Introduction
+## Introduction
 
 Payload has a few email adapters that can be imported to enable email functionality. The [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) package will be the package most will want to install. This package provides an easy way to use [Nodemailer](https://nodemailer.com) for email and won't get in your way for those already familiar.
 
 The email adapter should be passed into the `email` property of the Payload config. This will allow Payload to send emails for things like password resets, new user verification, and any other email sending needs you may have.
 
-### Configuration
+## Configuration
 
-#### Default Configuration
+### Default Configuration
 
 When email is not needed or desired, Payload will log a warning on startup notifying that email is not configured. A  warning message will also be logged on any attempt to send an email.
 
-#### Email Adapter
+### Email Adapter
 
 An email adapter will require at least the following fields:
 
@@ -28,21 +28,21 @@ An email adapter will require at least the following fields:
 | **`defaultFromAddress`** \* | The email address part of the From field that will be used when delivering email |
 
 
-#### Officlal Email Adapters
+### Official Email Adapters
 
 | Name       | Package                                                                                    | Description                                                                                                                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Nodemailer | [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) | Use any [Nodemailer transport](https://nodemailer.com/transports), including SMTP, Resend, SendGrid, and more. This was provided by default in Payload 2.x. This is the easiest migration path. |
 | Resend     | [@payloadcms/email-resend](https://www.npmjs.com/package/@payloadcms/email-resend)         | Resend email via their REST API. This is preferred for serverless platforms such as Vercel because it is much more lightweight than the nodemailer adapter.                                     |
 
-### Nodemailer Configuration
+## Nodemailer Configuration
 
 | Option                 | Description                                                                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`transport`**        | The Nodemailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                           |
 | **`transportOptions`** | An object that configures the transporter that Payload will create. For all the available options see the [Nodemailer documentation](https://nodemailer.com) or see the examples below |
 
-### Use SMTP
+## Use SMTP
 
 Simple Mail Transfer Protocol (SMTP) options can be passed in using the `transportOptions` object on the `email` options. See the [Nodemailer SMTP documentation](https://nodemailer.com/smtp/) for more information, including details on when `secure` should and should not be set to `true`.
 
@@ -127,7 +127,7 @@ export default buildConfig({
 })
 ```
 
-### Resend Configuration
+## Resend Configuration
 
 The Resend adapter requires an API key to be passed in the options. This can be found in the Resend dashboard. This is the preferred package if you are deploying on Vercel because this is much more lightweight than the Nodemailer adapter.
 
@@ -148,7 +148,7 @@ export default buildConfig({
 })
 ```
 
-### Sending Mail
+## Sending Mail
 
 With a working transport you can call it anywhere you have access to payload by calling `payload.sendEmail(message)`. The `message` will contain the `to`, `subject` and `html` or `text` for the email being sent. Other options are also available and can be seen in the sendEmail args. Support for these will depend on the adapter being used.
 
@@ -161,6 +161,6 @@ const email = await payload.sendEmail({
 })
 ```
 
-### Using multiple mail providers
+## Using multiple mail providers
 
 Payload supports the use of a single transporter of email, but there is nothing stopping you from having more. Consider a use case where sending bulk email is handled differently than transactional email and could be done using a [hook](/docs/hooks/overview).

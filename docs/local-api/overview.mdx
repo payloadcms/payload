@@ -26,11 +26,11 @@ Here are some common examples of how you can use the Local API:
 - Opening custom Express routes which feature additional functionality but still rely on Payload
 - Within access control and hook functions
 
-### Accessing payload
+## Accessing payload
 
 You can gain access to the currently running `payload` object via two ways:
 
-##### Importing it
+#### Importing it
 
 You can import or require `payload` into your own files after it's been initialized, but you need to make sure that
 your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been
@@ -49,7 +49,7 @@ const afterChangeHook: CollectionAfterChangeHook = async () => {
 }
 ```
 
-##### Accessing from the `req`
+#### Accessing from the `req`
 
 Payload is available anywhere you have access to the Express `req` - including within your access control and hook
 functions.
@@ -64,7 +64,7 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) 
 }
 ```
 
-### Local options available
+## Local options available
 
 You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are
 executed in.
@@ -95,7 +95,7 @@ _There are more options available on an operation by operation basis outlined be
 
 The following Collection operations are available through the Local API:
 
-#### Create
+### Create
 
 ```js
 // The created Post document is returned
@@ -127,7 +127,7 @@ const post = await payload.create({
 })
 ```
 
-#### Find
+### Find
 
 ```js
 // Result will be a paginated set of Posts.
@@ -148,7 +148,7 @@ const result = await payload.find({
 })
 ```
 
-#### Find by ID
+### Find by ID
 
 ```js
 // Result will be a Post document.
@@ -164,7 +164,7 @@ const result = await payload.findByID({
 })
 ```
 
-#### Count
+### Count
 
 ```js
 // Result will be an object with:
@@ -180,7 +180,7 @@ const result = await payload.count({
 })
 ```
 
-#### Update by ID
+### Update by ID
 
 ```js
 // Result will be the updated Post document.
@@ -211,7 +211,7 @@ const result = await payload.update({
 })
 ```
 
-#### Update Many
+### Update Many
 
 ```js
 // Result will be an object with:
@@ -249,7 +249,7 @@ const result = await payload.update({
 })
 ```
 
-#### Delete
+### Delete
 
 ```js
 // Result will be the now-deleted Post document.
@@ -265,7 +265,7 @@ const result = await payload.delete({
 })
 ```
 
-#### Delete Many
+### Delete Many
 
 ```js
 // Result will be an object with:
@@ -293,7 +293,7 @@ const result = await payload.delete({
 If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be
 available:
 
-#### Login
+### Login
 
 ```js
 // result will be formatted as follows:
@@ -320,7 +320,7 @@ const result = await payload.login({
 })
 ```
 
-#### Forgot Password
+### Forgot Password
 
 ```js
 // Returned token will allow for a password reset
@@ -334,7 +334,7 @@ const token = await payload.forgotPassword({
 })
 ```
 
-#### Reset Password
+### Reset Password
 
 ```js
 // Result will be formatted as follows:
@@ -354,7 +354,7 @@ const result = await payload.resetPassword({
 })
 ```
 
-#### Unlock
+### Unlock
 
 ```js
 // Returned result will be a boolean representing success or failure
@@ -369,7 +369,7 @@ const result = await payload.unlock({
 })
 ```
 
-#### Verify
+### Verify
 
 ```js
 // Returned result will be a boolean representing success or failure
@@ -383,7 +383,7 @@ const result = await payload.verifyEmail({
 
 The following Global operations are available through the Local API:
 
-#### Find
+### Find
 
 ```js
 // Result will be the Header Global.
@@ -398,7 +398,7 @@ const result = await payload.findGlobal({
 })
 ```
 
-#### Update
+### Update
 
 ```js
 // Result will be the updated Header Global.
