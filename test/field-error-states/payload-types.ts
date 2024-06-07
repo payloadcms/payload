@@ -10,7 +10,9 @@ export interface Config {
   collections: {
     'error-fields': ErrorField;
     uploads: Upload;
-    'validate-drafts': ValidateDraft;
+    'validate-drafts-on': ValidateDraftsOn;
+    'validate-drafts-off': ValidateDraftsOff;
+    'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -261,9 +263,31 @@ export interface Upload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "validate-drafts".
+ * via the `definition` "validate-drafts-on".
  */
-export interface ValidateDraft {
+export interface ValidateDraftsOn {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-off".
+ */
+export interface ValidateDraftsOff {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-on-autosave".
+ */
+export interface ValidateDraftsOnAutosave {
   id: string;
   title: string;
   updatedAt: string;
