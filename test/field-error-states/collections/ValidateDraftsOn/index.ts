@@ -13,7 +13,6 @@ export const ValidateDraftsOn: CollectionConfig = {
   ],
   versions: {
     drafts: {
-      autosave: true,
       validate: true,
     },
   },
