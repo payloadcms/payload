@@ -7,7 +7,7 @@ import 'react-image-crop/dist/ReactCrop.css'
 import type { Data } from '../../forms/Form/types'
 
 import Plus from '../../icons/Plus'
-import { useFormQueryParams } from '../../utilities/FormQueryParams'
+import { useUploadEdits } from '../../utilities/UploadEdits'
 import { editDrawerSlug } from '../../views/collections/Edit/Upload'
 import Button from '../Button'
 import './index.scss'
@@ -35,8 +35,8 @@ export const EditUpload: React.FC<{
 }> = ({ doc, fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
-  const { formQueryParams, setFormQueryParams } = useFormQueryParams()
-  const { uploadEdits } = formQueryParams || {}
+  const { updateUploadEdits, uploadEdits } = useUploadEdits()
+
   const [crop, setCrop] = useState<CropType>({
     height: uploadEdits?.crop?.height || 100,
     unit: '%',
@@ -87,12 +87,9 @@ export const EditUpload: React.FC<{
   }
 
   const saveEdits = () => {
-    setFormQueryParams({
-      ...formQueryParams,
-      uploadEdits: {
-        crop: crop || undefined,
-        focalPoint: focalPosition ? focalPosition : undefined,
-      },
+    updateUploadEdits({
+      crop: crop || undefined,
+      focalPoint: focalPosition ? focalPosition : undefined,
     })
     closeModal(editDrawerSlug)
   }

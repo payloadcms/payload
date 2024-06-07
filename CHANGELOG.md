@@ -1,3 +1,10 @@
+## [2.19.3](https://github.com/payloadcms/payload/compare/v2.19.2...v2.19.3) (2024-06-07)
+
+
+### Bug Fixes
+
+* scopes uploadEdits to documents, hoists action to doc provider ([#6664](https://github.com/payloadcms/payload/issues/6664)) ([373cb00](https://github.com/payloadcms/payload/commit/373cb0013902b52aba455542e10402316da4b2f4))
+
 ## [2.19.2](https://github.com/payloadcms/payload/compare/v2.19.1...v2.19.2) (2024-06-06)
 
 
