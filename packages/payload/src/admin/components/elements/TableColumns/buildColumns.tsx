@@ -42,6 +42,12 @@ const buildColumns = ({
       colIndex += 1
     }
     const props = cellProps?.[colIndex] || {}
+
+    const fieldAffectsDataSubFields =
+      field &&
+      field.type &&
+      (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
+
     return {
       name: field.name,
       accessor: field.name,
@@ -49,14 +55,9 @@ const buildColumns = ({
       components: {
         Heading: (
           <SortColumn
-            disable={
-              ('disableSort' in field && Boolean(field.disableSort)) ||
-              fieldIsPresentationalOnly(field) ||
-              undefined
-            }
+            disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
             label={field.label || field.name}
             name={field.name}
-            type={field.type}
           />
         ),
         renderCell: (rowData, cellData) => {
