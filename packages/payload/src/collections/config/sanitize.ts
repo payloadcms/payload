@@ -84,6 +84,7 @@ export const sanitizeCollection = async (
       if (sanitized.versions.drafts === true) {
         sanitized.versions.drafts = {
           autosave: false,
+          validate: false,
         }
       }
 
@@ -91,6 +92,10 @@ export const sanitizeCollection = async (
         sanitized.versions.drafts.autosave = {
           interval: 2000,
         }
+      }
+
+      if (sanitized.versions.drafts.validate === undefined) {
+        sanitized.versions.drafts.validate = false
       }
 
       sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
