@@ -6,7 +6,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
-import { useDebounce } from '../../hooks/useDebounce.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -51,7 +50,6 @@ export const Autosave: React.FC<Props> = ({
 
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<number>()
-  const debouncedFields = useDebounce(fields, interval)
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
@@ -170,14 +168,12 @@ export const Autosave: React.FC<Props> = ({
             }
 
             setSaving(false)
-          }, 1000)
+          }, interval)
         }
       }
     }
 
-    if (globalDoc || (collection && id !== undefined)) {
-      void autosave()
-    }
+    void autosave()
   }, [
     api,
     collection,
@@ -186,6 +182,7 @@ export const Autosave: React.FC<Props> = ({
     globalDoc,
     i18n,
     id,
+    interval,
     modified,
     reportUpdate,
     serverURL,
