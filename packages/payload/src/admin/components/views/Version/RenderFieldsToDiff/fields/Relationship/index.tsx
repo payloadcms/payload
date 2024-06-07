@@ -3,7 +3,7 @@ import ReactDiffViewer from 'react-diff-viewer-continued'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../../../../collections/config/types'
-import type { RelationshipField } from '../../../../../../../fields/config/types'
+import type { Field, RelationshipField } from '../../../../../../../fields/config/types'
 import type { Props } from '../types'
 
 import {
@@ -49,9 +49,36 @@ const generateLabelFromValue = (
 
   if (relatedCollection) {
     const useAsTitle = relatedCollection?.admin?.useAsTitle
-    const useAsTitleField = relatedCollection.fields.find(
-      (f) => fieldAffectsData(f) && !fieldIsPresentationalOnly(f) && f.name === useAsTitle,
-    )
+
+    const findFieldRecursively = (fields: Field[], fieldName: string): Field | undefined => {
+      for (const field of fields) {
+        if (
+          'name' in field &&
+          field.name === fieldName &&
+          fieldAffectsData(field) &&
+          !fieldIsPresentationalOnly(field)
+        ) {
+          return field
+        }
+        if ('fields' in field && Array.isArray(field.fields)) {
+          const foundField = findFieldRecursively(field.fields, fieldName)
+          if (foundField) {
+            return foundField
+          }
+        } else if ('tabs' in field && Array.isArray(field.tabs)) {
+          for (const tab of field.tabs) {
+            const foundField = findFieldRecursively(tab.fields, fieldName)
+            if (foundField) {
+              return foundField
+            }
+          }
+        }
+      }
+      return undefined
+    }
+
+    const useAsTitleField = findFieldRecursively(relatedCollection.fields, useAsTitle)
+
     let titleFieldIsLocalized = false
 
     if (useAsTitleField && fieldAffectsData(useAsTitleField))
