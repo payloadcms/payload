@@ -53,21 +53,20 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   if (cached.payload) {
     const config = await options.config // TODO: check if we can move this inside the cached.reload === true condition
 
-    // Generate types on startup
-    if (config.typescript.autoGenerate !== false) {
-      const configHash = quickHash(config)
-
-      if (cached.hashedConfig !== configHash) {
-        cached.payload.logger.info(`Config has changed, regenerating types... (${configHash})`)
-        cached.hashedConfig = configHash
-        await generateTypes(config)
-      }
-    }
-
     if (cached.reload === true) {
       let resolve
 
       cached.reload = new Promise((res) => (resolve = res))
+
+      // Generate types on startup
+      if (config.typescript.autoGenerate !== false) {
+        const configHash = quickHash(config)
+
+        if (cached.hashedConfig !== configHash) {
+          cached.hashedConfig = configHash
+          void generateTypes(config, { log: false })
+        }
+      }
 
       await reload(config, cached.payload)
 
