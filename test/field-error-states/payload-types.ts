@@ -10,6 +10,7 @@ export interface Config {
   collections: {
     'error-fields': ErrorField;
     uploads: Upload;
+    'validate-drafts': ValidateDraft;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -257,6 +258,17 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts".
+ */
+export interface ValidateDraft {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

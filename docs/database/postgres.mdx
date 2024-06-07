@@ -36,7 +36,7 @@ export default buildConfig({
 })
 ```
 
-### Options
+## Options
 
 | Option                | Description                                                                                                                                                                                           |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -51,7 +51,7 @@ export default buildConfig({
 
 
 
-### Access to Drizzle
+## Access to Drizzle
 
 After Payload is initialized, this adapter will expose the full power of Drizzle to you for use if you need it.
 
@@ -61,7 +61,7 @@ You can access Drizzle as follows:
 payload.db.drizzle
 ```
 
-### Tables, relations, and enums
+## Tables, relations, and enums
 
 In addition to exposing Drizzle directly, all of the tables, Drizzle relations, and enum configs are exposed for you via the `payload.db` property as well.
 
@@ -69,7 +69,7 @@ In addition to exposing Drizzle directly, all of the tables, Drizzle relations, 
 - Enums - `payload.db.enums`
 - Relations - `payload.db.relations`
 
-### Prototyping in development mode
+## Prototyping in development mode
 
 Drizzle exposes two ways to work locally in development mode.
 
@@ -79,7 +79,7 @@ You will be warned if any changes that you make will entail data loss while in d
 
 Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload config.
 
-### Migration workflows
+## Migration workflows
 
 Migrations are extremely powerful thanks to the seamless way that Payload and Drizzle work together. Let's take the following scenario:
 

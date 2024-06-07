@@ -31,14 +31,14 @@ npm script will build both and output these directories.
 Payload features a suite of security features that you can rely on to strengthen your application's security. When
 deploying to Production, it's a good idea to double-check that you are making proper use of each of them.
 
-##### The Secret Key
+### The Secret Key
 
 When you initialize Payload, you provide it with a `secret` property. This property should be impossible to guess and
 extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string. It's
 often best practice to store it in an `env` file which is not checked into your Git repository, using `dotenv` to supply
 it to your `payload.init` call.
 
-##### Double-check and thoroughly test all Access Control
+### Double-check and thoroughly test all Access Control
 
 Because _**you**_ are in complete control of who can do what with your data, you should double and triple-check that you
 wield that power responsibly before deploying to Production.
@@ -47,13 +47,14 @@ wield that power responsibly before deploying to Production.
   <strong>
     By default, all Access Control functions require that a user is successfully logged in to
     Payload to create, read, update, or delete data.
-  </strong>{' '}
+  </strong>
+
   But, if you allow public user registration, for example, you will want to make sure that your
   access control functions are more strict - permitting <strong>only appropriate users</strong> to
   perform appropriate actions.
 </Banner>
 
-##### Building the Admin panel
+### Building the Admin panel
 
 Before running in Production, you need to have built a production-ready copy of the Payload Admin panel. To do this,
 Payload provides the `build` NPM script. You can use it by adding a `script` to your `package.json` file like this:
@@ -75,19 +76,19 @@ Payload provides the `build` NPM script. You can use it by adding a `script` to 
 Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Admin bundle will be
 created in the `build` directory.
 
-##### Setting Node to Production
+### Setting Node to Production
 
 Make sure you set the environment variable `NODE_ENV` to `production`. Based on this variable, many Node packages
 automatically optimize themselves. In production, Payload automatically disables
 the [GraphQL Playground](/docs/graphql/overview#graphql-playground), serves a production-ready version of the Admin
 panel, and other changes.
 
-##### Secure Cookie Settings
+### Secure Cookie Settings
 
 You should be using an SSL certificate for production Payload instances, which means you
 can [enable secure cookies](/docs/authentication/config) in your Authentication-enabled Collection configs.
 
-##### Preventing API Abuse
+### Preventing API Abuse
 
 Payload comes with a robust set of built-in anti-abuse measures, such as locking out users after X amount of failed
 login attempts, request rate limiting, GraphQL query complexity limits, max `depth` settings, and
@@ -97,7 +98,7 @@ more. [Click here to learn more](/docs/production/preventing-abuse).
 
 Payload can be used with any MongoDB compatible database including AWS DocumentDB or Azure Cosmos DB.
 
-##### Managing MongoDB yourself
+### Managing MongoDB yourself
 
 If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephemeral-filesystems) such as
 a [DigitalOcean Droplet](https://www.digitalocean.com/products/droplets/) or
@@ -106,7 +107,7 @@ server, you might opt to install MongoDB directly on that server itself so that 
 With this approach, you can benefit from faster response times, but scaling can become more involved as your app's user
 base grows.
 
-##### Letting someone else do it
+### Letting someone else do it
 
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas
 or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and
@@ -122,13 +123,13 @@ backups.
   Limitations](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations).
 </Banner>
 
-##### DocumentDB
+### DocumentDB
 
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `connectOptions`
 passed to the `mongooseAdapter` . You also need to set `connectOptions.useFacet` to `false` to disable use of the
 unsupported `$facet` aggregation.
 
-##### CosmosDB
+### CosmosDB
 
 When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all
 fields that may be sorted in the admin UI use the <a href="/docs/configuration/overview">indexSortableFields</a>
@@ -140,7 +141,7 @@ If you are using Payload to [manage file uploads](/docs/upload/overview), you ne
 will be permanently stored. If you do not use Payload for file uploads, then this section does not impact your app
 whatsoever.
 
-#### Persistent vs Ephemeral Filesystems
+### Persistent vs Ephemeral Filesystems
 
 Some cloud app hosts such as [Heroku](https://heroku.com) use `ephemeral` file systems, which means that any files
 uploaded to your server only last until the server restarts or shuts down. Heroku and similar providers schedule
@@ -169,7 +170,7 @@ perpetually.
   with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
 </Banner>
 
-##### Using ephemeral filesystem providers like Heroku
+### Using ephemeral filesystem providers like Heroku
 
 If you don't use Payload's `upload` functionality, you can go ahead and use Heroku or similar platform easily.
 Everything will work exactly as you want it to.

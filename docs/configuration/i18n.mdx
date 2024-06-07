@@ -56,7 +56,7 @@ export const Articles: CollectionConfig = {
 }
 ```
 
-### Admin UI
+## Admin UI
 
 The Payload admin panel reads the language settings of a user's browser and display all text in that language, or will fall back to English if the user's language is not yet supported.
 After a user logs in, they can change their language selection in the `/account` view.
@@ -68,13 +68,13 @@ After a user logs in, they can change their language selection in the `/account`
   [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 </Banner>
 
-### Node Express
+## Node Express
 
 Payload's backend uses express middleware to set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
 Anywhere in your Payload app that you have access to the `req` object, you can access payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
-### Configuration Options
+## Configuration Options
 
 In your Payload config, you can add translations and customize the settings in `i18n`. Payload will use your custom options and merge it with the default, allowing you to override the settings Payload provides.
 

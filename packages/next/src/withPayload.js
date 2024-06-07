@@ -28,6 +28,13 @@ export const withPayload = (nextConfig = {}) => {
           'libsql',
         ],
       },
+      turbo: {
+        ...(nextConfig?.experimental?.turbo || {}),
+        resolveAlias: {
+          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
+          'payload-mock-package': 'payload-mock-package',
+        },
+      },
     },
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []

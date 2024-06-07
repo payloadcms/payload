@@ -32,7 +32,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
 }
 ```
 
-### Async Hooks with Transactions
+## Async Hooks with Transactions
 
 Since Payload hooks can be async and be written to not await the result, it is possible to have an incorrect success response returned on a request that is rolled back. If you have a hook where you do not `await` the result, then you should **not** pass the `req.transactionID`.
 
@@ -59,7 +59,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
 }
 ```
 
-### Direct Transaction Access
+## Direct Transaction Access
 
 When writing your own scripts or custom endpoints, you may wish to have direct control over transactions. This is useful for interacting with your database outside of Payload's local API.
 
