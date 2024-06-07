@@ -3,8 +3,9 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { toast } from 'react-toastify'
 
-import { useAllFormFields, useFormModified } from '../../forms/Form/context.js'
+import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
@@ -36,6 +37,7 @@ export const Autosave: React.FC<Props> = ({
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
+  const { dispatchFields, setSubmitted } = useForm()
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()
@@ -117,6 +119,54 @@ export const Autosave: React.FC<Props> = ({
                 })
                 void getVersions()
               }
+
+              if (
+                versionsConfig?.drafts &&
+                versionsConfig?.drafts?.validate &&
+                res.status === 400
+              ) {
+                const json = await res.json()
+                if (Array.isArray(json.errors)) {
+                  const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                    ([fieldErrs, nonFieldErrs], err) => {
+                      const newFieldErrs = []
+                      const newNonFieldErrs = []
+
+                      if (err?.message) {
+                        newNonFieldErrs.push(err)
+                      }
+
+                      if (Array.isArray(err?.data)) {
+                        err.data.forEach((dataError) => {
+                          if (dataError?.field) {
+                            newFieldErrs.push(dataError)
+                          } else {
+                            newNonFieldErrs.push(dataError)
+                          }
+                        })
+                      }
+
+                      return [
+                        [...fieldErrs, ...newFieldErrs],
+                        [...nonFieldErrs, ...newNonFieldErrs],
+                      ]
+                    },
+                    [[], []],
+                  )
+
+                  dispatchFields({
+                    type: 'ADD_SERVER_ERRORS',
+                    errors: fieldErrors,
+                  })
+
+                  nonFieldErrors.forEach((err) => {
+                    toast.error(err.message || i18n.t('error:unknown'))
+                  })
+
+                  return
+                }
+                setSubmitted(true)
+              }
             }
 
             setSaving(false)
@@ -125,7 +175,9 @@ export const Autosave: React.FC<Props> = ({
       }
     }
 
-    void autosave()
+    if (globalDoc || (collection && id !== undefined)) {
+      void autosave()
+    }
   }, [
     i18n,
     debouncedFields,
@@ -137,6 +189,8 @@ export const Autosave: React.FC<Props> = ({
     reportUpdate,
     id,
     getVersions,
+    setSubmitted,
+    dispatchFields,
   ])
 
   useEffect(() => {

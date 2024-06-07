@@ -23,12 +23,14 @@ describe('field error states', () => {
   let page: Page
   let validateDraftsOff: AdminUrlUtil
   let validateDraftsOn: AdminUrlUtil
+  let validateDraftsOnAutosave: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     validateDraftsOff = new AdminUrlUtil(serverURL, slugs.validateDraftsOff)
     validateDraftsOn = new AdminUrlUtil(serverURL, slugs.validateDraftsOn)
+    validateDraftsOnAutosave = new AdminUrlUtil(serverURL, slugs.validateDraftsOnAutosave)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -79,6 +81,15 @@ describe('field error states', () => {
     test('should validate drafts when enabled', async () => {
       await page.goto(validateDraftsOn.create)
       await saveDocAndAssert(page, '#action-save-draft', 'error')
+    })
+
+    // eslint-disable-next-line playwright/expect-expect
+    test('should show validation errors when validate and autosave are enabled', async () => {
+      await page.goto(validateDraftsOnAutosave.create)
+      await page.locator('#field-title').fill('valid')
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('')
+      await saveDocAndAssert(page, '#action-save', 'error')
     })
   })
 })

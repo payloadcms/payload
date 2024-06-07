@@ -4,9 +4,16 @@ import { ErrorFieldsCollection } from './collections/ErrorFields/index.js'
 import Uploads from './collections/Upload/index.js'
 import { ValidateDraftsOff } from './collections/ValidateDraftsOff/index.js'
 import { ValidateDraftsOn } from './collections/ValidateDraftsOn/index.js'
+import { ValidateDraftsOnAndAutosave } from './collections/ValidateDraftsOnAutosave/index.js'
 
 export default buildConfigWithDefaults({
-  collections: [ErrorFieldsCollection, Uploads, ValidateDraftsOn, ValidateDraftsOff],
+  collections: [
+    ErrorFieldsCollection,
+    Uploads,
+    ValidateDraftsOn,
+    ValidateDraftsOff,
+    ValidateDraftsOnAndAutosave,
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

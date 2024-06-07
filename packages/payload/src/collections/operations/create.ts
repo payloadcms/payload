@@ -166,14 +166,6 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    // if (!collectionConfig.upload.disableLocalStorage) {
-    //   await uploadFiles(payload, filesToUpload, req.t)
-    // }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
