@@ -124,7 +124,6 @@ export { RenderFields } from '../../forms/RenderFields/index.js'
 export { RowLabel } from '../../forms/RowLabel/index.js'
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
-export { buildStateFromSchema } from '../../forms/buildStateFromSchema/index.js'
 export { useField } from '../../forms/useField/index.js'
 export { withCondition } from '../../forms/withCondition/index.js'
 
