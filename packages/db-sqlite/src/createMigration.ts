@@ -1,17 +1,37 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { CreateMigration } from 'payload/database'
+import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
 
 import fs from 'fs'
+import { createRequire } from 'module'
 import path from 'path'
 import { getPredefinedMigration } from 'payload/database'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
-import type { DrizzleAdapter } from './types.js'
+import type { SQLiteAdapter } from './types.js'
+
+import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
+
+const require = createRequire(import.meta.url)
+
+const migrationTemplate = ({
+  downSQL,
+  imports,
+  upSQL,
+}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
+${imports ? `${imports}\n` : ''}
+export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
+${upSQL}
+};
+
+export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
+${downSQL}
+};
+`
 
 export const createMigration: CreateMigration = async function createMigration(
-  this: DrizzleAdapter,
+  this: SQLiteAdapter,
   { file, forceAcceptWarning, migrationName, payload },
 ) {
   const filename = fileURLToPath(import.meta.url)
@@ -20,10 +40,8 @@ export const createMigration: CreateMigration = async function createMigration(
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
-  const { generateDrizzleJson, generateMigration, upPgSnapshot } = await import(
-    'drizzle-kit/payload'
-  )
-  const drizzleJsonAfter = generateDrizzleJson(this.schema)
+  const { generateSQLiteDrizzleJson, generateSQLiteMigration } = require('drizzle-kit/payload')
+  const drizzleJsonAfter = generateSQLiteDrizzleJson(this.schema)
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
   const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '')
@@ -44,7 +62,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
   const filePath = `${dir}/${fileName}`
 
-  let drizzleJsonBefore = this.defaultDrizzleSnapshot
+  let drizzleJsonBefore = defaultDrizzleSnapshot as any
 
   if (!upSQL) {
     // Get latest migration snapshot
@@ -58,15 +76,10 @@ export const createMigration: CreateMigration = async function createMigration(
       drizzleJsonBefore = JSON.parse(
         fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
       ) as DrizzleSnapshotJSON
-
-      // Upgrade old snapshots to match the installed drizzle-kit version
-      if (drizzleJsonBefore.version < drizzleJsonBefore.version) {
-        drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
-      }
     }
 
-    const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
-    const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+    const sqlStatementsUp = await generateSQLiteMigration(drizzleJsonBefore, drizzleJsonAfter)
+    const sqlStatementsDown = await generateSQLiteMigration(drizzleJsonAfter, drizzleJsonBefore)
     const sqlExecute = 'await payload.db.drizzle.execute(sql`'
 
     if (sqlStatementsUp?.length) {
@@ -95,15 +108,15 @@ export const createMigration: CreateMigration = async function createMigration(
         process.exit(0)
       }
     }
-  }
 
-  // write schema
-  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+    // write schema
+    fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+  }
 
   // write migration
   fs.writeFileSync(
     `${filePath}.ts`,
-    this.getMigrationTemplate({
+    migrationTemplate({
       downSQL: downSQL || `  // Migration code`,
       imports,
       upSQL: upSQL || `  // Migration code`,

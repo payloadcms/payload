@@ -8,7 +8,6 @@ import {
   create,
   createGlobal,
   createGlobalVersion,
-  createMigration,
   createVersion,
   deleteMany,
   deleteOne,
@@ -39,6 +38,7 @@ import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
 import { countDistinct } from './countDistinct.js'
+import { createMigration } from './createMigration.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { deleteWhere } from './deleteWhere.js'
 import { dropTables } from './dropTables.js'

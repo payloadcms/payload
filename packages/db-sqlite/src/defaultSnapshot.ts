@@ -1,16 +1,14 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSQLiteSnapshotJSON } from 'drizzle-kit/payload'
 
-export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
+export const defaultDrizzleSnapshot: DrizzleSQLiteSnapshotJSON = {
   id: '00000000-0000-0000-0000-000000000000',
   _meta: {
     columns: {},
-    schemas: {},
     tables: {},
   },
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
-  schemas: {},
   tables: {},
   version: '6',
 }

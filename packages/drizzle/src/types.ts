@@ -1,4 +1,3 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type {
   ColumnBaseConfig,
   ColumnDataType,
@@ -19,6 +18,12 @@ import type { BaseDatabaseAdapter, MigrationTemplateArgs } from 'payload/databas
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 
 export { BuildQueryJoinAliases }
+
+import type { ResultSet } from '@libsql/client'
+import type { PgRaw } from 'drizzle-orm/pg-core/query-builders/raw'
+import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
+import type { QueryResult } from 'pg'
+
 import type { ChainedMethods } from './find/chainMethods.js'
 
 export { ChainedMethods }
@@ -72,28 +77,49 @@ export type TransactionPg = PgTransaction<
 
 export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
+export type CountDistinct = (args: {
+  db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  joins: BuildQueryJoinAliases
+  tableName: string
+  where: SQL
+}) => Promise<number>
+
+export type DeleteWhere = (args: {
+  db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  tableName: string
+  where: SQL
+}) => Promise<void>
+
+export type DropTables = (args: { adapter: DrizzleAdapter }) => Promise<void>
+
+export type Execute = (args: {
+  db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  drizzle?: LibSQLDatabase | PostgresDB
+  raw?: string
+  sql?: SQL<unknown>
+}) =>
+  | PgRaw<QueryResult<Record<string, unknown>>>
+  | SQLiteRaw<Promise<unknown>>
+  | SQLiteRaw<ResultSet>
+
+export type GenerateDrizzleJSON = (args: { schema: Record<string, unknown> }) => unknown
+
+export type Insert = (args: {
+  db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  onConflictDoUpdate?: unknown
+  tableName: string
+  values: Record<string, unknown> | Record<string, unknown>[]
+}) => Promise<Record<string, unknown>[]>
+
 export type DrizzleAdapter = BaseDatabaseAdapter & {
-  countDistinct: (args: {
-    db: DrizzleTransaction | PostgresDB | SQLiteDB
-    joins: BuildQueryJoinAliases
-    tableName: string
-    where: SQL
-  }) => Promise<number>
-  defaultDrizzleSnapshot: DrizzleSnapshotJSON
-  deleteWhere: (args: {
-    db: DrizzleTransaction | PostgresDB | SQLiteDB
-    tableName: string
-    where: SQL
-  }) => Promise<void>
-  drizzle: PostgresDB | SQLiteDB
-  dropTables: (args: { adapter: DrizzleAdapter }) => Promise<void>
+  countDistinct: CountDistinct
+  defaultDrizzleSnapshot: Record<string, unknown>
+  deleteWhere: DeleteWhere
+  // drizzle: LibSQLDatabase<Record<string, unknown>> | PostgresDB
+  drizzle: LibSQLDatabase | PostgresDB
+  dropTables: DropTables
   enums?: Record<string, unknown>
-  execute: (args: {
-    db?: DrizzleTransaction | PostgresDB | SQLiteDB
-    drizzle?: PostgresDB | SQLiteDB
-    raw?: string
-    sql?: SQL<unknown>
-  }) => Promise<{ rows: Record<string, unknown> }>
+  execute: Execute
   features: {
     json?: boolean
   }
@@ -102,17 +128,12 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  generateDrizzleJSON: (args: { schema: Record<string, unknown> }) => unknown
+  generateDrizzleJSON: GenerateDrizzleJSON
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
   // TODO: figure out the type for idType
   idType: unknown
   initializing: Promise<void>
-  insert: (args: {
-    db: DrizzleTransaction | PostgresDB | SQLiteDB
-    onConflictDoUpdate?: unknown
-    tableName: string
-    values: Record<string, unknown> | Record<string, unknown>[]
-  }) => Promise<Record<string, unknown>[]>
+  insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   push: boolean
@@ -124,7 +145,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   schemaName?: string
   sessions: {
     [id: string]: {
-      db: DrizzleTransaction | PostgresDB | SQLiteDB
+      db: DrizzleTransaction | LibSQLDatabase | PostgresDB
       reject: () => Promise<void>
       resolve: () => Promise<void>
     }

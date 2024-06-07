@@ -9,19 +9,17 @@ export const countDistinct: CountDistinct = async function countDistinct(
   this: PostgresAdapter,
   { db, joins, tableName, where },
 ) {
-  const selectCountMethods: ChainedMethods = []
+  const chainedMethods: ChainedMethods = []
 
-  Object.entries(joins).forEach(([joinTable, condition]) => {
-    if (joinTable) {
-      selectCountMethods.push({
-        args: [this.tables[joinTable], condition],
-        method: 'leftJoin',
-      })
-    }
+  joins.forEach(({ condition, table }) => {
+    chainedMethods.push({
+      args: [table, condition],
+      method: 'leftJoin',
+    })
   })
 
   const countResult = await chainMethods({
-    methods: selectCountMethods,
+    methods: chainedMethods,
     query: db
       .select({
         count: sql<number>`count

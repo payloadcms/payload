@@ -117,15 +117,14 @@ export const findMany = async function find({
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
-  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : false)) {
-    const countResult = await adapter.countDistinct({
+  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
+    totalDocs = await adapter.countDistinct({
       db,
       joins,
       tableName,
       where,
     })
 
-    totalDocs = Number(countResult[0].count)
     totalPages = typeof limit === 'number' && limit !== 0 ? Math.ceil(totalDocs / limit) : 1
     hasPrevPage = page > 1
     hasNextPage = totalPages > page

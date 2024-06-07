@@ -436,6 +436,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0

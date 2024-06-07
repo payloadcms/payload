@@ -16,11 +16,13 @@ export const migrationTableExists = async (adapter: DrizzleAdapter): Promise<boo
         AND name = 'payload_migrations';`
   }
 
-  const result = await adapter.execute({
+  // TODO: remove any
+  const result: any = await adapter.execute({
     drizzle: adapter.drizzle,
     raw: statement,
   })
 
-  // @ts-expect-error
-  return result.rows[0]?.exists
+  const [row] = result.rows
+
+  return 'exists' in row && typeof row.exists === 'boolean' && row.exists
 }

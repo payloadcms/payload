@@ -1,11 +1,11 @@
-import type { Client, Config } from '@libsql/client'
+import type { Client, Config, ResultSet } from '@libsql/client'
 import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
-  PostgresDB,
   SQLiteDB,
   TransactionSQLite,
 } from '@payloadcms/drizzle/types'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
@@ -54,37 +54,56 @@ export type GenericTable = SQLiteTableWithColumns<{
 
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
+export type CountDistinct = (args: {
+  db: TransactionSQLite
+  joins: BuildQueryJoinAliases
+  tableName: string
+  where: SQL
+}) => Promise<number>
+
+export type DeleteWhere = (args: {
+  db: SQLiteDB | TransactionSQLite
+  tableName: string
+  where: SQL
+}) => Promise<void>
+
+export type DropTables = (args: { adapter: SQLiteAdapter }) => Promise<void>
+
+export type Execute = (args: {
+  db?: TransactionSQLite
+  drizzle?: LibSQLDatabase
+  raw?: string
+  sql?: SQL<unknown>
+}) => SQLiteRaw<Promise<unknown>> | SQLiteRaw<ResultSet>
+
+export type GenerateDrizzleJSON = (args: {
+  schema: Record<string, GenericRelation | GenericTable>
+}) => Record<string, unknown>
+
+export type Insert = (args: {
+  db: SQLiteDB | TransactionSQLite
+  onConflictDoUpdate?: SQLiteInsertOnConflictDoUpdateConfig<any>
+  tableName: string
+  values: Record<string, unknown> | Record<string, unknown>[]
+}) => Promise<Record<string, unknown>[]>
+
 export type SQLiteAdapter = DrizzleAdapter & {
   client: Client
-  countDistinct: (args: {
-    db: TransactionSQLite
-    joins: BuildQueryJoinAliases
-    tableName: string
-    where: SQL
-  }) => Promise<number>
-  deleteWhere: (args: { db: TransactionSQLite; tableName: string; where: SQL }) => Promise<void>
-  drizzle: SQLiteDB
-  dropTables: (args: { adapter: SQLiteAdapter }) => Promise<void>
-  execute: (args: {
-    db?: TransactionSQLite
-    drizzle?: PostgresDB
-    raw?: string
-    sql?: SQL<unknown>
-  }) => SQLiteRaw<Record<string, unknown>>
+  countDistinct: CountDistinct
+  defaultDrizzleSnapshot: any
+  deleteWhere: DeleteWhere
+  drizzle: LibSQLDatabase
+  dropTables: DropTables
+  execute: Execute
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  generateDrizzleJSON: (args: { schema: Record<string, GenericRelation | GenericTable> }) => unknown
+  generateDrizzleJSON: GenerateDrizzleJSON
   idType: Args['idType']
   initializing: Promise<void>
-  insert: (args: {
-    db: TransactionSQLite
-    onConflictDoUpdate?: SQLiteInsertOnConflictDoUpdateConfig<any>
-    tableName: string
-    values: Record<string, unknown> | Record<string, unknown>[]
-  }) => Promise<Record<string, unknown>[]>
+  insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   push: boolean

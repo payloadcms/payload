@@ -53,7 +53,8 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
 
   await apply()
 
-  const result = await adapter.execute({
+  // TODO: type this
+  const result: any = await adapter.execute({
     drizzle: adapter.drizzle,
     sql: sql`SELECT * FROM payload_migrations WHERE batch = '-1'`,
   })

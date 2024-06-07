@@ -3,9 +3,9 @@ import type { ChainedMethods } from '@payloadcms/drizzle/types'
 import { chainMethods } from '@payloadcms/drizzle'
 import { sql } from 'drizzle-orm'
 
-import type { SQLiteAdapter } from './types.js'
+import type { CountDistinct, SQLiteAdapter } from './types.js'
 
-export const countDistinct: SQLiteAdapter['countDistinct'] = async function countDistinct(
+export const countDistinct: CountDistinct = async function countDistinct(
   this: SQLiteAdapter,
   { db, joins, tableName, where },
 ) {

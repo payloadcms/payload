@@ -9,7 +9,6 @@ import { APIError } from 'payload/errors'
 import { fieldAffectsData, tabHasName } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
 import toSnakeCase from 'to-snake-case'
-import { v4 as uuid } from 'uuid'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -495,8 +494,7 @@ export const getTableColumnFromPath = ({
 
             // parent to relationship join table
             relationshipFields = relationshipConfig.fields
-
-            const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
+            ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
 
             joins.push({
               condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),

@@ -4,6 +4,7 @@ import type {
   PostgresDB,
   TransactionPg,
 } from '@payloadcms/drizzle/types'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type {
   ColumnBaseConfig,
   ColumnDataType,
@@ -92,6 +93,7 @@ export type Insert = (args: {
 
 export type PostgresAdapter = DrizzleAdapter & {
   countDistinct: CountDistinct
+  defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   drizzle: PostgresDB
   dropTables: DropTables

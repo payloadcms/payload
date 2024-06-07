@@ -2,7 +2,7 @@ import type { Connect } from 'payload/database'
 
 import { createClient } from '@libsql/client'
 import { sql } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/libsql'
+import { type LibSQLDatabase, drizzle } from 'drizzle-orm/libsql'
 
 import type { SQLiteAdapter } from './types.js'
 
@@ -28,17 +28,12 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.client, { logger, schema: this.schema })
+    this.drizzle = drizzle(this.client, { logger, schema: this.schema }) as LibSQLDatabase
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
-        await this.drizzle.execute(
-          sql.raw(`
-          drop schema if exists ${this.schemaName || 'public'} cascade;
-          create schema ${this.schemaName || 'public'};
-        `),
-        )
+        await this.dropTables({ adapter: this })
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
