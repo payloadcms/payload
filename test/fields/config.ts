@@ -51,10 +51,6 @@ export const collectionSlugs: CollectionConfig[] = [
         type: 'checkbox',
         defaultValue: true,
       },
-      // {
-      //   name: 'asdf',
-      //   type: 'text',
-      // },
     ],
   },
   ArrayFields,

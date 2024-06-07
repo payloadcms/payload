@@ -1,13 +1,11 @@
 import type { GeneratedTypes, Payload } from 'payload'
 import type { InitOptions, SanitizedConfig } from 'payload/config'
 
-import { createHash } from 'crypto'
 import { BasePayload } from 'payload'
 import { generateTypes } from 'payload/bin'
 import WebSocket from 'ws'
 
 let cached: {
-  hashedConfig?: string
   payload: Payload | null
   promise: Promise<Payload> | null
   reload: Promise<boolean> | boolean
@@ -39,6 +37,11 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
 
   // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
 
+  // Generate types
+  if (config.typescript.autoGenerate !== false) {
+    void generateTypes(config, { log: false })
+  }
+
   await payload.db.init()
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
@@ -57,16 +60,6 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
       let resolve
 
       cached.reload = new Promise((res) => (resolve = res))
-
-      // Generate types on startup
-      if (config.typescript.autoGenerate !== false) {
-        const configHash = quickHash(config)
-
-        if (cached.hashedConfig !== configHash) {
-          cached.hashedConfig = configHash
-          void generateTypes(config, { log: false })
-        }
-      }
 
       await reload(config, cached.payload)
 
@@ -117,8 +110,4 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   }
 
   return cached.payload
-}
-
-function quickHash(config: SanitizedConfig): string {
-  return createHash('sha256').update(JSON.stringify(config)).digest('hex')
 }

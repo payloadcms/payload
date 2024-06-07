@@ -19,7 +19,6 @@ const componentWebpackConfig = {
     'react-image-crop',
     'payload/operations',
     'payload/bin',
-    'crypto',
   ],
   mode: 'production',
   module: {
