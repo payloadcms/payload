@@ -2,11 +2,13 @@ import type {
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
+  EditorConfig,
   LexicalCommand,
   LexicalNode,
   SerializedLexicalNode,
 } from 'lexical'
 
+import { addClassNamesToElement } from '@lexical/utils'
 import { $applyNodeReplacement, DecoratorNode, createCommand } from 'lexical'
 import * as React from 'react'
 
@@ -65,8 +67,10 @@ export class HorizontalRuleNode extends DecoratorNode<React.ReactElement> {
   /**
    * Determines how the hr element is rendered in the lexical editor. This is only the "initial" / "outer" HTML element.
    */
-  createDOM(): HTMLElement {
-    return document.createElement('hr')
+  createDOM(config: EditorConfig): HTMLElement {
+    const element = document.createElement('hr')
+    addClassNamesToElement(element, config.theme.hr)
+    return element
   }
 
   /**

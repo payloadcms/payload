@@ -25,11 +25,11 @@ This is Payload's GraphQL dependency. You should not install your own copy of Gr
 
 This is a copy of the currently running Payload instance, which provides you with existing GraphQL types for all of your Collections and Globals - among other things.
 
-##### Return value
+## Return value
 
 Both `graphQL.queries` and `graphQL.mutations` functions should return an object with properties equal to your newly written GraphQL queries and mutations.
 
-### Example
+## Example
 
 `payload.config.js`:
 
@@ -68,7 +68,7 @@ export default buildConfig({
 })
 ```
 
-### Resolver function
+## Resolver function
 
 In your resolver, make sure you set `depth: 0` if you're returning data directly from the local API so that GraphQL can correctly resolve queries to nested values such as relationship data.
 
@@ -96,7 +96,7 @@ An object containing the `req` and `res` objects that will provide you with the 
 
 Contextual information about the currently running GraphQL operation. You can get schema information from this as well as contextual information about where this resolver function is being run.
 
-### Types
+## Types
 
 We've exposed a few types and utilities to help you extend the API further. Payload uses the GraphQL.js package for which you can view the full list of available types in the [official documentation](https://graphql.org/graphql-js/type/).
 
@@ -138,7 +138,7 @@ graphQL?: {
 }
 ```
 
-### Best practices
+## Best practices
 
 There are a few ways to structure your code, we recommend using a dedicated `graphql` directory so you can keep all of your logic in one place. You have total freedom of how you want to structure this but a common pattern is to group functions by type and with their resolver.
 

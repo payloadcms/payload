@@ -4,6 +4,8 @@ import path from 'path'
 
 import type { SanitizedConfig } from '../config/types.js'
 
+import { loadEnv } from '../bin/loadEnv.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -20,6 +22,7 @@ export const importWithoutClientFiles = async <T = unknown>(filePath: string) =>
  * Resolve and load Payload config from either a relative or absolute path
  */
 export const importConfig = async (configPath: string) => {
+  loadEnv() // loadConfig would usually be run outside of next. This means they will not get next's automatic env loading here. In order to not force them to install dotenv and set it up manually, we can load the env for them here
   const isAbsolutePath = path.isAbsolute(configPath)
   if (isAbsolutePath) {
     const config = await importWithoutClientFiles<{ default: Promise<SanitizedConfig> }>(configPath)

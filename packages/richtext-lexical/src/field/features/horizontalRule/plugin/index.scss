@@ -1,20 +1,20 @@
 @import '../../../../scss/styles.scss';
 
-hr {
+.LexicalEditorTheme__hr {
   padding: 2px 2px;
   border: none;
   margin: 1rem 0;
   cursor: pointer;
 }
 
-hr:after {
+.LexicalEditorTheme__hr:after {
   content: '';
   display: block;
   height: 2px;
   background-color: var(--theme-elevation-250);
 }
 
-hr.selected {
+.LexicalEditorTheme__hr.selected {
   outline: 2px solid var(--theme-success-500);
   user-select: none;
 }

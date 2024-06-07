@@ -116,7 +116,7 @@ That plugin should create an alias to support Vite as follows:
 
 This will effectively alias the entire plugin and work with Vite. If the plugin requires admin-specific code, then the `./my-admin-plugin.js` alias target file should reflect any changes necessary to the admin UI that the main server-side plugin performs.
 
-### Extending the Vite config
+## Extending the Vite config
 
 The Payload config supports a new property for plugins to be able to extend the Vite config specifically. That property exists on the main Payload config under `admin.vite`. You can check out the [Vite docs](https://vitejs.dev/config/shared-options.html) for more information on what you can do with the Vite config.
 

@@ -15,7 +15,7 @@ Extending on Payload's [Draft](/docs/versions/drafts) functionality, you can con
 ![Autosave Enabled](/images/docs/autosave-enabled.png)
 _If Autosave is enabled, drafts will be created automatically as the document is modified and the Admin UI adds an indicator describing when the document was last saved to the top right of the sidebar._
 
-### Options
+## Options
 
 Collections and Globals both support the same options for configuring autosave. You can either set `versions.drafts.autosave` to `true`, or pass an object to configure autosave properties.
 
@@ -60,11 +60,11 @@ export const Pages: CollectionConfig = {
 }
 ```
 
-### Autosave API
+## Autosave API
 
 When `autosave` is enabled, all `update` operations within Payload expose a new argument called `autosave`. When set to `true`, Payload will treat the incoming draft update as an `autosave`. This is primarily used by the Admin UI, but there may be some cases where you are building an app for your users and wish to implement `autosave` in your own app. To do so, use the `autosave` argument in your `update` operations.
 
-#### How autosaves are stored
+### How autosaves are stored
 
 If we created a new version for each autosave, you'd quickly find a ton of autosaves that clutter up your `_versions` collection within the database. That would be messy quick because `autosave` is typically set to save a document at ~800ms intervals.
 

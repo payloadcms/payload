@@ -16,12 +16,25 @@ const baseRules = {
       type: 'natural',
       order: 'asc',
       'partition-by-comment': true,
+      'partition-by-new-line': true,
       groups: ['top', 'unknown'],
       'custom-groups': {
         top: ['_id', 'id', 'name', 'slug', 'type'],
       },
     },
   ],
+  /*'perfectionist/sort-object-types': [
+    'error',
+    {
+      'partition-by-new-line': true,
+    },
+  ],
+  'perfectionist/sort-interfaces': [
+    'error',
+    {
+      'partition-by-new-line': true,
+    },
+  ],*/
   'payload/no-jsx-import-statements': 'error',
 }
 
