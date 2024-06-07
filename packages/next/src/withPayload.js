@@ -61,7 +61,6 @@ export const withPayload = (nextConfig = {}) => {
       'pino',
       'pino-pretty',
       'graphql',
-      'json-schema-to-typescript',
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
