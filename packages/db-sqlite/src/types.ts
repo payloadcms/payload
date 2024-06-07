@@ -2,7 +2,6 @@ import type { Client, Config, ResultSet } from '@libsql/client'
 import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
-  SQLiteDB,
   TransactionSQLite,
 } from '@payloadcms/drizzle/types'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
@@ -72,7 +71,7 @@ export type CountDistinct = (args: {
 }) => Promise<number>
 
 export type DeleteWhere = (args: {
-  db: SQLiteDB | TransactionSQLite
+  db: LibSQLDatabase | TransactionSQLite
   tableName: string
   where: SQL
 }) => Promise<void>
@@ -91,7 +90,7 @@ export type GenerateDrizzleJSON = (args: {
 }) => Record<string, unknown>
 
 export type Insert = (args: {
-  db: SQLiteDB | TransactionSQLite
+  db: LibSQLDatabase | TransactionSQLite
   onConflictDoUpdate?: SQLiteInsertOnConflictDoUpdateConfig<any>
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]

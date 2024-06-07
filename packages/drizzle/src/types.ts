@@ -115,7 +115,6 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: Record<string, unknown>
   deleteWhere: DeleteWhere
-  // drizzle: LibSQLDatabase<Record<string, unknown>> | PostgresDB
   drizzle: LibSQLDatabase | PostgresDB
   dropTables: DropTables
   enums?: Record<string, unknown> | never

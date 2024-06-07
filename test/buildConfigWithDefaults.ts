@@ -37,8 +37,8 @@ import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
-process.env.PAYLOAD_DATABASE = 'sqlite'
-process.env.SQLITE_URL = 'file:C:/code/payload-v3/sqlite.db'
+// process.env.PAYLOAD_DATABASE = 'sqlite'
+// process.env.SQLITE_URL = 'file:C:/code/payload-v3/sqlite.db'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 

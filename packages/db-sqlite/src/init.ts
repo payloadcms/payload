@@ -2,7 +2,6 @@
 import type { Init } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { pgEnum } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 

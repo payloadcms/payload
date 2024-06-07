@@ -1,6 +1,6 @@
-import type { SQLiteAdapter } from './types.js'
+import type { Insert } from './types.js'
 
-export const insert: SQLiteAdapter['insert'] = async function insert({
+export const insert: Insert = async function insert({
   db,
   onConflictDoUpdate,
   tableName,

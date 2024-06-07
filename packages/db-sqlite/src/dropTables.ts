@@ -1,4 +1,4 @@
-import type { DropTables, SQLiteAdapter } from './types.js'
+import type { DropTables } from './types.js'
 
 export const dropTables: DropTables = async function dropTables({ adapter }) {
   const statement = Object.keys(adapter.tables).reduce(
