@@ -130,6 +130,7 @@ export { withCondition } from '../../forms/withCondition/index.js'
 // graphics
 export { Account } from '../../graphics/Account/index.js'
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
+export { File } from '../../graphics/File/index.js'
 
 // icons
 export { CalendarIcon } from '../../icons/Calendar/index.js'

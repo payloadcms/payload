@@ -14,7 +14,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { File } from '@payloadcms/ui/graphics/File'
+import { File } from '@payloadcms/ui/client'
 import {
   $getNodeByKey,
   $getSelection,
