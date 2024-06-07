@@ -5,8 +5,6 @@ import { expect, test } from '@playwright/test'
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { desktopBreakpoint, mobileBreakpoint } from './shared'
-import { startLivePreviewDemo } from './startLivePreviewDemo'
 import {
   ensureDeviceIsCentered,
   ensureDeviceIsLeftAligned,
@@ -14,6 +12,8 @@ import {
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
 } from './helpers'
+import { desktopBreakpoint, mobileBreakpoint } from './shared'
+import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test
 
@@ -228,7 +228,11 @@ describe('Live Preview', () => {
     await goToCollectionLivePreview(page, url)
     await selectLivePreviewBreakpoint(page, mobileBreakpoint.label)
     await ensureDeviceIsCentered(page)
+    await selectLivePreviewZoom(page, '75%')
+    await ensureDeviceIsCentered(page)
     await selectLivePreviewZoom(page, '50%')
+    await ensureDeviceIsCentered(page)
+    await selectLivePreviewZoom(page, '125%')
     await ensureDeviceIsCentered(page)
     await selectLivePreviewZoom(page, '200%')
     await ensureDeviceIsCentered(page)
@@ -239,7 +243,11 @@ describe('Live Preview', () => {
     await goToCollectionLivePreview(page, url)
     await selectLivePreviewBreakpoint(page, desktopBreakpoint.label)
     await ensureDeviceIsLeftAligned(page)
+    await selectLivePreviewZoom(page, '75%')
+    await ensureDeviceIsLeftAligned(page)
     await selectLivePreviewZoom(page, '50%')
+    await ensureDeviceIsLeftAligned(page)
+    await selectLivePreviewZoom(page, '125%')
     await ensureDeviceIsLeftAligned(page)
     await selectLivePreviewZoom(page, '200%')
     await ensureDeviceIsLeftAligned(page)
