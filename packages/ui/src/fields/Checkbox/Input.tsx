@@ -78,6 +78,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
       </div>
       <FieldLabel
         CustomLabel={CustomLabel}
+        htmlFor={id}
         label={label}
         required={required}
         {...(labelProps || {})}
