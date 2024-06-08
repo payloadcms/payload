@@ -20,7 +20,7 @@ const baseClass = 'unpublish-many'
 
 import type { ClientCollectionConfig } from 'payload/types'
 
-import { toast } from '../Sonner/index.js'
+import { toast } from 'sonner'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig

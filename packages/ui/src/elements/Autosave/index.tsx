@@ -3,6 +3,7 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -12,7 +13,6 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDate.js'
 import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
-import { toast } from '../Sonner/index.js'
 import './index.scss'
 
 const baseClass = 'autosave'

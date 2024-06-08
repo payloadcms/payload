@@ -2,7 +2,6 @@
 
 import type { FormState, PayloadRequestWithData } from 'payload/types'
 
-import { toast } from '@payloadcms/ui/elements/Sonner'
 import { Email } from '@payloadcms/ui/fields/Email'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
@@ -10,6 +9,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { email } from 'payload/fields/validations'
 import React, { Fragment, useState } from 'react'
+import { toast } from 'sonner'
 
 export const ForgotPasswordForm: React.FC = () => {
   const config = useConfig()

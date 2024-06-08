@@ -1,7 +1,6 @@
 'use client'
 import type { FormState } from 'payload/types'
 
-import { toast } from '@payloadcms/ui/elements/Sonner'
 import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
 import { HiddenInput } from '@payloadcms/ui/fields/HiddenInput'
 import { Password } from '@payloadcms/ui/fields/Password'
@@ -12,6 +11,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
+import { toast } from 'sonner'
 
 type Args = {
   token: string

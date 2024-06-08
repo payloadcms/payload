@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@payloadcms/ui/elements/Button'
-import { toast } from '@payloadcms/ui/elements/Sonner'
 import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
 import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
 import { Email } from '@payloadcms/ui/fields/Email'
@@ -11,6 +10,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 

@@ -8,6 +8,7 @@ import { serialize } from 'object-to-formdata'
 import { wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import type {
   Context as FormContextType,
@@ -16,7 +17,6 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { toast } from '../../elements/Sonner/index.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
