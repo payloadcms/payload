@@ -8,7 +8,6 @@ import { serialize } from 'object-to-formdata'
 import { wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import type {
   Context as FormContextType,
@@ -17,6 +16,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
+import { toast } from '../../elements/Sonner/index.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -281,7 +281,7 @@ export const Form: React.FC<FormProps> = (props) => {
           if (redirect) {
             router.push(redirect)
           } else if (!disableSuccessStatus) {
-            toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
+            toast.success(json.message || t('general:submissionSuccessful'))
           }
         } else {
           setProcessing(false)

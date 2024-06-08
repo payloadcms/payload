@@ -5,7 +5,6 @@ import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -17,6 +16,7 @@ import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
+import { toast } from '../Sonner/index.js'
 import './index.scss'
 
 const baseClass = 'delete-documents'
@@ -65,7 +65,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
           const json = await res.json()
           toggleModal(modalSlug)
           if (res.status < 400) {
-            toast.success(json.message || t('general:deletedSuccessfully'), { autoClose: 3000 })
+            toast.success(json.message || t('general:deletedSuccessfully'))
             toggleAll()
             router.replace(
               stringifyParams({

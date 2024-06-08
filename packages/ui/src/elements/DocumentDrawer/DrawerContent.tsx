@@ -3,7 +3,6 @@
 import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import type { DocumentDrawerProps } from './types.js'
 
@@ -18,6 +17,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
+import { toast } from '../Sonner/index.js'
 import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({

@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@payloadcms/ui/elements/Button'
+import { toast } from '@payloadcms/ui/elements/Sonner'
 import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
 import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
 import { Email } from '@payloadcms/ui/fields/Email'
@@ -10,7 +11,6 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
@@ -71,7 +71,7 @@ export const Auth: React.FC<Props> = (props) => {
     })
 
     if (response.status === 200) {
-      toast.success(t('authentication:successfullyUnlocked'), { autoClose: 3000 })
+      toast.success(t('authentication:successfullyUnlocked'))
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }

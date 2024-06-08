@@ -1,11 +1,11 @@
 'use client'
 import { useCallback, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { toast } from '../Sonner/index.js'
 
 export const usePreviewURL = (): {
   generatePreviewURL: ({ openPreviewWindow }: { openPreviewWindow?: boolean }) => void

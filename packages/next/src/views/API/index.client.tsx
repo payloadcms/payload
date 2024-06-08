@@ -2,6 +2,7 @@
 
 import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { toast } from '@payloadcms/ui/elements/Sonner'
 import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
 import { NumberField as NumberInput } from '@payloadcms/ui/fields/Number'
 import { Form } from '@payloadcms/ui/forms/Form'
@@ -15,7 +16,6 @@ import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'
-import { toast } from 'react-toastify'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { LocaleSelector } from './LocaleSelector/index.js'

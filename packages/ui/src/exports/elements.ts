@@ -31,6 +31,7 @@ export type { Option } from '../elements/ReactSelect/types.js'
 export { RenderCustomComponent } from '../elements/RenderCustomComponent/index.js'
 export { ShimmerEffect } from '../elements/ShimmerEffect/index.js'
 export { StaggeredShimmers } from '../elements/ShimmerEffect/index.js'
+export { toast } from '../elements/Sonner/index.js'
 export { SortColumn } from '../elements/SortColumn/index.js'
 export { SetStepNav } from '../elements/StepNav/SetStepNav.js'
 export { useStepNav } from '../elements/StepNav/index.js'
@@ -46,9 +47,4 @@ export { Tooltip } from '../elements/Tooltip/index.js'
 export { Translation } from '../elements/Translation/index.js'
 export { UnpublishMany } from '../elements/UnpublishMany/index.js'
 export { Upload } from '../elements/Upload/index.js'
-import { Modal } from '@faceless-ui/modal'
-export { Modal }
-import * as reactToastifyImport from 'react-toastify'
-const { toast } =
-  reactToastifyImport && 'toast' in reactToastifyImport ? reactToastifyImport : { toast: undefined }
-export { toast }
+export { Modal } from '@faceless-ui/modal'

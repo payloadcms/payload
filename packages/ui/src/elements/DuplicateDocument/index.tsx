@@ -6,7 +6,6 @@ import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -16,6 +15,7 @@ import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { PopupList } from '../Popup/index.js'
+import { toast } from '../Sonner/index.js'
 import './index.scss'
 
 const baseClass = 'duplicate'
@@ -67,9 +67,6 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             toast.success(
               message ||
                 t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
-              {
-                autoClose: 3000,
-              },
             )
             setModified(false)
             router.push(`${admin}/collections/${slug}/${doc.id}?locale=${locale.code}`)
@@ -78,7 +75,6 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
               errors?.[0].message ||
                 message ||
                 t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
-              { autoClose: 5000 },
             )
           }
         })
