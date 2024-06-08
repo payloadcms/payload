@@ -17,6 +17,7 @@ import { Users } from './collections/Users.js'
 import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
 import { AfterNavLinks } from './components/AfterNavLinks/index.js'
+import { BeforeCreateFirstUser } from './components/BeforeCreateFirstUser/index.js'
 import { BeforeLogin } from './components/BeforeLogin/index.js'
 import { CustomProvider } from './components/CustomProvider/index.js'
 import { Logout } from './components/Logout/index.js'
@@ -49,6 +50,7 @@ export default buildConfigWithDefaults({
       afterDashboard: [AfterDashboard],
       afterNavLinks: [AfterNavLinks],
       beforeLogin: [BeforeLogin],
+      beforeCreateFirstUser: [BeforeCreateFirstUser],
       logout: {
         Button: Logout,
       },

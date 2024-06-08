@@ -36,9 +36,11 @@ export default joi.object({
     components: joi.object().keys({
       Nav: component,
       actions: joi.array().items(component),
+      afterCreateFirstUser: joi.array().items(component),
       afterDashboard: joi.array().items(component),
       afterLogin: joi.array().items(component),
       afterNavLinks: joi.array().items(component),
+      beforeCreateFirstUser: joi.array().items(component),
       beforeDashboard: joi.array().items(component),
       beforeLogin: joi.array().items(component),
       beforeNavLinks: joi.array().items(component),
