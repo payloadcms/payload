@@ -96,9 +96,9 @@
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
-    "@faceless-ui/modal": "file:~/dev/faceless-ui/modal",
-    "@faceless-ui/scroll-info": "file:~/dev/faceless-ui/scroll-info",
-    "@faceless-ui/window-info": "file:~/dev/faceless-ui/window-info",
+    "@faceless-ui/modal": "3.0.0-beta.0",
+    "@faceless-ui/scroll-info": "2.0.0-beta.0",
+    "@faceless-ui/window-info": "3.0.0-beta.0",
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",

@@ -41,8 +41,8 @@
     "translateNewKeys": "tsx scripts/translateNewKeys.ts"
   },
   "dependencies": {
-    "@faceless-ui/modal": "file:~/dev/faceless-ui/modal",
-    "@faceless-ui/scroll-info": "file:~/dev/faceless-ui/scroll-info",
+    "@faceless-ui/modal": "3.0.0-beta.0",
+    "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@lexical/headless": "0.16.0",
     "@lexical/link": "0.16.0",
     "@lexical/list": "0.16.0",
@@ -75,8 +75,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "file:~/dev/faceless-ui/modal",
-    "@faceless-ui/scroll-info": "file:~/dev/faceless-ui/scroll-info",
+    "@faceless-ui/modal": "3.0.0-beta.0",
+    "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@lexical/headless": "0.16.0",
     "@lexical/link": "0.16.0",
     "@lexical/list": "0.16.0",
