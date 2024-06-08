@@ -28,7 +28,6 @@
     "src/**/*.svg",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.json"
   ],
