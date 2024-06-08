@@ -1142,11 +1142,11 @@ importers:
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+        specifier: 3.0.0-beta.0
+        version: 3.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@faceless-ui/scroll-info':
-        specifier: 1.4.0-rc.0
-        version: 1.4.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+        specifier: 2.0.0-beta.0
+        version: 2.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@lexical/headless':
         specifier: 0.16.0
         version: 0.16.0
@@ -1242,8 +1242,8 @@ importers:
   packages/richtext-slate:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+        specifier: 3.0.0-beta.0
+        version: 3.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1402,14 +1402,14 @@ importers:
         specifier: 7.0.2
         version: 7.0.2(@dnd-kit/core@6.0.8)(react@19.0.0-rc-f994737d14-20240522)
       '@faceless-ui/modal':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+        specifier: 3.0.0-beta.0
+        version: 3.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@faceless-ui/scroll-info':
-        specifier: 1.4.0-rc.0
-        version: 1.4.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+        specifier: 2.0.0-beta.0
+        version: 2.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@faceless-ui/window-info':
-        specifier: 2.2.0-rc.0
-        version: 2.2.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+        specifier: 3.0.0-beta.0
+        version: 3.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
@@ -4871,8 +4871,8 @@ packages:
     resolution: {integrity: sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  /@faceless-ui/modal@2.1.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
-    resolution: {integrity: sha512-BFm7Raj2GE46nOvkTPD0AJ4LR/sdhqUrxx53z9ZgVXjwbyWHkwQVVphbSoRRc01kwnvPwlxoRpRNfXEgUMvTBA==}
+  /@faceless-ui/modal@3.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
+    resolution: {integrity: sha512-gZboS0pLMO4THTqAHLmZuxLOE2KyYMN9QOUikd25WSrwPOqdtcgEiRlps/RcOivHA+sowtb1IBitiIWJ0L5Eow==}
     peerDependencies:
       react: ^19.0.0-rc-f994737d14-20240522
       react-dom: ^19.0.0-rc-f994737d14-20240522
@@ -4885,8 +4885,8 @@ packages:
       react-transition-group: 4.4.5(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
     dev: false
 
-  /@faceless-ui/scroll-info@1.4.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
-    resolution: {integrity: sha512-83/4AOgGJd6PGRKGEyr3Ir/F5BP484PwwAoSg3u36QfTTfVANwbD7/TIMIv+e5QcBPrNm7HdCCPVqjqSxq4YTw==}
+  /@faceless-ui/scroll-info@2.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
+    resolution: {integrity: sha512-pUBhQP8vduA7rVndNsjhaCcds1BykA/Q4iV23JWijU6ZFL/M3Fm9P3ypDS+0VVxolqemNhw8S3FXPwZGgjH4Rw==}
     peerDependencies:
       react: ^19.0.0-rc-f994737d14-20240522
       react-dom: ^19.0.0-rc-f994737d14-20240522
@@ -4895,8 +4895,8 @@ packages:
       react-dom: 19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522)
     dev: false
 
-  /@faceless-ui/window-info@2.2.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
-    resolution: {integrity: sha512-fhvgt7MfbBpbZDa8adcxbJDDgVsprTvQki/W5L4blEYVEUDhSNitcg1IM/zBlO6BVURItJ8eOL3ogomooqmITw==}
+  /@faceless-ui/window-info@3.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
+    resolution: {integrity: sha512-Qs8xRA+fl4sU2aFVe9xawxfi5TVZ9VTPuhdQpx9aSv7U5a2F0AXwT61lJfnaJ9Flm8tOcxzq67p8cVZsXNCVeQ==}
     peerDependencies:
       react: ^19.0.0-rc-f994737d14-20240522
       react-dom: ^19.0.0-rc-f994737d14-20240522

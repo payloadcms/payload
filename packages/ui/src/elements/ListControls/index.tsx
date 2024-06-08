@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, Where } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/window-info'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
@@ -47,8 +47,6 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
-
-  const { useWindowInfo } = facelessUIImport
 
   const { handleSearchChange } = useListQuery()
   const { searchParams } = useSearchParams()

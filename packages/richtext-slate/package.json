@@ -32,7 +32,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "2.1.0-rc.0",
+    "@faceless-ui/modal": "3.0.0-beta.0",
     "is-hotkey": "0.2.0",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
