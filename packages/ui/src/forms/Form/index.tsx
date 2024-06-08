@@ -166,6 +166,23 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
+      // create new toast promise which will resolve manually later
+      let successToast, errorToast
+      const promise = new Promise((resolve, reject) => {
+        successToast = resolve
+        errorToast = reject
+      })
+
+      toast.promise(promise, {
+        error: (data) => {
+          return data as string
+        },
+        loading: t('general:submitting'),
+        success: (data) => {
+          return data as string
+        },
+      })
+
       const {
         action: actionArg,
         method: methodToUse = method,
@@ -219,7 +236,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If not valid, prevent submission
       if (!isValid) {
-        toast.error(t('error:correctInvalidFields'))
+        errorToast(t('error:correctInvalidFields'))
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
@@ -281,7 +298,7 @@ export const Form: React.FC<FormProps> = (props) => {
           if (redirect) {
             router.push(redirect)
           } else if (!disableSuccessStatus) {
-            toast.success(json.message || t('general:submissionSuccessful'))
+            successToast(json.message || t('general:submissionSuccessful'))
           }
         } else {
           setProcessing(false)
@@ -289,7 +306,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
-            toast.error(json.message)
+            errorToast(json.message)
 
             return
           }
@@ -328,7 +345,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              toast.error(err.message || t('error:unknown'))
+              errorToast(err.message || t('error:unknown'))
             })
 
             return
@@ -336,14 +353,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
           const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
 
-          toast.error(message)
+          errorToast(message)
         }
       } catch (err) {
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
 
-        toast.error(err)
+        errorToast(err)
       }
     },
     [

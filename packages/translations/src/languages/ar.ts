@@ -271,6 +271,7 @@ export const arTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'البقاء على هذه الصفحة',
     submissionSuccessful: 'تمت الإرسال بنجاح.',
     submit: 'إرسال',
+    submitting: 'جاري التقديم...',
     success: 'النجاح',
     successfullyCreated: '{{label}} تم إنشاؤها بنجاح.',
     successfullyDuplicated: '{{label}} تم استنساخها بنجاح.',

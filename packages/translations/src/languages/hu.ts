@@ -275,6 +275,7 @@ export const huTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Maradjon ezen az oldalon',
     submissionSuccessful: 'Beküldés sikeres.',
     submit: 'Beküldés',
+    submitting: 'Beküldés...',
     success: 'Siker',
     successfullyCreated: '{{label}} sikeresen létrehozva.',
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
