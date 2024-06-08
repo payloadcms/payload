@@ -503,7 +503,7 @@ export type Config = {
       /**
        * Add custom components before the create first user form
        */
-      beforeCreateFirstUser?: Custom
+      beforeCreateFirstUser?: CustomComponent[]
       /**
        * Add custom components before the collection overview
        */
