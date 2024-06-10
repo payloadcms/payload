@@ -19,7 +19,12 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
-import { arrayFieldsSlug, blockFieldsSlug, collapsibleFieldsSlug } from './slugs.js'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  collapsibleFieldsSlug,
+  tabsFields2Slug,
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -443,6 +448,28 @@ describe('fields', () => {
 
       const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup')
       await expect(fieldRelyingOnSiblingData).toBeVisible()
+    })
+  })
+
+  describe('tabs', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, tabsFields2Slug)
+    })
+
+    test('should correctly save nested unnamed and named tabs', async () => {
+      await page.goto(url.create)
+
+      await page.locator('#field-tabsInArray .array-field__add-row').click()
+      await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
+      await page.locator('.tabs-field__tabs button:nth-child(2)').click()
+      await page.locator('#field-tabsInArray__0__tab2__text2').fill('tab 2 text')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
+      await page.locator('.tabs-field__tabs button:nth-child(2)').click()
+      await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
     })
   })
 })
