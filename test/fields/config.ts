@@ -27,6 +27,7 @@ import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
+import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
@@ -70,6 +71,7 @@ export const collectionSlugs: CollectionConfig[] = [
   RelationshipFields,
   RichTextFields,
   SelectFields,
+  TabsFields2,
   TabsFields,
   TextFields,
   Uploads,

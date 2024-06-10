@@ -46,6 +46,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'select-fields': SelectField;
+    'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
     uploads: Upload;
@@ -1122,6 +1123,24 @@ export interface SelectField {
   settings?: {
     category?: ('a' | 'b')[] | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-fields-2".
+ */
+export interface TabsFields2 {
+  id: string;
+  tabsInArray?:
+    | {
+        text?: string | null;
+        tab2?: {
+          text2?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
