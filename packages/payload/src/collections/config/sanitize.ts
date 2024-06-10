@@ -15,6 +15,7 @@ import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
+import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults } from './defaults.js'
 
 export const sanitizeCollection = async (
@@ -90,7 +91,7 @@ export const sanitizeCollection = async (
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
-          interval: 2000,
+          interval: versionDefaults.autosaveInterval,
         }
       }
 
