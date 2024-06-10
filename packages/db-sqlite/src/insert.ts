@@ -10,9 +10,9 @@ export const insert: Insert = async function insert({
   let result
 
   if (onConflictDoUpdate) {
-    result = db.insert(table).values(values).onConflictDoUpdate(onConflictDoUpdate).get()
+    result = db.insert(table).values(values).onConflictDoUpdate(onConflictDoUpdate).returning()
   } else {
-    result = db.insert(table).values(values).get()
+    result = db.insert(table).values(values).returning()
   }
   result = await result
   return result

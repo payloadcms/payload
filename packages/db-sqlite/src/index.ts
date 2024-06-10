@@ -41,7 +41,7 @@ import { countDistinct } from './countDistinct.js'
 import { createMigration } from './createMigration.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { deleteWhere } from './deleteWhere.js'
-import { dropTables } from './dropTables.js'
+import { dropDatabase } from './dropDatabase.js'
 import { execute } from './execute.js'
 import { generateDrizzleJSON } from './generateDrizzleJSON.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
@@ -108,7 +108,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       deleteVersions,
       deleteWhere,
       destroy,
-      dropTables,
+      dropDatabase,
       execute,
       find,
       findGlobal,

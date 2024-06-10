@@ -12,5 +12,5 @@ export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
   tables: {},
-  version: '6',
+  version: '7',
 }

@@ -71,14 +71,14 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropTables = (args: { adapter: PostgresAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: PostgresAdapter }) => Promise<void>
 
-export type Execute = (args: {
+export type Execute<T> = (args: {
   db?: PostgresDB | TransactionPg
   drizzle?: PostgresDB
   raw?: string
   sql?: SQL<unknown>
-}) => PgRaw<QueryResult<Record<string, unknown>>>
+}) => PgRaw<QueryResult<Record<string, T>>>
 
 export type GenerateDrizzleJSON = (args: {
   schema: Record<string, GenericRelation | GenericTable>
@@ -96,9 +96,9 @@ export type PostgresAdapter = DrizzleAdapter & {
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   drizzle: PostgresDB
-  dropTables: DropTables
+  dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
-  execute: Execute
+  execute: Execute<unknown>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields

@@ -20,6 +20,7 @@ type Args = {
   prefix?: string
   /** For tables based on fields that could have both enumName and dbName (ie: select with hasMany), default: 'dbName' */
   target?: 'dbName' | 'enumName'
+  /** Throws error if true for postgres when table and enum names exceed 63 characters */
   throwValidationError?: boolean
   /** Adds the versions suffix to the default table name - should only be used on the base collection to avoid duplicate suffixing */
   versions?: boolean

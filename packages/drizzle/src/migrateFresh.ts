@@ -46,7 +46,7 @@ export async function migrateFresh(
     msg: `Dropping database.`,
   })
 
-  await this.dropTables({ adapter: this })
+  await this.dropDatabase({ adapter: this })
 
   const migrationFiles = await readMigrationFiles({ payload })
   payload.logger.debug({

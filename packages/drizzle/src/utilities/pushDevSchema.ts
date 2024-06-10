@@ -74,7 +74,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   } else {
     await adapter.execute({
       drizzle: adapter.drizzle,
-      raw: `UPDATE ${migrationsTable} SET updated_at = ${new Date()} WHERE batch = '-1'`,
+      raw: `UPDATE ${migrationsTable} SET updated_at = CURRENT_TIMESTAMP WHERE batch = '-1'`,
     })
   }
 }

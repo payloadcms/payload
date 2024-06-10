@@ -90,16 +90,16 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropTables = (args: { adapter: DrizzleAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: DrizzleAdapter }) => Promise<void>
 
-export type Execute = (args: {
+export type Execute<T> = (args: {
   db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
   drizzle?: LibSQLDatabase | PostgresDB
   raw?: string
   sql?: SQL<unknown>
 }) =>
   | PgRaw<QueryResult<Record<string, unknown>>>
-  | SQLiteRaw<Promise<unknown>>
+  | SQLiteRaw<Promise<{ rows: T[] }>>
   | SQLiteRaw<ResultSet>
 
 export type GenerateDrizzleJSON = (args: { schema: Record<string, unknown> }) => unknown
@@ -116,9 +116,9 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   defaultDrizzleSnapshot: Record<string, unknown>
   deleteWhere: DeleteWhere
   drizzle: LibSQLDatabase | PostgresDB
-  dropTables: DropTables
+  dropDatabase: DropDatabase
   enums?: Record<string, unknown> | never
-  execute: Execute
+  execute: Execute<unknown>
   features: {
     json?: boolean
   }

@@ -76,14 +76,14 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropTables = (args: { adapter: SQLiteAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: SQLiteAdapter }) => Promise<void>
 
-export type Execute = (args: {
+export type Execute<T> = (args: {
   db?: TransactionSQLite
   drizzle?: LibSQLDatabase
   raw?: string
   sql?: SQL<unknown>
-}) => SQLiteRaw<Promise<unknown>> | SQLiteRaw<ResultSet>
+}) => SQLiteRaw<Promise<T>> | SQLiteRaw<ResultSet>
 
 export type GenerateDrizzleJSON = (args: {
   schema: Record<string, GenericRelation | GenericTable>
@@ -103,8 +103,8 @@ export type SQLiteAdapter = DrizzleAdapter & {
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
   drizzle: LibSQLDatabase
-  dropTables: DropTables
-  execute: Execute
+  dropDatabase: DropDatabase
+  execute: Execute<unknown>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
