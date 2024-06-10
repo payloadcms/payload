@@ -121,7 +121,7 @@ export const VersionView: EditViewComponent = async (props) => {
     }
   }
 
-  const publishedNewerThanDraft = latestPublishedVersion.updatedAt > latestDraftVersion.updatedAt
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
 
   if (publishedNewerThanDraft) {
     latestDraftVersion = {

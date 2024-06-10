@@ -106,7 +106,7 @@ export const VersionsView: EditViewComponent = async (props) => {
       ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
       : ''
 
-  const publishedNewerThanDraft = latestPublishedVersion.updatedAt > latestDraftVersion.updatedAt
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
 
   if (publishedNewerThanDraft) {
     latestDraftVersion = {
@@ -121,8 +121,8 @@ export const VersionsView: EditViewComponent = async (props) => {
     docID: id,
     globalConfig,
     i18n,
-    latestDraftVersion: latestDraftVersion.id,
-    latestPublishedVersion: latestPublishedVersion.id,
+    latestDraftVersion: latestDraftVersion?.id,
+    latestPublishedVersion: latestPublishedVersion?.id,
   })
 
   return (
