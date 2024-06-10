@@ -67,13 +67,10 @@ export const ListControls: React.FC<Props> = (props) => {
   }, [listSearchableFields, fields])
 
   React.useEffect(() => {
-    if (hasWhereParam.current && !params?.where) {
+    if (!params?.limit) {
       setVisibleDrawer(undefined)
-      hasWhereParam.current = false
-    } else if (params?.where) {
-      hasWhereParam.current = true
     }
-  }, [setVisibleDrawer, params?.where])
+  }, [setVisibleDrawer, params?.limit])
 
   return (
     <div className={baseClass}>
