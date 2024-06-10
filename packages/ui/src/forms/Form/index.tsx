@@ -166,23 +166,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
-      // create new toast promise which will resolve manually later
-      let successToast, errorToast
-      const promise = new Promise((resolve, reject) => {
-        successToast = resolve
-        errorToast = reject
-      })
-
-      toast.promise(promise, {
-        error: (data) => {
-          return data as string
-        },
-        loading: t('general:submitting'),
-        success: (data) => {
-          return data as string
-        },
-      })
-
       const {
         action: actionArg,
         method: methodToUse = method,
@@ -195,6 +178,30 @@ export const Form: React.FC<FormProps> = (props) => {
           e.preventDefault()
         }
         return
+      }
+
+      // create new toast promise which will resolve manually later
+      let successToast, errorToast
+      const promise = new Promise((resolve, reject) => {
+        successToast = resolve
+        errorToast = reject
+      })
+
+      if (redirect || disableSuccessStatus) {
+        // Do not show submitting toast, as the promise toast may never disappear under these conditions.
+        // Instead, make successToast() or errorToast() throw toast.success / toast.error
+        successToast = (data) => toast.success(data)
+        errorToast = (data) => toast.error(data)
+      } else {
+        toast.promise(promise, {
+          error: (data) => {
+            return data as string
+          },
+          loading: t('general:submitting'),
+          success: (data) => {
+            return data as string
+          },
+        })
       }
 
       if (e) {
@@ -289,7 +296,6 @@ export const Form: React.FC<FormProps> = (props) => {
         let json: Record<string, any> = {}
 
         if (isJSON) json = await res.json()
-
         if (res.status < 400) {
           if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
