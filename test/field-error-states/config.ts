@@ -5,6 +5,7 @@ import Uploads from './collections/Upload/index.js'
 import { ValidateDraftsOff } from './collections/ValidateDraftsOff/index.js'
 import { ValidateDraftsOn } from './collections/ValidateDraftsOn/index.js'
 import { ValidateDraftsOnAndAutosave } from './collections/ValidateDraftsOnAutosave/index.js'
+import { GlobalValidateDraftsOn } from './globals/ValidateDraftsOn/index.js'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -14,6 +15,7 @@ export default buildConfigWithDefaults({
     ValidateDraftsOff,
     ValidateDraftsOnAndAutosave,
   ],
+  globals: [GlobalValidateDraftsOn],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

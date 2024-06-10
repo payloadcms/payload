@@ -1,5 +1,6 @@
 export { buildVersionCollectionFields } from '../versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from '../versions/buildGlobalFields.js'
+export { versionDefaults } from '../versions/defaults.js'
 export { deleteCollectionVersions } from '../versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from '../versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
