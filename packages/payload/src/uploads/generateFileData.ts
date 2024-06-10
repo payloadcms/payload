@@ -133,21 +133,23 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (fileHasAdjustments && sharp) {
+    if (sharp) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
         sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
-      if (resizeOptions) {
-        sharpFile = sharpFile.resize(resizeOptions)
-      }
-      if (formatOptions) {
-        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-      }
-      if (trimOptions) {
-        sharpFile = sharpFile.trim(trimOptions)
+      if (fileHasAdjustments) {
+        if (resizeOptions) {
+          sharpFile = sharpFile.resize(resizeOptions)
+        }
+        if (formatOptions) {
+          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
+        }
+        if (trimOptions) {
+          sharpFile = sharpFile.trim(trimOptions)
+        }
       }
     }
 
