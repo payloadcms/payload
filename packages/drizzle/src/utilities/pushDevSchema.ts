@@ -1,5 +1,3 @@
-import { pushSQLiteSchema } from 'drizzle-kit/payload'
-import { sql } from 'drizzle-orm'
 import { createRequire } from 'module'
 import prompts from 'prompts'
 
@@ -10,7 +8,7 @@ const require = createRequire(import.meta.url)
 /**
  * Pushes the development schema to the database using Drizzle.
  *
- * @param {PostgresAdapter} adapter - The PostgresAdapter instance connected to the database.
+ * @param {DrizzleAdapter} adapter - The PostgresAdapter instance connected to the database.
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
@@ -56,27 +54,27 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   }
 
   await apply()
+  const migrationsTable = adapter.schemaName
+    ? `"${adapter.schemaName}"."payload_migrations"`
+    : '"payload_migrations"'
 
   // TODO: type this
   const result: any = await adapter.execute({
     drizzle: adapter.drizzle,
-    sql: sql`SELECT * FROM payload_migrations WHERE batch = '-1'`,
+    raw: `SELECT * FROM ${migrationsTable} WHERE batch = '-1'`,
   })
 
   const devPush = result.rows
-  const table = adapter.schemaName
-    ? `"${adapter.schemaName}"."payload_migrations"`
-    : '"payload_migrations"'
 
   if (!devPush.length) {
     await adapter.execute({
       drizzle: adapter.drizzle,
-      raw: `INSERT INTO ${table} (name, batch) VALUES ('dev', '-1')`,
+      raw: `INSERT INTO ${migrationsTable} (name, batch) VALUES ('dev', '-1')`,
     })
   } else {
     await adapter.execute({
       drizzle: adapter.drizzle,
-      raw: `UPDATE ${table} SET updated_at = ${new Date()} WHERE batch = '-1'`,
+      raw: `UPDATE ${migrationsTable} SET updated_at = ${new Date()} WHERE batch = '-1'`,
     })
   }
 }
