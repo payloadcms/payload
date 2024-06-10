@@ -12,6 +12,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     'draft-posts': DraftPost;
+    'draft-with-max-posts': DraftWithMaxPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
     users: User;
@@ -21,6 +22,7 @@ export interface Config {
   globals: {
     'autosave-global': AutosaveGlobal;
     'draft-global': DraftGlobal;
+    'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
   };
   locale: 'en' | 'es';
@@ -94,6 +96,30 @@ export interface DraftPost {
       }[]
     | null;
   relation?: (string | null) | DraftPost;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-max-posts".
+ */
+export interface DraftWithMaxPost {
+  id: string;
+  title: string;
+  description: string;
+  radio?: 'test' | null;
+  select?: ('test1' | 'test2')[] | null;
+  blocksField?:
+    | {
+        text?: string | null;
+        localized?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  relation?: (string | null) | DraftWithMaxPost;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -175,6 +201,17 @@ export interface AutosaveGlobal {
  * via the `definition` "draft-global".
  */
 export interface DraftGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-max-global".
+ */
+export interface DraftWithMaxGlobal {
   id: string;
   title: string;
   _status?: ('draft' | 'published') | null;

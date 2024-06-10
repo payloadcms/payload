@@ -47,6 +47,7 @@ import type { TypeWithVersion } from './versions/types.js'
 import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
+import { generateTypes } from './bin/generateTypes.js'
 import localOperations from './collections/operations/local/index.js'
 import { validateSchema } from './config/validate.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
@@ -362,6 +363,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
         customIDType,
       }
     })
+
+    // Generate types on startup
+    if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
+      void generateTypes(this.config, { log: false })
+    }
 
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this

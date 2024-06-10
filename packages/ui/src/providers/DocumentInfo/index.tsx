@@ -354,12 +354,14 @@ export const DocumentInfoProvider: React.FC<
 
       const docPreferences = await getDocPreferences()
 
+      const newData = collectionSlug ? json.doc : json.result
+
       const newState = await getFormState({
         apiRoute: api,
         body: {
           id,
           collectionSlug,
-          data: json.doc,
+          data: newData,
           docPreferences,
           globalSlug,
           locale,
@@ -368,8 +370,6 @@ export const DocumentInfoProvider: React.FC<
         },
         serverURL,
       })
-
-      const newData = json.doc
 
       setInitialState(newState)
       setData(newData)

@@ -221,6 +221,7 @@ const collectionSchema = joi.object().keys({
               interval: joi.number(),
             }),
           ),
+          validate: joi.boolean(),
         }),
         joi.boolean(),
       ),

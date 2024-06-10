@@ -28,6 +28,13 @@ export const withPayload = (nextConfig = {}) => {
           'libsql',
         ],
       },
+      turbo: {
+        ...(nextConfig?.experimental?.turbo || {}),
+        resolveAlias: {
+          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
+          'payload-mock-package': 'payload-mock-package',
+        },
+      },
     },
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
@@ -61,6 +68,7 @@ export const withPayload = (nextConfig = {}) => {
       'pino',
       'pino-pretty',
       'graphql',
+      'json-schema-to-typescript',
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
@@ -76,6 +84,7 @@ export const withPayload = (nextConfig = {}) => {
           'drizzle-kit/payload',
           'sharp',
           'libsql',
+          'json-schema-to-typescript',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),

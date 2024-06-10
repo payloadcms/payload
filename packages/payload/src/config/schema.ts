@@ -101,7 +101,7 @@ export default joi.object({
   defaultMaxTextLength: joi.number(),
   editor: joi
     .object()
-    .required()
+    .optional()
     .keys({
       CellComponent: componentSchema.optional(),
       FieldComponent: componentSchema.optional(),
@@ -189,6 +189,7 @@ export default joi.object({
   sharp: joi.any(),
   telemetry: joi.boolean(),
   typescript: joi.object({
+    autoGenerate: joi.boolean(),
     declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
     outputFile: joi.string(),
   }),
