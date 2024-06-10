@@ -173,7 +173,12 @@ export const buildTable = ({
     const localeTableName = `${tableName}${adapter.localesSuffix}`
     localesColumns.id = integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true })
     localesColumns._locale = text('_locale', { enum: locales }).notNull()
-    localesColumns._parentID = getIDColumn({ name: '_parent_id', type: idColType, notNull: true })
+    localesColumns._parentID = getIDColumn({
+      name: '_parent_id',
+      type: idColType,
+      notNull: true,
+      primaryKey: false,
+    })
 
     localesTable = sqliteTable(localeTableName, localesColumns, (cols) => {
       return Object.entries(localesIndexes).reduce(
@@ -232,7 +237,12 @@ export const buildTable = ({
       const columns: Record<string, SQLiteColumnBuilder> = {
         id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
         order: integer('order').notNull(),
-        parent: getIDColumn({ name: 'parent_id', type: idColType, notNull: true }),
+        parent: getIDColumn({
+          name: 'parent_id',
+          type: idColType,
+          notNull: true,
+          primaryKey: false,
+        }),
         path: text('path').notNull(),
         text: text('text'),
       }
@@ -282,7 +292,12 @@ export const buildTable = ({
         id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
         number: numeric('number'),
         order: integer('order').notNull(),
-        parent: getIDColumn({ name: 'parent_id', type: idColType, notNull: true }),
+        parent: getIDColumn({
+          name: 'parent_id',
+          type: idColType,
+          notNull: true,
+          primaryKey: false,
+        }),
         path: text('path').notNull(),
       }
 
@@ -329,7 +344,12 @@ export const buildTable = ({
       const relationshipColumns: Record<string, SQLiteColumnBuilder> = {
         id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
         order: integer('order'),
-        parent: getIDColumn({ name: 'parent_id', type: idColType, notNull: true }),
+        parent: getIDColumn({
+          name: 'parent_id',
+          type: idColType,
+          notNull: true,
+          primaryKey: false,
+        }),
         path: text('path').notNull(),
       }
 
@@ -345,18 +365,18 @@ export const buildTable = ({
         const formattedRelationTo = createTableName({
           adapter,
           config: relationshipConfig,
-          throwValidationError: true,
         })
-        let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
+        let colType: IDType = 'integer'
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
         if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
-        if (relatedCollectionCustomIDType === 'text') colType = 'varchar'
+        if (relatedCollectionCustomIDType === 'text') colType = 'text'
 
         relationshipColumns[`${relationTo}ID`] = getIDColumn({
           name: `${formattedRelationTo}_id`,
-          type: idColType,
+          type: colType,
+          primaryKey: false,
         })
 
         relationExtraConfig[`${relationTo}IdFk`] = (cols) =>
@@ -411,7 +431,6 @@ export const buildTable = ({
             const relatedTableName = createTableName({
               adapter,
               config: adapter.payload.collections[relationTo].config,
-              throwValidationError: true,
             })
             const idColumnName = `${relationTo}ID`
             result[idColumnName] = one(adapter.tables[relatedTableName], {

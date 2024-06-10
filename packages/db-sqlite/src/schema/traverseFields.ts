@@ -1,10 +1,6 @@
 /* eslint-disable no-param-reassign */
-import type { Relation, Writable } from 'drizzle-orm'
-import type {
-  IndexBuilder,
-  SQLiteColumnBuilder,
-  SQLiteTextBuilderInitial,
-} from 'drizzle-orm/sqlite-core'
+import type { Relation } from 'drizzle-orm'
+import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
 import type { Field, TabAsField } from 'payload/types'
 
 import {
@@ -84,7 +80,6 @@ export const traverseFields = ({
   rootTableName,
   versions,
 }: Args): Result => {
-  const throwValidationError = true
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
   let hasManyTextField: 'index' | boolean = false
@@ -231,12 +226,16 @@ export const traverseFields = ({
             config: field,
             parentTableName: newTableName,
             prefix: `${newTableName}_`,
-            throwValidationError,
             versionsCustomName: versions,
           })
           const baseColumns: Record<string, SQLiteColumnBuilder> = {
             order: integer('order').notNull(),
-            parent: getIDColumn({ name: 'parent_id', type: parentIDColType, notNull: true }),
+            parent: getIDColumn({
+              name: 'parent_id',
+              type: parentIDColType,
+              notNull: true,
+              primaryKey: false,
+            }),
             value: text('value', { enum: options }),
           }
 
@@ -309,13 +308,17 @@ export const traverseFields = ({
           config: field,
           parentTableName: newTableName,
           prefix: `${newTableName}_`,
-          throwValidationError,
           versionsCustomName: versions,
         })
 
         const baseColumns: Record<string, SQLiteColumnBuilder> = {
           _order: integer('_order').notNull(),
-          _parentID: getIDColumn({ name: '_parent_id', type: parentIDColType, notNull: true }),
+          _parentID: getIDColumn({
+            name: '_parent_id',
+            type: parentIDColType,
+            notNull: true,
+            primaryKey: false,
+          }),
         }
 
         const baseExtraConfig: BaseExtraConfig = {
@@ -419,7 +422,6 @@ export const traverseFields = ({
             config: block,
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
-            throwValidationError,
             versionsCustomName: versions,
           })
           if (!adapter.tables[blockTableName]) {
@@ -429,6 +431,7 @@ export const traverseFields = ({
                 name: '_parent_id',
                 type: rootTableIDColType,
                 notNull: true,
+                primaryKey: false,
               }),
               _path: text('_path').notNull(),
             }
@@ -729,6 +732,7 @@ export const traverseFields = ({
           targetTable[fieldName] = getIDColumn({
             name: `${columnName}_id`,
             type: colType,
+            primaryKey: false,
           }).references(() => adapter.tables[tableName].id, { onDelete: 'set null' })
 
           // add relationship to table
