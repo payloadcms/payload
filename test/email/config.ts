@@ -48,4 +48,7 @@ export default buildConfigWithDefaults({
       file: imageFile,
     })
   },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

@@ -124,6 +124,7 @@
     "husky": "^8.0.3",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
+    "json-schema-to-typescript": "11.0.3",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",

@@ -68,6 +68,7 @@ export const withPayload = (nextConfig = {}) => {
       'pino',
       'pino-pretty',
       'graphql',
+      'json-schema-to-typescript',
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
@@ -83,6 +84,7 @@ export const withPayload = (nextConfig = {}) => {
           'drizzle-kit/payload',
           'sharp',
           'libsql',
+          'json-schema-to-typescript',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),

@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import CustomIDs from './collections/CustomIDs.js'
@@ -32,5 +36,8 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)
     }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
