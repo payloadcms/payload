@@ -81,13 +81,7 @@ describe('database', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
         const db = payload.db as unknown as PostgresAdapter
-        const drizzle = db.drizzle
-        const schemaName = db.schemaName || 'public'
-
-        await drizzle.execute(
-          sql.raw(`drop schema ${schemaName} cascade;
-        create schema ${schemaName};`),
-        )
+        await db.dropDatabase({ adapter: db })
       }
     })
 
