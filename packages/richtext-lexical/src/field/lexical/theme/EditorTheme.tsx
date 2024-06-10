@@ -52,6 +52,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
     h5: 'LexicalEditorTheme__h5',
     h6: 'LexicalEditorTheme__h6',
   },
+  hr: 'LexicalEditorTheme__hr',
   indent: 'LexicalEditorTheme__indent',
   inlineImage: 'LexicalEditor__inline-image',
   link: 'LexicalEditorTheme__link',

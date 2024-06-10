@@ -89,7 +89,7 @@ export const contactForm: Form = {
       blockType: 'email',
       label: 'Email',
       required: true,
-      width: 50,
+      width: 100,
     },
     {
       id: '63c07f8169853127a889530e',
@@ -98,7 +98,7 @@ export const contactForm: Form = {
       blockType: 'number',
       label: 'Phone',
       required: false,
-      width: 50,
+      width: 100,
     },
     {
       id: '63c07f9d69853127a8895310',

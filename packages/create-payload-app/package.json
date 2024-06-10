@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.0.0-beta.39",
+  "version": "3.0.0-beta.43",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -10,10 +10,24 @@
   "license": "MIT",
   "type": "module",
   "exports": {
+    "./types": {
+      "import": "./src/types.ts",
+      "require": "./src/types.ts"
+    },
     "./commands": {
       "import": "./src/lib/init-next.ts",
       "require": "./src/lib/init-next.ts",
       "types": "./src/lib/init-next.ts"
+    },
+    "./lib/*": {
+      "import": "./src/lib/*",
+      "require": "./src/lib/*",
+      "types": "./src/lib/*"
+    },
+    "./utils/*": {
+      "import": "./src/utils/*",
+      "require": "./src/utils/*",
+      "types": "./src/utils/*"
     }
   },
   "bin": {
@@ -51,7 +65,7 @@
     "@types/degit": "^2.8.3",
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
-    "@types/jest": "^27.0.3",
+    "@types/jest": "29.5.12",
     "@types/node": "20.12.5",
     "temp-dir": "2.0.0"
   }

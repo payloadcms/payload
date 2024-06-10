@@ -56,6 +56,13 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     configWithDefaults.serverURL = ''
   }
 
+  if (process.env.NEXT_BASE_PATH) {
+    if (!incomingConfig?.routes?.api) {
+      // check for incomingConfig, as configWithDefaults will always have a default value for routes.api
+      configWithDefaults.routes.api = process.env.NEXT_BASE_PATH + '/api'
+    }
+  }
+
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
   if (config.localization && config.localization.locales?.length > 0) {

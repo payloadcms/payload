@@ -615,7 +615,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapterProvider<any, any, any>
+  editor?: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -747,7 +747,7 @@ export type SanitizedConfig = Omit<
 > & {
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>

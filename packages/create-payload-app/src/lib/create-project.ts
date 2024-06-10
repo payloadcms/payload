@@ -90,7 +90,10 @@ export async function createProject(args: {
 
   await updatePackageJSON({ projectDir, projectName })
   spinner.message('Configuring Payload...')
-  await configurePayloadConfig({ dbDetails, projectDirOrConfigPath: { projectDir } })
+  await configurePayloadConfig({
+    dbType: dbDetails?.type,
+    projectDirOrConfigPath: { projectDir },
+  })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
   const lockPath = path.resolve(projectDir, 'yarn.lock')

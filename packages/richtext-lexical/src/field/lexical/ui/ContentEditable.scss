@@ -26,14 +26,14 @@ $lexical-contenteditable-bottom-padding: 8px;
 }
 
 
-@media (max-width: 1025px) {
+@media (max-width: 768px) {
   .ContentEditable__root {
     padding-left: 0;
     padding-right: 0;
   }
 }
 
-@media (min-width: 1026px) {
+@media (min-width: 769px) {
   .rich-text-lexical--show-gutter > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor {
     > .ContentEditable__root {
       padding-left: 3rem;

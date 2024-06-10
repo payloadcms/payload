@@ -121,10 +121,10 @@ export const createMigration: CreateMigration = async function createMigration(
         process.exit(0)
       }
     }
-
-    // write schema
-    fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
   }
+
+  // write schema
+  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
 
   // write migration
   fs.writeFileSync(

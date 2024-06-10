@@ -1,6 +1,6 @@
 'use client'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -27,8 +27,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   drawerSlug,
   onSave: onSaveFromProps,
 }) => {
-  const { useModal } = facelessUIImport
-
   const config = useConfig()
 
   const {

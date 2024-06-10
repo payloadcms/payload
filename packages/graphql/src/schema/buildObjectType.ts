@@ -41,6 +41,7 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
+import { MissingEditorProp } from 'payload/errors'
 import { tabHasName } from 'payload/types'
 import { createDataloaderCacheKey, toWords } from 'payload/utilities'
 
@@ -476,6 +477,10 @@ function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          if (!field?.editor) {
+            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+          }
+
           if (typeof field?.editor === 'function') {
             throw new Error('Attempted to access unsanitized rich text editor.')
           }

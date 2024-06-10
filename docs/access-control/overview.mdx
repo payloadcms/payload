@@ -19,7 +19,7 @@ Access control within Payload is extremely powerful while remaining easy and int
 - Restricting a `User` to only be able to see their own `Order`(s), but no others
 - Allowing `User`s that belong to a certain `Organization` to access only that `Organization`'s `Resource`s
 
-### Default Settings
+## Default Settings
 
 **By default, all Collections and Globals require that a user is logged in to be able to interact in any way.** The default Access Control function evaluates the `user` from the Express `req` and returns `true` if a user is logged in, and `false` if not.
 
@@ -43,7 +43,7 @@ const defaultPayloadAccess = ({ req: { user } }) => {
   to <strong>false</strong>.
 </Banner>
 
-### Access Control Types
+## Access Control Types
 
 You can manage access within Payload on three different levels:
 
@@ -51,7 +51,7 @@ You can manage access within Payload on three different levels:
 - [Fields](/docs/access-control/fields)
 - [Globals](/docs/access-control/globals)
 
-### When Access Control is Executed
+## When Access Control is Executed
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -60,17 +60,17 @@ You can manage access within Payload on three different levels:
   your access control is executed.
 </Banner>
 
-#### As you execute operations
+### As you execute operations
 
 When you perform Payload operations like `create`, `read`, `update`, and `delete`, your access control functions will be executed before any changes or operations are completed.
 
-#### Within the Admin UI
+### Within the Admin UI
 
 The Payload Admin UI responds dynamically to the access control that you define. For example, if you restrict editing a `ExampleCollection` to only users that feature a `role` of `admin`, the Payload Admin UI will **hide** the `ExampleCollection` from the Admin UI entirely. This is super powerful and allows you to control who can do what with your Admin UI.
 
 To accomplish this, Payload ships with an `Access` operation, which is executed when a user logs into the Admin UI. Payload will execute each one of your access control functions, across all collections, globals, and fields, at the top level and return a response that contains a reflection of what the currently authenticated user can do with your application.
 
-### Argument Availability
+## Argument Availability
 
 <Banner type="warning">
   <strong>Important:</strong>

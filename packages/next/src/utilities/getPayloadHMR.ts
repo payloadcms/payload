@@ -81,7 +81,9 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     ) {
       try {
         const port = process.env.PORT || '3000'
-        const ws = new WebSocket(`ws://localhost:${port}/_next/webpack-hmr`)
+        const ws = new WebSocket(
+          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+        )
 
         ws.onmessage = (event) => {
           if (typeof event.data === 'string') {

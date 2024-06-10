@@ -5,7 +5,12 @@ import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { LinkFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  LinkFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
 import { UnderlineFeature } from '@payloadcms/richtext-lexical'
 import { ItalicFeature } from '@payloadcms/richtext-lexical'
@@ -121,6 +126,27 @@ export default buildConfig({
     formBuilderPlugin({
       fields: {
         payment: false,
+      },
+      formOverrides: {
+        fields: ({ defaultFields }) => {
+          return defaultFields.map((field) => {
+            if ('name' in field && field.name === 'confirmationMessage') {
+              return {
+                ...field,
+                editor: lexicalEditor({
+                  features: ({ rootFeatures }) => {
+                    return [
+                      ...rootFeatures,
+                      FixedToolbarFeature(),
+                      HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    ]
+                  },
+                }),
+              }
+            }
+            return field
+          })
+        },
       },
     }),
     payloadCloudPlugin(),

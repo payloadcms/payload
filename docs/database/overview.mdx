@@ -19,7 +19,7 @@ To use a specific database adapter, you need to install it and configure it acco
 
 There are several factors to consider when choosing which database technology and hosting option is right for your project and workload. Payload can theoretically support any database, but it's up to you to decide which database to use.
 
-#### When to use MongoDB
+### When to use MongoDB
 
 If your project has a lot of dynamic fields, and you are comfortable with allowing Payload to enforce data integrity across your documents, MongoDB is a great choice. With it, your Payload documents are stored as _one_ document in your database—no matter if you have localization enabled, how many block or array fields you have, etc. This means that the shape of your data in your database will very closely reflect your field schema, and there is minimal complexity involved in storing or retrieving your data.
 
@@ -30,7 +30,7 @@ You should prefer MongoDB if:
 - Most (or everything) in your project is localized
 - You leverage a lot of array fields, block fields, or `hasMany` select fields and similar
 
-#### When to use a relational DB
+### When to use a relational DB
 
 Many projects might call for more rigid database architecture where the shape of your data is strongly enforced at the database level. For example, if you know the shape of your data and it's relatively "flat", and you don't anticipate it to change often, your workload might suit relational databases like Postgres very well.
 
@@ -40,7 +40,7 @@ You should prefer a relational DB like Postgres if:
 - You require enforced data consistency at the database level
 - You have a lot of relationships between collections and require relationships to be enforced
 
-#### Differences in Payload features
+### Differences in Payload features
 
 It's important to note that almost everything Payload does is available in all of our officially supported database adapters, including localization, arrays, blocks, etc.
 

@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload/types'
 import type { Where } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
@@ -50,8 +50,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   onSelect,
   selectedCollection,
 }) => {
-  const { useModal } = facelessUIImport
-
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { setPreference } = usePreferences()
