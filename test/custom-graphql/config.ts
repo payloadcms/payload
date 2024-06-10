@@ -1,3 +1,4 @@
+import { GraphQLJSON } from '@payloadcms/graphql/types'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
@@ -34,6 +35,11 @@ export default buildConfigWithDefaults({
         TransactionID2: {
           type: GraphQL.GraphQLString,
           resolve: resolveTransactionId,
+        },
+        foo: {
+          type: GraphQLJSON,
+          args: {},
+          resolve: () => 'json test',
         },
       }
     },
