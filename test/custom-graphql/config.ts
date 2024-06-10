@@ -1,3 +1,4 @@
+import { GraphQLJSON } from '@payloadcms/graphql/types'
 import { commitTransaction, initTransaction, killTransaction } from 'payload/database'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -30,6 +31,11 @@ export default buildConfigWithDefaults({
         TransactionID2: {
           type: GraphQL.GraphQLString,
           resolve: resolveTransactionId,
+        },
+        foo: {
+          type: GraphQLJSON,
+          args: {},
+          resolve: () => 'json test',
         },
       }
     },
