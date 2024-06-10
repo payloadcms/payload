@@ -398,7 +398,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
       // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
       // see: https://github.com/vercel/next.js/issues/66723
-      spawn('node', ['node_modules/.bin/payload', 'generate:types'])
       void this.bin({
         args: ['generate:types'],
         log: false,
