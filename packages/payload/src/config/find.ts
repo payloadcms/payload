@@ -1,5 +1,5 @@
 import { findUpSync, pathExistsSync } from 'find-up'
-import fs from 'fs'
+import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
 
 /**
@@ -12,37 +12,30 @@ const getTSConfigPaths = (): {
   outPath?: string
   rootPath?: string
   srcPath?: string
+  tsConfigPath?: string
 } => {
-  const tsConfigPath = findUpSync('tsconfig.json')
-
-  if (!tsConfigPath) {
-    return {
-      rootPath: process.cwd(),
-    }
-  }
+  const tsConfigResult = getTsconfig()
+  const tsConfig = tsConfigResult.config
+  const tsConfigDir = path.dirname(tsConfigResult.path)
 
   try {
-    // Read the file as a string and remove trailing commas
-    const rawTsConfig = fs
-      .readFileSync(tsConfigPath, 'utf-8')
-      .replace(/,\s*\]/g, ']')
-      .replace(/,\s*\}/g, '}')
-
-    const tsConfig = JSON.parse(rawTsConfig)
-
-    const rootPath = process.cwd()
+    const rootConfigDir = path.resolve(tsConfigDir, tsConfig.compilerOptions.baseUrl || '')
     const srcPath = tsConfig.compilerOptions?.rootDir || path.resolve(process.cwd(), 'src')
     const outPath = tsConfig.compilerOptions?.outDir || path.resolve(process.cwd(), 'dist')
-    const tsConfigDir = path.dirname(tsConfigPath)
-    let configPath = tsConfig.compilerOptions?.paths?.['@payload-config']?.[0]
+    let configPath = path.resolve(
+      rootConfigDir,
+      tsConfig.compilerOptions?.paths?.['@payload-config']?.[0],
+    )
+
     if (configPath) {
-      configPath = path.resolve(tsConfigDir, configPath)
+      configPath = path.resolve(rootConfigDir, configPath)
     }
     return {
       configPath,
       outPath,
-      rootPath,
+      rootPath: rootConfigDir,
       srcPath,
+      tsConfigPath: tsConfigResult.path,
     }
   } catch (error) {
     console.error(`Error parsing tsconfig.json: ${error}`) // Do not throw the error, as we can still continue with the other config path finding methods
@@ -69,6 +62,11 @@ export const findConfig = (): string => {
   }
 
   const { configPath, outPath, rootPath, srcPath } = getTSConfigPaths()
+
+  // if configPath is absolute file, not folder, return it
+  if (path.extname(configPath) === '.js' || path.extname(configPath) === '.ts') {
+    return configPath
+  }
 
   const searchPaths =
     process.env.NODE_ENV === 'production'
