@@ -129,4 +129,7 @@ export default buildConfigWithDefaults({
       })
     }
   },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

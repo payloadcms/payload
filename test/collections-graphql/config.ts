@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import type { CollectionConfig } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -537,5 +541,8 @@ export default buildConfigWithDefaults({
       collection: 'content-type',
       data: {},
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

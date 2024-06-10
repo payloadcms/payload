@@ -554,4 +554,7 @@ export default buildConfigWithDefaults({
       fileSize: 2_000_000, // 2MB
     },
   },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

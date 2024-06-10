@@ -12,6 +12,7 @@
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.525.0",
     "@lexical/headless": "0.16.0",
     "@lexical/markdown": "0.16.0",
     "@payloadcms/db-mongodb": "workspace:*",

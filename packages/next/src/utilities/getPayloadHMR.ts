@@ -2,6 +2,7 @@ import type { GeneratedTypes, Payload } from 'payload'
 import type { InitOptions, SanitizedConfig } from 'payload/config'
 
 import { BasePayload } from 'payload'
+import { generateTypes } from 'payload/bin'
 import WebSocket from 'ws'
 
 let cached: {
@@ -35,6 +36,11 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
   }
 
   // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
+
+  // Generate types
+  if (config.typescript.autoGenerate !== false) {
+    void generateTypes(config, { log: false })
+  }
 
   await payload.db.init()
   if (payload.db.connect) {

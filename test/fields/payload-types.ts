@@ -838,6 +838,9 @@ export interface GroupField {
         id?: string | null;
       }[]
     | null;
+  localizedGroup?: {
+    text?: string | null;
+  };
   potentiallyEmptyGroup?: {
     text?: string | null;
   };
