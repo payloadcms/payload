@@ -49,6 +49,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   serverURL: '',
   telemetry: true,
   typescript: {
+    autoGenerate: true,
     outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   },
   upload: {},
