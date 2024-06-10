@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.41",
+  "version": "3.0.0-beta.43",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -84,7 +84,7 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=18.20.2"
+    "node": "^18.20.2 || >=20.9.0"
   },
   "publishConfig": {
     "exports": {

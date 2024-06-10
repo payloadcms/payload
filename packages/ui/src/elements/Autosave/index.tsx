@@ -3,9 +3,9 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { toast } from 'react-toastify'
 
-import { useAllFormFields, useFormModified } from '../../forms/Form/context.js'
-import { useDebounce } from '../../hooks/useDebounce.js'
+import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -36,6 +36,7 @@ export const Autosave: React.FC<Props> = ({
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
+  const { dispatchFields, setSubmitted } = useForm()
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()
@@ -49,7 +50,6 @@ export const Autosave: React.FC<Props> = ({
 
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<number>()
-  const debouncedFields = useDebounce(fields, interval)
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
@@ -117,26 +117,77 @@ export const Autosave: React.FC<Props> = ({
                 })
                 void getVersions()
               }
+
+              if (
+                versionsConfig?.drafts &&
+                versionsConfig?.drafts?.validate &&
+                res.status === 400
+              ) {
+                const json = await res.json()
+                if (Array.isArray(json.errors)) {
+                  const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                    ([fieldErrs, nonFieldErrs], err) => {
+                      const newFieldErrs = []
+                      const newNonFieldErrs = []
+
+                      if (err?.message) {
+                        newNonFieldErrs.push(err)
+                      }
+
+                      if (Array.isArray(err?.data)) {
+                        err.data.forEach((dataError) => {
+                          if (dataError?.field) {
+                            newFieldErrs.push(dataError)
+                          } else {
+                            newNonFieldErrs.push(dataError)
+                          }
+                        })
+                      }
+
+                      return [
+                        [...fieldErrs, ...newFieldErrs],
+                        [...nonFieldErrs, ...newNonFieldErrs],
+                      ]
+                    },
+                    [[], []],
+                  )
+
+                  dispatchFields({
+                    type: 'ADD_SERVER_ERRORS',
+                    errors: fieldErrors,
+                  })
+
+                  nonFieldErrors.forEach((err) => {
+                    toast.error(err.message || i18n.t('error:unknown'))
+                  })
+
+                  return
+                }
+                setSubmitted(true)
+              }
             }
 
             setSaving(false)
-          }, 1000)
+          }, interval)
         }
       }
     }
 
     void autosave()
   }, [
-    i18n,
-    debouncedFields,
-    modified,
-    serverURL,
     api,
     collection,
-    globalDoc,
-    reportUpdate,
-    id,
+    dispatchFields,
     getVersions,
+    globalDoc,
+    i18n,
+    id,
+    interval,
+    modified,
+    reportUpdate,
+    serverURL,
+    setSubmitted,
+    versionsConfig?.drafts,
   ])
 
   useEffect(() => {

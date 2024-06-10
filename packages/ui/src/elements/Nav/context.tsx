@@ -1,5 +1,5 @@
 'use client'
-import * as facelessUIImport from '@faceless-ui/window-info'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'
 
@@ -32,8 +32,6 @@ const getNavPreference = async (getPreference): Promise<boolean> => {
 export const NavProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
-  const { useWindowInfo } = facelessUIImport
-
   const {
     breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()

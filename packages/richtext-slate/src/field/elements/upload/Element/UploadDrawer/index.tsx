@@ -3,7 +3,7 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { ClientCollectionConfig } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { Drawer } from '@payloadcms/ui/elements/Drawer'
 import { Form, type FormProps } from '@payloadcms/ui/forms/Form'
@@ -34,8 +34,6 @@ export const UploadDrawer: React.FC<{
   relatedCollection: ClientCollectionConfig
   schemaPath: string
 }> = (props) => {
-  const { useModal } = facelessUIImport
-
   const editor = useSlateStatic()
 
   const { drawerSlug, element, fieldProps, relatedCollection, schemaPath } = props

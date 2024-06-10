@@ -11,6 +11,7 @@ import { Footer } from './globals/Footer.js'
 import { Header } from './globals/Header.js'
 import { seed } from './seed/index.js'
 import {
+  desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
   postsSlug,
@@ -25,7 +26,7 @@ export default buildConfigWithDefaults({
       // You can define any of these properties on a per collection or global basis
       // The Live Preview config cascades from the top down, properties are inherited from here
       url: formatLivePreviewURL,
-      breakpoints: [mobileBreakpoint],
+      breakpoints: [mobileBreakpoint, desktopBreakpoint],
       collections: [pagesSlug, postsSlug, ssrPagesSlug, ssrAutosavePagesSlug],
       globals: ['header', 'footer'],
     },

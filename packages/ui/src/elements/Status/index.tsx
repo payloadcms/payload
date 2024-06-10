@@ -1,5 +1,5 @@
 'use client'
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -16,8 +16,6 @@ import './index.scss'
 const baseClass = 'status'
 
 export const Status: React.FC = () => {
-  const { Modal, useModal } = facelessUIImport
-
   const {
     id,
     collectionSlug,

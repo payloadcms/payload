@@ -74,6 +74,9 @@ export const DocumentControls: React.FC<{
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
   )
 
+  const unsavedDraftWithValidations =
+    !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -103,7 +106,8 @@ export const DocumentControls: React.FC<{
                   </li>
                 )}
                 {((collectionConfig?.versions?.drafts &&
-                  collectionConfig?.versions?.drafts?.autosave) ||
+                  collectionConfig?.versions?.drafts?.autosave &&
+                  !unsavedDraftWithValidations) ||
                   (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
                     <li className={`${baseClass}__list-item`}>
@@ -168,6 +172,7 @@ export const DocumentControls: React.FC<{
                   <React.Fragment>
                     {((collectionConfig?.versions?.drafts &&
                       !collectionConfig?.versions?.drafts?.autosave) ||
+                      unsavedDraftWithValidations ||
                       (globalConfig?.versions?.drafts &&
                         !globalConfig?.versions?.drafts?.autosave)) && (
                       <SaveDraftButton CustomComponent={componentMap.SaveDraftButton} />
