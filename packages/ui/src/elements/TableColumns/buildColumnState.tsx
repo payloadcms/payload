@@ -110,14 +110,15 @@ export const buildColumnState = (args: Args): Column[] => {
       />
     )
 
+    const fieldAffectsDataSubFields =
+      field &&
+      field.type &&
+      (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
+
     const Heading = (
       <SortColumn
         Label={Label}
-        disable={
-          ('disableSort' in field && Boolean(field.disableSort)) ||
-          fieldIsPresentationalOnly(field) ||
-          undefined
-        }
+        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         // eslint-disable-next-line react/jsx-no-duplicate-props
         label={
           'fieldComponentProps' in field && 'label' in field.fieldComponentProps
@@ -125,7 +126,6 @@ export const buildColumnState = (args: Args): Column[] => {
             : undefined
         }
         name={'name' in field ? field.name : undefined}
-        type={'type' in field ? field.type : undefined}
       />
     )
 
