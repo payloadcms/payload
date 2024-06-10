@@ -4,8 +4,6 @@ import { register } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-import { bin } from './dist/bin/index.js'
-
 // Allow disabling SWC for debugging
 if (process.env.DISABLE_SWC !== 'true') {
   const filename = fileURLToPath(import.meta.url)
@@ -15,4 +13,9 @@ if (process.env.DISABLE_SWC !== 'true') {
   register('./dist/bin/loader/index.js', url)
 }
 
-bin()
+const start = async () => {
+  const { bin } = await import('./dist/bin/index.js')
+  bin()
+}
+
+void start()
