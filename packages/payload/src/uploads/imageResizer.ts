@@ -362,7 +362,7 @@ export default async function resizeAndTransformImageSizes({
         name: imageResizeConfig.name,
         filename: imageNameWithDimensions,
         filesize: size,
-        height: fileIsAnimated ? height / metadata.pages : height,
+        height: fileIsAnimated && metadata.pages ? height / metadata.pages : height,
         mimeType: mimeInfo?.mime || mimeType,
         sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,
