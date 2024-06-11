@@ -7,6 +7,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
+import { versionDefaults } from '../../versions/defaults.js'
 
 export const sanitizeGlobals = async (
   config: Config,
@@ -47,13 +48,18 @@ export const sanitizeGlobals = async (
         if (global.versions.drafts === true) {
           global.versions.drafts = {
             autosave: false,
+            validate: false,
           }
         }
 
         if (global.versions.drafts.autosave === true) {
           global.versions.drafts.autosave = {
-            interval: 2000,
+            interval: versionDefaults.autosaveInterval,
           }
+        }
+
+        if (global.versions.drafts.validate === undefined) {
+          global.versions.drafts.validate = false
         }
 
         global.fields = mergeBaseFields(global.fields, baseVersionFields)

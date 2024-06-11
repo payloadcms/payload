@@ -1,8 +1,7 @@
 'use client'
-import type { Data } from 'payload/types'
 import type CropType from 'react-image-crop'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
@@ -60,8 +59,6 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   showCrop,
   showFocalPoint,
 }) => {
-  const { useModal } = facelessUIImport
-
   const { closeModal } = useModal()
   const { t } = useTranslation()
 
@@ -74,8 +71,6 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     x: 50,
     y: 50,
   }
-
-  console.log({ initialFocalPoint })
 
   const [focalPosition, setFocalPosition] = useState<FocalPosition>(() => ({
     ...defaultFocalPosition,

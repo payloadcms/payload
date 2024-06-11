@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import Categories from './collections/Categories.js'
 import { Media } from './collections/Media.js'
@@ -36,4 +40,7 @@ export default buildConfigWithDefaults({
   collections: [Users, Pages, Posts, SSR, SSRAutosave, Tenants, Categories, Media],
   globals: [Header, Footer],
   onInit: seed,
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

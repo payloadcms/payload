@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
@@ -27,8 +27,6 @@ export type Props = {
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { Modal, useModal } = facelessUIImport
-
   const { collection: { slug, labels: { plural } } = {} } = props
 
   const { permissions } = useAuth()

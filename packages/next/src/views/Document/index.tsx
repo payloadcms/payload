@@ -151,8 +151,10 @@ export const Document: React.FC<AdminViewProps> = async ({
     hasSavePermission &&
     ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+  const validateDraftData =
+    collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
 
-  if (shouldAutosave && !id && collectionSlug) {
+  if (shouldAutosave && !validateDraftData && !id && collectionSlug) {
     const doc = await payload.create({
       collection: collectionSlug,
       data: {},
