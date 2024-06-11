@@ -97,7 +97,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || undefined
+        : listPreferences?.sort || collectionConfig.defaultSort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
