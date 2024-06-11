@@ -54,8 +54,8 @@
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",
-    "react-toastify": "10.0.5",
     "sass": "1.77.4",
+    "sonner": "^1.5.0",
     "ws": "^8.16.0"
   },
   "devDependencies": {

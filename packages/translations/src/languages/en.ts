@@ -273,6 +273,7 @@ export const enTranslations = {
     stayOnThisPage: 'Stay on this page',
     submissionSuccessful: 'Submission Successful.',
     submit: 'Submit',
+    submitting: 'Submitting...',
     success: 'Success',
     successfullyCreated: '{{label}} successfully created.',
     successfullyDuplicated: '{{label}} successfully duplicated.',

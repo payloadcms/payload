@@ -15,7 +15,7 @@ import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { LocaleSelector } from './LocaleSelector/index.js'

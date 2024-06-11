@@ -113,8 +113,8 @@
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.8.0",
-    "react-toastify": "10.0.5",
     "scheduler": "0.25.0-rc-f994737d14-20240522",
+    "sonner": "^1.5.0",
     "use-context-selector": "2.0.0",
     "uuid": "^9.0.1"
   },

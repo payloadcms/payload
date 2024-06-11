@@ -1,7 +1,7 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -29,7 +29,7 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
   const handleGenerate = () => {
     setKey()
     toggleModal(modalSlug)
-    toast.success(t('authentication:newAPIKeyGenerated'), { autoClose: 3000 })
+    toast.success(t('authentication:newAPIKeyGenerated'))
     highlightField(true)
   }
 
