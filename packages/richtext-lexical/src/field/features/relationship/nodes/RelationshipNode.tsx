@@ -23,7 +23,7 @@ const RelationshipComponent = React.lazy(() =>
 
 export type RelationshipData = {
   relationTo: string
-  value: number | string
+  value: Record<string, unknown> | number | string
 }
 
 export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode>

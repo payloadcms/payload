@@ -8,7 +8,12 @@ import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 import type { Payload } from 'payload'
 import type { PaginatedDocs } from 'payload/database'
 
-import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
+import type {
+  LexicalField,
+  LexicalLocalizedField,
+  LexicalMigrateField,
+  RichTextField,
+} from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -568,5 +573,72 @@ describe('Lexical', () => {
       // Should now be populated (length 12)
       expect(populatedDocEditorRelationshipNode.value.text).toStrictEqual(textDoc.text)
     })
+  })
+
+  describe('Localization', () => {
+    it('ensure localized lexical field is different across locales', async () => {
+      const lexicalDocEN = await payload.find({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        where: {
+          title: {
+            equals: 'Localized Lexical en',
+          },
+        },
+      })
+
+      expect(lexicalDocEN.docs[0].lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
+        'English text',
+      )
+
+      const lexicalDocES = await payload.findByID({
+        collection: 'lexical-localized-fields',
+        locale: 'es',
+        id: lexicalDocEN.docs[0].id,
+      })
+
+      expect(lexicalDocES.lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
+        'Spanish text',
+      )
+    })
+
+    it('ensure localized text field within blocks field within unlocalized lexical field is different across locales', async () => {
+      const lexicalDocEN = await payload.find({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        where: {
+          title: {
+            equals: 'Localized Lexical en',
+          },
+        },
+      })
+
+      expect(
+        lexicalDocEN.docs[0].lexicalBlocksSubLocalized.root.children[0].children[0].text,
+      ).toEqual('Shared text')
+
+      expect(
+        (lexicalDocEN.docs[0].lexicalBlocksSubLocalized.root.children[1].fields as any)
+          .textLocalized,
+      ).toEqual('English text in block')
+
+      const lexicalDocES = await payload.findByID({
+        collection: 'lexical-localized-fields',
+        locale: 'es',
+        id: lexicalDocEN.docs[0].id,
+      })
+
+      expect(lexicalDocES.lexicalBlocksSubLocalized.root.children[0].children[0].text).toEqual(
+        'Shared text',
+      )
+
+      expect(
+        (lexicalDocES.lexicalBlocksSubLocalized.root.children[1].fields as any).textLocalized,
+      ).toEqual('Spanish text in block')
+    })
+  })
+
+  describe('Hooks', () => {
+    it.todo('ensure hook within text field within lexical block runs')
   })
 })
