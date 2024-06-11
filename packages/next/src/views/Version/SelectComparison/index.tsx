@@ -2,11 +2,9 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
 
-import { Pill } from '@payloadcms/ui/elements/Pill'
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { fieldBaseClass } from '@payloadcms/ui/fields/shared'
 import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import qs from 'qs'
@@ -15,14 +13,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Props } from './types.js'
 
 import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
-import { mostRecentVersionOption, publishedVersionOption } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'compare-version'
 
 const maxResultsPerRequest = 10
 
-const baseOptions = [mostRecentVersionOption]
+const baseOptions = []
 
 export const SelectComparison: React.FC<Props> = (props) => {
   const {
@@ -31,7 +28,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
     latestPublishedVersion,
     onChange,
     parentID,
-    publishedDoc,
     value,
     versionID,
   } = props
@@ -40,7 +36,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
     admin: { dateFormat },
   } = useConfig()
 
-  const { docConfig } = useDocumentInfo()
   const [options, setOptions] = useState<
     {
       label: React.ReactNode | string
@@ -71,14 +66,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
             },
           ],
         },
-      }
-
-      if (docConfig.versions?.drafts) {
-        query.where.and.push({
-          latest: {
-            not_equals: true,
-          },
-        })
       }
 
       if (parentID) {
@@ -134,11 +121,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
             }
           })
 
-          setOptions((existingOptions) => [
-            ...(publishedDoc?._status === 'published' ? [publishedVersionOption] : []),
-            ...existingOptions,
-            ...additionalOptions,
-          ])
+          setOptions((existingOptions) => [...existingOptions, ...additionalOptions])
 
           if (!data.hasNextPage) {
             loadedAllOptionsRef.current = true
@@ -149,18 +132,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
         setErrorLoading(t('error:unspecific'))
       }
     },
-    [
-      dateFormat,
-      baseURL,
-      parentID,
-      versionID,
-      t,
-      i18n,
-      docConfig.versions?.drafts,
-      latestDraftVersion,
-      latestPublishedVersion,
-      publishedDoc?._status,
-    ],
+    [dateFormat, baseURL, parentID, versionID, t, i18n, latestDraftVersion, latestPublishedVersion],
   )
 
   useEffect(() => {
@@ -170,6 +142,12 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const filteredOptions = options.filter(
     (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
   )
+
+  useEffect(() => {
+    if (filteredOptions.length > 0 && !value) {
+      onChange(filteredOptions[0])
+    }
+  }, [filteredOptions, value, onChange])
 
   return (
     <div

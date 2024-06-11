@@ -9,7 +9,6 @@ export type Props = {
   latestPublishedVersion?: string
   onChange: (val: CompareOption) => void
   parentID?: number | string
-  publishedDoc: any
   value: CompareOption
   versionID: string
 }

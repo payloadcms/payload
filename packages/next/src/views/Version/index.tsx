@@ -30,8 +30,6 @@ export const VersionView: EditViewComponent = async (props) => {
   let slug: string
 
   let doc: Document
-  let publishedDoc: Document
-  let mostRecentDoc: Document
   let latestPublishedVersion = null
   let latestDraftVersion = null
 
@@ -45,26 +43,6 @@ export const VersionView: EditViewComponent = async (props) => {
         id: versionID,
         collection: slug,
         depth: 1,
-        locale: '*',
-        overrideAccess: false,
-        user,
-      })
-
-      publishedDoc = await payload.findByID({
-        id,
-        collection: slug,
-        depth: 1,
-        draft: false,
-        locale: '*',
-        overrideAccess: false,
-        user,
-      })
-
-      mostRecentDoc = await payload.findByID({
-        id,
-        collection: slug,
-        depth: 1,
-        draft: true,
         locale: '*',
         overrideAccess: false,
         user,
@@ -89,24 +67,6 @@ export const VersionView: EditViewComponent = async (props) => {
         id: versionID,
         slug,
         depth: 1,
-        locale: '*',
-        overrideAccess: false,
-        user,
-      })
-
-      publishedDoc = await payload.findGlobal({
-        slug,
-        depth: 1,
-        draft: false,
-        locale: '*',
-        overrideAccess: false,
-        user,
-      })
-
-      mostRecentDoc = await payload.findGlobal({
-        slug,
-        depth: 1,
-        draft: true,
         locale: '*',
         overrideAccess: false,
         user,
@@ -138,6 +98,11 @@ export const VersionView: EditViewComponent = async (props) => {
       value: code,
     }))
 
+  const latestVersion =
+    latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+      ? latestPublishedVersion
+      : latestDraftVersion
+
   if (!doc) {
     return notFound()
   }
@@ -146,12 +111,10 @@ export const VersionView: EditViewComponent = async (props) => {
     <DefaultVersionView
       doc={doc}
       docPermissions={docPermissions}
-      initialComparisonDoc={mostRecentDoc}
+      initialComparisonDoc={latestVersion}
       latestDraftVersion={latestDraftVersion.id}
       latestPublishedVersion={latestPublishedVersion.id}
       localeOptions={localeOptions}
-      mostRecentDoc={mostRecentDoc}
-      publishedDoc={publishedDoc}
       versionID={versionID}
     />
   )

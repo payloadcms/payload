@@ -16,7 +16,5 @@ export type DefaultVersionsViewProps = {
   latestDraftVersion?: string
   latestPublishedVersion?: string
   localeOptions: OptionObject[]
-  mostRecentDoc: Document
-  publishedDoc: Document
   versionID?: string
 }
