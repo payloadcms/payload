@@ -470,6 +470,7 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
+              hideGutter: field.admin?.hideGutter,
               readOnly: field.admin?.readOnly,
               style: field.admin?.style,
               width: field.admin?.width,
