@@ -10,7 +10,7 @@ const Context = createContext({
   collapsed: false,
   isVisible: true,
   toggle: () => {},
-  withinCollapsible: undefined,
+  withinCollapsible: false,
 })
 
 export const CollapsibleProvider: React.FC<{
