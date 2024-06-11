@@ -1,7 +1,6 @@
-import type { RelationshipField } from 'payload/types'
-
 import type { FeatureProviderProviderServer } from '../types.js'
 
+import { populate } from '../../../populateGraphQL/populate.js'
 import { createNode } from '../typeUtilities.js'
 import { RelationshipFeatureClientComponent } from './feature.client.js'
 import { relationshipPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -53,69 +52,54 @@ export const RelationshipFeature: FeatureProviderProviderServer<
         nodes: [
           createNode({
             graphQLPopulationPromises: [relationshipPopulationPromiseHOC(props)],
-            node: RelationshipNode,
-            subFields: ({ node, originalNode, originalNodeWithLocales, req }) => {
-              if (node?.value) {
-                const collection = req.payload.collections[node?.relationTo]
-
-                if (collection) {
-                  // Construct fake relationship field for the relationship itself
-                  const relationshipField: RelationshipField = {
-                    name: 'relationship',
-                    type: 'relationship',
-                    localized: false,
-                    relationTo: node?.relationTo,
+            hooks: {
+              afterRead: [
+                ({
+                  currentDepth,
+                  depth,
+                  draft,
+                  node,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  showHiddenFields,
+                }) => {
+                  if (!node?.value) {
+                    return node
                   }
-                  if (props?.maxDepth !== undefined) {
-                    relationshipField.maxDepth = props.maxDepth
-                  }
+                  const collection = req.payload.collections[node?.relationTo]
 
-                  // For backwards compatibility
-                  const valueContainer = {
-                    relationship:
-                      typeof node?.value === 'object' && node?.value !== null
-                        ? // @ts-expect-error
-                          node?.value?.id
-                        : node?.value,
+                  if (!collection) {
+                    return node
                   }
+                  // @ts-expect-error
+                  const id = node?.value?.id || node?.value // for backwards-compatibility
 
-                  // makes sure that whatever is later modifying the value will mutate the original node here
-                  const valueProxy = new Proxy(valueContainer, {
-                    get(target, prop) {
-                      if (prop === 'relationship') {
-                        return node.value
-                      }
-                      return {
-                        relationship: node.value,
-                      }
-                    },
-                    set(target, prop, newValue) {
-                      if (prop === 'relationship') {
-                        node.value = newValue
-                      } else {
-                        node.value = newValue.relationship
-                      }
-                      return true
-                    },
-                  })
+                  const populateDepth =
+                    props?.maxDepth !== undefined && props?.maxDepth < depth
+                      ? props?.maxDepth
+                      : depth
 
-                  return {
-                    data: valueProxy,
-                    fields: [relationshipField],
-                    originalData: {
-                      // @ts-expect-error
-                      relationship: originalNode?.value?.id || originalNode?.value, // originalData never needs to be modified
-                    },
-                    originalDataWithLocales: {
-                      relationship:
-                        // @ts-expect-error
-                        originalNodeWithLocales?.value?.id || originalNodeWithLocales?.value, // originalData never needs to be modified
-                    },
-                  }
-                }
-              }
-              return null
+                  populationPromises.push(
+                    populate({
+                      id,
+                      collection,
+                      currentDepth,
+                      data: node,
+                      depth: populateDepth,
+                      draft,
+                      key: 'value',
+                      overrideAccess,
+                      req,
+                      showHiddenFields,
+                    }),
+                  )
+
+                  return node
+                },
+              ],
             },
+            node: RelationshipNode,
           }),
         ],
         serverFeatureProps: props,

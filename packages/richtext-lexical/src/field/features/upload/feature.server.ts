@@ -1,13 +1,5 @@
 import type { Config } from 'payload/config'
-import type {
-  Field,
-  FieldsWithData,
-  FileData,
-  FileSize,
-  Payload,
-  TypeWithID,
-  UploadField,
-} from 'payload/types'
+import type { Field, FieldsWithData, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
@@ -15,6 +7,7 @@ import { sanitizeFields } from 'payload/config'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
+import { populate } from '../../../populateGraphQL/populate.js'
 import { createNode } from '../typeUtilities.js'
 import { UploadFeatureClientComponent } from './feature.client.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -186,63 +179,57 @@ export const UploadFeature: FeatureProviderProviderServer<
               },
             },
             graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
+            hooks: {
+              afterRead: [
+                ({
+                  currentDepth,
+                  depth,
+                  draft,
+                  node,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  showHiddenFields,
+                }) => {
+                  if (!node?.value) {
+                    return node
+                  }
+                  const collection = req.payload.collections[node?.relationTo]
+
+                  if (!collection) {
+                    return node
+                  }
+                  // @ts-expect-error
+                  const id = node?.value?.id || node?.value // for backwards-compatibility
+
+                  const populateDepth =
+                    props?.maxDepth !== undefined && props?.maxDepth < depth
+                      ? props?.maxDepth
+                      : depth
+
+                  populationPromises.push(
+                    populate({
+                      id,
+                      collection,
+                      currentDepth,
+                      data: node,
+                      depth: populateDepth,
+                      draft,
+                      key: 'value',
+                      overrideAccess,
+                      req,
+                      showHiddenFields,
+                    }),
+                  )
+
+                  return node
+                },
+              ],
+            },
             node: UploadNode,
             subFields: ({ node, originalNode, originalNodeWithLocales, req }) => {
               const subFields: FieldsWithData[] = []
               const collection = req.payload.collections[node?.relationTo]
-
-              // Construct fake upload field for the upload itself
-              const uploadField: UploadField = {
-                name: 'upload',
-                type: 'upload',
-                localized: false,
-                relationTo: node?.relationTo,
-              }
-              if (props?.maxDepth !== undefined) {
-                uploadField.maxDepth = props.maxDepth
-              }
-
-              // For backwards compatibility
-              const valueContainer = {
-                upload:
-                  typeof node?.value === 'object' && node?.value !== null
-                    ? // @ts-expect-error
-                      node.value?.id
-                    : node.value,
-              }
-
-              // makes sure that whatever is later modifying the value will mutate the original node here
-              const valueProxy = new Proxy(valueContainer, {
-                get(target, prop) {
-                  if (prop === 'upload') {
-                    return node.value
-                  }
-                  return {
-                    upload: node.value,
-                  }
-                },
-                set(target, prop, newValue) {
-                  if (prop === 'upload') {
-                    node.value = newValue
-                  } else {
-                    node.value = newValue.upload
-                  }
-                  return true
-                },
-              })
-
-              subFields.push({
-                data: valueProxy,
-                fields: [uploadField],
-                originalData: {
-                  // @ts-expect-error
-                  upload: originalNode?.value?.id || originalNode?.value, // originalData never needs to be modified
-                },
-                originalDataWithLocales: {
-                  // @ts-expect-error
-                  upload: originalNodeWithLocales?.value?.id || originalNodeWithLocales?.value, // originalData never needs to be modified
-                },
-              })
 
               if (collection) {
                 const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
