@@ -272,6 +272,7 @@ export const faTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'ماندن در این برگه',
     submissionSuccessful: 'با موفقیت ثبت شد.',
     submit: 'فرستادن',
+    submitting: 'در حال ارسال...',
     success: 'موفقیت',
     successfullyCreated: '{{label}} با موفقیت ساخته شد.',
     successfullyDuplicated: '{{label}} با موفقیت رونوشت شد.',

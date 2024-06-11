@@ -6,7 +6,6 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import { WindowInfoProvider } from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
-import { Slide, ToastContainer } from 'react-toastify'
 
 import type { ComponentMap } from '../ComponentMap/buildComponentMap/types.js'
 import type { Theme } from '../Theme/index.js'
@@ -28,6 +27,7 @@ import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ThemeProvider } from '../Theme/index.js'
+import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 
 type Props = {
@@ -112,7 +112,7 @@ export const RootProvider: React.FC<Props> = ({
           </ComponentMapProvider>
         </ConfigProvider>
       </RouteCache>
-      <ToastContainer icon={false} position="bottom-center" transition={Slide} />
+      <ToastContainer />
     </Fragment>
   )
 }

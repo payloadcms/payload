@@ -46,9 +46,5 @@ export { Tooltip } from '../elements/Tooltip/index.js'
 export { Translation } from '../elements/Translation/index.js'
 export { UnpublishMany } from '../elements/UnpublishMany/index.js'
 export { Upload } from '../elements/Upload/index.js'
-import { Modal } from '@faceless-ui/modal'
-export { Modal }
-import * as reactToastifyImport from 'react-toastify'
-const { toast } =
-  reactToastifyImport && 'toast' in reactToastifyImport ? reactToastifyImport : { toast: undefined }
-export { toast }
+export { Modal } from '@faceless-ui/modal'
+export { toast } from 'sonner'

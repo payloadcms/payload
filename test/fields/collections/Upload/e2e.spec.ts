@@ -109,7 +109,7 @@ describe('Upload', () => {
       page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
     ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
     // Assert that the media field has the png upload
     await expect(
@@ -140,7 +140,7 @@ describe('Upload', () => {
       page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
     ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('.field-type.upload .file-details__remove').click()
   })
 

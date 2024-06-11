@@ -835,7 +835,9 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page)
 
-      await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
+      await expect(page.locator('.payload-toast-container')).not.toContainText(
+        'Please correct invalid fields.',
+      )
     }
 
     // eslint-disable-next-line playwright/expect-expect
@@ -919,7 +921,10 @@ describe('lexicalBlocks', () => {
 
       await page.click('#action-save', { delay: 100 })
 
-      await expect(page.locator('.Toastify')).toContainText('The following fields are invalid')
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'The following fields are invalid',
+      )
+      await wait(300)
 
       const requiredTooltip = conditionalArrayBlock
         .locator('.tooltip-content:has-text("This field is required.")')

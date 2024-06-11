@@ -182,7 +182,7 @@ describe('Block fields', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -208,7 +208,7 @@ describe('Block fields', () => {
     await expect(firstRow).toHaveValue('first row')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: blocksWithMinRows',
     )
   })

@@ -47,6 +47,17 @@ import type {
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
 import { FieldDescription } from '../../../forms/FieldDescription/index.js'
 
+function generateFieldPath(parentPath, name) {
+  let tabPath = parentPath || ''
+  if (parentPath && name) {
+    tabPath = `${parentPath}.${name}`
+  } else if (!parentPath && name) {
+    tabPath = name
+  }
+
+  return tabPath
+}
+
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated
   config: SanitizedConfig
@@ -90,9 +101,10 @@ export const mapFields = (args: {
 
         const isFieldAffectingData = fieldAffectsData(field)
 
-        const path = `${parentPath ? `${parentPath}.` : ''}${
-          field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
-        }`
+        const path = generateFieldPath(
+          parentPath,
+          isFieldAffectingData && 'name' in field ? field.name : '',
+        )
 
         const AfterInput =
           ('admin' in field &&

@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 import { versionDefaults } from 'payload/versions'
 import React, { useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import {
   useAllFormFields,
