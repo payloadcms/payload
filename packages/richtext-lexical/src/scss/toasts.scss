@@ -2,7 +2,7 @@
   .payload-toast-close-button {
     left: unset;
     right: 0.5rem;
-    top: 1.5rem;
+    top: 1.55rem;
     color: var(--theme-elevation-400);
     background: unset;
     border: none;
@@ -28,7 +28,7 @@
   }
 
   .payload-toast-item {
-    padding: 1rem;
+    padding: 1rem 2.5rem 1rem 1rem;
     color: var(--theme-text);
     font-style: normal;
     font-weight: 600;
