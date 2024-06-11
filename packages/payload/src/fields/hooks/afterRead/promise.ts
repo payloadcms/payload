@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import type { FieldsWithData } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
@@ -204,28 +205,17 @@ export const promise = async ({
               const hookedValue = await currentHook({
                 collection,
                 context,
-                currentDepth,
                 data: doc,
-                depth,
-                draft,
-                fallbackLocale,
                 field,
-                fieldPromises,
                 findMany,
-                flattenLocales,
                 global,
-                locale,
                 operation: 'read',
                 originalDoc: doc,
                 overrideAccess,
                 path: fieldPath,
-                populationPromises,
                 req,
                 schemaPath: fieldSchemaPath,
-                showHiddenFields,
                 siblingData: siblingDoc,
-                triggerAccessControl,
-                triggerHooks,
                 value,
               })
 
@@ -240,28 +230,17 @@ export const promise = async ({
           const hookedValue = await currentHook({
             collection,
             context,
-            currentDepth,
             data: doc,
-            depth,
-            draft,
-            fallbackLocale,
             field,
-            fieldPromises,
             findMany,
-            flattenLocales,
             global,
-            locale,
             operation: 'read',
             originalDoc: doc,
             overrideAccess,
             path: fieldPath,
-            populationPromises,
             req,
             schemaPath: fieldSchemaPath,
-            showHiddenFields,
             siblingData: siblingDoc,
-            triggerAccessControl,
-            triggerHooks,
             value: siblingDoc[field.name],
           })
 
@@ -590,6 +569,42 @@ export const promise = async ({
         triggerAccessControl,
         triggerHooks,
       })
+      break
+    }
+
+    case 'richText': {
+      const subFields: FieldsWithData[] = (context as any)?.internal?.richText?.[
+        fieldPath.join('.')
+      ]?.afterRead?.subFields
+
+      if (subFields?.length) {
+        for (const { data, fields } of subFields) {
+          traverseFields({
+            collection,
+            context,
+            currentDepth,
+            depth,
+            doc: data,
+            draft,
+            fallbackLocale,
+            fieldPromises,
+            fields,
+            findMany,
+            flattenLocales,
+            global,
+            locale,
+            overrideAccess,
+            path: fieldPath,
+            populationPromises,
+            req,
+            schemaPath: fieldSchemaPath,
+            showHiddenFields,
+            siblingDoc: data,
+            triggerAccessControl,
+            triggerHooks,
+          })
+        }
+      }
       break
     }
 

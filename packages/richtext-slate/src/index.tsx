@@ -1,5 +1,5 @@
 import type { Config } from 'payload/config'
-import type { RichTextAdapterProvider } from 'payload/types'
+import type { FieldsWithData, RichTextAdapterProvider } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
 import { withNullableJSONSchemaType } from 'payload/utilities'
@@ -7,6 +7,7 @@ import { withNullableJSONSchemaType } from 'payload/utilities'
 import type { AdapterArguments } from './types.js'
 
 import { RichTextCell } from './cell/index.js'
+import { richTextConstructSubFields } from './data/getRichTextSubFields.js'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
 import { richTextValidate } from './data/validation.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
@@ -92,21 +93,8 @@ export function slateEditor(
       },
       hooks: {
         afterRead: [
-          ({
-            context,
-            currentDepth,
-            depth,
-            draft,
-            field: _field,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            overrideAccess,
-            populationPromises,
-            req,
-            showHiddenFields,
-            siblingData,
-          }) => {
+          ({ context: _context, field: _field, path, req, siblingData }) => {
+            const context: any = _context
             const field = _field as any
             if (
               field.admin?.elements?.includes('relationship') ||
@@ -114,21 +102,27 @@ export function slateEditor(
               field.admin?.elements?.includes('link') ||
               !field?.admin?.elements
             ) {
-              richTextRelationshipPromise({
-                context,
-                currentDepth,
-                depth,
-                draft,
+              const allSubFields: FieldsWithData[] = []
+
+              richTextConstructSubFields({
+                allSubFields,
                 field,
-                fieldPromises,
-                findMany,
-                flattenLocales,
-                overrideAccess,
-                populationPromises,
                 req,
-                showHiddenFields,
                 siblingDoc: siblingData,
               })
+
+              if (!context.internal) {
+                context.internal = {}
+              }
+              if (!context.internal.richText) {
+                context.internal.richText = {}
+              }
+              if (!context.internal.richText[path.join('.')]) {
+                context.internal.richText[path.join('.')] = {}
+              }
+              context.internal.richText[path.join('.')].afterRead = {
+                subFields: allSubFields,
+              }
             }
           },
         ],

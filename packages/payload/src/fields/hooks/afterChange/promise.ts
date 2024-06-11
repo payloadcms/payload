@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import type { FieldsWithData } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
@@ -246,6 +247,34 @@ export const promise = async ({
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
       })
+      break
+    }
+
+    case 'richText': {
+      const subFields: FieldsWithData[] = (context as any)?.internal?.richText?.[
+        fieldPath.join('.')
+      ]?.afterRead?.subFields
+
+      if (subFields?.length) {
+        for (const { data, fields, originalData } of subFields) {
+          await traverseFields({
+            collection,
+            context,
+            data: originalData,
+            doc: data,
+            fields,
+            global,
+            operation,
+            path: fieldPath,
+            previousDoc: data,
+            previousSiblingDoc: { ...data },
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData: originalData || {},
+            siblingDoc: { ...data },
+          })
+        }
+      }
       break
     }
 

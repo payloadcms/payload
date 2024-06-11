@@ -3,15 +3,7 @@ import type { Block, BlockField, Field } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { baseBlockFields, sanitizeFields } from 'payload/config'
-import {
-  afterChangeTraverseFields,
-  afterReadTraverseFields,
-  beforeChangeTraverseFields,
-  beforeValidateTraverseFields,
-  deepCopyObject,
-  fieldsToJSONSchema,
-  formatLabels,
-} from 'payload/utilities'
+import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
@@ -123,179 +115,19 @@ export const BlocksFeature: FeatureProviderProviderServer<
         nodes: [
           createNode({
             graphQLPopulationPromises: [blockPopulationPromiseHOC(props)],
-            hooks: {
-              afterChange: [
-                async ({
-                  context,
-                  node,
-                  operation,
-                  originalNode,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                }) => {
-                  const blockType = node.fields.blockType
-
-                  const block = deepCopyObject(
-                    props.blocks.find((block) => block.slug === blockType),
-                  )
-
-                  await afterChangeTraverseFields({
-                    collection: null,
-                    context,
-                    data: originalNode.fields,
-                    doc: node.fields,
-                    fields: block.fields,
-                    global: null,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: parentRichTextFieldPath,
-                    previousDoc: node.fields,
-                    previousSiblingDoc: node.fields,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    siblingData: originalNode.fields,
-                    siblingDoc: node.fields,
-                  })
-
-                  return node
-                },
-              ],
-              afterRead: [
-                ({
-                  context,
-                  currentDepth,
-                  depth,
-                  draft,
-                  fallbackLocale,
-                  fieldPromises,
-                  findMany,
-                  flattenLocales,
-                  locale,
-                  node,
-                  overrideAccess,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  populationPromises,
-                  req,
-                  showHiddenFields,
-                  triggerAccessControl,
-                  triggerHooks,
-                }) => {
-                  const blockType = node.fields.blockType
-
-                  const block = deepCopyObject(
-                    props.blocks.find((block) => block.slug === blockType),
-                  )
-
-                  afterReadTraverseFields({
-                    collection: null,
-                    context,
-                    currentDepth,
-                    depth,
-                    doc: node.fields,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
-                    fields: block.fields,
-                    findMany,
-                    flattenLocales,
-                    global: null,
-                    locale,
-                    overrideAccess,
-                    path: parentRichTextFieldPath,
-                    populationPromises,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    showHiddenFields,
-                    siblingDoc: node.fields,
-                    triggerAccessControl,
-                    triggerHooks,
-                  })
-                  //await Promise.all(fieldPromises) // TODO: (not 100% sure on this, maybe we should create our own promise arrays and await them here). // END TODO. Do NOT await fieldPromises here. They will be added to the fieldPromises array of the document containing this richText field, and awaited there, on the document-level.
-
-                  return node
-                },
-              ],
-              beforeChange: [
-                async ({
-                  context,
-                  duplicate,
-                  errors,
-                  mergeLocaleActions,
-                  node,
-                  operation,
-                  originalNode,
-                  originalNodeWithLocales,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                  skipValidation,
-                }) => {
-                  const blockType = node.fields.blockType
-
-                  const block = deepCopyObject(
-                    props.blocks.find((block) => block.slug === blockType),
-                  )
-
-                  await beforeChangeTraverseFields({
-                    id: null,
-                    collection: null,
-                    context,
-                    data: node.fields,
-                    doc: originalNode.fields,
-                    docWithLocales: originalNodeWithLocales?.fields ?? {},
-                    duplicate,
-                    errors,
-                    fields: block.fields,
-                    global: null,
-                    mergeLocaleActions,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: parentRichTextFieldPath,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    siblingData: node.fields,
-                    siblingDoc: originalNode.fields,
-                    siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
-                    skipValidation,
-                  })
-
-                  return node
-                },
-              ],
-
-              beforeValidate: [
-                async ({ context, node, operation, originalNode, overrideAccess, req }) => {
-                  const blockType = node.fields.blockType
-
-                  const block = deepCopyObject(
-                    props.blocks.find((block) => block.slug === blockType),
-                  )
-
-                  await beforeValidateTraverseFields({
-                    id: null,
-                    collection: null,
-                    context,
-                    data: node.fields,
-                    doc: originalNode.fields,
-                    fields: block.fields,
-                    global: null,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    overrideAccess,
-                    path: [],
-                    req,
-                    schemaPath: [],
-                    siblingData: node.fields,
-                    siblingDoc: originalNode.fields,
-                  })
-
-                  return node
-                },
-              ],
-            },
             node: BlockNode,
+            subFields: ({ node, originalNode, originalNodeWithLocales }) => {
+              const blockType = node.fields.blockType
+
+              const block = props.blocks.find((block) => block.slug === blockType)
+
+              return {
+                data: node.fields,
+                fields: block.fields,
+                originalData: originalNode?.fields,
+                originalDataWithLocales: originalNodeWithLocales?.fields,
+              }
+            },
             validations: [blockValidationHOC(props)],
           }),
         ],

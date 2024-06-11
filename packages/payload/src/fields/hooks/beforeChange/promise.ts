@@ -1,5 +1,6 @@
 import merge from 'deepmerge'
 
+import type { FieldsWithData } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { Operation, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
@@ -99,12 +100,8 @@ export const promise = async ({
           collection,
           context,
           data,
-          docWithLocales,
-          duplicate,
-          errors,
           field,
           global,
-          mergeLocaleActions,
           operation,
           originalDoc: doc,
           path: fieldPath,
@@ -114,7 +111,6 @@ export const promise = async ({
           schemaPath: parentSchemaPath,
           siblingData,
           siblingDocWithLocales,
-          skipValidation,
           value: siblingData[field.name],
         })
 
@@ -160,7 +156,6 @@ export const promise = async ({
       collection,
       context,
       data,
-      docWithLocales,
       field,
       global: undefined,
       path: fieldPath,
@@ -438,6 +433,40 @@ export const promise = async ({
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
       })
+
+      break
+    }
+
+    case 'richText': {
+      const subFields: FieldsWithData[] = (context as any)?.internal?.richText?.[
+        fieldPath.join('.')
+      ]?.beforeChange?.subFields
+
+      if (subFields?.length) {
+        for (const { data, fields, originalData, originalDataWithLocales } of subFields) {
+          await traverseFields({
+            id,
+            collection,
+            context,
+            data,
+            doc: originalData,
+            docWithLocales: originalDataWithLocales ?? {},
+            duplicate,
+            errors,
+            fields,
+            global,
+            mergeLocaleActions,
+            operation,
+            path: fieldPath,
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData: data,
+            siblingDoc: originalData,
+            siblingDocWithLocales: originalDataWithLocales ?? {},
+            skipValidation: skipValidationFromHere,
+          })
+        }
+      }
 
       break
     }

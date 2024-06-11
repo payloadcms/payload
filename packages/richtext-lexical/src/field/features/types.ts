@@ -8,6 +8,7 @@ import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type {
   Field,
+  FieldsWithData,
   PayloadRequestWithData,
   ReplaceAny,
   RichTextField,
@@ -238,44 +239,9 @@ export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extend
     } & ClientFeatureProps
 
 export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
-  /**
-   * Only available in `afterRead` hooks.
-   */
-  currentDepth: number
-  /**
-   * Only available in `afterRead` hooks.
-   */
-  depth: number
-  draft: boolean
-  fallbackLocale: string
-  /**
-   *  Only available in `afterRead` field hooks.
-   */
-  fieldPromises: Promise<void>[]
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany: boolean
-  flattenLocales: boolean
-  /**
-   * The requested locale.
-   */
-  locale: string
   overrideAccess: boolean
-  /**
-   *  Only available in `afterRead` field hooks.
-   */
-  populationPromises: Promise<void>[]
-  /**
-   * Only available in `afterRead` hooks.
-   */
-  showHiddenFields: boolean
-  /**
-   * Only available in `afterRead` hooks.
-   */
-  triggerAccessControl: boolean
-  /**
-   * Only available in `afterRead` hooks.
-   */
-  triggerHooks: boolean
 }
 
 export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
@@ -293,12 +259,6 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
-  duplicate: boolean
-  /**
-   * Only available in `beforeChange` hooks.
-   */
-  errors: { field: string; message: string }[]
-  mergeLocaleActions: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
@@ -307,7 +267,6 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
-  skipValidation: boolean
 }
 
 export type BeforeDuplicateNodeHookArgs<T extends SerializedLexicalNode> = {
@@ -368,6 +327,16 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     >
   }
   node: Klass<T> | LexicalNodeReplacement
+  /**
+   * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
+   * automatically populate & run hooks for them
+   */
+  subFields?: (args: {
+    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    originalNode?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    originalNodeWithLocales?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    req: PayloadRequestWithData
+  }) => FieldsWithData | FieldsWithData[] | null
   validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
 }
 
@@ -558,6 +527,15 @@ export type SanitizedServerFeatures = Required<
     beforeDuplicate?: Map<string, Array<BeforeDuplicateNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
+  subFields?: Map<
+    string,
+    (args: {
+      node: SerializedLexicalNode
+      originalNode?: SerializedLexicalNode
+      originalNodeWithLocales?: SerializedLexicalNode
+      req: PayloadRequestWithData
+    }) => FieldsWithData | FieldsWithData[] | null
+  >
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
 }

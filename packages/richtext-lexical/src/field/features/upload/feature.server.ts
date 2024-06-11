@@ -1,14 +1,16 @@
 import type { Config } from 'payload/config'
-import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
+import type {
+  Field,
+  FieldsWithData,
+  FileData,
+  FileSize,
+  Payload,
+  TypeWithID,
+  UploadField,
+} from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
-import {
-  afterChangeTraverseFields,
-  afterReadTraverseFields,
-  beforeChangeTraverseFields,
-  beforeValidateTraverseFields,
-} from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
@@ -184,208 +186,81 @@ export const UploadFeature: FeatureProviderProviderServer<
               },
             },
             graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
-            hooks: {
-              afterChange: [
-                async ({
-                  context,
-                  node,
-                  operation,
-                  originalNode,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                }) => {
-                  const collection = req.payload.collections[node?.relationTo]
-
-                  if (collection) {
-                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
-
-                    if (Array.isArray(collectionFieldSchema)) {
-                      if (!collectionFieldSchema?.length) {
-                        return
-                      }
-
-                      await afterChangeTraverseFields({
-                        collection: null,
-                        context,
-                        data: originalNode.fields,
-                        doc: node.fields,
-                        fields: collectionFieldSchema,
-                        global: null,
-                        operation:
-                          operation === 'create' || operation === 'update' ? operation : 'update',
-                        path: parentRichTextFieldPath,
-                        previousDoc: node.fields,
-                        previousSiblingDoc: node.fields,
-                        req,
-                        schemaPath: parentRichTextFieldSchemaPath,
-                        siblingData: originalNode.fields,
-                        siblingDoc: node.fields,
-                      })
-                    }
-                  }
-
-                  return node
-                },
-              ],
-              afterRead: [
-                ({
-                  context,
-                  currentDepth,
-                  depth,
-                  draft,
-                  fallbackLocale,
-                  fieldPromises,
-                  findMany,
-                  flattenLocales,
-                  locale,
-                  node,
-                  overrideAccess,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  populationPromises,
-                  req,
-                  showHiddenFields,
-                  triggerAccessControl,
-                  triggerHooks,
-                }) => {
-                  const collection = req.payload.collections[node?.relationTo]
-
-                  if (collection) {
-                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
-
-                    if (Array.isArray(collectionFieldSchema)) {
-                      if (!collectionFieldSchema?.length) {
-                        return node
-                      }
-                      afterReadTraverseFields({
-                        collection: null,
-                        context,
-                        currentDepth,
-                        depth,
-                        doc: node.fields,
-                        draft,
-                        fallbackLocale,
-                        fieldPromises,
-                        fields: collectionFieldSchema,
-                        findMany,
-                        flattenLocales,
-                        global: null,
-                        locale,
-                        overrideAccess,
-                        path: parentRichTextFieldPath,
-                        populationPromises,
-                        req,
-                        schemaPath: parentRichTextFieldSchemaPath,
-                        showHiddenFields,
-                        siblingDoc: node.fields,
-                        triggerAccessControl,
-                        triggerHooks,
-                      })
-                    }
-                  }
-
-                  return node
-                },
-              ],
-              beforeChange: [
-                async ({
-                  context,
-                  duplicate,
-                  errors,
-                  mergeLocaleActions,
-                  node,
-                  operation,
-                  originalNode,
-                  originalNodeWithLocales,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                  skipValidation,
-                }) => {
-                  const collection = req.payload.collections[node?.relationTo]
-
-                  if (collection) {
-                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
-
-                    if (Array.isArray(collectionFieldSchema)) {
-                      if (!collectionFieldSchema?.length) {
-                        return node
-                      }
-                      await beforeChangeTraverseFields({
-                        id: null,
-                        collection: null,
-                        context,
-                        data: node.fields,
-                        doc: originalNode.fields,
-                        docWithLocales: originalNodeWithLocales?.fields ?? {},
-                        duplicate,
-                        errors,
-                        fields: collectionFieldSchema,
-                        global: null,
-                        mergeLocaleActions,
-                        operation:
-                          operation === 'create' || operation === 'update' ? operation : 'update',
-                        path: parentRichTextFieldPath,
-                        req,
-                        schemaPath: parentRichTextFieldSchemaPath,
-                        siblingData: node.fields,
-                        siblingDoc: originalNode.fields,
-                        siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
-                        skipValidation,
-                      })
-                    }
-                  }
-
-                  return node
-                },
-              ],
-
-              beforeValidate: [
-                async ({
-                  context,
-                  node,
-                  operation,
-                  originalNode,
-                  overrideAccess,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                }) => {
-                  const collection = req.payload.collections[node?.relationTo]
-
-                  if (collection) {
-                    const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
-
-                    if (Array.isArray(collectionFieldSchema)) {
-                      if (!collectionFieldSchema?.length) {
-                        return node
-                      }
-                      await beforeValidateTraverseFields({
-                        id: null,
-                        collection: null,
-                        context,
-                        data: node.fields,
-                        doc: originalNode.fields,
-                        fields: collectionFieldSchema,
-                        global: null,
-                        operation:
-                          operation === 'create' || operation === 'update' ? operation : 'update',
-                        overrideAccess,
-                        path: parentRichTextFieldPath,
-                        req,
-                        schemaPath: parentRichTextFieldSchemaPath,
-                        siblingData: node.fields,
-                        siblingDoc: originalNode.fields,
-                      })
-                    }
-                  }
-
-                  return node
-                },
-              ],
-            },
             node: UploadNode,
+            subFields: ({ node, originalNode, originalNodeWithLocales, req }) => {
+              const subFields: FieldsWithData[] = []
+              const collection = req.payload.collections[node?.relationTo]
+
+              // Construct fake upload field for the upload itself
+              const uploadField: UploadField = {
+                name: 'upload',
+                type: 'upload',
+                localized: false,
+                relationTo: node?.relationTo,
+              }
+              if (props?.maxDepth !== undefined) {
+                uploadField.maxDepth = props.maxDepth
+              }
+
+              // For backwards compatibility
+              const valueContainer = {
+                upload:
+                  typeof node?.value === 'object' && node?.value !== null
+                    ? // @ts-expect-error
+                      node.value?.id
+                    : node.value,
+              }
+
+              // makes sure that whatever is later modifying the value will mutate the original node here
+              const valueProxy = new Proxy(valueContainer, {
+                get(target, prop) {
+                  if (prop === 'upload') {
+                    return node.value
+                  }
+                  return {
+                    upload: node.value,
+                  }
+                },
+                set(target, prop, newValue) {
+                  if (prop === 'upload') {
+                    node.value = newValue
+                  } else {
+                    node.value = newValue.upload
+                  }
+                  return true
+                },
+              })
+
+              subFields.push({
+                data: valueProxy,
+                fields: [uploadField],
+                originalData: {
+                  // @ts-expect-error
+                  upload: originalNode?.value?.id || originalNode?.value, // originalData never needs to be modified
+                },
+                originalDataWithLocales: {
+                  // @ts-expect-error
+                  upload: originalNodeWithLocales?.value?.id || originalNodeWithLocales?.value, // originalData never needs to be modified
+                },
+              })
+
+              if (collection) {
+                const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                if (Array.isArray(collectionFieldSchema)) {
+                  if (!collectionFieldSchema?.length) {
+                    return subFields
+                  }
+                  subFields.push({
+                    data: node.fields,
+                    fields: collectionFieldSchema,
+                    originalData: originalNode?.fields,
+                    originalDataWithLocales: originalNodeWithLocales?.fields,
+                  })
+                }
+              }
+              return subFields
+            },
             validations: [uploadValidation(props)],
           }),
         ],

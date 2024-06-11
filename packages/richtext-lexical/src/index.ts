@@ -4,6 +4,7 @@ import type {
   SerializedEditorState,
   SerializedLexicalNode,
 } from 'lexical'
+import type { FieldsWithData } from 'payload/types'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { withNullableJSONSchemaType } from 'payload/utilities'
@@ -164,7 +165,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       hooks: {
         afterChange: [
           async ({ context: _context, operation, path, req, schemaPath, value }) => {
-            if (!finalSanitizedEditorConfig.features.hooks.afterChange.size) {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
+              !finalSanitizedEditorConfig.features.subFields.size
+            ) {
               return value
             }
             const context: any = _context
@@ -177,7 +181,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context?.internal?.lexical?.[path.join('.')]?.originalNodeIDMap
+            } = context?.internal?.richText?.[path.join('.')]?.originalNodeIDMap
 
             if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
               return value
@@ -187,6 +191,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            const allSubFields: FieldsWithData[] = []
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
@@ -215,8 +221,35 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
+              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, originalNode: originalNodeIDMap[id], req })
+
+                if (subFields) {
+                  if (Array.isArray(subFields)) {
+                    if (allSubFields.length) {
+                      allSubFields.push(...subFields)
+                    }
+                  } else {
+                    allSubFields.push(subFields)
+                  }
+                }
+              }
             }
 
+            if (!context.internal) {
+              context.internal = {}
+            }
+            if (!context.internal.richText) {
+              context.internal.richText = {}
+            }
+            if (!context.internal.richText[path.join('.')]) {
+              context.internal.richText[path.join('.')] = {}
+            }
+            context.internal.richText[path.join('.')].afterChange = {
+              subFields: allSubFields,
+            }
             return value
           },
         ],
@@ -224,27 +257,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           /**
            * afterRead hooks do not receive the originalNode. Thus, they can run on all nodes, not just nodes with an ID.
            */
-          async ({
-            context: context,
-            currentDepth,
-            depth,
-            draft,
-            fallbackLocale,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            locale,
-            overrideAccess,
-            path,
-            populationPromises,
-            req,
-            schemaPath,
-            showHiddenFields,
-            triggerAccessControl,
-            triggerHooks,
-            value,
-          }) => {
-            if (!finalSanitizedEditorConfig.features.hooks.afterRead.size) {
+          async ({ context: context, findMany, overrideAccess, path, req, schemaPath, value }) => {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.afterRead.size &&
+              !finalSanitizedEditorConfig.features.subFields.size
+            ) {
               return value
             }
             const flattenedNodes: SerializedLexicalNode[] = []
@@ -254,54 +271,70 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
 
+            let allSubFields: FieldsWithData[] = []
+
             for (let node of flattenedNodes) {
               const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
               if (afterReadHooks?.has(node.type)) {
                 for (const hook of afterReadHooks.get(node.type)) {
                   node = await hook({
                     context,
-                    currentDepth,
-                    depth,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
                     findMany,
-                    flattenLocales,
-                    locale,
                     node,
                     overrideAccess,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    populationPromises,
                     req,
-                    showHiddenFields,
-                    triggerAccessControl,
-                    triggerHooks,
                   })
                 }
               }
-            }
+              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
 
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, req })
+
+                if (subFields) {
+                  if (Array.isArray(subFields)) {
+                    if (allSubFields.length) {
+                      allSubFields = allSubFields.concat(subFields)
+                    }
+                  } else {
+                    allSubFields.push(subFields)
+                  }
+                }
+              }
+            }
+            if (!(context as any).internal) {
+              ;(context as any).internal = {}
+            }
+            if (!(context as any).internal.richText) {
+              ;(context as any).internal.richText = {}
+            }
+            if (!(context as any).internal.richText[path.join('.')]) {
+              ;(context as any).internal.richText[path.join('.')] = {}
+            }
+            ;(context as any).internal.richText[path.join('.')].afterRead = {
+              subFields: allSubFields,
+            }
             return value
           },
         ],
         beforeChange: [
           async ({
             context: _context,
-            duplicate,
-            errors,
             field,
-            mergeLocaleActions,
             operation,
             path,
             req,
             schemaPath,
             siblingData,
             siblingDocWithLocales,
-            skipValidation,
             value,
           }) => {
-            if (!finalSanitizedEditorConfig.features.hooks.beforeChange.size) {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
+              !finalSanitizedEditorConfig.features.subFields.size
+            ) {
               return value
             }
 
@@ -315,7 +348,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context?.internal?.lexical?.[path.join('.')]?.originalNodeIDMap
+            } = context?.internal?.richText?.[path.join('.')]?.originalNodeIDMap
 
             if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
               return value
@@ -339,6 +372,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               })
             }
 
+            const allSubFields: FieldsWithData[] = []
+
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
               const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
@@ -357,9 +392,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   }
                   node = await hook({
                     context,
-                    duplicate,
-                    errors,
-                    mergeLocaleActions,
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
@@ -367,8 +399,28 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
                     req,
-                    skipValidation,
                   })
+                }
+              }
+
+              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({
+                  node,
+                  originalNode: originalNodeIDMap[id],
+                  originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
+                  req,
+                })
+
+                if (subFields) {
+                  if (Array.isArray(subFields)) {
+                    if (allSubFields.length) {
+                      allSubFields.push(...subFields)
+                    }
+                  } else {
+                    allSubFields.push(subFields)
+                  }
                 }
               }
             }
@@ -398,10 +450,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               // Add to context, for other hooks to use
               context.internal = {}
             }
-            if (!context.internal.lexical) {
-              context.internal.lexical = {}
+            if (!context.internal.richText) {
+              context.internal.richText = {}
             }
-            context.internal.lexical[path.join('.')] = {
+            context.internal.richText[path.join('.')] = {
+              beforeChange: {
+                subFields: allSubFields,
+              },
               originalNodeIDMap: newOriginalNodeIDMap,
             }
 
@@ -410,7 +465,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         ],
         beforeDuplicate: [
           async ({ context: _context, path, req, schemaPath, value }) => {
-            if (!finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size) {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size &&
+              !finalSanitizedEditorConfig.features.subFields.size
+            ) {
               return value
             }
             const context: any = _context
@@ -423,7 +481,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              */
             const originalNodeIDMap: {
               [key: string]: SerializedLexicalNode
-            } = context?.internal?.lexical?.[path.join('.')]?.originalNodeIDMap
+            } = context?.internal?.richText?.[path.join('.')]?.originalNodeIDMap
 
             if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
               return value
@@ -433,6 +491,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            const allSubFields: FieldsWithData[] = []
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
@@ -460,8 +520,36 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
+
+              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, originalNode: originalNodeIDMap[id], req })
+
+                if (subFields) {
+                  if (Array.isArray(subFields)) {
+                    if (allSubFields.length) {
+                      allSubFields.push(...subFields)
+                    }
+                  } else {
+                    allSubFields.push(subFields)
+                  }
+                }
+              }
             }
 
+            if (!context.internal) {
+              context.internal = {}
+            }
+            if (!context.internal.richText) {
+              context.internal.richText = {}
+            }
+            if (!context.internal.richText[path.join('.')]) {
+              context.internal.richText[path.join('.')] = {}
+            }
+            context.internal.richText[path.join('.')].beforeDuplicate = {
+              subFields: allSubFields,
+            }
             return value
           },
         ],
@@ -481,7 +569,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
               !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
               !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
-              !finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size
+              !finalSanitizedEditorConfig.features.hooks.beforeDuplicate.size &&
+              !finalSanitizedEditorConfig.features.subFields.size
             ) {
               return value
             }
@@ -524,10 +613,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               // Add to context, for other hooks to use
               context.internal = {}
             }
-            if (!(context as any).internal.lexical) {
-              ;(context as any).internal.lexical = {}
+            if (!(context as any).internal.richText) {
+              ;(context as any).internal.richText = {}
             }
-            ;(context as any).internal.lexical[path.join('.')] = {
+            ;(context as any).internal.richText[path.join('.')] = {
               originalNodeIDMap,
             }
 
@@ -545,6 +634,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            const allSubFields: FieldsWithData[] = []
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
@@ -574,8 +665,26 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
+              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, originalNode: originalNodeIDMap[id], req })
+
+                if (subFields) {
+                  if (Array.isArray(subFields)) {
+                    if (allSubFields.length) {
+                      allSubFields.push(...subFields)
+                    }
+                  } else {
+                    allSubFields.push(subFields)
+                  }
+                }
+              }
             }
 
+            ;(context as any).internal.richText[path.join('.')].beforeValidate = {
+              subFields: allSubFields,
+            }
             return value
           },
         ],

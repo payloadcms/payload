@@ -3,13 +3,7 @@ import type { Field, FieldAffectingData } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
-import {
-  afterChangeTraverseFields,
-  afterReadTraverseFields,
-  beforeChangeTraverseFields,
-  beforeValidateTraverseFields,
-  deepCopyObject,
-} from 'payload/utilities'
+import { deepCopyObject } from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'
@@ -193,163 +187,15 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
               },
             },
             graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
-            hooks: {
-              afterChange: [
-                async ({
-                  context,
-                  node,
-                  operation,
-                  originalNode,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                }) => {
-                  await afterChangeTraverseFields({
-                    collection: null,
-                    context,
-                    data: originalNode.fields,
-                    doc: node.fields,
-                    fields: sanitizedFieldsWithoutText,
-                    global: null,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: parentRichTextFieldPath,
-                    previousDoc: node.fields,
-                    previousSiblingDoc: node.fields,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    siblingData: originalNode.fields,
-                    siblingDoc: node.fields,
-                  })
-
-                  return node
-                },
-              ],
-              afterRead: [
-                ({
-                  context,
-                  currentDepth,
-                  depth,
-                  draft,
-                  fallbackLocale,
-                  fieldPromises,
-                  findMany,
-                  flattenLocales,
-                  locale,
-                  node,
-                  overrideAccess,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  populationPromises,
-                  req,
-                  showHiddenFields,
-                  triggerAccessControl,
-                  triggerHooks,
-                }) => {
-                  afterReadTraverseFields({
-                    collection: null,
-                    context,
-                    currentDepth,
-                    depth,
-                    doc: node.fields,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
-                    fields: sanitizedFieldsWithoutText,
-                    findMany,
-                    flattenLocales,
-                    global: null,
-                    locale,
-                    overrideAccess,
-                    path: parentRichTextFieldPath,
-                    populationPromises,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    showHiddenFields,
-                    siblingDoc: node.fields,
-                    triggerAccessControl,
-                    triggerHooks,
-                  })
-
-                  return node
-                },
-              ],
-              beforeChange: [
-                async ({
-                  context,
-                  duplicate,
-                  errors,
-                  mergeLocaleActions,
-                  node,
-                  operation,
-                  originalNode,
-                  originalNodeWithLocales,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                  skipValidation,
-                }) => {
-                  await beforeChangeTraverseFields({
-                    id: null,
-                    collection: null,
-                    context,
-                    data: node.fields,
-                    doc: originalNode.fields,
-                    docWithLocales: originalNodeWithLocales?.fields ?? {},
-                    duplicate,
-                    errors,
-                    fields: sanitizedFieldsWithoutText,
-                    global: null,
-                    mergeLocaleActions,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    path: parentRichTextFieldPath,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    siblingData: node.fields,
-                    siblingDoc: originalNode.fields,
-                    siblingDocWithLocales: originalNodeWithLocales?.fields ?? {},
-                    skipValidation,
-                  })
-
-                  return node
-                },
-              ],
-
-              beforeValidate: [
-                async ({
-                  context,
-                  node,
-                  operation,
-                  originalNode,
-                  overrideAccess,
-                  parentRichTextFieldPath,
-                  parentRichTextFieldSchemaPath,
-                  req,
-                }) => {
-                  await beforeValidateTraverseFields({
-                    id: null,
-                    collection: null,
-                    context,
-                    data: node.fields,
-                    doc: originalNode.fields,
-                    fields: sanitizedFieldsWithoutText,
-                    global: null,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    overrideAccess,
-                    path: parentRichTextFieldPath,
-                    req,
-                    schemaPath: parentRichTextFieldSchemaPath,
-                    siblingData: node.fields,
-                    siblingDoc: originalNode.fields,
-                  })
-
-                  return node
-                },
-              ],
-            },
             node: LinkNode,
+            subFields: ({ node, originalNode, originalNodeWithLocales }) => {
+              return {
+                data: node.fields,
+                fields: sanitizedFieldsWithoutText,
+                originalData: originalNode?.fields,
+                originalDataWithLocales: originalNodeWithLocales?.fields,
+              }
+            },
             validations: [linkValidation(props, sanitizedFieldsWithoutText)],
           }),
         ],
