@@ -100,7 +100,7 @@ describe('fields', () => {
       await page.click('#action-save', { delay: 200 })
 
       // toast error
-      await expect(page.locator('.Toastify')).toContainText(
+      await expect(page.locator('.payload-toast-container')).toContainText(
         'The following field is invalid: uniqueText',
       )
 
@@ -121,7 +121,7 @@ describe('fields', () => {
       await page.locator('#action-save').click()
 
       // toast error
-      await expect(page.locator('.Toastify')).toContainText(
+      await expect(page.locator('.payload-toast-container')).toContainText(
         'The following field is invalid: group.unique',
       )
 
@@ -307,7 +307,7 @@ describe('fields', () => {
       await titleInput.fill('Row 123')
       await page.locator('#action-save').click()
       await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
       // ensure the 'title' field is visible in the table header
       await page.goto(url.list)
@@ -329,7 +329,7 @@ describe('fields', () => {
       await titleInput.fill('Row 456')
       await page.locator('#action-save').click()
       await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
       // ensure there are not two ID fields in the table header
       await page.goto(url.list)

@@ -86,13 +86,13 @@ describe('relationship', () => {
     const textValue = 'hello'
     await textField.fill(textValue)
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     await expect(
       page.locator('#field-relationship .relationship--single-value__text'),
     ).toContainText(textValue)
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should create nested inline relationships', async () => {
@@ -151,7 +151,7 @@ describe('relationship', () => {
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
     await page.locator('#action-save').click()
 
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should hide relationship add new button', async () => {
@@ -250,10 +250,10 @@ describe('relationship', () => {
     await page.locator('.drawer__content #field-text').fill('something')
 
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
@@ -263,7 +263,7 @@ describe('relationship', () => {
 
     // Save and close the drawer
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
 
     // Now open the drawer again to edit the `text` field _using the keyboard_
@@ -286,12 +286,12 @@ describe('relationship', () => {
 
     // save drawer
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     // close drawer
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     // save document and reload
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.reload()
 
     // check if the value is saved
@@ -352,7 +352,7 @@ describe('relationship', () => {
     await page.getByText('Seeded text document', { exact: true }).click()
 
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -373,7 +373,7 @@ describe('relationship', () => {
       .click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: relationshipWithMinRows',
     )
   })
