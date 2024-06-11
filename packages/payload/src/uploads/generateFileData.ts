@@ -141,21 +141,23 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (fileHasAdjustments) {
+    if (sharp && (fileIsAnimated || fileHasAdjustments)) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
         sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
-      if (resizeOptions) {
-        sharpFile = sharpFile.resize(resizeOptions)
-      }
-      if (formatOptions) {
-        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-      }
-      if (trimOptions) {
-        sharpFile = sharpFile.trim(trimOptions)
+      if (fileHasAdjustments) {
+        if (resizeOptions) {
+          sharpFile = sharpFile.resize(resizeOptions)
+        }
+        if (formatOptions) {
+          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
+        }
+        if (trimOptions) {
+          sharpFile = sharpFile.trim(trimOptions)
+        }
       }
     }
 
@@ -209,7 +211,6 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData) {
-      const metadata = await sharpFile.metadata()
       const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
 
       filesToSave.push({
@@ -223,7 +224,11 @@ export const generateFileData = async <T>({
         size: info.size,
       }
       fileData.width = info.width
-      fileData.height = fileIsAnimated ? info.height / metadata.pages : info.height
+      fileData.height = info.height
+      if (fileIsAnimated) {
+        const metadata = await sharpFile.metadata()
+        fileData.height = info.height / metadata.pages
+      }
       fileData.filesize = info.size
 
       if (file.tempFilePath) {
