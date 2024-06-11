@@ -91,7 +91,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = ({
       {Array.isArray(BeforeCreateFirstUsers) &&
         BeforeCreateFirstUsers.map((Component) => Component)}
       {!collectionConfig?.auth?.disableLocalStrategy && (
-        <CreateFirstUserForm searchParams={searchParams} />
+        <CreateFirstUserForm req={req} searchParams={searchParams} />
       )}
       {Array.isArray(AfterCreateFirstUsers) && AfterCreateFirstUsers.map((Component) => Component)}
     </Fragment>

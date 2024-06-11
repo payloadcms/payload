@@ -1,5 +1,7 @@
 'use client'
-import type { PayloadRequestWithData } from 'payload/types'
+
+import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { Field, FormState, PayloadRequestWithData } from 'payload/types'
 
 export const createFirstUserBaseClass = 'create-first-user__form'
 
@@ -9,17 +11,20 @@ import { Password } from '@payloadcms/ui/fields/Password'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { email, password } from 'payload/fields/validations'
 import React from 'react'
 
 import './index.scss'
 
 export const CreateFirstUserForm: React.FC<{
+  req: PayloadRequestWithData
   searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ searchParams }) => {
+}> = async ({ req, searchParams }) => {
   const { t } = useTranslation()
 
   const config = useConfig()
@@ -29,14 +34,61 @@ export const CreateFirstUserForm: React.FC<{
   const {
     admin: { user: userSlug },
     routes: { admin, api },
+    serverURL,
   } = config
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
 
+  const fields: Field[] = [
+    {
+      name: 'email',
+      type: 'email',
+      label: t('general:email'),
+      required: true,
+    },
+    {
+      name: 'password',
+      type: 'text',
+      label: t('general:password'),
+      required: true,
+    },
+    {
+      name: 'confirm-password',
+      type: 'text',
+      label: t('authentication:confirmPassword'),
+      required: true,
+    },
+  ]
+
+  const initialState: FormState = await buildStateFromSchema({
+    fieldSchema: fields,
+    operation: 'create',
+    preferences: { fields: {} },
+    req,
+  })
+
+  const onChange: FormProps['onChange'][0] = React.useCallback(
+    async ({ formState: prevFormState }) => {
+      return getFormState({
+        apiRoute: api,
+        body: {
+          collectionSlug: userSlug,
+          formState: prevFormState,
+          operation: 'create',
+          schemaPath: userSlug,
+        },
+        serverURL,
+      })
+    },
+    [api, userSlug, serverURL],
+  )
+
   return (
     <Form
       action={`${api}/${userSlug}/first-register`}
+      initialState={initialState}
       method="POST"
+      onChange={[onChange]}
       redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : admin}
       validationOperation="create"
     >
@@ -65,7 +117,7 @@ export const CreateFirstUserForm: React.FC<{
         />
         <Password
           autoComplete="off"
-          label={t('authentication:newPassword')}
+          label={t('general:password')}
           name="password"
           required
           validate={(value) =>
