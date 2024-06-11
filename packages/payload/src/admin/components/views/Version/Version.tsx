@@ -27,7 +27,6 @@ import fieldComponents from './RenderFieldsToDiff/fields'
 import Restore from './Restore'
 import SelectLocales from './SelectLocales'
 import './index.scss'
-import { mostRecentVersionOption } from './shared'
 
 const baseClass = 'view-version'
 
@@ -46,11 +45,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     params: { id, versionID },
   } = useRouteMatch<{ id?: string; versionID: string }>()
 
-  const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption)
+  const [compareValue, setCompareValue] = useState<CompareOption>()
   const [localeOptions] = useState<Option[]>(() => {
     if (localization && localization?.locales) {
       return localization.locales.map(({ code, label }) => ({
-        label: label,
+        label,
         value: code,
       }))
     }
@@ -70,6 +69,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   let compareBaseURL: string
   let slug: string
   let parentID: string
+  const [latestDraftVersion, setLatestDraftVersion] = useState(undefined)
+  const [latestPublishedVersion, setLatestPublishedVersion] = useState(undefined)
 
   if (collection) {
     ;({ slug } = collection)
@@ -92,10 +93,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     fieldPermissions = permissions.globals[global.slug].fields
   }
 
-  const compareFetchURL =
-    compareValue?.value === 'mostRecent' || compareValue?.value === 'published'
-      ? originalDocFetchURL
-      : `${compareBaseURL}/${compareValue.value}`
+  const compareFetchURL = compareValue?.value && `${compareBaseURL}/${compareValue.value}`
 
   const [{ data: doc, isError }] = usePayloadAPI(versionFetchURL, {
     initialParams: { depth: 1, locale: '*' },
@@ -109,6 +107,39 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, {
     initialParams: { depth: 1, draft: 'true', locale: '*' },
   })
+
+  const sharedParams = (status) => {
+    return {
+      depth: 0,
+      limit: 1,
+      sort: '-updatedAt',
+      where: {
+        'version._status': {
+          equals: status,
+        },
+      },
+    }
+  }
+
+  const [{ data: draft }] = usePayloadAPI(compareBaseURL, {
+    initialParams: { ...sharedParams('draft') },
+  })
+
+  const [{ data: published }] = usePayloadAPI(compareBaseURL, {
+    initialParams: { ...sharedParams('published') },
+  })
+
+  useEffect(() => {
+    const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
+    const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
+
+    if (!formattedPublished || !formattedDraft) return
+
+    const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
+
+    setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
+    setLatestPublishedVersion(formattedPublished?.id)
+  }, [draft, published])
 
   useEffect(() => {
     let nav: StepNavItem[] = []
@@ -192,18 +223,18 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   let metaTitle: string
   let metaDesc: string
-  const formattedCreatedAt = doc?.createdAt
-    ? formatDate(doc.createdAt, dateFormat, i18n?.language)
+  const versionCreatedAt = doc?.updatedAt
+    ? formatDate(doc.updatedAt, dateFormat, i18n?.language)
     : ''
 
   if (collection) {
     const useAsTitle = collection?.admin?.useAsTitle || 'id'
-    metaTitle = `${t('version')} - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`
+    metaTitle = `${t('version')} - ${versionCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`
     metaDesc = t('viewingVersion', { documentTitle: doc[useAsTitle], entityLabel })
   }
 
   if (global) {
-    metaTitle = `${t('version')} - ${formattedCreatedAt} - ${entityLabel}`
+    metaTitle = `${t('version')} - ${versionCreatedAt} - ${entityLabel}`
     metaDesc = t('viewingVersionGlobal', { entityLabel })
   }
 
@@ -234,14 +265,14 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             })}
           </p>
           <header className={`${baseClass}__header`}>
-            <h2>{formattedCreatedAt}</h2>
+            <h2>{versionCreatedAt}</h2>
             {canUpdate && (
               <Restore
                 className={`${baseClass}__restore`}
                 collection={collection}
                 global={global}
                 originalDocID={id}
-                versionDate={formattedCreatedAt}
+                versionDate={versionCreatedAt}
                 versionID={versionID}
               />
             )}
@@ -250,9 +281,10 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
         <div className={`${baseClass}__controls`}>
           <CompareVersion
             baseURL={compareBaseURL}
+            latestDraftVersion={latestDraftVersion}
+            latestPublishedVersion={latestPublishedVersion}
             onChange={setCompareValue}
             parentID={parentID}
-            publishedDoc={publishedDoc}
             value={compareValue}
             versionID={versionID}
           />

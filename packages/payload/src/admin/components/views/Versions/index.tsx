@@ -36,6 +36,8 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   let entityLabel: string
   let slug: string
   let editURL: string
+  const [latestDraftVersion, setLatestDraftVersion] = useState(undefined)
+  const [latestPublishedVersion, setLatestPublishedVersion] = useState(undefined)
 
   if (collection) {
     ;({ slug } = collection)
@@ -91,6 +93,38 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   const [{ data, isLoading }] = usePayloadAPI(docURL, { initialParams: { draft: 'true' } })
   const [{ data: versionsData, isLoading: isLoadingVersions }, { setParams }] =
     usePayloadAPI(fetchURL)
+
+  const sharedParams = (status) => {
+    return {
+      depth: 0,
+      limit: 1,
+      sort: '-updatedAt',
+      where: {
+        'version._status': {
+          equals: status,
+        },
+      },
+    }
+  }
+
+  const [{ data: draft }] = usePayloadAPI(fetchURL, {
+    initialParams: { ...sharedParams('draft') },
+  })
+
+  const [{ data: published }] = usePayloadAPI(fetchURL, {
+    initialParams: { ...sharedParams('published') },
+  })
+
+  useEffect(() => {
+    const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
+    const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
+
+    if (!formattedPublished || !formattedDraft) return
+
+    const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
+    setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
+    setLatestPublishedVersion(formattedPublished?.id)
+  }, [draft, published])
 
   useEffect(() => {
     const params = {
@@ -158,6 +192,8 @@ const VersionsView: React.FC<IndexProps> = (props) => {
           global,
           isLoading,
           isLoadingVersions,
+          latestDraftVersion,
+          latestPublishedVersion,
           user,
           versionsData,
         }}
