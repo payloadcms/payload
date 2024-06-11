@@ -6,11 +6,11 @@ import { Error } from './icons/Error.js'
 import { Info } from './icons/Info.js'
 import { Success } from './icons/Success.js'
 import { Warning } from './icons/Warning.js'
-import './index.scss'
 
 export const ToastContainer: React.FC = () => {
   return (
     <Toaster
+      className="payload-toast-container"
       closeButton
       // @ts-expect-error
       dir="undefined"
@@ -29,7 +29,7 @@ export const ToastContainer: React.FC = () => {
           icon: 'toast-icon',
           info: 'toast-info',
           success: 'toast-success',
-          toast: 'payload-toast-container',
+          toast: 'payload-toast-item',
           warning: 'toast-warning',
         },
         unstyled: true,

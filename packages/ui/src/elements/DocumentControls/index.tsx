@@ -4,6 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
+import { toast } from 'sonner'
 
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -58,6 +59,8 @@ export const DocumentControls: React.FC<{
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
   })
+
+  toast('test', { duration: Infinity })
 
   const {
     admin: { dateFormat },

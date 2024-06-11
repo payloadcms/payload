@@ -233,14 +233,16 @@ describe('uploads', () => {
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
-    await expect(page.locator('.payload-toast-container.toast-success')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'successfully',
     )
-    await page.locator('.payload-toast-container.toast-success .payload-toast-close-button').click()
+    await page
+      .locator('.payload-toast-container .toast-success .payload-toast-close-button')
+      .click()
 
     // save the document and expect an error
     await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container.toast-error')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
       'The following field is invalid: audio',
     )
   })
@@ -251,7 +253,7 @@ describe('uploads', () => {
     await expect(page.locator('.file-field__filename')).toHaveValue('2mb.jpg')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container.toast-error')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
       'File size limit has been reached',
     )
   })

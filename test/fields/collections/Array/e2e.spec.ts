@@ -290,7 +290,7 @@ describe('Array', () => {
     await targetInput.fill(bulkText)
 
     await page.locator('#edit-array-fields .form-submit .edit-many__save').click()
-    await expect(page.locator('.payload-toast-container.toast-success')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 3 Array Fields successfully.',
     )
   })
