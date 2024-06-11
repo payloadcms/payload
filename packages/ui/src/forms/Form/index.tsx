@@ -187,7 +187,10 @@ export const Form: React.FC<FormProps> = (props) => {
         errorToast = reject
       })
 
-      if (redirect || disableSuccessStatus) {
+      const hasFormSubmitAction =
+        actionArg || typeof action === 'string' || typeof action === 'function'
+
+      if (redirect || disableSuccessStatus || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
@@ -258,6 +261,15 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         onSubmit(fields, data)
+      }
+
+      if (!hasFormSubmitAction) {
+        // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
+        // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
+        setProcessing(false)
+        setSubmitted(true)
+        setDisabled(false)
+        return
       }
 
       const formData = contextRef.current.createFormData(overrides)
@@ -362,11 +374,12 @@ export const Form: React.FC<FormProps> = (props) => {
           errorToast(message)
         }
       } catch (err) {
+        console.error('Error submitting form', err)
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
 
-        errorToast(err)
+        errorToast(err.message)
       }
     },
     [
