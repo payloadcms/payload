@@ -277,7 +277,15 @@ export default async function resizeAndTransformImageSizes({
       const metadata = await sharpBase.metadata()
 
       if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
-        const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
+        const { height: resizeHeight } = imageResizeConfig
+        let { width: resizeWidth } = imageResizeConfig
+
+        // Calculate resizeWidth based on original aspect ratio if it's undefined
+        if (resizeHeight && !resizeWidth) {
+          const originalAspectRatio = dimensions.width / dimensions.height
+          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
+        }
+
         const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
@@ -296,10 +304,16 @@ export default async function resizeAndTransformImageSizes({
         )
         const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
 
-        const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
+        const isAnimated = fileIsAnimated && metadata.pages
 
-        const maxOffsetY = fileIsAnimated
-          ? resizeHeight - safeResizeHeight
+        let safeResizeHeight = resizeHeight ?? scaledImageInfo.height
+
+        if (isAnimated && resizeHeight === undefined) {
+          safeResizeHeight = scaledImageInfo.height / metadata.pages
+        }
+
+        const maxOffsetY = isAnimated
+          ? safeResizeHeight - (resizeHeight ?? safeResizeHeight)
           : scaledImageInfo.height - safeResizeHeight
 
         const topFocalEdge = Math.round(
