@@ -32,7 +32,7 @@ export const createTestHooks = async (testSuiteName = '_community') => {
       tsConfig.compilerOptions.paths['@payload-config'] = [`./test/${testSuiteName}/config.ts`]
       await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
 
-      process.env.PAYLOAD_CONFIG_PATH = path.resolve(testSuiteName, 'config')
+      process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, 'config.ts')
     },
   }
 }

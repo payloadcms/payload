@@ -231,6 +231,7 @@ export interface FormSubmission {
         id?: string | null;
       }[]
     | null;
+  custom?: string | null;
   payment?: {
     field?: string | null;
     status?: string | null;

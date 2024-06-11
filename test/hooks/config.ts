@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import type { SanitizedConfig } from 'payload/config'
 
 import { APIError } from 'payload/errors'
@@ -55,6 +59,9 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         collectionAfterRead: false,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 
