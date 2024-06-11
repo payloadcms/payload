@@ -40,6 +40,22 @@ export const LexicalLocalizedFields: CollectionConfig = {
                     localized: true,
                   },
                   {
+                    name: 'counter',
+                    type: 'number',
+                    hooks: {
+                      beforeChange: [
+                        ({ value }) => {
+                          return value ? value + 1 : 1
+                        },
+                      ],
+                      afterRead: [
+                        ({ value }) => {
+                          return value ? value * 10 : 10
+                        },
+                      ],
+                    },
+                  },
+                  {
                     name: 'rel',
                     type: 'relationship',
                     relationTo: lexicalLocalizedFieldsSlug,

@@ -33,6 +33,7 @@ export function generateLexicalLocalizedRichText(text1: string, text2: string, b
             id: blockID ?? '66685716795f191f08367b1a',
             blockName: '',
             textLocalized: text2,
+            counter: 1,
             blockType: 'block',
           },
         },
