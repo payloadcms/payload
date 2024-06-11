@@ -2,7 +2,6 @@ import type { GeneratedTypes, Payload } from 'payload'
 import type { InitOptions, SanitizedConfig } from 'payload/config'
 
 import { BasePayload } from 'payload'
-import { generateTypes } from 'payload/bin'
 import WebSocket from 'ws'
 
 let cached: {
@@ -39,7 +38,12 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
 
   // Generate types
   if (config.typescript.autoGenerate !== false) {
-    void generateTypes(config, { log: false })
+    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
+    // see: https://github.com/vercel/next.js/issues/66723
+    void payload.bin({
+      args: ['generate:types'],
+      log: false,
+    })
   }
 
   await payload.db.init()
