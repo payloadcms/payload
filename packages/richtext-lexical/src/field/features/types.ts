@@ -239,9 +239,44 @@ export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extend
     } & ClientFeatureProps
 
 export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  currentDepth: number
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  depth: number
+  draft: boolean
+  fallbackLocale: string
+  /**
+   *  Only available in `afterRead` field hooks.
+   */
+  fieldPromises: Promise<void>[]
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany: boolean
+  flattenLocales: boolean
+  /**
+   * The requested locale.
+   */
+  locale: string
   overrideAccess: boolean
+  /**
+   *  Only available in `afterRead` field hooks.
+   */
+  populationPromises: Promise<void>[]
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  showHiddenFields: boolean
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  triggerAccessControl: boolean
+  /**
+   * Only available in `afterRead` hooks.
+   */
+  triggerHooks: boolean
 }
 
 export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
@@ -259,6 +294,12 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
+  duplicate: boolean
+  /**
+   * Only available in `beforeChange` hooks.
+   */
+  errors: { field: string; message: string }[]
+  mergeLocaleActions: (() => Promise<void>)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
@@ -267,11 +308,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
-}
-
-export type BeforeDuplicateNodeHookArgs<T extends SerializedLexicalNode> = {
-  /** The value of the node before any changes. Not available in afterRead hooks */
-  originalNode: T
+  skipValidation: boolean
 }
 
 export type BaseNodeHookArgs<T extends SerializedLexicalNode> = {
@@ -296,10 +333,6 @@ export type BeforeChangeNodeHook<T extends SerializedLexicalNode> = (
   args: BeforeChangeNodeHookArgs<T> & BaseNodeHookArgs<T>,
 ) => Promise<T> | T
 
-export type BeforeDuplicateNodeHook<T extends SerializedLexicalNode> = (
-  args: BeforeDuplicateNodeHookArgs<T> & BaseNodeHookArgs<T>,
-) => Promise<T> | T
-
 export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
   args: BeforeValidateNodeHookArgs<T> & BaseNodeHookArgs<T>,
 ) => Promise<T> | T
@@ -316,12 +349,6 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     afterChange?: Array<AfterChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
     afterRead?: Array<AfterReadNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
     beforeChange?: Array<BeforeChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    /**
-     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
-     */
-    beforeDuplicate?: Array<
-      BeforeDuplicateNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-    >
     beforeValidate?: Array<
       BeforeValidateNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
     >
@@ -521,10 +548,6 @@ export type SanitizedServerFeatures = Required<
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>
-    /**
-     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
-     */
-    beforeDuplicate?: Map<string, Array<BeforeDuplicateNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
   subFields?: Map<

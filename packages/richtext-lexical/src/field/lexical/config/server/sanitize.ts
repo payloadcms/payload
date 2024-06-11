@@ -1,4 +1,4 @@
-import type { Config, SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload/config'
 
 import type { ResolvedServerFeatureMap, SanitizedServerFeatures } from '../../../features/types.js'
 import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types.js'
@@ -21,7 +21,6 @@ export const sanitizeServerFeatures = (
       afterChange: new Map(),
       afterRead: new Map(),
       beforeChange: new Map(),
-      beforeDuplicate: new Map(),
       beforeValidate: new Map(),
     },
     i18n: {},
@@ -73,9 +72,6 @@ export const sanitizeServerFeatures = (
         }
         if (node?.hooks?.beforeChange) {
           sanitized.hooks.beforeChange.set(nodeType, node.hooks.beforeChange)
-        }
-        if (node?.hooks?.beforeDuplicate) {
-          sanitized.hooks.beforeDuplicate.set(nodeType, node.hooks.beforeDuplicate)
         }
         if (node?.hooks?.beforeValidate) {
           sanitized.hooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)

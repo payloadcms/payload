@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
-import type { FieldsWithData } from '../../../admin/RichText.js'
+import type { FieldsWithData, RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
@@ -251,29 +252,41 @@ export const promise = async ({
     }
 
     case 'richText': {
-      const subFields: FieldsWithData[] = (context as any)?.internal?.richText?.[
-        fieldPath.join('.')
-      ]?.afterRead?.subFields
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
 
-      if (subFields?.length) {
-        for (const { data, fields, originalData } of subFields) {
-          await traverseFields({
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.afterChange?.length) {
+        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
             collection,
             context,
-            data: originalData,
-            doc: data,
-            fields,
+            data,
+            field,
             global,
             operation,
+            originalDoc: doc,
             path: fieldPath,
-            previousDoc: data,
-            previousSiblingDoc: { ...data },
+            previousDoc,
+            previousSiblingDoc,
+            previousValue: previousDoc[field.name],
             req,
             schemaPath: fieldSchemaPath,
-            siblingData: originalData || {},
-            siblingDoc: { ...data },
+            siblingData,
+            value: siblingDoc[field.name],
           })
-        }
+
+          if (hookedValue !== undefined) {
+            siblingDoc[field.name] = hookedValue
+          }
+        }, Promise.resolve())
       }
       break
     }

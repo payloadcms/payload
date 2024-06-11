@@ -1,11 +1,12 @@
 import merge from 'deepmerge'
 
-import type { FieldsWithData } from '../../../admin/RichText.js'
+import type { FieldsWithData, RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { Operation, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
 
+import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { beforeDuplicate } from './beforeDuplicate.js'
@@ -438,34 +439,46 @@ export const promise = async ({
     }
 
     case 'richText': {
-      const subFields: FieldsWithData[] = (context as any)?.internal?.richText?.[
-        fieldPath.join('.')
-      ]?.beforeChange?.subFields
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
 
-      if (subFields?.length) {
-        for (const { data, fields, originalData, originalDataWithLocales } of subFields) {
-          await traverseFields({
-            id,
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.beforeChange?.length) {
+        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
             collection,
             context,
             data,
-            doc: originalData,
-            docWithLocales: originalDataWithLocales ?? {},
+            docWithLocales,
             duplicate,
             errors,
-            fields,
+            field,
             global,
             mergeLocaleActions,
             operation,
+            originalDoc: doc,
             path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingDoc[field.name],
             req,
-            schemaPath: fieldSchemaPath,
-            siblingData: data,
-            siblingDoc: originalData,
-            siblingDocWithLocales: originalDataWithLocales ?? {},
-            skipValidation: skipValidationFromHere,
+            schemaPath: parentSchemaPath,
+            siblingData,
+            siblingDocWithLocales,
+            skipValidation,
+            value: siblingData[field.name],
           })
-        }
+
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
+          }
+        }, Promise.resolve())
       }
 
       break

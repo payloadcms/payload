@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { FieldsWithData } from '../../../admin/RichText.js'
+import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
@@ -573,37 +573,96 @@ export const promise = async ({
     }
 
     case 'richText': {
-      const subFields: FieldsWithData[] = (context as any)?.internal?.richText?.[
-        fieldPath.join('.')
-      ]?.afterRead?.subFields
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
 
-      if (subFields?.length) {
-        for (const { data, fields } of subFields) {
-          traverseFields({
-            collection,
-            context,
-            currentDepth,
-            depth,
-            doc: data,
-            draft,
-            fallbackLocale,
-            fieldPromises,
-            fields,
-            findMany,
-            flattenLocales,
-            global,
-            locale,
-            overrideAccess,
-            path: fieldPath,
-            populationPromises,
-            req,
-            schemaPath: fieldSchemaPath,
-            showHiddenFields,
-            siblingDoc: data,
-            triggerAccessControl,
-            triggerHooks,
-          })
-        }
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.afterRead?.length) {
+        await editor.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const shouldRunHookOnAllLocales =
+            field.localized &&
+            (locale === 'all' || !flattenLocales) &&
+            typeof siblingDoc[field.name] === 'object'
+
+          if (shouldRunHookOnAllLocales) {
+            const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
+              (async () => {
+                const hookedValue = await currentHook({
+                  collection,
+                  context,
+                  currentDepth,
+                  data: doc,
+                  depth,
+                  draft,
+                  fallbackLocale,
+                  field,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  global,
+                  locale,
+                  operation: 'read',
+                  originalDoc: doc,
+                  overrideAccess,
+                  path: fieldPath,
+                  populationPromises,
+                  req,
+                  schemaPath: fieldSchemaPath,
+                  showHiddenFields,
+                  siblingData: siblingDoc,
+                  triggerAccessControl,
+                  triggerHooks,
+                  value,
+                })
+
+                if (hookedValue !== undefined) {
+                  siblingDoc[field.name][locale] = hookedValue
+                }
+              })(),
+            )
+
+            await Promise.all(hookPromises)
+          } else {
+            const hookedValue = await currentHook({
+              collection,
+              context,
+              currentDepth,
+              data: doc,
+              depth,
+              draft,
+              fallbackLocale,
+              field,
+              fieldPromises,
+              findMany,
+              flattenLocales,
+              global,
+              locale,
+              operation: 'read',
+              originalDoc: doc,
+              overrideAccess,
+              path: fieldPath,
+              populationPromises,
+              req,
+              schemaPath: fieldSchemaPath,
+              showHiddenFields,
+              siblingData: siblingDoc,
+              triggerAccessControl,
+              triggerHooks,
+              value: siblingDoc[field.name],
+            })
+
+            if (hookedValue !== undefined) {
+              siblingDoc[field.name] = hookedValue
+            }
+          }
+        }, Promise.resolve())
       }
       break
     }
