@@ -224,11 +224,10 @@ export const generateFileData = async <T>({
         size: info.size,
       }
       fileData.width = info.width
+      fileData.height = info.height
       if (fileIsAnimated) {
         const metadata = await sharpFile.metadata()
         fileData.height = info.height / metadata.pages
-      } else {
-        fileData.height = info.height
       }
       fileData.filesize = info.size
 
