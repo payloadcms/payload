@@ -30,6 +30,8 @@ const payload = new Payload()
 
 export default payload
 module.exports = payload
+exports = module.exports
+exports.Payload = Payload
 
 type GeneratedTypes = {
   collections: {
