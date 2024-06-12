@@ -250,7 +250,7 @@ describe('access control', () => {
       await expect(page.locator('#field-name')).toHaveValue('name')
       await expect(page.locator('#action-save')).toBeVisible()
       await page.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(page.locator('#action-save')).toBeHidden()
       await expect(page.locator('#field-name')).toBeDisabled()
     })
@@ -277,7 +277,7 @@ describe('access control', () => {
       await documentDrawer.locator('#field-name').fill('name')
       await expect(documentDrawer.locator('#field-name')).toHaveValue('name')
       await documentDrawer.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(documentDrawer.locator('#action-save')).toBeHidden()
       await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     })
@@ -301,7 +301,7 @@ describe('access control', () => {
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill('anonymous@email.com')
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(page.locator('#field-name')).toBeDisabled()
         await expect(page.locator('#action-save')).toBeHidden()
 
@@ -309,7 +309,7 @@ describe('access control', () => {
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill(devUser.email)
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(page.locator('#field-name')).toBeEnabled()
         await expect(page.locator('#action-save')).toBeVisible()
       })
@@ -332,7 +332,7 @@ describe('access control', () => {
         await expect(documentDrawer).toBeVisible()
         await documentDrawer.locator('#field-name').fill('anonymous@email.com')
         await documentDrawer.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(documentDrawer.locator('#field-name')).toBeDisabled()
         await documentDrawer.locator('button.doc-drawer__header-close').click()
         await expect(documentDrawer).toBeHidden()
@@ -341,7 +341,7 @@ describe('access control', () => {
         await expect(documentDrawer2).toBeVisible()
         await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
         await documentDrawer2.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
       })
     })
@@ -355,7 +355,7 @@ describe('access control', () => {
         await expect(page.locator('#field-name')).toBeEnabled()
         await page.locator('#field-name').fill('anonymous@email.com')
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText(
+        await expect(page.locator('.payload-toast-container')).toContainText(
           'You are not allowed to perform this action',
         )
 

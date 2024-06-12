@@ -8,7 +8,7 @@ import { serialize } from 'object-to-formdata'
 import { wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type {
   Context as FormContextType,
@@ -180,6 +180,33 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
+      // create new toast promise which will resolve manually later
+      let successToast, errorToast
+      const promise = new Promise((resolve, reject) => {
+        successToast = resolve
+        errorToast = reject
+      })
+
+      const hasFormSubmitAction =
+        actionArg || typeof action === 'string' || typeof action === 'function'
+
+      if (redirect || disableSuccessStatus || !hasFormSubmitAction) {
+        // Do not show submitting toast, as the promise toast may never disappear under these conditions.
+        // Instead, make successToast() or errorToast() throw toast.success / toast.error
+        successToast = (data) => toast.success(data)
+        errorToast = (data) => toast.error(data)
+      } else {
+        toast.promise(promise, {
+          error: (data) => {
+            return data as string
+          },
+          loading: t('general:submitting'),
+          success: (data) => {
+            return data as string
+          },
+        })
+      }
+
       if (e) {
         e.stopPropagation()
         e.preventDefault()
@@ -219,7 +246,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If not valid, prevent submission
       if (!isValid) {
-        toast.error(t('error:correctInvalidFields'))
+        errorToast(t('error:correctInvalidFields'))
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
@@ -234,6 +261,15 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         onSubmit(fields, data)
+      }
+
+      if (!hasFormSubmitAction) {
+        // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
+        // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
+        setProcessing(false)
+        setSubmitted(true)
+        setDisabled(false)
+        return
       }
 
       const formData = contextRef.current.createFormData(overrides)
@@ -272,7 +308,6 @@ export const Form: React.FC<FormProps> = (props) => {
         let json: Record<string, any> = {}
 
         if (isJSON) json = await res.json()
-
         if (res.status < 400) {
           if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
@@ -281,7 +316,7 @@ export const Form: React.FC<FormProps> = (props) => {
           if (redirect) {
             router.push(redirect)
           } else if (!disableSuccessStatus) {
-            toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
+            successToast(json.message || t('general:submissionSuccessful'))
           }
         } else {
           setProcessing(false)
@@ -289,7 +324,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
-            toast.error(json.message)
+            errorToast(json.message)
 
             return
           }
@@ -328,7 +363,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              toast.error(err.message || t('error:unknown'))
+              errorToast(err.message || t('error:unknown'))
             })
 
             return
@@ -336,14 +371,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
           const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
 
-          toast.error(message)
+          errorToast(message)
         }
       } catch (err) {
+        console.error('Error submitting form', err)
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
 
-        toast.error(err)
+        errorToast(err.message)
       }
     },
     [

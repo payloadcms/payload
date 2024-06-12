@@ -137,7 +137,7 @@ describe('versions', () => {
       await page.locator('.delete-documents__toggle').click()
       await page.locator('#confirm-delete').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Deleted 1 Draft Post successfully.',
       )
 
@@ -214,7 +214,7 @@ describe('versions', () => {
       await page.locator('#field-description').fill(description)
       await page.locator('.form-submit .edit-many__publish').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Draft Posts successfully.',
       )
 
@@ -241,7 +241,7 @@ describe('versions', () => {
       await page.locator('#field-description').fill(description)
       await page.locator('.form-submit .edit-many__draft').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Draft Posts successfully.',
       )
 

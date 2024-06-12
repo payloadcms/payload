@@ -1,5 +1,10 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const pagesSlug = 'pages'
 
@@ -12,7 +17,7 @@ export default buildConfigWithDefaults({
     },
   ],
   plugins: [
-    async (config) => ({
+    (config) => ({
       ...config,
       collections: [
         ...(config.collections || []),
@@ -36,5 +41,8 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

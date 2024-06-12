@@ -9,7 +9,7 @@ import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { requests } from '@payloadcms/ui/utilities/api'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 

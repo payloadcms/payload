@@ -167,7 +167,8 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       global: globalConfig,
       operation: 'update',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////

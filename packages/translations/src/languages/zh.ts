@@ -265,6 +265,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     stayOnThisPage: '停留在此页面',
     submissionSuccessful: '提交成功。',
     submit: '提交',
+    submitting: '提交中...',
     success: '成功',
     successfullyCreated: '成功创建{{label}}',
     successfullyDuplicated: '成功复制{{label}}',

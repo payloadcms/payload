@@ -1,5 +1,5 @@
 'use client'
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
@@ -64,8 +64,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 }
 
 export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
-  const { useModal } = facelessUIImport
-
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()

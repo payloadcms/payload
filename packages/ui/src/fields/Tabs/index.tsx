@@ -113,6 +113,17 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
 
   const activeTabConfig = tabs[activeTabIndex]
 
+  function generateTabPath() {
+    let tabPath = path
+    if (path && activeTabConfig.name) {
+      tabPath = `${path}.${activeTabConfig.name}`
+    } else if (!path && activeTabConfig.name) {
+      tabPath = activeTabConfig.name
+    }
+
+    return tabPath
+  }
+
   return (
     <div
       className={[
@@ -168,7 +179,7 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
                       : activeTabConfig['name']
                   }
                   margins="small"
-                  path={`${path ? `${path}.` : ''}${activeTabConfig.name ? `${activeTabConfig.name}` : ''}`}
+                  path={generateTabPath()}
                   permissions={
                     'name' in activeTabConfig && permissions?.fields?.[activeTabConfig.name]?.fields
                       ? permissions?.fields?.[activeTabConfig.name]?.fields

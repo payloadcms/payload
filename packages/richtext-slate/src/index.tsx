@@ -107,6 +107,8 @@ export { ElementButton } from './field/elements/Button.js'
 
 export { toggleElement } from './field/elements/toggle.js'
 export { LeafButton } from './field/leaves/Button.js'
+export { useLeaf } from './field/providers/LeafProvider.js'
+
 export type {
   AdapterArguments,
   ElementNode,

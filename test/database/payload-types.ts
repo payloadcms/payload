@@ -11,6 +11,7 @@ export interface Config {
     posts: Post;
     'relation-a': RelationA;
     'relation-b': RelationB;
+    'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
     users: User;
     'payload-preferences': PayloadPreference;
@@ -89,6 +90,40 @@ export interface RelationB {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pg-migrations".
+ */
+export interface PgMigration {
+  id: string;
+  relation1?: (string | null) | RelationA;
+  myArray?:
+    | {
+        relation2?: (string | null) | RelationB;
+        mySubArray?:
+          | {
+              relation3?: (string | null) | RelationB;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  myGroup?: {
+    relation4?: (string | null) | RelationB;
+  };
+  myBlocks?:
+    | {
+        relation5?: (string | null) | RelationA;
+        relation6?: (string | null) | RelationB;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-schema".
  */
 export interface CustomSchema {
@@ -116,6 +151,7 @@ export interface CustomSchema {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

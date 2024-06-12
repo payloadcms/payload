@@ -28,7 +28,7 @@ export interface NestedField {
   array?:
     | {
         group?: {
-          namedTab: {
+          namedTab?: {
             blocks?:
               | {
                   text?: string | null;
@@ -48,7 +48,7 @@ export interface NestedField {
         id?: string | null;
       }[]
     | null;
-  tab1: {
+  tab1?: {
     layout?:
       | (
           | {

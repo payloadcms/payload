@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.42",
+  "version": "3.0.0-beta.45",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -96,9 +96,9 @@
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
-    "@faceless-ui/modal": "2.1.0-rc.0",
-    "@faceless-ui/scroll-info": "1.4.0-rc.0",
-    "@faceless-ui/window-info": "2.2.0-rc.0",
+    "@faceless-ui/modal": "3.0.0-beta.0",
+    "@faceless-ui/scroll-info": "2.0.0-beta.0",
+    "@faceless-ui/window-info": "3.0.0-beta.0",
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
@@ -113,8 +113,8 @@
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.8.0",
-    "react-toastify": "10.0.5",
     "scheduler": "0.25.0-rc-f994737d14-20240522",
+    "sonner": "^1.5.0",
     "use-context-selector": "2.0.0",
     "uuid": "^9.0.1"
   },
