@@ -273,6 +273,7 @@ export const azTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Bu səhifədə qal',
     submissionSuccessful: 'Təqdimat uğurlu oldu.',
     submit: 'Təqdim et',
+    submitting: 'Təqdim olunur...',
     success: 'Uğur',
     successfullyCreated: '{{label}} uğurla yaradıldı.',
     successfullyDuplicated: '{{label}} uğurla dublikatlandı.',

@@ -276,6 +276,7 @@ export const trTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Bu sayfada kal',
     submissionSuccessful: 'Gönderme başarılı',
     submit: 'Gönder',
+    submitting: 'Gönderiliyor...',
     success: 'Başarı',
     successfullyCreated: '{{label}} başarıyla oluşturuldu.',
     successfullyDuplicated: '{{label}} başarıyla kopyalandı.',

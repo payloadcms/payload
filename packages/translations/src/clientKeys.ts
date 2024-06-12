@@ -213,6 +213,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:stayOnThisPage',
   'general:submissionSuccessful',
   'general:submit',
+  'general:submitting',
   'general:success',
   'general:successfullyCreated',
   'general:successfullyDuplicated',

@@ -9,7 +9,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { email } from 'payload/fields/validations'
 import React, { Fragment, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 export const ForgotPasswordForm: React.FC = () => {
   const config = useConfig()

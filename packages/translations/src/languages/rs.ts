@@ -272,6 +272,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Остани на овој страници',
     submissionSuccessful: 'Успешно слање',
     submit: 'Потврди',
+    submitting: 'Podnošenje...',
     success: 'Uspeh',
     successfullyCreated: '{{label}} успешно креирано.',
     successfullyDuplicated: '{{label}} успешно дуплицирано.',

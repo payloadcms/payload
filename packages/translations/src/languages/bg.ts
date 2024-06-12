@@ -272,6 +272,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Остани на тази страница',
     submissionSuccessful: 'Успешно подаване.',
     submit: 'Подай',
+    submitting: 'Подаване...',
     success: 'Успех',
     successfullyCreated: '{{label}} успешно създаден.',
     successfullyDuplicated: '{{label}} успешно дупликиран.',

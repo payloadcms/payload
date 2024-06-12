@@ -158,7 +158,7 @@ export const sanitizeFields = async ({
             // config.editor should be sanitized at this point
             field.editor = _config.editor
           } else {
-            throw new MissingEditorProp(field)
+            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
           }
         }
 

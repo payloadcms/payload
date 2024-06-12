@@ -1,4 +1,10 @@
-import type { AuthStrategyFunction } from 'payload/auth.js'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+import type { AuthStrategyFunction } from 'payload/auth'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 import { usersSlug } from './shared.js'
@@ -78,4 +84,7 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

@@ -2,7 +2,7 @@
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { ClientCollectionConfig, FormState } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
 import { Drawer } from '@payloadcms/ui/elements/Drawer'
@@ -34,8 +34,6 @@ export const ExtraFieldsUploadDrawer: React.FC<
     relatedCollection: ClientCollectionConfig
   }
 > = (props) => {
-  const { useModal } = facelessUIImport
-
   const {
     data: { fields, relationTo, value },
     drawerSlug,

@@ -271,6 +271,7 @@ export const viTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Ở lại trang này',
     submissionSuccessful: 'Gửi thành công.',
     submit: 'Gửi',
+    submitting: 'Đang gửi...',
     success: 'Thành công',
     successfullyCreated: '{{label}} đã được tạo thành công.',
     successfullyDuplicated: '{{label}} đã được sao chép thành công.',

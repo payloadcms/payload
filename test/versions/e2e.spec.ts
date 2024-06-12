@@ -55,6 +55,8 @@ import {
   disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftWithMaxCollectionSlug,
+  draftWithMaxGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
 
@@ -135,7 +137,7 @@ describe('versions', () => {
       await page.locator('.delete-documents__toggle').click()
       await page.locator('#confirm-delete').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Deleted 1 Draft Post successfully.',
       )
 
@@ -212,7 +214,7 @@ describe('versions', () => {
       await page.locator('#field-description').fill(description)
       await page.locator('.form-submit .edit-many__publish').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Draft Posts successfully.',
       )
 
@@ -239,7 +241,7 @@ describe('versions', () => {
       await page.locator('#field-description').fill(description)
       await page.locator('.form-submit .edit-many__draft').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Draft Posts successfully.',
       )
 
@@ -350,6 +352,44 @@ describe('versions', () => {
       expect(versionsTab).toBeTruthy()
       const href = await versionsTab.locator('a').first().getAttribute('href')
       expect(href).toBe(`${pathname}/versions`)
+    })
+
+    test('global — respects max number of versions', async () => {
+      await payload.updateGlobal({
+        slug: draftWithMaxGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+
+      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
+      await page.goto(global.global(draftWithMaxGlobalSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldInitial).toHaveValue('updated title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('latest title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
     })
 
     test('global — has versions route', async () => {
@@ -534,6 +574,46 @@ describe('versions', () => {
       await expect(page.locator('.rs__option')).toHaveCount(1)
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
+    })
+
+    test('collection — respects max number of versions', async () => {
+      const maxOneCollection = await payload.create({
+        collection: draftWithMaxCollectionSlug,
+        data: {
+          title: 'initial title',
+          description: 'some description',
+        },
+        draft: true,
+      })
+
+      const collection = new AdminUrlUtil(serverURL, draftWithMaxCollectionSlug)
+      await page.goto(collection.edit(maxOneCollection.id))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldInitial).toHaveValue('updated title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('latest title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
     })
   })
 })

@@ -275,6 +275,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Blijf op deze pagina',
     submissionSuccessful: 'Indiening succesvol.',
     submit: 'Indienen',
+    submitting: 'Inzenden...',
     success: 'Succes',
     successfullyCreated: '{{label}} succesvol aangemaakt.',
     successfullyDuplicated: '{{label}} succesvol gedupliceerd.',

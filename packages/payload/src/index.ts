@@ -2,7 +2,10 @@ import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
 import type pino from 'pino'
 
+import { spawn } from 'child_process'
 import crypto from 'crypto'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
 
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
@@ -55,6 +58,9 @@ import localGlobalOperations from './globals/operations/local/index.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 /**
  * @description Payload
@@ -301,6 +307,31 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     [slug: string]: any // TODO: Type this
   } = {}
 
+  async bin({
+    args,
+    cwd,
+    log,
+  }: {
+    args: string[]
+    cwd?: string
+    log?: boolean
+  }): Promise<{ code: number }> {
+    return new Promise((resolve, reject) => {
+      const spawned = spawn('node', [path.resolve(dirname, '../bin.js'), ...args], {
+        cwd,
+        stdio: log || log === undefined ? 'inherit' : 'ignore',
+      })
+
+      spawned.on('exit', (code) => {
+        resolve({ code })
+      })
+
+      spawned.on('error', (error) => {
+        reject(error)
+      })
+    })
+  }
+
   /**
    * @description delete one or more documents
    * @param options
@@ -362,6 +393,16 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
         customIDType,
       }
     })
+
+    // Generate types on startup
+    if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
+      // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
+      // see: https://github.com/vercel/next.js/issues/66723
+      void this.bin({
+        args: ['generate:types'],
+        log: false,
+      })
+    }
 
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this

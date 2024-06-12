@@ -269,6 +269,7 @@ export const thTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'อยู่หน้านี้ต่อ',
     submissionSuccessful: 'ส่งสำเร็จ',
     submit: 'ส่ง',
+    submitting: 'ส่ง...',
     success: 'ความสำเร็จ',
     successfullyCreated: 'สร้าง {{label}} สำเร็จ',
     successfullyDuplicated: 'สำเนา {{label}} สำเร็จ',

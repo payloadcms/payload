@@ -273,6 +273,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Ostani na ovoj stranici',
     submissionSuccessful: 'Uspješno slanje',
     submit: 'Podnesi',
+    submitting: 'Podnošenje...',
     success: 'Uspjeh',
     successfullyCreated: '{{label}} uspješno kreirano.',
     successfullyDuplicated: '{{label}} uspješno duplicirano.',

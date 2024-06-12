@@ -273,6 +273,7 @@ export const plTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Pozostań na stronie',
     submissionSuccessful: 'Zgłoszenie zakończone powodzeniem.',
     submit: 'Zatwierdź',
+    submitting: 'Przesyłanie...',
     success: 'Sukces',
     successfullyCreated: 'Pomyślnie utworzono {{label}}.',
     successfullyDuplicated: 'Pomyślnie zduplikowano {{label}}',

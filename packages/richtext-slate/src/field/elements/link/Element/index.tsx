@@ -2,7 +2,7 @@
 
 import type { FormState } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
@@ -60,7 +60,6 @@ const insertChange = (editor, fields) => {
 export const LinkElement = () => {
   const { attributes, children, editorRef, element, fieldProps, schemaPath } =
     useElement<LinkElementType>()
-  const { useModal } = facelessUIImport
 
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 

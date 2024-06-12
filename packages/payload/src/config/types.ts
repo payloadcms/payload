@@ -615,7 +615,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapterProvider<any, any, any>
+  editor?: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -719,6 +719,12 @@ export type Config = {
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
+    /**
+     * Automatically generate types during development
+     * @default true
+     */
+    autoGenerate?: boolean
+
     /** Disable declare block in generated types file */
     declare?:
       | {
@@ -732,6 +738,7 @@ export type Config = {
           ignoreTSError?: boolean
         }
       | false
+
     /** Filename to write the generated types to */
     outputFile?: string
   }
@@ -747,7 +754,7 @@ export type SanitizedConfig = Omit<
 > & {
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>

@@ -275,6 +275,7 @@ export const esTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Permanecer en esta página',
     submissionSuccessful: 'Envío realizado correctamente.',
     submit: 'Enviar',
+    submitting: 'Enviando...',
     success: 'Éxito',
     successfullyCreated: '{{label}} creado correctamente.',
     successfullyDuplicated: '{{label}} duplicado correctamente.',

@@ -273,6 +273,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Залишитись на цій сторінці',
     submissionSuccessful: 'Успішно відправлено.',
     submit: 'Відправити',
+    submitting: 'Надсилаємо...',
     success: 'Успіх',
     successfullyCreated: '{{label}} успішно створено.',
     successfullyDuplicated: '{{label}} успішно продубльовано.',

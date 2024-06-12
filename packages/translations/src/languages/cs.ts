@@ -272,6 +272,7 @@ export const csTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Zůstat na této stránce',
     submissionSuccessful: 'Odeslání úspěšné.',
     submit: 'Odeslat',
+    submitting: 'Odesílání...',
     success: 'Úspěch',
     successfullyCreated: '{{label}} úspěšně vytvořeno.',
     successfullyDuplicated: '{{label}} úspěšně duplikováno.',

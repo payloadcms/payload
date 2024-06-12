@@ -275,6 +275,7 @@ export const itTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Rimani su questa pagina',
     submissionSuccessful: 'Invio riuscito.',
     submit: 'Invia',
+    submitting: 'Inviando...',
     success: 'Successo',
     successfullyCreated: '{{label}} creato con successo.',
     successfullyDuplicated: '{{label}} duplicato con successo.',

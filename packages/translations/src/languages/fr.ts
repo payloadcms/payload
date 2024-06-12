@@ -279,6 +279,7 @@ export const frTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Rester sur cette page',
     submissionSuccessful: 'Soumission réussie.',
     submit: 'Soumettre',
+    submitting: 'Soumission...',
     success: 'Succès',
     successfullyCreated: '{{label}} créé(e) avec succès.',
     successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
