@@ -279,8 +279,7 @@ export async function resizeAndTransformImageSizes({
       const metadata = await sharpBase.metadata()
 
       if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
-        let { height: resizeHeight } = imageResizeConfig
-        let { width: resizeWidth } = imageResizeConfig
+        let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
 
         const originalAspectRatio = dimensions.width / dimensions.height
 
