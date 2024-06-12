@@ -8,11 +8,11 @@ export async function cropImage({ cropData, dimensions, file, sharp }) {
   try {
     const { height, width, x, y } = cropData
 
-    const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+    const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimated) sharpOptions.animated = true
+    if (fileIsAnimatedType) sharpOptions.animated = true
 
     const formattedCropData = {
       height: percentToPixel(height, dimensions.height),

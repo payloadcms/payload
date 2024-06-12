@@ -190,6 +190,53 @@ export interface Media {
     };
   };
 }
+export interface AnimatedTypeMedia {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  focalX?: number
+  focalY?: number
+  sizes?: {
+    squareSmall?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedHeight?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedWidth?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedAll?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
@@ -821,6 +868,6 @@ export interface PayloadMigration {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
