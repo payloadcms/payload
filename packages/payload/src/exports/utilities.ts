@@ -1,5 +1,5 @@
 /**
- * WARNING: This file contains exports that can only be safely used on the front-end
+ * WARNING: This file contains exports that can be safely used on the front-end and back-end.
  */
 
 export { createDataloaderCacheKey, getDataLoader } from '../collections/dataloader.js'

@@ -1,0 +1,2900 @@
+{
+  "inputs": {
+    "src/auth/types.ts": { "bytes": 3785, "imports": [], "format": "esm" },
+    "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js": {
+      "bytes": 38665,
+      "imports": [],
+      "format": "cjs"
+    },
+    "src/errors/APIError.ts": {
+      "bytes": 1318,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/parseCookies.ts": {
+      "bytes": 628,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "../errors/APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/auth/extractJWT.ts": {
+      "bytes": 1012,
+      "imports": [
+        {
+          "path": "src/utilities/parseCookies.ts",
+          "kind": "import-statement",
+          "original": "../utilities/parseCookies.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/auth/cookies.ts": { "bytes": 5126, "imports": [], "format": "esm" },
+    "src/auth/index.ts": {
+      "bytes": 102,
+      "imports": [
+        { "path": "src/auth/types.ts", "kind": "import-statement", "original": "./types.js" },
+        {
+          "path": "src/auth/extractJWT.ts",
+          "kind": "import-statement",
+          "original": "./extractJWT.js"
+        },
+        { "path": "src/auth/cookies.ts", "kind": "import-statement", "original": "./cookies.js" }
+      ],
+      "format": "esm"
+    },
+    "src/errors/AuthenticationError.ts": {
+      "bytes": 431,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/DuplicateCollection.ts": {
+      "bytes": 243,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/DuplicateFieldName.ts": {
+      "bytes": 269,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/DuplicateGlobal.ts": {
+      "bytes": 260,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/ErrorDeletingFile.ts": {
+      "bytes": 414,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/FileRetrievalError.ts": {
+      "bytes": 448,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/FileUploadError.ts": {
+      "bytes": 418,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/Forbidden.ts": {
+      "bytes": 420,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/InvalidConfiguration.ts": {
+      "bytes": 225,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/InvalidFieldName.ts": {
+      "bytes": 374,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/InvalidFieldRelationship.ts": {
+      "bytes": 342,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/LockedAuth.ts": {
+      "bytes": 375,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/MissingCollectionLabel.ts": {
+      "bytes": 184,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/config/types.ts": {
+      "bytes": 25256,
+      "imports": [{ "path": "monaco-editor", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/errors/MissingEditorProp.ts": {
+      "bytes": 470,
+      "imports": [
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/MissingFieldInputOptions.ts": {
+      "bytes": 282,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/MissingFieldType.ts": {
+      "bytes": 420,
+      "imports": [
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/MissingFile.ts": {
+      "bytes": 404,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/NotFound.ts": {
+      "bytes": 370,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/QueryError.ts": {
+      "bytes": 416,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/ValidationError.ts": {
+      "bytes": 708,
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/errors/index.ts": {
+      "bytes": 1187,
+      "imports": [
+        {
+          "path": "src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        },
+        {
+          "path": "src/errors/AuthenticationError.ts",
+          "kind": "import-statement",
+          "original": "./AuthenticationError.js"
+        },
+        {
+          "path": "src/errors/DuplicateCollection.ts",
+          "kind": "import-statement",
+          "original": "./DuplicateCollection.js"
+        },
+        {
+          "path": "src/errors/DuplicateFieldName.ts",
+          "kind": "import-statement",
+          "original": "./DuplicateFieldName.js"
+        },
+        {
+          "path": "src/errors/DuplicateGlobal.ts",
+          "kind": "import-statement",
+          "original": "./DuplicateGlobal.js"
+        },
+        {
+          "path": "src/errors/ErrorDeletingFile.ts",
+          "kind": "import-statement",
+          "original": "./ErrorDeletingFile.js"
+        },
+        {
+          "path": "src/errors/FileRetrievalError.ts",
+          "kind": "import-statement",
+          "original": "./FileRetrievalError.js"
+        },
+        {
+          "path": "src/errors/FileUploadError.ts",
+          "kind": "import-statement",
+          "original": "./FileUploadError.js"
+        },
+        {
+          "path": "src/errors/Forbidden.ts",
+          "kind": "import-statement",
+          "original": "./Forbidden.js"
+        },
+        {
+          "path": "src/errors/InvalidConfiguration.ts",
+          "kind": "import-statement",
+          "original": "./InvalidConfiguration.js"
+        },
+        {
+          "path": "src/errors/InvalidFieldName.ts",
+          "kind": "import-statement",
+          "original": "./InvalidFieldName.js"
+        },
+        {
+          "path": "src/errors/InvalidFieldRelationship.ts",
+          "kind": "import-statement",
+          "original": "./InvalidFieldRelationship.js"
+        },
+        {
+          "path": "src/errors/LockedAuth.ts",
+          "kind": "import-statement",
+          "original": "./LockedAuth.js"
+        },
+        {
+          "path": "src/errors/MissingCollectionLabel.ts",
+          "kind": "import-statement",
+          "original": "./MissingCollectionLabel.js"
+        },
+        {
+          "path": "src/errors/MissingEditorProp.ts",
+          "kind": "import-statement",
+          "original": "./MissingEditorProp.js"
+        },
+        {
+          "path": "src/errors/MissingFieldInputOptions.ts",
+          "kind": "import-statement",
+          "original": "./MissingFieldInputOptions.js"
+        },
+        {
+          "path": "src/errors/MissingFieldType.ts",
+          "kind": "import-statement",
+          "original": "./MissingFieldType.js"
+        },
+        {
+          "path": "src/errors/MissingFile.ts",
+          "kind": "import-statement",
+          "original": "./MissingFile.js"
+        },
+        {
+          "path": "src/errors/NotFound.ts",
+          "kind": "import-statement",
+          "original": "./NotFound.js"
+        },
+        {
+          "path": "src/errors/QueryError.ts",
+          "kind": "import-statement",
+          "original": "./QueryError.js"
+        },
+        {
+          "path": "src/errors/ValidationError.ts",
+          "kind": "import-statement",
+          "original": "./ValidationError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/deepCopyObject.ts": { "bytes": 715, "imports": [], "format": "esm" },
+    "src/fields/getDefaultValue.ts": {
+      "bytes": 709,
+      "imports": [
+        {
+          "path": "src/utilities/deepCopyObject.ts",
+          "kind": "import-statement",
+          "original": "../utilities/deepCopyObject.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/afterChange/promise.ts": {
+      "bytes": 5727,
+      "imports": [
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../../config/types.js"
+        },
+        {
+          "path": "src/fields/hooks/afterChange/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./traverseFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/afterChange/traverseFields.ts": {
+      "bytes": 1377,
+      "imports": [
+        {
+          "path": "src/fields/hooks/afterChange/promise.ts",
+          "kind": "import-statement",
+          "original": "./promise.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/dataloader@2.2.2/node_modules/dataloader/index.js": {
+      "bytes": 13974,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js": {
+      "bytes": 9281,
+      "imports": [],
+      "format": "cjs"
+    },
+    "src/utilities/isValidID.ts": {
+      "bytes": 637,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js",
+          "kind": "import-statement",
+          "original": "bson-objectid"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/collections/dataloader.ts": {
+      "bytes": 5118,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/dataloader@2.2.2/node_modules/dataloader/index.js",
+          "kind": "import-statement",
+          "original": "dataloader"
+        },
+        {
+          "path": "src/utilities/isValidID.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isValidID.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/afterRead/relationshipPopulationPromise.ts": {
+      "bytes": 6014,
+      "imports": [
+        {
+          "path": "src/collections/dataloader.ts",
+          "kind": "import-statement",
+          "original": "../../../collections/dataloader.js"
+        },
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../../config/types.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/afterRead/traverseFields.ts": {
+      "bytes": 1926,
+      "imports": [
+        {
+          "path": "src/fields/hooks/afterRead/promise.ts",
+          "kind": "import-statement",
+          "original": "./promise.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/afterRead/promise.ts": {
+      "bytes": 14535,
+      "imports": [
+        {
+          "path": "src/errors/index.ts",
+          "kind": "import-statement",
+          "original": "../../../errors/index.js"
+        },
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../../config/types.js"
+        },
+        {
+          "path": "src/fields/getDefaultValue.ts",
+          "kind": "import-statement",
+          "original": "../../getDefaultValue.js"
+        },
+        {
+          "path": "src/fields/hooks/afterRead/relationshipPopulationPromise.ts",
+          "kind": "import-statement",
+          "original": "./relationshipPopulationPromise.js"
+        },
+        {
+          "path": "src/fields/hooks/afterRead/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./traverseFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/deepmerge@4.3.1/node_modules/deepmerge/dist/cjs.js": {
+      "bytes": 4048,
+      "imports": [],
+      "format": "cjs"
+    },
+    "src/fields/hooks/beforeChange/beforeDuplicate.ts": {
+      "bytes": 285,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/fields/hooks/beforeChange/getExistingRowDoc.ts": {
+      "bytes": 680,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/fields/hooks/beforeChange/promise.ts": {
+      "bytes": 11754,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/deepmerge@4.3.1/node_modules/deepmerge/dist/cjs.js",
+          "kind": "import-statement",
+          "original": "deepmerge"
+        },
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../../config/types.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeChange/beforeDuplicate.ts",
+          "kind": "import-statement",
+          "original": "./beforeDuplicate.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeChange/getExistingRowDoc.ts",
+          "kind": "import-statement",
+          "original": "./getExistingRowDoc.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeChange/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./traverseFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/beforeChange/traverseFields.ts": {
+      "bytes": 2252,
+      "imports": [
+        {
+          "path": "src/fields/hooks/beforeChange/promise.ts",
+          "kind": "import-statement",
+          "original": "./promise.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/beforeChange/cloneDataFromOriginalDoc.ts": {
+      "bytes": 437,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/fields/hooks/beforeValidate/promise.ts": {
+      "bytes": 12764,
+      "imports": [
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../../config/types.js"
+        },
+        {
+          "path": "src/fields/getDefaultValue.ts",
+          "kind": "import-statement",
+          "original": "../../getDefaultValue.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeChange/cloneDataFromOriginalDoc.ts",
+          "kind": "import-statement",
+          "original": "../beforeChange/cloneDataFromOriginalDoc.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeChange/getExistingRowDoc.ts",
+          "kind": "import-statement",
+          "original": "../beforeChange/getExistingRowDoc.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeValidate/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./traverseFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/hooks/beforeValidate/traverseFields.ts": {
+      "bytes": 1411,
+      "imports": [
+        {
+          "path": "src/fields/hooks/beforeValidate/promise.ts",
+          "kind": "import-statement",
+          "original": "./promise.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/sortableFieldTypes.ts": { "bytes": 98, "imports": [], "format": "esm" },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/code.js": {
+      "bytes": 4609,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/scope.js": {
+      "bytes": 5233,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/code.js",
+          "kind": "import-statement",
+          "original": "./code"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js": {
+      "bytes": 23195,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/code.js",
+          "kind": "import-statement",
+          "original": "./code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/scope.js",
+          "kind": "import-statement",
+          "original": "./scope"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js": {
+      "bytes": 7195,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "./codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/code.js",
+          "kind": "import-statement",
+          "original": "./codegen/code"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js": {
+      "bytes": 1481,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "./codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/errors.js": {
+      "bytes": 5884,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "./codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "./util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "./names"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/boolSchema.js": {
+      "bytes": 1654,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/errors.js",
+          "kind": "import-statement",
+          "original": "../errors"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "../names"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/rules.js": {
+      "bytes": 918,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/applicability.js": {
+      "bytes": 853,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/dataType.js": {
+      "bytes": 8622,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/rules.js",
+          "kind": "import-statement",
+          "original": "../rules"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/applicability.js",
+          "kind": "import-statement",
+          "original": "./applicability"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/errors.js",
+          "kind": "import-statement",
+          "original": "../errors"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/defaults.js": {
+      "bytes": 1528,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js": {
+      "bytes": 6381,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "../compile/names"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/keyword.js": {
+      "bytes": 5887,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "../names"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../../vocabularies/code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/errors.js",
+          "kind": "import-statement",
+          "original": "../errors"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/subschema.js": {
+      "bytes": 3938,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal/index.js": {
+      "bytes": 1177,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/json-schema-traverse@1.0.0/node_modules/json-schema-traverse/index.js": {
+      "bytes": 2428,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/resolve.js": {
+      "bytes": 5149,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "./util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal/index.js",
+          "kind": "import-statement",
+          "original": "fast-deep-equal"
+        },
+        {
+          "path": "../../node_modules/.pnpm/json-schema-traverse@1.0.0/node_modules/json-schema-traverse/index.js",
+          "kind": "import-statement",
+          "original": "json-schema-traverse"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/index.js": {
+      "bytes": 21025,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/boolSchema.js",
+          "kind": "import-statement",
+          "original": "./boolSchema"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/dataType.js",
+          "kind": "import-statement",
+          "original": "./dataType"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/applicability.js",
+          "kind": "import-statement",
+          "original": "./applicability"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/defaults.js",
+          "kind": "import-statement",
+          "original": "./defaults"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/keyword.js",
+          "kind": "import-statement",
+          "original": "./keyword"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/subschema.js",
+          "kind": "import-statement",
+          "original": "./subschema"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "../names"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/resolve.js",
+          "kind": "import-statement",
+          "original": "../resolve"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/errors.js",
+          "kind": "import-statement",
+          "original": "../errors"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/validation_error.js": {
+      "bytes": 337,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/ref_error.js": {
+      "bytes": 584,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/resolve.js",
+          "kind": "import-statement",
+          "original": "./resolve"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/index.js": {
+      "bytes": 10320,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "./codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/validation_error.js",
+          "kind": "import-statement",
+          "original": "../runtime/validation_error"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "./names"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/resolve.js",
+          "kind": "import-statement",
+          "original": "./resolve"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "./util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/index.js",
+          "kind": "import-statement",
+          "original": "./validate"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/refs/data.json": {
+      "bytes": 409,
+      "imports": []
+    },
+    "../../node_modules/.pnpm/uri-js@4.4.1/node_modules/uri-js/dist/es5/uri.all.js": {
+      "bytes": 57304,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/uri.js": {
+      "bytes": 249,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/uri-js@4.4.1/node_modules/uri-js/dist/es5/uri.all.js",
+          "kind": "import-statement",
+          "original": "uri-js"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/core.js": {
+      "bytes": 25818,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/index.js",
+          "kind": "import-statement",
+          "original": "./compile/validate"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "./compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/validation_error.js",
+          "kind": "import-statement",
+          "original": "./runtime/validation_error"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/ref_error.js",
+          "kind": "import-statement",
+          "original": "./compile/ref_error"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/rules.js",
+          "kind": "import-statement",
+          "original": "./compile/rules"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/index.js",
+          "kind": "import-statement",
+          "original": "./compile"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/resolve.js",
+          "kind": "import-statement",
+          "original": "./compile/resolve"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/dataType.js",
+          "kind": "import-statement",
+          "original": "./compile/validate/dataType"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "./compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/refs/data.json",
+          "kind": "import-statement",
+          "original": "./refs/data.json"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/uri.js",
+          "kind": "import-statement",
+          "original": "./runtime/uri"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/id.js": {
+      "bytes": 267,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/ref.js": {
+      "bytes": 5574,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/ref_error.js",
+          "kind": "import-statement",
+          "original": "../../compile/ref_error"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "../../compile/names"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/index.js",
+          "kind": "import-statement",
+          "original": "../../compile"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/index.js": {
+      "bytes": 421,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/id.js",
+          "kind": "import-statement",
+          "original": "./id"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/ref.js",
+          "kind": "import-statement",
+          "original": "./ref"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitNumber.js": {
+      "bytes": 1101,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/multipleOf.js": {
+      "bytes": 1088,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/ucs2length.js": {
+      "bytes": 808,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitLength.js": {
+      "bytes": 1325,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/ucs2length.js",
+          "kind": "import-statement",
+          "original": "../../runtime/ucs2length"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/pattern.js": {
+      "bytes": 1007,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitProperties.js": {
+      "bytes": 961,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/required.js": {
+      "bytes": 3349,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitItems.js": {
+      "bytes": 917,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/equal.js": {
+      "bytes": 335,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal/index.js",
+          "kind": "import-statement",
+          "original": "fast-deep-equal"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js": {
+      "bytes": 3307,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/dataType.js",
+          "kind": "import-statement",
+          "original": "../../compile/validate/dataType"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/equal.js",
+          "kind": "import-statement",
+          "original": "../../runtime/equal"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/const.js": {
+      "bytes": 1037,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/equal.js",
+          "kind": "import-statement",
+          "original": "../../runtime/equal"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/enum.js": {
+      "bytes": 2086,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/equal.js",
+          "kind": "import-statement",
+          "original": "../../runtime/equal"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/index.js": {
+      "bytes": 1490,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitNumber.js",
+          "kind": "import-statement",
+          "original": "./limitNumber"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/multipleOf.js",
+          "kind": "import-statement",
+          "original": "./multipleOf"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitLength.js",
+          "kind": "import-statement",
+          "original": "./limitLength"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/pattern.js",
+          "kind": "import-statement",
+          "original": "./pattern"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitProperties.js",
+          "kind": "import-statement",
+          "original": "./limitProperties"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/required.js",
+          "kind": "import-statement",
+          "original": "./required"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitItems.js",
+          "kind": "import-statement",
+          "original": "./limitItems"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js",
+          "kind": "import-statement",
+          "original": "./uniqueItems"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/const.js",
+          "kind": "import-statement",
+          "original": "./const"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/enum.js",
+          "kind": "import-statement",
+          "original": "./enum"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js": {
+      "bytes": 2055,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items.js": {
+      "bytes": 2154,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js": {
+      "bytes": 391,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items.js",
+          "kind": "import-statement",
+          "original": "./items"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items2020.js": {
+      "bytes": 1255,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js",
+          "kind": "import-statement",
+          "original": "./additionalItems"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/contains.js": {
+      "bytes": 3804,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/dependencies.js": {
+      "bytes": 3359,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js": {
+      "bytes": 1345,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js": {
+      "bytes": 4531,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js",
+          "kind": "import-statement",
+          "original": "../../compile/names"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/properties.js": {
+      "bytes": 2383,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/validate"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js",
+          "kind": "import-statement",
+          "original": "./additionalProperties"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js": {
+      "bytes": 3395,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/not.js": {
+      "bytes": 832,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/anyOf.js": {
+      "bytes": 380,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js",
+          "kind": "import-statement",
+          "original": "../code"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/oneOf.js": {
+      "bytes": 2381,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/allOf.js": {
+      "bytes": 815,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/if.js": {
+      "bytes": 2562,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/thenElse.js": {
+      "bytes": 505,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/index.js": {
+      "bytes": 2257,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js",
+          "kind": "import-statement",
+          "original": "./additionalItems"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js",
+          "kind": "import-statement",
+          "original": "./prefixItems"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items.js",
+          "kind": "import-statement",
+          "original": "./items"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items2020.js",
+          "kind": "import-statement",
+          "original": "./items2020"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/contains.js",
+          "kind": "import-statement",
+          "original": "./contains"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/dependencies.js",
+          "kind": "import-statement",
+          "original": "./dependencies"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js",
+          "kind": "import-statement",
+          "original": "./propertyNames"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js",
+          "kind": "import-statement",
+          "original": "./additionalProperties"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/properties.js",
+          "kind": "import-statement",
+          "original": "./properties"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js",
+          "kind": "import-statement",
+          "original": "./patternProperties"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/not.js",
+          "kind": "import-statement",
+          "original": "./not"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/anyOf.js",
+          "kind": "import-statement",
+          "original": "./anyOf"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/oneOf.js",
+          "kind": "import-statement",
+          "original": "./oneOf"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/allOf.js",
+          "kind": "import-statement",
+          "original": "./allOf"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/if.js",
+          "kind": "import-statement",
+          "original": "./if"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/thenElse.js",
+          "kind": "import-statement",
+          "original": "./thenElse"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/format/format.js": {
+      "bytes": 4382,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/format/index.js": {
+      "bytes": 248,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/format/format.js",
+          "kind": "import-statement",
+          "original": "./format"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/metadata.js": {
+      "bytes": 427,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/draft7.js": {
+      "bytes": 768,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/index.js",
+          "kind": "import-statement",
+          "original": "./core"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/index.js",
+          "kind": "import-statement",
+          "original": "./validation"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/index.js",
+          "kind": "import-statement",
+          "original": "./applicator"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/format/index.js",
+          "kind": "import-statement",
+          "original": "./format"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/metadata.js",
+          "kind": "import-statement",
+          "original": "./metadata"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/discriminator/types.js": {
+      "bytes": 308,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/discriminator/index.js": {
+      "bytes": 5154,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "../../compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/discriminator/types.js",
+          "kind": "import-statement",
+          "original": "../discriminator/types"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/index.js",
+          "kind": "import-statement",
+          "original": "../../compile"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/ref_error.js",
+          "kind": "import-statement",
+          "original": "../../compile/ref_error"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js",
+          "kind": "import-statement",
+          "original": "../../compile/util"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/refs/json-schema-draft-07.json": {
+      "bytes": 3811,
+      "imports": []
+    },
+    "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/ajv.js": {
+      "bytes": 3353,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/core.js",
+          "kind": "import-statement",
+          "original": "./core"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/draft7.js",
+          "kind": "import-statement",
+          "original": "./vocabularies/draft7"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/discriminator/index.js",
+          "kind": "import-statement",
+          "original": "./vocabularies/discriminator"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/refs/json-schema-draft-07.json",
+          "kind": "import-statement",
+          "original": "./refs/json-schema-draft-07.json"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/index.js",
+          "kind": "import-statement",
+          "original": "./compile/validate"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js",
+          "kind": "import-statement",
+          "original": "./compile/codegen"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/validation_error.js",
+          "kind": "import-statement",
+          "original": "./runtime/validation_error"
+        },
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/ref_error.js",
+          "kind": "import-statement",
+          "original": "./compile/ref_error"
+        }
+      ],
+      "format": "cjs"
+    },
+    "src/utilities/isNumber.ts": { "bytes": 223, "imports": [], "format": "esm" },
+    "src/fields/validations.ts": {
+      "bytes": 17001,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/ajv.js",
+          "kind": "import-statement",
+          "original": "ajv"
+        },
+        {
+          "path": "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js",
+          "kind": "import-statement",
+          "original": "bson-objectid"
+        },
+        {
+          "path": "src/utilities/isNumber.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isNumber.js"
+        },
+        {
+          "path": "src/utilities/isValidID.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isValidID.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/translations/getLocalI18n.ts": {
+      "bytes": 382,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/types/constants.ts": { "bytes": 252, "imports": [], "format": "esm" },
+    "src/types/index.ts": { "bytes": 3362, "imports": [], "format": "esm" },
+    "src/uploads/formatFilesize.ts": { "bytes": 364, "imports": [], "format": "esm" },
+    "src/uploads/isImage.ts": { "bytes": 196, "imports": [], "format": "esm" },
+    "src/utilities/combineMerge.ts": {
+      "bytes": 519,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/deepmerge@4.3.1/node_modules/deepmerge/dist/cjs.js",
+          "kind": "import-statement",
+          "original": "deepmerge"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/pluralize.js": {
+      "bytes": 12618,
+      "imports": [{ "path": "<runtime>", "kind": "import-statement", "external": true }],
+      "format": "cjs"
+    },
+    "src/utilities/formatLabels.ts": {
+      "bytes": 1363,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/pluralize.js",
+          "kind": "import-statement",
+          "original": "pluralize"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/getCollectionIDFieldTypes.ts": { "bytes": 921, "imports": [], "format": "esm" },
+    "src/utilities/configToJSONSchema.ts": {
+      "bytes": 19662,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/pluralize.js",
+          "kind": "import-statement",
+          "original": "pluralize"
+        },
+        {
+          "path": "src/errors/MissingEditorProp.ts",
+          "kind": "import-statement",
+          "original": "../errors/MissingEditorProp.js"
+        },
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "src/utilities/deepCopyObject.ts",
+          "kind": "import-statement",
+          "original": "./deepCopyObject.js"
+        },
+        {
+          "path": "src/utilities/formatLabels.ts",
+          "kind": "import-statement",
+          "original": "./formatLabels.js"
+        },
+        {
+          "path": "src/utilities/getCollectionIDFieldTypes.ts",
+          "kind": "import-statement",
+          "original": "./getCollectionIDFieldTypes.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/createArrayFromCommaDelineated.ts": {
+      "bytes": 199,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/utilities/createLocalReq.ts": {
+      "bytes": 3400,
+      "imports": [
+        {
+          "path": "src/collections/dataloader.ts",
+          "kind": "import-statement",
+          "original": "../collections/dataloader.js"
+        },
+        {
+          "path": "src/translations/getLocalI18n.ts",
+          "kind": "import-statement",
+          "original": "../translations/getLocalI18n.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/deepMerge.ts": { "bytes": 380, "imports": [], "format": "esm" },
+    "src/utilities/fieldSchemaToJSON.ts": { "bytes": 2973, "imports": [], "format": "esm" },
+    "src/utilities/flattenTopLevelFields.ts": {
+      "bytes": 1460,
+      "imports": [
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/getObjectDotNotation.ts": { "bytes": 286, "imports": [], "format": "esm" },
+    "src/utilities/getUniqueListBy.ts": { "bytes": 144, "imports": [], "format": "esm" },
+    "src/utilities/isEntityHidden.ts": { "bytes": 495, "imports": [], "format": "esm" },
+    "src/utilities/isPlainObject.ts": { "bytes": 789, "imports": [], "format": "esm" },
+    "src/utilities/isReactComponent.ts": {
+      "bytes": 1823,
+      "imports": [
+        {
+          "path": "src/utilities/isPlainObject.ts",
+          "kind": "import-statement",
+          "original": "./isPlainObject.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/isolateObjectProperty.ts": { "bytes": 937, "imports": [], "format": "esm" },
+    "src/utilities/mapAsync.ts": { "bytes": 178, "imports": [], "format": "esm" },
+    "src/utilities/mergeListSearchAndWhere.ts": {
+      "bytes": 1830,
+      "imports": [
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "src/utilities/flattenTopLevelFields.ts",
+          "kind": "import-statement",
+          "original": "./flattenTopLevelFields.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/setsAreEqual.ts": { "bytes": 125, "imports": [], "format": "esm" },
+    "src/utilities/toKebabCase.ts": { "bytes": 155, "imports": [], "format": "esm" },
+    "src/utilities/wait.ts": { "bytes": 104, "imports": [], "format": "esm" },
+    "src/utilities/wordBoundariesRegex.ts": { "bytes": 676, "imports": [], "format": "esm" },
+    "src/versions/buildCollectionFields.ts": { "bytes": 1161, "imports": [], "format": "esm" },
+    "src/versions/buildGlobalFields.ts": { "bytes": 909, "imports": [], "format": "esm" },
+    "src/versions/defaults.ts": { "bytes": 61, "imports": [], "format": "esm" },
+    "src/versions/deleteCollectionVersions.ts": { "bytes": 627, "imports": [], "format": "esm" },
+    "src/versions/enforceMaxVersions.ts": { "bytes": 1829, "imports": [], "format": "esm" },
+    "src/versions/getLatestCollectionVersion.ts": {
+      "bytes": 1251,
+      "imports": [
+        {
+          "path": "src/types/index.ts",
+          "kind": "import-statement",
+          "original": "../types/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/versions/getLatestGlobalVersion.ts": {
+      "bytes": 1323,
+      "imports": [
+        {
+          "path": "src/types/index.ts",
+          "kind": "import-statement",
+          "original": "../types/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/sanitizeInternalFields.ts": { "bytes": 456, "imports": [], "format": "esm" },
+    "src/versions/saveVersion.ts": {
+      "bytes": 4483,
+      "imports": [
+        {
+          "path": "src/utilities/deepCopyObject.ts",
+          "kind": "import-statement",
+          "original": "../utilities/deepCopyObject.js"
+        },
+        {
+          "path": "src/utilities/sanitizeInternalFields.ts",
+          "kind": "import-statement",
+          "original": "../utilities/sanitizeInternalFields.js"
+        },
+        {
+          "path": "src/versions/enforceMaxVersions.ts",
+          "kind": "import-statement",
+          "original": "./enforceMaxVersions.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/bundle.ts": {
+      "bytes": 8982,
+      "imports": [
+        { "path": "src/auth/index.ts", "kind": "import-statement", "original": "./auth/index.js" },
+        {
+          "path": "src/errors/index.ts",
+          "kind": "import-statement",
+          "original": "./errors/index.js"
+        },
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "./fields/config/types.js"
+        },
+        {
+          "path": "src/fields/getDefaultValue.ts",
+          "kind": "import-statement",
+          "original": "./fields/getDefaultValue.js"
+        },
+        {
+          "path": "src/fields/hooks/afterChange/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./fields/hooks/afterChange/traverseFields.js"
+        },
+        {
+          "path": "src/fields/hooks/afterRead/promise.ts",
+          "kind": "import-statement",
+          "original": "./fields/hooks/afterRead/promise.js"
+        },
+        {
+          "path": "src/fields/hooks/afterRead/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./fields/hooks/afterRead/traverseFields.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeChange/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./fields/hooks/beforeChange/traverseFields.js"
+        },
+        {
+          "path": "src/fields/hooks/beforeValidate/traverseFields.ts",
+          "kind": "import-statement",
+          "original": "./fields/hooks/beforeValidate/traverseFields.js"
+        },
+        {
+          "path": "src/fields/sortableFieldTypes.ts",
+          "kind": "import-statement",
+          "original": "./fields/sortableFieldTypes.js"
+        },
+        {
+          "path": "src/fields/validations.ts",
+          "kind": "import-statement",
+          "original": "./fields/validations.js"
+        },
+        {
+          "path": "src/translations/getLocalI18n.ts",
+          "kind": "import-statement",
+          "original": "./translations/getLocalI18n.js"
+        },
+        {
+          "path": "src/types/constants.ts",
+          "kind": "import-statement",
+          "original": "./types/constants.js"
+        },
+        {
+          "path": "src/types/index.ts",
+          "kind": "import-statement",
+          "original": "./types/index.js"
+        },
+        {
+          "path": "src/uploads/formatFilesize.ts",
+          "kind": "import-statement",
+          "original": "./uploads/formatFilesize.js"
+        },
+        {
+          "path": "src/uploads/isImage.ts",
+          "kind": "import-statement",
+          "original": "./uploads/isImage.js"
+        },
+        {
+          "path": "src/utilities/combineMerge.ts",
+          "kind": "import-statement",
+          "original": "./utilities/combineMerge.js"
+        },
+        {
+          "path": "src/utilities/configToJSONSchema.ts",
+          "kind": "import-statement",
+          "original": "./utilities/configToJSONSchema.js"
+        },
+        {
+          "path": "src/utilities/createArrayFromCommaDelineated.ts",
+          "kind": "import-statement",
+          "original": "./utilities/createArrayFromCommaDelineated.js"
+        },
+        {
+          "path": "src/utilities/createLocalReq.ts",
+          "kind": "import-statement",
+          "original": "./utilities/createLocalReq.js"
+        },
+        {
+          "path": "src/utilities/deepCopyObject.ts",
+          "kind": "import-statement",
+          "original": "./utilities/deepCopyObject.js"
+        },
+        {
+          "path": "src/utilities/deepMerge.ts",
+          "kind": "import-statement",
+          "original": "./utilities/deepMerge.js"
+        },
+        {
+          "path": "src/utilities/fieldSchemaToJSON.ts",
+          "kind": "import-statement",
+          "original": "./utilities/fieldSchemaToJSON.js"
+        },
+        {
+          "path": "src/utilities/flattenTopLevelFields.ts",
+          "kind": "import-statement",
+          "original": "./utilities/flattenTopLevelFields.js"
+        },
+        {
+          "path": "src/utilities/formatLabels.ts",
+          "kind": "import-statement",
+          "original": "./utilities/formatLabels.js"
+        },
+        {
+          "path": "src/utilities/getCollectionIDFieldTypes.ts",
+          "kind": "import-statement",
+          "original": "./utilities/getCollectionIDFieldTypes.js"
+        },
+        {
+          "path": "src/utilities/getObjectDotNotation.ts",
+          "kind": "import-statement",
+          "original": "./utilities/getObjectDotNotation.js"
+        },
+        {
+          "path": "src/utilities/getUniqueListBy.ts",
+          "kind": "import-statement",
+          "original": "./utilities/getUniqueListBy.js"
+        },
+        {
+          "path": "src/utilities/isEntityHidden.ts",
+          "kind": "import-statement",
+          "original": "./utilities/isEntityHidden.js"
+        },
+        {
+          "path": "src/utilities/isNumber.ts",
+          "kind": "import-statement",
+          "original": "./utilities/isNumber.js"
+        },
+        {
+          "path": "src/utilities/isPlainObject.ts",
+          "kind": "import-statement",
+          "original": "./utilities/isPlainObject.js"
+        },
+        {
+          "path": "src/utilities/isReactComponent.ts",
+          "kind": "import-statement",
+          "original": "./utilities/isReactComponent.js"
+        },
+        {
+          "path": "src/utilities/isValidID.ts",
+          "kind": "import-statement",
+          "original": "./utilities/isValidID.js"
+        },
+        {
+          "path": "src/utilities/isolateObjectProperty.ts",
+          "kind": "import-statement",
+          "original": "./utilities/isolateObjectProperty.js"
+        },
+        {
+          "path": "src/utilities/mapAsync.ts",
+          "kind": "import-statement",
+          "original": "./utilities/mapAsync.js"
+        },
+        {
+          "path": "src/utilities/mergeListSearchAndWhere.ts",
+          "kind": "import-statement",
+          "original": "./utilities/mergeListSearchAndWhere.js"
+        },
+        {
+          "path": "src/utilities/setsAreEqual.ts",
+          "kind": "import-statement",
+          "original": "./utilities/setsAreEqual.js"
+        },
+        {
+          "path": "src/utilities/toKebabCase.ts",
+          "kind": "import-statement",
+          "original": "./utilities/toKebabCase.js"
+        },
+        {
+          "path": "src/utilities/wait.ts",
+          "kind": "import-statement",
+          "original": "./utilities/wait.js"
+        },
+        {
+          "path": "src/utilities/wordBoundariesRegex.ts",
+          "kind": "import-statement",
+          "original": "./utilities/wordBoundariesRegex.js"
+        },
+        {
+          "path": "src/versions/buildCollectionFields.ts",
+          "kind": "import-statement",
+          "original": "./versions/buildCollectionFields.js"
+        },
+        {
+          "path": "src/versions/buildGlobalFields.ts",
+          "kind": "import-statement",
+          "original": "./versions/buildGlobalFields.js"
+        },
+        {
+          "path": "src/versions/defaults.ts",
+          "kind": "import-statement",
+          "original": "./versions/defaults.js"
+        },
+        {
+          "path": "src/versions/deleteCollectionVersions.ts",
+          "kind": "import-statement",
+          "original": "./versions/deleteCollectionVersions.js"
+        },
+        {
+          "path": "src/versions/enforceMaxVersions.ts",
+          "kind": "import-statement",
+          "original": "./versions/enforceMaxVersions.js"
+        },
+        {
+          "path": "src/versions/getLatestCollectionVersion.ts",
+          "kind": "import-statement",
+          "original": "./versions/getLatestCollectionVersion.js"
+        },
+        {
+          "path": "src/versions/getLatestGlobalVersion.ts",
+          "kind": "import-statement",
+          "original": "./versions/getLatestGlobalVersion.js"
+        },
+        {
+          "path": "src/versions/saveVersion.ts",
+          "kind": "import-statement",
+          "original": "./versions/saveVersion.js"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "dist/bundle.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 832953 },
+    "dist/bundle.js": {
+      "imports": [
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@payloadcms/translations/languages/en",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+      ],
+      "exports": [
+        "APIError",
+        "AuthenticationError",
+        "DuplicateCollection",
+        "DuplicateFieldName",
+        "DuplicateGlobal",
+        "ErrorDeletingFile",
+        "FileRetrievalError",
+        "FileUploadError",
+        "Forbidden",
+        "InvalidConfiguration",
+        "InvalidFieldName",
+        "InvalidFieldRelationship",
+        "LockedAuth",
+        "MissingCollectionLabel",
+        "MissingEditorProp",
+        "MissingFieldInputOptions",
+        "MissingFieldType",
+        "MissingFile",
+        "NotFound",
+        "QueryError",
+        "ValidationError",
+        "afterChangeTraverseFields",
+        "afterReadPromise",
+        "afterReadTraverseFields",
+        "array",
+        "beforeChangeTraverseFields",
+        "beforeValidateTraverseFields",
+        "blocks",
+        "buildVersionCollectionFields",
+        "buildVersionGlobalFields",
+        "checkbox",
+        "code",
+        "combineMerge",
+        "configToJSONSchema",
+        "createArrayFromCommaDelineated",
+        "createLocalReq",
+        "date",
+        "deepCopyObject",
+        "deepMerge",
+        "deleteCollectionVersions",
+        "docHasTimestamps",
+        "email",
+        "enforceMaxVersions",
+        "entityToJSONSchema",
+        "fieldAffectsData",
+        "fieldHasMaxDepth",
+        "fieldHasSubFields",
+        "fieldIsArrayType",
+        "fieldIsBlockType",
+        "fieldIsGroupType",
+        "fieldIsLocalized",
+        "fieldIsPresentationalOnly",
+        "fieldSchemaToJSON",
+        "fieldSupportsMany",
+        "fieldsToJSONSchema",
+        "flattenTopLevelFields",
+        "formatFilesize",
+        "formatLabels",
+        "formatNames",
+        "getCollectionIDFieldTypes",
+        "getDefaultValue",
+        "getLatestCollectionVersion",
+        "getLatestGlobalVersion",
+        "getLocalI18n",
+        "getObjectDotNotation",
+        "getUniqueListBy",
+        "isEntityHidden",
+        "isImage",
+        "isNumber",
+        "isPlainObject",
+        "isReactClientComponent",
+        "isReactComponentOrFunction",
+        "isReactServerComponentOrFunction",
+        "isValidID",
+        "isolateObjectProperty",
+        "json",
+        "mapAsync",
+        "mergeListSearchAndWhere",
+        "number",
+        "optionIsObject",
+        "optionIsValue",
+        "optionsAreObjects",
+        "password",
+        "point",
+        "radio",
+        "relationship",
+        "richText",
+        "saveVersion",
+        "select",
+        "setsAreEqual",
+        "sortableFieldTypes",
+        "tabHasName",
+        "text",
+        "textarea",
+        "toKebabCase",
+        "toWords",
+        "upload",
+        "validOperators",
+        "valueIsValueWithRelation",
+        "versionDefaults",
+        "wait",
+        "withNullableJSONSchemaType",
+        "wordBoundariesRegex"
+      ],
+      "entryPoint": "src/bundle.ts",
+      "inputs": {
+        "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js": {
+          "bytesInOutput": 21226
+        },
+        "../../node_modules/.pnpm/dataloader@2.2.2/node_modules/dataloader/index.js": {
+          "bytesInOutput": 4410
+        },
+        "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js": {
+          "bytesInOutput": 3559
+        },
+        "../../node_modules/.pnpm/deepmerge@4.3.1/node_modules/deepmerge/dist/cjs.js": {
+          "bytesInOutput": 1638
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/code.js": {
+          "bytesInOutput": 2551
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/scope.js": {
+          "bytesInOutput": 2593
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/codegen/index.js": {
+          "bytesInOutput": 11795
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/util.js": {
+          "bytesInOutput": 3623
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/names.js": {
+          "bytesInOutput": 637
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/errors.js": {
+          "bytesInOutput": 3146
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/boolSchema.js": {
+          "bytesInOutput": 714
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/rules.js": {
+          "bytesInOutput": 570
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/applicability.js": {
+          "bytesInOutput": 480
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/dataType.js": {
+          "bytesInOutput": 4187
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/defaults.js": {
+          "bytesInOutput": 705
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/code.js": {
+          "bytesInOutput": 3209
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/keyword.js": {
+          "bytesInOutput": 3020
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/subschema.js": {
+          "bytesInOutput": 2003
+        },
+        "../../node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal/index.js": {
+          "bytesInOutput": 736
+        },
+        "../../node_modules/.pnpm/json-schema-traverse@1.0.0/node_modules/json-schema-traverse/index.js": {
+          "bytesInOutput": 1246
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/resolve.js": {
+          "bytesInOutput": 2129
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/validate/index.js": {
+          "bytesInOutput": 10365
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/validation_error.js": {
+          "bytesInOutput": 206
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/ref_error.js": {
+          "bytesInOutput": 331
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/compile/index.js": {
+          "bytesInOutput": 4781
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/refs/data.json": {
+          "bytesInOutput": 349
+        },
+        "../../node_modules/.pnpm/uri-js@4.4.1/node_modules/uri-js/dist/es5/uri.all.js": {
+          "bytesInOutput": 18913
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/uri.js": {
+          "bytesInOutput": 163
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/core.js": {
+          "bytesInOutput": 12446
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/id.js": {
+          "bytesInOutput": 195
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/ref.js": {
+          "bytesInOutput": 2472
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/core/index.js": {
+          "bytesInOutput": 238
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitNumber.js": {
+          "bytesInOutput": 674
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/multipleOf.js": {
+          "bytesInOutput": 559
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/ucs2length.js": {
+          "bytesInOutput": 301
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitLength.js": {
+          "bytesInOutput": 671
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/pattern.js": {
+          "bytesInOutput": 522
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitProperties.js": {
+          "bytesInOutput": 557
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/required.js": {
+          "bytesInOutput": 1442
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/limitItems.js": {
+          "bytesInOutput": 518
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/runtime/equal.js": {
+          "bytesInOutput": 165
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js": {
+          "bytesInOutput": 1558
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/const.js": {
+          "bytesInOutput": 481
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/enum.js": {
+          "bytesInOutput": 963
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/validation/index.js": {
+          "bytesInOutput": 542
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js": {
+          "bytesInOutput": 1115
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items.js": {
+          "bytesInOutput": 1117
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js": {
+          "bytesInOutput": 235
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/items2020.js": {
+          "bytesInOutput": 589
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/contains.js": {
+          "bytesInOutput": 1759
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/dependencies.js": {
+          "bytesInOutput": 1607
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js": {
+          "bytesInOutput": 655
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js": {
+          "bytesInOutput": 1800
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/properties.js": {
+          "bytesInOutput": 1051
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js": {
+          "bytesInOutput": 1217
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/not.js": {
+          "bytesInOutput": 443
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/anyOf.js": {
+          "bytesInOutput": 237
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/oneOf.js": {
+          "bytesInOutput": 937
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/allOf.js": {
+          "bytesInOutput": 415
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/if.js": {
+          "bytesInOutput": 1130
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/thenElse.js": {
+          "bytesInOutput": 286
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/applicator/index.js": {
+          "bytesInOutput": 725
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/format/format.js": {
+          "bytesInOutput": 1957
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/format/index.js": {
+          "bytesInOutput": 129
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/metadata.js": {
+          "bytesInOutput": 308
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/draft7.js": {
+          "bytesInOutput": 311
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/discriminator/types.js": {
+          "bytesInOutput": 181
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/vocabularies/discriminator/index.js": {
+          "bytesInOutput": 2364
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/refs/json-schema-draft-07.json": {
+          "bytesInOutput": 2472
+        },
+        "../../node_modules/.pnpm/ajv@8.14.0/node_modules/ajv/dist/ajv.js": {
+          "bytesInOutput": 1813
+        },
+        "../../node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/pluralize.js": {
+          "bytesInOutput": 5816
+        },
+        "src/errors/APIError.ts": { "bytesInOutput": 363 },
+        "src/errors/index.ts": { "bytesInOutput": 0 },
+        "src/errors/AuthenticationError.ts": { "bytesInOutput": 233 },
+        "src/errors/DuplicateCollection.ts": { "bytesInOutput": 101 },
+        "src/errors/DuplicateFieldName.ts": { "bytesInOutput": 150 },
+        "src/errors/DuplicateGlobal.ts": { "bytesInOutput": 93 },
+        "src/errors/ErrorDeletingFile.ts": { "bytesInOutput": 218 },
+        "src/errors/FileRetrievalError.ts": { "bytesInOutput": 206 },
+        "src/errors/FileUploadError.ts": { "bytesInOutput": 224 },
+        "src/errors/Forbidden.ts": { "bytesInOutput": 232 },
+        "src/errors/InvalidConfiguration.ts": { "bytesInOutput": 99 },
+        "src/errors/InvalidFieldName.ts": { "bytesInOutput": 159 },
+        "src/errors/InvalidFieldRelationship.ts": { "bytesInOutput": 101 },
+        "src/errors/LockedAuth.ts": { "bytesInOutput": 205 },
+        "src/errors/MissingCollectionLabel.ts": { "bytesInOutput": 98 },
+        "src/fields/config/types.ts": { "bytesInOutput": 760 },
+        "src/errors/MissingEditorProp.ts": { "bytesInOutput": 221 },
+        "src/errors/MissingFieldInputOptions.ts": { "bytesInOutput": 86 },
+        "src/errors/MissingFieldType.ts": { "bytesInOutput": 156 },
+        "src/errors/MissingFile.ts": { "bytesInOutput": 214 },
+        "src/errors/NotFound.ts": { "bytesInOutput": 202 },
+        "src/errors/QueryError.ts": { "bytesInOutput": 195 },
+        "src/errors/ValidationError.ts": { "bytesInOutput": 362 },
+        "src/bundle.ts": { "bytesInOutput": 0 },
+        "src/utilities/deepCopyObject.ts": { "bytesInOutput": 279 },
+        "src/fields/getDefaultValue.ts": { "bytesInOutput": 144 },
+        "src/fields/hooks/afterChange/promise.ts": { "bytesInOutput": 1998 },
+        "src/fields/hooks/afterChange/traverseFields.ts": { "bytesInOutput": 346 },
+        "src/collections/dataloader.ts": { "bytesInOutput": 1082 },
+        "src/utilities/isValidID.ts": { "bytesInOutput": 278 },
+        "src/fields/hooks/afterRead/relationshipPopulationPromise.ts": { "bytesInOutput": 2192 },
+        "src/fields/hooks/afterRead/traverseFields.ts": { "bytesInOutput": 573 },
+        "src/fields/hooks/afterRead/promise.ts": { "bytesInOutput": 5398 },
+        "src/fields/hooks/beforeChange/promise.ts": { "bytesInOutput": 4125 },
+        "src/fields/hooks/beforeChange/beforeDuplicate.ts": { "bytesInOutput": 111 },
+        "src/fields/hooks/beforeChange/getExistingRowDoc.ts": { "bytesInOutput": 130 },
+        "src/fields/hooks/beforeChange/traverseFields.ts": { "bytesInOutput": 500 },
+        "src/fields/hooks/beforeChange/cloneDataFromOriginalDoc.ts": { "bytesInOutput": 112 },
+        "src/fields/hooks/beforeValidate/promise.ts": { "bytesInOutput": 4156 },
+        "src/fields/hooks/beforeValidate/traverseFields.ts": { "bytesInOutput": 320 },
+        "src/fields/sortableFieldTypes.ts": { "bytesInOutput": 82 },
+        "src/fields/validations.ts": { "bytesInOutput": 7032 },
+        "src/utilities/isNumber.ts": { "bytesInOutput": 93 },
+        "src/translations/getLocalI18n.ts": { "bytesInOutput": 135 },
+        "src/types/constants.ts": { "bytesInOutput": 173 },
+        "src/types/index.ts": { "bytesInOutput": 49 },
+        "src/uploads/formatFilesize.ts": { "bytesInOutput": 206 },
+        "src/uploads/isImage.ts": { "bytesInOutput": 116 },
+        "src/utilities/combineMerge.ts": { "bytesInOutput": 216 },
+        "src/utilities/configToJSONSchema.ts": { "bytesInOutput": 5100 },
+        "src/utilities/formatLabels.ts": { "bytesInOutput": 479 },
+        "src/utilities/getCollectionIDFieldTypes.ts": { "bytesInOutput": 230 },
+        "src/utilities/createArrayFromCommaDelineated.ts": { "bytesInOutput": 76 },
+        "src/utilities/createLocalReq.ts": { "bytesInOutput": 1212 },
+        "src/utilities/deepMerge.ts": { "bytesInOutput": 178 },
+        "src/utilities/fieldSchemaToJSON.ts": { "bytesInOutput": 798 },
+        "src/utilities/flattenTopLevelFields.ts": { "bytesInOutput": 211 },
+        "src/utilities/getObjectDotNotation.ts": { "bytesInOutput": 102 },
+        "src/utilities/getUniqueListBy.ts": { "bytesInOutput": 65 },
+        "src/utilities/isEntityHidden.ts": { "bytesInOutput": 68 },
+        "src/utilities/isPlainObject.ts": { "bytesInOutput": 300 },
+        "src/utilities/isReactComponent.ts": { "bytesInOutput": 338 },
+        "src/utilities/isolateObjectProperty.ts": { "bytesInOutput": 271 },
+        "src/utilities/mapAsync.ts": { "bytesInOutput": 52 },
+        "src/utilities/mergeListSearchAndWhere.ts": { "bytesInOutput": 404 },
+        "src/utilities/setsAreEqual.ts": { "bytesInOutput": 57 },
+        "src/utilities/toKebabCase.ts": { "bytesInOutput": 87 },
+        "src/utilities/wait.ts": { "bytesInOutput": 62 },
+        "src/utilities/wordBoundariesRegex.ts": { "bytesInOutput": 244 },
+        "src/versions/buildCollectionFields.ts": { "bytesInOutput": 491 },
+        "src/versions/buildGlobalFields.ts": { "bytesInOutput": 370 },
+        "src/versions/defaults.ts": { "bytesInOutput": 30 },
+        "src/versions/deleteCollectionVersions.ts": { "bytesInOutput": 231 },
+        "src/versions/enforceMaxVersions.ts": { "bytesInOutput": 615 },
+        "src/versions/getLatestCollectionVersion.ts": { "bytesInOutput": 367 },
+        "src/versions/getLatestGlobalVersion.ts": { "bytesInOutput": 422 },
+        "src/utilities/sanitizeInternalFields.ts": { "bytesInOutput": 121 },
+        "src/versions/saveVersion.ts": { "bytesInOutput": 1688 }
+      },
+      "bytes": 216757
+    }
+  }
+}

@@ -45,14 +45,12 @@ await esbuild
 // Bundle `client.ts`
 const resultClient = await esbuild
   .build({
-    entryPoints: {
-      'client/index': 'src/exports/client/index.ts',
-      //'server/index': 'src/exports/server/index.ts',
-    },
+    entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outdir: 'dist/exports',
+    outdir: 'dist/exports/client',
+    //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
     external: [
@@ -94,13 +92,12 @@ const resultClient = await esbuild
 
 const resultServer = await esbuild
   .build({
-    entryPoints: {
-      'server/index': 'src/exports/server/index.ts',
-    },
+    entryPoints: ['src/exports/server/index.ts'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: 'dist/exports',
+    outdir: 'dist/exports/server',
+    //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
     external: ['*.scss', '*.css', '@payloadcms/translations', '@payloadcms/graphql'],

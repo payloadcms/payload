@@ -28,10 +28,559 @@
       ],
       "format": "esm"
     },
+    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js": {
+      "bytes": 416,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js": {
+      "bytes": 348,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js": {
+      "bytes": 229,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js": {
+      "bytes": 259,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js",
+          "kind": "import-statement",
+          "original": "./setPrototypeOf.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/lib/ReactPropTypesSecret.js": {
+      "bytes": 314,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/factoryWithThrowingShims.js": {
+      "bytes": 1639,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/lib/ReactPropTypesSecret.js",
+          "kind": "require-call",
+          "original": "./lib/ReactPropTypesSecret"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js": {
+      "bytes": 710,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/factoryWithThrowingShims.js",
+          "kind": "require-call",
+          "original": "./factoryWithThrowingShims"
+        }
+      ],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/hasClass.js": {
+      "bytes": 380,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/addClass.js": {
+      "bytes": 520,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/hasClass.js",
+          "kind": "import-statement",
+          "original": "./hasClass"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/removeClass.js": {
+      "bytes": 709,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/config.js": {
+      "bytes": 37,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/PropTypes.js": {
+      "bytes": 682,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js",
+          "kind": "import-statement",
+          "original": "prop-types"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroupContext.js": {
+      "bytes": 68,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/reflow.js": {
+      "bytes": 81,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/Transition.js": {
+      "bytes": 19378,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/objectWithoutPropertiesLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/inheritsLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js",
+          "kind": "import-statement",
+          "original": "prop-types"
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/config.js",
+          "kind": "import-statement",
+          "original": "./config"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/PropTypes.js",
+          "kind": "import-statement",
+          "original": "./utils/PropTypes"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroupContext.js",
+          "kind": "import-statement",
+          "original": "./TransitionGroupContext"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/reflow.js",
+          "kind": "import-statement",
+          "original": "./utils/reflow"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/CSSTransition.js": {
+      "bytes": 13483,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/extends"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/objectWithoutPropertiesLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/inheritsLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js",
+          "kind": "import-statement",
+          "original": "prop-types"
+        },
+        {
+          "path": "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/addClass.js",
+          "kind": "import-statement",
+          "original": "dom-helpers/addClass"
+        },
+        {
+          "path": "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/removeClass.js",
+          "kind": "import-statement",
+          "original": "dom-helpers/removeClass"
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/Transition.js",
+          "kind": "import-statement",
+          "original": "./Transition"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/PropTypes.js",
+          "kind": "import-statement",
+          "original": "./utils/PropTypes"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/reflow.js",
+          "kind": "import-statement",
+          "original": "./utils/reflow"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js": {
+      "bytes": 191,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/ChildMapping.js": {
+      "bytes": 4710,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroup.js": {
+      "bytes": 6553,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/objectWithoutPropertiesLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/extends"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/assertThisInitialized"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/inheritsLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js",
+          "kind": "import-statement",
+          "original": "prop-types"
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroupContext.js",
+          "kind": "import-statement",
+          "original": "./TransitionGroupContext"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/ChildMapping.js",
+          "kind": "import-statement",
+          "original": "./utils/ChildMapping"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/ReplaceTransition.js": {
+      "bytes": 4442,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/objectWithoutPropertiesLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/inheritsLoose"
+        },
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js",
+          "kind": "import-statement",
+          "original": "prop-types"
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroup.js",
+          "kind": "import-statement",
+          "original": "./TransitionGroup"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/SwitchTransition.js": {
+      "bytes": 7066,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js",
+          "kind": "import-statement",
+          "original": "@babel/runtime/helpers/esm/inheritsLoose"
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js",
+          "kind": "import-statement",
+          "original": "prop-types"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/Transition.js",
+          "kind": "import-statement",
+          "original": "./Transition"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroupContext.js",
+          "kind": "import-statement",
+          "original": "./TransitionGroupContext"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/index.js": {
+      "bytes": 357,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/CSSTransition.js",
+          "kind": "import-statement",
+          "original": "./CSSTransition"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/ReplaceTransition.js",
+          "kind": "import-statement",
+          "original": "./ReplaceTransition"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/SwitchTransition.js",
+          "kind": "import-statement",
+          "original": "./SwitchTransition"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroup.js",
+          "kind": "import-statement",
+          "original": "./TransitionGroup"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/Transition.js",
+          "kind": "import-statement",
+          "original": "./Transition"
+        },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/config.js",
+          "kind": "import-statement",
+          "original": "./config"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/context.js": {
+      "bytes": 135,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/useModal/index.js": {
+      "bytes": 199,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/context.js",
+          "kind": "import-statement",
+          "original": "../ModalProvider/context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateTransitionClasses.js": {
+      "bytes": 659,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/tabbable@5.3.3/node_modules/tabbable/dist/index.esm.js": {
+      "bytes": 19692,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/focus-trap@6.9.4/node_modules/focus-trap/dist/focus-trap.esm.js": {
+      "bytes": 27817,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/tabbable@5.3.3/node_modules/tabbable/dist/index.esm.js",
+          "kind": "import-statement",
+          "original": "tabbable"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/asModal/index.js": {
+      "bytes": 6122,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/index.js",
+          "kind": "import-statement",
+          "original": "react-transition-group"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/useModal/index.js",
+          "kind": "import-statement",
+          "original": "../useModal/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateTransitionClasses.js",
+          "kind": "import-statement",
+          "original": "../ModalProvider/generateTransitionClasses.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/focus-trap@6.9.4/node_modules/focus-trap/dist/focus-trap.esm.js",
+          "kind": "import-statement",
+          "original": "focus-trap"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/Modal/index.js": {
+      "bytes": 466,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/asModal/index.js",
+          "kind": "import-statement",
+          "original": "../asModal/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalContainer/index.js": {
+      "bytes": 1907,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/index.js",
+          "kind": "import-statement",
+          "original": "react-transition-group"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/useModal/index.js",
+          "kind": "import-statement",
+          "original": "../useModal/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateTransitionClasses.js",
+          "kind": "import-statement",
+          "original": "../ModalProvider/generateTransitionClasses.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/body-scroll-lock@3.1.5/node_modules/body-scroll-lock/lib/bodyScrollLock.esm.js": {
+      "bytes": 7105,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateCSS.js": {
+      "bytes": 1217,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalContainer/index.js",
+          "kind": "import-statement",
+          "original": "../ModalContainer/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/asModal/index.js",
+          "kind": "import-statement",
+          "original": "../asModal/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/reducer.js": {
+      "bytes": 2732,
+      "imports": [],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/index.js": {
+      "bytes": 6049,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/body-scroll-lock@3.1.5/node_modules/body-scroll-lock/lib/bodyScrollLock.esm.js",
+          "kind": "import-statement",
+          "original": "body-scroll-lock"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateCSS.js",
+          "kind": "import-statement",
+          "original": "./generateCSS.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/context.js",
+          "kind": "import-statement",
+          "original": "./context.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/reducer.js",
+          "kind": "import-statement",
+          "original": "./reducer.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalToggler/index.js": {
+      "bytes": 1701,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/useModal/index.js",
+          "kind": "import-statement",
+          "original": "../useModal/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js": {
+      "bytes": 413,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/asModal/index.js",
+          "kind": "import-statement",
+          "original": "./asModal/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/Modal/index.js",
+          "kind": "import-statement",
+          "original": "./Modal/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalContainer/index.js",
+          "kind": "import-statement",
+          "original": "./ModalContainer/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/context.js",
+          "kind": "import-statement",
+          "original": "./ModalProvider/context.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/index.js",
+          "kind": "import-statement",
+          "original": "./ModalProvider/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalToggler/index.js",
+          "kind": "import-statement",
+          "original": "./ModalToggler/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/useModal/index.js",
+          "kind": "import-statement",
+          "original": "./useModal/index.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/hooks/useHotkey.ts": {
       "bytes": 4709,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true }
       ],
@@ -271,7 +820,11 @@
     "src/elements/StayLoggedIn/index.tsx": {
       "bytes": 1758,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -314,7 +867,11 @@
     "src/providers/Auth/index.tsx": {
       "bytes": 9895,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -648,6 +1205,90 @@
       ],
       "format": "esm"
     },
+    "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/context.js": {
+      "bytes": 167,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/useWindowInfo/index.js": {
+      "bytes": 238,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/context.js",
+          "kind": "import-statement",
+          "original": "../WindowInfoProvider/context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfo/index.js": {
+      "bytes": 520,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/useWindowInfo/index.js",
+          "kind": "import-statement",
+          "original": "../useWindowInfo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/index.js": {
+      "bytes": 3788,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/context.js",
+          "kind": "import-statement",
+          "original": "../WindowInfoProvider/context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/withWindowInfo/index.js": {
+      "bytes": 450,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/useWindowInfo/index.js",
+          "kind": "import-statement",
+          "original": "../useWindowInfo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js": {
+      "bytes": 395,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/useWindowInfo/index.js",
+          "kind": "import-statement",
+          "original": "./useWindowInfo/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfo/index.js",
+          "kind": "import-statement",
+          "original": "./WindowInfo/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/context.js",
+          "kind": "import-statement",
+          "original": "./WindowInfoProvider/context.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/index.js",
+          "kind": "import-statement",
+          "original": "./WindowInfoProvider/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/withWindowInfo/index.js",
+          "kind": "import-statement",
+          "original": "./withWindowInfo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/elements/Popup/PopupTrigger/index.tsx": {
       "bytes": 1042,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
@@ -661,7 +1302,11 @@
           "kind": "import-statement",
           "original": "./PopupButtonList/index.js"
         },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/window-info"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/hooks/useIntersect.ts",
@@ -733,7 +1378,11 @@
     "src/elements/Nav/context.tsx": {
       "bytes": 2815,
       "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/window-info"
+        },
         {
           "path": "../../node_modules/.pnpm/body-scroll-lock@4.0.0-beta.0/node_modules/body-scroll-lock/lib/bodyScrollLock.esm.js",
           "kind": "import-statement",
@@ -751,7 +1400,11 @@
     "src/elements/Nav/NavToggler/index.tsx": {
       "bytes": 1431,
       "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/window-info"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/providers/Preferences/index.tsx",
@@ -1029,7 +1682,11 @@
     "src/elements/DeleteMany/index.tsx": {
       "bytes": 4135,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7003,7 +7660,11 @@
     "src/elements/DeleteDocument/index.tsx": {
       "bytes": 4580,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7058,7 +7719,11 @@
     "src/elements/DuplicateDocument/index.tsx": {
       "bytes": 3771,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7305,7 +7970,11 @@
     "src/elements/Status/index.tsx": {
       "bytes": 6419,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
@@ -7460,7 +8129,11 @@
     "src/elements/Drawer/index.tsx": {
       "bytes": 3762,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/icons/X/index.tsx",
@@ -7527,7 +8200,11 @@
     "src/elements/DocumentDrawer/DrawerContent.tsx": {
       "bytes": 4058,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -7601,7 +8278,11 @@
     "src/elements/DocumentDrawer/index.tsx": {
       "bytes": 3560,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -8473,7 +9154,11 @@
     "src/fields/Blocks/BlocksDrawer/index.tsx": {
       "bytes": 3260,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -8507,7 +9192,11 @@
     "src/fields/Blocks/RowActions.tsx": {
       "bytes": 1975,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/ArrayAction/index.tsx",
@@ -9118,33 +9807,6 @@
         }
       ],
       "format": "esm"
-    },
-    "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/lib/ReactPropTypesSecret.js": {
-      "bytes": 314,
-      "imports": [],
-      "format": "cjs"
-    },
-    "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/factoryWithThrowingShims.js": {
-      "bytes": 1639,
-      "imports": [
-        {
-          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/lib/ReactPropTypesSecret.js",
-          "kind": "require-call",
-          "original": "./lib/ReactPropTypesSecret"
-        }
-      ],
-      "format": "cjs"
-    },
-    "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js": {
-      "bytes": 710,
-      "imports": [
-        {
-          "path": "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/factoryWithThrowingShims.js",
-          "kind": "require-call",
-          "original": "./factoryWithThrowingShims"
-        }
-      ],
-      "format": "cjs"
     },
     "../../node_modules/.pnpm/clsx@2.1.0/node_modules/clsx/dist/clsx.js": {
       "bytes": 397,
@@ -15811,11 +16473,6 @@
       ],
       "format": "esm"
     },
-    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js": {
-      "bytes": 348,
-      "imports": [],
-      "format": "esm"
-    },
     "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js": {
       "bytes": 632,
       "imports": [
@@ -15849,11 +16506,6 @@
       ],
       "format": "esm"
     },
-    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js": {
-      "bytes": 416,
-      "imports": [],
-      "format": "esm"
-    },
     "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/classCallCheck.js": {
       "bytes": 176,
       "imports": [],
@@ -15868,11 +16520,6 @@
           "original": "./toPropertyKey.js"
         }
       ],
-      "format": "esm"
-    },
-    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js": {
-      "bytes": 229,
-      "imports": [],
       "format": "esm"
     },
     "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inherits.js": {
@@ -15893,11 +16540,6 @@
     },
     "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/isNativeReflectConstruct.js": {
       "bytes": 274,
-      "imports": [],
-      "format": "esm"
-    },
-    "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js": {
-      "bytes": 191,
       "imports": [],
       "format": "esm"
     },
@@ -17783,7 +18425,11 @@
     "src/elements/EditUpload/index.tsx": {
       "bytes": 13474,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/react-image-crop@10.1.8_react@19.0.0-rc-f994737d14-20240522/node_modules/react-image-crop/dist/index.js",
@@ -18498,7 +19144,11 @@
     "src/elements/ListDrawer/DrawerContent.tsx": {
       "bytes": 10352,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -18592,7 +19242,11 @@
     "src/elements/ListDrawer/index.tsx": {
       "bytes": 3606,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/ListDrawer/types.ts",
@@ -19155,7 +19809,11 @@
     "src/elements/EditMany/index.tsx": {
       "bytes": 8149,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -19245,7 +19903,11 @@
     "src/elements/GenerateConfirmation/index.tsx": {
       "bytes": 2000,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
@@ -19327,7 +19989,11 @@
     "src/elements/PublishMany/index.tsx": {
       "bytes": 4264,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -19416,7 +20082,11 @@
     "src/elements/UnpublishMany/index.tsx": {
       "bytes": 4227,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -19713,7 +20383,11 @@
     "src/elements/ListControls/index.tsx": {
       "bytes": 6977,
       "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/window-info"
+        },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react-animate-height", "kind": "import-statement", "external": true },
@@ -19846,7 +20520,13 @@
     },
     "src/elements/Modal/index.tsx": {
       "bytes": 80,
-      "imports": [{ "path": "@faceless-ui/modal", "kind": "import-statement", "external": true }],
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        }
+      ],
       "format": "esm"
     },
     "src/elements/NavGroup/index.tsx": {
@@ -20000,6 +20680,90 @@
       ],
       "format": "esm"
     },
+    "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/context.js": {
+      "bytes": 126,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/useScrollInfo/index.js": {
+      "bytes": 205,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/context.js",
+          "kind": "import-statement",
+          "original": "../ScrollInfoProvider/context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfo/index.js": {
+      "bytes": 490,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/useScrollInfo/index.js",
+          "kind": "import-statement",
+          "original": "../useScrollInfo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/index.js": {
+      "bytes": 3950,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/context.js",
+          "kind": "import-statement",
+          "original": "../ScrollInfoProvider/context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/withScrollInfo/index.js": {
+      "bytes": 416,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/useScrollInfo/index.js",
+          "kind": "import-statement",
+          "original": "../useScrollInfo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/index.js": {
+      "bytes": 340,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfo/index.js",
+          "kind": "import-statement",
+          "original": "./ScrollInfo/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/context.js",
+          "kind": "import-statement",
+          "original": "./ScrollInfoProvider/context.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/index.js",
+          "kind": "import-statement",
+          "original": "./ScrollInfoProvider/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/useScrollInfo/index.js",
+          "kind": "import-statement",
+          "original": "./useScrollInfo/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/withScrollInfo/index.js",
+          "kind": "import-statement",
+          "original": "./withScrollInfo/index.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/providers/ToastContainer/icons/Error.tsx": {
       "bytes": 548,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
@@ -20055,9 +20819,21 @@
     "src/providers/Root/index.tsx": {
       "bytes": 4935,
       "imports": [
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/modal"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/scroll-info"
+        },
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/window-info"
+        },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/LoadingOverlay/index.tsx",
@@ -20160,14 +20936,22 @@
     "src/providers/ScrollInfo/index.tsx": {
       "bytes": 405,
       "imports": [
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true }
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/scroll-info"
+        }
       ],
       "format": "esm"
     },
     "src/providers/WindowInfo/index.tsx": {
       "bytes": 405,
       "imports": [
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true }
+        {
+          "path": "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js",
+          "kind": "import-statement",
+          "original": "@faceless-ui/window-info"
+        }
       ],
       "format": "esm"
     },
@@ -20948,25 +21732,36 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1933637
+      "bytes": 2080211
     },
     "dist/exports/client/index.js": {
       "imports": [
-        { "path": "dist/exports/chunk-Y6VTUGJS.js", "kind": "import-statement" },
-        { "path": "dist/exports/chunk-CYLV2KMN.js", "kind": "import-statement" },
-        { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-TLG7P5PN.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-CEWSYVM7.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -20974,7 +21769,6 @@
         { "path": "react-dom", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21013,12 +21807,14 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/link.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21032,7 +21828,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21054,12 +21849,10 @@
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21072,16 +21865,12 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21126,25 +21915,23 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "dist/exports/CodeEditor-Z2WKYSJA.js", "kind": "dynamic-import" },
-        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "dist/exports/DatePicker-AEW4GN7P.js", "kind": "dynamic-import" },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/CodeEditor-LQX4VBTA.js", "kind": "dynamic-import" },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/DatePicker-57WWBUKA.js", "kind": "dynamic-import" },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -21223,7 +22010,6 @@
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -21236,9 +22022,7 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21276,7 +22060,6 @@
         { "path": "payload/types", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21290,22 +22073,18 @@
         { "path": "deep-equal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "payload/types", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react-animate-height", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21325,7 +22104,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react-animate-height", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21344,17 +22122,17 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
-        { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true }
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
       ],
       "exports": [
         "Account",
@@ -21589,16 +22367,100 @@
         "src/hooks/useDebouncedCallback.ts": { "bytesInOutput": 204 },
         "src/hooks/useDebouncedEffect.ts": { "bytesInOutput": 188 },
         "src/hooks/useDelayedRender.ts": { "bytesInOutput": 537 },
-        "src/hooks/useHotkey.ts": { "bytesInOutput": 1419 },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/asModal/index.js": {
+          "bytesInOutput": 2147
+        },
+        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js": {
+          "bytesInOutput": 231
+        },
+        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js": {
+          "bytesInOutput": 138
+        },
+        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js": {
+          "bytesInOutput": 124
+        },
+        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inheritsLoose.js": {
+          "bytesInOutput": 90
+        },
+        "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/hasClass.js": {
+          "bytesInOutput": 134
+        },
+        "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/addClass.js": {
+          "bytesInOutput": 187
+        },
+        "../../node_modules/.pnpm/dom-helpers@5.2.1/node_modules/dom-helpers/esm/removeClass.js": {
+          "bytesInOutput": 302
+        },
+        "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/CSSTransition.js": {
+          "bytesInOutput": 2400
+        },
+        "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/Transition.js": {
+          "bytesInOutput": 3897
+        },
+        "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/config.js": {
+          "bytesInOutput": 21
+        },
+        "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/TransitionGroupContext.js": {
+          "bytesInOutput": 52
+        },
+        "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/utils/reflow.js": {
+          "bytesInOutput": 39
+        },
+        "../../node_modules/.pnpm/react-transition-group@4.4.5_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/react-transition-group/esm/index.js": {
+          "bytesInOutput": 0
+        },
+        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js": {
+          "bytesInOutput": 124
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/useModal/index.js": {
+          "bytesInOutput": 54
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/context.js": {
+          "bytesInOutput": 53
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateTransitionClasses.js": {
+          "bytesInOutput": 263
+        },
+        "../../node_modules/.pnpm/tabbable@5.3.3/node_modules/tabbable/dist/index.esm.js": {
+          "bytesInOutput": 4557
+        },
+        "../../node_modules/.pnpm/focus-trap@6.9.4/node_modules/focus-trap/dist/focus-trap.esm.js": {
+          "bytesInOutput": 7296
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js": {
+          "bytesInOutput": 0
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/Modal/index.js": {
+          "bytesInOutput": 172
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalContainer/index.js": {
+          "bytesInOutput": 903
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/index.js": {
+          "bytesInOutput": 2049
+        },
+        "../../node_modules/.pnpm/body-scroll-lock@3.1.5/node_modules/body-scroll-lock/lib/bodyScrollLock.esm.js": {
+          "bytesInOutput": 2282
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/generateCSS.js": {
+          "bytesInOutput": 698
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalProvider/reducer.js": {
+          "bytesInOutput": 1113
+        },
+        "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/ModalToggler/index.js": {
+          "bytesInOutput": 22
+        },
+        "src/hooks/useHotkey.ts": { "bytesInOutput": 1372 },
         "src/hooks/useIntersect.ts": { "bytesInOutput": 418 },
         "src/hooks/usePayloadAPI.ts": { "bytesInOutput": 736 },
         "src/providers/Locale/index.tsx": { "bytesInOutput": 667 },
         "src/utilities/findLocaleFromCode.ts": { "bytesInOutput": 84 },
-        "src/providers/Auth/index.tsx": { "bytesInOutput": 3279 },
+        "src/providers/Auth/index.tsx": { "bytesInOutput": 3232 },
         "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs": {
           "bytesInOutput": 28412
         },
-        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 824 },
+        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 765 },
         "src/elements/Button/index.tsx": { "bytesInOutput": 1748 },
         "src/icons/Chevron/index.tsx": { "bytesInOutput": 457 },
         "src/icons/Edit/index.tsx": { "bytesInOutput": 624 },
@@ -21626,13 +22488,31 @@
         "src/elements/Localizer/LocalizerLabel/index.tsx": { "bytesInOutput": 506 },
         "src/elements/Localizer/index.tsx": { "bytesInOutput": 749 },
         "src/elements/Popup/PopupButtonList/index.tsx": { "bytesInOutput": 719 },
-        "src/elements/Popup/index.tsx": { "bytesInOutput": 2135 },
+        "src/elements/Popup/index.tsx": { "bytesInOutput": 2077 },
+        "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/index.js": {
+          "bytesInOutput": 131
+        },
+        "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/useWindowInfo/index.js": {
+          "bytesInOutput": 60
+        },
+        "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/context.js": {
+          "bytesInOutput": 59
+        },
+        "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfo/index.js": {
+          "bytesInOutput": 175
+        },
+        "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/WindowInfoProvider/index.js": {
+          "bytesInOutput": 1257
+        },
+        "../../node_modules/.pnpm/@faceless-ui+window-info@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/window-info/dist/withWindowInfo/index.js": {
+          "bytesInOutput": 116
+        },
         "src/elements/Popup/PopupTrigger/index.tsx": { "bytesInOutput": 410 },
-        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 504 },
-        "src/elements/Nav/context.tsx": { "bytesInOutput": 670 },
+        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 446 },
         "../../node_modules/.pnpm/body-scroll-lock@4.0.0-beta.0/node_modules/body-scroll-lock/lib/bodyScrollLock.esm.js": {
           "bytesInOutput": 3335
         },
+        "src/elements/Nav/context.tsx": { "bytesInOutput": 612 },
         "src/elements/StepNav/index.tsx": { "bytesInOutput": 1017 },
         "src/graphics/Icon/index.tsx": { "bytesInOutput": 426 },
         "src/elements/StepNav/context.tsx": { "bytesInOutput": 212 },
@@ -21643,7 +22523,7 @@
         "src/elements/Collapsible/provider.tsx": { "bytesInOutput": 413 },
         "src/elements/CopyToClipboard/index.tsx": { "bytesInOutput": 639 },
         "src/icons/Copy/index.tsx": { "bytesInOutput": 301 },
-        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1671 },
+        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1612 },
         "src/providers/Selection/index.tsx": { "bytesInOutput": 1219 },
         "src/elements/Pill/index.tsx": { "bytesInOutput": 1232 },
         "../../node_modules/.pnpm/@dnd-kit+sortable@7.0.2_@dnd-kit+core@6.0.8_react@19.0.0-rc-f994737d14-20240522/node_modules/@dnd-kit/sortable/dist/sortable.esm.js": {
@@ -21779,9 +22659,9 @@
         "src/utilities/isEditing.ts": { "bytesInOutput": 59 },
         "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 186 },
         "src/utilities/reduceFieldsToValuesWithValidation.ts": { "bytesInOutput": 242 },
-        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1746 },
+        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1687 },
         "src/elements/Translation/index.tsx": { "bytesInOutput": 517 },
-        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1615 },
+        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1556 },
         "src/elements/Gutter/index.tsx": { "bytesInOutput": 369 },
         "src/elements/PreviewButton/index.tsx": { "bytesInOutput": 265 },
         "src/elements/PreviewButton/usePreviewURL.tsx": { "bytesInOutput": 717 },
@@ -21791,12 +22671,12 @@
         "src/providers/EditDepth/index.tsx": { "bytesInOutput": 156 },
         "src/providers/Operation/index.tsx": { "bytesInOutput": 161 },
         "src/elements/SaveDraftButton/index.tsx": { "bytesInOutput": 883 },
-        "src/elements/Status/index.tsx": { "bytesInOutput": 2753 },
-        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1331 },
+        "src/elements/Status/index.tsx": { "bytesInOutput": 2694 },
+        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1284 },
         "src/fields/Relationship/AddNew/useRelatedCollections.ts": { "bytesInOutput": 151 },
-        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1540 },
+        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1481 },
         "src/elements/Drawer/useDrawerSlug.tsx": { "bytesInOutput": 99 },
-        "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1411 },
+        "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1364 },
         "src/providers/FormQueryParams/index.tsx": { "bytesInOutput": 667 },
         "src/elements/IDLabel/index.tsx": { "bytesInOutput": 172 },
         "src/elements/RenderTitle/index.tsx": { "bytesInOutput": 401 },
@@ -21832,8 +22712,8 @@
         "src/forms/RowLabel/Context/index.tsx": { "bytesInOutput": 257 },
         "src/fields/Blocks/index.tsx": { "bytesInOutput": 4087 },
         "src/fields/Blocks/BlockRow.tsx": { "bytesInOutput": 1589 },
-        "src/fields/Blocks/RowActions.tsx": { "bytesInOutput": 586 },
-        "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1203 },
+        "src/fields/Blocks/RowActions.tsx": { "bytesInOutput": 539 },
+        "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1156 },
         "src/elements/ThumbnailCard/index.tsx": { "bytesInOutput": 553 },
         "src/graphics/DefaultBlockImage/index.tsx": { "bytesInOutput": 4641 },
         "../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-browser/rng.js": {
@@ -21855,14 +22735,14 @@
         "src/icons/Search/index.tsx": { "bytesInOutput": 332 },
         "src/fields/Blocks/SectionTitle/index.tsx": { "bytesInOutput": 466 },
         "src/fields/Code/index.tsx": { "bytesInOutput": 1030 },
-        "src/elements/CodeEditor/index.tsx": { "bytesInOutput": 239 },
+        "src/elements/CodeEditor/index.tsx": { "bytesInOutput": 238 },
         "src/fields/Collapsible/index.tsx": { "bytesInOutput": 1675 },
         "src/forms/WatchChildErrors/buildPathSegments.ts": { "bytesInOutput": 511 },
         "src/forms/WatchChildErrors/getFieldStateFromPaths.ts": { "bytesInOutput": 228 },
         "src/forms/WatchChildErrors/index.tsx": { "bytesInOutput": 174 },
         "src/fields/ConfirmPassword/index.tsx": { "bytesInOutput": 738 },
         "src/fields/DateTime/index.tsx": { "bytesInOutput": 1106 },
-        "src/elements/DatePicker/index.tsx": { "bytesInOutput": 199 },
+        "src/elements/DatePicker/index.tsx": { "bytesInOutput": 198 },
         "src/fields/Email/index.tsx": { "bytesInOutput": 1094 },
         "src/fields/Group/index.tsx": { "bytesInOutput": 1262 },
         "src/fields/Row/provider.tsx": { "bytesInOutput": 164 },
@@ -21904,17 +22784,11 @@
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/slicedToArray.js": {
           "bytesInOutput": 54
         },
-        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js": {
-          "bytesInOutput": 138
-        },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js": {
           "bytesInOutput": 246
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/useStateManager-7e1e8489.esm.js": {
           "bytesInOutput": 1001
-        },
-        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js": {
-          "bytesInOutput": 231
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/react-select.esm.js": {
           "bytesInOutput": 179
@@ -21925,9 +22799,6 @@
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/createClass.js": {
           "bytesInOutput": 282
         },
-        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js": {
-          "bytesInOutput": 124
-        },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/inherits.js": {
           "bytesInOutput": 281
         },
@@ -21936,9 +22807,6 @@
         },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/isNativeReflectConstruct.js": {
           "bytesInOutput": 142
-        },
-        "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js": {
-          "bytesInOutput": 124
         },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js": {
           "bytesInOutput": 180
@@ -22067,16 +22935,16 @@
         "src/elements/FileDetails/index.tsx": { "bytesInOutput": 821 },
         "src/elements/Upload/index.tsx": { "bytesInOutput": 3453 },
         "src/elements/Dropzone/index.tsx": { "bytesInOutput": 1624 },
-        "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5572 },
+        "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5519 },
         "../../node_modules/.pnpm/react-image-crop@10.1.8_react@19.0.0-rc-f994737d14-20240522/node_modules/react-image-crop/dist/index.js": {
           "bytesInOutput": 13459
         },
         "src/elements/PreviewSizes/index.tsx": { "bytesInOutput": 1739 },
         "src/elements/FileDetails/FileMeta/index.tsx": { "bytesInOutput": 843 },
-        "src/elements/Thumbnail/index.tsx": { "bytesInOutput": 535 },
+        "src/elements/Thumbnail/index.tsx": { "bytesInOutput": 536 },
         "src/graphics/File/index.tsx": { "bytesInOutput": 432 },
-        "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1272 },
-        "src/elements/ListDrawer/DrawerContent.tsx": { "bytesInOutput": 3303 },
+        "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1225 },
+        "src/elements/ListDrawer/DrawerContent.tsx": { "bytesInOutput": 3256 },
         "src/providers/ListInfo/index.tsx": { "bytesInOutput": 154 },
         "src/providers/ListQuery/index.tsx": { "bytesInOutput": 1626 },
         "src/elements/Loading/index.tsx": { "bytesInOutput": 1247 },
@@ -22107,7 +22975,7 @@
         "src/elements/TableColumns/filterFields.tsx": { "bytesInOutput": 336 },
         "src/elements/TableColumns/getInitialColumns.ts": { "bytesInOutput": 518 },
         "src/fields/index.tsx": { "bytesInOutput": 255 },
-        "src/elements/EditMany/index.tsx": { "bytesInOutput": 3199 },
+        "src/elements/EditMany/index.tsx": { "bytesInOutput": 3152 },
         "src/forms/Form/index.tsx": { "bytesInOutput": 6381 },
         "src/forms/Form/errorMessages.ts": { "bytesInOutput": 66 },
         "src/forms/Form/fieldReducer.ts": { "bytesInOutput": 3430 },
@@ -22120,13 +22988,13 @@
         "src/forms/Form/mergeErrorPaths.ts": { "bytesInOutput": 234 },
         "src/elements/FieldSelect/index.tsx": { "bytesInOutput": 1919 },
         "src/forms/Form/createNestedFieldPath.ts": { "bytesInOutput": 140 },
-        "src/elements/GenerateConfirmation/index.tsx": { "bytesInOutput": 958 },
+        "src/elements/GenerateConfirmation/index.tsx": { "bytesInOutput": 899 },
         "src/elements/HydrateClientUser/index.tsx": { "bytesInOutput": 149 },
-        "src/elements/ListControls/index.tsx": { "bytesInOutput": 2515 },
+        "src/elements/ListControls/index.tsx": { "bytesInOutput": 2457 },
         "src/elements/ColumnSelector/index.tsx": { "bytesInOutput": 753 },
-        "src/elements/PublishMany/index.tsx": { "bytesInOutput": 1750 },
+        "src/elements/PublishMany/index.tsx": { "bytesInOutput": 1691 },
         "src/elements/SearchFilter/index.tsx": { "bytesInOutput": 1096 },
-        "src/elements/UnpublishMany/index.tsx": { "bytesInOutput": 1745 },
+        "src/elements/UnpublishMany/index.tsx": { "bytesInOutput": 1686 },
         "src/elements/WhereBuilder/index.tsx": { "bytesInOutput": 2625 },
         "src/elements/WhereBuilder/Condition/index.tsx": { "bytesInOutput": 2069 },
         "src/elements/RenderCustomClientComponent/index.tsx": { "bytesInOutput": 168 },
@@ -22146,7 +23014,6 @@
         "src/elements/ListSelection/index.tsx": { "bytesInOutput": 517 },
         "src/elements/Logout/index.tsx": { "bytesInOutput": 447 },
         "src/icons/LogOut/index.tsx": { "bytesInOutput": 408 },
-        "src/elements/Modal/index.tsx": { "bytesInOutput": 59 },
         "src/elements/NavGroup/index.tsx": { "bytesInOutput": 1075 },
         "src/elements/Pagination/index.tsx": { "bytesInOutput": 999 },
         "src/elements/Pagination/ClickableArrow/index.tsx": { "bytesInOutput": 303 },
@@ -22161,27 +23028,45 @@
         "src/providers/ClientFunction/index.tsx": { "bytesInOutput": 627 },
         "src/providers/EntityVisibility/index.tsx": { "bytesInOutput": 334 },
         "src/providers/Params/index.tsx": { "bytesInOutput": 217 },
-        "src/providers/Root/index.tsx": { "bytesInOutput": 1333 },
+        "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/index.js": {
+          "bytesInOutput": 131
+        },
+        "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfo/index.js": {
+          "bytesInOutput": 169
+        },
+        "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/useScrollInfo/index.js": {
+          "bytesInOutput": 54
+        },
+        "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/context.js": {
+          "bytesInOutput": 53
+        },
+        "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/ScrollInfoProvider/index.js": {
+          "bytesInOutput": 1112
+        },
+        "../../node_modules/.pnpm/@faceless-ui+scroll-info@2.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/scroll-info/dist/withScrollInfo/index.js": {
+          "bytesInOutput": 110
+        },
+        "src/providers/Root/index.tsx": { "bytesInOutput": 1134 },
         "src/providers/ToastContainer/index.tsx": { "bytesInOutput": 528 },
         "src/providers/ToastContainer/icons/Error.tsx": { "bytesInOutput": 467 },
         "src/providers/ToastContainer/icons/Info.tsx": { "bytesInOutput": 440 },
         "src/providers/ToastContainer/icons/Success.tsx": { "bytesInOutput": 451 },
         "src/providers/ToastContainer/icons/Warning.tsx": { "bytesInOutput": 427 },
-        "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 202 },
-        "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 202 }
+        "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 158 },
+        "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 158 }
       },
-      "bytes": 416109
+      "bytes": 446961
     },
-    "dist/exports/CodeEditor-Z2WKYSJA.js.map": {
+    "dist/exports/client/CodeEditor-LQX4VBTA.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 68983
+      "bytes": 69064
     },
-    "dist/exports/CodeEditor-Z2WKYSJA.js": {
+    "dist/exports/client/CodeEditor-LQX4VBTA.js": {
       "imports": [
-        { "path": "dist/exports/chunk-Y6VTUGJS.js", "kind": "import-statement" },
-        { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-TLG7P5PN.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -22238,13 +23123,13 @@
       },
       "bytes": 14814
     },
-    "dist/exports/chunk-Y6VTUGJS.js.map": {
+    "dist/exports/client/chunk-TLG7P5PN.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 8846
+      "bytes": 8855
     },
-    "dist/exports/chunk-Y6VTUGJS.js": {
+    "dist/exports/client/chunk-TLG7P5PN.js": {
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -22258,16 +23143,16 @@
       },
       "bytes": 2188
     },
-    "dist/exports/DatePicker-AEW4GN7P.js.map": {
+    "dist/exports/client/DatePicker-57WWBUKA.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1448976
+      "bytes": 1445608
     },
-    "dist/exports/DatePicker-AEW4GN7P.js": {
+    "dist/exports/client/DatePicker-57WWBUKA.js": {
       "imports": [
-        { "path": "dist/exports/chunk-CYLV2KMN.js", "kind": "import-statement" },
-        { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-CEWSYVM7.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react-dom", "kind": "require-call", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -22288,15 +23173,6 @@
       "exports": ["default"],
       "entryPoint": "src/elements/DatePicker/DatePicker.tsx",
       "inputs": {
-        "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/lib/ReactPropTypesSecret.js": {
-          "bytesInOutput": 102
-        },
-        "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/factoryWithThrowingShims.js": {
-          "bytesInOutput": 672
-        },
-        "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js": {
-          "bytesInOutput": 49
-        },
         "../../node_modules/.pnpm/clsx@2.1.0/node_modules/clsx/dist/clsx.js": {
           "bytesInOutput": 416
         },
@@ -23221,17 +24097,17 @@
         "src/elements/DatePicker/DatePicker.tsx": { "bytesInOutput": 1655 },
         "src/elements/DatePicker/getFormattedLocale.ts": { "bytesInOutput": 67 }
       },
-      "bytes": 325068
+      "bytes": 324253
     },
-    "dist/exports/chunk-CYLV2KMN.js.map": {
+    "dist/exports/client/chunk-CEWSYVM7.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 144602
+      "bytes": 148960
     },
-    "dist/exports/chunk-CYLV2KMN.js": {
+    "dist/exports/client/chunk-CEWSYVM7.js": {
       "imports": [
-        { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -23248,6 +24124,7 @@
         "E",
         "F",
         "G",
+        "H",
         "a",
         "b",
         "c",
@@ -23276,6 +24153,15 @@
         "z"
       ],
       "inputs": {
+        "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/lib/ReactPropTypesSecret.js": {
+          "bytesInOutput": 103
+        },
+        "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/factoryWithThrowingShims.js": {
+          "bytesInOutput": 673
+        },
+        "../../node_modules/.pnpm/prop-types@15.8.1/node_modules/prop-types/index.js": {
+          "bytesInOutput": 50
+        },
         "../../node_modules/.pnpm/@floating-ui+utils@0.2.1/node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs": {
           "bytesInOutput": 2080
         },
@@ -23323,15 +24209,15 @@
         },
         "src/icons/Calendar/index.tsx": { "bytesInOutput": 514 }
       },
-      "bytes": 30046
+      "bytes": 30888
     },
-    "dist/exports/chunk-S57FL4TE.js.map": {
+    "dist/exports/client/chunk-S57FL4TE.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
       "bytes": 93
     },
-    "dist/exports/chunk-S57FL4TE.js": {
+    "dist/exports/client/chunk-S57FL4TE.js": {
       "imports": [],
       "exports": ["a", "b", "c", "d", "e", "f"],
       "inputs": {},

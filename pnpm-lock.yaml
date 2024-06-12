@@ -770,6 +770,9 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
     devDependencies:
+      '@hyrious/esbuild-plugin-commonjs':
+        specifier: ^0.2.4
+        version: 0.2.4(esbuild@0.21.5)
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
@@ -812,6 +815,9 @@ importers:
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
+      esbuild:
+        specifier: ^0.21.4
+        version: 0.21.5
       graphql-http:
         specifier: ^1.22.0
         version: 1.22.0(graphql@16.8.1)
