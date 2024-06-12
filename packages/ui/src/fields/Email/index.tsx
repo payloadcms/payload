@@ -1,6 +1,6 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
-import type { EmailField as EmailFieldType } from 'payload/types'
+import type { ClientValidate } from 'payload/bundle'
+import type { EmailField as EmailFieldType } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'

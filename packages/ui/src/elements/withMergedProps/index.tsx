@@ -1,5 +1,5 @@
-import { serverProps } from 'payload/config'
-import { deepMerge, isReactServerComponentOrFunction } from 'payload/utilities'
+import { deepMerge, isReactServerComponentOrFunction } from 'payload/bundle'
+import { serverProps } from 'payload/server'
 import React from 'react'
 
 /**

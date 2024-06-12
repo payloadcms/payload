@@ -1,5 +1,5 @@
 'use client'
-import type { Labels } from 'payload/types'
+import type { Labels } from 'payload/bundle'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'

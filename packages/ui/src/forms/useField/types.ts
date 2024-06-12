@@ -1,4 +1,4 @@
-import type { ClientValidate, FieldPermissions, FilterOptionsResult, Row } from 'payload/types'
+import type { ClientValidate, FieldPermissions, FilterOptionsResult, Row } from 'payload/bundle'
 
 export type Options = {
   disableFormData?: boolean

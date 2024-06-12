@@ -4,7 +4,7 @@ import type {
   ClientGlobalConfig,
   SanitizedConfig,
   TypeWithID,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 

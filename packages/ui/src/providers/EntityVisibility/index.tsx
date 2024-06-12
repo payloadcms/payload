@@ -3,7 +3,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   VisibleEntities,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import React, { createContext, useCallback, useContext } from 'react'
 

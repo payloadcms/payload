@@ -1,5 +1,5 @@
 'use client'
-import type { LabelProps, SanitizedLabelProps } from 'payload/types'
+import type { LabelProps, SanitizedLabelProps } from 'payload/bundle'
 
 import React from 'react'
 

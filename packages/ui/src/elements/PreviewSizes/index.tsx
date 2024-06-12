@@ -4,7 +4,7 @@ import type {
   FileSize,
   SanitizedCollectionConfig,
   SanitizedUploadConfig,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import React, { useEffect, useMemo, useState } from 'react'
 

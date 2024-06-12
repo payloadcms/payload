@@ -1,6 +1,6 @@
-import type { Operator, Where } from 'payload/types'
+import type { Operator, Where } from 'payload/bundle'
 
-import { validOperators } from 'payload/types'
+import { validOperators } from 'payload/bundle'
 
 const validateWhereQuery = (whereQuery): whereQuery is Where => {
   if (

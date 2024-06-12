@@ -1,4 +1,3 @@
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
@@ -11,7 +10,8 @@ import type {
   SanitizedGlobalConfig,
   TypeWithID,
   TypeWithTimestamps,
-} from 'payload/types'
+} from 'payload/bundle'
+import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type React from 'react'
 
 export type DocumentInfoProps = {

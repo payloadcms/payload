@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig } from 'payload/types'
+import type { FormState, SanitizedCollectionConfig } from 'payload/bundle'
 
 import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'

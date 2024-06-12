@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/bundle'
 
 import React from 'react'
 

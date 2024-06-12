@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload/bundle'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -28,7 +28,7 @@ import './index.scss'
 
 const baseClass = 'edit-many'
 
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/bundle'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 

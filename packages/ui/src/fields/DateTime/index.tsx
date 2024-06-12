@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -14,7 +14,7 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { DateField } from 'payload/types'
+import type { DateField } from 'payload/bundle'
 
 import type { FormFieldBase } from '../shared/index.js'
 

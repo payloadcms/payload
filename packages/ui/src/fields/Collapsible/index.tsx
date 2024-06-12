@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences } from 'payload/types'
+import type { DocumentPreferences } from 'payload/bundle'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 

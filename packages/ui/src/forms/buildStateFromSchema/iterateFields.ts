@@ -4,9 +4,9 @@ import type {
   Field as FieldSchema,
   FormState,
   PayloadRequestWithData,
-} from 'payload/types'
+} from 'payload/bundle'
 
-import { fieldIsPresentationalOnly } from 'payload/types'
+import { fieldIsPresentationalOnly } from 'payload/bundle'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 

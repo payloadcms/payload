@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable no-shadow */
 import { useModal } from '@faceless-ui/modal'
-import { setsAreEqual } from 'payload/utilities'
+import { setsAreEqual } from 'payload/bundle'
 import { useCallback, useEffect } from 'react'
 
 // Required to be outside of hook, else debounce would be necessary

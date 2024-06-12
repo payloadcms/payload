@@ -1,5 +1,5 @@
 'use client'
-import type { ClientConfig, FieldAffectingData, SanitizedCollectionConfig } from 'payload/types'
+import type { ClientConfig, FieldAffectingData, SanitizedCollectionConfig } from 'payload/bundle'
 
 import React, { createContext, useContext } from 'react'
 

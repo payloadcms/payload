@@ -1,4 +1,4 @@
-import type { FormState, SanitizedConfig } from 'payload/types'
+import type { FormState, SanitizedConfig } from 'payload/bundle'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 

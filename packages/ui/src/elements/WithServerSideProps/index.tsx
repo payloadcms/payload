@@ -1,6 +1,6 @@
-import type { WithServerSidePropsComponent } from 'payload/types'
+import type { WithServerSidePropsComponent } from 'payload/bundle'
 
-import { isReactServerComponentOrFunction } from 'payload/utilities'
+import { isReactServerComponentOrFunction } from 'payload/bundle'
 import React from 'react'
 
 export const WithServerSideProps: WithServerSidePropsComponent = ({

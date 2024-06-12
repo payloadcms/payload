@@ -1,8 +1,8 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
-import { optionsAreObjects } from 'payload/types'
+import { optionsAreObjects } from 'payload/bundle'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'

@@ -1,6 +1,6 @@
 'use client'
 import type { ClientUser, Permissions } from 'payload/auth'
-import type { MeOperationResult } from 'payload/types'
+import type { MeOperationResult } from 'payload/bundle'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'

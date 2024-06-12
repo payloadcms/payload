@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, Option, OptionObject } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload/bundle'
 
 import React, { useCallback, useState } from 'react'
 

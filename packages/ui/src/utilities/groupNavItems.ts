@@ -1,6 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Permissions } from 'payload/auth'
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 

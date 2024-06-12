@@ -1,5 +1,5 @@
 import type { User } from 'payload/auth'
-import type { Data, Field as FieldSchema } from 'payload/types'
+import type { Data, Field as FieldSchema } from 'payload/bundle'
 
 import { iterateFields } from './iterateFields.js'
 

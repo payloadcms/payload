@@ -1,5 +1,5 @@
 import type { User } from 'payload/auth'
-import type { Data, Field, TabAsField } from 'payload/types'
+import type { Data, Field, TabAsField } from 'payload/bundle'
 
 import { defaultValuePromise } from './promise.js'
 

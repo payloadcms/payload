@@ -1,9 +1,9 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { Option } from 'payload/types'
+import type { Option } from 'payload/bundle'
 
-import { optionIsObject } from 'payload/types'
+import { optionIsObject } from 'payload/bundle'
 import React, { useCallback } from 'react'
 
 import { useForm } from '../../forms/Form/context.js'

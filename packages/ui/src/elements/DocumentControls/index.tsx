@@ -1,6 +1,6 @@
 'use client'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'

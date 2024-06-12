@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, FieldBase } from 'payload/types'
+import type { CellComponentProps, FieldBase } from 'payload/bundle'
 
 import React from 'react'
 

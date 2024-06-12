@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject } from 'payload/types'
+import type { OptionObject } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

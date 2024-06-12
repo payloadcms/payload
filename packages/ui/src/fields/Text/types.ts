@@ -1,4 +1,4 @@
-import type { TextField } from 'payload/types'
+import type { TextField } from 'payload/bundle'
 import type { ChangeEvent } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'

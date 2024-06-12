@@ -1,4 +1,4 @@
-import type { Where } from 'payload/types'
+import type { Where } from 'payload/bundle'
 
 import type { Action, FieldCondition } from '../types.js'
 

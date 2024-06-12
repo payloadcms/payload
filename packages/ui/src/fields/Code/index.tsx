@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { CodeField as CodeFieldType } from 'payload/types'
+import type { CodeField as CodeFieldType } from 'payload/bundle'
 
 import React, { useCallback } from 'react'
 

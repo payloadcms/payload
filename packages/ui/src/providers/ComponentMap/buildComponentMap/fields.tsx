@@ -1,5 +1,4 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
   Field,
@@ -8,10 +7,11 @@ import type {
   LabelProps,
   Option,
   SanitizedConfig,
-} from 'payload/types'
+} from 'payload/bundle'
+import type { CustomComponent } from 'payload/config'
 
-import { MissingEditorProp } from 'payload/errors'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+import { MissingEditorProp } from 'payload/bundle'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/bundle'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'

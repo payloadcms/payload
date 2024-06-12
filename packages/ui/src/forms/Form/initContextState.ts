@@ -1,4 +1,4 @@
-import type { Data, FormField, FormState } from 'payload/types'
+import type { Data, FormField, FormState } from 'payload/bundle'
 
 import type {
   Context,

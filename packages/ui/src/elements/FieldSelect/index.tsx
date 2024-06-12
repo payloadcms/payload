@@ -1,5 +1,5 @@
 'use client'
-import type { FieldWithPath } from 'payload/types'
+import type { FieldWithPath } from 'payload/bundle'
 
 import React, { Fragment, type JSX, useState } from 'react'
 

@@ -1,9 +1,9 @@
 'use client'
 import type { FieldPermissions } from 'payload/auth'
-import type { DocumentPreferences } from 'payload/types'
+import type { DocumentPreferences } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
-import { toKebabCase } from 'payload/utilities'
+import { toKebabCase } from 'payload/bundle'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'

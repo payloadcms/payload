@@ -1,4 +1,4 @@
-import type { TextareaField as TextareaFieldType } from 'payload/types'
+import type { TextareaField as TextareaFieldType } from 'payload/bundle'
 
 import { type ChangeEvent } from 'react'
 
