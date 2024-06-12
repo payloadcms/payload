@@ -2,7 +2,7 @@ import type { PopulationPromise } from '../types.js'
 import type { LinkFeatureServerProps } from './feature.server.js'
 import type { SerializedLinkNode } from './nodes/types.js'
 
-import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
+import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 
 export const linkPopulationPromiseHOC = (
   props: LinkFeatureServerProps,
@@ -30,7 +30,7 @@ export const linkPopulationPromiseHOC = (
      * Should populate all fields, including the doc field (for internal links), as it's treated like a normal field
      */
     if (Array.isArray(props.fields)) {
-      recurseNestedFields({
+      recursivelyPopulateFieldsForGraphQL({
         context,
         currentDepth,
         data: node.fields,
@@ -40,7 +40,7 @@ export const linkPopulationPromiseHOC = (
         fieldPromises,
         fields: props.fields,
         findMany,
-        flattenLocales: false, // Disable localization handling which does not work properly yet. Once we fully support hooks, this can be enabled (pass through flattenLocales again)
+        flattenLocales,
         overrideAccess,
         populationPromises,
         req,

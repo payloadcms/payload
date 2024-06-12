@@ -1,5 +1,5 @@
 import type { Config, SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, FieldAffectingData } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
@@ -11,12 +11,12 @@ import type { ClientProps } from './feature.client.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
 import { LinkFeatureClientComponent } from './feature.client.js'
+import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
 import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
-import { linkPopulationPromiseHOC } from './populationPromise.js'
 import { linkValidation } from './validate.js'
 
 export type ExclusiveLinkCollectionsProps =
@@ -46,7 +46,12 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    * A function or array defining additional fields for the link feature. These will be
    * displayed in the link editor drawer.
    */
-  fields?: ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[]) | Field[]
+  fields?:
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldAffectingData[]
+      }) => (Field | FieldAffectingData)[])
+    | Field[]
   /**
    * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
    * This behaves exactly like the maxDepth properties of relationship and upload fields.
@@ -81,6 +86,13 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
         validRelationships,
       })
       props.fields = sanitizedFields
+
+      // the text field is not included in the node data.
+      // Thus, for tasks like validation, we do not want to pass it a text field in the schema which will never have data.
+      // Otherwise, it will cause a validation error (field is required).
+      const sanitizedFieldsWithoutText = deepCopyObject(sanitizedFields).filter(
+        (field) => field.name !== 'text',
+      )
 
       return {
         ClientComponent: LinkFeatureClientComponent,
@@ -143,16 +155,9 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                 nodeTypes: [AutoLinkNode.getType()],
               },
             },
-            hooks: {
-              afterRead: [
-                ({ node }) => {
-                  return node
-                },
-              ],
-            },
             node: AutoLinkNode,
-            populationPromises: [linkPopulationPromiseHOC(props)],
-            validations: [linkValidation(props)],
+            // Since AutoLinkNodes are just internal links, they need no hooks or graphQL population promises
+            validations: [linkValidation(props, sanitizedFieldsWithoutText)],
           }),
           createNode({
             converters: {
@@ -181,9 +186,15 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                 nodeTypes: [LinkNode.getType()],
               },
             },
+            getSubFields: ({ node, req }) => {
+              return sanitizedFieldsWithoutText
+            },
+            getSubFieldsData: ({ node }) => {
+              return node?.fields
+            },
+            graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
             node: LinkNode,
-            populationPromises: [linkPopulationPromiseHOC(props)],
-            validations: [linkValidation(props)],
+            validations: [linkValidation(props, sanitizedFieldsWithoutText)],
           }),
         ],
         serverFeatureProps: props,

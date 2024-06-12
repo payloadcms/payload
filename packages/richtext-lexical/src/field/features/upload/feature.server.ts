@@ -7,11 +7,12 @@ import { sanitizeFields } from 'payload/config'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
+import { populate } from '../../../populateGraphQL/populate.js'
 import { createNode } from '../typeUtilities.js'
 import { UploadFeatureClientComponent } from './feature.client.js'
+import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { UploadNode } from './nodes/UploadNode.js'
-import { uploadPopulationPromiseHOC } from './populationPromise.js'
 import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
@@ -177,8 +178,73 @@ export const UploadFeature: FeatureProviderProviderServer<
                 nodeTypes: [UploadNode.getType()],
               },
             },
+            getSubFields: ({ node, req }) => {
+              const collection = req.payload.collections[node?.relationTo]
+
+              if (collection) {
+                const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                if (Array.isArray(collectionFieldSchema)) {
+                  if (!collectionFieldSchema?.length) {
+                    return null
+                  }
+                  return collectionFieldSchema
+                }
+              }
+              return null
+            },
+            getSubFieldsData: ({ node }) => {
+              return node?.fields
+            },
+            graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
+            hooks: {
+              afterRead: [
+                ({
+                  currentDepth,
+                  depth,
+                  draft,
+                  node,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  showHiddenFields,
+                }) => {
+                  if (!node?.value) {
+                    return node
+                  }
+                  const collection = req.payload.collections[node?.relationTo]
+
+                  if (!collection) {
+                    return node
+                  }
+                  // @ts-expect-error
+                  const id = node?.value?.id || node?.value // for backwards-compatibility
+
+                  const populateDepth =
+                    props?.maxDepth !== undefined && props?.maxDepth < depth
+                      ? props?.maxDepth
+                      : depth
+
+                  populationPromises.push(
+                    populate({
+                      id,
+                      collection,
+                      currentDepth,
+                      data: node,
+                      depth: populateDepth,
+                      draft,
+                      key: 'value',
+                      overrideAccess,
+                      req,
+                      showHiddenFields,
+                    }),
+                  )
+
+                  return node
+                },
+              ],
+            },
             node: UploadNode,
-            populationPromises: [uploadPopulationPromiseHOC(props)],
             validations: [uploadValidation(props)],
           }),
         ],

@@ -28,6 +28,7 @@ export function generateLexicalRichText() {
           format: '',
           type: 'upload',
           version: 2,
+          id: '665d105a91e1c337ba8308dd',
           fields: {
             caption: {
               root: {

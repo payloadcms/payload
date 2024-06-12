@@ -7,7 +7,7 @@ import type { AdapterProps } from '../types.js'
 import { recurseNodes } from '../forEachNodeRecursively.js'
 
 export type Args = Parameters<
-  RichTextAdapter<SerializedEditorState, AdapterProps>['populationPromises']
+  RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']
 >[0] & {
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
 }
@@ -31,7 +31,9 @@ export const populateLexicalPopulationPromises = ({
   showHiddenFields,
   siblingDoc,
 }: Args) => {
-  if (depth <= 0 || currentDepth > depth) {
+  const shouldPopulate = depth && currentDepth <= depth
+
+  if (!shouldPopulate) {
     return
   }
 

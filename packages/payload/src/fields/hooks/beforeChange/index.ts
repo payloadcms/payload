@@ -27,7 +27,7 @@ type Args<T> = {
  * - Validate data
  * - Transform data for storage
  * - beforeDuplicate hooks (if duplicate)
- * - Unflatten locales
+ * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
 export const beforeChange = async <T extends Record<string, unknown>>({
   id,
@@ -59,8 +59,9 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     global,
     mergeLocaleActions,
     operation,
-    path: '',
+    path: [],
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,

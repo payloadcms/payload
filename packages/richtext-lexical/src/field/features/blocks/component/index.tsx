@@ -29,10 +29,8 @@ import type { BlocksFeatureClientProps } from '../feature.client.js'
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import { BlockContent } from './BlockContent.js'
 import './index.scss'
-import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
-  blockFieldWrapperName: string
   children?: React.ReactNode
 
   formData: BlockFields
@@ -44,7 +42,7 @@ type Props = {
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
-  const { blockFieldWrapperName, formData, nodeKey } = props
+  const { formData, nodeKey } = props
   const config = useConfig()
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
@@ -81,7 +79,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         setInitialState({
-          ...removeEmptyArrayValues({ fields: state }),
+          ...state,
           blockName: {
             initialValue: '',
             passesCondition: true,
@@ -175,6 +173,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       </Collapsible>
     )
   }, [
+    classNames,
     fieldMap,
     parentLexicalRichTextField,
     nodeKey,
@@ -182,7 +181,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     submitted,
     initialState,
     reducedBlock,
-    blockFieldWrapperName,
     onChange,
     schemaFieldsPath,
     path,
