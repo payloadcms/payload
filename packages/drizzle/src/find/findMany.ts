@@ -105,6 +105,10 @@ export const findMany = async function find({
   } else {
     findManyArgs.limit = limitArg === 0 ? undefined : limitArg
 
+    if (adapter.name === 'sqlite' && !findManyArgs.limit) {
+      findManyArgs.limit = -1
+    }
+
     const offset = skip || (page - 1) * limitArg
 
     if (!Number.isNaN(offset)) findManyArgs.offset = offset

@@ -1,9 +1,6 @@
-import { createRequire } from 'module'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter } from '../types.js'
-
-const require = createRequire(import.meta.url)
 
 /**
  * Pushes the development schema to the database using Drizzle.
@@ -12,13 +9,7 @@ const require = createRequire(import.meta.url)
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
-  let pushSchema
-  if (adapter.name === 'postgres') {
-    ;({ pushSchema } = require('drizzle-kit/payload'))
-  }
-  if (adapter.name === 'sqlite') {
-    ;({ pushSQLiteSchema: pushSchema } = require('drizzle-kit/payload'))
-  }
+  const { pushSchema } = adapter.requireDrizzleKit(adapter)
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, warnings } = await pushSchema(adapter.schema, adapter.drizzle)

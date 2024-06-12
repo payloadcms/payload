@@ -20,7 +20,6 @@ import type {
   PgSchema,
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
-import type { PgRaw } from 'drizzle-orm/pg-core/query-builders/raw'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload } from 'payload'
 import type { PayloadRequestWithData } from 'payload/types'
@@ -78,7 +77,7 @@ export type Execute<T> = (args: {
   drizzle?: PostgresDB
   raw?: string
   sql?: SQL<unknown>
-}) => PgRaw<QueryResult<Record<string, T>>>
+}) => Promise<QueryResult<Record<string, T>>>
 
 export type GenerateDrizzleJSON = (args: {
   schema: Record<string, GenericRelation | GenericTable>

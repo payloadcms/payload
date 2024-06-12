@@ -98,7 +98,7 @@ export type Execute<T> = (args: {
   raw?: string
   sql?: SQL<unknown>
 }) =>
-  | PgRaw<QueryResult<Record<string, unknown>>>
+  | Promise<QueryResult<Record<string, T>>>
   | SQLiteRaw<Promise<{ rows: T[] }>>
   | SQLiteRaw<ResultSet>
 
@@ -110,6 +110,13 @@ export type Insert = (args: {
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
+
+export type RequireDrizzleKit = (adapter: DrizzleAdapter) => {
+  pushSchema: (
+    schema: Record<string, unknown>,
+    drizzle: DrizzleAdapter['drizzle'],
+  ) => Promise<{ apply; hasDataLoss; warnings }>
+}
 
 export type DrizzleAdapter = BaseDatabaseAdapter & {
   countDistinct: CountDistinct
@@ -139,6 +146,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
+  requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
   schema: Record<string, unknown>
   schemaName?: string

@@ -47,6 +47,7 @@ import { generateDrizzleJSON } from './generateDrizzleJSON.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 import { init } from './init.js'
 import { insert } from './insert.js'
+import { requireDrizzleKit } from './requireDrizzleKit.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -130,6 +131,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       payload,
       queryDrafts,
       rejectInitializing,
+      requireDrizzleKit,
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
