@@ -13,7 +13,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui/client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
@@ -74,7 +74,7 @@ export const Auth: React.FC<Props> = (props) => {
     })
 
     if (response.status === 200) {
-      toast.success(t('authentication:successfullyUnlocked'), { autoClose: 3000 })
+      toast.success(t('authentication:successfullyUnlocked'))
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }

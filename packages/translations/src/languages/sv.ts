@@ -273,6 +273,7 @@ export const svTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Stanna på denna sida',
     submissionSuccessful: 'Inlämningen Lyckades.',
     submit: 'Lämna in',
+    submitting: 'Inlämnar...',
     success: 'Framgång',
     successfullyCreated: '{{label}} skapades framgångsrikt.',
     successfullyDuplicated: '{{label}} duplicerades framgångsrikt.',

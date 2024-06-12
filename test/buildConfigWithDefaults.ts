@@ -160,12 +160,15 @@ export async function buildConfigWithDefaults(
     secret: 'TEST_SECRET',
     sharp,
     telemetry: false,
+
+    ...testConfig,
+
     typescript: {
       declare: {
         ignoreTSError: true,
       },
+      ...testConfig?.typescript,
     },
-    ...testConfig,
     i18n: {
       supportedLanguages: {
         de,

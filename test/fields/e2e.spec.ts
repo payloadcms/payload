@@ -19,7 +19,12 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
-import { arrayFieldsSlug, blockFieldsSlug, collapsibleFieldsSlug } from './slugs.js'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  collapsibleFieldsSlug,
+  tabsFields2Slug,
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -100,7 +105,7 @@ describe('fields', () => {
       await page.click('#action-save', { delay: 200 })
 
       // toast error
-      await expect(page.locator('.Toastify')).toContainText(
+      await expect(page.locator('.payload-toast-container')).toContainText(
         'The following field is invalid: uniqueText',
       )
 
@@ -121,7 +126,7 @@ describe('fields', () => {
       await page.locator('#action-save').click()
 
       // toast error
-      await expect(page.locator('.Toastify')).toContainText(
+      await expect(page.locator('.payload-toast-container')).toContainText(
         'The following field is invalid: group.unique',
       )
 
@@ -307,7 +312,7 @@ describe('fields', () => {
       await titleInput.fill('Row 123')
       await page.locator('#action-save').click()
       await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
       // ensure the 'title' field is visible in the table header
       await page.goto(url.list)
@@ -329,7 +334,7 @@ describe('fields', () => {
       await titleInput.fill('Row 456')
       await page.locator('#action-save').click()
       await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
       // ensure there are not two ID fields in the table header
       await page.goto(url.list)
@@ -443,6 +448,28 @@ describe('fields', () => {
 
       const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup')
       await expect(fieldRelyingOnSiblingData).toBeVisible()
+    })
+  })
+
+  describe('tabs', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, tabsFields2Slug)
+    })
+
+    test('should correctly save nested unnamed and named tabs', async () => {
+      await page.goto(url.create)
+
+      await page.locator('#field-tabsInArray .array-field__add-row').click()
+      await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
+      await page.locator('.tabs-field__tabs button:nth-child(2)').click()
+      await page.locator('#field-tabsInArray__0__tab2__text2').fill('tab 2 text')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
+      await page.locator('.tabs-field__tabs button:nth-child(2)').click()
+      await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
     })
   })
 })

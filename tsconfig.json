@@ -104,6 +104,9 @@
   "composite": true,
   "references": [
     {
+      "path": "./packages/create-payload-app"
+    },
+    {
       "path": "./packages/db-mongodb"
     },
     {

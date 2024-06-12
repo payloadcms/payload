@@ -14,7 +14,7 @@ import {
 } from '@payloadcms/ui/client'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 type Args = {
   token: string
@@ -52,7 +52,7 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
         history.push(`${admin}`)
       } else {
         history.push(`${admin}/login`)
-        toast.success(i18n.t('general:updatedSuccessfully'), { autoClose: 3000 })
+        toast.success(i18n.t('general:updatedSuccessfully'))
       }
     },
     [fetchFullUser, history, admin, i18n],

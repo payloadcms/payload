@@ -19,6 +19,7 @@ export interface Config {
     'payload-api-test-twos': PayloadApiTestTwo;
     'content-type': ContentType;
     'cyclical-relationship': CyclicalRelationship;
+    media: Media;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -105,7 +106,7 @@ export interface Post {
       C3?: string | null;
     };
   };
-  D1: {
+  D1?: {
     D2?: {
       D3?: {
         D4?: string | null;
@@ -195,9 +196,29 @@ export interface CyclicalRelationship {
   id: string;
   title?: string | null;
   relationToSelf?: (string | null) | CyclicalRelationship;
+  media?: string | Media | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

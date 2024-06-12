@@ -36,6 +36,16 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
 
   // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
 
+  // Generate types
+  if (config.typescript.autoGenerate !== false) {
+    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
+    // see: https://github.com/vercel/next.js/issues/66723
+    void payload.bin({
+      args: ['generate:types'],
+      log: false,
+    })
+  }
+
   await payload.db.init()
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
@@ -81,7 +91,9 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     ) {
       try {
         const port = process.env.PORT || '3000'
-        const ws = new WebSocket(`ws://localhost:${port}/_next/webpack-hmr`)
+        const ws = new WebSocket(
+          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+        )
 
         ws.onmessage = (event) => {
           if (typeof event.data === 'string') {

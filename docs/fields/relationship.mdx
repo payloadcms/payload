@@ -24,7 +24,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 - To allow for an `Order` to feature a `placedBy` relationship to either an `Organization` or `User` collection
 - To assign `Category` documents to `Post` documents
 
-### Config
+## Config
 
 | Option              | Description                                                                                                                                                                    |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -58,7 +58,7 @@ _\* An asterisk denotes that a property is required._
   related documents that are returned by the API.
 </Banner>
 
-### Admin config
+## Admin config
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), the Relationship field type also
 allows for the following admin-specific properties:
@@ -122,7 +122,7 @@ In this configuration:
 
 Note: If `sortOptions` is not defined, the default sorting behavior of the Relationship field dropdown will be used.
 
-### Filtering relationship options
+## Filtering relationship options
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
 for validating input and filtering available relationships in the UI.
@@ -139,7 +139,7 @@ called with an argument object with the following properties:
 | `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation      |
 | `user`        | An object containing the currently authenticated user                                                 |
 
-### Example
+## Example
 
 ```ts
 import { CollectionConfig } from 'payload/types'
@@ -181,13 +181,13 @@ You can learn more about writing queries [here](/docs/queries/overview).
   <strong>payload/fields/validations</strong> in your validate function.
 </Banner>
 
-### How the data is saved
+## How the data is saved
 
 Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating
 and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from
 this field.
 
-#### Has One
+### Has One
 
 The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type
 of collection.
@@ -221,7 +221,7 @@ When querying documents in this collection via REST API, you could query as foll
 
 `?where[owner][equals]=6031ac9e1289176380734024`.
 
-#### Has One - Polymorphic
+### Has One - Polymorphic
 
 Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that
 tells Payload which Collections are valid to reference.
@@ -263,7 +263,7 @@ You can also query for documents where a field has a relationship to a specific 
 
 This query would return only documents that have an owner relationship to organizations.
 
-#### Has Many
+### Has Many
 
 The `hasMany` tells Payload that there may be more than one collection saved to the field.
 
@@ -295,7 +295,7 @@ When querying documents, the format does not change for arrays:
 
 `?where[owners][equals]=6031ac9e1289176380734024`.
 
-#### Has Many - Polymorphic
+### Has Many - Polymorphic
 
 ```ts
 {
@@ -336,7 +336,7 @@ Querying is done in the same way as the earlier Polymorphic example:
 
 `?where[owners.value][equals]=6031ac9e1289176380734024`.
 
-#### Querying and Filtering Polymorphic Relationships
+### Querying and Filtering Polymorphic Relationships
 
 Polymorphic and non-polymorphic relationships must be queried differently because of how the related data is stored and
 may be inconsistent across different collections. Because of this, filtering polymorphic relationship fields from the

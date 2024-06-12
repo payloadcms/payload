@@ -272,6 +272,7 @@ export const koTranslations: DefaultTranslationsObject = {
     stayOnThisPage: '이 페이지에 머무르기',
     submissionSuccessful: '제출이 완료되었습니다.',
     submit: '제출',
+    submitting: '제출 중...',
     success: '성공',
     successfullyCreated: '{{label}}이(가) 생성되었습니다.',
     successfullyDuplicated: '{{label}}이(가) 복제되었습니다.',

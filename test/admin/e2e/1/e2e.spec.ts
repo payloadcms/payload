@@ -69,6 +69,7 @@ describe('admin1', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
+  let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
@@ -87,6 +88,7 @@ describe('admin1', () => {
     }))
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
@@ -616,6 +618,22 @@ describe('admin1', () => {
     })
   })
 
+  describe('form state', () => {
+    test('collection — should re-enable fields after save', async () => {
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('#field-title')).toBeEnabled()
+    })
+
+    test('global — should re-enable fields after save', async () => {
+      await page.goto(globalURL.global(globalSlug))
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('#field-title')).toBeEnabled()
+    })
+  })
+
   describe('document titles', () => {
     test('collection — should render fallback titles when creating new', async () => {
       await page.goto(postsUrl.create)
@@ -647,13 +665,17 @@ describe('admin1', () => {
     })
 
     test('global — should render custom, localized label', async () => {
-      await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
+      await page.goto(globalURL.global(globalSlug))
+      await page.waitForURL(globalURL.global(globalSlug))
       await openNav(page)
       const label = 'My Global Label'
       const globalLabel = page.locator(`#nav-global-global`)
       await expect(globalLabel).toContainText(label)
       await globalLabel.click()
+      await checkPageTitle(page, label)
+      await checkBreadcrumb(page, label)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
     })
@@ -747,7 +769,7 @@ describe('admin1', () => {
 
       await page.goto(postsUrl.list)
       await selectAndDeleteAll()
-      await expect(page.locator('.Toastify__toast--success')).toHaveText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
@@ -781,7 +803,7 @@ describe('admin1', () => {
       await titleInput.fill(bulkTitle)
 
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Updated 3 Posts successfully.',
       )
       await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle)

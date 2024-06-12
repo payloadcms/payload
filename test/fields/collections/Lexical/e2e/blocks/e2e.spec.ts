@@ -575,6 +575,14 @@ describe('lexicalBlocks', () => {
       // reload page and assert again
       await page.reload()
       await wait(300)
+      await newSubLexicalAndUploadBlock.scrollIntoViewIfNeeded()
+      await expect(newSubLexicalAndUploadBlock).toBeVisible()
+      await newSubLexicalAndUploadBlock
+        .locator('.field-type.upload .file-meta__url a')
+        .scrollIntoViewIfNeeded()
+      await expect(
+        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+      ).toBeVisible()
 
       await expect(
         newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
@@ -827,7 +835,9 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page)
 
-      await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
+      await expect(page.locator('.payload-toast-container')).not.toContainText(
+        'Please correct invalid fields.',
+      )
     }
 
     // eslint-disable-next-line playwright/expect-expect
@@ -912,7 +922,9 @@ describe('lexicalBlocks', () => {
       await page.click('#action-save', { delay: 100 })
       await wait(300)
 
-      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'The following field is invalid',
+      )
       await wait(300)
 
       const requiredTooltip = conditionalArrayBlock

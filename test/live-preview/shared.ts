@@ -15,4 +15,11 @@ export const mobileBreakpoint = {
   height: 667,
 }
 
+export const desktopBreakpoint = {
+  label: 'Desktop',
+  name: 'desktop',
+  width: 1920,
+  height: 1080,
+}
+
 export const renderedPageTitleID = 'rendered-page-title'

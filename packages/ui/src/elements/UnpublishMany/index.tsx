@@ -1,9 +1,8 @@
 'use client'
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -20,13 +19,14 @@ const baseClass = 'unpublish-many'
 
 import type { ClientCollectionConfig } from 'payload/types'
 
+import { toast } from 'sonner'
+
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
-  const { Modal, useModal } = facelessUIImport
 
   const {
     routes: { api },

@@ -1,11 +1,11 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -25,7 +25,6 @@ export type PublishManyProps = {
 }
 
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
-  const { Modal, useModal } = facelessUIImport
   const { clearRouteCache } = useRouteCache()
 
   const { collection: { slug, labels: { plural }, versions } = {} } = props

@@ -2,7 +2,7 @@
 
 import type { FormState } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { useConfig, useDrawerSlug, useFieldProps, useTranslation } from '@payloadcms/ui/client'
 import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
 import React, { Fragment, useState } from 'react'
@@ -56,8 +56,6 @@ const insertLink = (editor, fields) => {
 }
 
 export const LinkButton: React.FC = () => {
-  const { useModal } = facelessUIImport
-
   const { fieldProps } = useElementButton()
   const [initialState, setInitialState] = useState<FormState>({})
 

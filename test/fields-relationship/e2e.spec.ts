@@ -233,7 +233,7 @@ describe('fields - relationship', () => {
 
     await openDocControls(page)
     await page.locator('#action-duplicate').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     const field = page.locator('#field-relationship .relationship--single-value__text')
 
     await expect(field).toHaveText(relationOneDoc.id)
@@ -259,7 +259,7 @@ describe('fields - relationship', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText(`is invalid: ${fieldName}`)
+    await expect(page.locator('.payload-toast-container')).toContainText(`is invalid: ${fieldName}`)
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -406,13 +406,13 @@ describe('fields - relationship', () => {
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
     ).toHaveCount(1)
     await drawerField.fill('Updated document')
     await saveButton.click()
-    await expect(page.locator('.Toastify')).toContainText('Updated successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('Updated successfully')
     await page.locator('.doc-drawer__header-close').click()
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),

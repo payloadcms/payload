@@ -242,7 +242,11 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       global: null,
       operation: 'update',
       req,
-      skipValidation: Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate &&
+        data._status !== 'published',
     })
 
     // /////////////////////////////////////

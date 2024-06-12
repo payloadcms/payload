@@ -2,11 +2,11 @@
 
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -26,8 +26,6 @@ export type Props = {
 }
 
 export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
-  const { Modal, useModal } = facelessUIImport
-
   const router = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
@@ -68,9 +66,6 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             toast.success(
               message ||
                 t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
-              {
-                autoClose: 3000,
-              },
             )
             setModified(false)
             router.push(`${admin}/collections/${slug}/${doc.id}?locale=${locale.code}`)
@@ -79,7 +74,6 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
               errors?.[0].message ||
                 message ||
                 t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
-              { autoClose: 5000 },
             )
           }
         })

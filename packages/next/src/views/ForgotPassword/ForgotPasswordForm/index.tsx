@@ -5,7 +5,7 @@ import type { FormState, PayloadRequestWithData } from 'payload/types'
 import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
 import { email } from 'payload/fields/validations'
 import React, { Fragment, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 export const ForgotPasswordForm: React.FC = () => {
   const config = useConfig()

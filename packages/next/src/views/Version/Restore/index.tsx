@@ -4,7 +4,7 @@ import { Button, Modal, Pill, useConfig, useModal, useTranslation } from '@paylo
 import { requests } from '@payloadcms/ui/server'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 

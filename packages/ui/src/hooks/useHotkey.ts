@@ -1,6 +1,6 @@
 'use client'
 /* eslint-disable no-shadow */
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { setsAreEqual } from 'payload/utilities'
 import { useCallback, useEffect } from 'react'
 
@@ -74,8 +74,6 @@ export const useHotkey = (
   },
   func: (e: KeyboardEvent) => void,
 ): void => {
-  const { useModal } = facelessUIImport
-
   const { cmdCtrlKey, editDepth, keyCodes } = options
 
   const { modalState } = useModal()
