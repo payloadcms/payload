@@ -18,6 +18,7 @@ test-results
 /media
 test/media
 test/payloadtests.db
+test/payloadtests.db-journal
 /versions
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
