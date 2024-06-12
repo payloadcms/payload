@@ -280,9 +280,7 @@ export default async function resizeAndTransformImageSizes({
         let { height: resizeHeight } = imageResizeConfig
         let { width: resizeWidth } = imageResizeConfig
 
-        const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
-        const prioritizeHeight = resizeAspectRatio < originalAspectRatio
 
         // Calculate resizeWidth based on original aspect ratio if it's undefined
         if (resizeHeight && !resizeWidth) {
@@ -296,9 +294,10 @@ export default async function resizeAndTransformImageSizes({
 
         // Scale the image up or down to fit the resize dimensions
         const scaledImage = imageToResize.resize({
-          height: prioritizeHeight ? resizeHeight : null,
-          width: prioritizeHeight ? null : resizeWidth,
+          height: resizeHeight,
+          width: resizeWidth,
         })
+
         const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
         const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
