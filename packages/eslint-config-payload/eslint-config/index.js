@@ -10,7 +10,7 @@ const baseRules = {
   'no-use-before-define': 'off',
   'object-shorthand': 'warn',
   'no-useless-escape': 'warn',
-  'import/no-duplicates': 'error',
+  'import/no-duplicates': 'warn',
   'perfectionist/sort-objects': [
     'error',
     {
