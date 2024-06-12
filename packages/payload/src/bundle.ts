@@ -63,6 +63,8 @@ export type {
 } from './auth/types.js'
 
 export type { ClientCollectionConfig } from './collections/config/client.js'
+export { defaults as collectionDefaults } from './collections/config/defaults.js'
+
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -83,8 +85,9 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
-
 export type { ClientConfig } from './config/client.js'
+export { defaults } from './config/defaults.js'
+
 export type {
   Access,
   AccessArgs,
@@ -126,7 +129,6 @@ export type {
   SharpDependency,
 } from './config/types.js'
 export { serverProps } from './config/types.js'
-
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
   APIError,
@@ -151,7 +153,9 @@ export {
   QueryError,
   ValidationError,
 } from './errors/index.js'
+
 export type { ClientFieldConfig } from './fields/config/client.js'
+
 export type {
   ArrayField,
   Block,
@@ -208,7 +212,6 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -225,13 +228,14 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from './fields/config/types.js'
-
 export { default as getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
+
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
@@ -255,7 +259,6 @@ export {
   textarea,
   upload,
 } from './fields/validations.js'
-
 export type { ClientGlobalConfig } from './globals/config/client.js'
 
 export type {
@@ -276,7 +279,6 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
-
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export { validOperators } from './types/constants.js'
 export type {
@@ -323,9 +325,9 @@ export {
   fieldsToJSONSchema,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
+
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
-
 export { deepCopyObject } from './utilities/deepCopyObject.js'
 export { deepMerge } from './utilities/deepMerge.js'
 export { fieldSchemaToJSON } from './utilities/fieldSchemaToJSON.js'
@@ -336,33 +338,35 @@ export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from './utilities/getUniqueListBy.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { isNumber } from './utilities/isNumber.js'
+
 export { isPlainObject } from './utilities/isPlainObject.js'
 export {
   isReactClientComponent,
   isReactComponentOrFunction,
   isReactServerComponentOrFunction,
 } from './utilities/isReactComponent.js'
-
 export { isValidID } from './utilities/isValidID.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
+
 export { setsAreEqual } from './utilities/setsAreEqual.js'
+
 export { default as toKebabCase } from './utilities/toKebabCase.js'
 
 export { wait } from './utilities/wait.js'
-
 export { default as wordBoundariesRegex } from './utilities/wordBoundariesRegex.js'
-
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { versionDefaults } from './versions/defaults.js'
-export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
-export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 
+export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
+
+export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
+
 export { saveVersion } from './versions/saveVersion.js'
 
 export type { TypeWithVersion } from './versions/types.js'

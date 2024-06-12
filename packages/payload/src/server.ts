@@ -48,8 +48,6 @@ export { loadEnv } from './bin/loadEnv.js'
 
 export { createClientCollectionConfig } from './collections/config/client.js'
 
-export { defaults as collectionDefaults } from './collections/config/defaults.js'
-
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 
 export { countOperation } from './collections/operations/count.js'
@@ -70,7 +68,6 @@ export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
 export { createClientConfig } from './config/client.js'
-export { defaults } from './config/defaults.js'
 
 export { findConfig } from './config/find.js'
 
