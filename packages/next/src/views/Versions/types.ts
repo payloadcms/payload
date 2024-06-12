@@ -1,9 +1,9 @@
 import type { I18n } from '@payloadcms/translations'
-import type { User } from 'payload/bundle'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  User,
 } from 'payload/bundle'
 import type { PaginatedDocs } from 'payload/database'
 

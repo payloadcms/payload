@@ -1,6 +1,4 @@
-import type { CollectionPermission, GlobalPermission } from 'payload/bundle'
-import type { OptionObject } from 'payload/bundle'
-import type { Document } from 'payload/bundle'
+import type { CollectionPermission, Document, GlobalPermission, OptionObject } from 'payload/bundle'
 
 export type CompareOption = {
   label: string

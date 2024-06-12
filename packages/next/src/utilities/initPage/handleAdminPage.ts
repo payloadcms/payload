@@ -1,5 +1,5 @@
-import type { Permissions } from 'payload/bundle'
 import type {
+  Permissions,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
