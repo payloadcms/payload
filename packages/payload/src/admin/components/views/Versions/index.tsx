@@ -123,7 +123,7 @@ const VersionsView: React.FC<IndexProps> = (props) => {
 
     const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
     setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
-    setLatestPublishedVersion(publishedNewerThanDraft ? formattedPublished?.id : undefined)
+    setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
   }, [draft, published])
 
   useEffect(() => {
