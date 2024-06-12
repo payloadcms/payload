@@ -215,7 +215,7 @@ describe('uploads', () => {
     // choose from existing
     await page.locator('.list-drawer__toggler').click()
 
-    await expect(page.locator('.cell-title')).toContainText('draft')
+    await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
