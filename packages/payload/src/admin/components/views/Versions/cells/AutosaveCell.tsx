@@ -11,7 +11,6 @@ type AutosaveCellProps = {
 }
 
 export const renderPill = (data, latestVersion, currentLabel, previousLabel, pillStyle) => {
-  console.log(data.id === latestVersion)
   return (
     <React.Fragment>
       {data?.id === latestVersion ? (
