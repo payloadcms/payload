@@ -39,7 +39,10 @@
       "@payloadcms/ui/utilities/*": ["../packages/ui/src/utilities/*.ts"],
       "@payloadcms/ui/scss": ["../packages/ui/src/scss.scss"],
       "@payloadcms/ui/client": [
-        "../packages/ui/dist/exports/client/index.js"
+        "../packages/ui/src/exports/client/index.ts"
+      ],
+      "@payloadcms/ui/server": [
+        "../packages/ui/src/exports/server/index.ts"
       ],
       "@payloadcms/ui/scss/app.scss": ["../packages/ui/src/scss/app.scss"],
       "payload/types": ["../packages/payload/src/exports/types/index.ts"],

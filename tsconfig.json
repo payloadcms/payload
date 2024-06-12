@@ -76,10 +76,10 @@
         "./packages/ui/src/utilities/*.ts"
       ],
       "@payloadcms/ui/client": [
-        "./packages/ui/dist/exports/client/index.js"
+        "./packages/ui/src/exports/client/index.ts"
       ],
       "@payloadcms/ui/server": [
-        "./packages/ui/src/server.js"
+        "./packages/ui/src/exports/server/index.ts"
       ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"
