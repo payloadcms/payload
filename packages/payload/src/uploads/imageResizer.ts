@@ -277,18 +277,22 @@ export default async function resizeAndTransformImageSizes({
       const metadata = await sharpBase.metadata()
 
       if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
-        const { height: resizeHeight } = imageResizeConfig
+        let { height: resizeHeight } = imageResizeConfig
         let { width: resizeWidth } = imageResizeConfig
-
-        // Calculate resizeWidth based on original aspect ratio if it's undefined
-        if (resizeHeight && !resizeWidth) {
-          const originalAspectRatio = dimensions.width / dimensions.height
-          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
-        }
 
         const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+
+        // Calculate resizeWidth based on original aspect ratio if it's undefined
+        if (resizeHeight && !resizeWidth) {
+          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
+        }
+
+        // Calculate resizeHeight based on original aspect ratio if it's undefined
+        if (resizeWidth && !resizeHeight) {
+          resizeHeight = Math.round(resizeWidth / originalAspectRatio)
+        }
 
         // Scale the image up or down to fit the resize dimensions
         const scaledImage = imageToResize.resize({
