@@ -1494,7 +1494,7 @@ importers:
         version: 7.24.1(@babel/core@7.24.5)
       '@hyrious/esbuild-plugin-commonjs':
         specifier: ^0.2.4
-        version: 0.2.4(esbuild@0.21.4)
+        version: 0.2.4(esbuild@0.21.5)
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
@@ -5222,7 +5222,7 @@ packages:
   /@humanwhocodes/object-schema@2.0.3:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
 
-  /@hyrious/esbuild-plugin-commonjs@0.2.4(esbuild@0.21.4):
+  /@hyrious/esbuild-plugin-commonjs@0.2.4(esbuild@0.21.5):
     resolution: {integrity: sha512-NKR8bsDbNP7EpM//cjoo8Bpihmc97gPpnwrggG+18iSGow6oaJpfmy3Bv+oBgPkPlxcGzC9SXh+6szoCoKFvCw==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -5232,7 +5232,7 @@ packages:
       cjs-module-lexer:
         optional: true
     dependencies:
-      esbuild: 0.21.4
+      esbuild: 0.21.5
     dev: true
 
   /@img/sharp-darwin-arm64@0.33.4:
