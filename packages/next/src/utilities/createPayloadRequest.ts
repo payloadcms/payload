@@ -5,7 +5,7 @@ import type {
 } from 'payload/bundle'
 
 import { initI18n } from '@payloadcms/translations'
-import { executeAuthStrategies, parseCookies } from 'payload/bundle'
+import { executeAuthStrategies, parseCookies } from 'payload/server'
 import { getDataLoader } from 'payload/utilities'
 import qs from 'qs'
 import { URL } from 'url'
