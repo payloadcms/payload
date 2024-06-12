@@ -1,6 +1,7 @@
 import type { AdminViewProps } from 'payload/types'
 
 import { Logo } from '@payloadcms/ui/graphics/Logo'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -39,10 +40,10 @@ export const Verify: React.FC<AdminViewProps> = async ({
       token,
     })
 
-    return redirect(`${adminRoute}/login`)
+    return redirect(generateAdminURL(adminRoute, '/login'))
   } catch (e) {
     // already verified
-    if (e?.status === 202) redirect(`${adminRoute}/login`)
+    if (e?.status === 202) redirect(generateAdminURL(adminRoute, '/login'))
     textToRender = req.t('authentication:unableToVerify')
   }
 

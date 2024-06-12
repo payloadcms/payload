@@ -125,7 +125,12 @@ export const getViewsFromConfig = ({
               }
 
               default: {
-                const baseRoute = [adminRoute, 'collections', collectionSlug, segment3]
+                const baseRoute = [
+                  adminRoute !== '/' && adminRoute,
+                  'collections',
+                  collectionSlug,
+                  segment3,
+                ]
                   .filter(Boolean)
                   .join('/')
 
@@ -154,7 +159,12 @@ export const getViewsFromConfig = ({
                 ErrorView = UnauthorizedView
               }
             } else {
-              const baseRoute = [adminRoute, collectionEntity, collectionSlug, segment3]
+              const baseRoute = [
+                adminRoute !== '/' && adminRoute,
+                collectionEntity,
+                collectionSlug,
+                segment3,
+              ]
                 .filter(Boolean)
                 .join('/')
 
@@ -248,7 +258,9 @@ export const getViewsFromConfig = ({
                 ErrorView = UnauthorizedView
               }
             } else {
-              const baseRoute = [adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
+              const baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug]
+                .filter(Boolean)
+                .join('/')
 
               const currentRoute = [baseRoute, segment3, ...remainingSegments]
                 .filter(Boolean)

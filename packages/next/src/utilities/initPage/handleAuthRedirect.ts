@@ -1,3 +1,4 @@
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { redirect } from 'next/navigation.js'
 import QueryString from 'qs'
 
@@ -30,7 +31,7 @@ export const handleAuthRedirect = ({
         : undefined,
     )
 
-    const adminLoginRoute = `${adminRoute}${loginRouteFromConfig}`
+    const adminLoginRoute = generateAdminURL(adminRoute, loginRouteFromConfig)
 
     const customLoginRoute =
       typeof redirectUnauthenticatedUser === 'string' ? redirectUnauthenticatedUser : undefined

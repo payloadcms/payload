@@ -38,4 +38,5 @@ export const customCollectionParamViewPath = `${customCollectionParamViewPathBas
 export const customAdminRoutes = {
   logout: '/custom-logout',
   inactivity: '/custom-inactivity',
+  admin: '/',
 }

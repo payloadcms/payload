@@ -4,6 +4,7 @@ import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { generateAdminURL } from '../../utilities/generateAdminURL.js'
 import { DefaultAccountIcon } from './Default/index.js'
 export { GravatarAccountIcon } from './Gravatar/index.js'
 
@@ -18,8 +19,6 @@ export const Account = () => {
 
   const { user } = useAuth()
   const pathname = usePathname()
-
-  const isOnAccountPage = pathname === `${adminRoute}${accountRoute}`
-
+  const isOnAccountPage = pathname === generateAdminURL(adminRoute, accountRoute)
   if (!user?.email || Avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
 }

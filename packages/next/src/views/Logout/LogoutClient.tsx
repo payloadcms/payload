@@ -2,6 +2,7 @@
 import { Button } from '@payloadcms/ui/elements/Button'
 import { useAuth } from '@payloadcms/ui/providers/Auth'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import LinkImport from 'next/link.js'
 import React, { Fragment, useEffect } from 'react'
 
@@ -34,9 +35,12 @@ export const LogoutClient: React.FC<{
           Link={Link}
           buttonStyle="secondary"
           el="link"
-          url={`${adminRoute}/login${
-            redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
-          }`}
+          url={generateAdminURL(
+            adminRoute,
+            `/login${
+              redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
+            }`,
+          )}
         >
           {t('authentication:logBackIn')}
         </Button>

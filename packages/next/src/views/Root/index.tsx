@@ -5,6 +5,7 @@ import type { SanitizedConfig } from 'payload/types'
 import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -43,7 +44,10 @@ export const RootPage = async ({
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = `${adminRoute}${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`
+  const currentRoute = generateAdminURL(
+    adminRoute,
+    `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+  )
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -71,7 +75,7 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc)
 
-    const routeWithAdmin = `${adminRoute}${createFirstUserRoute}`
+    const routeWithAdmin = generateAdminURL(adminRoute, createFirstUserRoute)
 
     if (!dbHasUser && currentRoute !== routeWithAdmin) {
       redirect(routeWithAdmin)

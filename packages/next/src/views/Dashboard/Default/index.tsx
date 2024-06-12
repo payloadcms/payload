@@ -9,6 +9,7 @@ import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { EntityType, type groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
 import React, { Fragment } from 'react'
 
@@ -107,7 +108,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                       if (type === EntityType.collection) {
                         title = getTranslation(entity.labels.plural, i18n)
                         buttonAriaLabel = t('general:showAllLabel', { label: title })
-                        href = `${adminRoute}/collections/${entity.slug}`
+                        href = generateAdminURL(adminRoute, `/collections/${entity.slug}`)
                         createHREF = `${adminRoute}/collections/${entity.slug}/create`
                         hasCreatePermission =
                           permissions?.collections?.[entity.slug]?.create?.permission

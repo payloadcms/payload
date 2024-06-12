@@ -13,6 +13,7 @@ import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
 import { OperationProvider } from '@payloadcms/ui/providers/Operation'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { useRouter } from 'next/navigation.js'
 import { useSearchParams } from 'next/navigation.js'
@@ -122,7 +123,10 @@ export const DefaultEditView: React.FC = () => {
 
       if (!isEditing && depth < 2) {
         // Redirect to the same locale if it's been set
-        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        const redirectRoute = generateAdminURL(
+          adminRoute,
+          `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
+        )
         router.push(redirectRoute)
       } else {
         dispatchFormQueryParams({

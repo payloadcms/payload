@@ -3,6 +3,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import LinkImport from 'next/link.js'
 import { useParams, usePathname } from 'next/navigation.js'
+import { generateAdminURL } from 'packages/ui/src/utilities/generateAdminURL.js'
 import React from 'react'
 
 import { useSearchParams } from '../../../../providers/SearchParams/index.js'
@@ -39,7 +40,10 @@ export const DocumentTabLink: React.FC<{
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'
-  let docPath = `${adminRoute}/${isCollection ? 'collections' : 'globals'}/${entitySlug}`
+  let docPath = generateAdminURL(
+    adminRoute,
+    `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
+  )
   if (isCollection && segmentThree) {
     // doc ID
     docPath += `/${segmentThree}`

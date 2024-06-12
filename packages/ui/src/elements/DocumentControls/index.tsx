@@ -9,6 +9,7 @@ import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDate } from '../../utilities/formatDate.js'
+import { generateAdminURL } from '../../utilities/generateAdminURL.js'
 import { Autosave } from '../Autosave/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
@@ -203,7 +204,10 @@ export const DocumentControls: React.FC<{
                 {hasCreatePermission && (
                   <React.Fragment>
                     <PopupList.Button
-                      href={`${adminRoute}/collections/${collectionConfig?.slug}/create`}
+                      href={generateAdminURL(
+                        adminRoute,
+                        `/collections/${collectionConfig?.slug}/create`,
+                      )}
                       id="action-create"
                     >
                       {i18n.t('general:createNew')}

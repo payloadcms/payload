@@ -8,6 +8,7 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomCompo
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
@@ -167,7 +168,11 @@ export const Document: React.FC<AdminViewProps> = async ({
     })
 
     if (doc?.id) {
-      const redirectURL = `${serverURL}${adminRoute}/collections/${collectionSlug}/${doc.id}`
+      const redirectURL = generateAdminURL(
+        adminRoute,
+        `/collections/${collectionSlug}/${doc.id}`,
+        serverURL,
+      )
       redirect(redirectURL)
     } else {
       notFound()

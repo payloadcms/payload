@@ -9,6 +9,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useLocale } from '@payloadcms/ui/providers/Locale'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { formatDate } from '@payloadcms/ui/utilities/formatDate'
+import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
@@ -74,15 +75,15 @@ export const SetStepNav: React.FC<{
       nav = [
         {
           label: getTranslation(pluralLabel, i18n),
-          url: `${adminRoute}/collections/${collectionSlug}`,
+          url: generateAdminURL(adminRoute, `/collections/${collectionSlug}`),
         },
         {
           label: docLabel,
-          url: `${adminRoute}/collections/${collectionSlug}/${id}`,
+          url: generateAdminURL(adminRoute, `/collections/${collectionSlug}/${id}`),
         },
         {
           label: 'Versions',
-          url: `${adminRoute}/collections/${collectionSlug}/${id}/versions`,
+          url: generateAdminURL(adminRoute, `/collections/${collectionSlug}/${id}/versions`),
         },
         {
           label: doc?.createdAt
