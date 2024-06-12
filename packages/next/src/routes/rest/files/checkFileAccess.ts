@@ -1,6 +1,6 @@
-import type { Collection, PayloadRequestWithData, TypeWithID, Where } from 'payload/types'
+import type { Collection, PayloadRequestWithData, TypeWithID, Where } from 'payload/bundle'
 
-import { executeAccess } from 'payload/auth'
+import { executeAccess } from 'payload/bundle'
 import { Forbidden } from 'payload/errors'
 
 import { endpointsAreDisabled } from '../checkEndpoints.js'

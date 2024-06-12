@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState, PayloadRequestWithData } from 'payload/types'
+import type { FormState, PayloadRequestWithData } from 'payload/bundle'
 
 import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
 import { email } from 'payload/fields/validations'

@@ -1,4 +1,4 @@
-import type { Where } from 'payload/types'
+import type { Where } from 'payload/bundle'
 
 import httpStatus from 'http-status'
 import { findVersionsOperationGlobal } from 'payload/operations'

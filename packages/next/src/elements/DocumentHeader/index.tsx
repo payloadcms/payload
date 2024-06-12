@@ -1,10 +1,10 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Permissions } from 'payload/auth'
+import type { Permissions } from 'payload/bundle'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import { Gutter, RenderTitle } from '@payloadcms/ui/client'
 import React, { Fragment } from 'react'

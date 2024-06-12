@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData } from 'payload/types'
+import type { Collection, PayloadRequestWithData } from 'payload/bundle'
 
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'

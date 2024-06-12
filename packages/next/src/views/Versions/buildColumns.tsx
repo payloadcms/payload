@@ -3,7 +3,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import { type Column, SortColumn } from '@payloadcms/ui/client'
 import React from 'react'

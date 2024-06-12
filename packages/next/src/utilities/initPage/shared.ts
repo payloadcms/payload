@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/bundle'
 
 const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
   'createFirstUser',

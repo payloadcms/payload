@@ -1,8 +1,8 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { LivePreviewConfig } from 'payload/config'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
+import type { LivePreviewConfig } from 'payload/bundle'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/bundle'
 
 import {
   DocumentControls,

@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/types'
+import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/bundle'
 
 import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'

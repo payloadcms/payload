@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/bundle'
 
 export type Args = {
   /**

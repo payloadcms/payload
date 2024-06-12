@@ -1,4 +1,4 @@
-import type { LivePreviewConfig } from 'payload/config'
+import type { LivePreviewConfig } from 'payload/bundle'
 import type { fieldSchemaToJSON } from 'payload/utilities'
 import type { Dispatch } from 'react'
 

@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/bundle'
 
 import { WithServerSideProps } from '@payloadcms/ui/server'
 import { notFound, redirect } from 'next/navigation.js'

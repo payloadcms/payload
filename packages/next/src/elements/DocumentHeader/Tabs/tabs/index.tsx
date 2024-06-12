@@ -1,4 +1,4 @@
-import type { DocumentTabConfig } from 'payload/types'
+import type { DocumentTabConfig } from 'payload/bundle'
 
 import { VersionsPill } from './VersionsPill/index.js'
 

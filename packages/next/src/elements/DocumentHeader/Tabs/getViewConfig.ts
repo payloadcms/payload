@@ -1,5 +1,5 @@
-import type { EditViewConfig } from 'payload/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { EditViewConfig } from 'payload/bundle'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/bundle'
 
 export const getViewConfig = (args: {
   collectionConfig: SanitizedCollectionConfig

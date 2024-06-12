@@ -1,5 +1,5 @@
-import type { EditViewComponent } from 'payload/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { EditViewComponent } from 'payload/bundle'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/bundle'
 
 import { isReactComponentOrFunction } from 'payload/utilities'
 

@@ -1,10 +1,10 @@
-import type { Locale } from 'payload/config'
+import type { Locale } from 'payload/bundle'
 import type {
   Data,
   PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import { buildFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
 

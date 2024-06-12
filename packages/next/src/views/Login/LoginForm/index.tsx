@@ -6,7 +6,7 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequestWithData } from 'payload/types'
+import type { FormState, PayloadRequestWithData } from 'payload/bundle'
 
 import {
   EmailField,

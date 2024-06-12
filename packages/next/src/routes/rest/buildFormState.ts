@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/bundle'
 
 import { buildFormState as buildFormStateFn } from '@payloadcms/ui/server'
 import httpStatus from 'http-status'

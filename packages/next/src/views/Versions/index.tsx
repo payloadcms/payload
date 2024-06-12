@@ -1,5 +1,5 @@
+import type { EditViewComponent } from 'payload/bundle'
 import type { PaginatedDocs } from 'payload/database'
-import type { EditViewComponent } from 'payload/types'
 
 import { ListQueryProvider } from '@payloadcms/ui/client'
 import { Gutter } from '@payloadcms/ui/client'

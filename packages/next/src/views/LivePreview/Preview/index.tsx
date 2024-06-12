@@ -1,6 +1,6 @@
 'use client'
 
-import type { EditViewProps } from 'payload/types'
+import type { EditViewProps } from 'payload/bundle'
 
 import { ShimmerEffect, useAllFormFields, useDocumentEvents } from '@payloadcms/ui/client'
 import { reduceFieldsToValues } from '@payloadcms/ui/server'

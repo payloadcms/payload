@@ -1,10 +1,10 @@
-import type { DocumentPermissions } from 'payload/auth'
+import type { DocumentPermissions } from 'payload/bundle'
 import type {
   Data,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import {
   hasSavePermission as getHasSavePermission,

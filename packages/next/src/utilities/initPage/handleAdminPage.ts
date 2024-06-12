@@ -1,9 +1,9 @@
-import type { Permissions } from 'payload/auth'
+import type { Permissions } from 'payload/bundle'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload/bundle'
 
 import { notFound } from 'next/navigation.js'
 

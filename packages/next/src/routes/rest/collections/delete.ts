@@ -1,4 +1,4 @@
-import type { Where } from 'payload/types'
+import type { Where } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'

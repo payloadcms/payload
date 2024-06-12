@@ -1,5 +1,5 @@
 import type { ColumnPreferences } from '@payloadcms/ui/client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/bundle'
 
 export type DefaultListViewProps = {
   collectionSlug: SanitizedCollectionConfig['slug']

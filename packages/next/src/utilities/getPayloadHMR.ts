@@ -1,5 +1,5 @@
 import type { GeneratedTypes, Payload } from 'payload'
-import type { InitOptions, SanitizedConfig } from 'payload/config'
+import type { InitOptions, SanitizedConfig } from 'payload/bundle'
 
 import { BasePayload } from 'payload'
 import WebSocket from 'ws'

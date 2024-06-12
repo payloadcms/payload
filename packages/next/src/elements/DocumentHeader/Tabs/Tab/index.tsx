@@ -1,4 +1,4 @@
-import type { DocumentTabConfig, DocumentTabProps } from 'payload/types'
+import type { DocumentTabConfig, DocumentTabProps } from 'payload/bundle'
 
 import React, { Fragment } from 'react'
 

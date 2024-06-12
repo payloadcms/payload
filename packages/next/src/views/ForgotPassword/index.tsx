@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload/bundle'
 
 import { Button, Translation } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'

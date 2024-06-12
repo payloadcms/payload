@@ -1,5 +1,5 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/bundle'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { initI18n } from '@payloadcms/translations'
@@ -8,8 +8,8 @@ import { buildComponentMap } from '@payloadcms/ui/providers/ComponentMap/buildCo
 import '@payloadcms/ui/scss/app.scss'
 import { Merriweather } from 'next/font/google'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { parseCookies } from 'payload/auth'
-import { createClientConfig } from 'payload/config'
+import { parseCookies } from 'payload/bundle'
+import { createClientConfig } from 'payload/bundle'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'

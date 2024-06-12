@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { extractJWT } from 'payload/auth'
+import { extractJWT } from 'payload/bundle'
 import { findByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 

@@ -1,5 +1,5 @@
-import type { ServerProps } from 'payload/config'
-import type { VisibleEntities } from 'payload/types'
+import type { ServerProps } from 'payload/bundle'
+import type { VisibleEntities } from 'payload/bundle'
 
 import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui/client'
 import { RenderCustomComponent } from '@payloadcms/ui/server'

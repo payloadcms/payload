@@ -1,4 +1,4 @@
-import type { PayloadRequest, PayloadRequestData } from 'payload/types'
+import type { PayloadRequest, PayloadRequestData } from 'payload/bundle'
 
 import { APIError } from 'payload/errors'
 

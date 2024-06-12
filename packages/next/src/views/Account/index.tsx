@@ -1,5 +1,5 @@
-import type { ServerSideEditViewProps } from 'payload/types'
-import type { AdminViewProps } from 'payload/types'
+import type { ServerSideEditViewProps } from 'payload/bundle'
+import type { AdminViewProps } from 'payload/bundle'
 
 import {
   DocumentInfoProvider,
