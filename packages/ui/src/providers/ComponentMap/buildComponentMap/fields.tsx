@@ -44,8 +44,10 @@ import type {
   ReducedBlock,
 } from './types.js'
 
-import { FieldDescription } from '../../../fields/FieldDescription/index.js'
-import { HiddenInput } from '../../../fields/HiddenInput/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { FieldDescription } from '../../../exports/client/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { HiddenInput } from '../../../exports/client/index.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''

@@ -1,6 +1,6 @@
 import type { ClientCollectionConfig } from 'payload/types'
 
-import type { FieldMap, MappedField } from '../utilities/buildComponentMap.js'
+import type { FieldMap, MappedField } from '../providers/ComponentMap/buildComponentMap/types.js'
 
 import { flattenFieldMap } from '../utilities/flattenFieldMap.js'
 

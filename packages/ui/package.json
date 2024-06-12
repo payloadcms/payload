@@ -85,7 +85,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
+    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
     "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
     "build:esbuild": "node bundle.js",
     "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
@@ -129,6 +129,7 @@
     "@babel/preset-env": "^7.24.5",
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",
@@ -167,9 +168,9 @@
         "types": "./dist/assets/index.d.ts"
       },
       "./client": {
-        "import": "./dist/client.js",
-        "require": "./dist/client.js",
-        "types": "./dist/client.d.ts"
+        "import": "./dist/exports/client/index.js",
+        "require": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",
@@ -214,9 +215,9 @@
         "types": "./dist/providers/*/index.d.ts"
       },
       "./server": {
-        "import": "./dist/server.js",
-        "require": "./dist/server.js",
-        "types": "./dist/server.d.ts"
+        "import": "./dist/exports/server/index.js",
+        "require": "./dist/exports/server/index.js",
+        "types": "./dist/exports/server/index.d.ts"
       },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",

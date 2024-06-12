@@ -17,6 +17,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
+export { ViewDescription } from '../../elements/ViewDescription/index.js'
 export { AppHeader } from '../../elements/AppHeader/index.js'
 export { Button } from '../../elements/Button/index.js'
 export { Card } from '../../elements/Card/index.js'
@@ -77,6 +78,7 @@ export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 
 // fields
+export { HiddenInput } from '../../fields/HiddenInput/index.js'
 export { ArrayField } from '../../fields/Array/index.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { Checkbox as CheckboxField } from '../../fields/Checkbox/index.js'
@@ -125,13 +127,13 @@ export { RenderFields } from '../../forms/RenderFields/index.js'
 export { RowLabel } from '../../forms/RowLabel/index.js'
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
-export { buildStateFromSchema } from '../../forms/buildStateFromSchema/index.js'
 export { useField } from '../../forms/useField/index.js'
 export { withCondition } from '../../forms/withCondition/index.js'
 
 // graphics
 export { Account } from '../../graphics/Account/index.js'
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
+export { File } from '../../graphics/File/index.js'
 
 // icons
 export { CalendarIcon } from '../../icons/Calendar/index.js'

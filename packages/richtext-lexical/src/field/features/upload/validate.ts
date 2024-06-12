@@ -1,4 +1,4 @@
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { buildStateFromSchema } from '@payloadcms/ui/server'
 import { isValidID } from 'payload/utilities'
 
 import type { NodeValidation } from '../types.js'

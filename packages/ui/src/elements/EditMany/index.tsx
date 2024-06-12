@@ -30,7 +30,7 @@ const baseClass = 'edit-many'
 
 import type { ClientCollectionConfig } from 'payload/types'
 
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export type EditManyProps = {
   collection: ClientCollectionConfig

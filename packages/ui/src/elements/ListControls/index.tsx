@@ -9,7 +9,7 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
