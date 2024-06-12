@@ -1,4 +1,4 @@
-import type { ServerProps } from 'payload/bundle'
+import type { ServerProps } from 'payload/server'
 
 import { Logout } from '@payloadcms/ui/client'
 import React from 'react'

@@ -8,8 +8,8 @@ import { buildComponentMap } from '@payloadcms/ui/providers/ComponentMap/buildCo
 import '@payloadcms/ui/scss/app.scss'
 import { Merriweather } from 'next/font/google'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { parseCookies } from 'payload/bundle'
-import { createClientConfig } from 'payload/bundle'
+import { createClientConfig } from 'payload/server'
+import { parseCookies } from 'payload/server'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'

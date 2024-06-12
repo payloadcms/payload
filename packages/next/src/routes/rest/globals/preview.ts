@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
-import { extractJWT } from 'payload/bundle'
 import { findOneOperation } from 'payload/operations'
+import { extractJWT } from 'payload/server'
 import { isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
