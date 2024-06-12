@@ -37,6 +37,7 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs'
+import { NotFound } from '../../packages/payload/src/errors'
 
 let client: RESTClient
 let graphQLClient: GraphQLClient
@@ -344,6 +345,26 @@ describe('Fields', () => {
 
       expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
+    })
+
+    // https://github.com/payloadcms/payload/issues/6485
+    it('delete with selectHasMany relationship', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+      await payload.delete({
+        collection: 'select-fields',
+        id,
+      })
+      await expect(
+        payload.findByID({
+          collection: 'select-fields',
+          id,
+        }),
+      ).rejects.toThrow(NotFound)
     })
 
     it('should query hasMany in', async () => {
