@@ -1,7 +1,6 @@
 import type { Connect } from 'payload/database'
 
 import { createClient } from '@libsql/client'
-import { sql } from 'drizzle-orm'
 import { type LibSQLDatabase, drizzle } from 'drizzle-orm/libsql'
 
 import type { SQLiteAdapter } from './types.js'

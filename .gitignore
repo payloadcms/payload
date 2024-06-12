@@ -17,6 +17,7 @@ test-results
 # Ignore test directory media folder/files
 /media
 test/media
+test/payloadtests.db
 /versions
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode

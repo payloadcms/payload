@@ -26,6 +26,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import path from 'path'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
 import { de } from 'payload/i18n/de'
@@ -37,10 +38,9 @@ import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
-// process.env.PAYLOAD_DATABASE = 'sqlite'
-// process.env.SQLITE_URL = 'file:C:/code/payload-v3/sqlite.db'
-
 // process.env.PAYLOAD_DATABASE = 'postgres'
+// process.env.PAYLOAD_DATABASE = 'sqlite'
+const defaultSQLiteURL = `file:${path.resolve('./payloadtests.db').replaceAll('\\', '/')}`
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
@@ -70,7 +70,9 @@ export async function buildConfigWithDefaults(
       },
     }),
     sqlite: sqliteAdapter({
-      client: { url: process.env.SQLITE_URL },
+      client: {
+        url: process.env.SQLITE_URL || defaultSQLiteURL,
+      },
     }),
     supabase: postgresAdapter({
       pool: {
