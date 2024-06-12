@@ -5,7 +5,7 @@ import type {
   SanitizedGlobalConfig,
   User,
 } from 'payload/bundle'
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs } from 'payload/server'
 
 export type DefaultVersionsViewProps = {
   canAccessAdmin: boolean

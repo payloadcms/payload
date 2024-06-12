@@ -8,7 +8,7 @@ import type {
   Option,
   SanitizedConfig,
 } from 'payload/bundle'
-import type { CustomComponent } from 'payload/config'
+import type { CustomComponent } from 'payload/bundle'
 
 import { MissingEditorProp } from 'payload/bundle'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/bundle'

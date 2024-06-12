@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldPermissions } from 'payload/bundle'
-import type { FieldTypes } from 'payload/config'
+import type { FieldTypes } from 'payload/bundle'
 
 import React from 'react'
 

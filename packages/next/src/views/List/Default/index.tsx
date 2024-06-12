@@ -31,7 +31,7 @@ import {
   useWindowInfo,
 } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'
-import { formatFilesize, isNumber } from 'payload/utilities'
+import { formatFilesize, isNumber } from 'payload/bundle'
 import React, { Fragment, useEffect } from 'react'
 
 import './index.scss'

@@ -4,8 +4,8 @@ import type { InitPageResult, PayloadRequestWithData, VisibleEntities } from 'pa
 import { initI18n } from '@payloadcms/translations'
 import { findLocaleFromCode } from '@payloadcms/ui/server'
 import { headers as getHeaders } from 'next/headers.js'
+import { createLocalReq, isEntityHidden } from 'payload/bundle'
 import { parseCookies } from 'payload/server'
-import { createLocalReq, isEntityHidden } from 'payload/utilities'
 import qs from 'qs'
 
 import type { Args } from './types.js'

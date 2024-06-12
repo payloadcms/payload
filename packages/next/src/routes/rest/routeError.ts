@@ -1,7 +1,7 @@
 import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/bundle'
 
 import httpStatus from 'http-status'
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload/bundle'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'

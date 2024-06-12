@@ -15,9 +15,9 @@ const componentWebpackConfig = {
     'react',
     'react-dom',
     'payload',
-    'payload/config',
     'react-image-crop',
-    'payload/operations',
+    'payload/client',
+    'payload/server',
   ],
   mode: 'production',
   module: {

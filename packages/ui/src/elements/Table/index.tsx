@@ -5,7 +5,7 @@ import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
-import type { FieldTypes } from 'payload/config'
+import type { FieldTypes } from 'payload/bundle'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 

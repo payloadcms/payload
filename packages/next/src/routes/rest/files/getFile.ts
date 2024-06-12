@@ -4,7 +4,7 @@ import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
 import path from 'path'
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload/bundle'
 
 import { streamFile } from '../../../fetchAPI-stream-file/index.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'

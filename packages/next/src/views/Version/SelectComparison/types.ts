@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from 'payload/bundle'
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs } from 'payload/server'
 
 import type { CompareOption } from '../Default/types.js'
 

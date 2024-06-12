@@ -1,4 +1,4 @@
-import type { LabelFunction } from 'payload/config'
+import type { LabelFunction } from 'payload/bundle'
 
 export type StepNavItem = {
   label: LabelFunction | Record<string, string> | string

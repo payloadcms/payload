@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
-import { findOneOperation } from 'payload/operations'
+import { isNumber } from 'payload/bundle'
+import { findOneOperation } from 'payload/server'
 import { extractJWT } from 'payload/server'
-import { isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
 

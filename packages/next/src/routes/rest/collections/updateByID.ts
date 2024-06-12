@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
-import { updateByIDOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/bundle'
+import { updateByIDOperation } from 'payload/server'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 

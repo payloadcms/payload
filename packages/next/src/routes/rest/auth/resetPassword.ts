@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { resetPasswordOperation } from 'payload/operations'
+import { resetPasswordOperation } from 'payload/server'
 import { generatePayloadCookie } from 'payload/server'
 
 import type { CollectionRouteHandler } from '../types.js'
