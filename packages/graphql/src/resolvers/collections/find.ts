@@ -1,6 +1,5 @@
 import type { PaginatedDocs } from 'payload/database'
-import type { PayloadRequestWithData, Where } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection, PayloadRequestWithData , Where } from 'payload/types'
 
 import { findOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'

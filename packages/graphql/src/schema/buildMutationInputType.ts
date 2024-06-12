@@ -37,8 +37,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/types'
-import { toWords } from 'payload/utilities'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { flattenTopLevelFields , toWords } from 'payload/utilities'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'

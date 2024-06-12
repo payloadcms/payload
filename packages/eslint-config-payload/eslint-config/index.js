@@ -10,6 +10,7 @@ const baseRules = {
   'no-use-before-define': 'off',
   'object-shorthand': 'warn',
   'no-useless-escape': 'warn',
+  'import/no-duplicates': 'warn',
   'perfectionist/sort-objects': [
     'error',
     {
@@ -123,7 +124,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: [], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
+  plugins: ['import'], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
   overrides: [
     {
       files: ['**/*.ts'],

@@ -1,6 +1,5 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection , PayloadRequestWithData } from 'payload/types'
 import type { MarkOptional } from 'ts-essentials'
 
 import { createOperation } from 'payload/operations'

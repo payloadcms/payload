@@ -1,5 +1,4 @@
-import type { BaseSelection } from 'lexical'
-import type {
+import type { BaseSelection ,
   DOMConversionMap,
   DOMConversionOutput,
   EditorConfig,
