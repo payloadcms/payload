@@ -40,7 +40,6 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 // process.env.PAYLOAD_DATABASE = 'sqlite'
-const defaultSQLiteURL = `file:${path.resolve('./payloadtests.db').replaceAll('\\', '/')}`
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
@@ -71,7 +70,7 @@ export async function buildConfigWithDefaults(
     }),
     sqlite: sqliteAdapter({
       client: {
-        url: process.env.SQLITE_URL || defaultSQLiteURL,
+        url: process.env.SQLITE_URL || 'file:./payloadtests.db',
       },
     }),
     supabase: postgresAdapter({

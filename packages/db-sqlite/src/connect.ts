@@ -25,7 +25,7 @@ export const connect: Connect = async function connect(
       this.client = createClient(this.clientConfig)
     }
 
-    const logger = this.logger || false || true
+    const logger = this.logger || false
     this.drizzle = drizzle(this.client, { logger, schema: this.schema }) as LibSQLDatabase
 
     if (!hotReload) {

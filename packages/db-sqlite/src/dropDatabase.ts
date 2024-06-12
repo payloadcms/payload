@@ -28,7 +28,9 @@ export const dropDatabase: DropDatabase = async function dropDatabase({ adapter 
   let result = await getTables(adapter)
   await dropTables(adapter, result.rows)
 
-  // for some reason the first dropTables doesn't drop all tables
-  result = getTables(adapter)
+  if (!result.rows.length) return
+
+  // for some reason the first dropTables doesn't always drop all tables
+  result = await getTables(adapter)
   await dropTables(adapter, result.rows)
 }
