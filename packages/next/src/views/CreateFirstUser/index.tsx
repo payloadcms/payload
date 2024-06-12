@@ -1,6 +1,7 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps, Field, FormState } from 'payload/types'
 
 import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
+import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { Logo } from '@payloadcms/ui/graphics/Logo'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
@@ -12,7 +13,7 @@ export { generateCreateFirstUserMetadata } from './meta.js'
 
 export const createFirstUserBaseClass = 'create-first-user'
 
-export const CreateFirstUserView: React.FC<AdminViewProps> = ({
+export const CreateFirstUserView: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
   searchParams,
@@ -74,6 +75,34 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = ({
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
 
+  const fields: Field[] = [
+    {
+      name: 'email',
+      type: 'email',
+      label: req.t('general:email'),
+      required: true,
+    },
+    {
+      name: 'password',
+      type: 'text',
+      label: req.t('general:password'),
+      required: true,
+    },
+    {
+      name: 'confirm-password',
+      type: 'text',
+      label: req.t('authentication:confirmPassword'),
+      required: true,
+    },
+  ]
+
+  const initialState: FormState = await buildStateFromSchema({
+    fieldSchema: fields,
+    operation: 'create',
+    preferences: { fields: {} },
+    req,
+  })
+
   return (
     <Fragment>
       <div className={`${createFirstUserBaseClass}__brand`}>
@@ -91,7 +120,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = ({
       {Array.isArray(BeforeCreateFirstUsers) &&
         BeforeCreateFirstUsers.map((Component) => Component)}
       {!collectionConfig?.auth?.disableLocalStrategy && (
-        <CreateFirstUserForm req={req} searchParams={searchParams} />
+        <CreateFirstUserForm initialState={initialState} searchParams={searchParams} />
       )}
       {Array.isArray(AfterCreateFirstUsers) && AfterCreateFirstUsers.map((Component) => Component)}
     </Fragment>
