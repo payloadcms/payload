@@ -16,7 +16,7 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { email, password } from 'payload/server'
+import { email, password } from 'payload/bundle'
 
 import './index.scss'
 

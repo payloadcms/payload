@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { MetaConfig } from 'payload/server'
+import type { MetaConfig } from 'payload/bundle'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import QueryString from 'qs'

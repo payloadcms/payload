@@ -7,7 +7,7 @@ import type {
   SanitizedLabelProps,
   Validate,
 } from 'payload/bundle'
-import type { Locale, SanitizedLocalizationConfig } from 'payload/server'
+import type { Locale, SanitizedLocalizationConfig } from 'payload/bundle'
 
 export const fieldBaseClass = 'field-type'
 

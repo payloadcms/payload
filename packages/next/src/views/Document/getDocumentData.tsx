@@ -4,7 +4,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload/bundle'
-import type { Locale } from 'payload/server'
+import type { Locale } from 'payload/bundle'
 
 import { buildFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
 

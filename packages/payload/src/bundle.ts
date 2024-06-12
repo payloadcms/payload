@@ -88,12 +88,45 @@ export type { ClientConfig } from './config/client.js'
 export type {
   Access,
   AccessArgs,
+  AccessResult,
+  BaseLocalizationConfig,
+  BinScript,
+  BinScriptConfig,
+  Config,
+  CustomComponent,
+  EditConfig,
+  EditView,
   EditViewComponent,
+  EditViewConfig,
+  EmailAdapter,
+  Endpoint,
   EntityDescription,
   EntityDescriptionComponent,
   EntityDescriptionFunction,
+  GeneratePreviewURL,
+  GraphQLExtension,
+  GraphQLInfo,
+  IconConfig,
+  InitOptions,
+  LabelFunction,
+  LivePreviewConfig,
+  Locale,
+  LocalizationConfig,
+  LocalizationConfigWithLabels,
+  LocalizationConfigWithNoLabels,
+  MetaConfig,
+  OGImageConfig,
+  OpenGraphConfig,
+  PayloadHandler,
+  Plugin,
   SanitizedConfig,
+  SanitizedLocalizationConfig,
+  ServerOnlyLivePreviewProperties,
+  ServerProps,
+  SharpDependency,
 } from './config/types.js'
+export { serverProps } from './config/types.js'
+
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
   APIError,
@@ -234,7 +267,6 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export type {
   CollapsedPreferences,
   DocumentPreferences,
@@ -244,8 +276,8 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
-export { getLocalI18n } from './translations/getLocalI18n.js'
 
+export { getLocalI18n } from './translations/getLocalI18n.js'
 export { validOperators } from './types/constants.js'
 export type {
   AllOperations,
@@ -293,8 +325,8 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
-export { deepCopyObject } from './utilities/deepCopyObject.js'
 
+export { deepCopyObject } from './utilities/deepCopyObject.js'
 export { deepMerge } from './utilities/deepMerge.js'
 export { fieldSchemaToJSON } from './utilities/fieldSchemaToJSON.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
@@ -310,26 +342,27 @@ export {
   isReactComponentOrFunction,
   isReactServerComponentOrFunction,
 } from './utilities/isReactComponent.js'
-export { isValidID } from './utilities/isValidID.js'
 
+export { isValidID } from './utilities/isValidID.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { setsAreEqual } from './utilities/setsAreEqual.js'
 export { default as toKebabCase } from './utilities/toKebabCase.js'
+
 export { wait } from './utilities/wait.js'
 
 export { default as wordBoundariesRegex } from './utilities/wordBoundariesRegex.js'
 
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
-
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
+
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
 export { saveVersion } from './versions/saveVersion.js'
+
 export type { TypeWithVersion } from './versions/types.js'

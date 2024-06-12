@@ -464,6 +464,7 @@
       ],
       "format": "esm"
     },
+    "../payload/src/config/types.ts": { "bytes": 24832, "imports": [], "format": "esm" },
     "../payload/src/errors/AuthenticationError.ts": {
       "bytes": 431,
       "imports": [
@@ -2658,12 +2659,17 @@
       "format": "esm"
     },
     "../payload/src/bundle.ts": {
-      "bytes": 8982,
+      "bytes": 9606,
       "imports": [
         {
           "path": "../payload/src/auth/index.ts",
           "kind": "import-statement",
           "original": "./auth/index.js"
+        },
+        {
+          "path": "../payload/src/config/types.ts",
+          "kind": "import-statement",
+          "original": "./config/types.js"
         },
         {
           "path": "../payload/src/errors/index.ts",

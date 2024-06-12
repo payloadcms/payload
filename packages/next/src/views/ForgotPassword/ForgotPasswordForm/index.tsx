@@ -3,7 +3,7 @@
 import type { FormState, PayloadRequestWithData } from 'payload/bundle'
 
 import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
-import { email } from 'payload/server'
+import { email } from 'payload/bundle'
 import React, { Fragment, useState } from 'react'
 import { toast } from 'sonner'
 

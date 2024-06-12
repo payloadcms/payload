@@ -53,6 +53,7 @@
       ],
       "format": "esm"
     },
+    "src/config/types.ts": { "bytes": 24832, "imports": [], "format": "esm" },
     "src/errors/AuthenticationError.ts": {
       "bytes": 431,
       "imports": [
@@ -952,9 +953,14 @@
       "format": "esm"
     },
     "src/bundle.ts": {
-      "bytes": 8982,
+      "bytes": 9606,
       "imports": [
         { "path": "src/auth/index.ts", "kind": "import-statement", "original": "./auth/index.js" },
+        {
+          "path": "src/config/types.ts",
+          "kind": "import-statement",
+          "original": "./config/types.js"
+        },
         {
           "path": "src/errors/index.ts",
           "kind": "import-statement",
@@ -1195,7 +1201,7 @@
     }
   },
   "outputs": {
-    "dist/bundle.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 366029 },
+    "dist/bundle.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 391856 },
     "dist/bundle.js": {
       "imports": [
         {
@@ -1331,6 +1337,7 @@
         "richText",
         "saveVersion",
         "select",
+        "serverProps",
         "setsAreEqual",
         "sortableFieldTypes",
         "tabHasName",
@@ -1363,6 +1370,8 @@
         "../../node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/pluralize.js": {
           "bytesInOutput": 11044
         },
+        "src/config/types.ts": { "bytesInOutput": 121 },
+        "src/bundle.ts": { "bytesInOutput": 0 },
         "src/errors/APIError.ts": { "bytesInOutput": 948 },
         "src/errors/index.ts": { "bytesInOutput": 0 },
         "src/errors/AuthenticationError.ts": { "bytesInOutput": 351 },
@@ -1386,7 +1395,6 @@
         "src/errors/NotFound.ts": { "bytesInOutput": 301 },
         "src/errors/QueryError.ts": { "bytesInOutput": 368 },
         "src/errors/ValidationError.ts": { "bytesInOutput": 536 },
-        "src/bundle.ts": { "bytesInOutput": 0 },
         "src/utilities/deepCopyObject.ts": { "bytesInOutput": 542 },
         "src/fields/getDefaultValue.ts": { "bytesInOutput": 402 },
         "src/fields/hooks/afterChange/promise.ts": { "bytesInOutput": 4386 },
@@ -1442,7 +1450,7 @@
         "src/utilities/sanitizeInternalFields.ts": { "bytesInOutput": 395 },
         "src/versions/saveVersion.ts": { "bytesInOutput": 3685 }
       },
-      "bytes": 190653
+      "bytes": 190813
     }
   }
 }

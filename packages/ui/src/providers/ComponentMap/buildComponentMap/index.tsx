@@ -4,7 +4,7 @@ import type {
   Payload,
   WithServerSidePropsComponentProps,
 } from 'payload/bundle'
-import type { ServerProps } from 'payload/server'
+import type { ServerProps } from 'payload/bundle'
 
 import React from 'react'
 

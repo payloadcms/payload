@@ -1,4 +1,4 @@
-import type { Locale, SanitizedLocalizationConfig } from 'payload/server'
+import type { Locale, SanitizedLocalizationConfig } from 'payload/bundle'
 /*
  return the Locale for given locale code, else return null
 */
