@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/bundle'
 
 import { sql } from 'drizzle-orm'
 import {
@@ -6,7 +6,7 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
-} from 'payload/database'
+} from 'payload/server'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types.js'

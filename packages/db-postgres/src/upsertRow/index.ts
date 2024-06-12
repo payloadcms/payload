@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload/bundle'
 
 import { eq } from 'drizzle-orm'
-import { ValidationError } from 'payload/errors'
+import { ValidationError } from 'payload/bundle'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'

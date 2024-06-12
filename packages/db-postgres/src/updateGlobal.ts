@@ -1,5 +1,5 @@
-import type { UpdateGlobalArgs } from 'payload/database'
-import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, TypeWithID } from 'payload/bundle'
+import type { UpdateGlobalArgs } from 'payload/server'
 
 import toSnakeCase from 'to-snake-case'
 

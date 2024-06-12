@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload/types'
+import type { Field } from 'payload/bundle'
 
-import { fieldAffectsData, tabHasName } from 'payload/types'
+import { fieldAffectsData, tabHasName } from 'payload/bundle'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types.js'

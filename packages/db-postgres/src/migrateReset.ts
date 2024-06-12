@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/bundle'
 
 import {
   commitTransaction,
@@ -7,7 +7,7 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
-} from 'payload/database'
+} from 'payload/server'
 
 import type { PostgresAdapter } from './types.js'
 

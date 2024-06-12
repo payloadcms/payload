@@ -1,4 +1,4 @@
-import type { Destroy } from 'payload/database'
+import type { Destroy } from 'payload/server'
 
 import type { PostgresAdapter } from './types.js'
 

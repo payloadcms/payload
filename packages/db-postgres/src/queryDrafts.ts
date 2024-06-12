@@ -1,7 +1,7 @@
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/bundle'
 
-import { type QueryDrafts, combineQueries } from 'payload/database'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields } from 'payload/bundle'
+import { type QueryDrafts, combineQueries } from 'payload/server'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'

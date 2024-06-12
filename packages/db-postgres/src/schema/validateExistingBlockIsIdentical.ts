@@ -1,7 +1,7 @@
-import type { Block, Field } from 'payload/types'
+import type { Block, Field } from 'payload/bundle'
 
-import { InvalidConfiguration } from 'payload/errors'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/bundle'
+import { InvalidConfiguration } from 'payload/bundle'
 
 import type { GenericTable } from '../types.js'
 

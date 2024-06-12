@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { Payload } from 'payload'
-import type { Migration } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/bundle'
+import type { Migration } from 'payload/server'
 
 import { createRequire } from 'module'
 import {
@@ -9,7 +9,7 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
-} from 'payload/database'
+} from 'payload/server'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types.js'

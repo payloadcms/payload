@@ -1,5 +1,5 @@
-import type { FindOneArgs } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedCollectionConfig, TypeWithID } from 'payload/bundle'
+import type { FindOneArgs } from 'payload/server'
 
 import toSnakeCase from 'to-snake-case'
 
