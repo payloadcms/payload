@@ -194,7 +194,7 @@ export const UploadFeature: FeatureProviderProviderServer<
               return null
             },
             getSubFieldsData: ({ node }) => {
-              return node.fields
+              return node?.fields
             },
             graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
             hooks: {

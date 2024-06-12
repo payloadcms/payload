@@ -190,7 +190,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
               return sanitizedFieldsWithoutText
             },
             getSubFieldsData: ({ node }) => {
-              return node.fields
+              return node?.fields
             },
             graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
             node: LinkNode,

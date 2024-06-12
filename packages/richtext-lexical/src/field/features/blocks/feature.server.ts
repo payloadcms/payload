@@ -118,10 +118,10 @@ export const BlocksFeature: FeatureProviderProviderServer<
               const blockType = node.fields.blockType
 
               const block = props.blocks.find((block) => block.slug === blockType)
-              return block.fields
+              return block?.fields
             },
             getSubFieldsData: ({ node }) => {
-              return node.fields
+              return node?.fields
             },
             graphQLPopulationPromises: [blockPopulationPromiseHOC(props)],
             node: BlockNode,
