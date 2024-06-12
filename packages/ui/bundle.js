@@ -71,8 +71,6 @@ const resultClient = await esbuild
       'react',
       'react-dom',
       'next',
-      '@faceless-ui',
-      '@faceless-ui/*',
       'react-animate-height',
       'crypto',
     ],
@@ -105,7 +103,7 @@ const resultServer = await esbuild
     outdir: 'dist/exports',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
-    external: ['*.scss', '*.css'],
+    external: ['*.scss', '*.css', '@payloadcms/translations', '@payloadcms/graphql'],
     //packages: 'external',
     minify: true, // TODO: set to true later. false ust for testing
     metafile: true,

@@ -14,7 +14,7 @@ const resultServer = await esbuild
     format: 'esm',
     outfile: 'dist/index.js',
     splitting: false,
-    external: ['*.scss', '*.css', 'drizzle-kit', 'libsql', 'pg'],
+    external: ['*.scss', '*.css', 'drizzle-kit', 'libsql', 'pg', '@payloadcms/translations'],
     minify: true,
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
