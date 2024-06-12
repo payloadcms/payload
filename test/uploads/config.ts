@@ -539,7 +539,7 @@ export default buildConfigWithDefaults({
     })
 
     // Create animated type images
-    const animatedImageFilePath = path.resolve(__dirname, './animated.webp')
+    const animatedImageFilePath = path.resolve(dirname, './animated.webp')
     const animatedImageFile = await getFileByPath(animatedImageFilePath)
 
     await payload.create({
@@ -557,7 +557,7 @@ export default buildConfigWithDefaults({
       file: animatedImageFile,
     })
 
-    const nonAnimatedImageFilePath = path.resolve(__dirname, './non-animated.webp')
+    const nonAnimatedImageFilePath = path.resolve(dirname, './non-animated.webp')
     const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
 
     await payload.create({
