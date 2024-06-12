@@ -68,9 +68,7 @@ export { type Column, Table } from '../../elements/Table/index.js'
 export { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
-import * as reactToastifyImport from 'react-toastify'
-const { toast } =
-  reactToastifyImport && 'toast' in reactToastifyImport ? reactToastifyImport : { toast: undefined }
+import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'

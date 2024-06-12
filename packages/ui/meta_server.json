@@ -403,12 +403,476 @@
       ],
       "format": "esm"
     },
-    "../payload/src/types/index.ts": { "bytes": 3362, "imports": [], "format": "esm" },
+    "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js": {
+      "bytes": 38665,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../payload/src/errors/APIError.ts": {
+      "bytes": 1318,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        }
+      ],
+      "format": "esm"
+    },
+    "../translations/src/languages/en.ts": { "bytes": 17904, "imports": [], "format": "esm" },
+    "../payload/src/errors/AuthenticationError.ts": {
+      "bytes": 431,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/DuplicateCollection.ts": {
+      "bytes": 243,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/DuplicateFieldName.ts": {
+      "bytes": 269,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/DuplicateGlobal.ts": {
+      "bytes": 260,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/ErrorDeletingFile.ts": {
+      "bytes": 414,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/FileRetrievalError.ts": {
+      "bytes": 448,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/FileUploadError.ts": {
+      "bytes": 418,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/Forbidden.ts": {
+      "bytes": 420,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/InvalidConfiguration.ts": {
+      "bytes": 225,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/InvalidFieldName.ts": {
+      "bytes": 374,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/InvalidFieldRelationship.ts": {
+      "bytes": 342,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/LockedAuth.ts": {
+      "bytes": 375,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/MissingCollectionLabel.ts": {
+      "bytes": 184,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
     "../payload/src/fields/config/types.ts": {
       "bytes": 25256,
       "imports": [{ "path": "monaco-editor", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
+    "../payload/src/errors/MissingEditorProp.ts": {
+      "bytes": 470,
+      "imports": [
+        {
+          "path": "../payload/src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/MissingFieldInputOptions.ts": {
+      "bytes": 282,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/MissingFieldType.ts": {
+      "bytes": 420,
+      "imports": [
+        {
+          "path": "../payload/src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/MissingFile.ts": {
+      "bytes": 404,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/NotFound.ts": {
+      "bytes": 370,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/QueryError.ts": {
+      "bytes": 416,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/ValidationError.ts": {
+      "bytes": 708,
+      "imports": [
+        {
+          "path": "../translations/src/languages/en.ts",
+          "kind": "import-statement",
+          "original": "@payloadcms/translations/languages/en"
+        },
+        {
+          "path": "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js",
+          "kind": "import-statement",
+          "original": "http-status"
+        },
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/errors/index.ts": {
+      "bytes": 1187,
+      "imports": [
+        {
+          "path": "../payload/src/errors/APIError.ts",
+          "kind": "import-statement",
+          "original": "./APIError.js"
+        },
+        {
+          "path": "../payload/src/errors/AuthenticationError.ts",
+          "kind": "import-statement",
+          "original": "./AuthenticationError.js"
+        },
+        {
+          "path": "../payload/src/errors/DuplicateCollection.ts",
+          "kind": "import-statement",
+          "original": "./DuplicateCollection.js"
+        },
+        {
+          "path": "../payload/src/errors/DuplicateFieldName.ts",
+          "kind": "import-statement",
+          "original": "./DuplicateFieldName.js"
+        },
+        {
+          "path": "../payload/src/errors/DuplicateGlobal.ts",
+          "kind": "import-statement",
+          "original": "./DuplicateGlobal.js"
+        },
+        {
+          "path": "../payload/src/errors/ErrorDeletingFile.ts",
+          "kind": "import-statement",
+          "original": "./ErrorDeletingFile.js"
+        },
+        {
+          "path": "../payload/src/errors/FileRetrievalError.ts",
+          "kind": "import-statement",
+          "original": "./FileRetrievalError.js"
+        },
+        {
+          "path": "../payload/src/errors/FileUploadError.ts",
+          "kind": "import-statement",
+          "original": "./FileUploadError.js"
+        },
+        {
+          "path": "../payload/src/errors/Forbidden.ts",
+          "kind": "import-statement",
+          "original": "./Forbidden.js"
+        },
+        {
+          "path": "../payload/src/errors/InvalidConfiguration.ts",
+          "kind": "import-statement",
+          "original": "./InvalidConfiguration.js"
+        },
+        {
+          "path": "../payload/src/errors/InvalidFieldName.ts",
+          "kind": "import-statement",
+          "original": "./InvalidFieldName.js"
+        },
+        {
+          "path": "../payload/src/errors/InvalidFieldRelationship.ts",
+          "kind": "import-statement",
+          "original": "./InvalidFieldRelationship.js"
+        },
+        {
+          "path": "../payload/src/errors/LockedAuth.ts",
+          "kind": "import-statement",
+          "original": "./LockedAuth.js"
+        },
+        {
+          "path": "../payload/src/errors/MissingCollectionLabel.ts",
+          "kind": "import-statement",
+          "original": "./MissingCollectionLabel.js"
+        },
+        {
+          "path": "../payload/src/errors/MissingEditorProp.ts",
+          "kind": "import-statement",
+          "original": "./MissingEditorProp.js"
+        },
+        {
+          "path": "../payload/src/errors/MissingFieldInputOptions.ts",
+          "kind": "import-statement",
+          "original": "./MissingFieldInputOptions.js"
+        },
+        {
+          "path": "../payload/src/errors/MissingFieldType.ts",
+          "kind": "import-statement",
+          "original": "./MissingFieldType.js"
+        },
+        {
+          "path": "../payload/src/errors/MissingFile.ts",
+          "kind": "import-statement",
+          "original": "./MissingFile.js"
+        },
+        {
+          "path": "../payload/src/errors/NotFound.ts",
+          "kind": "import-statement",
+          "original": "./NotFound.js"
+        },
+        {
+          "path": "../payload/src/errors/QueryError.ts",
+          "kind": "import-statement",
+          "original": "./QueryError.js"
+        },
+        {
+          "path": "../payload/src/errors/ValidationError.ts",
+          "kind": "import-statement",
+          "original": "./ValidationError.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/exports/errors.ts": {
+      "bytes": 452,
+      "imports": [
+        {
+          "path": "../payload/src/errors/index.ts",
+          "kind": "import-statement",
+          "original": "../errors/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "../payload/src/types/index.ts": { "bytes": 3362, "imports": [], "format": "esm" },
     "../payload/src/types/constants.ts": { "bytes": 252, "imports": [], "format": "esm" },
     "../payload/src/exports/types.ts": {
       "bytes": 3467,
@@ -432,8 +896,13 @@
       "format": "esm"
     },
     "src/utilities/buildFieldSchemaMap/traverseFields.ts": {
-      "bytes": 2454,
+      "bytes": 2717,
       "imports": [
+        {
+          "path": "../payload/src/exports/errors.ts",
+          "kind": "import-statement",
+          "original": "payload/errors"
+        },
         {
           "path": "../payload/src/exports/types.ts",
           "kind": "import-statement",
@@ -8533,7 +9002,7 @@
       "format": "esm"
     },
     "../translations/src/importDateFNSLocale.ts": {
-      "bytes": 2518,
+      "bytes": 2671,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/date-fns@3.3.1/node_modules/date-fns/locale/ar.mjs",
@@ -8689,7 +9158,7 @@
       "format": "esm"
     },
     "../translations/src/utilities/deepMerge.ts": { "bytes": 799, "imports": [], "format": "esm" },
-    "../translations/src/clientKeys.ts": { "bytes": 8457, "imports": [], "format": "esm" },
+    "../translations/src/clientKeys.ts": { "bytes": 8481, "imports": [], "format": "esm" },
     "../translations/src/utilities/getTranslationsByContext.ts": {
       "bytes": 1721,
       "imports": [
@@ -8807,7 +9276,7 @@
       "format": "esm"
     },
     "src/exports/server/utilities.ts": {
-      "bytes": 923,
+      "bytes": 837,
       "imports": [
         {
           "path": "src/utilities/api.ts",
@@ -9040,8 +9509,13 @@
       "format": "esm"
     },
     "../payload/src/fields/hooks/afterRead/promise.ts": {
-      "bytes": 14268,
+      "bytes": 14535,
       "imports": [
+        {
+          "path": "../payload/src/errors/index.ts",
+          "kind": "import-statement",
+          "original": "../../../errors/index.js"
+        },
         {
           "path": "../payload/src/fields/config/types.ts",
           "kind": "import-statement",
@@ -9204,12 +9678,17 @@
       "format": "esm"
     },
     "../payload/src/utilities/configToJSONSchema.ts": {
-      "bytes": 19371,
+      "bytes": 19662,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/pluralize.js",
           "kind": "import-statement",
           "original": "pluralize"
+        },
+        {
+          "path": "../payload/src/errors/MissingEditorProp.ts",
+          "kind": "import-statement",
+          "original": "../errors/MissingEditorProp.js"
         },
         {
           "path": "../payload/src/fields/config/types.ts",
@@ -9659,7 +10138,7 @@
       "format": "esm"
     },
     "src/exports/server/index.ts": {
-      "bytes": 172,
+      "bytes": 276,
       "imports": [
         {
           "path": "src/exports/server/utilities.ts",
@@ -10418,7 +10897,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 564266
+      "bytes": 612879
     },
     "dist/exports/server/index.js": {
       "imports": [
@@ -10558,9 +11037,12 @@
           "bytesInOutput": 4240
         },
         "../../node_modules/.pnpm/qs@6.11.2/node_modules/qs/lib/parse.js": {
-          "bytesInOutput": 4064
+          "bytesInOutput": 4083
         },
         "../../node_modules/.pnpm/qs@6.11.2/node_modules/qs/lib/index.js": { "bytesInOutput": 146 },
+        "../../node_modules/.pnpm/http-status@1.6.2/node_modules/http-status/lib/index.js": {
+          "bytesInOutput": 21226
+        },
         "../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js": {
           "bytesInOutput": 300
         },
@@ -10581,9 +11063,13 @@
         },
         "src/utilities/api.ts": { "bytesInOutput": 753 },
         "src/exports/server/utilities.ts": { "bytesInOutput": 0 },
-        "../payload/src/exports/types.ts": { "bytesInOutput": 0 },
+        "../payload/src/errors/APIError.ts": { "bytesInOutput": 364 },
         "../payload/src/fields/config/types.ts": { "bytesInOutput": 205 },
-        "src/utilities/buildFieldSchemaMap/traverseFields.ts": { "bytesInOutput": 994 },
+        "../payload/src/errors/MissingEditorProp.ts": { "bytesInOutput": 223 },
+        "../payload/src/errors/index.ts": { "bytesInOutput": 0 },
+        "../payload/src/exports/errors.ts": { "bytesInOutput": 0 },
+        "../payload/src/exports/types.ts": { "bytesInOutput": 0 },
+        "src/utilities/buildFieldSchemaMap/traverseFields.ts": { "bytesInOutput": 1024 },
         "src/utilities/buildFieldSchemaMap/index.ts": { "bytesInOutput": 319 },
         "src/utilities/buildFormState.ts": { "bytesInOutput": 1982 },
         "src/utilities/findLocaleFromCode.ts": { "bytesInOutput": 84 },
@@ -10657,11 +11143,11 @@
           "bytesInOutput": 1296
         },
         "src/utilities/formatDate.ts": { "bytesInOutput": 90 },
-        "../translations/src/importDateFNSLocale.ts": { "bytesInOutput": 1566 },
+        "../translations/src/importDateFNSLocale.ts": { "bytesInOutput": 1719 },
         "../translations/src/exports/index.ts": { "bytesInOutput": 0 },
         "../translations/src/utilities/getTranslation.ts": { "bytesInOutput": 357 },
         "../translations/src/utilities/deepMerge.ts": { "bytesInOutput": 236 },
-        "../translations/src/clientKeys.ts": { "bytesInOutput": 7318 },
+        "../translations/src/clientKeys.ts": { "bytesInOutput": 7339 },
         "../translations/src/utilities/getTranslationsByContext.ts": { "bytesInOutput": 525 },
         "../translations/src/utilities/init.ts": { "bytesInOutput": 1504 },
         "src/utilities/formatDocTitle.ts": { "bytesInOutput": 391 },
@@ -10693,7 +11179,7 @@
         "src/forms/buildStateFromSchema/iterateFields.ts": { "bytesInOutput": 725 },
         "src/forms/buildStateFromSchema/index.tsx": { "bytesInOutput": 339 }
       },
-      "bytes": 119098
+      "bytes": 141134
     },
     "dist/exports/en-US-J6LTG47D.js.map": {
       "imports": [],

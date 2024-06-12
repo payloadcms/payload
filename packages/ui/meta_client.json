@@ -29,7 +29,7 @@
       "format": "esm"
     },
     "src/hooks/useHotkey.ts": {
-      "bytes": 4759,
+      "bytes": 4709,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
@@ -38,11 +38,21 @@
       "format": "esm"
     },
     "src/hooks/useIntersect.ts": {
-      "bytes": 976,
+      "bytes": 1014,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/utilities/findLocaleFromCode.ts": { "bytes": 440, "imports": [], "format": "esm" },
+    "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs": {
+      "bytes": 29136,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
     "src/icons/Chevron/index.tsx": {
       "bytes": 775,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
@@ -240,7 +250,7 @@
       "format": "esm"
     },
     "src/providers/Translation/index.tsx": {
-      "bytes": 3401,
+      "bytes": 3405,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -259,7 +269,7 @@
       "format": "esm"
     },
     "src/elements/StayLoggedIn/index.tsx": {
-      "bytes": 1807,
+      "bytes": 1758,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
@@ -302,13 +312,17 @@
       "format": "esm"
     },
     "src/providers/Auth/index.tsx": {
-      "bytes": 9953,
+      "bytes": 9895,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/elements/StayLoggedIn/index.tsx",
           "kind": "import-statement",
@@ -426,7 +440,7 @@
       "format": "esm"
     },
     "src/hooks/useResize.ts": {
-      "bytes": 1624,
+      "bytes": 1558,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
@@ -640,7 +654,7 @@
       "format": "esm"
     },
     "src/elements/Popup/index.tsx": {
-      "bytes": 5759,
+      "bytes": 5709,
       "imports": [
         {
           "path": "src/elements/Popup/PopupButtonList/index.tsx",
@@ -717,7 +731,7 @@
       "format": "esm"
     },
     "src/elements/Nav/context.tsx": {
-      "bytes": 2865,
+      "bytes": 2815,
       "imports": [
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         {
@@ -735,7 +749,7 @@
       "format": "esm"
     },
     "src/elements/Nav/NavToggler/index.tsx": {
-      "bytes": 1480,
+      "bytes": 1431,
       "imports": [
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -1013,13 +1027,17 @@
       "format": "esm"
     },
     "src/elements/DeleteMany/index.tsx": {
-      "bytes": 4214,
+      "bytes": 4135,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/providers/Auth/index.tsx",
           "kind": "import-statement",
@@ -6767,32 +6785,31 @@
       ],
       "format": "esm"
     },
-    "../../node_modules/.pnpm/scheduler@0.23.0/node_modules/scheduler/cjs/scheduler.production.min.js": {
-      "bytes": 4235,
+    "../../node_modules/.pnpm/scheduler@0.25.0-rc-f994737d14-20240522/node_modules/scheduler/cjs/scheduler.production.js": {
+      "bytes": 10346,
       "imports": [],
       "format": "cjs"
     },
-    "../../node_modules/.pnpm/scheduler@0.23.0/node_modules/scheduler/index.js": {
-      "bytes": 198,
+    "../../node_modules/.pnpm/scheduler@0.25.0-rc-f994737d14-20240522/node_modules/scheduler/index.js": {
+      "bytes": 194,
       "imports": [
         {
-          "path": "../../node_modules/.pnpm/scheduler@0.23.0/node_modules/scheduler/cjs/scheduler.production.min.js",
+          "path": "../../node_modules/.pnpm/scheduler@0.25.0-rc-f994737d14-20240522/node_modules/scheduler/cjs/scheduler.production.js",
           "kind": "require-call",
-          "original": "./cjs/scheduler.production.min.js"
+          "original": "./cjs/scheduler.production.js"
         }
       ],
       "format": "cjs"
     },
-    "../../node_modules/.pnpm/use-context-selector@1.4.1_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_scheduler@0.23.0/node_modules/use-context-selector/dist/index.modern.js": {
-      "bytes": 2321,
+    "../../node_modules/.pnpm/use-context-selector@2.0.0_react@19.0.0-rc-f994737d14-20240522_scheduler@0.25.0-rc-f994737d14-20240522/node_modules/use-context-selector/dist/index.js": {
+      "bytes": 8366,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
-          "path": "../../node_modules/.pnpm/scheduler@0.23.0/node_modules/scheduler/index.js",
+          "path": "../../node_modules/.pnpm/scheduler@0.25.0-rc-f994737d14-20240522/node_modules/scheduler/index.js",
           "kind": "import-statement",
           "original": "scheduler"
-        },
-        { "path": "react-dom", "kind": "import-statement", "external": true }
+        }
       ],
       "format": "esm"
     },
@@ -6801,7 +6818,7 @@
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
-          "path": "../../node_modules/.pnpm/use-context-selector@1.4.1_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_scheduler@0.23.0/node_modules/use-context-selector/dist/index.modern.js",
+          "path": "../../node_modules/.pnpm/use-context-selector@2.0.0_react@19.0.0-rc-f994737d14-20240522_scheduler@0.25.0-rc-f994737d14-20240522/node_modules/use-context-selector/dist/index.js",
           "kind": "import-statement",
           "original": "use-context-selector"
         }
@@ -6851,7 +6868,7 @@
       "format": "esm"
     },
     "src/providers/DocumentInfo/index.tsx": {
-      "bytes": 14724,
+      "bytes": 14754,
       "imports": [
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
@@ -6909,10 +6926,27 @@
       ],
       "format": "esm"
     },
-    "src/elements/Autosave/index.tsx": {
-      "bytes": 4767,
+    "src/utilities/reduceFieldsToValuesWithValidation.ts": {
+      "bytes": 1174,
       "imports": [
+        {
+          "path": "../../node_modules/.pnpm/flatley@5.2.0/node_modules/flatley/index.js",
+          "kind": "import-statement",
+          "original": "flatley"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/elements/Autosave/index.tsx": {
+      "bytes": 7587,
+      "imports": [
+        { "path": "payload/versions", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
@@ -6954,9 +6988,9 @@
           "original": "../../utilities/formatDate.js"
         },
         {
-          "path": "src/utilities/reduceFieldsToValues.ts",
+          "path": "src/utilities/reduceFieldsToValuesWithValidation.ts",
           "kind": "import-statement",
-          "original": "../../utilities/reduceFieldsToValues.js"
+          "original": "../../utilities/reduceFieldsToValuesWithValidation.js"
         }
       ],
       "format": "esm"
@@ -6967,13 +7001,17 @@
       "format": "esm"
     },
     "src/elements/DeleteDocument/index.tsx": {
-      "bytes": 4637,
+      "bytes": 4580,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
@@ -7018,13 +7056,17 @@
       "format": "esm"
     },
     "src/elements/DuplicateDocument/index.tsx": {
-      "bytes": 3930,
+      "bytes": 3771,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
@@ -7069,10 +7111,14 @@
       "format": "esm"
     },
     "src/elements/PreviewButton/usePreviewURL.tsx": {
-      "bytes": 2298,
+      "bytes": 2290,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/providers/Config/index.tsx",
           "kind": "import-statement",
@@ -7257,11 +7303,15 @@
       "format": "esm"
     },
     "src/elements/Status/index.tsx": {
-      "bytes": 6477,
+      "bytes": 6419,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/forms/Form/context.ts",
           "kind": "import-statement",
@@ -7301,7 +7351,7 @@
       "format": "esm"
     },
     "src/elements/DocumentControls/index.tsx": {
-      "bytes": 8780,
+      "bytes": 9014,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7408,7 +7458,7 @@
       "format": "esm"
     },
     "src/elements/Drawer/index.tsx": {
-      "bytes": 3860,
+      "bytes": 3762,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -7475,12 +7525,16 @@
       "format": "esm"
     },
     "src/elements/DocumentDrawer/DrawerContent.tsx": {
-      "bytes": 4116,
+      "bytes": 4058,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/fields/Relationship/AddNew/useRelatedCollections.ts",
           "kind": "import-statement",
@@ -7545,7 +7599,7 @@
       "format": "esm"
     },
     "src/elements/DocumentDrawer/index.tsx": {
-      "bytes": 3610,
+      "bytes": 3560,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -7806,7 +7860,7 @@
       "format": "esm"
     },
     "src/fields/Checkbox/Input.tsx": {
-      "bytes": 2084,
+      "bytes": 2105,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -7987,7 +8041,7 @@
       "format": "esm"
     },
     "src/forms/RowLabel/index.tsx": {
-      "bytes": 882,
+      "bytes": 928,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -8417,7 +8471,7 @@
       "format": "esm"
     },
     "src/fields/Blocks/BlocksDrawer/index.tsx": {
-      "bytes": 3309,
+      "bytes": 3260,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -8451,7 +8505,7 @@
       "format": "esm"
     },
     "src/fields/Blocks/RowActions.tsx": {
-      "bytes": 2024,
+      "bytes": 1975,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -15357,7 +15411,7 @@
       "format": "esm"
     },
     "src/elements/DatePicker/DatePicker.tsx": {
-      "bytes": 3761,
+      "bytes": 3692,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -17484,7 +17538,7 @@
       "format": "esm"
     },
     "src/fields/Tabs/index.tsx": {
-      "bytes": 6275,
+      "bytes": 6469,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
@@ -17727,7 +17781,7 @@
       "format": "esm"
     },
     "src/elements/EditUpload/index.tsx": {
-      "bytes": 13604,
+      "bytes": 13474,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -18355,7 +18409,7 @@
       "format": "esm"
     },
     "src/elements/TableColumns/buildColumnState.tsx": {
-      "bytes": 5458,
+      "bytes": 5547,
       "imports": [
         { "path": "payload/types", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -18442,7 +18496,7 @@
       "format": "esm"
     },
     "src/elements/ListDrawer/DrawerContent.tsx": {
-      "bytes": 10402,
+      "bytes": 10352,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -18536,7 +18590,7 @@
       "format": "esm"
     },
     "src/elements/ListDrawer/index.tsx": {
-      "bytes": 3656,
+      "bytes": 3606,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -18941,7 +18995,7 @@
       "format": "esm"
     },
     "src/forms/Form/index.tsx": {
-      "bytes": 19129,
+      "bytes": 20552,
       "imports": [
         { "path": "deep-equal", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
@@ -18953,7 +19007,11 @@
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/hooks/useDebouncedEffect.ts",
           "kind": "import-statement",
@@ -19095,7 +19153,7 @@
       "format": "esm"
     },
     "src/elements/EditMany/index.tsx": {
-      "bytes": 8199,
+      "bytes": 8149,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -19185,11 +19243,15 @@
       "format": "esm"
     },
     "src/elements/GenerateConfirmation/index.tsx": {
-      "bytes": 2079,
+      "bytes": 2000,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/providers/DocumentInfo/index.tsx",
           "kind": "import-statement",
@@ -19263,13 +19325,17 @@
       "format": "esm"
     },
     "src/elements/PublishMany/index.tsx": {
-      "bytes": 4321,
+      "bytes": 4264,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/providers/Auth/index.tsx",
           "kind": "import-statement",
@@ -19348,13 +19414,12 @@
       "format": "esm"
     },
     "src/elements/UnpublishMany/index.tsx": {
-      "bytes": 4283,
+      "bytes": 4227,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         {
           "path": "src/providers/Auth/index.tsx",
           "kind": "import-statement",
@@ -19399,6 +19464,11 @@
           "path": "src/elements/Pill/index.tsx",
           "kind": "import-statement",
           "original": "../Pill/index.js"
+        },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
         }
       ],
       "format": "esm"
@@ -19641,7 +19711,7 @@
       "format": "esm"
     },
     "src/elements/ListControls/index.tsx": {
-      "bytes": 7027,
+      "bytes": 6977,
       "imports": [
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -19775,7 +19845,7 @@
       "format": "esm"
     },
     "src/elements/Modal/index.tsx": {
-      "bytes": 352,
+      "bytes": 80,
       "imports": [{ "path": "@faceless-ui/modal", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
@@ -19930,14 +20000,65 @@
       ],
       "format": "esm"
     },
+    "src/providers/ToastContainer/icons/Error.tsx": {
+      "bytes": 548,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/ToastContainer/icons/Info.tsx": {
+      "bytes": 520,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/ToastContainer/icons/Success.tsx": {
+      "bytes": 534,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/ToastContainer/icons/Warning.tsx": {
+      "bytes": 510,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/providers/ToastContainer/index.tsx": {
+      "bytes": 995,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
+        {
+          "path": "src/providers/ToastContainer/icons/Error.tsx",
+          "kind": "import-statement",
+          "original": "./icons/Error.js"
+        },
+        {
+          "path": "src/providers/ToastContainer/icons/Info.tsx",
+          "kind": "import-statement",
+          "original": "./icons/Info.js"
+        },
+        {
+          "path": "src/providers/ToastContainer/icons/Success.tsx",
+          "kind": "import-statement",
+          "original": "./icons/Success.js"
+        },
+        {
+          "path": "src/providers/ToastContainer/icons/Warning.tsx",
+          "kind": "import-statement",
+          "original": "./icons/Warning.js"
+        }
+      ],
+      "format": "esm"
+    },
     "src/providers/Root/index.tsx": {
-      "bytes": 5303,
+      "bytes": 4935,
       "imports": [
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         {
           "path": "src/elements/LoadingOverlay/index.tsx",
           "kind": "import-statement",
@@ -20024,6 +20145,11 @@
           "original": "../Theme/index.js"
         },
         {
+          "path": "src/providers/ToastContainer/index.tsx",
+          "kind": "import-statement",
+          "original": "../ToastContainer/index.js"
+        },
+        {
           "path": "src/providers/Translation/index.tsx",
           "kind": "import-statement",
           "original": "../Translation/index.js"
@@ -20046,7 +20172,7 @@
       "format": "esm"
     },
     "src/exports/client/index.ts": {
-      "bytes": 11265,
+      "bytes": 11282,
       "imports": [
         {
           "path": "src/hooks/useDebounce.ts",
@@ -20348,7 +20474,11 @@
           "kind": "import-statement",
           "original": "../../elements/Tooltip/index.js"
         },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs",
+          "kind": "import-statement",
+          "original": "sonner"
+        },
         {
           "path": "src/elements/UnpublishMany/index.tsx",
           "kind": "import-statement",
@@ -20578,6 +20708,11 @@
           "path": "src/graphics/DefaultBlockImage/index.tsx",
           "kind": "import-statement",
           "original": "../../graphics/DefaultBlockImage/index.js"
+        },
+        {
+          "path": "src/graphics/File/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/File/index.js"
         },
         {
           "path": "src/icons/Calendar/index.tsx",
@@ -20813,12 +20948,12 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1852579
+      "bytes": 1933637
     },
     "dist/exports/client/index.js": {
       "imports": [
         { "path": "dist/exports/chunk-Y6VTUGJS.js", "kind": "import-statement" },
-        { "path": "dist/exports/chunk-75FU2OG6.js", "kind": "import-statement" },
+        { "path": "dist/exports/chunk-CYLV2KMN.js", "kind": "import-statement" },
         { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -20835,7 +20970,10 @@
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -20898,7 +21036,6 @@
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/link.js", "kind": "import-statement", "external": true },
@@ -20908,10 +21045,10 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "payload/versions", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-dom", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
@@ -20921,17 +21058,14 @@
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -20940,7 +21074,6 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -20951,7 +21084,6 @@
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21012,7 +21144,7 @@
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "dist/exports/DatePicker-ENJAS7XK.js", "kind": "dynamic-import" },
+        { "path": "dist/exports/DatePicker-AEW4GN7P.js", "kind": "dynamic-import" },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -21153,7 +21285,6 @@
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "deep-equal", "kind": "import-statement", "external": true },
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "deep-equal", "kind": "import-statement", "external": true },
@@ -21161,7 +21292,6 @@
         { "path": "payload/types", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/modal", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
@@ -21172,7 +21302,6 @@
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21180,7 +21309,6 @@
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21208,7 +21336,6 @@
         { "path": "payload/utilities", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21221,7 +21348,11 @@
         { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "react-toastify", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/scroll-info", "kind": "import-statement", "external": true },
         { "path": "@faceless-ui/window-info", "kind": "import-statement", "external": true }
       ],
@@ -21271,6 +21402,7 @@
         "FieldError",
         "FieldLabel",
         "FieldPropsProvider",
+        "File",
         "Form",
         "FormLoadingOverlayToggle",
         "FormQueryParamsProvider",
@@ -21428,10 +21560,10 @@
           "bytesInOutput": 301
         },
         "../../node_modules/.pnpm/md5@2.3.0/node_modules/md5/md5.js": { "bytesInOutput": 3370 },
-        "../../node_modules/.pnpm/scheduler@0.23.0/node_modules/scheduler/cjs/scheduler.production.min.js": {
-          "bytesInOutput": 3993
+        "../../node_modules/.pnpm/scheduler@0.25.0-rc-f994737d14-20240522/node_modules/scheduler/cjs/scheduler.production.js": {
+          "bytesInOutput": 3807
         },
-        "../../node_modules/.pnpm/scheduler@0.23.0/node_modules/scheduler/index.js": {
+        "../../node_modules/.pnpm/scheduler@0.25.0-rc-f994737d14-20240522/node_modules/scheduler/index.js": {
           "bytesInOutput": 51
         },
         "../../node_modules/.pnpm/flatley@5.2.0/node_modules/flatley/index.js": {
@@ -21453,17 +21585,20 @@
           "bytesInOutput": 3561
         },
         "src/hooks/useDebounce.ts": { "bytesInOutput": 166 },
-        "src/exports/client/index.ts": { "bytesInOutput": 84 },
+        "src/exports/client/index.ts": { "bytesInOutput": 0 },
         "src/hooks/useDebouncedCallback.ts": { "bytesInOutput": 204 },
         "src/hooks/useDebouncedEffect.ts": { "bytesInOutput": 188 },
         "src/hooks/useDelayedRender.ts": { "bytesInOutput": 537 },
-        "src/hooks/useHotkey.ts": { "bytesInOutput": 1425 },
-        "src/hooks/useIntersect.ts": { "bytesInOutput": 416 },
+        "src/hooks/useHotkey.ts": { "bytesInOutput": 1419 },
+        "src/hooks/useIntersect.ts": { "bytesInOutput": 418 },
         "src/hooks/usePayloadAPI.ts": { "bytesInOutput": 736 },
         "src/providers/Locale/index.tsx": { "bytesInOutput": 667 },
         "src/utilities/findLocaleFromCode.ts": { "bytesInOutput": 84 },
-        "src/providers/Auth/index.tsx": { "bytesInOutput": 3334 },
-        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 825 },
+        "src/providers/Auth/index.tsx": { "bytesInOutput": 3279 },
+        "../../node_modules/.pnpm/sonner@1.5.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/sonner/dist/index.mjs": {
+          "bytesInOutput": 28412
+        },
+        "src/elements/StayLoggedIn/index.tsx": { "bytesInOutput": 824 },
         "src/elements/Button/index.tsx": { "bytesInOutput": 1748 },
         "src/icons/Chevron/index.tsx": { "bytesInOutput": 457 },
         "src/icons/Edit/index.tsx": { "bytesInOutput": 624 },
@@ -21475,7 +21610,7 @@
         "src/utilities/api.ts": { "bytesInOutput": 751 },
         "src/providers/SearchParams/index.tsx": { "bytesInOutput": 562 },
         "src/providers/Preferences/index.tsx": { "bytesInOutput": 1373 },
-        "src/hooks/useResize.ts": { "bytesInOutput": 412 },
+        "src/hooks/useResize.ts": { "bytesInOutput": 398 },
         "src/hooks/useThrottledEffect.ts": { "bytesInOutput": 238 },
         "src/utilities/flattenFieldMap.ts": { "bytesInOutput": 399 },
         "src/hooks/useUseAsTitle.ts": { "bytesInOutput": 77 },
@@ -21491,10 +21626,10 @@
         "src/elements/Localizer/LocalizerLabel/index.tsx": { "bytesInOutput": 506 },
         "src/elements/Localizer/index.tsx": { "bytesInOutput": 749 },
         "src/elements/Popup/PopupButtonList/index.tsx": { "bytesInOutput": 719 },
-        "src/elements/Popup/index.tsx": { "bytesInOutput": 2145 },
+        "src/elements/Popup/index.tsx": { "bytesInOutput": 2135 },
         "src/elements/Popup/PopupTrigger/index.tsx": { "bytesInOutput": 410 },
-        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 510 },
-        "src/elements/Nav/context.tsx": { "bytesInOutput": 676 },
+        "src/elements/Nav/NavToggler/index.tsx": { "bytesInOutput": 504 },
+        "src/elements/Nav/context.tsx": { "bytesInOutput": 670 },
         "../../node_modules/.pnpm/body-scroll-lock@4.0.0-beta.0/node_modules/body-scroll-lock/lib/bodyScrollLock.esm.js": {
           "bytesInOutput": 3335
         },
@@ -21508,17 +21643,17 @@
         "src/elements/Collapsible/provider.tsx": { "bytesInOutput": 413 },
         "src/elements/CopyToClipboard/index.tsx": { "bytesInOutput": 639 },
         "src/icons/Copy/index.tsx": { "bytesInOutput": 301 },
-        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1728 },
+        "src/elements/DeleteMany/index.tsx": { "bytesInOutput": 1671 },
         "src/providers/Selection/index.tsx": { "bytesInOutput": 1219 },
         "src/elements/Pill/index.tsx": { "bytesInOutput": 1232 },
         "../../node_modules/.pnpm/@dnd-kit+sortable@7.0.2_@dnd-kit+core@6.0.8_react@19.0.0-rc-f994737d14-20240522/node_modules/@dnd-kit/sortable/dist/sortable.esm.js": {
-          "bytesInOutput": 6076
+          "bytesInOutput": 6067
         },
         "../../node_modules/.pnpm/@dnd-kit+utilities@3.2.2_react@19.0.0-rc-f994737d14-20240522/node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 1485
         },
         "src/elements/DraggableSortable/useDraggableSortable/index.tsx": { "bytesInOutput": 271 },
-        "src/elements/DocumentControls/index.tsx": { "bytesInOutput": 3490 },
+        "src/elements/DocumentControls/index.tsx": { "bytesInOutput": 3552 },
         "../../node_modules/.pnpm/date-fns@3.3.1/node_modules/date-fns/toDate.mjs": {
           "bytesInOutput": 254
         },
@@ -21631,36 +21766,37 @@
           "bytesInOutput": 43
         },
         "src/utilities/formatDate.ts": { "bytesInOutput": 164 },
-        "src/elements/Autosave/index.tsx": { "bytesInOutput": 1337 },
+        "src/elements/Autosave/index.tsx": { "bytesInOutput": 2083 },
         "src/forms/Form/context.ts": { "bytesInOutput": 254 },
-        "../../node_modules/.pnpm/use-context-selector@1.4.1_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_scheduler@0.23.0/node_modules/use-context-selector/dist/index.modern.js": {
-          "bytesInOutput": 1485
+        "../../node_modules/.pnpm/use-context-selector@2.0.0_react@19.0.0-rc-f994737d14-20240522_scheduler@0.25.0-rc-f994737d14-20240522/node_modules/use-context-selector/dist/index.js": {
+          "bytesInOutput": 1487
         },
         "src/providers/DocumentEvents/index.tsx": { "bytesInOutput": 267 },
-        "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 4492 },
+        "src/providers/DocumentInfo/index.tsx": { "bytesInOutput": 4488 },
         "src/utilities/formatDocTitle.ts": { "bytesInOutput": 450 },
         "src/utilities/getFormState.ts": { "bytesInOutput": 341 },
         "src/utilities/hasSavePermission.ts": { "bytesInOutput": 172 },
         "src/utilities/isEditing.ts": { "bytesInOutput": 59 },
         "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 186 },
-        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1787 },
+        "src/utilities/reduceFieldsToValuesWithValidation.ts": { "bytesInOutput": 242 },
+        "src/elements/DeleteDocument/index.tsx": { "bytesInOutput": 1746 },
         "src/elements/Translation/index.tsx": { "bytesInOutput": 517 },
-        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1687 },
+        "src/elements/DuplicateDocument/index.tsx": { "bytesInOutput": 1615 },
         "src/elements/Gutter/index.tsx": { "bytesInOutput": 369 },
         "src/elements/PreviewButton/index.tsx": { "bytesInOutput": 265 },
-        "src/elements/PreviewButton/usePreviewURL.tsx": { "bytesInOutput": 757 },
+        "src/elements/PreviewButton/usePreviewURL.tsx": { "bytesInOutput": 717 },
         "src/elements/PublishButton/index.tsx": { "bytesInOutput": 451 },
         "src/forms/Submit/index.tsx": { "bytesInOutput": 291 },
         "src/elements/SaveButton/index.tsx": { "bytesInOutput": 448 },
         "src/providers/EditDepth/index.tsx": { "bytesInOutput": 156 },
         "src/providers/Operation/index.tsx": { "bytesInOutput": 161 },
         "src/elements/SaveDraftButton/index.tsx": { "bytesInOutput": 883 },
-        "src/elements/Status/index.tsx": { "bytesInOutput": 2793 },
-        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1336 },
+        "src/elements/Status/index.tsx": { "bytesInOutput": 2753 },
+        "src/elements/DocumentDrawer/index.tsx": { "bytesInOutput": 1331 },
         "src/fields/Relationship/AddNew/useRelatedCollections.ts": { "bytesInOutput": 151 },
-        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1564 },
+        "src/elements/Drawer/index.tsx": { "bytesInOutput": 1540 },
         "src/elements/Drawer/useDrawerSlug.tsx": { "bytesInOutput": 99 },
-        "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1456 },
+        "src/elements/DocumentDrawer/DrawerContent.tsx": { "bytesInOutput": 1411 },
         "src/providers/FormQueryParams/index.tsx": { "bytesInOutput": 667 },
         "src/elements/IDLabel/index.tsx": { "bytesInOutput": 172 },
         "src/elements/RenderTitle/index.tsx": { "bytesInOutput": 401 },
@@ -21673,18 +21809,18 @@
         "src/forms/withCondition/index.tsx": { "bytesInOutput": 177 },
         "src/forms/withCondition/WatchCondition.tsx": { "bytesInOutput": 348 },
         "src/providers/FieldComponents/index.tsx": { "bytesInOutput": 150 },
-        "src/fields/Array/index.tsx": { "bytesInOutput": 3950 },
+        "src/fields/Array/index.tsx": { "bytesInOutput": 3943 },
         "src/elements/Banner/index.tsx": { "bytesInOutput": 599 },
         "src/elements/DraggableSortable/DraggableSortableItem/index.tsx": { "bytesInOutput": 299 },
         "src/elements/DraggableSortable/index.tsx": { "bytesInOutput": 696 },
         "src/elements/ErrorPill/index.tsx": { "bytesInOutput": 390 },
         "src/forms/NullifyField/index.tsx": { "bytesInOutput": 605 },
-        "src/fields/Checkbox/index.tsx": { "bytesInOutput": 1116 },
+        "src/fields/Checkbox/index.tsx": { "bytesInOutput": 1117 },
         "src/utilities/generateFieldID.ts": { "bytesInOutput": 82 },
         "src/fields/FieldDescription/index.tsx": { "bytesInOutput": 437 },
         "src/fields/FieldError/index.tsx": { "bytesInOutput": 397 },
-        "src/fields/shared/index.tsx": { "bytesInOutput": 218 },
-        "src/fields/Checkbox/Input.tsx": { "bytesInOutput": 736 },
+        "src/fields/shared/index.tsx": { "bytesInOutput": 219 },
+        "src/fields/Checkbox/Input.tsx": { "bytesInOutput": 746 },
         "src/icons/Check/index.tsx": { "bytesInOutput": 401 },
         "src/icons/Line/index.tsx": { "bytesInOutput": 237 },
         "src/fields/FieldLabel/index.tsx": { "bytesInOutput": 455 },
@@ -21694,10 +21830,10 @@
         "src/icons/More/index.tsx": { "bytesInOutput": 410 },
         "src/forms/RowLabel/index.tsx": { "bytesInOutput": 410 },
         "src/forms/RowLabel/Context/index.tsx": { "bytesInOutput": 257 },
-        "src/fields/Blocks/index.tsx": { "bytesInOutput": 4094 },
+        "src/fields/Blocks/index.tsx": { "bytesInOutput": 4087 },
         "src/fields/Blocks/BlockRow.tsx": { "bytesInOutput": 1589 },
-        "src/fields/Blocks/RowActions.tsx": { "bytesInOutput": 592 },
-        "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1209 },
+        "src/fields/Blocks/RowActions.tsx": { "bytesInOutput": 586 },
+        "src/fields/Blocks/BlocksDrawer/index.tsx": { "bytesInOutput": 1203 },
         "src/elements/ThumbnailCard/index.tsx": { "bytesInOutput": 553 },
         "src/graphics/DefaultBlockImage/index.tsx": { "bytesInOutput": 4641 },
         "../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-browser/rng.js": {
@@ -21718,21 +21854,21 @@
         "src/fields/Blocks/BlocksDrawer/BlockSearch/index.tsx": { "bytesInOutput": 285 },
         "src/icons/Search/index.tsx": { "bytesInOutput": 332 },
         "src/fields/Blocks/SectionTitle/index.tsx": { "bytesInOutput": 466 },
-        "src/fields/Code/index.tsx": { "bytesInOutput": 1028 },
+        "src/fields/Code/index.tsx": { "bytesInOutput": 1030 },
         "src/elements/CodeEditor/index.tsx": { "bytesInOutput": 239 },
-        "src/fields/Collapsible/index.tsx": { "bytesInOutput": 1674 },
+        "src/fields/Collapsible/index.tsx": { "bytesInOutput": 1675 },
         "src/forms/WatchChildErrors/buildPathSegments.ts": { "bytesInOutput": 511 },
         "src/forms/WatchChildErrors/getFieldStateFromPaths.ts": { "bytesInOutput": 228 },
         "src/forms/WatchChildErrors/index.tsx": { "bytesInOutput": 174 },
-        "src/fields/ConfirmPassword/index.tsx": { "bytesInOutput": 736 },
-        "src/fields/DateTime/index.tsx": { "bytesInOutput": 1104 },
+        "src/fields/ConfirmPassword/index.tsx": { "bytesInOutput": 738 },
+        "src/fields/DateTime/index.tsx": { "bytesInOutput": 1106 },
         "src/elements/DatePicker/index.tsx": { "bytesInOutput": 199 },
-        "src/fields/Email/index.tsx": { "bytesInOutput": 1092 },
-        "src/fields/Group/index.tsx": { "bytesInOutput": 1261 },
+        "src/fields/Email/index.tsx": { "bytesInOutput": 1094 },
+        "src/fields/Group/index.tsx": { "bytesInOutput": 1262 },
         "src/fields/Row/provider.tsx": { "bytesInOutput": 164 },
         "src/fields/Tabs/provider.tsx": { "bytesInOutput": 164 },
         "src/fields/Group/provider.tsx": { "bytesInOutput": 166 },
-        "src/fields/JSON/index.tsx": { "bytesInOutput": 1608 },
+        "src/fields/JSON/index.tsx": { "bytesInOutput": 1601 },
         "src/fields/Number/index.tsx": { "bytesInOutput": 2140 },
         "src/elements/ReactSelect/index.tsx": { "bytesInOutput": 2501 },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/typeof.js": {
@@ -21748,7 +21884,7 @@
           "bytesInOutput": 129
         },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/objectSpread2.js": {
-          "bytesInOutput": 573
+          "bytesInOutput": 574
         },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js": {
           "bytesInOutput": 44
@@ -21775,13 +21911,13 @@
           "bytesInOutput": 246
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/useStateManager-7e1e8489.esm.js": {
-          "bytesInOutput": 999
+          "bytesInOutput": 1001
         },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/extends.js": {
-          "bytesInOutput": 228
+          "bytesInOutput": 231
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/react-select.esm.js": {
-          "bytesInOutput": 178
+          "bytesInOutput": 179
         },
         "../../node_modules/.pnpm/@babel+runtime@7.24.4/node_modules/@babel/runtime/helpers/esm/classCallCheck.js": {
           "bytesInOutput": 95
@@ -21823,7 +21959,7 @@
           "bytesInOutput": 48
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/Select-49a62830.esm.js": {
-          "bytesInOutput": 42314
+          "bytesInOutput": 42329
         },
         "../../node_modules/.pnpm/@emotion+react@11.11.4_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/@emotion/react/dist/emotion-element-43c6fea0.browser.esm.js": {
           "bytesInOutput": 1227
@@ -21877,7 +22013,7 @@
           "bytesInOutput": 115
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/index-a301f526.esm.js": {
-          "bytesInOutput": 17781
+          "bytesInOutput": 17843
         },
         "../../node_modules/.pnpm/use-isomorphic-layout-effect@1.1.2_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/use-isomorphic-layout-effect/dist/use-isomorphic-layout-effect.browser.esm.js": {
           "bytesInOutput": 57
@@ -21886,10 +22022,10 @@
           "bytesInOutput": 514
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/creatable/dist/react-select-creatable.esm.js": {
-          "bytesInOutput": 172
+          "bytesInOutput": 173
         },
         "../../node_modules/.pnpm/react-select@5.8.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522_types-react@19.0.0-beta.2/node_modules/react-select/dist/useCreatable-d97ef2c9.esm.js": {
-          "bytesInOutput": 1761
+          "bytesInOutput": 1763
         },
         "src/elements/ReactSelect/ClearIndicator/index.tsx": { "bytesInOutput": 310 },
         "src/elements/ReactSelect/Control/index.tsx": { "bytesInOutput": 388 },
@@ -21900,11 +22036,11 @@
         "src/elements/ReactSelect/MultiValueRemove/index.tsx": { "bytesInOutput": 565 },
         "src/elements/ReactSelect/SingleValue/index.tsx": { "bytesInOutput": 223 },
         "src/elements/ReactSelect/ValueContainer/index.tsx": { "bytesInOutput": 202 },
-        "src/fields/Password/index.tsx": { "bytesInOutput": 846 },
-        "src/fields/Point/index.tsx": { "bytesInOutput": 1769 },
-        "src/fields/RadioGroup/index.tsx": { "bytesInOutput": 1371 },
+        "src/fields/Password/index.tsx": { "bytesInOutput": 848 },
+        "src/fields/Point/index.tsx": { "bytesInOutput": 1770 },
+        "src/fields/RadioGroup/index.tsx": { "bytesInOutput": 1373 },
         "src/fields/RadioGroup/Radio/index.tsx": { "bytesInOutput": 638 },
-        "src/fields/Relationship/index.tsx": { "bytesInOutput": 5205 },
+        "src/fields/Relationship/index.tsx": { "bytesInOutput": 5202 },
         "src/fields/Relationship/AddNew/index.tsx": { "bytesInOutput": 1981 },
         "src/fields/Relationship/createRelationMap.ts": { "bytesInOutput": 519 },
         "src/fields/Relationship/findOptionsByValue.ts": { "bytesInOutput": 368 },
@@ -21916,22 +22052,22 @@
           "bytesInOutput": 1130
         },
         "src/fields/RichText/index.tsx": { "bytesInOutput": 16 },
-        "src/fields/Row/index.tsx": { "bytesInOutput": 442 },
+        "src/fields/Row/index.tsx": { "bytesInOutput": 443 },
         "src/fields/Select/index.tsx": { "bytesInOutput": 1125 },
-        "src/fields/Select/Input.tsx": { "bytesInOutput": 1174 },
-        "src/fields/Tabs/index.tsx": { "bytesInOutput": 1772 },
+        "src/fields/Select/Input.tsx": { "bytesInOutput": 1176 },
+        "src/fields/Tabs/index.tsx": { "bytesInOutput": 1817 },
         "src/fields/Tabs/Tab/index.tsx": { "bytesInOutput": 591 },
-        "src/fields/Text/index.tsx": { "bytesInOutput": 1389 },
-        "src/fields/Text/Input.tsx": { "bytesInOutput": 1350 },
+        "src/fields/Text/index.tsx": { "bytesInOutput": 1377 },
+        "src/fields/Text/Input.tsx": { "bytesInOutput": 1352 },
         "src/fields/Textarea/index.tsx": { "bytesInOutput": 1059 },
-        "src/fields/Textarea/Input.tsx": { "bytesInOutput": 1106 },
+        "src/fields/Textarea/Input.tsx": { "bytesInOutput": 1108 },
         "src/fields/UI/index.tsx": { "bytesInOutput": 16 },
         "src/fields/Upload/index.tsx": { "bytesInOutput": 883 },
-        "src/fields/Upload/Input.tsx": { "bytesInOutput": 1933 },
+        "src/fields/Upload/Input.tsx": { "bytesInOutput": 1935 },
         "src/elements/FileDetails/index.tsx": { "bytesInOutput": 821 },
-        "src/elements/Upload/index.tsx": { "bytesInOutput": 3452 },
+        "src/elements/Upload/index.tsx": { "bytesInOutput": 3453 },
         "src/elements/Dropzone/index.tsx": { "bytesInOutput": 1624 },
-        "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5616 },
+        "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5572 },
         "../../node_modules/.pnpm/react-image-crop@10.1.8_react@19.0.0-rc-f994737d14-20240522/node_modules/react-image-crop/dist/index.js": {
           "bytesInOutput": 13459
         },
@@ -21939,15 +22075,15 @@
         "src/elements/FileDetails/FileMeta/index.tsx": { "bytesInOutput": 843 },
         "src/elements/Thumbnail/index.tsx": { "bytesInOutput": 535 },
         "src/graphics/File/index.tsx": { "bytesInOutput": 432 },
-        "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1278 },
-        "src/elements/ListDrawer/DrawerContent.tsx": { "bytesInOutput": 3314 },
+        "src/elements/ListDrawer/index.tsx": { "bytesInOutput": 1272 },
+        "src/elements/ListDrawer/DrawerContent.tsx": { "bytesInOutput": 3303 },
         "src/providers/ListInfo/index.tsx": { "bytesInOutput": 154 },
         "src/providers/ListQuery/index.tsx": { "bytesInOutput": 1626 },
         "src/elements/Loading/index.tsx": { "bytesInOutput": 1247 },
         "src/elements/LoadingOverlay/index.tsx": { "bytesInOutput": 842 },
         "src/elements/LoadingOverlay/reducer.ts": { "bytesInOutput": 445 },
         "src/elements/TableColumns/index.tsx": { "bytesInOutput": 1296 },
-        "src/elements/TableColumns/buildColumnState.tsx": { "bytesInOutput": 1867 },
+        "src/elements/TableColumns/buildColumnState.tsx": { "bytesInOutput": 1903 },
         "src/elements/SelectAll/index.tsx": { "bytesInOutput": 376 },
         "src/elements/SelectRow/index.tsx": { "bytesInOutput": 217 },
         "src/elements/Table/TableCellProvider/index.tsx": { "bytesInOutput": 296 },
@@ -21971,8 +22107,8 @@
         "src/elements/TableColumns/filterFields.tsx": { "bytesInOutput": 336 },
         "src/elements/TableColumns/getInitialColumns.ts": { "bytesInOutput": 518 },
         "src/fields/index.tsx": { "bytesInOutput": 255 },
-        "src/elements/EditMany/index.tsx": { "bytesInOutput": 3205 },
-        "src/forms/Form/index.tsx": { "bytesInOutput": 6161 },
+        "src/elements/EditMany/index.tsx": { "bytesInOutput": 3199 },
+        "src/forms/Form/index.tsx": { "bytesInOutput": 6381 },
         "src/forms/Form/errorMessages.ts": { "bytesInOutput": 66 },
         "src/forms/Form/fieldReducer.ts": { "bytesInOutput": 3430 },
         "src/forms/Form/rows.ts": { "bytesInOutput": 381 },
@@ -21984,19 +22120,19 @@
         "src/forms/Form/mergeErrorPaths.ts": { "bytesInOutput": 234 },
         "src/elements/FieldSelect/index.tsx": { "bytesInOutput": 1919 },
         "src/forms/Form/createNestedFieldPath.ts": { "bytesInOutput": 140 },
-        "src/elements/GenerateConfirmation/index.tsx": { "bytesInOutput": 1015 },
+        "src/elements/GenerateConfirmation/index.tsx": { "bytesInOutput": 958 },
         "src/elements/HydrateClientUser/index.tsx": { "bytesInOutput": 149 },
-        "src/elements/ListControls/index.tsx": { "bytesInOutput": 2521 },
+        "src/elements/ListControls/index.tsx": { "bytesInOutput": 2515 },
         "src/elements/ColumnSelector/index.tsx": { "bytesInOutput": 753 },
-        "src/elements/PublishMany/index.tsx": { "bytesInOutput": 1791 },
+        "src/elements/PublishMany/index.tsx": { "bytesInOutput": 1750 },
         "src/elements/SearchFilter/index.tsx": { "bytesInOutput": 1096 },
-        "src/elements/UnpublishMany/index.tsx": { "bytesInOutput": 1786 },
+        "src/elements/UnpublishMany/index.tsx": { "bytesInOutput": 1745 },
         "src/elements/WhereBuilder/index.tsx": { "bytesInOutput": 2625 },
         "src/elements/WhereBuilder/Condition/index.tsx": { "bytesInOutput": 2069 },
         "src/elements/RenderCustomClientComponent/index.tsx": { "bytesInOutput": 168 },
         "src/elements/WhereBuilder/Condition/Date/index.tsx": { "bytesInOutput": 222 },
         "src/elements/WhereBuilder/Condition/Number/index.tsx": { "bytesInOutput": 255 },
-        "src/elements/WhereBuilder/Condition/Relationship/index.tsx": { "bytesInOutput": 2909 },
+        "src/elements/WhereBuilder/Condition/Relationship/index.tsx": { "bytesInOutput": 2904 },
         "src/elements/WhereBuilder/Condition/Relationship/optionsReducer.ts": {
           "bytesInOutput": 766
         },
@@ -22025,11 +22161,16 @@
         "src/providers/ClientFunction/index.tsx": { "bytesInOutput": 627 },
         "src/providers/EntityVisibility/index.tsx": { "bytesInOutput": 334 },
         "src/providers/Params/index.tsx": { "bytesInOutput": 217 },
-        "src/providers/Root/index.tsx": { "bytesInOutput": 1587 },
+        "src/providers/Root/index.tsx": { "bytesInOutput": 1333 },
+        "src/providers/ToastContainer/index.tsx": { "bytesInOutput": 528 },
+        "src/providers/ToastContainer/icons/Error.tsx": { "bytesInOutput": 467 },
+        "src/providers/ToastContainer/icons/Info.tsx": { "bytesInOutput": 440 },
+        "src/providers/ToastContainer/icons/Success.tsx": { "bytesInOutput": 451 },
+        "src/providers/ToastContainer/icons/Warning.tsx": { "bytesInOutput": 427 },
         "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 202 },
         "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 202 }
       },
-      "bytes": 385124
+      "bytes": 416109
     },
     "dist/exports/CodeEditor-Z2WKYSJA.js.map": {
       "imports": [],
@@ -22117,15 +22258,15 @@
       },
       "bytes": 2188
     },
-    "dist/exports/DatePicker-ENJAS7XK.js.map": {
+    "dist/exports/DatePicker-AEW4GN7P.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1449046
+      "bytes": 1448976
     },
-    "dist/exports/DatePicker-ENJAS7XK.js": {
+    "dist/exports/DatePicker-AEW4GN7P.js": {
       "imports": [
-        { "path": "dist/exports/chunk-75FU2OG6.js", "kind": "import-statement" },
+        { "path": "dist/exports/chunk-CYLV2KMN.js", "kind": "import-statement" },
         { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "require-call", "external": true },
         { "path": "react-dom", "kind": "require-call", "external": true },
@@ -23082,13 +23223,13 @@
       },
       "bytes": 325068
     },
-    "dist/exports/chunk-75FU2OG6.js.map": {
+    "dist/exports/chunk-CYLV2KMN.js.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 144636
+      "bytes": 144602
     },
-    "dist/exports/chunk-75FU2OG6.js": {
+    "dist/exports/chunk-CYLV2KMN.js": {
       "imports": [
         { "path": "dist/exports/chunk-S57FL4TE.js", "kind": "import-statement" },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -23178,11 +23319,11 @@
           "bytesInOutput": 1861
         },
         "../../node_modules/.pnpm/date-fns@3.3.1/node_modules/date-fns/locale/en-US.mjs": {
-          "bytesInOutput": 148
+          "bytesInOutput": 142
         },
         "src/icons/Calendar/index.tsx": { "bytesInOutput": 514 }
       },
-      "bytes": 30052
+      "bytes": 30046
     },
     "dist/exports/chunk-S57FL4TE.js.map": {
       "imports": [],
