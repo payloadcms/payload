@@ -52,11 +52,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const [globalConfig] = useState(() => config.globals.find((global) => global.slug === globalSlug))
 
   const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
-  const initialValue = {
-    label: initialComparisonDoc.label,
-    value: initialComparisonDoc.id,
-  }
-  console.log(initialComparisonDoc)
+
   const [compareValue, setCompareValue] = useState<CompareOption>()
 
   const {
