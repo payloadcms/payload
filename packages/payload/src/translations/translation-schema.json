@@ -1314,6 +1314,12 @@
         "currentDocumentStatus": {
           "type": "string"
         },
+        "currentDraft": {
+          "type": "string"
+        },
+        "currentPublishedVersion": {
+          "type": "string"
+        },
         "draft": {
           "type": "string"
         },
@@ -1330,6 +1336,9 @@
           "type": "string"
         },
         "preview": {
+          "type": "string"
+        },
+        "previouslyPublished": {
           "type": "string"
         },
         "problemRestoringVersion": {

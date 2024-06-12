@@ -1,6 +1,6 @@
 name: Bug Report
 description: Create a bug report for Payload
-labels: ['status: needs-triage']
+labels: ['status: needs-triage', 'v2']
 body:
   - type: markdown
     attributes:
