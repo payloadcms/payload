@@ -36,6 +36,7 @@ async function main() {
     'ui',
     'next',
     'db-mongodb',
+    'db-postgres',
     'richtext-lexical',
     'translations',
     'plugin-cloud',
