@@ -76,6 +76,10 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
 
   const canSaveDraft = modified
 
+  const validateDrafts =
+    (collection?.versions.drafts && collection.versions?.drafts?.validate) ||
+    (global?.versions.drafts && global.versions?.drafts?.validate)
+
   const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
@@ -96,9 +100,9 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
       overrides: {
         _status: 'draft',
       },
-      skipValidation: true,
+      skipValidation: !validateDrafts,
     })
-  }, [submit, collection, global, serverURL, api, locale, id])
+  }, [submit, collection, global, serverURL, api, locale, id, validateDrafts])
 
   return (
     <RenderCustomComponent

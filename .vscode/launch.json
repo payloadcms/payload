@@ -55,6 +55,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run dev field-error-states",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Field Error States",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run dev uploads",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Uploads",

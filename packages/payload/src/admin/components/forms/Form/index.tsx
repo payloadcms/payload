@@ -149,9 +149,9 @@ const Form: React.FC<Props> = (props) => {
 
       if (!stateMatches) {
         dispatchFields({
+          type: 'UPDATE',
           path,
           rows: newRows,
-          type: 'UPDATE',
         })
       }
     })
@@ -204,7 +204,7 @@ const Form: React.FC<Props> = (props) => {
     await Promise.all(validationPromises)
 
     if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ state: validatedFieldState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
     return isValid
@@ -299,8 +299,8 @@ const Form: React.FC<Props> = (props) => {
               destination.state = {
                 status: [
                   {
-                    message: json.message,
                     type: 'success',
+                    message: json.message,
                   },
                 ],
               }
@@ -481,11 +481,11 @@ const Form: React.FC<Props> = (props) => {
         })
 
         dispatchFields({
+          type: 'ADD_ROW',
           blockType: data?.blockType,
           path,
           rowIndex,
           subFieldState,
-          type: 'ADD_ROW',
         })
       }
     },
@@ -494,7 +494,7 @@ const Form: React.FC<Props> = (props) => {
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(
     ({ path, rowIndex }) => {
-      dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' })
+      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
     },
     [dispatchFields],
   )
@@ -520,11 +520,11 @@ const Form: React.FC<Props> = (props) => {
           user,
         })
         dispatchFields({
+          type: 'REPLACE_ROW',
           blockType: data?.blockType,
           path,
           rowIndex,
           subFieldState,
-          type: 'REPLACE_ROW',
         })
       }
     },
@@ -589,7 +589,7 @@ const Form: React.FC<Props> = (props) => {
       })
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [id, user, operation, locale, t, dispatchFields, getDocPreferences, config],
   )
@@ -598,7 +598,7 @@ const Form: React.FC<Props> = (props) => {
     (state: Fields) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [dispatchFields],
   )
@@ -630,7 +630,7 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ state: initialState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: initialState })
     }
   }, [initialState, dispatchFields])
 
@@ -639,7 +639,7 @@ const Form: React.FC<Props> = (props) => {
       contextRef.current = { ...initContextState } as FormContextType
       const builtState = buildInitialState(initialData)
       setFormattedInitialData(builtState)
-      dispatchFields({ state: builtState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: builtState })
     }
   }, [initialData, dispatchFields])
 

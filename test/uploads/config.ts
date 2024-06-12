@@ -147,26 +147,14 @@ export default buildConfigWithDefaults({
     },
     {
       slug: cropOnlySlug,
-      fields: [],
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+      ],
       upload: {
         focalPoint: false,
-        imageSizes: [
-          {
-            name: 'focalTest',
-            height: 300,
-            width: 400,
-          },
-          {
-            name: 'focalTest2',
-            height: 300,
-            width: 600,
-          },
-          {
-            name: 'focalTest3',
-            height: 300,
-            width: 900,
-          },
-        ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: './crop-only',
         staticURL: '/crop-only',
