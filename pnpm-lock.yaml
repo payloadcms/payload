@@ -356,6 +356,9 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
     devDependencies:
+      '@hyrious/esbuild-plugin-commonjs':
+        specifier: ^0.2.4
+        version: 0.2.4(esbuild@0.21.5)
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
@@ -365,6 +368,9 @@ importers:
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
+      esbuild:
+        specifier: ^0.21.4
+        version: 0.21.5
       payload:
         specifier: workspace:*
         version: link:../payload
