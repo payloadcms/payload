@@ -2,8 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import type { FilterQuery } from 'mongoose'
 import type { Payload } from 'payload'
-import type { Operator, Where } from 'payload/types'
-import type { Field } from 'payload/types'
+import type { Field, Operator , Where } from 'payload/types'
 
 import deepmerge from 'deepmerge'
 import { validOperators } from 'payload/types'

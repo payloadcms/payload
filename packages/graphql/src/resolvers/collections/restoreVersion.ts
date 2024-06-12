@@ -1,5 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection , PayloadRequestWithData } from 'payload/types'
 
 import { restoreVersionOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'

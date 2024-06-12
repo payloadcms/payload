@@ -1,5 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection, Field, RichTextField } from 'payload/types'
+import type { Collection, Field, PayloadRequestWithData, RichTextField } from 'payload/types'
 
 import { createDataloaderCacheKey } from 'payload/utilities'
 

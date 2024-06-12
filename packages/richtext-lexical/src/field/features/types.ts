@@ -1,9 +1,7 @@
 import type { Transformer } from '@lexical/markdown'
 import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
-import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
-import type { SerializedLexicalNode } from 'lexical'
-import type { LexicalNodeReplacement } from 'lexical'
+import type { Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement , SerializedEditorState , SerializedLexicalNode } from 'lexical'
 import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type {
