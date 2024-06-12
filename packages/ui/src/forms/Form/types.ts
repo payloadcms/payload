@@ -1,4 +1,4 @@
-import type { User } from 'payload/auth'
+import type { User } from 'payload/bundle'
 import type { Data, Field, FormField, FormState } from 'payload/bundle'
 import type React from 'react'
 import type { Dispatch } from 'react'

@@ -1,5 +1,5 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
+import type { FieldPermissions } from 'payload/bundle'
 import type { ArrayField as ArrayFieldType } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'

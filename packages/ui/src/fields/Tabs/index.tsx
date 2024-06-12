@@ -1,5 +1,5 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
+import type { FieldPermissions } from 'payload/bundle'
 import type { DocumentPreferences } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'

@@ -1,7 +1,7 @@
 'use client'
 import type { Data, FormState, TypeWithTimestamps } from 'payload/bundle'
 import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/bundle'
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
+import type { PaginatedDocs, TypeWithVersion } from 'payload/server'
 
 import { notFound } from 'next/navigation.js'
 import qs from 'qs'

@@ -8770,13 +8770,13 @@
     },
     "src/utilities/getFormState.ts": { "bytes": 974, "imports": [], "format": "esm" },
     "src/utilities/groupNavItems.ts": {
-      "bytes": 1975,
+      "bytes": 1977,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
-    "src/utilities/hasSavePermission.ts": { "bytes": 769, "imports": [], "format": "esm" },
+    "src/utilities/hasSavePermission.ts": { "bytes": 771, "imports": [], "format": "esm" },
     "src/utilities/isEditing.ts": { "bytes": 205, "imports": [], "format": "esm" },
     "../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js": {
       "bytes": 698,
@@ -8984,7 +8984,7 @@
       "format": "esm"
     },
     "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts": {
-      "bytes": 3441,
+      "bytes": 3443,
       "imports": [
         {
           "path": "../payload/src/bundle.ts",
@@ -9000,7 +9000,7 @@
       "format": "esm"
     },
     "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts": {
-      "bytes": 678,
+      "bytes": 680,
       "imports": [
         {
           "path": "src/forms/buildStateFromSchema/calculateDefaultValues/promise.ts",
@@ -9011,7 +9011,7 @@
       "format": "esm"
     },
     "src/forms/buildStateFromSchema/calculateDefaultValues/index.ts": {
-      "bytes": 537,
+      "bytes": 539,
       "imports": [
         {
           "path": "src/forms/buildStateFromSchema/calculateDefaultValues/iterateFields.ts",
@@ -9116,7 +9116,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 613559
+      "bytes": 613569
     },
     "dist/exports/server/index.js": {
       "imports": [

@@ -1,4 +1,4 @@
-import type { User } from 'payload/auth'
+import type { User } from 'payload/bundle'
 import type { Data } from 'payload/bundle'
 
 import {

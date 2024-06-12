@@ -1,5 +1,5 @@
 'use client'
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { CollectionPermission, GlobalPermission } from 'payload/bundle'
 import type { SanitizedCollectionConfig } from 'payload/bundle'
 
 import { getTranslation } from '@payloadcms/translations'

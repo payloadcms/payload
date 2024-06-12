@@ -18,7 +18,7 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldPermissions } from 'payload/auth'
+import type { FieldPermissions } from 'payload/bundle'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'

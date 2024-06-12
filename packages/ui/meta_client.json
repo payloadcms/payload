@@ -865,7 +865,7 @@
       "format": "esm"
     },
     "src/providers/Auth/index.tsx": {
-      "bytes": 9896,
+      "bytes": 9898,
       "imports": [
         {
           "path": "../../node_modules/.pnpm/@faceless-ui+modal@3.0.0-beta.0_react-dom@19.0.0-rc-f994737d14-20240522_react@19.0.0-rc-f994737d14-20240522/node_modules/@faceless-ui/modal/dist/index.js",
@@ -7500,7 +7500,7 @@
       "format": "esm"
     },
     "src/utilities/getFormState.ts": { "bytes": 974, "imports": [], "format": "esm" },
-    "src/utilities/hasSavePermission.ts": { "bytes": 769, "imports": [], "format": "esm" },
+    "src/utilities/hasSavePermission.ts": { "bytes": 771, "imports": [], "format": "esm" },
     "src/utilities/isEditing.ts": { "bytes": 205, "imports": [], "format": "esm" },
     "../../node_modules/.pnpm/flatley@5.2.0/node_modules/flatley/index.js": {
       "bytes": 3518,
@@ -7525,7 +7525,7 @@
       "format": "esm"
     },
     "src/providers/DocumentInfo/index.tsx": {
-      "bytes": 14756,
+      "bytes": 14754,
       "imports": [
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
@@ -8020,7 +8020,7 @@
       "format": "esm"
     },
     "src/elements/DocumentControls/index.tsx": {
-      "bytes": 9015,
+      "bytes": 9017,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -8496,7 +8496,7 @@
       ],
       "format": "esm"
     },
-    "src/fields/shared/index.tsx": { "bytes": 2193, "imports": [], "format": "esm" },
+    "src/fields/shared/index.tsx": { "bytes": 2195, "imports": [], "format": "esm" },
     "src/icons/Check/index.tsx": {
       "bytes": 459,
       "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
@@ -8735,7 +8735,7 @@
       "format": "esm"
     },
     "src/fields/Array/ArrayRow.tsx": {
-      "bytes": 4170,
+      "bytes": 4172,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -8778,7 +8778,7 @@
       "format": "esm"
     },
     "src/fields/Array/index.tsx": {
-      "bytes": 10932,
+      "bytes": 10934,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -9234,7 +9234,7 @@
       "format": "esm"
     },
     "src/fields/Blocks/BlockRow.tsx": {
-      "bytes": 4458,
+      "bytes": 4460,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -9282,7 +9282,7 @@
       "format": "esm"
     },
     "src/fields/Blocks/index.tsx": {
-      "bytes": 11556,
+      "bytes": 11558,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -9700,7 +9700,7 @@
       "format": "esm"
     },
     "src/fields/Collapsible/index.tsx": {
-      "bytes": 5840,
+      "bytes": 5842,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -16243,7 +16243,7 @@
       "format": "esm"
     },
     "src/fields/Group/index.tsx": {
-      "bytes": 4278,
+      "bytes": 4280,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -17955,7 +17955,7 @@
       "format": "esm"
     },
     "src/fields/Relationship/index.tsx": {
-      "bytes": 18384,
+      "bytes": 18382,
       "imports": [
         { "path": "payload/bundle", "kind": "import-statement", "external": true },
         { "path": "qs", "kind": "import-statement", "external": true },
@@ -18180,7 +18180,7 @@
       "format": "esm"
     },
     "src/fields/Tabs/index.tsx": {
-      "bytes": 6467,
+      "bytes": 6469,
       "imports": [
         { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
         { "path": "payload/bundle", "kind": "import-statement", "external": true },
@@ -18527,9 +18527,9 @@
       "format": "esm"
     },
     "src/elements/Upload/index.tsx": {
-      "bytes": 8860,
+      "bytes": 8857,
       "imports": [
-        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "payload/bundle", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         {
           "path": "src/fields/FieldError/index.tsx",
@@ -18644,7 +18644,7 @@
       "format": "esm"
     },
     "src/providers/ListQuery/index.tsx": {
-      "bytes": 5466,
+      "bytes": 5464,
       "imports": [
         { "path": "next/navigation.js", "kind": "import-statement", "external": true },
         { "path": "payload/bundle", "kind": "import-statement", "external": true },
@@ -19938,7 +19938,7 @@
       "format": "esm"
     },
     "src/elements/HydrateClientUser/index.tsx": {
-      "bytes": 546,
+      "bytes": 548,
       "imports": [
         { "path": "react", "kind": "import-statement", "external": true },
         {
@@ -20180,7 +20180,7 @@
       "format": "esm"
     },
     "src/elements/WhereBuilder/Condition/Relationship/index.tsx": {
-      "bytes": 10402,
+      "bytes": 10400,
       "imports": [
         { "path": "qs", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -21732,7 +21732,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 2080287
+      "bytes": 2080300
     },
     "dist/exports/client/index.js": {
       "imports": [
@@ -22007,7 +22007,7 @@
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "payload/bundle", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
-        { "path": "payload/utilities", "kind": "import-statement", "external": true },
+        { "path": "payload/bundle", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
         { "path": "react", "kind": "import-statement", "external": true },
@@ -22933,7 +22933,7 @@
         "src/fields/Upload/index.tsx": { "bytesInOutput": 883 },
         "src/fields/Upload/Input.tsx": { "bytesInOutput": 1935 },
         "src/elements/FileDetails/index.tsx": { "bytesInOutput": 818 },
-        "src/elements/Upload/index.tsx": { "bytesInOutput": 3453 },
+        "src/elements/Upload/index.tsx": { "bytesInOutput": 3450 },
         "src/elements/Dropzone/index.tsx": { "bytesInOutput": 1624 },
         "src/elements/EditUpload/index.tsx": { "bytesInOutput": 5519 },
         "../../node_modules/.pnpm/react-image-crop@10.1.8_react@19.0.0-rc-f994737d14-20240522/node_modules/react-image-crop/dist/index.js": {
@@ -23055,7 +23055,7 @@
         "src/providers/ScrollInfo/index.tsx": { "bytesInOutput": 158 },
         "src/providers/WindowInfo/index.tsx": { "bytesInOutput": 158 }
       },
-      "bytes": 446933
+      "bytes": 446930
     },
     "dist/exports/client/CodeEditor-LQX4VBTA.js.map": {
       "imports": [],

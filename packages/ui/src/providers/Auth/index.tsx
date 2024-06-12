@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, Permissions } from 'payload/auth'
+import type { ClientUser, Permissions } from 'payload/bundle'
 import type { MeOperationResult } from 'payload/server'
 
 import { useModal } from '@faceless-ui/modal'
