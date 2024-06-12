@@ -16,6 +16,8 @@ export const sanitizeServerFeatures = (
     generatedTypes: {
       modifyOutputSchemas: [],
     },
+    getSubFields: new Map(),
+    getSubFieldsData: new Map(),
     graphQLPopulationPromises: new Map(),
     hooks: {
       afterChange: new Map(),
@@ -26,7 +28,6 @@ export const sanitizeServerFeatures = (
     i18n: {},
     markdownTransformers: [],
     nodes: [],
-    subFields: new Map(),
 
     validations: new Map(),
   }
@@ -76,8 +77,11 @@ export const sanitizeServerFeatures = (
         if (node?.hooks?.beforeValidate) {
           sanitized.hooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)
         }
-        if (node?.subFields) {
-          sanitized.subFields.set(nodeType, node.subFields)
+        if (node?.getSubFields) {
+          sanitized.getSubFields.set(nodeType, node.getSubFields)
+        }
+        if (node?.getSubFieldsData) {
+          sanitized.getSubFieldsData.set(nodeType, node.getSubFieldsData)
         }
       })
     }

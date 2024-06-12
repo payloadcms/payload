@@ -181,7 +181,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           }) => {
             if (
               !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
-              !finalSanitizedEditorConfig.features.subFields.size
+              !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
             }
@@ -233,34 +233,33 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
-              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
 
               if (subFieldFn) {
-                let subFields = subFieldFn({ node, originalNode: originalNodeIDMap[id], req })
-                if (subFields) {
-                  if (!Array.isArray(subFields)) {
-                    subFields = [subFields]
-                  }
-                  if (subFields?.length) {
-                    for (const { data, fields, originalData } of subFields) {
-                      await afterChangeTraverseFields({
-                        collection,
-                        context,
-                        data: originalData,
-                        doc: data,
-                        fields,
-                        global,
-                        operation,
-                        path,
-                        previousDoc: data,
-                        previousSiblingDoc: { ...data },
-                        req,
-                        schemaPath,
-                        siblingData: originalData || {},
-                        siblingDoc: { ...data },
-                      })
-                    }
-                  }
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+
+                if (subFields?.length) {
+                  await afterChangeTraverseFields({
+                    collection,
+                    context,
+                    data: originalData,
+                    doc: data,
+                    fields: subFields,
+                    global,
+                    operation,
+                    path,
+                    previousDoc: data,
+                    previousSiblingDoc: { ...data },
+                    req,
+                    schemaPath,
+                    siblingData: originalData || {},
+                    siblingDoc: { ...data },
+                  })
                 }
               }
             }
@@ -295,7 +294,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           }) => {
             if (
               !finalSanitizedEditorConfig.features.hooks.afterRead.size &&
-              !finalSanitizedEditorConfig.features.subFields.size
+              !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
             }
@@ -332,43 +331,40 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
-              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
 
               if (subFieldFn) {
-                let subFields = subFieldFn({ node, req })
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
 
-                if (subFields) {
-                  if (!Array.isArray(subFields)) {
-                    subFields = [subFields]
-                  }
-                  if (subFields?.length) {
-                    for (const { data, fields } of subFields) {
-                      afterReadTraverseFields({
-                        collection,
-                        context,
-                        currentDepth,
-                        depth,
-                        doc: data,
-                        draft,
-                        fallbackLocale,
-                        fieldPromises,
-                        fields,
-                        findMany,
-                        flattenLocales,
-                        global,
-                        locale,
-                        overrideAccess,
-                        path,
-                        populationPromises,
-                        req,
-                        schemaPath,
-                        showHiddenFields,
-                        siblingDoc: data,
-                        triggerAccessControl,
-                        triggerHooks,
-                      })
-                    }
-                  }
+                if (subFields?.length) {
+                  afterReadTraverseFields({
+                    collection,
+                    context,
+                    currentDepth,
+                    depth,
+                    doc: data,
+                    draft,
+                    fallbackLocale,
+                    fieldPromises,
+                    fields: subFields,
+                    findMany,
+                    flattenLocales,
+                    global,
+                    locale,
+                    overrideAccess,
+                    path,
+                    populationPromises,
+                    req,
+                    schemaPath,
+                    showHiddenFields,
+                    siblingDoc: data,
+                    triggerAccessControl,
+                    triggerHooks,
+                  })
                 }
               }
             }
@@ -396,7 +392,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           }) => {
             if (
               !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
-              !finalSanitizedEditorConfig.features.subFields.size
+              !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
             }
@@ -468,50 +464,42 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 }
               }
 
-              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
 
               if (subFieldFn) {
-                let subFields = subFieldFn({
-                  node,
-                  originalNode: originalNodeIDMap[id],
-                  originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const originalDataWithLocales = subFieldDataFn({
+                  node: originalNodeWithLocalesIDMap[id],
                   req,
                 })
 
-                if (subFields) {
-                  if (!Array.isArray(subFields)) {
-                    subFields = [subFields]
-                  }
-                  if (subFields?.length) {
-                    for (const {
-                      data,
-                      fields,
-                      originalData,
-                      originalDataWithLocales,
-                    } of subFields) {
-                      await beforeChangeTraverseFields({
-                        id,
-                        collection,
-                        context,
-                        data,
-                        doc: originalData,
-                        docWithLocales: originalDataWithLocales ?? {},
-                        duplicate,
-                        errors,
-                        fields,
-                        global,
-                        mergeLocaleActions,
-                        operation,
-                        path,
-                        req,
-                        schemaPath,
-                        siblingData: data,
-                        siblingDoc: originalData,
-                        siblingDocWithLocales: originalDataWithLocales ?? {},
-                        skipValidation,
-                      })
-                    }
-                  }
+                if (subFields?.length) {
+                  await beforeChangeTraverseFields({
+                    id,
+                    collection,
+                    context,
+                    data,
+                    doc: originalData,
+                    docWithLocales: originalDataWithLocales ?? {},
+                    duplicate,
+                    errors,
+                    fields: subFields,
+                    global,
+                    mergeLocaleActions,
+                    operation,
+                    path,
+                    req,
+                    schemaPath,
+                    siblingData: data,
+                    siblingDoc: originalData,
+                    siblingDocWithLocales: originalDataWithLocales ?? {},
+                    skipValidation,
+                  })
                 }
               }
             }
@@ -569,7 +557,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
               !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
               !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
-              !finalSanitizedEditorConfig.features.subFields.size
+              !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
             }
@@ -662,35 +650,33 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   })
                 }
               }
-              const subFieldFn = finalSanitizedEditorConfig.features.subFields.get(node.type)
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
 
               if (subFieldFn) {
-                let subFields = subFieldFn({ node, originalNode: originalNodeIDMap[id], req })
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
 
-                if (subFields) {
-                  if (!Array.isArray(subFields)) {
-                    subFields = [subFields]
-                  }
-                  if (subFields?.length) {
-                    for (const { data, fields, originalData } of subFields) {
-                      await beforeValidateTraverseFields({
-                        id,
-                        collection,
-                        context,
-                        data,
-                        doc: originalData,
-                        fields,
-                        global,
-                        operation,
-                        overrideAccess,
-                        path,
-                        req,
-                        schemaPath,
-                        siblingData: data,
-                        siblingDoc: originalData,
-                      })
-                    }
-                  }
+                if (subFields?.length) {
+                  await beforeValidateTraverseFields({
+                    id,
+                    collection,
+                    context,
+                    data,
+                    doc: originalData,
+                    fields: subFields,
+                    global,
+                    operation,
+                    overrideAccess,
+                    path,
+                    req,
+                    schemaPath,
+                    siblingData: data,
+                    siblingDoc: originalData,
+                  })
                 }
               }
             }

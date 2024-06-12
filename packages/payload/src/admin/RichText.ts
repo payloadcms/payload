@@ -248,13 +248,6 @@ type RichTextAdapterBase<
   >
 }
 
-export type FieldsWithData = {
-  data: Record<string, unknown>
-  fields: Field[]
-  originalData?: Record<string, unknown>
-  originalDataWithLocales?: Record<string, unknown>
-}
-
 export type RichTextAdapter<
   Value extends object = object,
   AdapterProps = any,

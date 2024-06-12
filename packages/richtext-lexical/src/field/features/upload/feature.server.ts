@@ -1,5 +1,5 @@
 import type { Config } from 'payload/config'
-import type { Field, FieldsWithData, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
+import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload/config'
@@ -178,6 +178,24 @@ export const UploadFeature: FeatureProviderProviderServer<
                 nodeTypes: [UploadNode.getType()],
               },
             },
+            getSubFields: ({ node, req }) => {
+              const collection = req.payload.collections[node?.relationTo]
+
+              if (collection) {
+                const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
+
+                if (Array.isArray(collectionFieldSchema)) {
+                  if (!collectionFieldSchema?.length) {
+                    return null
+                  }
+                  return collectionFieldSchema
+                }
+              }
+              return null
+            },
+            getSubFieldsData: ({ node }) => {
+              return node.fields
+            },
             graphQLPopulationPromises: [uploadPopulationPromiseHOC(props)],
             hooks: {
               afterRead: [
@@ -227,27 +245,6 @@ export const UploadFeature: FeatureProviderProviderServer<
               ],
             },
             node: UploadNode,
-            subFields: ({ node, originalNode, originalNodeWithLocales, req }) => {
-              const subFields: FieldsWithData[] = []
-              const collection = req.payload.collections[node?.relationTo]
-
-              if (collection) {
-                const collectionFieldSchema = props?.collections?.[node?.relationTo]?.fields
-
-                if (Array.isArray(collectionFieldSchema)) {
-                  if (!collectionFieldSchema?.length) {
-                    return subFields
-                  }
-                  subFields.push({
-                    data: node.fields,
-                    fields: collectionFieldSchema,
-                    originalData: originalNode?.fields,
-                    originalDataWithLocales: originalNodeWithLocales?.fields,
-                  })
-                }
-              }
-              return subFields
-            },
             validations: [uploadValidation(props)],
           }),
         ],

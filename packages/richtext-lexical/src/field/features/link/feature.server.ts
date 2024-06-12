@@ -186,16 +186,14 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                 nodeTypes: [LinkNode.getType()],
               },
             },
+            getSubFields: ({ node, req }) => {
+              return sanitizedFieldsWithoutText
+            },
+            getSubFieldsData: ({ node }) => {
+              return node.fields
+            },
             graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
             node: LinkNode,
-            subFields: ({ node, originalNode, originalNodeWithLocales }) => {
-              return {
-                data: node.fields,
-                fields: sanitizedFieldsWithoutText,
-                originalData: originalNode?.fields,
-                originalDataWithLocales: originalNodeWithLocales?.fields,
-              }
-            },
             validations: [linkValidation(props, sanitizedFieldsWithoutText)],
           }),
         ],

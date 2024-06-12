@@ -8,7 +8,6 @@ import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type {
   Field,
-  FieldsWithData,
   PayloadRequestWithData,
   ReplaceAny,
   RichTextField,
@@ -342,6 +341,18 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   converters?: {
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
+  /**
+   * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
+   * automatically populate & run hooks for them
+   */
+  getSubFields?: (args: {
+    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    req: PayloadRequestWithData
+  }) => Field[] | null
+  getSubFieldsData?: (args: {
+    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    req: PayloadRequestWithData
+  }) => Record<string, unknown>
   graphQLPopulationPromises?: Array<
     PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   >
@@ -354,16 +365,6 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     >
   }
   node: Klass<T> | LexicalNodeReplacement
-  /**
-   * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
-   * automatically populate & run hooks for them
-   */
-  subFields?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    originalNode?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    originalNodeWithLocales?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    req: PayloadRequestWithData
-  }) => FieldsWithData | FieldsWithData[] | null
   validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
 }
 
@@ -543,6 +544,14 @@ export type SanitizedServerFeatures = Required<
   }
   /**  The node types mapped to their hooks */
 
+  getSubFields?: Map<
+    string,
+    (args: { node: SerializedLexicalNode; req: PayloadRequestWithData }) => Field[] | null
+  >
+  getSubFieldsData?: Map<
+    string,
+    (args: { node: SerializedLexicalNode; req: PayloadRequestWithData }) => Record<string, unknown>
+  >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
   hooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
@@ -550,15 +559,6 @@ export type SanitizedServerFeatures = Required<
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
-  subFields?: Map<
-    string,
-    (args: {
-      node: SerializedLexicalNode
-      originalNode?: SerializedLexicalNode
-      originalNodeWithLocales?: SerializedLexicalNode
-      req: PayloadRequestWithData
-    }) => FieldsWithData | FieldsWithData[] | null
-  >
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
 }

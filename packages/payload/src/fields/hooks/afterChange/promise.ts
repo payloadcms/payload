@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { FieldsWithData, RichTextAdapter } from '../../../admin/RichText.js'
+import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'

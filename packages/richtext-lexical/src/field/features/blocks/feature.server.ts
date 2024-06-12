@@ -114,20 +114,17 @@ export const BlocksFeature: FeatureProviderProviderServer<
         i18n,
         nodes: [
           createNode({
-            graphQLPopulationPromises: [blockPopulationPromiseHOC(props)],
-            node: BlockNode,
-            subFields: ({ node, originalNode, originalNodeWithLocales }) => {
+            getSubFields: ({ node, req }) => {
               const blockType = node.fields.blockType
 
               const block = props.blocks.find((block) => block.slug === blockType)
-
-              return {
-                data: node.fields,
-                fields: block.fields,
-                originalData: originalNode?.fields,
-                originalDataWithLocales: originalNodeWithLocales?.fields,
-              }
+              return block.fields
             },
+            getSubFieldsData: ({ node }) => {
+              return node.fields
+            },
+            graphQLPopulationPromises: [blockPopulationPromiseHOC(props)],
+            node: BlockNode,
             validations: [blockValidationHOC(props)],
           }),
         ],
