@@ -26,7 +26,6 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import path from 'path'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
 import { de } from 'payload/i18n/de'
