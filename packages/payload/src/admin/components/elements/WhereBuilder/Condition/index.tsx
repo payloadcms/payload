@@ -102,6 +102,7 @@ const Condition: React.FC<Props> = (props) => {
                   orIndex,
                 })
                 setInternalOperatorField(operator.value)
+                setInternalValue('') // Reset value when operator changes
               }}
               options={activeField.operators}
               value={

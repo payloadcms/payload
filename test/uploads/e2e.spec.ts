@@ -12,7 +12,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
-import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
+import { adminThumbnailSlug, audioSlug, globalWithMedia, mediaSlug, relationSlug } from './shared'
 
 const { beforeAll, describe } = test
 
@@ -21,6 +21,7 @@ let mediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailURL: AdminUrlUtil
+let globalURL: string
 
 describe('uploads', () => {
   let page: Page
@@ -36,6 +37,7 @@ describe('uploads', () => {
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailURL = new AdminUrlUtil(serverURL, adminThumbnailSlug)
+    globalURL = new AdminUrlUtil(serverURL, globalWithMedia).global(globalWithMedia)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -321,6 +323,19 @@ describe('uploads', () => {
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
       expect(redDoc.filesize).toEqual(1207)
+    })
+  })
+
+  describe('globals', () => {
+    test('should be able to crop media from a global', async () => {
+      await page.goto(globalURL)
+      await page.click('.upload__toggler.doc-drawer__toggler')
+      await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'))
+      await page.click('.file-field__edit')
+      await page.click('.btn.edit-upload__save')
+      await saveDocAndAssert(page, '.drawer__content #action-save')
+      await saveDocAndAssert(page)
+      await expect(page.locator('.thumbnail img')).toBeVisible()
     })
   })
 })

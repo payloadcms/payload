@@ -9,12 +9,12 @@ import React, {
 } from 'react'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { Field } from '../../../../fields/config/types'
 import type { Props as CellProps } from '../../views/collections/List/Cell/types'
 import type { ListPreferences } from '../../views/collections/List/types'
 import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
+import { type Field, fieldHasSubFields } from '../../../../fields/config/types'
 import { usePreferences } from '../../utilities/Preferences'
 import formatFields from '../../views/collections/List/formatFields'
 import buildColumns from './buildColumns'
@@ -35,6 +35,12 @@ export const useTableColumns = (): ITableColumns => useContext(TableColumnContex
 
 const filterTableFields = (fields: Field[]): Field[] => {
   return fields.reduce((acc, field) => {
+    if (fieldHasSubFields(field)) {
+      field = {
+        ...field,
+        fields: filterTableFields(field.fields),
+      }
+    }
     if (!field.admin?.disableListColumn) acc.push(field)
     return acc
   }, [])

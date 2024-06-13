@@ -37,19 +37,20 @@ export function UploadPlugin(): JSX.Element | null {
         INSERT_UPLOAD_COMMAND,
         (payload: InsertUploadPayload) => {
           editor.update(() => {
-            const uploadNode = $createUploadNode({
-              data: {
-                fields: payload.fields,
-                relationTo: payload.relationTo,
-                value: {
-                  id: payload.id,
-                },
-              },
-            })
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const uploadNode = $createUploadNode({
+                data: {
+                  fields: payload.fields,
+                  relationTo: payload.relationTo,
+                  value: {
+                    id: payload.id,
+                  },
+                },
+              })
+              $insertNodeToNearestRoot(uploadNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -65,8 +66,6 @@ export function UploadPlugin(): JSX.Element | null {
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(uploadNode)
             }
           })
 

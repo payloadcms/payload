@@ -331,6 +331,9 @@
         "unspecific": {
           "type": "string"
         },
+        "userEmailAlreadyRegistered": {
+          "type": "string"
+        },
         "userLocked": {
           "type": "string"
         },
@@ -373,6 +376,7 @@
         "unauthorized",
         "unknown",
         "unspecific",
+        "userEmailAlreadyRegistered",
         "unableToDeleteCount",
         "unableToUpdateCount",
         "userLocked",
@@ -1310,6 +1314,12 @@
         "currentDocumentStatus": {
           "type": "string"
         },
+        "currentDraft": {
+          "type": "string"
+        },
+        "currentPublishedVersion": {
+          "type": "string"
+        },
         "draft": {
           "type": "string"
         },
@@ -1326,6 +1336,9 @@
           "type": "string"
         },
         "preview": {
+          "type": "string"
+        },
+        "previouslyPublished": {
           "type": "string"
         },
         "problemRestoringVersion": {
