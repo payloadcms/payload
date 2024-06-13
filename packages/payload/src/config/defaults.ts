@@ -2,7 +2,7 @@ import type { Config } from './types.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
-    avatar: 'default',
+    avatar: 'gravatar',
     components: {},
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
