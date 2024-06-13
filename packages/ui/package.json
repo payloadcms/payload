@@ -63,10 +63,10 @@
       "default": "./src/providers/*/index.tsx",
       "types": "./src/providers/*/index.tsx"
     },
-    "./server": {
-      "import": "./src/exports/server/index.ts",
-      "require": "./src/exports/server/index.ts",
-      "types": "./src/exports/server/index.ts"
+    "./shared": {
+      "import": "./src/exports/shared/index.ts",
+      "require": "./src/exports/shared/index.ts",
+      "types": "./src/exports/shared/index.ts"
     },
     "./utilities/*": {
       "import": "./src/utilities/*.ts",
@@ -215,10 +215,10 @@
         "default": "./dist/providers/*/index.js",
         "types": "./dist/providers/*/index.d.ts"
       },
-      "./server": {
-        "import": "./dist/exports/server/index.js",
-        "require": "./dist/exports/server/index.js",
-        "types": "./dist/exports/server/index.d.ts"
+      "./shared": {
+        "import": "./dist/exports/shared/index.js",
+        "require": "./dist/exports/shared/index.js",
+        "types": "./dist/exports/shared/index.d.ts"
       },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",

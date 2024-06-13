@@ -7,7 +7,6 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  getFormState,
   useConfig,
   useDocumentInfo,
   useEditDepth,
@@ -15,6 +14,7 @@ import {
   useHotkey,
   useTranslation,
 } from '@payloadcms/ui/client'
+import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'

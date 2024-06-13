@@ -6,8 +6,8 @@ import type {
 } from 'payload'
 import type { Locale } from 'payload'
 
-import { reduceFieldsToValues } from '@payloadcms/ui/client'
-import { buildFormState } from '@payloadcms/ui/server'
+import { reduceFieldsToValues } from '@payloadcms/ui/shared'
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig

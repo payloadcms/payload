@@ -42,7 +42,7 @@
         "../packages/ui/src/exports/client/index.ts"
       ],
       "@payloadcms/ui/server": [
-        "../packages/ui/src/exports/server/index.ts"
+        "../packages/ui/src/exports/shared/index.ts"
       ],
       "@payloadcms/ui/scss/app.scss": ["../packages/ui/src/scss/app.scss"],
       "payload/types": ["../packages/payload/src/exports/types/index.ts"],

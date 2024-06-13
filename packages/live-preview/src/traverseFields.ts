@@ -1,4 +1,4 @@
-import type { fieldSchemaToJSON } from 'payload/client'
+import type { fieldSchemaToJSON } from 'payload/shared'
 
 import type { PopulationsByCollection, UpdatedDocument } from './types.js'
 

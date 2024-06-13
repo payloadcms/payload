@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
 import { sortableFieldTypes } from 'payload'
-import { fieldAffectsData } from 'payload/client'
+import { fieldAffectsData } from 'payload/shared'
 import queryString from 'qs'
 import React, { useEffect, useState } from 'react'
 

@@ -78,8 +78,8 @@
       "@payloadcms/ui/client": [
         "./packages/ui/src/exports/client/index.ts"
       ],
-      "@payloadcms/ui/server": [
-        "./packages/ui/src/exports/server/index.ts"
+      "@payloadcms/ui/shared": [
+        "packages/ui/src/exports/shared/index.ts"
       ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"

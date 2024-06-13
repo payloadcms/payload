@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Field, SanitizedConfig } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { tabHasName } from 'payload/client'
+import { tabHasName } from 'payload/shared'
 
 import type { FieldSchemaMap } from './types.js'
 

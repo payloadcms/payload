@@ -63,8 +63,6 @@ export {
 export { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from '../utilities/createLocalReq.js'
 
-export { deepMerge } from '../utilities/deepMerge.js'
-
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js'
 
@@ -75,11 +73,6 @@ export { isEntityHidden } from '../utilities/isEntityHidden.js'
 
 export { isPlainObject } from '../utilities/isPlainObject.js'
 
-export {
-  isReactClientComponent,
-  isReactComponentOrFunction,
-  isReactServerComponentOrFunction,
-} from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 

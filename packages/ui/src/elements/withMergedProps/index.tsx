@@ -1,5 +1,4 @@
-import { deepMerge, isReactServerComponentOrFunction } from 'payload'
-import { serverProps } from 'payload'
+import { deepMerge, isReactServerComponentOrFunction, serverProps } from 'payload/shared'
 import React from 'react'
 
 /**

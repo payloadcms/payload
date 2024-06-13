@@ -20,7 +20,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, optionIsObject } from 'payload/client'
+import { fieldAffectsData, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'

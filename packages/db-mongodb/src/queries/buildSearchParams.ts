@@ -6,7 +6,7 @@ import type { Operator } from 'payload'
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload'
-import { validOperators } from 'payload/client'
+import { validOperators } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 

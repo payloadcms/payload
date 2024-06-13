@@ -6,7 +6,7 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { isReactComponentOrFunction } from 'payload'
+import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'

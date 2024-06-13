@@ -43,7 +43,7 @@ import {
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { MissingEditorProp } from 'payload'
 import { createDataloaderCacheKey, toWords } from 'payload'
-import { tabHasName } from 'payload/client'
+import { tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 

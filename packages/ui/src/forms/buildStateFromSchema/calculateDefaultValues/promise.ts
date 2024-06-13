@@ -1,7 +1,7 @@
 import type { Data, Field, TabAsField, User } from 'payload'
 
 import { getDefaultValue } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/client'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import { iterateFields } from './iterateFields.js'
 

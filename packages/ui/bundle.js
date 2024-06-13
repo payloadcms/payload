@@ -92,21 +92,19 @@ const resultClient = await esbuild
   })
   .catch(() => process.exit(1))
 
-/*
-const resultServer = await esbuild
+const resultShared = await esbuild
   .build({
-    entryPoints: ['src/exports/server/index.ts'],
+    entryPoints: ['src/exports/shared/index.ts'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: 'dist/exports/server',
+    outdir: 'dist/exports/shared',
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: false,
     treeShaking: true,
     //packages: 'external',
     external: [
-      //path.resolve(dirname, './src/exports/client/index.ts'),
       '*.scss',
       '*.css',
       'qs',
@@ -134,10 +132,10 @@ const resultServer = await esbuild
     sourcemap: true,
   })
   .then((res, err) => {
-    console.log('server.ts bundled successfully')
+    console.log('shared.ts bundled successfully')
     return res
   })
   .catch(() => process.exit(1))
-*/
+
 fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
-//fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))
+fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))

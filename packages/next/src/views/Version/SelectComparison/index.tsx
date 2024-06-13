@@ -5,11 +5,11 @@ import type { PaginatedDocs } from 'payload'
 import {
   ReactSelect,
   fieldBaseClass,
-  formatDate,
   useConfig,
   useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui/client'
+import { formatDate } from '@payloadcms/ui/shared'
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 

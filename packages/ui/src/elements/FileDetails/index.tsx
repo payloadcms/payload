@@ -1,5 +1,5 @@
 'use client'
-import { isImage } from 'payload/client'
+import { isImage } from 'payload/shared'
 import React from 'react'
 
 import { UploadActions } from '../../elements/Upload/index.js'

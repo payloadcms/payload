@@ -4,13 +4,13 @@ import type { OptionObject } from 'payload'
 import {
   Gutter,
   SetViewActions,
-  formatDate,
   useComponentMap,
   useConfig,
   useDocumentInfo,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui/client'
+import { formatDate } from '@payloadcms/ui/shared'
 import React, { useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'

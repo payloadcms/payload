@@ -6,7 +6,7 @@ import type {
   PayloadRequestWithData,
 } from 'payload'
 
-import { fieldIsPresentationalOnly } from 'payload/client'
+import { fieldIsPresentationalOnly } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 

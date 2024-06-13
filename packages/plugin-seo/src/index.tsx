@@ -3,7 +3,7 @@ import type { Field, GroupField, TabsField, TextField } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
-import { deepMerge } from 'payload'
+import { deepMerge } from 'payload/shared'
 
 import type {
   GenerateDescription,

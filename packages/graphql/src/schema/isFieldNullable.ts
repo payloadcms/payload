@@ -1,6 +1,6 @@
 import type { FieldAffectingData } from 'payload'
 
-import { fieldAffectsData } from 'payload/client'
+import { fieldAffectsData } from 'payload/shared'
 
 const isFieldNullable = (field: FieldAffectingData, force: boolean): boolean => {
   const hasReadAccessControl = field.access && field.access.read

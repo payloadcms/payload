@@ -1,6 +1,6 @@
 import { APIError, type Field, type TabAsField } from 'payload'
 import { createArrayFromCommaDelineated } from 'payload'
-import { fieldAffectsData } from 'payload/client'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { PostgresAdapter } from '../types.js'
 

@@ -10,7 +10,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { text } from 'payload/client'
+import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 

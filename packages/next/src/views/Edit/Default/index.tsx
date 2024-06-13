@@ -7,7 +7,6 @@ import {
   type FormProps,
   OperationProvider,
   Upload,
-  getFormState,
   useAuth,
   useComponentMap,
   useConfig,
@@ -16,6 +15,7 @@ import {
   useEditDepth,
   useFormQueryParams,
 } from '@payloadcms/ui/client'
+import { getFormState } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'

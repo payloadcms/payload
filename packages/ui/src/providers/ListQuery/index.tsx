@@ -3,7 +3,7 @@ import type { Where } from 'payload'
 import type { PaginatedDocs } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
-import { isNumber } from 'payload/client'
+import { isNumber } from 'payload/shared'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 

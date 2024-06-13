@@ -12,7 +12,7 @@ import {
   useNav,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { EntityType, groupNavItems } from '@payloadcms/ui/client'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 

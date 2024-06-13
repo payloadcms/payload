@@ -3,7 +3,7 @@
 import type { FormState, PayloadRequestWithData } from 'payload'
 
 import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
-import { email } from 'payload/client'
+import { email } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { toast } from 'sonner'
 

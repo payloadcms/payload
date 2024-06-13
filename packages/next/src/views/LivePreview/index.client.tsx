@@ -10,7 +10,6 @@ import {
   Form,
   OperationProvider,
   SetViewActions,
-  getFormState,
   useAuth,
   useComponentMap,
   useConfig,
@@ -18,6 +17,7 @@ import {
   useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui/client'
+import { getFormState } from '@payloadcms/ui/shared'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'

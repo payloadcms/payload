@@ -1,5 +1,4 @@
-import type { Where } from 'payload'
-import type { AdminViewProps } from 'payload'
+import type { AdminViewProps, Where } from 'payload'
 
 import {
   HydrateClientUser,
@@ -7,11 +6,10 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui/client'
-import { RenderCustomComponent } from '@payloadcms/ui/server'
+import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { isReactComponentOrFunction, mergeListSearchAndWhere } from 'payload'
-import { createClientCollectionConfig } from 'payload'
-import { isNumber } from 'payload/client'
+import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
+import { isNumber, isReactComponentOrFunction } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'

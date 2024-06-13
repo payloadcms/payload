@@ -2,7 +2,7 @@ import type { SanitizedConfig } from 'payload'
 import type { Field } from 'payload'
 
 import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/client'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig

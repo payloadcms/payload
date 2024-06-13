@@ -3,7 +3,7 @@ import type { Field, FieldAffectingData } from 'payload'
 
 import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/client'
+import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/shared'
 
 import formatName from '../utilities/formatName.js'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'

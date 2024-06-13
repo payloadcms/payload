@@ -1,6 +1,6 @@
 import type { ServerProps } from 'payload'
 
-import { PayloadLogo, RenderCustomComponent } from '@payloadcms/ui/server'
+import { PayloadLogo, RenderCustomComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const Logo: React.FC<ServerProps> = (props) => {

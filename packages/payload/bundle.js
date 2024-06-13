@@ -16,6 +16,7 @@ const resultIndex = await esbuild
     splitting: false,
     external: [
       'lodash',
+      'joi',
       '*.scss',
       '*.css',
       '@payloadcms/translations',
@@ -38,13 +39,13 @@ const resultIndex = await esbuild
   })
   .catch(() => process.exit(1))
 
-const resultClient = await esbuild
+const resultShared = await esbuild
   .build({
-    entryPoints: ['src/exports/client.ts'],
+    entryPoints: ['src/exports/shared.ts'],
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outfile: 'dist/exports/client.js',
+    outfile: 'dist/exports/shared.js',
     splitting: false,
     external: [
       'lodash',
@@ -65,10 +66,10 @@ const resultClient = await esbuild
     sourcemap: true,
   })
   .then((res, err) => {
-    console.log('payload client bundled successfully')
+    console.log('payload shared bundled successfully')
     return res
   })
   .catch(() => process.exit(1))
 
 fs.writeFileSync('meta_index.json', JSON.stringify(resultIndex.metafile))
-fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))

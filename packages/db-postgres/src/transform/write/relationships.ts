@@ -1,6 +1,6 @@
 import type { RelationshipField, UploadField } from 'payload'
 
-import { valueIsValueWithRelation } from 'payload/client'
+import { valueIsValueWithRelation } from 'payload/shared'
 
 type Args = {
   baseRow: Record<string, unknown>

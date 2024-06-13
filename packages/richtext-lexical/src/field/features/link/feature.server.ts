@@ -1,9 +1,9 @@
 import type { Config, SanitizedConfig } from 'payload'
 import type { Field } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/server'
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload'
-import { deepCopyObject } from 'payload/client'
+import { deepCopyObject } from 'payload/shared'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'

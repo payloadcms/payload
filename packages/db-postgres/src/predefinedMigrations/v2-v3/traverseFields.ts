@@ -1,6 +1,6 @@
 import type { Field, Payload } from 'payload'
 
-import { tabHasName } from 'payload/client'
+import { tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleTransaction, PostgresAdapter } from '../../types.js'

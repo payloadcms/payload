@@ -37,7 +37,7 @@ import {
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   tabHasName,
-} from 'payload/client'
+} from 'payload/shared'
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean

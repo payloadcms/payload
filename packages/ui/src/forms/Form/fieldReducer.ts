@@ -2,7 +2,7 @@ import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import equal from 'deep-equal'
-import { deepCopyObject } from 'payload/client'
+import { deepCopyObject } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 

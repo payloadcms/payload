@@ -45,10 +45,10 @@
       "require": "./src/exports/index.ts",
       "types": "./src/exports/index.ts"
     },
-    "./client": {
-      "import": "./src/exports/client.ts",
-      "require": "./src/exports/client.ts",
-      "types": "./src/exports/client.ts"
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "require": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts"
     },
     "./node": {
       "import": "./src/exports/node.ts",
@@ -164,10 +164,10 @@
         "require": "./dist/exports/node.js",
         "types": "./dist/exports/node.d.ts"
       },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "require": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts"
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "require": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts"
       },
       "./i18n/*": {
         "import": "./dist/exports/i18n/*.js",

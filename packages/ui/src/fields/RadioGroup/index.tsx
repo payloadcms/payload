@@ -3,7 +3,7 @@
 'use client'
 import type { Option } from 'payload'
 
-import { optionIsObject } from 'payload/client'
+import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import { useForm } from '../../forms/Form/context.js'

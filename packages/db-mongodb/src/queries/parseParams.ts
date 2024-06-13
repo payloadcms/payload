@@ -7,7 +7,7 @@ import type { Field } from 'payload'
 
 import deepmerge from 'deepmerge'
 import { combineMerge } from 'payload'
-import { validOperators } from 'payload/client'
+import { validOperators } from 'payload/shared'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'

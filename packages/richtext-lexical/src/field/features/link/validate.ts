@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/server'
+import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 
 import type { NodeValidation } from '../types.js'
 import type { LinkFeatureServerProps } from './feature.server.js'

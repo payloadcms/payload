@@ -1,6 +1,6 @@
 import type { PayloadRequestWithData } from 'payload'
 
-import { buildFormState as buildFormStateFn } from '@payloadcms/ui/server'
+import { buildFormState as buildFormStateFn } from '@payloadcms/ui/utilities/buildFormState'
 import httpStatus from 'http-status'
 
 import { headersWithCors } from '../../utilities/headersWithCors.js'

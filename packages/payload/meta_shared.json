@@ -1,0 +1,267 @@
+{
+  "inputs": {
+    "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js": {
+      "bytes": 9281,
+      "imports": [],
+      "format": "cjs"
+    },
+    "src/utilities/isNumber.ts": { "bytes": 223, "imports": [], "format": "esm" },
+    "src/utilities/isValidID.ts": {
+      "bytes": 637,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js",
+          "kind": "import-statement",
+          "original": "bson-objectid"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fields/validations.ts": {
+      "bytes": 17001,
+      "imports": [
+        { "path": "ajv", "kind": "import-statement", "external": true },
+        {
+          "path": "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js",
+          "kind": "import-statement",
+          "original": "bson-objectid"
+        },
+        {
+          "path": "src/utilities/isNumber.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isNumber.js"
+        },
+        {
+          "path": "src/utilities/isValidID.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isValidID.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/auth/defaultAccess.ts": { "bytes": 159, "imports": [], "format": "esm" },
+    "src/collections/config/defaults.ts": {
+      "bytes": 1134,
+      "imports": [
+        {
+          "path": "src/auth/defaultAccess.ts",
+          "kind": "import-statement",
+          "original": "../../auth/defaultAccess.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/config/types.ts": { "bytes": 24832, "imports": [], "format": "esm" },
+    "src/fields/config/types.ts": {
+      "bytes": 25256,
+      "imports": [{ "path": "monaco-editor", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/types/constants.ts": { "bytes": 252, "imports": [], "format": "esm" },
+    "src/uploads/formatFilesize.ts": { "bytes": 364, "imports": [], "format": "esm" },
+    "src/uploads/isImage.ts": { "bytes": 196, "imports": [], "format": "esm" },
+    "src/utilities/deepCopyObject.ts": { "bytes": 715, "imports": [], "format": "esm" },
+    "src/utilities/deepMerge.ts": { "bytes": 380, "imports": [], "format": "esm" },
+    "src/utilities/fieldSchemaToJSON.ts": { "bytes": 2973, "imports": [], "format": "esm" },
+    "src/utilities/getUniqueListBy.ts": { "bytes": 136, "imports": [], "format": "esm" },
+    "src/utilities/isPlainObject.ts": { "bytes": 789, "imports": [], "format": "esm" },
+    "src/utilities/isReactComponent.ts": {
+      "bytes": 1823,
+      "imports": [
+        {
+          "path": "src/utilities/isPlainObject.ts",
+          "kind": "import-statement",
+          "original": "./isPlainObject.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/setsAreEqual.ts": { "bytes": 125, "imports": [], "format": "esm" },
+    "src/utilities/toKebabCase.ts": { "bytes": 155, "imports": [], "format": "esm" },
+    "src/utilities/wait.ts": { "bytes": 104, "imports": [], "format": "esm" },
+    "src/utilities/wordBoundariesRegex.ts": { "bytes": 676, "imports": [], "format": "esm" },
+    "src/versions/defaults.ts": { "bytes": 61, "imports": [], "format": "esm" },
+    "src/exports/shared.ts": {
+      "bytes": 1450,
+      "imports": [
+        {
+          "path": "src/fields/validations.ts",
+          "kind": "import-statement",
+          "original": "../fields/validations.js"
+        },
+        {
+          "path": "src/collections/config/defaults.ts",
+          "kind": "import-statement",
+          "original": "../collections/config/defaults.js"
+        },
+        {
+          "path": "src/config/types.ts",
+          "kind": "import-statement",
+          "original": "../config/types.js"
+        },
+        {
+          "path": "src/fields/config/types.ts",
+          "kind": "import-statement",
+          "original": "../fields/config/types.js"
+        },
+        {
+          "path": "src/types/constants.ts",
+          "kind": "import-statement",
+          "original": "../types/constants.js"
+        },
+        {
+          "path": "src/uploads/formatFilesize.ts",
+          "kind": "import-statement",
+          "original": "../uploads/formatFilesize.js"
+        },
+        {
+          "path": "src/uploads/isImage.ts",
+          "kind": "import-statement",
+          "original": "../uploads/isImage.js"
+        },
+        {
+          "path": "src/utilities/deepCopyObject.ts",
+          "kind": "import-statement",
+          "original": "../utilities/deepCopyObject.js"
+        },
+        {
+          "path": "src/utilities/deepMerge.ts",
+          "kind": "import-statement",
+          "original": "../utilities/deepMerge.js"
+        },
+        {
+          "path": "src/utilities/fieldSchemaToJSON.ts",
+          "kind": "import-statement",
+          "original": "../utilities/fieldSchemaToJSON.js"
+        },
+        {
+          "path": "src/utilities/getUniqueListBy.ts",
+          "kind": "import-statement",
+          "original": "../utilities/getUniqueListBy.js"
+        },
+        {
+          "path": "src/utilities/isNumber.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isNumber.js"
+        },
+        {
+          "path": "src/utilities/isReactComponent.ts",
+          "kind": "import-statement",
+          "original": "../utilities/isReactComponent.js"
+        },
+        {
+          "path": "src/utilities/setsAreEqual.ts",
+          "kind": "import-statement",
+          "original": "../utilities/setsAreEqual.js"
+        },
+        {
+          "path": "src/utilities/toKebabCase.ts",
+          "kind": "import-statement",
+          "original": "../utilities/toKebabCase.js"
+        },
+        {
+          "path": "src/utilities/wait.ts",
+          "kind": "import-statement",
+          "original": "../utilities/wait.js"
+        },
+        {
+          "path": "src/utilities/wordBoundariesRegex.ts",
+          "kind": "import-statement",
+          "original": "../utilities/wordBoundariesRegex.js"
+        },
+        {
+          "path": "src/versions/defaults.ts",
+          "kind": "import-statement",
+          "original": "../versions/defaults.js"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "dist/exports/shared.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 113546 },
+    "dist/exports/shared.js": {
+      "imports": [{ "path": "ajv", "kind": "import-statement", "external": true }],
+      "exports": [
+        "array",
+        "blocks",
+        "checkbox",
+        "code",
+        "collectionDefaults",
+        "date",
+        "deepCopyObject",
+        "deepMerge",
+        "email",
+        "fieldAffectsData",
+        "fieldHasMaxDepth",
+        "fieldHasSubFields",
+        "fieldIsArrayType",
+        "fieldIsBlockType",
+        "fieldIsGroupType",
+        "fieldIsLocalized",
+        "fieldIsPresentationalOnly",
+        "fieldSchemaToJSON",
+        "fieldSupportsMany",
+        "formatFilesize",
+        "getUniqueListBy",
+        "isImage",
+        "isNumber",
+        "isReactClientComponent",
+        "isReactComponentOrFunction",
+        "isReactServerComponentOrFunction",
+        "json",
+        "number",
+        "optionIsObject",
+        "optionIsValue",
+        "optionsAreObjects",
+        "password",
+        "point",
+        "radio",
+        "relationship",
+        "richText",
+        "select",
+        "serverProps",
+        "setsAreEqual",
+        "tabHasName",
+        "text",
+        "textarea",
+        "toKebabCase",
+        "upload",
+        "validOperators",
+        "valueIsValueWithRelation",
+        "versionDefaults",
+        "wait",
+        "wordBoundariesRegex"
+      ],
+      "entryPoint": "src/exports/shared.ts",
+      "inputs": {
+        "../../node_modules/.pnpm/bson-objectid@2.0.4/node_modules/bson-objectid/objectid.js": {
+          "bytesInOutput": 7546
+        },
+        "src/fields/validations.ts": { "bytesInOutput": 14095 },
+        "src/utilities/isNumber.ts": { "bytesInOutput": 186 },
+        "src/utilities/isValidID.ts": { "bytesInOutput": 550 },
+        "src/exports/shared.ts": { "bytesInOutput": 0 },
+        "src/auth/defaultAccess.ts": { "bytesInOutput": 66 },
+        "src/collections/config/defaults.ts": { "bytesInOutput": 892 },
+        "src/config/types.ts": { "bytesInOutput": 121 },
+        "src/fields/config/types.ts": { "bytesInOutput": 1327 },
+        "src/types/constants.ts": { "bytesInOutput": 234 },
+        "src/uploads/formatFilesize.ts": { "bytesInOutput": 344 },
+        "src/uploads/isImage.ts": { "bytesInOutput": 158 },
+        "src/utilities/deepCopyObject.ts": { "bytesInOutput": 542 },
+        "src/utilities/deepMerge.ts": { "bytesInOutput": 375 },
+        "src/utilities/fieldSchemaToJSON.ts": { "bytesInOutput": 2343 },
+        "src/utilities/getUniqueListBy.ts": { "bytesInOutput": 109 },
+        "src/utilities/isPlainObject.ts": { "bytesInOutput": 506 },
+        "src/utilities/isReactComponent.ts": { "bytesInOutput": 916 },
+        "src/utilities/setsAreEqual.ts": { "bytesInOutput": 87 },
+        "src/utilities/toKebabCase.ts": { "bytesInOutput": 148 },
+        "src/utilities/wait.ts": { "bytesInOutput": 99 },
+        "src/utilities/wordBoundariesRegex.ts": { "bytesInOutput": 487 },
+        "src/versions/defaults.ts": { "bytesInOutput": 51 }
+      },
+      "bytes": 34215
+    }
+  }
+}

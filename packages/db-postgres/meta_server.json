@@ -3550,7 +3550,7 @@
         },
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/to-snake-case@1.0.0/node_modules/to-snake-case/index.js",
           "kind": "import-statement",
@@ -3623,7 +3623,7 @@
       "imports": [
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true }
+        { "path": "payload/shared", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
@@ -3636,7 +3636,7 @@
           "original": "drizzle-orm"
         },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         {
           "path": "src/queries/buildAndOrConditions.ts",
           "kind": "import-statement",
@@ -3720,7 +3720,7 @@
     "src/find/traverseFields.ts": {
       "bytes": 5044,
       "imports": [
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/to-snake-case@1.0.0/node_modules/to-snake-case/index.js",
           "kind": "import-statement",
@@ -3748,7 +3748,7 @@
     "src/transform/read/traverseFields.ts": {
       "bytes": 16022,
       "imports": [
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         {
           "path": "src/transform/read/hasManyNumber.ts",
           "kind": "import-statement",
@@ -3824,7 +3824,7 @@
     "src/transform/write/numbers.ts": { "bytes": 298, "imports": [], "format": "esm" },
     "src/transform/write/relationships.ts": {
       "bytes": 929,
-      "imports": [{ "path": "payload/client", "kind": "import-statement", "external": true }],
+      "imports": [{ "path": "payload/shared", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/transform/write/selects.ts": {
@@ -3842,7 +3842,7 @@
     "src/transform/write/traverseFields.ts": {
       "bytes": 15458,
       "imports": [
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/to-snake-case@1.0.0/node_modules/to-snake-case/index.js",
           "kind": "import-statement",
@@ -4297,13 +4297,13 @@
           "original": "drizzle-orm/pg-core"
         },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true }
+        { "path": "payload/shared", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
     "src/utilities/hasLocalesTable.ts": {
       "bytes": 482,
-      "imports": [{ "path": "payload/client", "kind": "import-statement", "external": true }],
+      "imports": [{ "path": "payload/shared", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
     "src/schema/createIndex.ts": {
@@ -4322,7 +4322,7 @@
       "bytes": 2997,
       "imports": [
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true }
+        { "path": "payload/shared", "kind": "import-statement", "external": true }
       ],
       "format": "esm"
     },
@@ -4340,7 +4340,7 @@
           "original": "drizzle-orm/pg-core"
         },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         {
           "path": "../../node_modules/.pnpm/to-snake-case@1.0.0/node_modules/to-snake-case/index.js",
           "kind": "import-statement",
@@ -5076,19 +5076,19 @@
         { "path": "module", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "crypto", "kind": "import-statement", "external": true },
         { "path": "crypto", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "fs", "kind": "import-statement", "external": true },
         { "path": "module", "kind": "import-statement", "external": true },
@@ -5102,12 +5102,12 @@
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
-        { "path": "payload/client", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
         { "path": "module", "kind": "import-statement", "external": true },
         { "path": "payload", "kind": "import-statement", "external": true },
         { "path": "pg", "kind": "import-statement", "external": true },

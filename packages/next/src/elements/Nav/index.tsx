@@ -9,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'nav'
 
-import { WithServerSideProps } from '@payloadcms/ui/server'
+import { WithServerSideProps } from '@payloadcms/ui/shared'
 
 import { DefaultNavClient } from './index.client.js'
 

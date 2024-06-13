@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/client'
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
 
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
