@@ -22,7 +22,7 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
       .map((table: any) => {
         return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
       })
-      .join()
+      .join('')
 
     await db.execute({
       drizzle: db.drizzle,
