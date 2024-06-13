@@ -6,7 +6,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
-const result = await esbuild
+const resultIndex = await esbuild
   .build({
     entryPoints: ['src/exports/index.ts'],
     bundle: true,
@@ -38,4 +38,37 @@ const result = await esbuild
   })
   .catch(() => process.exit(1))
 
-fs.writeFileSync('meta.json', JSON.stringify(result.metafile))
+  const resultClient = await esbuild
+  .build({
+    entryPoints: ['src/exports/client.ts'],
+    bundle: true,
+    platform: 'browser',
+    format: 'esm',
+    outfile: 'dist/exports/client.js',
+    splitting: false,
+    external: [
+      'lodash',
+      '*.scss',
+      '*.css',
+      '@payloadcms/translations',
+      'memoizee',
+      'pino-pretty',
+      'pino',
+      'ajv',
+      'conf',
+      'image-size',
+    ],
+    minify: false,
+    metafile: true,
+    tsconfig: path.resolve(dirname, './tsconfig.json'),
+    plugins: [commonjs()],
+    sourcemap: true,
+  })
+  .then((res, err) => {
+    console.log('payload client bundled successfully')
+    return res
+  })
+  .catch(() => process.exit(1))
+
+fs.writeFileSync('meta_index.json', JSON.stringify(resultIndex.metafile))
+fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))

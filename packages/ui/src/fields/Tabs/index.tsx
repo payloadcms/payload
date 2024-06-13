@@ -3,7 +3,7 @@ import type { FieldPermissions } from 'payload'
 import type { DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { toKebabCase } from 'payload'
+import { toKebabCase } from 'payload/client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'

@@ -2,7 +2,7 @@
 // TODO: abstract the `next/navigation` dependency out from this component
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
-import { versionDefaults } from 'payload'
+import { versionDefaults } from 'payload/client'
 import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 

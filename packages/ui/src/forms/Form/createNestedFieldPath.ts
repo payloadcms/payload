@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { fieldAffectsData } from 'payload'
+import { fieldAffectsData } from 'payload/client'
 
 import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 

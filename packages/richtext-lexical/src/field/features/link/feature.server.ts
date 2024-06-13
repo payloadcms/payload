@@ -3,7 +3,7 @@ import type { Field } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/server'
 import { sanitizeFields } from 'payload'
-import { deepCopyObject } from 'payload'
+import { deepCopyObject } from 'payload/client'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'

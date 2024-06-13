@@ -45,6 +45,11 @@
       "require": "./src/exports/index.ts",
       "types": "./src/exports/index.ts"
     },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "require": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts"
+    },
     "./node": {
       "import": "./src/exports/node.ts",
       "require": "./src/exports/node.ts",
@@ -158,6 +163,11 @@
         "import": "./dist/exports/node.js",
         "require": "./dist/exports/node.js",
         "types": "./dist/exports/node.d.ts"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "require": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts"
       },
       "./i18n/*": {
         "import": "./dist/exports/i18n/*.js",

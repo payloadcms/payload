@@ -3,7 +3,7 @@
 import type { NumberField as NumberFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { isNumber } from 'payload'
+import { isNumber } from 'payload/client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'

@@ -53,8 +53,6 @@ export type {
 } from '../preferences/types.js'
 export { getLocalI18n } from '../translations/getLocalI18n.js'
 
-export { formatFilesize } from '../uploads/formatFilesize.js'
-export { isImage } from '../uploads/isImage.js'
 export { combineMerge } from '../utilities/combineMerge.js'
 export {
   configToJSONSchema,
@@ -64,7 +62,6 @@ export {
 } from '../utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from '../utilities/createLocalReq.js'
-export { deepCopyObject } from '../utilities/deepCopyObject.js'
 
 export { deepMerge } from '../utilities/deepMerge.js'
 
@@ -78,7 +75,6 @@ export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
-export { isNumber } from '../utilities/isNumber.js'
 
 export { isPlainObject } from '../utilities/isPlainObject.js'
 
@@ -93,10 +89,7 @@ export { default as isolateObjectProperty } from '../utilities/isolateObjectProp
 export { mapAsync } from '../utilities/mapAsync.js'
 
 export { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
-export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
-export { default as toKebabCase } from '../utilities/toKebabCase.js'
-export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { buildVersionCollectionFields } from '../versions/buildCollectionFields.js'
@@ -241,7 +234,6 @@ export type {
   VerifyConfig,
 } from '../auth/types.js'
 export { createClientCollectionConfig } from '../collections/config/client.js'
-export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 export { createClientConfig } from '../config/client.js'
 
 export { defaults } from '../config/defaults.js'
@@ -307,15 +299,11 @@ export { createClientGlobalConfig } from '../globals/config/client.js'
 
 export type * from '../database/queryValidation/types.js'
 
-export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types.js'
-export { default as getDefaultValue } from '../fields/getDefaultValue.js'
-export { default as sortableFieldTypes } from '../fields/sortableFieldTypes.js'
-export * from '../fields/validations.js'
 export { accessOperation } from '../auth/operations/access.js'
-
 export { forgotPasswordOperation } from '../auth/operations/forgotPassword.js'
 export { initOperation } from '../auth/operations/init.js'
 export { loginOperation } from '../auth/operations/login.js'
+
 export { logoutOperation } from '../auth/operations/logout.js'
 export { meOperation } from '../auth/operations/me.js'
 export { refreshOperation } from '../auth/operations/refresh.js'
@@ -325,10 +313,10 @@ export { unlockOperation } from '../auth/operations/unlock.js'
 export { verifyEmailOperation } from '../auth/operations/verifyEmail.js'
 export { countOperation } from '../collections/operations/count.js'
 export { createOperation } from '../collections/operations/create.js'
-
 export { deleteOperation } from '../collections/operations/delete.js'
 export { deleteByIDOperation } from '../collections/operations/deleteByID.js'
 export { docAccessOperation } from '../collections/operations/docAccess.js'
+
 export { duplicateOperation } from '../collections/operations/duplicate.js'
 export { findOperation } from '../collections/operations/find.js'
 export { findByIDOperation } from '../collections/operations/findByID.js'
@@ -338,6 +326,9 @@ export { restoreVersionOperation } from '../collections/operations/restoreVersio
 export { updateOperation } from '../collections/operations/update.js'
 export { updateByIDOperation } from '../collections/operations/updateByID.js'
 export { sanitizeConfig } from '../config/sanitize.js'
+export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types.js'
+export { default as getDefaultValue } from '../fields/getDefaultValue.js'
+export { default as sortableFieldTypes } from '../fields/sortableFieldTypes.js'
 
 export { docAccessOperation as docAccessOperationGlobal } from '../globals/operations/docAccess.js'
 export { findOneOperation } from '../globals/operations/findOne.js'

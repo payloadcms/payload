@@ -1,8 +1,8 @@
 import type { Where } from 'payload'
 
 import httpStatus from 'http-status'
-import { isNumber } from 'payload'
 import { findVersionsOperation } from 'payload'
+import { isNumber } from 'payload/client'
 
 import type { CollectionRouteHandler } from '../types.js'
 

@@ -18,7 +18,7 @@ import {
 import { type FormProps } from '@payloadcms/ui/forms/Form'
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { getFormState } from '@payloadcms/ui/server'
-import { deepCopyObject } from 'payload'
+import { deepCopyObject } from 'payload/client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'

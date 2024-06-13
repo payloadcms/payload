@@ -1,5 +1,5 @@
 'use client'
-import { formatFilesize } from 'payload'
+import { formatFilesize } from 'payload/client'
 import React, { useState } from 'react'
 
 export type FileMetaProps = {

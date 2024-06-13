@@ -15,7 +15,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui/client'
 import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
-import { deepCopyObject } from 'payload'
+import { deepCopyObject } from 'payload/client'
 import React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
