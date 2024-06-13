@@ -7,8 +7,9 @@ import {
   EditDepthProvider,
   FormQueryParamsProvider,
   HydrateClientUser,
+  isEditing as getIsEditing,
 } from '@payloadcms/ui/client'
-import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/server'
+import { RenderCustomComponent } from '@payloadcms/ui/server'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 

@@ -9,7 +9,7 @@ import type {
 import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
-} from '@payloadcms/ui/server'
+} from '@payloadcms/ui/client'
 import { docAccessOperation, docAccessOperationGlobal } from 'payload'
 
 export const getDocumentPermissions = async (args: {

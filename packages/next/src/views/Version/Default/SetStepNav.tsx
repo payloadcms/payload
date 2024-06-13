@@ -4,8 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui/client'
-import { formatDate } from '@payloadcms/ui/server'
+import { formatDate, useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui/client'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{

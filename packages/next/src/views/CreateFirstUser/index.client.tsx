@@ -9,11 +9,11 @@ import {
   FormSubmit,
   PasswordField,
   RenderFields,
+  getFormState,
   useComponentMap,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState } from '@payloadcms/ui/server'
 import React from 'react'
 
 export const CreateFirstUserClient: React.FC<{

@@ -4,8 +4,8 @@ import type { VisibleEntities } from 'payload'
 import type { ServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui/client'
-import { EntityType, WithServerSideProps } from '@payloadcms/ui/server'
+import { Button, Card, EntityType, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui/client'
+import { WithServerSideProps } from '@payloadcms/ui/server'
 import React, { Fragment } from 'react'
 
 import './index.scss'
