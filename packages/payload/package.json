@@ -77,7 +77,7 @@
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
-    "build:esbuild": "node bundle.js",
+    "build:esbuild": "echo hi",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",

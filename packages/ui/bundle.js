@@ -103,7 +103,6 @@ const resultShared = await esbuild
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: false,
     treeShaking: true,
-    //packages: 'external',
     external: [
       '*.scss',
       '*.css',
