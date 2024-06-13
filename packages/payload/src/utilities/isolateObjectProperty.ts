@@ -1,7 +1,7 @@
 /**
  * Creates a proxy for the given object that has its own property
  */
-export default function isolateObjectProperty<T>(object: T, key): T {
+export default function isolateObjectProperty<T>(object: T, key: keyof T): T {
   const delegate = {}
   const handler = {
     deleteProperty(target, p): boolean {

@@ -25,56 +25,57 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
 
   const mimeType: Field = {
     name: 'mimeType',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'MIME Type',
-    type: 'text',
   }
 
   const url: Field = {
     name: 'url',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'URL',
-    type: 'text',
   }
 
   const width: Field = {
     name: 'width',
+    type: 'number',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: labels['upload:width'],
-    type: 'number',
   }
 
   const height: Field = {
     name: 'height',
+    type: 'number',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: labels['upload:height'],
-    type: 'number',
   }
 
   const filesize: Field = {
     name: 'filesize',
+    type: 'number',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: labels['upload:fileSize'],
-    type: 'number',
   }
 
   const filename: Field = {
     name: 'filename',
+    type: 'text',
     admin: {
       disableBulkEdit: true,
       hidden: true,
@@ -82,7 +83,6 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     },
     index: true,
     label: labels['upload:fileName'],
-    type: 'text',
     unique: true,
   }
 
@@ -115,15 +115,36 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
+  // Add focal point fields if not disabled
+  if (
+    uploadOptions.focalPoint !== false ||
+    uploadOptions.imageSizes ||
+    uploadOptions.resizeOptions
+  ) {
+    uploadFields = uploadFields.concat(
+      ['focalX', 'focalY'].map((name) => {
+        return {
+          name,
+          type: 'number',
+          admin: {
+            hidden: true,
+          },
+        }
+      }),
+    )
+  }
+
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
       {
         name: 'sizes',
+        type: 'group',
         admin: {
           hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
           name: size.name,
+          type: 'group',
           admin: {
             hidden: true,
           },
@@ -157,13 +178,12 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
             },
           ],
           label: size.name,
-          type: 'group',
         })),
-        label: labels['upload:Sizes'],
-        type: 'group',
+        label: labels['upload:sizes'],
       },
     ])
   }
+
   return uploadFields
 }
 

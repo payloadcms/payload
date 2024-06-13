@@ -47,6 +47,8 @@ export interface Media {
   filesize?: number
   width?: number
   height?: number
+  focalX?: number
+  focalY?: number
   sizes?: {
     maintainedAspectRatio?: {
       url?: string

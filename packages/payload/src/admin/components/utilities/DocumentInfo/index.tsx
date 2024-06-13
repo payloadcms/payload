@@ -1,4 +1,5 @@
 import qs from 'qs'
+import QueryString from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -14,12 +15,13 @@ import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
+import { UploadEditsProvider, useUploadEdits } from '../UploadEdits'
 
 const Context = createContext({} as ContextType)
 
 export const useDocumentInfo = (): ContextType => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<Props> = ({
+const DocumentInfo: React.FC<Props> = ({
   id: idFromProps,
   children,
   collection,
@@ -37,6 +39,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
   const { code } = useLocale()
+  const { uploadEdits } = useUploadEdits()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null)
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null)
@@ -256,16 +259,31 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   )
 
   useEffect(() => {
-    getVersions()
+    void getVersions()
   }, [getVersions])
 
   useEffect(() => {
-    getDocPermissions()
+    void getDocPermissions()
   }, [getDocPermissions])
+
+  const action: string = React.useMemo(() => {
+    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale: code,
+      uploadEdits: uploadEdits || undefined,
+    }
+
+    return `${docURL}${QueryString.stringify(params, {
+      addQueryPrefix: true,
+    })}`
+  }, [baseURL, code, pluralType, id, slug, uploadEdits])
 
   const value: ContextType = {
     id,
     slug,
+    action,
     collection,
     docPermissions,
     getDocPermissions,
@@ -280,4 +298,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
+}
+
+export const DocumentInfoProvider: React.FC<Props> = (props) => {
+  return (
+    <UploadEditsProvider>
+      <DocumentInfo {...props} />
+    </UploadEditsProvider>
+  )
 }

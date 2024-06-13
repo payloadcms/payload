@@ -78,6 +78,26 @@ describe('fields', () => {
       ).toBeHidden()
     })
 
+    test('should not display admin.disableListColumn true field in list view column selector if toggling other fields', async () => {
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Click another field in column selector
+      const updatedAtButton = page.locator(`.column-selector .column-selector__column`, {
+        hasText: exactText('Updated At'),
+      })
+      await updatedAtButton.click()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
+    })
+
     test('should display field in list view filter selector if admin.disableListColumn is true and admin.disableListFilter is false', async () => {
       await page.goto(url.list)
       await page.locator('.list-controls__toggle-where').click()
@@ -2059,6 +2079,31 @@ describe('fields', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'row-fields')
+    })
+
+    test('should not display field in list view column selector if admin.disableListColumn is true', async () => {
+      await page.goto(url.create)
+      const idInput = page.locator('input#field-id')
+      await idInput.fill('000')
+      const titleInput = page.locator('input#field-title')
+      await titleInput.fill('Row 000')
+      const disableListColumnText = page.locator('input#field-disableListColumnText')
+      await disableListColumnText.fill('Disable List Column Text')
+      await page.locator('#action-save').click()
+      await wait(200)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+
+      await page.goto(url.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
     })
 
     test('should show row fields as table columns', async () => {

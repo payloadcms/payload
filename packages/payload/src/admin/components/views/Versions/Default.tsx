@@ -17,7 +17,17 @@ import './index.scss'
 const baseClass = 'versions'
 
 export const DefaultVersionsView: React.FC<Props> = (props) => {
-  const { id, collection, data, entityLabel, global, isLoadingVersions, versionsData } = props
+  const {
+    id,
+    collection,
+    data,
+    entityLabel,
+    global,
+    isLoadingVersions,
+    latestDraftVersion,
+    latestPublishedVersion,
+    versionsData,
+  } = props
 
   const { t } = useTranslation('version')
 
@@ -58,7 +68,13 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
                 })}
               </div> */}
               <Table
-                columns={buildVersionColumns(collection, global, t)}
+                columns={buildVersionColumns(
+                  collection,
+                  global,
+                  t,
+                  latestDraftVersion,
+                  latestPublishedVersion,
+                )}
                 data={versionsData?.docs}
               />
               <div className={`${baseClass}__page-controls`}>

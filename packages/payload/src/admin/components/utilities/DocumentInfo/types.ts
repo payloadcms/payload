@@ -15,6 +15,7 @@ export type Version = TypeWithVersion<any>
 export type DocumentPermissions = CollectionPermission | GlobalPermission
 
 export type ContextType = {
+  action: string
   collection?: SanitizedCollectionConfig
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>

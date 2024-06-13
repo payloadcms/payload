@@ -31,12 +31,13 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
   const editDepth = useEditDepth()
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     if (disabled) {
       return
     }
 
-    e.preventDefault()
-    e.stopPropagation()
     if (ref?.current) {
       ref.current.click()
     }
@@ -69,6 +70,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const { submit } = useForm()
   const { id, collection, global } = useDocumentInfo()
   const modified = useFormModified()
+
   const { code: locale } = useLocale()
   const { t } = useTranslation('version')
 

@@ -390,7 +390,6 @@ export type UIField = {
     condition?: Condition
     disableBulkEdit?: boolean
     disableListColumn?: boolean
-    disableListFilter?: boolean
     position?: string
     width?: string
   }
