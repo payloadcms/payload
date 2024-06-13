@@ -1,5 +1,5 @@
 import { buildStateFromSchema } from '@payloadcms/ui/server'
-import { isValidID } from 'payload/utilities'
+import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../types.js'
 import type { UploadFeatureProps } from './feature.server.js'

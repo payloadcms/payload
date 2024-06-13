@@ -1,6 +1,6 @@
-import type { Field, FileData, ImageSize } from 'payload/types'
-import type { TypeWithID } from 'payload/types'
-import type { CollectionConfig, PayloadRequestWithData } from 'payload/types'
+import type { Field, FileData, ImageSize } from 'payload'
+import type { TypeWithID } from 'payload'
+import type { CollectionConfig, PayloadRequestWithData } from 'payload'
 
 export interface File {
   buffer: Buffer

@@ -3,11 +3,11 @@ import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString } from 'graph
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
-import type { GraphQLInfo } from 'payload/config'
-import type { Field, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { GraphQLInfo } from 'payload'
+import type { Field, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
-import { toWords } from 'payload/utilities'
-import { buildVersionGlobalFields } from 'payload/versions'
+import { toWords } from 'payload'
+import { buildVersionGlobalFields } from 'payload'
 
 import { docAccessResolver } from '../resolvers/globals/docAccess.js'
 import findOneResolver from '../resolvers/globals/findOne.js'

@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import { useWatchForm } from '@payloadcms/ui/forms/Form'
 import { useConfig } from '@payloadcms/ui/providers/Config'

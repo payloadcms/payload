@@ -1,7 +1,7 @@
 import type { RequestContext } from 'payload'
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload'
 
-import { afterReadTraverseFields } from 'payload/utilities'
+import { afterReadTraverseFields } from 'payload'
 
 import type { PopulationPromise } from '../field/features/types.js'
 

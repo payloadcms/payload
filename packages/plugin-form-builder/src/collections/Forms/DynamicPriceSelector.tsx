@@ -1,7 +1,7 @@
 'use client'
 
 import type { TextFieldProps } from '@payloadcms/ui/fields/Text'
-import type { Data } from 'payload/types'
+import type { Data } from 'payload'
 
 import { Text } from '@payloadcms/ui/fields/Text'
 import { useWatchForm } from '@payloadcms/ui/forms/Form'

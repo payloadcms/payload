@@ -1,5 +1,5 @@
-import type { ClientUser } from 'payload/auth'
-import type { ClientCollectionConfig, VisibleEntities } from 'payload/types'
+import type { ClientUser } from 'payload'
+import type { ClientCollectionConfig, VisibleEntities } from 'payload'
 
 import { useAuth, useConfig, useEntityVisibility } from '@payloadcms/ui/client'
 import * as React from 'react'

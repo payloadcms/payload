@@ -1,6 +1,6 @@
-import type { User } from 'payload/auth'
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, RadioField, TextField } from 'payload/types'
+import type { User } from 'payload'
+import type { SanitizedConfig } from 'payload'
+import type { Field, RadioField, TextField } from 'payload'
 
 import { validateUrl } from '../../../lexical/utils/url.js'
 

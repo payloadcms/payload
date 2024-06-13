@@ -5,14 +5,14 @@ import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'l
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 import type { RequestContext } from 'payload'
-import type { SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload'
 import type {
   Field,
   PayloadRequestWithData,
   ReplaceAny,
   RichTextField,
   ValidateOptions,
-} from 'payload/types'
+} from 'payload'
 import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'

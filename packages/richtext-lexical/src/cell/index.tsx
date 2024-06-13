@@ -1,6 +1,6 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { CellComponentProps } from 'payload/types'
+import type { CellComponentProps } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useClientFunctions, useTableCell } from '@payloadcms/ui/client'

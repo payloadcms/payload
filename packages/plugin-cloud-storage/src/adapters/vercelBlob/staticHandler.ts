@@ -1,5 +1,5 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig, PayloadRequestWithData, UploadConfig } from 'payload/types'
+import type { CollectionConfig, PayloadRequestWithData, UploadConfig } from 'payload'
 
 import { head } from '@vercel/blob'
 import path from 'path'

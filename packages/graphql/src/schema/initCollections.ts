@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import type { GraphQLInfo } from 'payload/config'
-import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
+import type { GraphQLInfo } from 'payload'
+import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
 
 import {
   GraphQLBoolean,
@@ -9,9 +9,9 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields, formatNames, toWords } from 'payload/utilities'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { fieldAffectsData } from 'payload'
+import { flattenTopLevelFields, formatNames, toWords } from 'payload'
+import { buildVersionCollectionFields } from 'payload'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 

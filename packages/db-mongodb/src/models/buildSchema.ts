@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
-import type { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
+import type { SanitizedConfig, SanitizedLocalizationConfig } from 'payload'
 import type {
   ArrayField,
   Block,
@@ -29,15 +29,10 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from 'payload/types'
+} from 'payload'
 
 import mongoose from 'mongoose'
-import {
-  fieldAffectsData,
-  fieldIsLocalized,
-  fieldIsPresentationalOnly,
-  tabHasName,
-} from 'payload/types'
+import { fieldAffectsData, fieldIsLocalized, fieldIsPresentationalOnly, tabHasName } from 'payload'
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean

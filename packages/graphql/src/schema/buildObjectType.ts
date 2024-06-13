@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
-import type { GraphQLInfo } from 'payload/config'
+import type { GraphQLInfo } from 'payload'
 import type {
   ArrayField,
   BlockField,
@@ -27,7 +27,7 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from 'payload/types'
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -41,9 +41,9 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { MissingEditorProp } from 'payload/errors'
-import { tabHasName } from 'payload/types'
-import { createDataloaderCacheKey, toWords } from 'payload/utilities'
+import { MissingEditorProp } from 'payload'
+import { tabHasName } from 'payload'
+import { createDataloaderCacheKey, toWords } from 'payload'
 
 import type { Context } from '../resolvers/types.js'
 

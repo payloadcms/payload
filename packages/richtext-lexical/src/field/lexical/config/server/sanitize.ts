@@ -1,4 +1,4 @@
-import type { Config, SanitizedConfig } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload'
 
 import type { ResolvedServerFeatureMap, SanitizedServerFeatures } from '../../../features/types.js'
 import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types.js'

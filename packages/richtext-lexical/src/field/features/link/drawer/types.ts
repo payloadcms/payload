@@ -1,4 +1,4 @@
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import type { LinkFields } from '../nodes/types.js'
 

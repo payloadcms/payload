@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequestWithData, UploadConfig } from 'payload/types'
+import type { CollectionConfig, PayloadRequestWithData, UploadConfig } from 'payload'
 
 export async function getFilePrefix({
   collection,

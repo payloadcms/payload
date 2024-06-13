@@ -1,8 +1,8 @@
-import type { Config } from 'payload/config'
-import type { CollectionConfig, FieldHook, RelationshipField, UploadField } from 'payload/types'
+import type { Config } from 'payload'
+import type { CollectionConfig, FieldHook, RelationshipField, UploadField } from 'payload'
 
 import mongoose from 'mongoose'
-import { fieldAffectsData } from 'payload/types'
+import { fieldAffectsData } from 'payload'
 
 const convertValue = ({
   relatedCollection,

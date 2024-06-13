@@ -14,7 +14,7 @@ npm install @payloadcms/richtext-lexical
 ## Usage
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({

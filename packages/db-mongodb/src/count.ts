@@ -1,6 +1,6 @@
 import type { QueryOptions } from 'mongoose'
 import type { Count } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 
 import { flattenWhereToOperators } from 'payload/database'
 

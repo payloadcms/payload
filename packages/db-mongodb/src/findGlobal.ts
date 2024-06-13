@@ -1,5 +1,5 @@
 import type { FindGlobal } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 
 import { combineQueries } from 'payload/database'
 

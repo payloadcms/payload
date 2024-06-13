@@ -4,8 +4,8 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Config, Plugin } from 'payload'
+import type { Field } from 'payload'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'

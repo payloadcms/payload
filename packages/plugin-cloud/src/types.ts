@@ -1,5 +1,5 @@
-import type { Config } from 'payload/config'
-import type { CollectionConfig, FileData, PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type { Config } from 'payload'
+import type { CollectionConfig, FileData, PayloadRequestWithData, TypeWithID } from 'payload'
 
 export interface File {
   buffer: Buffer

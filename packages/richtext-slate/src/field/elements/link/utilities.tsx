@@ -1,5 +1,5 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
+import type { Field } from 'payload'
 import type { Editor } from 'slate'
 
 import { Element, Range, Transforms } from 'slate'

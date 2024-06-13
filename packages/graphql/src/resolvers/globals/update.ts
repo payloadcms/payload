@@ -1,9 +1,9 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedGlobalConfig } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
-import { updateOperationGlobal } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { updateOperationGlobal } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

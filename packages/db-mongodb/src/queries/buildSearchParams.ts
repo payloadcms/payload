@@ -1,13 +1,13 @@
 import type { Payload } from 'payload'
 import type { PathToQuery } from 'payload/database'
-import type { Field } from 'payload/types'
-import type { Operator } from 'payload/types'
+import type { Field } from 'payload'
+import type { Operator } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload/database'
-import { fieldAffectsData } from 'payload/types'
-import { validOperators } from 'payload/types'
+import { fieldAffectsData } from 'payload'
+import { validOperators } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 

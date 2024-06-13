@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps } from 'payload/types'
+import type { DefaultCellComponentProps } from 'payload'
 
 import { useTableCell } from '@payloadcms/ui/client'
 import React from 'react'

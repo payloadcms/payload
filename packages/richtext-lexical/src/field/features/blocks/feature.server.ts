@@ -1,9 +1,9 @@
-import type { Config } from 'payload/config'
-import type { Block, BlockField, Field } from 'payload/types'
+import type { Config } from 'payload'
+import type { Block, BlockField, Field } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/server'
-import { baseBlockFields, sanitizeFields } from 'payload/config'
-import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
+import { baseBlockFields, sanitizeFields } from 'payload'
+import { fieldsToJSONSchema, formatLabels } from 'payload'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'

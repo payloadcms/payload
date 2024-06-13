@@ -1,5 +1,5 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, RichTextFieldProps } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
+import type { Field, RichTextFieldProps } from 'payload'
 import type { Editor } from 'slate'
 
 export type TextNode = { [x: string]: unknown; text: string }

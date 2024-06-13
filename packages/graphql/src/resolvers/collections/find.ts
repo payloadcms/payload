@@ -1,9 +1,9 @@
 import type { PaginatedDocs } from 'payload/database'
-import type { PayloadRequestWithData, Where } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { PayloadRequestWithData, Where } from 'payload'
+import type { Collection } from 'payload'
 
-import { findOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { findOperation } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

@@ -1,8 +1,8 @@
-import type { Config } from 'payload/config'
-import type { RichTextAdapterProvider } from 'payload/types'
+import type { Config } from 'payload'
+import type { RichTextAdapterProvider } from 'payload'
 
-import { sanitizeFields } from 'payload/config'
-import { withNullableJSONSchemaType } from 'payload/utilities'
+import { sanitizeFields } from 'payload'
+import { withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 

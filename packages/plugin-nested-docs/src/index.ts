@@ -1,5 +1,5 @@
-import type { Plugin } from 'payload/config'
-import type { SingleRelationshipField } from 'payload/types'
+import type { Plugin } from 'payload'
+import type { SingleRelationshipField } from 'payload'
 
 import type { NestedDocsPluginConfig } from './types.js'
 

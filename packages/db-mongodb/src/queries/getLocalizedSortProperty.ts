@@ -1,8 +1,8 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
+import type { Field } from 'payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload'
+import { flattenTopLevelFields } from 'payload'
 
 type Args = {
   config: SanitizedConfig

@@ -1,8 +1,8 @@
 import type { SerializedEditorState } from 'lexical'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection, Field, RichTextField } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
+import type { Collection, Field, RichTextField } from 'payload'
 
-import { createDataloaderCacheKey } from 'payload/utilities'
+import { createDataloaderCacheKey } from 'payload'
 
 import type { AdapterProps } from '../types.js'
 

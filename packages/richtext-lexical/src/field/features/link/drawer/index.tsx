@@ -1,5 +1,5 @@
 import type { FormProps } from '@payloadcms/ui/forms/Form'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import {
   Drawer,

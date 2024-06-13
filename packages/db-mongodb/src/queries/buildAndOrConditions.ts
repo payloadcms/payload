@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { Field, Where } from 'payload/types'
+import type { Field, Where } from 'payload'
 
 import { parseParams } from './parseParams.js'
 

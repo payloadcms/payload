@@ -1,6 +1,6 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 
-import { Forbidden } from 'payload/errors'
+import { Forbidden } from 'payload'
 
 import type { StripePluginConfig } from '../types.js'
 

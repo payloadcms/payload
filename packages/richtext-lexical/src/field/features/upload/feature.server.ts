@@ -1,8 +1,8 @@
-import type { Config } from 'payload/config'
-import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
+import type { Config } from 'payload'
+import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/server'
-import { sanitizeFields } from 'payload/config'
+import { sanitizeFields } from 'payload'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'

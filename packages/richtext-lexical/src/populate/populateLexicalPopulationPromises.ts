@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextAdapter } from 'payload/types'
+import type { RichTextAdapter } from 'payload'
 
 import type { PopulationPromise } from '../field/features/types.js'
 import type { AdapterProps } from '../types.js'

@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { Config as PayloadConfig } from 'payload/config'
+import type { Config as PayloadConfig } from 'payload'
 import type Stripe from 'stripe'
 
 export type StripeWebhookHandler<T = any> = (args: {

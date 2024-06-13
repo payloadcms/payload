@@ -1,8 +1,8 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { FieldMap, ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { FormState } from 'payload/types'
-import type { Data } from 'payload/types'
-import type { CollapsedPreferences } from 'payload/types'
+import type { FormState } from 'payload'
+import type { Data } from 'payload'
+import type { CollapsedPreferences } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'

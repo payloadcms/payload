@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { useConfig, useDrawerSlug, useFieldProps, useTranslation } from '@payloadcms/ui/client'

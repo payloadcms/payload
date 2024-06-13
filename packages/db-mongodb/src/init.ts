@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
 import type { PaginateOptions } from 'mongoose'
 import type { Init } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
 import paginate from 'mongoose-paginate-v2'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel } from './types.js'

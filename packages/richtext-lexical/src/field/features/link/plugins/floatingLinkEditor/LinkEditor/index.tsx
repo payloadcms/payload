@@ -1,7 +1,7 @@
 'use client'
 import type { LexicalNode } from 'lexical'
-import type { FormState } from 'payload/types'
-import type { Data } from 'payload/types'
+import type { FormState } from 'payload'
+import type { Data } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'

@@ -1,9 +1,9 @@
-import type { Config, SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Config, SanitizedConfig } from 'payload'
+import type { Field } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/server'
-import { sanitizeFields } from 'payload/config'
-import { deepCopyObject } from 'payload/utilities'
+import { sanitizeFields } from 'payload'
+import { deepCopyObject } from 'payload'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'

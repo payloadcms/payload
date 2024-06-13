@@ -14,7 +14,7 @@ npm install @payloadcms/db-postgres
 ## Usage
 
 ```ts
-import { buildConfig } from 'payload/server'
+import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
 export default buildConfig({

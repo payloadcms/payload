@@ -1,9 +1,9 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
+import type { Collection } from 'payload'
 
-import { deleteByIDOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { deleteByIDOperation } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
