@@ -1,11 +1,11 @@
 import type { Payload } from 'payload'
-import type { PathToQuery } from 'payload/database'
+import type { PathToQuery } from 'payload'
 import type { Field } from 'payload'
 import type { Operator } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
-import { getLocalizedPaths } from 'payload/database'
+import { getLocalizedPaths } from 'payload'
 import { fieldAffectsData } from 'payload'
 import { validOperators } from 'payload'
 

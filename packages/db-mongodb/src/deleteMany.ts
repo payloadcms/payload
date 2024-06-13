@@ -1,4 +1,4 @@
-import type { DeleteMany } from 'payload/database'
+import type { DeleteMany } from 'payload'
 import type { PayloadRequestWithData } from 'payload'
 
 import type { MongooseAdapter } from './index.js'

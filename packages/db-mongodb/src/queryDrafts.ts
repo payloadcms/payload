@@ -1,8 +1,8 @@
 import type { PaginateOptions } from 'mongoose'
-import type { QueryDrafts } from 'payload/database'
+import type { QueryDrafts } from 'payload'
 import type { PayloadRequestWithData } from 'payload'
 
-import { combineQueries, flattenWhereToOperators } from 'payload/database'
+import { combineQueries, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

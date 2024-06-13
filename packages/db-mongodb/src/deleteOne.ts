@@ -1,4 +1,4 @@
-import type { DeleteOne } from 'payload/database'
+import type { DeleteOne } from 'payload'
 import type { PayloadRequestWithData } from 'payload'
 import type { Document } from 'payload'
 

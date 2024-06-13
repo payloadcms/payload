@@ -1,4 +1,4 @@
-import type { CreateGlobalVersion } from 'payload/database'
+import type { CreateGlobalVersion } from 'payload'
 import type { PayloadRequestWithData } from 'payload'
 import type { Document } from 'payload'
 

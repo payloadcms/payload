@@ -1,4 +1,4 @@
-import type { CreateVersion } from 'payload/database'
+import type { CreateVersion } from 'payload'
 import type { PayloadRequestWithData } from 'payload'
 import type { Document } from 'payload'
 

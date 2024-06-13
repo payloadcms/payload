@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { PaginateOptions } from 'mongoose'
-import type { Init } from 'payload/database'
+import type { Init } from 'payload'
 import type { SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'

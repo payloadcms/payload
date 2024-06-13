@@ -1,4 +1,4 @@
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs } from 'payload'
 import type { PayloadRequestWithData, Where } from 'payload'
 import type { Collection } from 'payload'
 

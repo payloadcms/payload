@@ -1,8 +1,8 @@
 import type { PaginateOptions } from 'mongoose'
-import type { FindGlobalVersions } from 'payload/database'
+import type { FindGlobalVersions } from 'payload'
 import type { PayloadRequestWithData } from 'payload'
 
-import { flattenWhereToOperators } from 'payload/database'
+import { flattenWhereToOperators } from 'payload'
 import { buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
