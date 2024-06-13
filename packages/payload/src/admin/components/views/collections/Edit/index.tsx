@@ -1,11 +1,9 @@
-import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory, useRouteMatch } from 'react-router-dom'
 
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
-import type { QueryParamTypes } from '../../../utilities/FormQueryParams'
 import type { DefaultEditViewProps } from './Default'
 import type { IndexProps } from './types'
 
@@ -16,7 +14,6 @@ import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import { EditDepthContext } from '../../../utilities/EditDepth'
-import { FormQueryParams } from '../../../utilities/FormQueryParams'
 import { useLocale } from '../../../utilities/Locale'
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
 import NotFound from '../../NotFound'
@@ -32,15 +29,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))
   const [collection] = useState(() => ({ ...incomingCollection, fields }))
   const [redirect, setRedirect] = useState<string>()
-  const [formQueryParams, setFormQueryParams] = useState<QueryParamTypes>({
-    depth: 0,
-    'fallback-locale': 'null',
-    locale: '',
-    uploadEdits: undefined,
-  })
-
-  const formattedQueryParams = queryString.stringify(formQueryParams)
-
   const { code: locale } = useLocale()
 
   const config = useConfig()
@@ -56,7 +44,8 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [updatedAt, setUpdatedAt] = useState<string>()
   const { permissions, user } = useAuth()
   const userRef = useRef(user)
-  const { docPermissions, getDocPermissions, getDocPreferences, getVersions } = useDocumentInfo()
+  const { action, docPermissions, getDocPermissions, getDocPreferences, getVersions } =
+    useDocumentInfo()
   const { t } = useTranslation('general')
 
   const [{ data, isError, isLoading: isLoadingData }, { refetchData }] = usePayloadAPI(
@@ -87,20 +76,16 @@ const EditView: React.FC<IndexProps> = (props) => {
   )
 
   const onSave = useCallback(
-    async (json: { doc }) => {
-      getVersions()
-      getDocPermissions()
+    (json: { doc }) => {
+      void getVersions()
+      void getDocPermissions()
       setUpdatedAt(json?.doc?.updatedAt)
       if (!isEditing) {
         setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`)
       } else {
-        buildState(json.doc, {
+        void buildState(json.doc, {
           fieldSchema: collection.fields,
         })
-        setFormQueryParams((params) => ({
-          ...params,
-          uploadEdits: undefined,
-        }))
       }
     },
     [admin, getVersions, isEditing, buildState, getDocPermissions, collection],
@@ -108,15 +93,15 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     if (fields && (isEditing ? data : true)) {
-      const awaitInternalState = async () => {
+      const awaitInternalState = () => {
         setUpdatedAt(data?.updatedAt)
-        buildState(data, {
+        void buildState(data, {
           fieldSchema: fields,
           operation: isEditing ? 'update' : 'create',
         })
       }
 
-      awaitInternalState()
+      void awaitInternalState()
     }
   }, [isEditing, data, buildState, fields])
 
@@ -125,13 +110,6 @@ const EditView: React.FC<IndexProps> = (props) => {
       history.push(redirect)
     }
   }, [history, redirect])
-
-  useEffect(() => {
-    setFormQueryParams((params) => ({
-      ...params,
-      locale,
-    }))
-  }, [locale])
 
   useEffect(() => {
     if (history.location.state?.refetchDocumentData) {
@@ -146,10 +124,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   const apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
     collection.versions.drafts ? '&draft=true' : ''
   }`
-
-  const action = `${serverURL}${api}/${collectionSlug}${
-    isEditing ? `/${id}` : ''
-  }?${formattedQueryParams}`
 
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
@@ -177,13 +151,11 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   return (
     <EditDepthContext.Provider value={1}>
-      <FormQueryParams.Provider value={{ formQueryParams, setFormQueryParams }}>
-        <RenderCustomComponent
-          CustomComponent={typeof Edit === 'function' ? Edit : undefined}
-          DefaultComponent={DefaultEdit}
-          componentProps={componentProps}
-        />
-      </FormQueryParams.Provider>
+      <RenderCustomComponent
+        CustomComponent={typeof Edit === 'function' ? Edit : undefined}
+        DefaultComponent={DefaultEdit}
+        componentProps={componentProps}
+      />
     </EditDepthContext.Provider>
   )
 }

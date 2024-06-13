@@ -31,11 +31,12 @@ export function BlocksPlugin(): JSX.Element | null {
         INSERT_BLOCK_COMMAND,
         (payload: InsertBlockPayload) => {
           editor.update(() => {
-            const blockNode = $createBlockNode(payload)
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const blockNode = $createBlockNode(payload)
+              $insertNodeToNearestRoot(blockNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -51,8 +52,6 @@ export function BlocksPlugin(): JSX.Element | null {
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(blockNode)
             }
           })
 

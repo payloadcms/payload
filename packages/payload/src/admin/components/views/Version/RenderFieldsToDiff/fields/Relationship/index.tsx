@@ -6,11 +6,9 @@ import type { SanitizedCollectionConfig } from '../../../../../../../collections
 import type { RelationshipField } from '../../../../../../../fields/config/types'
 import type { Props } from '../types'
 
-import {
-  fieldAffectsData,
-  fieldIsPresentationalOnly,
-} from '../../../../../../../fields/config/types'
+import { fieldAffectsData } from '../../../../../../../fields/config/types'
 import { getTranslation } from '../../../../../../../utilities/getTranslation'
+import { useUseTitleField } from '../../../../../../hooks/useUseAsTitle'
 import { useConfig } from '../../../../../utilities/Config'
 import { useLocale } from '../../../../../utilities/Locale'
 import Label from '../../Label'
@@ -49,9 +47,10 @@ const generateLabelFromValue = (
 
   if (relatedCollection) {
     const useAsTitle = relatedCollection?.admin?.useAsTitle
-    const useAsTitleField = relatedCollection.fields.find(
-      (f) => fieldAffectsData(f) && !fieldIsPresentationalOnly(f) && f.name === useAsTitle,
-    )
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const useAsTitleField = useUseTitleField(relatedCollection)
+
     let titleFieldIsLocalized = false
 
     if (useAsTitleField && fieldAffectsData(useAsTitleField))
