@@ -9,6 +9,7 @@ import type {
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
 import { reduceFieldsToValues } from '../exports/client/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { buildStateFromSchema } from '../exports/server/index.js'

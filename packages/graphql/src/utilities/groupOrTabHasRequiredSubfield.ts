@@ -1,6 +1,6 @@
 import type { Field, Tab } from 'payload'
 
-import { fieldAffectsData } from 'payload'
+import { fieldAffectsData } from 'payload/client'
 
 export const groupOrTabHasRequiredSubfield = (entity: Field | Tab): boolean => {
   if ('type' in entity && entity.type === 'group') {

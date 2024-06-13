@@ -9,9 +9,9 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { fieldAffectsData } from 'payload'
 import { flattenTopLevelFields, formatNames, toWords } from 'payload'
 import { buildVersionCollectionFields } from 'payload'
+import { fieldAffectsData } from 'payload/client'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 

@@ -7,6 +7,8 @@ export { isImage } from '../uploads/isImage.js'
 export { deepCopyObject } from '../utilities/deepCopyObject.js'
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
+export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
+
 export { isNumber } from '../utilities/isNumber.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
@@ -14,6 +16,8 @@ export { setsAreEqual } from '../utilities/setsAreEqual.js'
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
 export { wait } from '../utilities/wait.js'
+
+export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { versionDefaults } from '../versions/defaults.js'
 
@@ -33,3 +37,5 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from './../fields/config/types.js'
+
+export { validOperators } from './../types/constants.js'

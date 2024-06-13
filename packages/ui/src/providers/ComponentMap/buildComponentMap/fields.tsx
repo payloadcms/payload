@@ -11,7 +11,7 @@ import type {
 import type { CustomComponent } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/client'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'

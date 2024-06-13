@@ -32,7 +32,12 @@ import type {
 } from 'payload'
 
 import mongoose from 'mongoose'
-import { fieldAffectsData, fieldIsLocalized, fieldIsPresentationalOnly, tabHasName } from 'payload'
+import {
+  fieldAffectsData,
+  fieldIsLocalized,
+  fieldIsPresentationalOnly,
+  tabHasName,
+} from 'payload/client'
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean

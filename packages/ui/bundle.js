@@ -75,6 +75,8 @@ const resultClient = await esbuild
     //packages: 'external',
     minify: true, // TODO: set to true later. false ust for testing
     metafile: true,
+    treeShaking: true,
+
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
       removeCSSImports,
@@ -90,6 +92,7 @@ const resultClient = await esbuild
   })
   .catch(() => process.exit(1))
 
+/*
 const resultServer = await esbuild
   .build({
     entryPoints: ['src/exports/server/index.ts'],
@@ -99,15 +102,29 @@ const resultServer = await esbuild
     outdir: 'dist/exports/server',
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: true,
+    splitting: false,
+    treeShaking: true,
+    //packages: 'external',
     external: [
-      path.resolve(dirname, './src/exports/client/index.ts'),
+      //path.resolve(dirname, './src/exports/client/index.ts'),
       '*.scss',
       '*.css',
+      'qs',
+      '@dnd-kit/core',
+      '@payloadcms/graphql',
+      '@payloadcms/translations',
+      'deep-equal',
+      'react-toastify',
       'payload',
       'payload/*',
-      '@payloadcms/translations',
-      '@payloadcms/graphql',
+      'react',
+      'react-dom',
+      'next',
+      'react-animate-height',
+      'crypto',
+      '@floating-ui/react',
+      'date-fns',
+      'react-datepicker',
     ],
     //packages: 'external',
     minify: true, // TODO: set to true later. false ust for testing
@@ -121,6 +138,6 @@ const resultServer = await esbuild
     return res
   })
   .catch(() => process.exit(1))
-
+*/
 fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
-fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))
+//fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))

@@ -55,17 +55,20 @@
     "src/uploads/isImage.ts": { "bytes": 196, "imports": [], "format": "esm" },
     "src/utilities/deepCopyObject.ts": { "bytes": 715, "imports": [], "format": "esm" },
     "src/utilities/fieldSchemaToJSON.ts": { "bytes": 2973, "imports": [], "format": "esm" },
+    "src/utilities/getUniqueListBy.ts": { "bytes": 136, "imports": [], "format": "esm" },
     "src/utilities/setsAreEqual.ts": { "bytes": 125, "imports": [], "format": "esm" },
     "src/utilities/toKebabCase.ts": { "bytes": 155, "imports": [], "format": "esm" },
     "src/utilities/wait.ts": { "bytes": 104, "imports": [], "format": "esm" },
+    "src/utilities/wordBoundariesRegex.ts": { "bytes": 676, "imports": [], "format": "esm" },
     "src/versions/defaults.ts": { "bytes": 61, "imports": [], "format": "esm" },
     "src/fields/config/types.ts": {
       "bytes": 25256,
       "imports": [{ "path": "monaco-editor", "kind": "import-statement", "external": true }],
       "format": "esm"
     },
+    "src/types/constants.ts": { "bytes": 252, "imports": [], "format": "esm" },
     "src/exports/client.ts": {
-      "bytes": 994,
+      "bytes": 1205,
       "imports": [
         {
           "path": "src/fields/validations.ts",
@@ -98,6 +101,11 @@
           "original": "../utilities/fieldSchemaToJSON.js"
         },
         {
+          "path": "src/utilities/getUniqueListBy.ts",
+          "kind": "import-statement",
+          "original": "../utilities/getUniqueListBy.js"
+        },
+        {
           "path": "src/utilities/isNumber.ts",
           "kind": "import-statement",
           "original": "../utilities/isNumber.js"
@@ -118,6 +126,11 @@
           "original": "../utilities/wait.js"
         },
         {
+          "path": "src/utilities/wordBoundariesRegex.ts",
+          "kind": "import-statement",
+          "original": "../utilities/wordBoundariesRegex.js"
+        },
+        {
           "path": "src/versions/defaults.ts",
           "kind": "import-statement",
           "original": "../versions/defaults.js"
@@ -126,13 +139,18 @@
           "path": "src/fields/config/types.ts",
           "kind": "import-statement",
           "original": "./../fields/config/types.js"
+        },
+        {
+          "path": "src/types/constants.ts",
+          "kind": "import-statement",
+          "original": "./../types/constants.js"
         }
       ],
       "format": "esm"
     }
   },
   "outputs": {
-    "dist/exports/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 81442 },
+    "dist/exports/client.js.map": { "imports": [], "exports": [], "inputs": {}, "bytes": 83327 },
     "dist/exports/client.js": {
       "imports": [{ "path": "ajv", "kind": "import-statement", "external": true }],
       "exports": [
@@ -155,6 +173,7 @@
         "fieldSchemaToJSON",
         "fieldSupportsMany",
         "formatFilesize",
+        "getUniqueListBy",
         "isImage",
         "isNumber",
         "json",
@@ -174,9 +193,11 @@
         "textarea",
         "toKebabCase",
         "upload",
+        "validOperators",
         "valueIsValueWithRelation",
         "versionDefaults",
-        "wait"
+        "wait",
+        "wordBoundariesRegex"
       ],
       "entryPoint": "src/exports/client.ts",
       "inputs": {
@@ -193,13 +214,16 @@
         "src/uploads/isImage.ts": { "bytesInOutput": 158 },
         "src/utilities/deepCopyObject.ts": { "bytesInOutput": 542 },
         "src/utilities/fieldSchemaToJSON.ts": { "bytesInOutput": 2343 },
+        "src/utilities/getUniqueListBy.ts": { "bytesInOutput": 109 },
         "src/utilities/setsAreEqual.ts": { "bytesInOutput": 87 },
         "src/utilities/toKebabCase.ts": { "bytesInOutput": 148 },
         "src/utilities/wait.ts": { "bytesInOutput": 99 },
+        "src/utilities/wordBoundariesRegex.ts": { "bytesInOutput": 487 },
         "src/versions/defaults.ts": { "bytesInOutput": 51 },
-        "src/fields/config/types.ts": { "bytesInOutput": 1327 }
+        "src/fields/config/types.ts": { "bytesInOutput": 1327 },
+        "src/types/constants.ts": { "bytesInOutput": 234 }
       },
-      "bytes": 31023
+      "bytes": 32049
     }
   }
 }

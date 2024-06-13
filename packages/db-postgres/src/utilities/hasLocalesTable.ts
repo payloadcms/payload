@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields } from 'payload'
+import { fieldAffectsData, fieldHasSubFields } from 'payload/client'
 
 export const hasLocalesTable = (fields: Field[]): boolean => {
   return fields.some((field) => {

@@ -38,7 +38,7 @@ const resultIndex = await esbuild
   })
   .catch(() => process.exit(1))
 
-  const resultClient = await esbuild
+const resultClient = await esbuild
   .build({
     entryPoints: ['src/exports/client.ts'],
     bundle: true,

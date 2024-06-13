@@ -70,7 +70,6 @@ export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js
 
 export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
-export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
 
@@ -87,8 +86,6 @@ export { default as isolateObjectProperty } from '../utilities/isolateObjectProp
 export { mapAsync } from '../utilities/mapAsync.js'
 
 export { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
-
-export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { buildVersionCollectionFields } from '../versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from '../versions/buildGlobalFields.js'
@@ -188,22 +185,7 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './../fields/config/types.js'
-export {
-  fieldAffectsData,
-  fieldHasMaxDepth,
-  fieldHasSubFields,
-  fieldIsArrayType,
-  fieldIsBlockType,
-  fieldIsGroupType,
-  fieldIsLocalized,
-  fieldIsPresentationalOnly,
-  fieldSupportsMany,
-  optionIsObject,
-  optionIsValue,
-  optionsAreObjects,
-  tabHasName,
-  valueIsValueWithRelation,
-} from './../fields/config/types.js'
+
 export type { ClientGlobalConfig } from './../globals/config/client.js'
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
@@ -214,7 +196,6 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types.js'
-export { validOperators } from './../types/constants.js'
 export * from '../config/types.js'
 
 export type { FieldTypes } from '../admin/forms/FieldTypes.js'

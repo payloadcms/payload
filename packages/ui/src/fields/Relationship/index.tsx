@@ -2,7 +2,7 @@
 import type { Where } from 'payload'
 import type { PaginatedDocs } from 'payload'
 
-import { wordBoundariesRegex } from 'payload'
+import { wordBoundariesRegex } from 'payload/client'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 

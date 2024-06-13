@@ -7,6 +7,7 @@
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/ui"
   },
+  "sideEffects": false,
   "type": "module",
   "exports": {
     "./assets": {

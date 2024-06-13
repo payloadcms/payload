@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { tabHasName } from 'payload'
+import { tabHasName } from 'payload/client'
 
 type Args = {
   doc: Record<string, unknown>

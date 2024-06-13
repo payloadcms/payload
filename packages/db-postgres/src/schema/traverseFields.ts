@@ -19,8 +19,8 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { fieldAffectsData, optionIsObject } from 'payload'
 import { InvalidConfiguration } from 'payload'
+import { fieldAffectsData, optionIsObject } from 'payload/client'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'

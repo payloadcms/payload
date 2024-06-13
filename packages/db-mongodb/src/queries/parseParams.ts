@@ -6,8 +6,8 @@ import type { Operator, Where } from 'payload'
 import type { Field } from 'payload'
 
 import deepmerge from 'deepmerge'
-import { validOperators } from 'payload'
 import { combineMerge } from 'payload'
+import { validOperators } from 'payload/client'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'

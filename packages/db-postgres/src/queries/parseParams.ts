@@ -3,8 +3,8 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 
 import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
-import { validOperators } from 'payload'
 import { QueryError } from 'payload'
+import { validOperators } from 'payload/client'
 
 import type { GenericColumn, PostgresAdapter } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'

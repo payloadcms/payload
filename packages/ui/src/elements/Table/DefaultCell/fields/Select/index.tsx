@@ -2,7 +2,7 @@
 import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { optionsAreObjects } from 'payload'
+import { optionsAreObjects } from 'payload/client'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'

@@ -42,8 +42,8 @@ import {
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { MissingEditorProp } from 'payload'
-import { tabHasName } from 'payload'
 import { createDataloaderCacheKey, toWords } from 'payload'
+import { tabHasName } from 'payload/client'
 
 import type { Context } from '../resolvers/types.js'
 
