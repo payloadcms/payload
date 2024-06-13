@@ -1,4 +1,4 @@
-import type { AdminViewComponent, SanitizedConfig } from 'payload/bundle'
+import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 

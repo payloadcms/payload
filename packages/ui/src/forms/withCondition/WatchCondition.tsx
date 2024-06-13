@@ -1,5 +1,5 @@
 'use client'
-import type { FieldTypes } from 'payload/server'
+import type { FieldTypes } from 'payload'
 
 import React from 'react'
 import { Fragment } from 'react'

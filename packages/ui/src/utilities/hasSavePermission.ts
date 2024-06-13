@@ -1,4 +1,4 @@
-import type { CollectionPermission, DocumentPermissions, GlobalPermission } from 'payload/bundle'
+import type { CollectionPermission, DocumentPermissions, GlobalPermission } from 'payload'
 
 export const hasSavePermission = (args: {
   /*

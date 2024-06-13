@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
 
 import { meta } from '../../utilities/meta.js'
 

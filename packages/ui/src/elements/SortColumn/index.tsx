@@ -10,7 +10,7 @@ export type SortColumnProps = {
   name: string
 }
 
-import type { FieldBase } from 'payload/bundle'
+import type { FieldBase } from 'payload'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'

@@ -1,8 +1,8 @@
 'use client'
-import type { Where } from 'payload/bundle'
-import type { PaginatedDocs } from 'payload/server'
+import type { Where } from 'payload'
+import type { PaginatedDocs } from 'payload'
 
-import { wordBoundariesRegex } from 'payload/bundle'
+import { wordBoundariesRegex } from 'payload'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 

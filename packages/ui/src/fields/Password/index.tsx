@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Description, Validate } from 'payload/bundle'
+import type { ClientValidate, Description, Validate } from 'payload'
 
 import React, { useCallback } from 'react'
 

@@ -1,6 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
-import type { SanitizedConfig } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
 
 import { extractHeaderLanguage } from '@payloadcms/translations'
 

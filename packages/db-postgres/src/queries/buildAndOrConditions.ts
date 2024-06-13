@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, Where } from 'payload/bundle'
+import type { Field, Where } from 'payload'
 
 import type { GenericColumn, PostgresAdapter } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'

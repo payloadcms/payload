@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountMetadata } from '../Account/index.js'

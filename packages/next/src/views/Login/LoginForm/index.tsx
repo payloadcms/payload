@@ -6,7 +6,7 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequestWithData } from 'payload/bundle'
+import type { FormState, PayloadRequestWithData } from 'payload'
 
 import {
   EmailField,
@@ -16,7 +16,7 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { email, password } from 'payload/bundle'
+import { email, password } from 'payload'
 
 import './index.scss'
 

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientConfig } from 'payload/bundle'
+import type { ClientConfig } from 'payload'
 
 import React, { createContext, useContext } from 'react'
 

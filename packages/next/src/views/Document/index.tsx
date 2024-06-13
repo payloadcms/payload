@@ -1,6 +1,6 @@
-import type { EditViewComponent } from 'payload/bundle'
-import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/bundle'
-import type { AdminViewProps } from 'payload/bundle'
+import type { EditViewComponent } from 'payload'
+import type { AdminViewComponent, ServerSideEditViewProps } from 'payload'
+import type { AdminViewProps } from 'payload'
 
 import {
   DocumentInfoProvider,

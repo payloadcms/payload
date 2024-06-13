@@ -1,10 +1,5 @@
 'use client'
-import type {
-  Data,
-  FileSize,
-  SanitizedCollectionConfig,
-  SanitizedUploadConfig,
-} from 'payload/bundle'
+import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig } from 'payload'
 
 import React, { useEffect, useMemo, useState } from 'react'
 

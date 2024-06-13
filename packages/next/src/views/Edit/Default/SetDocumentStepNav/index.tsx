@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/bundle'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {

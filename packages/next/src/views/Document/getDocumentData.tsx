@@ -3,8 +3,8 @@ import type {
   PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-} from 'payload/bundle'
-import type { Locale } from 'payload/bundle'
+} from 'payload'
+import type { Locale } from 'payload'
 
 import { buildFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
 

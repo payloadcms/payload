@@ -1,5 +1,5 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
-import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload/bundle'
+import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload'
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'

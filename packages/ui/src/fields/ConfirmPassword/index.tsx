@@ -1,5 +1,5 @@
 'use client'
-import type { FormField } from 'payload/bundle'
+import type { FormField } from 'payload'
 
 import React, { useCallback } from 'react'
 

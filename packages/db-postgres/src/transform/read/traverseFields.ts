@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { Field, TabAsField } from 'payload/bundle'
-import type { SanitizedConfig } from 'payload/bundle'
+import type { Field, TabAsField } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
-import { fieldAffectsData } from 'payload/bundle'
+import { fieldAffectsData } from 'payload'
 
 import type { PostgresAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ErrorProps } from 'payload/bundle'
+import type { ErrorProps } from 'payload'
 
 import React from 'react'
 

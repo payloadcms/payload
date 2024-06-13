@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
 
 import type { FieldSchemaMap } from './types.js'
 

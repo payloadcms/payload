@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
-import { isNumber } from 'payload/bundle'
-import { deleteByIDOperation } from 'payload/server'
+import { isNumber } from 'payload'
+import { deleteByIDOperation } from 'payload'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 

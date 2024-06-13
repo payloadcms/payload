@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload/bundle'
+import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'

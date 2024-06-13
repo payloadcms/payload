@@ -1,4 +1,4 @@
-import type { Field, Payload, PayloadRequestWithData } from 'payload/bundle'
+import type { Field, Payload, PayloadRequestWithData } from 'payload'
 
 import { sql } from 'drizzle-orm'
 

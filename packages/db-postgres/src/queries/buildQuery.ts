@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { Field, Where } from 'payload/bundle'
+import type { Field, Where } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
 

@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/bundle'
+import type { AdminViewProps } from 'payload'
 
 import React from 'react'
 

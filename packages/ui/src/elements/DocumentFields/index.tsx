@@ -1,5 +1,5 @@
 'use client'
-import type { Description, DocumentPermissions } from 'payload/bundle'
+import type { Description, DocumentPermissions } from 'payload'
 
 import React from 'react'
 

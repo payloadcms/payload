@@ -1,6 +1,6 @@
 'use client'
 
-import type { Locale } from 'payload/bundle'
+import type { Locale } from 'payload'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 

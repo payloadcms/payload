@@ -1,6 +1,6 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/bundle'
-import type { CellComponentProps } from 'payload/bundle'
+import type { SanitizedCollectionConfig } from 'payload'
+import type { CellComponentProps } from 'payload'
 
 import React, {
   createContext,

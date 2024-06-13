@@ -17,7 +17,7 @@ import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-import type { ClientCollectionConfig } from 'payload/bundle'
+import type { ClientCollectionConfig } from 'payload'
 
 import { toast } from 'sonner'
 

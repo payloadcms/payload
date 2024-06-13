@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload/bundle'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'

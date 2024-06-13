@@ -1,13 +1,7 @@
-import type { User } from 'payload/bundle'
-import type { Data } from 'payload/bundle'
+import type { User } from 'payload'
+import type { Data } from 'payload'
 
-import {
-  type Field,
-  type TabAsField,
-  fieldAffectsData,
-  getDefaultValue,
-  tabHasName,
-} from 'payload/bundle'
+import { type Field, type TabAsField, fieldAffectsData, getDefaultValue, tabHasName } from 'payload'
 
 import { iterateFields } from './iterateFields.js'
 

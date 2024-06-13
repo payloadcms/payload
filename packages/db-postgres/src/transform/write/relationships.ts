@@ -1,6 +1,6 @@
-import type { RelationshipField, UploadField } from 'payload/bundle'
+import type { RelationshipField, UploadField } from 'payload'
 
-import { valueIsValueWithRelation } from 'payload/bundle'
+import { valueIsValueWithRelation } from 'payload'
 
 type Args = {
   baseRow: Record<string, unknown>

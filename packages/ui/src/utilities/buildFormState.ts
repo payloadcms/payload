@@ -4,7 +4,7 @@ import type {
   FormState,
   PayloadRequestWithData,
   TypeWithID,
-} from 'payload/bundle'
+} from 'payload'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'

@@ -1,6 +1,6 @@
-import type { Field } from 'payload/bundle'
+import type { Field } from 'payload'
 
-import { tabHasName } from 'payload/bundle'
+import { tabHasName } from 'payload'
 
 type Args = {
   doc: Record<string, unknown>

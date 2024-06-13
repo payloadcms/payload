@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/bundle'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 export type Props = {
   className?: string

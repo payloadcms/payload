@@ -1,4 +1,4 @@
-import type { Where } from 'payload/bundle'
+import type { Where } from 'payload'
 
 import {
   HydrateClientUser,
@@ -8,9 +8,9 @@ import {
 } from '@payloadcms/ui/client'
 import { RenderCustomComponent } from '@payloadcms/ui/server'
 import { notFound } from 'next/navigation.js'
-import { type AdminViewProps } from 'payload/bundle'
-import { isNumber, isReactComponentOrFunction, mergeListSearchAndWhere } from 'payload/bundle'
-import { createClientCollectionConfig } from 'payload/server'
+import { type AdminViewProps } from 'payload'
+import { isNumber, isReactComponentOrFunction, mergeListSearchAndWhere } from 'payload'
+import { createClientCollectionConfig } from 'payload'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'

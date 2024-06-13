@@ -1,7 +1,7 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig } from 'payload/bundle'
+import type { FormState, SanitizedCollectionConfig } from 'payload'
 
-import { isImage } from 'payload/bundle'
+import { isImage } from 'payload'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { FieldError } from '../../fields/FieldError/index.js'

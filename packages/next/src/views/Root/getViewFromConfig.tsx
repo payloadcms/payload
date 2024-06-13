@@ -1,5 +1,5 @@
-import type { SanitizedConfig } from 'payload/bundle'
-import type { AdminViewComponent } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
+import type { AdminViewComponent } from 'payload'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 

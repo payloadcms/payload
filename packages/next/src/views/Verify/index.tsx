@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/bundle'
+import type { AdminViewProps } from 'payload'
 
 import { redirect } from 'next/navigation.js'
 import React from 'react'

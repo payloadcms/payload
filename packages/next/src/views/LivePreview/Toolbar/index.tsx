@@ -1,5 +1,5 @@
 'use client'
-import type { EditViewProps } from 'payload/bundle'
+import type { EditViewProps } from 'payload'
 
 import { useDraggable } from '@dnd-kit/core'
 import { DragHandleIcon } from '@payloadcms/ui/client'

@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload/bundle'
+import type { Field, Operator, Where } from 'payload'
 
 import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
-import { validOperators } from 'payload/bundle'
-import { QueryError } from 'payload/bundle'
+import { validOperators } from 'payload'
+import { QueryError } from 'payload'
 
 import type { GenericColumn, PostgresAdapter } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'

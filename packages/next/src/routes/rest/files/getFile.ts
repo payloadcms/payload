@@ -1,10 +1,10 @@
-import type { Collection, PayloadRequestWithData } from 'payload/bundle'
+import type { Collection, PayloadRequestWithData } from 'payload'
 
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
 import path from 'path'
-import { APIError } from 'payload/bundle'
+import { APIError } from 'payload'
 
 import { streamFile } from '../../../fetchAPI-stream-file/index.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'

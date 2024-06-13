@@ -1,5 +1,5 @@
 'use client'
-import type { LanguageOptions } from 'payload/bundle'
+import type { LanguageOptions } from 'payload'
 
 import { ReactSelect, useTranslation } from '@payloadcms/ui/client'
 import React from 'react'

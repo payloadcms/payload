@@ -3,7 +3,7 @@ import type {
   PayloadRequestData,
   PayloadRequestWithData,
   SanitizedConfig,
-} from 'payload/bundle'
+} from 'payload'
 
 /**
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams

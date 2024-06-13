@@ -10,8 +10,8 @@ import type {
   SanitizedGlobalConfig,
   TypeWithID,
   TypeWithTimestamps,
-} from 'payload/bundle'
-import type { PaginatedDocs, TypeWithVersion } from 'payload/server'
+} from 'payload'
+import type { PaginatedDocs, TypeWithVersion } from 'payload'
 import type React from 'react'
 
 export type DocumentInfoProps = {

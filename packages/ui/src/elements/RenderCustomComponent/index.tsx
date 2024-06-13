@@ -1,4 +1,4 @@
-import type { ServerProps } from 'payload/bundle'
+import type { ServerProps } from 'payload'
 
 import React from 'react'
 

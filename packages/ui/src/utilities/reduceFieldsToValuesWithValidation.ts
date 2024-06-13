@@ -1,4 +1,4 @@
-import type { Data, FormState } from 'payload/bundle'
+import type { Data, FormState } from 'payload'
 
 import flatleyImport from 'flatley'
 const { unflatten: flatleyUnflatten } = flatleyImport

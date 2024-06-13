@@ -1,4 +1,4 @@
-import type { Field } from 'payload/bundle'
+import type { Field } from 'payload'
 
 export const idToUUID = (fields: Field[]): Field[] =>
   fields.map((field) => {

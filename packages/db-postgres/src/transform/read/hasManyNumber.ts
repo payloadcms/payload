@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { NumberField } from 'payload/bundle'
+import type { NumberField } from 'payload'
 
 type Args = {
   field: NumberField

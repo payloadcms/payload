@@ -4,8 +4,8 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
-} from 'payload/bundle'
-import type { FieldTypes } from 'payload/server'
+} from 'payload'
+import type { FieldTypes } from 'payload'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
 import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'

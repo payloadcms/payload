@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedCollectionConfig } from 'payload/bundle'
-import type { Init } from 'payload/server'
+import type { SanitizedCollectionConfig } from 'payload'
+import type { Init } from 'payload'
 
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/bundle'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'

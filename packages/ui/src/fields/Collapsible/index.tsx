@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences } from 'payload/bundle'
+import type { DocumentPreferences } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -18,7 +18,7 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldPermissions } from 'payload/bundle'
+import type { FieldPermissions } from 'payload'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'

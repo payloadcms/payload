@@ -1,4 +1,4 @@
-import type { Payload } from 'payload/bundle'
+import type { Payload } from 'payload'
 
 type Args = {
   collectionSlug: string

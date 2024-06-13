@@ -3,7 +3,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload/bundle'
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
 

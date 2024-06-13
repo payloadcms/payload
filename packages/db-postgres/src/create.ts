@@ -1,4 +1,4 @@
-import type { Create } from 'payload/server'
+import type { Create } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

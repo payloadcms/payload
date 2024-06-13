@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject } from 'payload/bundle'
+import type { OptionObject } from 'payload'
 
 import {
   Gutter,

@@ -7,7 +7,7 @@ import type {
   TFunction,
 } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
-import type { ClientConfig, LanguageOptions } from 'payload/bundle'
+import type { ClientConfig, LanguageOptions } from 'payload'
 
 import { t } from '@payloadcms/translations'
 import { importDateFNSLocale } from '@payloadcms/translations'

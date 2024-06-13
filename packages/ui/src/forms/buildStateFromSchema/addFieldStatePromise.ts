@@ -6,10 +6,10 @@ import type {
   FormField,
   FormState,
   PayloadRequestWithData,
-} from 'payload/bundle'
+} from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/bundle'
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload'
 
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'

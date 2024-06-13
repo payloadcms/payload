@@ -7,11 +7,11 @@ import type {
   LabelProps,
   Option,
   SanitizedConfig,
-} from 'payload/bundle'
-import type { CustomComponent } from 'payload/bundle'
+} from 'payload'
+import type { CustomComponent } from 'payload'
 
-import { MissingEditorProp } from 'payload/bundle'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/bundle'
+import { MissingEditorProp } from 'payload'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'

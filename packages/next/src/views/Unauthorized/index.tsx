@@ -1,4 +1,4 @@
-import type { AdminViewComponent } from 'payload/bundle'
+import type { AdminViewComponent } from 'payload'
 
 import { Button, Gutter } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'

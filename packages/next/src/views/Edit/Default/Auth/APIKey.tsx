@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequestWithData } from 'payload/bundle'
+import type { PayloadRequestWithData } from 'payload'
 
 import {
   CopyToClipboard,
@@ -10,7 +10,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { text } from 'payload/bundle'
+import { text } from 'payload'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 

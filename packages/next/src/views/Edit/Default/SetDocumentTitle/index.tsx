@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload/bundle'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
 import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui/client'
 import { formatDocTitle } from '@payloadcms/ui/server'

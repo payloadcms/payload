@@ -1,6 +1,6 @@
 'use client'
 
-import type { LabelProps } from 'payload/bundle'
+import type { LabelProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

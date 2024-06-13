@@ -1,7 +1,7 @@
 import type { groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
-import type { Permissions } from 'payload/bundle'
-import type { VisibleEntities } from 'payload/bundle'
-import type { ServerProps } from 'payload/bundle'
+import type { Permissions } from 'payload'
+import type { VisibleEntities } from 'payload'
+import type { ServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui/client'

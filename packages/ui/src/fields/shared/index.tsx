@@ -1,4 +1,4 @@
-import type { User } from 'payload/bundle'
+import type { User } from 'payload'
 import type {
   DocumentPreferences,
   ErrorProps,
@@ -6,8 +6,8 @@ import type {
   LabelProps,
   SanitizedLabelProps,
   Validate,
-} from 'payload/bundle'
-import type { Locale, SanitizedLocalizationConfig } from 'payload/bundle'
+} from 'payload'
+import type { Locale, SanitizedLocalizationConfig } from 'payload'
 
 export const fieldBaseClass = 'field-type'
 

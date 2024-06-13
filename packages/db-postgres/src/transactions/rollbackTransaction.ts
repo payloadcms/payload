@@ -1,4 +1,4 @@
-import type { RollbackTransaction } from 'payload/server'
+import type { RollbackTransaction } from 'payload'
 
 export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(
   id = '',

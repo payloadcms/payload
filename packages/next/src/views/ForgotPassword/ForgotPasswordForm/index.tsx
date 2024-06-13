@@ -1,9 +1,9 @@
 'use client'
 
-import type { FormState, PayloadRequestWithData } from 'payload/bundle'
+import type { FormState, PayloadRequestWithData } from 'payload'
 
 import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
-import { email } from 'payload/bundle'
+import { email } from 'payload'
 import React, { Fragment, useState } from 'react'
 import { toast } from 'sonner'
 

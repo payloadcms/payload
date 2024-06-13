@@ -1,7 +1,7 @@
 import type { BusboyConfig } from 'busboy'
 
 import path from 'path'
-import { APIError } from 'payload/bundle'
+import { APIError } from 'payload'
 
 import { isEligibleRequest } from './isEligibleRequest.js'
 import { processMultipart } from './processMultipart.js'

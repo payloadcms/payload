@@ -1,9 +1,9 @@
 import type { Payload } from 'payload'
-import type { DatabaseAdapterObj } from 'payload/server'
+import type { DatabaseAdapterObj } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload/server'
+import { createDatabaseAdapter } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
 

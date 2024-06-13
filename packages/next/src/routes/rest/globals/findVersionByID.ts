@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
-import { isNumber } from 'payload/bundle'
-import { findVersionByIDOperationGlobal } from 'payload/server'
+import { isNumber } from 'payload'
+import { findVersionByIDOperationGlobal } from 'payload'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
 

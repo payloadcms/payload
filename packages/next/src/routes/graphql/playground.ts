@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
 
 import { renderPlaygroundPage } from 'graphql-playground-html'
 

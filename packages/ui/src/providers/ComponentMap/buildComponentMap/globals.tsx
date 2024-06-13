@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload/bundle'
+import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
-import { isReactComponentOrFunction } from 'payload/bundle'
+import { isReactComponentOrFunction } from 'payload'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'

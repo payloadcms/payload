@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/bundle'
+import type { PayloadRequestWithData } from 'payload'
 
 import { PayloadIcon } from '@payloadcms/ui/server'
 import fs from 'fs/promises'

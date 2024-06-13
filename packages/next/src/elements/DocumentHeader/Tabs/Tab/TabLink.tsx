@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedConfig } from 'payload/bundle'
+import type { SanitizedConfig } from 'payload'
 
 import { useSearchParams } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'

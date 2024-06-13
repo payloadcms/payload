@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { BlockField } from 'payload/bundle'
+import type { BlockField } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

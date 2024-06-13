@@ -1,4 +1,4 @@
-import type { AdminViewProps, Field } from 'payload/bundle'
+import type { AdminViewProps, Field } from 'payload'
 
 import { buildStateFromSchema } from '@payloadcms/ui/server'
 import React from 'react'

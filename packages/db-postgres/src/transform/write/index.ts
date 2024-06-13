@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload/bundle'
+import type { Field } from 'payload'
 
 import type { PostgresAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'

@@ -1,5 +1,5 @@
-import type { PayloadRequestWithData } from 'payload/bundle'
-import type { DeleteOne } from 'payload/server'
+import type { PayloadRequestWithData } from 'payload'
+import type { DeleteOne } from 'payload'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'

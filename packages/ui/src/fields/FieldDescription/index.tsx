@@ -1,5 +1,5 @@
 'use client'
-import type { FieldDescriptionProps } from 'payload/bundle'
+import type { FieldDescriptionProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

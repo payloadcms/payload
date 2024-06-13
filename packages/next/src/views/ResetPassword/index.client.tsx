@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload/bundle'
+import type { FormState } from 'payload'
 
 import {
   ConfirmPasswordField,

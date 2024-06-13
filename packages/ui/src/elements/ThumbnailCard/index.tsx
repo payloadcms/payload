@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig, TypeWithID } from 'payload/bundle'
+import type { SanitizedCollectionConfig, TypeWithID } from 'payload'
 
 import React from 'react'
 

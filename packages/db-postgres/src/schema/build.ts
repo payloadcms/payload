@@ -7,7 +7,7 @@ import type {
   PgTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload/bundle'
+import type { Field } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {

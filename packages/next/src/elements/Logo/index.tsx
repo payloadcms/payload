@@ -1,4 +1,4 @@
-import type { ServerProps } from 'payload/bundle'
+import type { ServerProps } from 'payload'
 
 import { PayloadLogo, RenderCustomComponent } from '@payloadcms/ui/server'
 import React from 'react'

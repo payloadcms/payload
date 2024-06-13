@@ -2,7 +2,7 @@
 import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload/bundle'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 

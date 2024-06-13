@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/bundle'
+import type { PayloadRequestWithData } from 'payload'
 
 type CorsArgs = {
   headers: Headers

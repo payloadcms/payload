@@ -100,7 +100,14 @@ const resultServer = await esbuild
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
-    external: ['*.scss', '*.css', '@payloadcms/translations', '@payloadcms/graphql'],
+    external: [
+      '*.scss',
+      '*.css',
+      'payload',
+      'payload/*',
+      '@payloadcms/translations',
+      '@payloadcms/graphql',
+    ],
     //packages: 'external',
     minify: true, // TODO: set to true later. false ust for testing
     metafile: true,

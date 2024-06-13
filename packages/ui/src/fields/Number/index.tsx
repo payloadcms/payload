@@ -1,9 +1,9 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { NumberField as NumberFieldType } from 'payload/bundle'
+import type { NumberField as NumberFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { isNumber } from 'payload/bundle'
+import { isNumber } from 'payload'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'

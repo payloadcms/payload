@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { AdminViewComponent, SanitizedConfig } from 'payload/bundle'
+import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
 import { HydrateClientUser } from '@payloadcms/ui/client'
 import React, { Fragment } from 'react'

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload/bundle'
+import type { ClientValidate } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { JSONField as JSONFieldType } from 'payload/bundle'
+import type { JSONField as JSONFieldType } from 'payload'
 
 import type { FormFieldBase } from '../shared/index.js'
 

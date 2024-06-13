@@ -1,4 +1,4 @@
-import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload/bundle'
+import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload'
 
 export type WhereBuilderProps = {
   collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']

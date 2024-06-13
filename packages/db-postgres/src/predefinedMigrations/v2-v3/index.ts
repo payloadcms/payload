@@ -1,11 +1,11 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/bundle'
+import type { PayloadRequestWithData } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import { createRequire } from 'module'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/bundle'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../../types.js'

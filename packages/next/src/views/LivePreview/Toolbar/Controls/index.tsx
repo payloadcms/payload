@@ -1,6 +1,6 @@
 'use client'
 
-import type { EditViewProps } from 'payload/bundle'
+import type { EditViewProps } from 'payload'
 
 import {
   ChevronIcon,

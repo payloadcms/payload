@@ -4,9 +4,9 @@ import type {
   EditViewProps,
   SanitizedCollectionConfig,
   SanitizedConfig,
-} from 'payload/bundle'
+} from 'payload'
 
-import { isReactComponentOrFunction } from 'payload/bundle'
+import { isReactComponentOrFunction } from 'payload'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'

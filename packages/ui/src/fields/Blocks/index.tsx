@@ -24,8 +24,8 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-import type { FieldPermissions } from 'payload/bundle'
-import type { BlockField } from 'payload/bundle'
+import type { FieldPermissions } from 'payload'
+import type { BlockField } from 'payload'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'

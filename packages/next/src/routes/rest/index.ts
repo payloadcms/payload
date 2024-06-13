@@ -4,8 +4,8 @@ import type {
   PayloadRequest,
   PayloadRequestData,
   SanitizedConfig,
-} from 'payload/bundle'
-import type { Endpoint } from 'payload/bundle'
+} from 'payload'
+import type { Endpoint } from 'payload'
 
 import httpStatus from 'http-status'
 import { match } from 'path-to-regexp'

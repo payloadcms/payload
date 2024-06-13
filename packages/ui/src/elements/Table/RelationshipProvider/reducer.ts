@@ -1,4 +1,4 @@
-import type { TypeWithID } from 'payload/bundle'
+import type { TypeWithID } from 'payload'
 
 import type { Documents } from './index.js'
 

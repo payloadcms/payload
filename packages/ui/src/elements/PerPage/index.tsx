@@ -1,7 +1,7 @@
 'use client'
-import { isNumber } from 'payload/bundle'
+import { isNumber } from 'payload'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { collectionDefaults } from 'payload/bundle'
+import { collectionDefaults } from 'payload'
 import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
