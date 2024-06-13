@@ -12,5 +12,5 @@ export const openGraphSchema = joi.object({
   description: joi.string(),
   images: joi.alternatives().try(ogImageObj, joi.array().items(ogImageObj)),
   title: joi.string(),
-  url: joi.string(),
+  siteName: joi.string(),
 })
