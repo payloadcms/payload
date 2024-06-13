@@ -8,6 +8,7 @@
     "build:all": "turbo build",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
+    "build:clean": "pnpm clean:build",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
     "build:core:force": "pnpm clean:build && turbo build --filter \"!@payloadcms/plugin-*\" --no-cache --force",
     "build:create-payload-app": "turbo build --filter create-payload-app",
