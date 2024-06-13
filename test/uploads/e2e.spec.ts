@@ -126,7 +126,7 @@ describe('uploads', () => {
   test('should create animated file upload', async () => {
     await page.goto(animatedTypeMediaURL.create)
 
-    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './animated.webp'))
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
     const animatedFilename = page.locator('.file-field__filename')
 
     await expect(animatedFilename).toHaveValue('animated.webp')
@@ -135,7 +135,7 @@ describe('uploads', () => {
 
     await page.goto(animatedTypeMediaURL.create)
 
-    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './non-animated.webp'))
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './non-animated.webp'))
     const nonAnimatedFileName = page.locator('.file-field__filename')
 
     await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')

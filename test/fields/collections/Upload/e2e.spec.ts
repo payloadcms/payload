@@ -91,7 +91,7 @@ describe('Upload', () => {
     await uploadImage()
     await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
       'src',
-      '/api/uploads/file/payload-1.jpg',
+      /\/api\/uploads\/file\/payload-1\.jpg(\?.*)?$/,
     )
   })
 
