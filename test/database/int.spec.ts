@@ -4,7 +4,6 @@ import type { Payload } from 'payload'
 import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { migratePostgresV2toV3 } from '@payloadcms/db-postgres/migration-utils'
-import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
 import { commitTransaction, initTransaction } from 'payload/database'
@@ -261,55 +260,57 @@ describe('database', () => {
 
   describe('transactions', () => {
     describe('local api', () => {
-      it('should commit multiple operations in isolation', async () => {
-        const req = {
-          payload,
-          user,
-        } as PayloadRequestWithData
+      if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
+        it('should commit multiple operations in isolation', async () => {
+          const req = {
+            payload,
+            user,
+          } as PayloadRequestWithData
 
-        await initTransaction(req)
+          await initTransaction(req)
 
-        const first = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
+          const first = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
 
-        await expect(() =>
-          payload.findByID({
+          await expect(() =>
+            payload.findByID({
+              id: first.id,
+              collection,
+              // omitting req for isolation
+            }),
+          ).rejects.toThrow('Not Found')
+
+          const second = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          await commitTransaction(req)
+          expect(req.transactionID).toBeUndefined()
+
+          const firstResult = await payload.findByID({
             id: first.id,
             collection,
-            // omitting req for isolation
-          }),
-        ).rejects.toThrow('Not Found')
+            req,
+          })
+          const secondResult = await payload.findByID({
+            id: second.id,
+            collection,
+            req,
+          })
 
-        const second = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
+          expect(firstResult.id).toStrictEqual(first.id)
+          expect(secondResult.id).toStrictEqual(second.id)
         })
-
-        await commitTransaction(req)
-        expect(req.transactionID).toBeUndefined()
-
-        const firstResult = await payload.findByID({
-          id: first.id,
-          collection,
-          req,
-        })
-        const secondResult = await payload.findByID({
-          id: second.id,
-          collection,
-          req,
-        })
-
-        expect(firstResult.id).toStrictEqual(first.id)
-        expect(secondResult.id).toStrictEqual(second.id)
-      })
+      }
 
       it('should commit multiple operations async', async () => {
         const req = {

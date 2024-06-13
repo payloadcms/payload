@@ -1,6 +1,5 @@
 import type { PayloadRequestWithData } from 'payload/types'
 
-import { sql } from 'drizzle-orm'
 import {
   commitTransaction,
   initTransaction,
@@ -9,8 +8,9 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter } from './types.js'
+import type { DrizzleAdapter, Migration } from './types.js'
 
+import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { parseError } from './utilities/parseError.js'
 
 /**
@@ -48,7 +48,9 @@ export async function migrateFresh(
 
   await this.dropDatabase({ adapter: this })
 
-  const migrationFiles = await readMigrationFiles({ payload })
+  await createMigrationTable(this)
+
+  const migrationFiles = (await readMigrationFiles({ payload })) as Migration[]
   payload.logger.debug({
     msg: `Found ${migrationFiles.length} migration files.`,
   })
@@ -60,7 +62,8 @@ export async function migrateFresh(
     try {
       const start = Date.now()
       await initTransaction(req)
-      await migration.up({ payload, req })
+      const db = (payload.db as DrizzleAdapter).sessions[req.transactionID].db
+      await migration.up({ db, payload, req })
       await payload.create({
         collection: 'payload-migrations',
         data: {

@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
+import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
 import { createRequire } from 'module'
@@ -12,23 +12,9 @@ import { fileURLToPath } from 'url'
 import type { SQLiteAdapter } from './types.js'
 
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
+import { getMigrationTemplate } from './getMigrationTemplate.js'
 
 const require = createRequire(import.meta.url)
-
-const migrationTemplate = ({
-  downSQL,
-  imports,
-  upSQL,
-}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
-${imports ? `${imports}\n` : ''}
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-${upSQL}
-};
-
-export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
-${downSQL}
-};
-`
 
 export const createMigration: CreateMigration = async function createMigration(
   this: SQLiteAdapter,
@@ -41,7 +27,7 @@ export const createMigration: CreateMigration = async function createMigration(
     fs.mkdirSync(dir)
   }
   const { generateSQLiteDrizzleJson, generateSQLiteMigration } = require('drizzle-kit/payload')
-  const drizzleJsonAfter = generateSQLiteDrizzleJson(this.schema)
+  const drizzleJsonAfter = await generateSQLiteDrizzleJson(this.schema)
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
   const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '')
@@ -80,13 +66,13 @@ export const createMigration: CreateMigration = async function createMigration(
 
     const sqlStatementsUp = await generateSQLiteMigration(drizzleJsonBefore, drizzleJsonAfter)
     const sqlStatementsDown = await generateSQLiteMigration(drizzleJsonAfter, drizzleJsonBefore)
-    const sqlExecute = 'await payload.db.drizzle.execute(sql`'
+    const sqlExecute = 'await db.run(sql`'
 
     if (sqlStatementsUp?.length) {
-      upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n')}\`)`
+      upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n').replaceAll('`', '\\`')}\`)`
     }
     if (sqlStatementsDown?.length) {
-      downSQL = `${sqlExecute}\n ${sqlStatementsDown?.join('\n')}\`)`
+      downSQL = `${sqlExecute}\n ${sqlStatementsDown?.join('\n').replaceAll('`', '\\`')}\`)`
     }
 
     if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
@@ -116,7 +102,7 @@ export const createMigration: CreateMigration = async function createMigration(
   // write migration
   fs.writeFileSync(
     `${filePath}.ts`,
-    migrationTemplate({
+    getMigrationTemplate({
       downSQL: downSQL || `  // Migration code`,
       imports,
       upSQL: upSQL || `  // Migration code`,

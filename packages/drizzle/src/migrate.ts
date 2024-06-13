@@ -1,9 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { Payload } from 'payload'
-import type { Migration } from 'payload/database'
 import type { PayloadRequestWithData } from 'payload/types'
 
-import { createRequire } from 'module'
 import {
   commitTransaction,
   initTransaction,
@@ -12,13 +10,11 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter } from './types.js'
+import type { DrizzleAdapter, Migration } from './types.js'
 
 import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
-
-const require = createRequire(import.meta.url)
 
 export async function migrate(this: DrizzleAdapter): Promise<void> {
   const { payload } = this
@@ -91,11 +87,12 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
-  const drizzleJSON = adapter.generateDrizzleJSON({ schema: adapter.schema })
+  const drizzleJSON = await adapter.generateDrizzleJSON({ schema: adapter.schema })
 
   try {
     await initTransaction(req)
-    await migration.up({ payload, req })
+    const db = (payload.db as DrizzleAdapter).sessions[req.transactionID].db
+    await migration.up({ db, payload, req })
     payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     await payload.create({
       collection: 'payload-migrations',

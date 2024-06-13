@@ -5,7 +5,7 @@ import type { SQLiteAdapter } from './types.js'
 
 export const generateDrizzleJSON: SQLiteAdapter['generateDrizzleJSON'] =
   function generateDrizzleJSON({ schema }) {
-    const { generateDrizzleJson } = require('drizzle-kit/payload')
+    const { generateSQLiteDrizzleJson } = require('drizzle-kit/payload')
 
-    return generateDrizzleJson(schema)
+    return generateSQLiteDrizzleJson(schema)
   }

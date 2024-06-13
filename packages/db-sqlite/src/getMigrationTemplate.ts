@@ -4,13 +4,13 @@ export const getMigrationTemplate = ({
   downSQL,
   imports,
   upSQL,
-}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
 ${imports ? `${imports}\n` : ''}
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL}
 }
 
-export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
 ${downSQL}
 }
 `

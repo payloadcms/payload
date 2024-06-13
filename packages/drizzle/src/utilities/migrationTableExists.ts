@@ -10,7 +10,7 @@ export const migrationTableExists = async (adapter: DrizzleAdapter): Promise<boo
 
   if (adapter.name === 'sqlite') {
     statement = `
-      SELECT name exists
+      SELECT name 'exists'
       FROM sqlite_master
       WHERE type = 'table'
         AND name = 'payload_migrations';`
@@ -24,5 +24,5 @@ export const migrationTableExists = async (adapter: DrizzleAdapter): Promise<boo
 
   const [row] = result.rows
 
-  return 'exists' in row && typeof row.exists === 'boolean' && row.exists
+  return row && 'exists' in row && typeof row.exists === 'boolean' && row.exists
 }

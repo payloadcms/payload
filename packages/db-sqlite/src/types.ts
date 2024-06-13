@@ -136,8 +136,16 @@ export type SQLiteAdapter = DrizzleAdapter & {
 
 export type IDType = 'integer' | 'numeric' | 'text'
 
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
+export type MigrateUpArgs = {
+  db: TransactionSQLite
+  payload: Payload
+  req?: Partial<PayloadRequestWithData>
+}
+export type MigrateDownArgs = {
+  db: TransactionSQLite
+  payload: Payload
+  req?: Partial<PayloadRequestWithData>
+}
 
 declare module 'payload' {
   export interface DatabaseAdapter

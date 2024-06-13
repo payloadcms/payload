@@ -27,7 +27,7 @@ const dropTables = (adapter, rows) => {
 export const dropDatabase: DropDatabase = async function dropDatabase({ adapter }) {
   let result = await getTables(adapter)
 
-  // for some reason some tables are not dropped, so we repeat the process until all tables are dropped
+  // for some reason some tables are not dropped, so we repeat until all tables are dropped
   while (result.rows.length) {
     await dropTables(adapter, result.rows)
     result = await getTables(adapter)
