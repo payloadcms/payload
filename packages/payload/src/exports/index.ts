@@ -65,8 +65,6 @@ export { createLocalReq } from '../utilities/createLocalReq.js'
 
 export { deepMerge } from '../utilities/deepMerge.js'
 
-export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js'
 

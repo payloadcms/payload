@@ -5,6 +5,7 @@ export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
 
 export { deepCopyObject } from '../utilities/deepCopyObject.js'
+export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { isNumber } from '../utilities/isNumber.js'
 

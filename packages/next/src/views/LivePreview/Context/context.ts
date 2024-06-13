@@ -1,5 +1,5 @@
-import type { fieldSchemaToJSON } from 'payload'
 import type { LivePreviewConfig } from 'payload'
+import type { fieldSchemaToJSON } from 'payload/client'
 import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'

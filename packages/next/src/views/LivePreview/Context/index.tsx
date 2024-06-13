@@ -3,7 +3,7 @@ import type { ClientFieldConfig } from 'payload'
 import type { LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import { fieldSchemaToJSON } from 'payload'
+import { fieldSchemaToJSON } from 'payload/client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { usePopupWindow } from '../usePopupWindow.js'
