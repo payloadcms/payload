@@ -16,7 +16,7 @@ const resultIndex = await esbuild
     splitting: false,
     external: [
       'lodash',
-      'joi',
+      //'joi',
       '*.scss',
       '*.css',
       '@payloadcms/translations',
@@ -30,7 +30,7 @@ const resultIndex = await esbuild
     minify: false,
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
-    plugins: [commonjs()],
+    // plugins: [commonjs()],
     sourcemap: true,
   })
   .then((res, err) => {
@@ -62,7 +62,7 @@ const resultShared = await esbuild
     minify: false,
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
-    plugins: [commonjs()],
+    // plugins: [commonjs()],
     sourcemap: true,
   })
   .then((res, err) => {
