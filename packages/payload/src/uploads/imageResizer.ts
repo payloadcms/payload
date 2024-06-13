@@ -253,10 +253,10 @@ export default async function resizeAndTransformImageSizes({
   if (!imageSizes) return defaultResult
 
   // Determine if the file is animated
-  const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
   const sharpOptions: SharpOptions = {}
 
-  if (fileIsAnimated) sharpOptions.animated = true
+  if (fileIsAnimatedType) sharpOptions.animated = true
 
   const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
 
@@ -277,16 +277,26 @@ export default async function resizeAndTransformImageSizes({
       const metadata = await sharpBase.metadata()
 
       if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
-        const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
-        const resizeAspectRatio = resizeWidth / resizeHeight
+        let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
+
         const originalAspectRatio = dimensions.width / dimensions.height
-        const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+
+        // Calculate resizeWidth based on original aspect ratio if it's undefined
+        if (resizeHeight && !resizeWidth) {
+          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
+        }
+
+        // Calculate resizeHeight based on original aspect ratio if it's undefined
+        if (resizeWidth && !resizeHeight) {
+          resizeHeight = Math.round(resizeWidth / originalAspectRatio)
+        }
 
         // Scale the image up or down to fit the resize dimensions
         const scaledImage = imageToResize.resize({
-          height: prioritizeHeight ? resizeHeight : null,
-          width: prioritizeHeight ? null : resizeWidth,
+          height: resizeHeight,
+          width: resizeWidth,
         })
+
         const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
         const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
@@ -296,10 +306,16 @@ export default async function resizeAndTransformImageSizes({
         )
         const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
 
-        const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
+        const isAnimated = fileIsAnimatedType && metadata.pages
 
-        const maxOffsetY = fileIsAnimated
-          ? resizeHeight - safeResizeHeight
+        let safeResizeHeight = resizeHeight ?? scaledImageInfo.height
+
+        if (isAnimated && resizeHeight === undefined) {
+          safeResizeHeight = scaledImageInfo.height / metadata.pages
+        }
+
+        const maxOffsetY = isAnimated
+          ? safeResizeHeight - (resizeHeight ?? safeResizeHeight)
           : scaledImageInfo.height - safeResizeHeight
 
         const topFocalEdge = Math.round(
@@ -308,7 +324,7 @@ export default async function resizeAndTransformImageSizes({
         const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
 
         // extract the focal area from the scaled image
-        resized = (fileIsAnimated ? imageToResize : scaledImage).extract({
+        resized = (fileIsAnimatedType ? imageToResize : scaledImage).extract({
           height: safeResizeHeight,
           left: safeOffsetX,
           top: safeOffsetY,
@@ -362,7 +378,7 @@ export default async function resizeAndTransformImageSizes({
         name: imageResizeConfig.name,
         filename: imageNameWithDimensions,
         filesize: size,
-        height: fileIsAnimated && metadata.pages ? height / metadata.pages : height,
+        height: fileIsAnimatedType && metadata.pages ? height / metadata.pages : height,
         mimeType: mimeInfo?.mime || mimeType,
         sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,
