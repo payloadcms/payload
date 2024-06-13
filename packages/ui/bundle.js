@@ -85,7 +85,7 @@ const resultClient = await esbuild
     sourcemap: true,
   })
   .then((res, err) => {
-    console.log('client.ts and server.ts bundled successfully')
+    console.log('client.ts bundled successfully')
     return res
   })
   .catch(() => process.exit(1))
@@ -116,7 +116,7 @@ const resultServer = await esbuild
     sourcemap: true,
   })
   .then((res, err) => {
-    console.log('client.ts and server.ts bundled successfully')
+    console.log('server.ts bundled successfully')
     return res
   })
   .catch(() => process.exit(1))

@@ -3,8 +3,14 @@
 import type { FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useConfig, useDrawerSlug, useFieldProps, useTranslation } from '@payloadcms/ui/client'
-import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
+import {
+  getFormState,
+  reduceFieldsToValues,
+  useConfig,
+  useDrawerSlug,
+  useFieldProps,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

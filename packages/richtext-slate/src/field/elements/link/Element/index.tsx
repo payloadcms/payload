@@ -7,6 +7,8 @@ import {
   Button,
   Popup,
   Translation,
+  getFormState,
+  reduceFieldsToValues,
   useAuth,
   useConfig,
   useDocumentInfo,
@@ -14,7 +16,6 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/server'
 import { deepCopyObject } from 'payload/client'
 import React from 'react'
 import { useCallback, useEffect, useState } from 'react'
