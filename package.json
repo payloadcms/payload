@@ -113,7 +113,7 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.5",
-    "drizzle-orm": "0.30.10",
+    "drizzle-orm": "0.31.2",
     "escape-html": "^1.0.3",
     "eslint-plugin-payload": "workspace:*",
     "execa": "5.1.1",
