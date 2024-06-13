@@ -3,7 +3,7 @@ import type { Data } from 'payload'
 import type React from 'react'
 
 import { useAllFormFields } from '@payloadcms/ui/client'
-import { reduceFieldsToValues } from '@payloadcms/ui/server'
+import { reduceFieldsToValues } from '@payloadcms/ui/client'
 import { useEffect } from 'react'
 
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'

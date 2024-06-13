@@ -11,7 +11,7 @@ import {
   useFieldProps,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { getFormState } from '@payloadcms/ui/server'
+import { getFormState } from '@payloadcms/ui/client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
