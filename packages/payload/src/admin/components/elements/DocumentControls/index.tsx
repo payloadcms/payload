@@ -48,12 +48,17 @@ export const DocumentControls: React.FC<{
     permissions,
   } = props
 
-  const { publishedDoc } = useDocumentInfo()
+  const { slug, publishedDoc } = useDocumentInfo()
 
   const {
     admin: { dateFormat },
+    collections,
+    globals,
     routes: { admin: adminRoute },
   } = useConfig()
+
+  const collectionConfig = collections.find((coll) => coll.slug === slug)
+  const globalConfig = globals.find((global) => global.slug === slug)
 
   const { i18n, t } = useTranslation('general')
 
@@ -69,6 +74,9 @@ export const DocumentControls: React.FC<{
     if (!label) return t('document')
     return typeof label === 'string' ? label : getTranslation(label, i18n)
   }
+
+  const unsavedDraftWithValidations =
+    !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
   return (
     <Gutter className={baseClass}>
@@ -93,8 +101,10 @@ export const DocumentControls: React.FC<{
                     <Status />
                   </li>
                 )}
-                {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
-                  (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
+                {((collectionConfig?.versions?.drafts &&
+                  collectionConfig?.versions?.drafts?.autosave &&
+                  !unsavedDraftWithValidations) ||
+                  (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
                     <li className={`${baseClass}__list-item`}>
                       <Autosave
@@ -168,8 +178,11 @@ export const DocumentControls: React.FC<{
               <React.Fragment>
                 {collection?.versions?.drafts || global?.versions?.drafts ? (
                   <React.Fragment>
-                    {((collection?.versions?.drafts && !collection?.versions?.drafts?.autosave) ||
-                      (global?.versions?.drafts && !global?.versions?.drafts?.autosave)) && (
+                    {((collectionConfig?.versions?.drafts &&
+                      !collectionConfig?.versions?.drafts?.autosave) ||
+                      unsavedDraftWithValidations ||
+                      (globalConfig?.versions?.drafts &&
+                        !globalConfig?.versions?.drafts?.autosave)) && (
                       <SaveDraft
                         CustomComponent={
                           collection?.admin?.components?.edit?.SaveDraftButton ||
