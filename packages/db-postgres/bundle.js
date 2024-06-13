@@ -22,6 +22,7 @@ const resultServer = await esbuild
       'pg',
       '@payloadcms/translations',
       'payload',
+      'payload/*',
     ],
     minify: true,
     metafile: true,
