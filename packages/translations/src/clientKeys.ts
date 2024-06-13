@@ -9,6 +9,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:accountOfCurrentUser',
   'authentication:alreadyActivated',
   'authentication:alreadyLoggedIn',
+  'authentication:apiKey',
   'authentication:authenticated',
   'authentication:backToLogin',
   'authentication:beginCreateFirstUser',
