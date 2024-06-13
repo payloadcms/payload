@@ -46,12 +46,14 @@ export const FormQueryParamsProvider: React.FC<{
   const locale = useLocale()
 
   React.useEffect(() => {
-    dispatchFormQueryParams({
-      type: 'SET',
-      params: {
-        locale: locale.code,
-      },
-    })
+    if (locale?.code) {
+      dispatchFormQueryParams({
+        type: 'SET',
+        params: {
+          locale: locale.code,
+        },
+      })
+    }
   }, [locale.code])
 
   return (
