@@ -58,6 +58,17 @@ export const createPayloadRequest = async ({
     fallbackLocale = locales.fallbackLocale
   }
 
+  const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
+  const queryToParse = overrideHttpMethod === 'GET' ? await request.text() : urlProperties.search
+
+  const query = queryToParse
+    ? qs.parse(queryToParse, {
+        arrayLimit: 1000,
+        depth: 10,
+        ignoreQueryPrefix: true,
+      })
+    : {}
+
   const customRequest: CustomPayloadRequestProperties = {
     context: {},
     fallbackLocale,
@@ -74,13 +85,7 @@ export const createPayloadRequest = async ({
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
-    query: urlProperties.search
-      ? qs.parse(urlProperties.search, {
-          arrayLimit: 1000,
-          depth: 10,
-          ignoreQueryPrefix: true,
-        })
-      : {},
+    query,
     routeParams: params || {},
     search: urlProperties.search,
     searchParams: urlProperties.searchParams,
