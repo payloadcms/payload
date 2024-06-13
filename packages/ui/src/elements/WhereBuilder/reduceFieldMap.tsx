@@ -10,6 +10,7 @@ export const reduceFieldMap = (
   i18n,
   labelPrefix?: string,
   pathPrefix?: string,
+  locale?: string,
 ) => {
   return fieldMap.reduce((reduced, field) => {
     if (field.disableListFilter) return reduced
@@ -17,7 +18,6 @@ export const reduceFieldMap = (
     if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
       const tabs = field.fieldComponentProps.tabs
       tabs.forEach((tab) => {
-        console.log(tab.fieldMap)
         if (tab.name && typeof tab.label === 'string' && tab.fieldMap) {
           reduced.push(...reduceFieldMap(tab.fieldMap, i18n, tab.label, tab.name))
         }
@@ -49,12 +49,17 @@ export const reduceFieldMap = (
         return acc
       }, [])
 
+      const localizedLabel =
+        locale && typeof field.fieldComponentProps.label === 'object'
+          ? field.fieldComponentProps.label[locale]
+          : field.fieldComponentProps.label
+
       const formattedLabel = labelPrefix
         ? combineLabel({
             field,
             prefix: labelPrefix,
           })
-        : field.fieldComponentProps.label
+        : localizedLabel
 
       const formattedValue = pathPrefix
         ? createNestedClientFieldPath(pathPrefix, field)

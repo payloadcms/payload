@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import type { WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -25,12 +26,13 @@ export { WhereBuilderProps }
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fieldMap } = props
   const { i18n, t } = useTranslation()
+  const { code: currentLocale } = useLocale()
 
   const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap(fieldMap, i18n))
 
   useEffect(() => {
-    setReducedColumns(reduceFieldMap(fieldMap, i18n))
-  }, [fieldMap, i18n])
+    setReducedColumns(reduceFieldMap(fieldMap, i18n, undefined, undefined, currentLocale))
+  }, [fieldMap, i18n, currentLocale])
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
