@@ -1,11 +1,11 @@
 /* eslint-disable perfectionist/sort-objects */
 /* eslint-disable regexp/no-obscure-range */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable regexp/no-misleading-unicode-character */
 //This copy-and-pasted from lexical here: https://github.com/facebook/lexical/blob/c2ceee223f46543d12c574e62155e619f9a18a5d/packages/lexical/src/LexicalConstants.ts
 
-import type { ElementFormatType, TextFormatType } from 'lexical'
+import type { ElementFormatType, TextFormatType, TextModeType } from 'lexical'
 export type TextDetailType = 'directionless' | 'unmergable'
-import type { TextModeType } from 'lexical'
 
 // DOM
 export const NodeFormat = {

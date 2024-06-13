@@ -66,9 +66,9 @@ const diskReplacement: StorageAdapterReplacement = {
 }
 
 export const storageReplacements: Record<StorageAdapterType, StorageAdapterReplacement> = {
+  localDisk: diskReplacement,
   payloadCloud: payloadCloudReplacement,
   vercelBlobStorage: vercelBlobStorageReplacement,
-  localDisk: diskReplacement,
 }
 
 /**

@@ -5,7 +5,7 @@ import path from 'path'
 import type { DbType, StorageAdapterType } from '../types.js'
 
 import { warning } from '../utils/log.js'
-import { configReplacements, dbReplacements, storageReplacements } from './replacements.js'
+import { dbReplacements, storageReplacements } from './replacements.js'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
@@ -15,8 +15,8 @@ export async function configurePayloadConfig(args: {
   }
   packageJsonName?: string
   projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
-  storageAdapter?: StorageAdapterType
   sharp?: boolean
+  storageAdapter?: StorageAdapterType
 }): Promise<void> {
   if (!args.dbType) {
     return
@@ -93,32 +93,32 @@ export async function configurePayloadConfig(args: {
     const dbReplacement = dbReplacements[args.dbType]
 
     configLines = replaceInConfigLines({
-      replacement: dbReplacement.configReplacement(args.envNames?.dbUri),
-      startMatch: `// database-adapter-config-start`,
       endMatch: `// database-adapter-config-end`,
       lines: configLines,
+      replacement: dbReplacement.configReplacement(args.envNames?.dbUri),
+      startMatch: `// database-adapter-config-start`,
     })
 
     configLines = replaceInConfigLines({
+      lines: configLines,
       replacement: [dbReplacement.importReplacement],
       startMatch: '// database-adapter-import',
-      lines: configLines,
     })
 
     // Storage Adapter Replacement
     if (args.storageAdapter) {
       const replacement = storageReplacements[args.storageAdapter]
       configLines = replaceInConfigLines({
+        lines: configLines,
         replacement: replacement.configReplacement,
         startMatch: '// storage-adapter-placeholder',
-        lines: configLines,
       })
 
       if (replacement?.importReplacement) {
         configLines = replaceInConfigLines({
+          lines: configLines,
           replacement: [replacement.importReplacement],
           startMatch: '// storage-adapter-import-placeholder',
-          lines: configLines,
         })
       }
     }
@@ -126,14 +126,14 @@ export async function configurePayloadConfig(args: {
     // Sharp Replacement (provided by default, only remove if explicitly set to false)
     if (args.sharp === false) {
       configLines = replaceInConfigLines({
+        lines: configLines,
         replacement: [],
         startMatch: 'sharp,',
-        lines: configLines,
       })
       configLines = replaceInConfigLines({
+        lines: configLines,
         replacement: [],
         startMatch: "import sharp from 'sharp'",
-        lines: configLines,
       })
     }
 
@@ -146,16 +146,16 @@ export async function configurePayloadConfig(args: {
 }
 
 function replaceInConfigLines({
-  replacement,
-  startMatch,
   endMatch,
   lines,
+  replacement,
+  startMatch,
 }: {
-  replacement: string[]
-  startMatch: string
   /** Optional endMatch to replace multiple lines */
   endMatch?: string
   lines: string[]
+  replacement: string[]
+  startMatch: string
 }) {
   if (!replacement) {
     return lines

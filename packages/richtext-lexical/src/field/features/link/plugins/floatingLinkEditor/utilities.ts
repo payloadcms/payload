@@ -1,5 +1,5 @@
 import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, FieldAffectingData } from 'payload/types'
 
 import { getBaseFields } from '../../drawer/baseFields.js'
 
@@ -8,14 +8,14 @@ import { getBaseFields } from '../../drawer/baseFields.js'
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[])
+    | ((args: { config: SanitizedConfig; defaultFields: FieldAffectingData[] }) => Field[])
     | Field[],
   config: SanitizedConfig,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
   maxDepth?: number,
 ): Field[] {
-  const baseFields: Field[] = getBaseFields(
+  const baseFields: FieldAffectingData[] = getBaseFields(
     config,
     enabledCollections,
     disabledCollections,
@@ -29,7 +29,7 @@ export function transformExtraFields(
   } else if (Array.isArray(customFieldSchema)) {
     fields = customFieldSchema
   } else {
-    fields = baseFields
+    fields = baseFields as Field[]
   }
 
   return fields

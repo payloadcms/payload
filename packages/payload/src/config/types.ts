@@ -120,7 +120,7 @@ export type MetaConfig = {
    *
    * For example browser tabs, phone home screens, and search engine results.
    */
-  icons?: IconConfig
+  icons?: IconConfig[]
   /**
    * Overrides the auto-generated <meta name="keywords"> of admin pages
    * @example `"CMS, Payload, Custom"`

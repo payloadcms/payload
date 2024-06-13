@@ -1,11 +1,14 @@
 import merge from 'deepmerge'
 
+import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { Operation, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
 
+import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { beforeDuplicate } from './beforeDuplicate.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -23,7 +26,14 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: string
+  /**
+   * The parent's path.
+   */
+  parentPath: (number | string)[]
+  /**
+   * The parent's schemaPath (path without indexes).
+   */
+  parentSchemaPath: string[]
   req: PayloadRequestWithData
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
@@ -52,7 +62,8 @@ export const promise = async ({
   global,
   mergeLocaleActions,
   operation,
-  path,
+  parentPath,
+  parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
@@ -66,6 +77,12 @@ export const promise = async ({
   const { localization } = req.payload.config
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
+
+  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+    field,
+    parentPath,
+    parentSchemaPath,
+  })
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -88,10 +105,13 @@ export const promise = async ({
           global,
           operation,
           originalDoc: doc,
+          path: fieldPath,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
+          schemaPath: parentSchemaPath,
           siblingData,
+          siblingDocWithLocales,
           value: siblingData[field.name],
         })
 
@@ -127,7 +147,7 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: `${path}${field.name}`,
+          field: fieldPath.join('.'),
           message: validationResult,
         })
       }
@@ -139,8 +159,13 @@ export const promise = async ({
       data,
       field,
       global: undefined,
+      path: fieldPath,
+      previousSiblingDoc: siblingDoc,
+      previousValue: siblingDoc[field.name],
       req,
+      schemaPath: parentSchemaPath,
       siblingData,
+      siblingDocWithLocales,
       value: siblingData[field.name],
     }
 
@@ -225,8 +250,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path: `${path}${field.name}.`,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData: siblingData[field.name] as Record<string, unknown>,
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
         siblingDocWithLocales: siblingDocWithLocales[field.name] as Record<string, unknown>,
@@ -256,8 +282,9 @@ export const promise = async ({
               global,
               mergeLocaleActions,
               operation,
-              path: `${path}${field.name}.${i}.`,
+              path: [...fieldPath, i],
               req,
+              schemaPath: fieldSchemaPath,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
@@ -299,8 +326,9 @@ export const promise = async ({
                 global,
                 mergeLocaleActions,
                 operation,
-                path: `${path}${field.name}.${i}.`,
+                path: [...fieldPath, i],
                 req,
+                schemaPath: fieldSchemaPath,
                 siblingData: row,
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
@@ -331,8 +359,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
@@ -343,13 +372,11 @@ export const promise = async ({
     }
 
     case 'tab': {
-      let tabPath = path
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
       let tabSiblingDocWithLocales = siblingDocWithLocales
 
       if (tabHasName(field)) {
-        tabPath = `${path}${field.name}.`
         if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
         if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
         if (typeof siblingDocWithLocales[field.name] !== 'object')
@@ -373,8 +400,9 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path: tabPath,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales,
@@ -398,13 +426,60 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
-        path,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
       })
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.beforeChange?.length) {
+        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            docWithLocales,
+            duplicate,
+            errors,
+            field,
+            global,
+            mergeLocaleActions,
+            operation,
+            originalDoc: doc,
+            path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingDoc[field.name],
+            req,
+            schemaPath: parentSchemaPath,
+            siblingData,
+            siblingDocWithLocales,
+            skipValidation,
+            value: siblingData[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
 
       break
     }
