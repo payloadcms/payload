@@ -69,7 +69,7 @@ export default joi.object({
     meta: joi.object().keys({
       defaultOGImageType: joi.string().valid('off', 'dynamic', 'static'),
       description: joi.string(),
-      icons: joi.array.items(
+      icons: joi.array().items(
         joi.object().keys({
           type: joi.string(),
           color: joi.string(),
