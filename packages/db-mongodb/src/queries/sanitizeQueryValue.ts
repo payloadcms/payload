@@ -11,6 +11,50 @@ type SanitizeQueryValueArgs = {
   val: any
 }
 
+const handleHasManyValues = (formattedValue) => {
+  return formattedValue.reduce((formattedValues, inVal) => {
+    const newValues = [inVal]
+    if (mongoose.Types.ObjectId.isValid(inVal)) {
+      newValues.push(new mongoose.Types.ObjectId(inVal))
+    }
+    const parsedNumber = parseFloat(inVal)
+    if (!Number.isNaN(parsedNumber)) {
+      newValues.push(parsedNumber)
+    }
+
+    return [...formattedValues, ...newValues]
+  }, [])
+}
+
+const handleNonHasManyValues = (formattedValue, operator, path) => {
+  const formattedQueries = formattedValue
+    .map((inVal) => {
+      if (inVal && typeof inVal === 'object' && 'relationTo' in inVal && 'value' in inVal) {
+        if (operator === 'in') {
+          return {
+            [`${path}.relationTo`]: { $eq: inVal.relationTo },
+            [`${path}.value`]: { $eq: inVal.value },
+          }
+        } else if (operator === 'not_in') {
+          return {
+            $and: [
+              { [`${path}.value`]: inVal.value },
+              { [`${path}.relationTo`]: inVal.relationTo },
+            ],
+          }
+        }
+      }
+      return null
+    })
+    .filter(Boolean)
+
+  if (formattedQueries.length > 0) {
+    return {
+      rawQuery: operator === 'in' ? { $or: formattedQueries } : { $nor: formattedQueries },
+    }
+  }
+}
+
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
@@ -92,17 +136,15 @@ export const sanitizeQueryValue = ({
       }
     }
 
-    if (operator === 'in' && Array.isArray(formattedValue)) {
-      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal]
-        if (mongoose.Types.ObjectId.isValid(inVal))
-          newValues.push(new mongoose.Types.ObjectId(inVal))
-
-        const parsedNumber = parseFloat(inVal)
-        if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber)
-
-        return [...formattedValues, ...newValues]
-      }, [])
+    if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
+      if ('hasMany' in field && field.hasMany) {
+        formattedValue = handleHasManyValues(formattedValue)
+      } else {
+        const result = handleNonHasManyValues(formattedValue, operator, path)
+        if (result) {
+          return result
+        }
+      }
     }
   }
 
