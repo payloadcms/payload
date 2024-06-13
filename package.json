@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
     "build:all": "turbo build",
     "build:app": "next build",
