@@ -9,8 +9,9 @@ import type {
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
+import { reduceFieldsToValues } from '../exports/client/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { buildStateFromSchema, reduceFieldsToValues } from '../exports/server/index.js'
+import { buildStateFromSchema } from '../exports/server/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
 let cached = global._payload_fieldSchemaMap

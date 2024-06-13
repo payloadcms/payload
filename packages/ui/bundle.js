@@ -101,6 +101,7 @@ const resultServer = await esbuild
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
     external: [
+      path.resolve(dirname, './src/exports/client/index.ts'),
       '*.scss',
       '*.css',
       'payload',
