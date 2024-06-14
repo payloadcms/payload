@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { sassPlugin } from 'esbuild-sass-plugin'
-import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
 const removeCSSImports = {
   name: 'remove-css-imports',
@@ -25,20 +24,18 @@ await esbuild
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
-    outdir: 'dist',
+    outdir: 'dist/field',
+    loader: { '.svg': 'dataurl' },
     packages: 'external',
+    //external: ['*.svg'],
     plugins: [sassPlugin({ css: 'external' })],
   })
   .then(() => {
-    fs.rename('dist/index.css', 'dist/styles.css', (err) => {
+    fs.rename('dist/field/index.css', 'dist/exports/client/bundled.css', (err) => {
       if (err) console.error(`Error while renaming index.css: ${err}`)
     })
 
-    fs.unlink('dist/index.js', (err) => {
-      if (err) console.error(`Error while deleting index.js: ${err}`)
-    })
-
-    console.log('styles.css bundled successfully')
+    console.log('dist/field/bundled.css bundled successfully')
   })
   .catch(() => process.exit(1))
 
@@ -56,6 +53,7 @@ const resultClient = await esbuild
     external: [
       '*.scss',
       '*.css',
+      '*.svg',
       'qs',
       '@dnd-kit/core',
       '@payloadcms/graphql',
@@ -64,6 +62,16 @@ const resultClient = await esbuild
       'react-toastify',
 
       //'side-channel',
+      '@payloadcms/ui',
+      '@payloadcms/ui/*',
+      '@payloadcms/ui/client',
+      '@payloadcms/ui/shared',
+      'lexical',
+      'lexical/*',
+      '@lexical',
+      '@lexical/*',
+      '@faceless-ui/*',
+      'bson-objectid',
       'payload',
       'payload/*',
       'react',
@@ -71,8 +79,10 @@ const resultClient = await esbuild
       'next',
       'react-animate-height',
       'crypto',
+      'lodash',
+      'ui',
     ],
-    //packages: 'external',
+    packages: 'external',
     minify: true,
     metafile: true,
     treeShaking: true,
@@ -87,54 +97,9 @@ const resultClient = await esbuild
     sourcemap: true,
   })
   .then((res, err) => {
-    console.log('client.ts bundled successfully')
-    return res
-  })
-  .catch(() => process.exit(1))
-
-const resultShared = await esbuild
-  .build({
-    entryPoints: ['src/exports/shared/index.ts'],
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    outdir: 'dist/exports/shared',
-    //outfile: 'index.js',
-    // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: false,
-    treeShaking: true,
-    external: [
-      '*.scss',
-      '*.css',
-      'qs',
-      '@dnd-kit/core',
-      '@payloadcms/graphql',
-      '@payloadcms/translations',
-      'deep-equal',
-      'react-toastify',
-      'payload',
-      'payload/*',
-      'react',
-      'react-dom',
-      'next',
-      'react-animate-height',
-      'crypto',
-      '@floating-ui/react',
-      'date-fns',
-      'react-datepicker',
-    ],
-    //packages: 'external',
-    minify: true,
-    metafile: true,
-    tsconfig: path.resolve(dirname, './tsconfig.json'),
-    plugins: [removeCSSImports, commonjs()],
-    sourcemap: true,
-  })
-  .then((res, err) => {
-    console.log('shared.ts bundled successfully')
+    console.log('client/index.ts bundled successfully')
     return res
   })
   .catch(() => process.exit(1))
 
 fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
-fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))

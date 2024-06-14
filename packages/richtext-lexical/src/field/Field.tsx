@@ -16,6 +16,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
 import './index.scss'
+import './bundled.css'
 import { LexicalProvider } from './lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'

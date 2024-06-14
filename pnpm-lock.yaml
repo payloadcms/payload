@@ -1195,9 +1195,6 @@ importers:
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
-      classnames:
-        specifier: ^2.3.2
-        version: 2.5.1
       deep-equal:
         specifier: 2.2.3
         version: 2.2.3
@@ -1207,9 +1204,6 @@ importers:
       lexical:
         specifier: 0.16.0
         version: 0.16.0
-      lodash:
-        specifier: 4.17.21
-        version: 4.17.21
       react:
         specifier: ^19.0.0-rc-f994737d14-20240522
         version: 19.0.0-rc-f994737d14-20240522
@@ -1250,6 +1244,12 @@ importers:
       '@types/react-dom':
         specifier: npm:types-react-dom@19.0.0-beta.2
         version: /types-react-dom@19.0.0-beta.2
+      esbuild:
+        specifier: ^0.21.4
+        version: 0.21.5
+      esbuild-sass-plugin:
+        specifier: ^3.3.0
+        version: 3.3.1(esbuild@0.21.5)(sass-embedded@1.77.5)
       payload:
         specifier: workspace:*
         version: link:../payload

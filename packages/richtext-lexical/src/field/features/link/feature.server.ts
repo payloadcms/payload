@@ -8,9 +8,10 @@ import { deepCopyObject } from 'payload/shared'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { LinkFeatureClientComponent } from '../../../exports/client/index.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
-import { LinkFeatureClientComponent } from './feature.client.js'
 import { i18n } from './i18n.js'
 import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'

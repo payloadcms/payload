@@ -13,8 +13,8 @@ import type {
   LexicalRichTextAdapterProvider,
 } from './types.js'
 
-import { RichTextCell } from './cell/index.js'
-import { RichTextField } from './field/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { RichTextCell, RichTextField } from './exports/client/index.js'
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
@@ -374,7 +374,6 @@ export { BoldFeature } from './field/features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './field/features/format/inlineCode/feature.server.js'
 
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
-export { toolbarFormatGroupWithItems } from './field/features/format/shared/toolbarFormatGroup.js'
 export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
@@ -442,10 +441,7 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
-export { toolbarAddDropdownGroupWithItems } from './field/features/shared/toolbar/addDropdownGroup.js'
-export { toolbarFeatureButtonsGroupWithItems } from './field/features/shared/toolbar/featureButtonsGroup.js'
 
-export { toolbarTextDropdownGroupWithItems } from './field/features/shared/toolbar/textDropdownGroup.js'
 export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
 export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'
 
@@ -489,15 +485,6 @@ export {
 } from './field/features/upload/nodes/UploadNode.js'
 
 export {
-  type EditorConfigContextType,
-  EditorConfigProvider,
-  useEditorConfigContext,
-} from './field/lexical/config/client/EditorConfigProvider.js'
-export {
-  sanitizeClientEditorConfig,
-  sanitizeClientFeatures,
-} from './field/lexical/config/client/sanitize.js'
-export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
@@ -526,14 +513,7 @@ export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM.js'
-export { cloneDeep } from './field/lexical/utils/cloneDeep.js'
-export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect.js'
-export { getSelectedNode } from './field/lexical/utils/getSelectedNode.js'
-export { isHTMLElement } from './field/lexical/utils/guard.js'
-export { invariant } from './field/lexical/utils/invariant.js'
-export { joinClasses } from './field/lexical/utils/joinClasses.js'
-export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode.js'
+
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -548,16 +528,7 @@ export {
   TEXT_TYPE_TO_FORMAT,
   TEXT_TYPE_TO_MODE,
 } from './field/lexical/utils/nodeFormat.js'
-export { Point, isPoint } from './field/lexical/utils/point.js'
-export { Rect } from './field/lexical/utils/rect.js'
-export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition.js'
-export { setFloatingElemPositionForLinkEditor } from './field/lexical/utils/setFloatingElemPositionForLinkEditor.js'
-export {
-  addSwipeDownListener,
-  addSwipeLeftListener,
-  addSwipeRightListener,
-  addSwipeUpListener,
-} from './field/lexical/utils/swipe.js'
+
 export { sanitizeUrl, validateUrl } from './field/lexical/utils/url.js'
 export { defaultRichTextValue } from './populate/defaultValue.js'
 

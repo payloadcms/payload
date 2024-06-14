@@ -7,8 +7,9 @@ import { sanitizeFields } from 'payload'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { UploadFeatureClientComponent } from '../../../exports/client/index.js'
 import { createNode } from '../typeUtilities.js'
-import { UploadFeatureClientComponent } from './feature.client.js'
 import { i18n } from './i18n.js'
 import { UploadNode } from './nodes/UploadNode.js'
 import { uploadPopulationPromiseHOC } from './populationPromise.js'

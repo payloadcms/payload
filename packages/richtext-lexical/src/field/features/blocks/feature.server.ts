@@ -8,8 +8,9 @@ import { fieldsToJSONSchema, formatLabels } from 'payload'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { BlocksFeatureClientComponent } from '../../../exports/client/index.js'
 import { createNode } from '../typeUtilities.js'
-import { BlocksFeatureClientComponent } from './feature.client.js'
 import { i18n } from './i18n.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'

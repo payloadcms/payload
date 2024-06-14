@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { TreeViewFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { TreeViewFeatureClientComponent } from '../../../../exports/client/index.js'
 
 export const TreeViewFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {
