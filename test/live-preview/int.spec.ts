@@ -2,7 +2,8 @@ import type { Payload } from 'payload'
 
 import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
 import path from 'path'
-import { fieldSchemaToJSON, getFileByPath } from 'payload'
+import { getFileByPath } from 'payload'
+import { fieldSchemaToJSON } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
