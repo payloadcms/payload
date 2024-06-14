@@ -1,6 +1,6 @@
 'use client'
 
-import type { UIField , User } from 'payload'
+import type { UIField, User } from 'payload'
 
 import { useAuth } from '@payloadcms/ui/providers/Auth'
 import React, { useEffect, useState } from 'react'

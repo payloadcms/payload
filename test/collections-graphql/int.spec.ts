@@ -2,7 +2,7 @@ import type { Payload } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath , mapAsync } from 'payload'
+import { getFileByPath, mapAsync } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'

@@ -1,4 +1,4 @@
-import type { BlockField , CollectionConfig } from 'payload'
+import type { BlockField, CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 

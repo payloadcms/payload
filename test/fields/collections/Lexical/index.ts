@@ -4,7 +4,9 @@ import type { CollectionConfig } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
-import { BlocksFeature , FixedToolbarFeature ,
+import {
+  BlocksFeature,
+  FixedToolbarFeature,
   HeadingFeature,
   LinkFeature,
   TreeViewFeature,

@@ -7,7 +7,8 @@ import {
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
- lexicalHTML } from '@payloadcms/richtext-lexical'
+  lexicalHTML,
+} from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { richTextFieldsSlug } from '../../slugs.js'

@@ -1,6 +1,6 @@
 import type { ArrayField, Block } from 'payload'
 
-import { BlocksFeature, FixedToolbarFeature , lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { textFieldsSlug } from '../Text/shared.js'
 

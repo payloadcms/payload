@@ -1,4 +1,4 @@
-import type { Payload , PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
 import { randomBytes } from 'crypto'
 

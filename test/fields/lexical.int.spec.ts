@@ -5,7 +5,7 @@ import type {
   SerializedUploadNode,
 } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
-import type { PaginatedDocs , Payload } from 'payload'
+import type { PaginatedDocs, Payload } from 'payload'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
