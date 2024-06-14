@@ -124,7 +124,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new AuthenticationError(req.t, loginWithUsername)
     }
 
-    if (user && isLocked(user.lockUntil)) {
+    if (user && isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)
     }
 
