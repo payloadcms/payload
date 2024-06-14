@@ -265,10 +265,6 @@ export interface ArrayField {
         id?: string | null
       }[]
     | null
-  requiredArrayWithMinRows: {
-    text?: string | null
-    id?: string | null
-  }[]
   disableSort?:
     | {
         text: string
