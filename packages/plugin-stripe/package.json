@@ -52,7 +52,7 @@
     "@payloadcms/ui": "workspace:*",
     "lodash.get": "^4.4.2",
     "stripe": "^10.2.0",
-    "uuid": "^9.0.0"
+    "uuid": "10.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

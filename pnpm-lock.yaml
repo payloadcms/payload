@@ -228,8 +228,8 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
 
   packages/create-payload-app:
     dependencies:
@@ -310,8 +310,8 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -353,8 +353,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: ^0.2.4
@@ -767,8 +767,8 @@ importers:
         specifier: 7.0.3
         version: 7.0.3(typescript@5.4.5)
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: ^0.2.4
@@ -1123,8 +1123,8 @@ importers:
         specifier: ^10.2.0
         version: 10.17.0
       uuid:
-        specifier: ^9.0.0
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1214,8 +1214,8 @@ importers:
         specifier: 4.0.13
         version: 4.0.13(react@19.0.0-rc-f994737d14-20240522)
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
     devDependencies:
       '@lexical/eslint-plugin':
         specifier: 0.15.0
@@ -1486,8 +1486,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0(react@19.0.0-rc-f994737d14-20240522)(scheduler@0.25.0-rc-f994737d14-20240522)
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: 10.0.0
+        version: 10.0.0
     devDependencies:
       '@babel/cli':
         specifier: ^7.24.5
@@ -17758,6 +17758,10 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
     dev: false
+
+  /uuid@10.0.0:
+    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
 
   /uuid@3.4.0:
     resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}

@@ -117,7 +117,7 @@
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
     "ts-essentials": "7.0.3",
-    "uuid": "^9.0.1"
+    "uuid": "10.0.0"
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
