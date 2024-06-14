@@ -1,7 +1,7 @@
 'use client'
-import type { CellComponentProps, SanitizedCollectionConfig } from 'payload/types'
+import type { CellComponentProps } from 'payload/types'
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
@@ -59,14 +59,13 @@ export const TableColumnsProvider: React.FC<Props> = ({
     admin: { defaultColumns, useAsTitle },
   } = collectionConfig
 
-  const prevCollection = useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
-  const { getPreference, setPreference } = usePreferences()
+  const { setPreference } = usePreferences()
 
   const [initialColumns] = useState<ColumnPreferences>(() =>
     getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
   )
 
-  const [tableColumns, setTableColumns] = React.useState(
+  const [tableColumns, setTableColumns] = React.useState(() =>
     buildColumnState({
       cellProps,
       columnPreferences: listPreferences?.columns,
@@ -89,7 +88,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [preferenceKey, setPreference],
   )
 
-  const reassignLinkColumn = (columns) => {
+  const reassignLinkColumn = (columns: Column[]): Column[] => {
     let foundFirstActive = false
     const newColumns = columns.map((col) => {
       const linkColumn = col.active && !foundFirstActive && col.accessor !== '_select'
@@ -97,7 +96,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
       return {
         ...col,
-        link: linkColumn,
+        cellProps: {
+          ...col.cellProps,
+          link: linkColumn,
+        },
       }
     })
 
@@ -149,48 +151,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     },
     [tableColumns, updateColumnPreferences],
   )
-
-  // /////////////////////////////////////
-  // Get preferences on collection change
-  // /////////////////////////////////////
-
-  useEffect(() => {
-    const sync = async () => {
-      const collectionHasChanged = prevCollection.current !== collectionSlug
-
-      if (collectionHasChanged || !listPreferences) {
-        const currentPreferences = await getPreference<{
-          columns: ColumnPreferences
-        }>(preferenceKey)
-        prevCollection.current = collectionSlug
-
-        if (currentPreferences?.columns) {
-          setTableColumns(
-            buildColumnState({
-              cellProps,
-              columnPreferences: currentPreferences?.columns,
-              columns: initialColumns,
-              enableRowSelections: true,
-              fieldMap,
-              useAsTitle,
-            }),
-          )
-        }
-      }
-    }
-
-    void sync()
-  }, [
-    preferenceKey,
-    getPreference,
-    collectionSlug,
-    fieldMap,
-    cellProps,
-    defaultColumns,
-    useAsTitle,
-    listPreferences,
-    initialColumns,
-  ])
 
   return (
     <TableColumnContext.Provider
