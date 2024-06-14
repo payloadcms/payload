@@ -564,6 +564,8 @@ export type Config = {
       login?: string
       /** The route for the logout page. */
       logout?: string
+      /** The route for the reset password page. */
+      reset?: string
       /** The route for the unauthorized page. */
       unauthorized?: string
     }

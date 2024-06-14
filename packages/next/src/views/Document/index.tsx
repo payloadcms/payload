@@ -1,6 +1,5 @@
 import type { EditViewComponent } from 'payload/config'
-import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewComponent, AdminViewProps, ServerSideEditViewProps } from 'payload/types'
 
 import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
