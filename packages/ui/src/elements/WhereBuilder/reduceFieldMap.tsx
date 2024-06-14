@@ -31,6 +31,7 @@ export const reduceFieldMap = (
           field.fieldComponentProps.fieldMap,
           i18n,
           field.fieldComponentProps.label as string,
+          field.name,
         ),
       )
       return reduced
