@@ -45,7 +45,7 @@ All options for the Admin panel are defined in your base Payload config file.
 | `components`      | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components)                                                                                                                                                                             |
 | `webpack`         | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack)                                                                                                                                                                           |
 | `vite`            | Customize the Vite config that's used to generate the Admin panel. [More](/docs/admin/vite)                                                                                                                                                                                 |
-| `routes`          | Replace built-in Admin Panel routes with your own custom routes. I.e. `{ logout: '/custom-logout', inactivity: 'custom-inactivity' }`                                                                                                                                       |
+| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More](/docs/admin/overview#custom-admin-panel-routes)                                                                                                                                                     |
 
 ### The Admin User Collection
 
@@ -88,3 +88,32 @@ Users in the admin panel have access to choosing between light mode and dark mod
 ### Restricting user access
 
 If you would like to restrict which users from a single Collection can access the Admin panel, you can use the `admin` access control function. [Click here](/docs/access-control/overview#admin) to learn more.
+
+### Custom admin panel routes
+
+You can configure custom routes in the admin panel for the following routes:
+
+| Option            | Default route                                                                                                                                                                                                                                                                 |
+| ----------------- | ----------------------- |
+| `account`         | `/account`              |
+| `createFirstUser` | `/create-first-user`    |
+| `forgot`          | `/forgot`               |
+| `inactivity`      | `/logout-inactivity`    |
+| `login`           | `/login`                |
+| `logout`          | `/logout`               |
+| `reset`           | `/reset`                |
+| `unauthorized`    | `/unauthorized`         |
+
+`payload.config.js`:
+
+```ts
+import { buildConfig } from 'payload/config'
+
+const config = buildConfig({
+  admin: {
+    routes: {
+      admin: '/custom-admin-route'
+    }
+  },
+})
+```

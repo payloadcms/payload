@@ -25,7 +25,7 @@ const baseClasses = {
 }
 
 type OneSegmentViews = {
-  [K in keyof SanitizedConfig['admin']['routes']]: AdminViewComponent
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: AdminViewComponent
 }
 
 const oneSegmentViews: OneSegmentViews = {
