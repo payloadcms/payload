@@ -1,5 +1,5 @@
 import type { User } from 'payload/auth'
-import type { Data, Field, FormField , FormState } from 'payload/types'
+import type { Data, Field, FormField, FormState } from 'payload/types'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -32,7 +32,11 @@ export type FormProps = (
    * feature of the Lexical Rich Text field)
    */
   fields?: Field[]
-  handleResponse?: (res: Response) => void
+  handleResponse?: (
+    res: Response,
+    successToast: (value: string) => void,
+    errorToast: (value: string) => void,
+  ) => void
   initialState?: FormState
   isInitializing?: boolean
   log?: boolean
