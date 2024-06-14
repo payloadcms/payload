@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps } from 'payload/types'
+import type { CellComponentProps, SanitizedCollectionConfig } from 'payload/types'
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
@@ -59,7 +59,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
     admin: { defaultColumns, useAsTitle },
   } = collectionConfig
 
-  const { setPreference } = usePreferences()
+  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
+  const { getPreference, setPreference } = usePreferences()
 
   const [initialColumns] = useState<ColumnPreferences>(() =>
     getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
@@ -151,6 +152,48 @@ export const TableColumnsProvider: React.FC<Props> = ({
     },
     [tableColumns, updateColumnPreferences],
   )
+
+  // /////////////////////////////////////
+  // Get preferences on collection change
+  // /////////////////////////////////////
+
+  React.useEffect(() => {
+    const sync = async () => {
+      const collectionHasChanged = prevCollection.current !== collectionSlug
+
+      if (collectionHasChanged || !listPreferences) {
+        const currentPreferences = await getPreference<{
+          columns: ColumnPreferences
+        }>(preferenceKey)
+        prevCollection.current = collectionSlug
+
+        if (currentPreferences?.columns) {
+          setTableColumns(
+            buildColumnState({
+              cellProps,
+              columnPreferences: currentPreferences?.columns,
+              columns: initialColumns,
+              enableRowSelections: true,
+              fieldMap,
+              useAsTitle,
+            }),
+          )
+        }
+      }
+    }
+
+    void sync()
+  }, [
+    preferenceKey,
+    getPreference,
+    collectionSlug,
+    fieldMap,
+    cellProps,
+    defaultColumns,
+    useAsTitle,
+    listPreferences,
+    initialColumns,
+  ])
 
   return (
     <TableColumnContext.Provider
