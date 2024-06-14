@@ -93,8 +93,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction,
-      commitTransaction,
+      // TODO: revisit if we can use transactions
+      // beginTransaction,
+      // commitTransaction,
       connect,
       count,
       countDistinct,
