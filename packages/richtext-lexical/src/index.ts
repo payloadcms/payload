@@ -6,7 +6,13 @@ import type {
 } from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
-import { withNullableJSONSchemaType } from 'payload'
+import {
+  afterChangeTraverseFields,
+  afterReadTraverseFields,
+  beforeChangeTraverseFields,
+  beforeValidateTraverseFields,
+  withNullableJSONSchemaType,
+} from 'payload'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
