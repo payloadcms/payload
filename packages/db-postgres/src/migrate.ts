@@ -32,7 +32,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
   let latestBatch = 0
   let migrationsInDB = []
 
-  const hasMigrationTable = await migrationTableExists(this.drizzle)
+  const hasMigrationTable = await migrationTableExists(this)
 
   if (hasMigrationTable) {
     ;({ docs: migrationsInDB } = await payload.find({
