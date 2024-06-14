@@ -10,8 +10,8 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 // import { Button } from 'payload/components/elements';
 // import { useConfig } from 'payload/components/utilities';
 
+import { MinimalTemplate } from '@payloadcms/next/templates'
 import { Button } from '@payloadcms/ui/elements/Button'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 
 import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 

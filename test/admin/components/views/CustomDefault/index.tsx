@@ -1,4 +1,4 @@
-import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
+import { DefaultTemplate } from '@payloadcms/next/templates'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
