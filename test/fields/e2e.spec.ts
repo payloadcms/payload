@@ -1974,6 +1974,7 @@ describe('fields', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
+    // TODO: properly handle polymorphic relationship handling with the postgres adapter
     test('should allow filtering by relationship field / is_in', async () => {
       const textDoc = await createTextFieldDoc()
       await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
