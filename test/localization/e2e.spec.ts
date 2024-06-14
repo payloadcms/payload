@@ -164,7 +164,7 @@ describe('Localization', () => {
       await page.waitForURL(`**${url.edit(id)}`)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(id)
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, spanishLocale)
@@ -215,8 +215,23 @@ describe('Localization', () => {
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.id-label')).not.toContainText(originalID)
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
-      await expect(page.locator('.Toastify')).toContainText('successfully duplicated')
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'successfully duplicated',
+      )
       await expect(page.locator('.id-label')).not.toContainText(originalID)
+    })
+  })
+
+  describe('locale preference', () => {
+    test('ensure preference is used when query param is not', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+      await fillValues({ title: spanishTitle })
+      await saveDocAndAssert(page)
+      await page.goto(url.admin)
+      await page.goto(url.list)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(spanishTitle)
     })
   })
 })

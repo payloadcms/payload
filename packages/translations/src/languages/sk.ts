@@ -274,6 +274,7 @@ export const skTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Zostať na tejto stránke',
     submissionSuccessful: 'Odoslanie úspešné.',
     submit: 'Odoslať',
+    submitting: 'Odosielanie...',
     success: 'Úspech',
     successfullyCreated: '{{label}} úspešne vytvorené.',
     successfullyDuplicated: '{{label}} úspešne duplikované.',

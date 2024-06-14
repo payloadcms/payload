@@ -1,4 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
+import type { Locale } from 'payload/config'
 import type { InitPageResult, PayloadRequestWithData, VisibleEntities } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
@@ -22,7 +23,6 @@ export const initPage = async ({
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
-  const localeParam = searchParams?.locale as string
   const payload = await getPayloadHMR({ config: configPromise })
 
   const {
@@ -34,10 +34,6 @@ export const initPage = async ({
   } = payload.config
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-  const localeCode = localeParam || defaultLocale
-  const locale = localization && findLocaleFromCode(localization, localeCode)
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
@@ -64,7 +60,6 @@ export const initPage = async ({
   const req = await createLocalReq(
     {
       fallbackLocale: null,
-      locale: locale.code,
       req: {
         host: headers.get('host'),
         i18n,
@@ -79,8 +74,52 @@ export const initPage = async ({
   )
 
   const { permissions, user } = await payload.auth({ headers, req })
-
   req.user = user
+
+  const localeParam = searchParams?.locale as string
+  let locale: Locale
+
+  if (localization) {
+    const defaultLocaleCode = localization.defaultLocale ? localization.defaultLocale : 'en'
+    let localeCode: string = localeParam
+
+    if (!localeCode) {
+      try {
+        localeCode = await payload
+          .find({
+            collection: 'payload-preferences',
+            depth: 0,
+            limit: 1,
+            user,
+            where: {
+              and: [
+                {
+                  'user.relationTo': {
+                    equals: payload.config.admin.user,
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: user.id,
+                  },
+                },
+                {
+                  key: {
+                    equals: 'locale',
+                  },
+                },
+              ],
+            },
+          })
+          ?.then((res) => res.docs?.[0]?.value as string)
+      } catch (error) {} // eslint-disable-line no-empty
+    }
+
+    locale = findLocaleFromCode(localization, localeCode)
+
+    if (!locale) locale = findLocaleFromCode(localization, defaultLocaleCode)
+    req.locale = locale.code
+  }
 
   const visibleEntities: VisibleEntities = {
     collections: collections

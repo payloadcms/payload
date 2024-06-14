@@ -22,6 +22,7 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
+  animatedTypeMedia,
   audioSlug,
   mediaSlug,
   relationSlug,
@@ -35,6 +36,7 @@ let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let serverURL: string
 let mediaURL: AdminUrlUtil
+let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
@@ -52,6 +54,7 @@ describe('uploads', () => {
     await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
+    animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
@@ -116,6 +119,26 @@ describe('uploads', () => {
     const filename = page.locator('.file-field__filename')
 
     await expect(filename).toHaveValue('image.png')
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should create animated file upload', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './non-animated.webp'))
+    const nonAnimatedFileName = page.locator('.file-field__filename')
+
+    await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
 
     await saveDocAndAssert(page)
   })
@@ -209,7 +232,7 @@ describe('uploads', () => {
     // choose from existing
     await openDocDrawer(page, '.list-drawer__toggler')
 
-    await expect(page.locator('.cell-title')).toContainText('draft')
+    await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
@@ -233,12 +256,16 @@ describe('uploads', () => {
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
-    await expect(page.locator('.Toastify .Toastify__toast--success')).toContainText('successfully')
-    await page.locator('.Toastify .Toastify__toast--success .Toastify__close-button').click()
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      'successfully',
+    )
+    await page
+      .locator('.payload-toast-container .toast-success .payload-toast-close-button')
+      .click()
 
     // save the document and expect an error
     await page.locator('button#action-save').click()
-    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
       'The following field is invalid: audio',
     )
   })
@@ -249,7 +276,7 @@ describe('uploads', () => {
     await expect(page.locator('.file-field__filename')).toHaveValue('2mb.jpg')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
       'File size limit has been reached',
     )
   })
@@ -347,7 +374,7 @@ describe('uploads', () => {
         await page.locator('button:has-text("Apply Changes")').click()
         await page.waitForSelector('button#action-save')
         await page.locator('button#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await wait(1000) // Wait for the save
       }
 

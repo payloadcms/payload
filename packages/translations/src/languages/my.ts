@@ -275,6 +275,7 @@ export const myTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
+    submitting: 'Menghantar...',
     success: 'အောင်မြင်မှု',
     successfullyCreated: '{{label}} အောင်မြင်စွာဖန်တီးခဲ့သည်။',
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',

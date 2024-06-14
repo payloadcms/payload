@@ -10,9 +10,9 @@ import type { BlocksFeatureClientProps } from './feature.client.js'
 
 import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
+import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { BlockNode } from './nodes/BlocksNode.js'
-import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
@@ -114,71 +114,17 @@ export const BlocksFeature: FeatureProviderProviderServer<
         i18n,
         nodes: [
           createNode({
-            /* // TODO: Implement these hooks once docWithLocales / originalSiblingDoc => node matching has been figured out
-            hooks: {
-              beforeChange: [
-                async ({ context, findMany, node, operation, overrideAccess, req }) => {
-                  const blockType = node.fields.blockType
+            getSubFields: ({ node, req }) => {
+              const blockType = node.fields.blockType
 
-                  const block = deepCopyObject(
-                    props.blocks.find((block) => block.slug === blockType),
-                  )
-
-
-                  await beforeChangeTraverseFields({
-                    id: null,
-                    collection: null,
-                    context,
-                    data: node.fields,
-                    doc: node.fields,
-                    fields: sanitizedBlock.fields,
-                    global: null,
-                    mergeLocaleActions: [],
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    overrideAccess,
-                    path: '',
-                    req,
-                    siblingData: node.fields,
-                    siblingDoc: node.fields,
-                  })
-
-
-                  return node
-                },
-              ],
-              beforeValidate: [
-                async ({ context, findMany, node, operation, overrideAccess, req }) => {
-                  const blockType = node.fields.blockType
-
-                  const block = deepCopyObject(
-                    props.blocks.find((block) => block.slug === blockType),
-                  )
-
-
-
-                  await beforeValidateTraverseFields({
-                    id: null,
-                    collection: null,
-                    context,
-                    data: node.fields,
-                    doc: node.fields,
-                    fields: sanitizedBlock.fields,
-                    global: null,
-                    operation:
-                      operation === 'create' || operation === 'update' ? operation : 'update',
-                    overrideAccess,
-                    req,
-                    siblingData: node.fields,
-                    siblingDoc: node.fields,
-                  })
-
-                  return node
-                },
-              ],
-            },*/
+              const block = props.blocks.find((block) => block.slug === blockType)
+              return block?.fields
+            },
+            getSubFieldsData: ({ node }) => {
+              return node?.fields
+            },
+            graphQLPopulationPromises: [blockPopulationPromiseHOC(props)],
             node: BlockNode,
-            populationPromises: [blockPopulationPromiseHOC(props)],
             validations: [blockValidationHOC(props)],
           }),
         ],

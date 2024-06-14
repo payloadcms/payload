@@ -5,7 +5,7 @@ import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'

@@ -273,6 +273,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'この画面にとどまる',
     submissionSuccessful: '送信が成功しました。',
     submit: '送信',
+    submitting: '提出中...',
     success: '成功',
     successfullyCreated: '{{label}} が作成されました。',
     successfullyDuplicated: '{{label}} が複製されました。',

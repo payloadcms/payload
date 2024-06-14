@@ -263,8 +263,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // /////////////////////////////////////
 
     if (collectionConfig.auth && collectionConfig.auth.verify) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      sendVerificationEmail({
+      await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
         disableEmail: disableVerificationEmail,

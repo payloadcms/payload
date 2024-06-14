@@ -90,6 +90,7 @@ const globalSchema = joi
                 interval: joi.number(),
               }),
             ),
+            validate: joi.boolean(),
           }),
           joi.boolean(),
         ),

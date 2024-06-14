@@ -59,7 +59,7 @@ export interface Post {
       )[]
     | null;
   restrictedField?: string | null;
-  D1: {
+  D1?: {
     D2?: {
       D3?: {
         D4?: string | null;

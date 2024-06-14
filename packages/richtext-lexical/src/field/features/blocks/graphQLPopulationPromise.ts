@@ -2,7 +2,7 @@ import type { PopulationPromise } from '../types.js'
 import type { BlocksFeatureProps } from './feature.server.js'
 import type { SerializedBlockNode } from './nodes/BlocksNode.js'
 
-import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
+import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 
 export const blockPopulationPromiseHOC = (
   props: BlocksFeatureProps,
@@ -21,7 +21,6 @@ export const blockPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
     const blockFieldData = node.fields
 
@@ -31,22 +30,21 @@ export const blockPopulationPromiseHOC = (
       return
     }
 
-    recurseNestedFields({
+    recursivelyPopulateFieldsForGraphQL({
       context,
       currentDepth,
       data: blockFieldData,
       depth,
+      draft,
       editorPopulationPromises,
       fieldPromises,
       fields: block.fields,
       findMany,
-      flattenLocales: false, // Disable localization handling which does not work properly yet. Once we fully support hooks, this can be enabled (pass through flattenLocales again)
+      flattenLocales,
       overrideAccess,
       populationPromises,
       req,
       showHiddenFields,
-      // The afterReadPromise gets its data from looking for field.name inside the siblingDoc. Thus, here we cannot pass the whole document's siblingDoc, but only the siblingDoc (sibling fields) of the current field.
-      draft,
       siblingDoc: blockFieldData,
     })
   }

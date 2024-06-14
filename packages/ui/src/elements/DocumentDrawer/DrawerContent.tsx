@@ -3,7 +3,7 @@
 import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
@@ -48,7 +48,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
   const isEditing = Boolean(docID)
   const apiURL = docID
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}?locale=${locale.code}`
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
     : null
   const action = `${serverURL}${apiRoute}/${collectionSlug}${
     isEditing ? `/${docID}` : ''

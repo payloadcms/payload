@@ -177,7 +177,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
     await page.keyboard.down('Control')
   }
   await page.keyboard.down('s')
-  await expect(page.locator('.Toastify')).toContainText('successfully')
+  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 }
 
 export async function saveDocAndAssert(
@@ -189,10 +189,10 @@ export async function saveDocAndAssert(
   await page.click(selector, { delay: 100 })
 
   if (expectation === 'success') {
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
   } else {
-    await expect(page.locator('.Toastify .Toastify__toast--error')).toBeVisible()
+    await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
 }
 

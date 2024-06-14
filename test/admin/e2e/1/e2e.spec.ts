@@ -769,7 +769,7 @@ describe('admin1', () => {
 
       await page.goto(postsUrl.list)
       await selectAndDeleteAll()
-      await expect(page.locator('.Toastify__toast--success')).toHaveText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
@@ -803,7 +803,7 @@ describe('admin1', () => {
       await titleInput.fill(bulkTitle)
 
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Updated 3 Posts successfully.',
       )
       await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle)

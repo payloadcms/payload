@@ -267,6 +267,7 @@ export const heTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'הישאר בדף זה',
     submissionSuccessful: 'נשלח בהצלחה.',
     submit: 'שלח',
+    submitting: 'מגיש...',
     success: 'הצלחה',
     successfullyCreated: '{{label}} נוצר בהצלחה.',
     successfullyDuplicated: '{{label}} שוכפל בהצלחה.',

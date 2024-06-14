@@ -276,6 +276,7 @@ export const roTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Rămâneți pe această pagină',
     submissionSuccessful: 'Trimitere cu succes.',
     submit: 'Trimite',
+    submitting: 'Se trimite...',
     success: 'Succes',
     successfullyCreated: '{{label}} creat(ă) cu succes.',
     successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',

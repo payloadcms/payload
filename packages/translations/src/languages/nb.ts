@@ -273,6 +273,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Bli på denne siden',
     submissionSuccessful: 'Innsending vellykket.',
     submit: 'Send inn',
+    submitting: 'Innsending...',
     success: 'Suksess',
     successfullyCreated: '{{label}} ble opprettet.',
     successfullyDuplicated: '{{label}} ble duplisert.',

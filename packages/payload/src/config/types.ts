@@ -120,7 +120,7 @@ export type MetaConfig = {
    *
    * For example browser tabs, phone home screens, and search engine results.
    */
-  icons?: IconConfig
+  icons?: IconConfig[]
   /**
    * Overrides the auto-generated <meta name="keywords"> of admin pages
    * @example `"CMS, Payload, Custom"`
@@ -719,6 +719,12 @@ export type Config = {
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
+    /**
+     * Automatically generate types during development
+     * @default true
+     */
+    autoGenerate?: boolean
+
     /** Disable declare block in generated types file */
     declare?:
       | {
@@ -732,6 +738,7 @@ export type Config = {
           ignoreTSError?: boolean
         }
       | false
+
     /** Filename to write the generated types to */
     outputFile?: string
   }
