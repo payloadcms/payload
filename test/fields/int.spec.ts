@@ -1,7 +1,7 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { Payload } from 'payload'
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs } from 'payload'
 
 import { reload } from '@payloadcms/next/utilities'
 

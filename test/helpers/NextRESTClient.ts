@@ -1,5 +1,5 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { Where } from 'payload/types'
+import type { Where } from 'payload'
+import type { SanitizedConfig } from 'payload'
 import type { ParsedQs } from 'qs'
 
 import {

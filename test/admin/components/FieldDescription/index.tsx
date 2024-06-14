@@ -1,5 +1,5 @@
 'use client'
-import type { DescriptionComponent } from 'payload/types'
+import type { DescriptionComponent } from 'payload'
 
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useFormFields } from '@payloadcms/ui/forms/Form'

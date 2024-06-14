@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { Where } from 'payload/types'
+import type { Where } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'

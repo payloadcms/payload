@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { BlockField } from 'payload/types'
+import type { BlockField } from 'payload'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'

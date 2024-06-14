@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { ArrayField, RelationshipField } from 'payload/types'
+import type { ArrayField, RelationshipField } from 'payload'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'

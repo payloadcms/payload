@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'

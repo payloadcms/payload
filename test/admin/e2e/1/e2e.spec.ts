@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload'
 
 import type { Geo, Post } from '../../payload-types.js'
 import type { Config } from '../../payload-types.js'

@@ -1,4 +1,4 @@
-import type { EditViewComponent } from 'payload/types'
+import type { EditViewComponent } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import { notFound } from 'next/navigation.js'

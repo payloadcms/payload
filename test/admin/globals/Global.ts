@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
 import { GlobalAPIButton } from '../components/GlobalAPIButton/index.js'
 import { GlobalEditButton } from '../components/GlobalEditButton/index.js'

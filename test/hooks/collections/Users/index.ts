@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
-import type { BeforeLoginHook, CollectionConfig } from 'payload/types'
+import type { BeforeLoginHook, CollectionConfig } from 'payload'
 
-import { AuthenticationError } from 'payload/errors'
+import { AuthenticationError } from 'payload'
 
 import { devUser, regularUser } from '../../../credentials.js'
 import { afterLoginHook } from './afterLoginHook.js'

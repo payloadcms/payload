@@ -2,7 +2,7 @@ import { createServer } from 'http'
 import nextImport from 'next'
 import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload'
 import { parse } from 'url'
 import { fileURLToPath } from 'url'
 

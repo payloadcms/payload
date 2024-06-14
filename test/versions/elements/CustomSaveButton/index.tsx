@@ -1,5 +1,5 @@
 'use client'
-import type { CustomPublishButton as CustomPublishButtonType } from 'payload/types'
+import type { CustomPublishButton as CustomPublishButtonType } from 'payload'
 
 import { DefaultPublishButton } from '@payloadcms/ui/elements/PublishButton'
 import * as React from 'react'

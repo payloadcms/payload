@@ -5,7 +5,7 @@ import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload'
 
 import { Button } from '@payloadcms/ui/elements/Button'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'

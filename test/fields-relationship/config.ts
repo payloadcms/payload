@@ -2,8 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import type { CollectionConfig } from 'payload/types'
-import type { FilterOptionsProps } from 'payload/types'
+import type { CollectionConfig } from 'payload'
+import type { FilterOptionsProps } from 'payload'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 
