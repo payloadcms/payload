@@ -511,6 +511,20 @@ describe('Auth', () => {
           await tryLogin()
           await tryLogin()
 
+          const loginAfterLimit = await fetch(`${apiUrl}/${slug}/login`, {
+            body: JSON.stringify({
+              email: userEmail,
+              password,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'post',
+          }).then((res) => res.json())
+
+          expect(loginAfterLimit.errors.length).toBeGreaterThan(0)
+
           const lockedUser = await payload.find({
             showHiddenFields: true,
             collection: slug,
