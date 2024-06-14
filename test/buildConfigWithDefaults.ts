@@ -37,8 +37,9 @@ import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
+process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payload'
 // process.env.PAYLOAD_DATABASE = 'postgres'
-// process.env.PAYLOAD_DATABASE = 'sqlite'
+process.env.PAYLOAD_DATABASE = 'sqlite'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
