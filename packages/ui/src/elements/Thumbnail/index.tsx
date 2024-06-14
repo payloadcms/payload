@@ -30,7 +30,7 @@ const ThumbnailContext = React.createContext({
 export const useThumbnailContext = () => React.useContext(ThumbnailContext)
 
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename } = {}, fileSrc, size } = props
+  const { className = '', doc: { filename } = {}, fileSrc, imageCacheTag, size } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
@@ -54,7 +54,12 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={filename as string} src={fileSrc} />}
+      {fileExists && (
+        <img
+          alt={filename as string}
+          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
+        />
+      )}
       {fileExists === false && <File />}
     </div>
   )

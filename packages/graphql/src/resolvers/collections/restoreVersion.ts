@@ -1,8 +1,6 @@
-import type { PayloadRequestWithData } from 'payload'
-import type { Collection } from 'payload'
+import type { Collection, PayloadRequestWithData } from 'payload'
 
-import { restoreVersionOperation } from 'payload'
-import { isolateObjectProperty } from 'payload'
+import { isolateObjectProperty, restoreVersionOperation } from 'payload'
 
 import type { Context } from '../types.js'
 

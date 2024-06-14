@@ -1,5 +1,4 @@
-import type { FileData, TypeWithID } from 'payload'
-import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
 import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 

@@ -11,8 +11,6 @@ import { $createUploadNode } from '../nodes/UploadNode.js'
 import { INSERT_UPLOAD_COMMAND } from '../plugin/index.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands.js'
 
-const baseClass = 'lexical-upload-drawer'
-
 const insertUpload = ({
   editor,
   relationTo,

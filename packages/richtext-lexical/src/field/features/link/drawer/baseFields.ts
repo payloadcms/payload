@@ -1,6 +1,4 @@
-import type { User } from 'payload'
-import type { SanitizedConfig } from 'payload'
-import type { Field, RadioField, TextField } from 'payload'
+import type { FieldAffectingData, RadioField, SanitizedConfig, TextField, User } from 'payload'
 
 import { validateUrl } from '../../../lexical/utils/url.js'
 
@@ -9,7 +7,7 @@ export const getBaseFields = (
   enabledCollections: false | string[],
   disabledCollections: false | string[],
   maxDepth?: number,
-): Field[] => {
+): FieldAffectingData[] => {
   let enabledRelations: string[]
 
   /**
@@ -33,7 +31,7 @@ export const getBaseFields = (
       .map(({ slug }) => slug)
   }
 
-  const baseFields: Field[] = [
+  const baseFields: FieldAffectingData[] = [
     {
       name: 'text',
       type: 'text',

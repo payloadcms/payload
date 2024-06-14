@@ -297,7 +297,7 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res)
+          handleResponse(res, successToast, errorToast)
           return
         }
 

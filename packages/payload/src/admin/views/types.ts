@@ -42,7 +42,7 @@ export type InitPageResult = {
   docID?: string
   globalConfig?: SanitizedGlobalConfig
   languageOptions: LanguageOptions
-  locale: Locale
+  locale?: Locale
   permissions: Permissions
   req: PayloadRequestWithData
   translations: ClientTranslationsObject

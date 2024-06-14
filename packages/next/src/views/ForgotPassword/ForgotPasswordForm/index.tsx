@@ -1,11 +1,11 @@
 'use client'
 
+import type { FormProps } from '@payloadcms/ui/client'
 import type { FormState, PayloadRequestWithData } from 'payload'
 
 import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
 import { email } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
-import { toast } from 'sonner'
 
 export const ForgotPasswordForm: React.FC = () => {
   const config = useConfig()
@@ -18,15 +18,16 @@ export const ForgotPasswordForm: React.FC = () => {
   const { t } = useTranslation()
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
-  const handleResponse = (res) => {
-    res.json().then(
-      () => {
+  const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
+    res
+      .json()
+      .then(() => {
         setHasSubmitted(true)
-      },
-      () => {
-        toast.error(t('authentication:emailNotValid'))
-      },
-    )
+        successToast(t('general:submissionSuccessful'))
+      })
+      .catch(() => {
+        errorToast(t('authentication:emailNotValid'))
+      })
   }
 
   const initialState: FormState = {

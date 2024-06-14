@@ -29,7 +29,7 @@ type NestedRichTextFieldsArgs = {
   siblingDoc: Record<string, unknown>
 }
 
-export const recurseNestedFields = ({
+export const recursivelyPopulateFieldsForGraphQL = ({
   context,
   currentDepth = 0,
   data,
@@ -60,11 +60,12 @@ export const recurseNestedFields = ({
     global: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
     locale: req.locale,
     overrideAccess,
+    path: [],
     populationPromises, // This is not the same as populationPromises passed into this recurseNestedFields. These are just promises resolved at the very end.
     req,
+    schemaPath: [],
     showHiddenFields,
     siblingDoc,
-    //triggerAccessControl: false, // TODO: Enable this to support access control
-    //triggerHooks: false, // TODO: Enable this to support hooks
+    triggerHooks: false,
   })
 }

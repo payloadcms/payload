@@ -10,6 +10,7 @@ import {
 } from '@payloadcms/ui/client'
 import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
+import QueryString from 'qs'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -86,10 +87,14 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
-
-    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
-      collectionConfig.versions?.drafts ? '&draft=true' : ''
-    }`
+    const apiQueryParams = QueryString.stringify(
+      {
+        draft: collectionConfig.versions?.drafts ? 'true' : undefined,
+        locale: locale?.code,
+      },
+      { addQueryPrefix: true },
+    )
+    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
     const editConfig = collectionConfig?.admin?.components?.views?.Edit
     ViewOverride = typeof editConfig === 'function' ? editConfig : null
@@ -119,9 +124,14 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
-    apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${
-      globalConfig.versions?.drafts ? '&draft=true' : ''
-    }`
+    const apiQueryParams = QueryString.stringify(
+      {
+        draft: globalConfig.versions?.drafts ? 'true' : undefined,
+        locale: locale?.code,
+      },
+      { addQueryPrefix: true },
+    )
+    apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
     const editConfig = globalConfig?.admin?.components?.views?.Edit
     ViewOverride = typeof editConfig === 'function' ? editConfig : null
@@ -162,7 +172,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       depth: 0,
       draft: true,
       fallbackLocale: null,
-      locale: locale.code,
+      locale: locale?.code,
       req,
       user,
     })
@@ -207,12 +217,15 @@ export const Document: React.FC<AdminViewProps> = async ({
         />
       )}
       <HydrateClientUser permissions={permissions} user={user} />
-      <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
+      <EditDepthProvider
+        depth={1}
+        key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+      >
         <FormQueryParamsProvider
           initialParams={{
             depth: 0,
             'fallback-locale': 'null',
-            locale: locale.code,
+            locale: locale?.code,
             uploadEdits: undefined,
           }}
         >

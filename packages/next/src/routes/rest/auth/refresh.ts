@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
-import { refreshOperation } from 'payload'
-import { extractJWT, generatePayloadCookie } from 'payload'
+import { extractJWT, generatePayloadCookie, refreshOperation } from 'payload'
 
 import type { CollectionRouteHandler } from '../types.js'
 

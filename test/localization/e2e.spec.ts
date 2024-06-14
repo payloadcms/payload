@@ -221,6 +221,19 @@ describe('Localization', () => {
       await expect(page.locator('.id-label')).not.toContainText(originalID)
     })
   })
+
+  describe('locale preference', () => {
+    test('ensure preference is used when query param is not', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+      await fillValues({ title: spanishTitle })
+      await saveDocAndAssert(page)
+      await page.goto(url.admin)
+      await page.goto(url.list)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(spanishTitle)
+    })
+  })
 })
 
 async function fillValues(data: Partial<LocalizedPost>) {

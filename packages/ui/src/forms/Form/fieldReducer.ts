@@ -247,7 +247,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     case 'DUPLICATE_ROW': {
       const { path, rowIndex } = action
       const { remainingFields, rows } = separateRows(path, state)
-      const rowsMetadata = state[path]?.rows || []
+      const rowsMetadata = [...(state[path].rows || [])]
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex])
       if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectId().toHexString()
@@ -264,13 +264,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const newState = {
         ...remainingFields,
+        ...flattenRows(path, rows),
         [path]: {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
           value: rows.length,
         },
-        ...flattenRows(path, rows),
       }
 
       return newState

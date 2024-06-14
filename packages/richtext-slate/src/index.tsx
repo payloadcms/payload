@@ -52,15 +52,7 @@ export function slateEditor(
       FieldComponent: RichTextField,
       generateComponentMap: getGenerateComponentMap(args),
       generateSchemaMap: getGenerateSchemaMap(args),
-      outputSchema: ({ isRequired }) => {
-        return {
-          type: withNullableJSONSchemaType('array', isRequired),
-          items: {
-            type: 'object',
-          },
-        }
-      },
-      populationPromises({
+      graphQLPopulationPromises({
         context,
         currentDepth,
         depth,
@@ -98,6 +90,58 @@ export function slateEditor(
           })
         }
       },
+      hooks: {
+        afterRead: [
+          ({
+            context: _context,
+            currentDepth,
+            depth,
+            draft,
+            field: _field,
+            fieldPromises,
+            findMany,
+            flattenLocales,
+            overrideAccess,
+            populationPromises,
+            req,
+            showHiddenFields,
+            siblingData,
+          }) => {
+            const context: any = _context
+            const field = _field as any
+            if (
+              field.admin?.elements?.includes('relationship') ||
+              field.admin?.elements?.includes('upload') ||
+              field.admin?.elements?.includes('link') ||
+              !field?.admin?.elements
+            ) {
+              richTextRelationshipPromise({
+                context,
+                currentDepth,
+                depth,
+                draft,
+                field,
+                fieldPromises,
+                findMany,
+                flattenLocales,
+                overrideAccess,
+                populationPromises,
+                req,
+                showHiddenFields,
+                siblingDoc: siblingData,
+              })
+            }
+          },
+        ],
+      },
+      outputSchema: ({ isRequired }) => {
+        return {
+          type: withNullableJSONSchemaType('array', isRequired),
+          items: {
+            type: 'object',
+          },
+        }
+      },
       validate: richTextValidate,
     }
   }
@@ -107,6 +151,8 @@ export { ElementButton } from './field/elements/Button.js'
 
 export { toggleElement } from './field/elements/toggle.js'
 export { LeafButton } from './field/leaves/Button.js'
+export { useLeaf } from './field/providers/LeafProvider.js'
+
 export type {
   AdapterArguments,
   ElementNode,

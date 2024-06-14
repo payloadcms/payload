@@ -1,8 +1,9 @@
 import type {
+  Adapter,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
+  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Adapter, GeneratedAdapter } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'

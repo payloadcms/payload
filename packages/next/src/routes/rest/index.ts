@@ -407,6 +407,11 @@ export const POST =
     let res: Response
     let collection: Collection
 
+    const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
+    if (overrideHttpMethod === 'GET') {
+      return await GET(config)(request, { params: { slug } })
+    }
+
     try {
       req = await createPayloadRequest({
         config,

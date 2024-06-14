@@ -1,7 +1,4 @@
-import type { Payload } from 'payload'
-import type { PathToQuery } from 'payload'
-import type { Field } from 'payload'
-import type { Operator } from 'payload'
+import type { Field, Operator, PathToQuery, Payload } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'

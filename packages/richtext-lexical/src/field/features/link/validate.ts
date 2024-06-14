@@ -8,6 +8,7 @@ import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.j
 
 export const linkValidation = (
   props: LinkFeatureServerProps,
+  sanitizedFieldsWithoutText: Field[],
   // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
 ): NodeValidation<SerializedAutoLinkNode | SerializedLinkNode> => {
   return async ({
@@ -20,19 +21,14 @@ export const linkValidation = (
      * Run buildStateFromSchema as that properly validates link fields and link sub-fields
      */
 
-    const data = {
-      ...node.fields,
-      text: 'ignored',
-    }
-
     const result = await buildStateFromSchema({
       id,
-      data,
-      fieldSchema: props.fields as Field[], // Sanitized in feature.server.ts
+      data: node.fields,
+      fieldSchema: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       preferences,
       req,
-      siblingData: data,
+      siblingData: node.fields,
     })
 
     let errorPaths = []

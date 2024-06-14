@@ -1,6 +1,4 @@
-import type { CreateVersion } from 'payload'
-import type { PayloadRequestWithData } from 'payload'
-import type { Document } from 'payload'
+import type { CreateVersion, Document, PayloadRequestWithData } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

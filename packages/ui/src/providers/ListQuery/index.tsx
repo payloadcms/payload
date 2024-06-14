@@ -35,6 +35,7 @@ export type ListQueryContext = Handlers & {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: string
+  refineListData: (args: RefineOverrides) => void
 }
 
 const Context = createContext({} as ListQueryContext)
@@ -176,6 +177,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        refineListData,
       }}
     >
       {children}

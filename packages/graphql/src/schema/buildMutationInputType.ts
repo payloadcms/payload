@@ -1,5 +1,4 @@
 import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
-import type { GraphQLInfo } from 'payload'
 import type {
   ArrayField,
   BlockField,
@@ -9,6 +8,7 @@ import type {
   DateField,
   EmailField,
   Field,
+  GraphQLInfo,
   GroupField,
   JSONField,
   NumberField,
@@ -36,8 +36,7 @@ import {
   GraphQLNonNull,
   GraphQLString,
 } from 'graphql'
-import { toWords } from 'payload'
-import { flattenTopLevelFields } from 'payload'
+import { flattenTopLevelFields, toWords } from 'payload'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'

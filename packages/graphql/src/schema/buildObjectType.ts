@@ -81,7 +81,7 @@ type Args = {
   parentName: string
 }
 
-function buildObjectType({
+export function buildObjectType({
   name,
   baseFields = {},
   config,
@@ -492,13 +492,13 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.populationPromises) {
+          if (editor?.graphQLPopulationPromises) {
             const fieldPromises = []
             const populationPromises = []
             const populateDepth =
               field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
 
-            editor?.populationPromises({
+            editor?.graphQLPopulationPromises({
               context,
               depth: populateDepth,
               draft: args.draft,
@@ -698,5 +698,3 @@ function buildObjectType({
 
   return newlyCreatedBlockType
 }
-
-export default buildObjectType

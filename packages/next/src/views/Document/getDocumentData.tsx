@@ -26,7 +26,7 @@ export const getDocumentData = async (args: {
           id,
           collectionSlug: collectionConfig?.slug,
           globalSlug: globalConfig?.slug,
-          locale: locale.code,
+          locale: locale?.code,
           operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
           schemaPath: collectionConfig?.slug || globalConfig?.slug,
         },

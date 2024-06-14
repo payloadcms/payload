@@ -93,7 +93,7 @@ export const Account: React.FC<AdminViewProps> = async ({
           initialParams={{
             depth: 0,
             'fallback-locale': 'null',
-            locale: locale.code,
+            locale: locale?.code,
             uploadEdits: undefined,
           }}
         >
