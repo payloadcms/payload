@@ -10,5 +10,9 @@ export const LanguageWrap: React.FC<{ children?: React.ReactNode }> = ({ childre
   const currentLanguage = i18n?.language
   const isScriptLanguage = currentLanguage && scriptLanguages.includes(currentLanguage)
 
-  return <div className={isScriptLanguage ? `script-language` : ''}>{children}</div>
+  if (isScriptLanguage) {
+    return <div className="script-language">{children}</div>
+  }
+
+  return <React.Fragment>{children}</React.Fragment>
 }
