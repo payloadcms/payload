@@ -1,14 +1,12 @@
-import type { Where } from 'payload'
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig , Where } from 'payload'
 import type { ParsedQs } from 'qs'
 
 import {
   REST_DELETE as createDELETE,
   REST_GET as createGET,
+  GRAPHQL_POST as createGraphqlPOST,
   REST_PATCH as createPATCH,
-  REST_POST as createPOST,
-} from '@payloadcms/next/routes'
-import { GRAPHQL_POST as createGraphqlPOST } from '@payloadcms/next/routes'
+ REST_POST as createPOST } from '@payloadcms/next/routes'
 import QueryString from 'qs'
 
 import { devUser } from '../credentials.js'

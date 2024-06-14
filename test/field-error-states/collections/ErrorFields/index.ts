@@ -1,5 +1,4 @@
-import type { CollectionConfig } from 'payload'
-import type { Field } from 'payload'
+import type { CollectionConfig , Field } from 'payload'
 
 export const errorFieldsSlug = 'error-fields'
 

@@ -1,5 +1,4 @@
-import type { SendEmailOptions } from 'payload'
-import type { PaginatedDocs } from 'payload'
+import type { PaginatedDocs , SendEmailOptions } from 'payload'
 
 import type {
   CreateArgs,

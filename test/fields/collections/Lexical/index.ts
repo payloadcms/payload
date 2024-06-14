@@ -4,17 +4,15 @@ import type { CollectionConfig } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
-import { getEnabledNodes } from '@payloadcms/richtext-lexical'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
-import {
-  BlocksFeature,
-  FixedToolbarFeature,
+import { BlocksFeature , FixedToolbarFeature ,
   HeadingFeature,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
   defaultEditorFeatures,
+  getEnabledNodes,
   lexicalEditor,
+  sanitizeServerEditorConfig,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalFieldsSlug } from '../../slugs.js'

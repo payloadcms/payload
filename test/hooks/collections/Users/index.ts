@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { BeforeLoginHook, CollectionConfig } from 'payload'
+import type { BeforeLoginHook , CollectionConfig, Payload } from 'payload'
 
 import { AuthenticationError } from 'payload'
 
