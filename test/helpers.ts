@@ -3,7 +3,7 @@ import type { Config } from 'payload'
 
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
-import { wait } from 'payload'
+import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 

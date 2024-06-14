@@ -3,7 +3,7 @@ import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
 import { type Payload } from 'payload'
-import { wait } from 'payload'
+import { wait } from 'payload/shared'
 import { parse } from 'url'
 
 import { createTestHooks } from '../testHooks.js'
