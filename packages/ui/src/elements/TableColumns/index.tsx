@@ -153,9 +153,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [tableColumns, updateColumnPreferences],
   )
 
-  // /////////////////////////////////////
-  // Get preferences on collection change
-  // /////////////////////////////////////
+  // //////////////////////////////////////////////
+  // Get preferences on collection change (drawers)
+  // //////////////////////////////////////////////
 
   React.useEffect(() => {
     const sync = async () => {
