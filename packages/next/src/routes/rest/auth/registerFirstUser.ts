@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
-import { registerFirstUserOperation } from 'payload'
-import { generatePayloadCookie } from 'payload'
+import { generatePayloadCookie, registerFirstUserOperation } from 'payload'
 
 import type { CollectionRouteHandler } from '../types.js'
 

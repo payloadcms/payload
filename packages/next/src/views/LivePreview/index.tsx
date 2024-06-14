@@ -1,5 +1,4 @@
-import type { EditViewComponent, TypeWithID } from 'payload'
-import type { LivePreviewConfig } from 'payload'
+import type { EditViewComponent, LivePreviewConfig, TypeWithID } from 'payload'
 
 import { notFound } from 'next/navigation.js'
 import React from 'react'

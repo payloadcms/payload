@@ -1,5 +1,4 @@
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
-import type { FindVersions } from 'payload'
+import type { FindVersions, PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
 
 import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'

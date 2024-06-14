@@ -1,6 +1,5 @@
 'use client'
-import type { OptionObject } from 'payload'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { OptionObject, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component

@@ -1,5 +1,4 @@
-import { initOperation } from 'payload'
-import { isolateObjectProperty } from 'payload'
+import { initOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

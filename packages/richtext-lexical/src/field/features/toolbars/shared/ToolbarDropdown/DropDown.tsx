@@ -1,8 +1,7 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import React from 'react'
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { ToolbarGroupItem } from '../../types.js'

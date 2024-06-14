@@ -2,17 +2,9 @@
 
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import { Form } from '@payloadcms/ui/client'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-
-import { type BlockFields } from '../nodes/BlocksNode.js'
-const baseClass = 'lexical-block'
-import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { FormState } from 'payload'
-
-import { getTranslation } from '@payloadcms/translations'
 import {
   Collapsible,
+  Form,
   Pill,
   SectionTitle,
   ShimmerEffect,
@@ -22,6 +14,14 @@ import {
   useFormSubmitted,
   useTranslation,
 } from '@payloadcms/ui/client'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { type BlockFields } from '../nodes/BlocksNode.js'
+const baseClass = 'lexical-block'
+import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { FormState } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
 import { v4 as uuid } from 'uuid'
 

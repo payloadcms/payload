@@ -1,6 +1,5 @@
 'use client'
-import type { CollectionPermission, GlobalPermission } from 'payload'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionPermission, GlobalPermission, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'

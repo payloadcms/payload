@@ -1,8 +1,7 @@
 import type { TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'

@@ -13,6 +13,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui/client'
 import {
+  $getNodeByKey,
   $getSelection,
   $isNodeSelection,
   CLICK_COMMAND,
@@ -20,7 +21,6 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from 'lexical'
-import { $getNodeByKey } from 'lexical'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../RelationshipNode.js'

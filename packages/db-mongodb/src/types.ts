@@ -1,6 +1,4 @@
 import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
-import type { Payload } from 'payload'
-import type { SanitizedConfig } from 'payload'
 import type {
   ArrayField,
   BlockField,
@@ -13,11 +11,13 @@ import type {
   GroupField,
   JSONField,
   NumberField,
+  Payload,
   PointField,
   RadioField,
   RelationshipField,
   RichTextField,
   RowField,
+  SanitizedConfig,
   SelectField,
   TabsField,
   TextField,

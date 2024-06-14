@@ -1,6 +1,6 @@
-import type { DocumentPermissions } from 'payload'
 import type {
   Data,
+  DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,

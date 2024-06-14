@@ -7,8 +7,7 @@ import React, { useEffect, useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
-import type { Option } from './types.js'
-import type { Props as ReactSelectAdapterProps } from './types.js'
+import type { Option, Props as ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'

@@ -1,7 +1,6 @@
 import type { Collection } from 'payload'
 
-import { forgotPasswordOperation } from 'payload'
-import { isolateObjectProperty } from 'payload'
+import { forgotPasswordOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

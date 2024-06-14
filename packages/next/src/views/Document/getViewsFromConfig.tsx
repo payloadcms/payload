@@ -1,7 +1,8 @@
-import type { CollectionPermission, GlobalPermission } from 'payload'
-import type { EditViewComponent } from 'payload'
 import type {
   AdminViewComponent,
+  CollectionPermission,
+  EditViewComponent,
+  GlobalPermission,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,

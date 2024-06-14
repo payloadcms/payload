@@ -1,11 +1,11 @@
 import type {
   Collection,
+  Endpoint,
   GlobalConfig,
   PayloadRequest,
   PayloadRequestData,
   SanitizedConfig,
 } from 'payload'
-import type { Endpoint } from 'payload'
 
 import httpStatus from 'http-status'
 import { match } from 'path-to-regexp'

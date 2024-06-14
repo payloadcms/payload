@@ -1,6 +1,5 @@
 import type { PaginateOptions, Schema } from 'mongoose'
-import type { SanitizedConfig } from 'payload'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload'
 
 import paginate from 'mongoose-paginate-v2'
 

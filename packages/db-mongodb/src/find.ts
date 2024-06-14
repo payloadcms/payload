@@ -1,6 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Find } from 'payload'
-import type { PayloadRequestWithData } from 'payload'
+import type { Find, PayloadRequestWithData } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 

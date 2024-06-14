@@ -1,5 +1,10 @@
-import type { PayloadRequestWithData, SanitizedCollectionConfig, TypeWithID } from 'payload'
-import type { TypeWithVersion, UpdateVersionArgs } from 'payload'
+import type {
+  PayloadRequestWithData,
+  SanitizedCollectionConfig,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateVersionArgs,
+} from 'payload'
 
 import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'

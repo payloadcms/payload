@@ -1,5 +1,4 @@
-import type { SanitizedConfig } from 'payload'
-import type { Field } from 'payload'
+import type { Field, SanitizedConfig } from 'payload'
 
 import { flattenTopLevelFields } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'

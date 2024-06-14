@@ -9,8 +9,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { flattenTopLevelFields, formatNames, toWords } from 'payload'
-import { buildVersionCollectionFields } from 'payload'
+import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'

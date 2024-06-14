@@ -1,10 +1,10 @@
 import type {
   Data,
+  Locale,
   PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
-import type { Locale } from 'payload'
 
 import { reduceFieldsToValues } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'

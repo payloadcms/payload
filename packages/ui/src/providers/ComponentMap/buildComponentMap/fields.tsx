@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   CellComponentProps,
+  CustomComponent,
   Field,
   FieldDescriptionProps,
   FieldWithPath,
@@ -8,7 +9,6 @@ import type {
   Option,
   SanitizedConfig,
 } from 'payload'
-import type { CustomComponent } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'

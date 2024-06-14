@@ -1,5 +1,4 @@
-import type { RequestContext } from 'payload'
-import type { Field, PayloadRequestWithData } from 'payload'
+import type { Field, PayloadRequestWithData, RequestContext } from 'payload'
 
 import { afterReadTraverseFields } from 'payload'
 

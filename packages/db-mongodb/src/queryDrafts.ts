@@ -1,6 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { QueryDrafts } from 'payload'
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequestWithData, QueryDrafts } from 'payload'
 
 import { combineQueries, flattenWhereToOperators } from 'payload'
 

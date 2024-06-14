@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
-import { loginOperation } from 'payload'
-import { generatePayloadCookie } from 'payload'
+import { generatePayloadCookie, loginOperation } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'

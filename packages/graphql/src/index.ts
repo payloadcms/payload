@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { OperationArgs } from 'graphql-http'
-import type { GraphQLInfo } from 'payload'
-import type { SanitizedConfig } from 'payload'
+import type { GraphQLInfo, SanitizedConfig } from 'payload'
 
 import * as GraphQL from 'graphql'
 

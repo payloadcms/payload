@@ -1,6 +1,4 @@
-import type { User } from 'payload'
-import type { SanitizedConfig } from 'payload'
-import type { Field } from 'payload'
+import type { Field, SanitizedConfig, User } from 'payload'
 
 export const getBaseFields = (config: SanitizedConfig): Field[] => [
   {

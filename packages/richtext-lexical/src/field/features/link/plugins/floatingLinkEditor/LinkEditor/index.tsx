@@ -1,16 +1,15 @@
 'use client'
 import type { LexicalNode } from 'lexical'
-import type { FormState } from 'payload'
-import type { Data } from 'payload'
+import type { Data, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui/client'
-import { $isLineBreakNode } from 'lexical'
 import {
   $getSelection,
+  $isLineBreakNode,
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
@@ -28,8 +27,7 @@ import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode.js
 import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
 import { LinkDrawer } from '../../../drawer/index.js'
 import { $isAutoLinkNode } from '../../../nodes/AutoLinkNode.js'
-import { $createLinkNode } from '../../../nodes/LinkNode.js'
-import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
+import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {

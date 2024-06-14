@@ -5,8 +5,7 @@ import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } fr
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
-import { APIError } from 'payload'
-import { flattenTopLevelFields } from 'payload'
+import { APIError, flattenTopLevelFields } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'

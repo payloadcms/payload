@@ -8,13 +8,13 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   DrawerToggler,
+  File,
   useConfig,
   useDocumentDrawer,
   useDrawerSlug,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui/client'
-import { File } from '@payloadcms/ui/client'
 import {
   $getNodeByKey,
   $getSelection,

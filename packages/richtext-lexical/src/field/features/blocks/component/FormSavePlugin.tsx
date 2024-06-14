@@ -1,5 +1,4 @@
-import type { FormState } from 'payload'
-import type { Data } from 'payload'
+import type { Data, FormState } from 'payload'
 import type React from 'react'
 
 import { useAllFormFields } from '@payloadcms/ui/client'

@@ -1,6 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
-import type { Where } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'

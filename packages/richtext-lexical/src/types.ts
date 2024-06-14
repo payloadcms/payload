@@ -1,7 +1,11 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type { FieldPermissions } from 'payload'
-import type { FieldTypes, SanitizedConfig } from 'payload'
-import type { RichTextAdapter, RichTextFieldProps } from 'payload'
+import type {
+  FieldPermissions,
+  FieldTypes,
+  RichTextAdapter,
+  RichTextFieldProps,
+  SanitizedConfig,
+} from 'payload'
 import type React from 'react'
 
 import type { FeatureProviderServer } from './field/features/types.js'

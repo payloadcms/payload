@@ -1,5 +1,4 @@
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
-import type { DeleteVersions } from 'payload'
+import type { DeleteVersions, PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'

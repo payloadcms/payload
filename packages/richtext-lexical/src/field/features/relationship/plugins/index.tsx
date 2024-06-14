@@ -12,8 +12,7 @@ import {
   COMMAND_PRIORITY_EDITOR,
   createCommand,
 } from 'lexical'
-import { useEffect } from 'react'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../types.js'
 import type { RelationshipFeatureProps } from '../feature.server.js'

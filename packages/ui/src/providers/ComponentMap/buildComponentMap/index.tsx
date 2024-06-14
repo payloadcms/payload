@@ -2,9 +2,9 @@ import type {
   AdminViewProps,
   EditViewProps,
   Payload,
+  ServerProps,
   WithServerSidePropsComponentProps,
 } from 'payload'
-import type { ServerProps } from 'payload'
 
 import React from 'react'
 

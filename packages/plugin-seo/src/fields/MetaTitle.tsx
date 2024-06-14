@@ -1,8 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { Options } from '@payloadcms/ui/forms/useField'
-import type { FieldType } from '@payloadcms/ui/forms/useField'
+import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
 
 import { FieldLabel } from '@payloadcms/ui/fields/FieldLabel'
 import { TextInput } from '@payloadcms/ui/fields/Text'

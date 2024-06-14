@@ -1,5 +1,4 @@
-import type { Config } from 'payload'
-import type { CollectionConfig, FieldHook, RelationshipField, UploadField } from 'payload'
+import type { CollectionConfig, Config, FieldHook, RelationshipField, UploadField } from 'payload'
 
 import mongoose from 'mongoose'
 import { fieldAffectsData } from 'payload/shared'

@@ -1,9 +1,7 @@
-import type { PayloadRequestWithData, TypeWithID } from 'payload'
-import type { TypeWithVersion } from 'payload'
+import type { PayloadRequestWithData, TypeWithID, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { buildVersionGlobalFields } from 'payload'
-import { type CreateGlobalVersionArgs } from 'payload'
+import { type CreateGlobalVersionArgs, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'

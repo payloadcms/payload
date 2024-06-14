@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
-import { findByIDOperation } from 'payload'
-import { extractJWT } from 'payload'
+import { extractJWT, findByIDOperation } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'

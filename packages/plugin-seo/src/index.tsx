@@ -1,5 +1,4 @@
-import type { Config } from 'payload'
-import type { Field, GroupField, TabsField, TextField } from 'payload'
+import type { Config, Field, GroupField, TabsField, TextField } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'

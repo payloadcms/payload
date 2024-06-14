@@ -2,7 +2,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
-import type { GraphQLInfo } from 'payload'
 import type {
   ArrayField,
   BlockField,
@@ -12,6 +11,7 @@ import type {
   DateField,
   EmailField,
   Field,
+  GraphQLInfo,
   GroupField,
   JSONField,
   NumberField,
@@ -41,8 +41,7 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { MissingEditorProp } from 'payload'
-import { createDataloaderCacheKey, toWords } from 'payload'
+import { MissingEditorProp, createDataloaderCacheKey, toWords } from 'payload'
 import { tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'

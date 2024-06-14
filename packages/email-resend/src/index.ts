@@ -1,5 +1,4 @@
-import type { EmailAdapter } from 'payload'
-import type { SendEmailOptions } from 'payload'
+import type { EmailAdapter, SendEmailOptions } from 'payload'
 
 import { APIError } from 'payload'
 

@@ -1,6 +1,10 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Permissions } from 'payload'
-import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  Permissions,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import { isPlainObject } from 'payload'
 import React from 'react'

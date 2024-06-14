@@ -1,5 +1,4 @@
-import type { User } from 'payload'
-import type { Data, Field, TabAsField } from 'payload'
+import type { Data, Field, TabAsField, User } from 'payload'
 
 import { defaultValuePromise } from './promise.js'
 

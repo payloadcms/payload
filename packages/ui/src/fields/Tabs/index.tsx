@@ -1,6 +1,5 @@
 'use client'
-import type { FieldPermissions } from 'payload'
-import type { DocumentPreferences } from 'payload'
+import type { DocumentPreferences, FieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/shared'

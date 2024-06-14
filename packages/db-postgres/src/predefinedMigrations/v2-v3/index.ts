@@ -1,6 +1,5 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
