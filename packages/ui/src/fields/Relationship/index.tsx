@@ -102,7 +102,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

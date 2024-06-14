@@ -57,7 +57,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const formInitializing = useFormInitializing()
   const formProcessing = useFormProcessing()
 
-  const path = pathFromContext || pathFromProps
+  const path = pathFromContext ?? pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()

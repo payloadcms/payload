@@ -55,7 +55,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
 
   const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
     useField<string>({
-      path: pathFromContext || pathFromProps,
+      path: pathFromContext ?? pathFromProps,
       validate: memoizedValidate,
     })
 

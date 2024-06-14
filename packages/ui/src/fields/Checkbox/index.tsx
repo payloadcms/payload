@@ -65,7 +65,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     disableFormData,
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

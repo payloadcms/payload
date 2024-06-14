@@ -56,7 +56,7 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
   } = useFieldProps()
 
   const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext || pathFromProps || name
+  const path = pathFromContext ?? pathFromProps ?? name
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
