@@ -90,6 +90,7 @@ export default joi.object({
       inactivity: joi.string(),
       login: joi.string(),
       logout: joi.string(),
+      reset: joi.string(),
       unauthorized: joi.string(),
     }),
     user: joi.string(),
