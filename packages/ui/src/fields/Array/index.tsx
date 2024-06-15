@@ -125,7 +125,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

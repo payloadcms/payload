@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate, DateField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -13,8 +13,6 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
-
-import type { DateField } from 'payload/types'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -68,7 +66,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
