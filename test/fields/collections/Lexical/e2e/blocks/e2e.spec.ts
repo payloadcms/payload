@@ -500,7 +500,7 @@ describe('lexicalBlocks', () => {
 
       const newRichTextBlock = richTextField
         .locator('.lexical-block:not(.lexical-block .lexical-block)')
-        .last() // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
       await newRichTextBlock.scrollIntoViewIfNeeded()
       await expect(newRichTextBlock).toBeVisible()
 
