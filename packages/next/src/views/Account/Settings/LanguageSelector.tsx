@@ -1,4 +1,6 @@
 'use client'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { Option } from '@payloadcms/ui/elements/ReactSelect'
 import type { LanguageOptions } from 'payload/types'
 
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
@@ -15,8 +17,8 @@ export const LanguageSelector: React.FC<{
   return (
     <ReactSelect
       inputId="language-select"
-      onChange={async ({ value }) => {
-        await switchLanguage(value)
+      onChange={async (option: Option<AcceptedLanguages>) => {
+        await switchLanguage(option.value)
       }}
       options={languageOptions}
       value={languageOptions.find((language) => language.value === i18n.language)}

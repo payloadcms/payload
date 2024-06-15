@@ -523,7 +523,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                   ? (selected) => {
                       if (selected === null) {
                         setValue(hasMany ? [] : null)
-                      } else if (hasMany) {
+                      } else if (hasMany && Array.isArray(selected)) {
                         setValue(
                           selected
                             ? selected.map((option) => {
@@ -538,12 +538,12 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                               })
                             : null,
                         )
-                      } else if (hasMultipleRelations) {
+                      } else if (hasMultipleRelations && !Array.isArray(selected)) {
                         setValue({
                           relationTo: selected.relationTo,
                           value: selected.value,
                         })
-                      } else {
+                      } else if (!Array.isArray(selected)) {
                         setValue(selected.value)
                       }
                     }

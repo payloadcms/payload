@@ -314,7 +314,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
               onChange(null)
               return
             }
-            if (hasMany) {
+            if (hasMany && Array.isArray(selected)) {
               onChange(
                 selected
                   ? selected.map((option) => {
@@ -329,12 +329,12 @@ export const RelationshipField: React.FC<Props> = (props) => {
                     })
                   : null,
               )
-            } else if (hasMultipleRelations) {
+            } else if (hasMultipleRelations && !Array.isArray(selected)) {
               onChange({
                 relationTo: selected?.relationTo,
                 value: selected?.value,
               })
-            } else {
+            } else if (!Array.isArray(selected)) {
               onChange(selected?.value)
             }
           }}

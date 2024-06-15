@@ -4,6 +4,7 @@ import type { ClientValidate, Option, OptionObject } from 'payload/types'
 
 import React, { useCallback, useState } from 'react'
 
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 import type { SelectInputProps } from './Input.js'
 
@@ -17,7 +18,7 @@ export type SelectFieldProps = FormFieldBase & {
   isClearable?: boolean
   isSortable?: boolean
   name?: string
-  onChange?: (e: string) => void
+  onChange?: (e: string | string[]) => void
   options?: Option[]
   path?: string
   value?: string
@@ -81,19 +82,17 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
-  const onChange = useCallback(
-    (selectedOption) => {
+  const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
+    (selectedOption: OptionObject | OptionObject[]) => {
       if (!disabled) {
-        let newValue
-        if (!selectedOption) {
-          newValue = null
-        } else if (hasMany) {
+        let newValue: string | string[] = null
+        if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
             newValue = selectedOption.map((option) => option.value)
           } else {
             newValue = []
           }
-        } else {
+        } else if (selectedOption && !Array.isArray(selectedOption)) {
           newValue = selectedOption.value
         }
 
