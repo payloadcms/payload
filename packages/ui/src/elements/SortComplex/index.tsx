@@ -1,6 +1,5 @@
 'use client'
-import type { OptionObject } from 'payload/types'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { OptionObject, SanitizedCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
@@ -16,6 +15,8 @@ export type SortComplexProps = {
   modifySearchQuery?: boolean
   sort?: string
 }
+
+import type { Option } from '../ReactSelect/index.js'
 
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -46,7 +47,7 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
   )
 
   const [sortField, setSortField] = useState(sortFields[0])
-  const [initialSort] = useState(() => ({ label: t('general:descending'), value: '-' }))
+  const [initialSort] = useState<Option>(() => ({ label: t('general:descending'), value: '-' }))
   const [sortOrder, setSortOrder] = useState(initialSort)
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
           <div className={`${baseClass}__select`}>
             <div className={`${baseClass}__label`}>{t('general:order')}</div>
             <ReactSelect
-              onChange={(incomingSort) => {
+              onChange={(incomingSort: Option) => {
                 setSortOrder(incomingSort || initialSort)
               }}
               options={sortOptions}

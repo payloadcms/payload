@@ -4,6 +4,7 @@ import type { OptionObject } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectFieldProps } from './index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
@@ -21,6 +22,7 @@ export type SelectInputProps = Omit<
   | 'docPreferences'
   | 'locale'
   | 'localized'
+  | 'onChange'
   | 'options'
   | 'rtl'
   | 'type'
@@ -28,6 +30,7 @@ export type SelectInputProps = Omit<
   | 'validate'
   | 'value'
 > & {
+  onChange?: ReactSelectAdapterProps['onChange']
   options?: OptionObject[]
   showError?: boolean
   value?: string | string[]
