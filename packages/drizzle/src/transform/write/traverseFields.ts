@@ -542,6 +542,10 @@ export const traverseFields = ({
         if (typeof value !== 'undefined') {
           let formattedValue = value
 
+          if (field.type === 'date' && value instanceof Date) {
+            formattedValue = value.toISOString()
+          }
+
           if (field.type === 'date' && field.name === 'updatedAt') {
             formattedValue = new Date().toISOString()
           }
