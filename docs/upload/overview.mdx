@@ -3,7 +3,7 @@ title: Uploads
 label: Overview
 order: 10
 desc: Payload supports uploads, storage and management of files directly on your server, combined with powerful file access control.
-keywords: uploads, images, media, overview, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: uploads, images, media, overview, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 <Banner>
@@ -50,7 +50,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 | **`externalFileHeaderFilter`** | Accepts existing headers and can filter/modify them.                                                                                                                                                             |
 | **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the Admin panel. The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
 | **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                          |
-| **`handlers`**                 | Array of Express request handlers to execute before the built-in Payload static middleware executes.                                                                                                             |
+| **`handlers`**                 | Array of [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) handlers to execute before the built-in Payload static middleware executes.                                                                                                             |
 | **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                               |
 | **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                         |                                                              |
 | **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                  |

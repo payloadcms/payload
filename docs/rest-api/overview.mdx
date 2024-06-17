@@ -3,7 +3,7 @@ title: REST API
 label: Overview
 order: 10
 desc: Payload generates a fully functional REST API from your Collection and Global configs.
-keywords: rest, api, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: rest, api, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 <Banner>
@@ -578,8 +578,8 @@ Each endpoint object needs to have:
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
 | **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers)                                                                                          |
-| **`root`**    | When `true`, defines the endpoint on the root Express app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
+| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Next.js](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)                                                                                          |
+| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
 Example:

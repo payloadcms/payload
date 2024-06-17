@@ -3,7 +3,7 @@ title: Global Hooks
 label: Globals
 order: 40
 desc: Hooks can be added to any Global and allow you to validate data, flatten locales, hide protected fields, remove fields and more.
-keywords: hooks, globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: hooks, globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Globals feature the ability to define the following hooks:
@@ -47,7 +47,7 @@ import { GlobalBeforeValidateHook } from 'payload/types'
 
 const beforeValidateHook: GlobalBeforeValidateHook = async ({
   data, // incoming data to update or create with
-  req, // full express request
+  req, // full Request object
   originalDoc, // original document
 }) => {
   return data // Return data to update the document with
@@ -63,7 +63,7 @@ import { GlobalBeforeChangeHook } from 'payload/types'
 
 const beforeChangeHook: GlobalBeforeChangeHook = async ({
   data, // incoming data to update or create with
-  req, // full express request
+  req, // full Request object
   originalDoc, // original document
 }) => {
   return data // Return data to update the document with
@@ -80,7 +80,7 @@ import { GlobalAfterChangeHook } from 'payload/types'
 const afterChangeHook: GlobalAfterChangeHook = async ({
   doc, // full document data
   previousDoc, // document data before updating the collection
-  req, // full express request
+  req, // full Request object
 }) => {
   return data
 }
@@ -95,7 +95,7 @@ import { GlobalBeforeReadHook } from 'payload/types'
 
 const beforeReadHook: GlobalBeforeReadHook = async ({
   doc, // full document data
-  req, // full express request
+  req, // full Request object
 }) => {...}
 ```
 
@@ -108,7 +108,7 @@ import { GlobalAfterReadHook } from 'payload/types'
 
 const afterReadHook: GlobalAfterReadHook = async ({
   doc, // full document data
-  req, // full express request
+  req, // full Request object
   findMany, // boolean to denote if this hook is running against finding one, or finding many (useful in versions)
 }) => {...}
 ```
