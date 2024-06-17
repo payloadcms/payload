@@ -95,7 +95,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.43.0",
-    "@swc/cli": "^0.1.62",
+    "@swc/cli": "0.3.12",
     "@swc/jest": "0.2.36",
     "@testing-library/jest-dom": "6.4.2",
     "@testing-library/react": "14.2.1",

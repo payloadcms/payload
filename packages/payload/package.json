@@ -77,7 +77,7 @@
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:swc && pnpm build:esbuild && pnpm build:types",
-    "build:esbuild": "echo hi",
+    "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
@@ -91,8 +91,8 @@
   "dependencies": {
     "@next/env": "^15.0.0-rc.0",
     "@payloadcms/translations": "workspace:*",
-    "@swc-node/core": "^1.13.0",
-    "@swc-node/sourcemap-support": "^0.5.0",
+    "@swc-node/core": "1.13.1",
+    "@swc-node/sourcemap-support": "0.5.0",
     "ajv": "8.14.0",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
@@ -141,7 +141,7 @@
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "@swc/core": "^1.4.13",
+    "@swc/core": "^1.6.1",
     "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {

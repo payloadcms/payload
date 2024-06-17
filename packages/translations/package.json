@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@swc/core": "^1.4.13",
+    "@swc/core": "^1.6.1",
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "dotenv": "16.4.5",

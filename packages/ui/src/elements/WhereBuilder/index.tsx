@@ -1,5 +1,5 @@
 'use client'
-import type { Operator } from 'payload/types'
+import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
