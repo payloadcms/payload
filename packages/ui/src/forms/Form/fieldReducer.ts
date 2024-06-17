@@ -1,8 +1,8 @@
-import type { FormField, FormState, Row } from 'payload/types'
+import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import equal from 'deep-equal'
-import { deepCopyObject } from 'payload/utilities'
+import { deepCopyObject } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 

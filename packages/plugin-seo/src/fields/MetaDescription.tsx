@@ -3,8 +3,8 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
 
+import { FieldLabel } from '@payloadcms/ui/fields/FieldLabel'
 import { TextareaInput } from '@payloadcms/ui/fields/Textarea'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'

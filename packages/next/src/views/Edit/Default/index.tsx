@@ -1,21 +1,22 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
-import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { Upload } from '@payloadcms/ui/elements/Upload'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
-import { OperationProvider } from '@payloadcms/ui/providers/Operation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { useRouter } from 'next/navigation.js'
-import { useSearchParams } from 'next/navigation.js'
+import {
+  DocumentControls,
+  DocumentFields,
+  Form,
+  type FormProps,
+  OperationProvider,
+  Upload,
+  useAuth,
+  useComponentMap,
+  useConfig,
+  useDocumentEvents,
+  useDocumentInfo,
+  useEditDepth,
+  useFormQueryParams,
+} from '@payloadcms/ui/client'
+import { getFormState } from '@payloadcms/ui/shared'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'

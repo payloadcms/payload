@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { slugs } from '../../shared.js'
 import { ValidateDraftsOn } from '../ValidateDraftsOn/index.js'

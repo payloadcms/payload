@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, TypeWithID } from 'payload/types'
+import type { Field, TypeWithID } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
 import type { PostgresAdapter } from '../../types.js'
 

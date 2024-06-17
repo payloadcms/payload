@@ -1,15 +1,14 @@
-import type { Config } from 'payload/config'
-import type { Block, BlockField, Field } from 'payload/types'
+import type { Block, BlockField, Config, Field } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
-import { baseBlockFields, sanitizeFields } from 'payload/config'
-import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
+import { baseBlockFields, fieldsToJSONSchema, formatLabels, sanitizeFields } from 'payload'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { BlocksFeatureClientComponent } from '../../../exports/client/index.js'
 import { createNode } from '../typeUtilities.js'
-import { BlocksFeatureClientComponent } from './feature.client.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { BlockNode } from './nodes/BlocksNode.js'

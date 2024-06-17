@@ -3,8 +3,7 @@ import type { LexicalEditor } from 'lexical'
 
 import * as scrollInfoImport from '@faceless-ui/scroll-info'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import useThrottledEffect from '@payloadcms/ui/hooks/useThrottledEffect'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useThrottledEffect, useTranslation } from '@payloadcms/ui/client'
 import * as React from 'react'
 import { useMemo } from 'react'
 

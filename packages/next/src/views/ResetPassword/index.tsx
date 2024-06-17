@@ -1,11 +1,10 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload'
 
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Translation } from '@payloadcms/ui/elements/Translation'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { Button, Translation } from '@payloadcms/ui/client'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { ResetPasswordClient } from './index.client.js'
 import './index.scss'
 

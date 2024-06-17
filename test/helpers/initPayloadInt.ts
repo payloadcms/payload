@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload'
 
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { type Payload } from 'payload'

@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { BoldFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { BoldFeatureClientComponent } from '../../../../exports/client/index.js'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,

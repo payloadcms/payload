@@ -2,25 +2,27 @@
 
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import { Form } from '@payloadcms/ui/forms/Form'
+import {
+  Collapsible,
+  Form,
+  Pill,
+  SectionTitle,
+  ShimmerEffect,
+  useConfig,
+  useDocumentInfo,
+  useFieldProps,
+  useFormSubmitted,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
 import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Collapsible } from '@payloadcms/ui/elements/Collapsible'
-import { Pill } from '@payloadcms/ui/elements/Pill'
-import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
-import { SectionTitle } from '@payloadcms/ui/fields/Blocks/SectionTitle'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useFormSubmitted } from '@payloadcms/ui/forms/Form'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { getFormState } from '@payloadcms/ui/shared'
 import { v4 as uuid } from 'uuid'
 
 import type { ClientComponentProps } from '../../types.js'

@@ -1,4 +1,4 @@
-import type { Block, CollectionConfig, Field } from 'payload/types'
+import type { Block, CollectionConfig, Field } from 'payload'
 
 export interface BlockConfig {
   block: Block

@@ -1,13 +1,12 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type { Payload, PayloadRequestWithData, TypeWithID } from 'payload'
 
 import { migratePostgresV2toV3 } from '@payloadcms/db-postgres/migration-utils'
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
-import { commitTransaction, initTransaction } from 'payload/database'
+import { commitTransaction, initTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'

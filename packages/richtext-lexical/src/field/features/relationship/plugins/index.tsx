@@ -3,7 +3,7 @@ import type { LexicalCommand } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
-import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useConfig } from '@payloadcms/ui/client'
 import {
   $getPreviousSelection,
   $getSelection,
@@ -12,8 +12,7 @@ import {
   COMMAND_PRIORITY_EDITOR,
   createCommand,
 } from 'lexical'
-import { useEffect } from 'react'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../types.js'
 import type { RelationshipFeatureProps } from '../feature.server.js'

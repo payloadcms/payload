@@ -1,6 +1,5 @@
 'use client'
-import type { CustomComponent } from 'payload/config'
-import type { UIField } from 'payload/types'
+import type { CustomComponent, UIField } from 'payload'
 
 import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'

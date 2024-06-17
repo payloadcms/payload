@@ -1,9 +1,9 @@
 import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import { expect } from '@playwright/test'
-import { defaults } from 'payload/config'
-import { wait } from 'payload/utilities'
+import { defaults } from 'payload'
+import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 

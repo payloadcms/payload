@@ -1,4 +1,4 @@
-import type { CollectionAfterOperationHook, CollectionConfig } from 'payload/types'
+import type { CollectionAfterOperationHook, CollectionConfig } from 'payload'
 
 import { AfterOperation } from '../../payload-types.js'
 

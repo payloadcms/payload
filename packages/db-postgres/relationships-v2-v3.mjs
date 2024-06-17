@@ -1,4 +1,4 @@
-const imports = `import { migratePostgresV2toV3 } from '@payloadcms/migratePostgresV2toV3'`;
+const imports = `import { migratePostgresV2toV3 } from '@payloadcms/migratePostgresV2toV3'`
 const up = `   await migratePostgresV2toV3({
         // enables logging of changes that will be made to the database
         debug: false,
@@ -7,7 +7,7 @@ const up = `   await migratePostgresV2toV3({
         payload,
         req,
         })
-`;
-export { imports, up };
+`
+export { imports, up }
 
 //# sourceMappingURL=relationships-v2-v3.js.map

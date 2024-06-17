@@ -1,4 +1,4 @@
-import type { ArrayField, Block } from 'payload/types'
+import type { ArrayField, Block } from 'payload'
 
 import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 

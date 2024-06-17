@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { UnderlineFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { UnderlineFeatureClientComponent } from '../../../../exports/client/index.js'
 
 export const UnderlineFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

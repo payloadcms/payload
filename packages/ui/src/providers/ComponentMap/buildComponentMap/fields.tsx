@@ -1,17 +1,17 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
+  CustomComponent,
   Field,
   FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
   Option,
   SanitizedConfig,
-} from 'payload/types'
+} from 'payload'
 
-import { MissingEditorProp } from 'payload/errors'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+import { MissingEditorProp } from 'payload'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -44,8 +44,10 @@ import type {
   ReducedBlock,
 } from './types.js'
 
-import { HiddenInput } from '../../../fields/HiddenInput/index.js'
-import { FieldDescription } from '../../../forms/FieldDescription/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { FieldDescription } from '../../../exports/client/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { HiddenInput } from '../../../exports/client/index.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''

@@ -19,7 +19,7 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { PayloadRequestWithData, RequestContext , Where } from '../../types/index.js'
+import type { PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type TypeWithID = {

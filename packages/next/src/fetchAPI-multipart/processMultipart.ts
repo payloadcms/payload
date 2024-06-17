@@ -2,7 +2,7 @@ import type { Readable } from 'stream'
 
 import Busboy from 'busboy'
 import httpStatus from 'http-status'
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 
 import type { FetchAPIFileUploadOptions, FetchAPIFileUploadResponse } from './index.js'
 

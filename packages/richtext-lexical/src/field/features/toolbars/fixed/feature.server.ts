@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { FixedToolbarFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { FixedToolbarFeatureClientComponent } from '../../../../exports/client/index.js'
 
 export type FixedToolbarFeatureProps = {
   /**

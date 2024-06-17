@@ -1,5 +1,4 @@
-import type { Config as PayloadConfig } from 'payload/config'
-import type { PayloadRequest } from 'payload/types'
+import type { Config as PayloadConfig, PayloadRequest } from 'payload'
 
 import Stripe from 'stripe'
 

@@ -1,15 +1,17 @@
 import type { FormProps } from '@payloadcms/ui/forms/Form'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
-import { Drawer } from '@payloadcms/ui/elements/Drawer'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import {
+  Drawer,
+  Form,
+  FormSubmit,
+  RenderFields,
+  useConfig,
+  useDocumentInfo,
+  useFieldProps,
+  useTranslation,
+} from '@payloadcms/ui/client'
+import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 

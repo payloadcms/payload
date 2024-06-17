@@ -11,5 +11,5 @@
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": false
   },
-  "include": ["src/**/*.ts", "src/**/*.js"],
+  "include": ["src/**/*.ts", "src/**/*.js"]
 }

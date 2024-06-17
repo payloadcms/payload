@@ -16,16 +16,6 @@
         "development": false,
         "useBuiltins": true
       }
-    },
-    "experimental": {
-      "plugins": [
-        [
-          "swc-plugin-transform-remove-imports",
-          {
-            "test": "\\.(scss|css)$"
-          }
-        ]
-      ]
     }
   },
   "module": {

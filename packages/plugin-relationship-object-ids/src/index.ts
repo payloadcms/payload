@@ -1,5 +1,4 @@
-import type { Config } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Config, Field } from 'payload'
 
 import { getBeforeChangeHook } from './hooks/beforeChange.js'
 

@@ -1,5 +1,4 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, FieldAffectingData } from 'payload/types'
+import type { Field, FieldAffectingData, SanitizedConfig } from 'payload'
 
 import { getBaseFields } from '../../drawer/baseFields.js'
 

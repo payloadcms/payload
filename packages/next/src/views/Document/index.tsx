@@ -1,19 +1,24 @@
-import type { EditViewComponent } from 'payload/config'
-import type { AdminViewComponent, AdminViewProps, ServerSideEditViewProps } from 'payload/types'
+import type {
+  AdminViewComponent,
+  AdminViewProps,
+  EditViewComponent,
+  ServerSideEditViewProps,
+} from 'payload'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
-import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
-import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
-import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
+} from '@payloadcms/ui/client'
+import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import QueryString from 'qs'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'

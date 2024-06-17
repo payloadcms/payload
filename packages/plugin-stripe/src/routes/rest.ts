@@ -1,7 +1,7 @@
-import type { PayloadRequest, PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequest, PayloadRequestWithData } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-import { Forbidden } from 'payload/errors'
+import { Forbidden } from 'payload'
 
 import type { StripePluginConfig } from '../types.js'
 
