@@ -42,7 +42,7 @@ importers:
         specifier: 1.40.1
         version: 1.40.1
       '@swc/cli':
-        specifier: ^0.1.62
+        specifier: 0.1.65
         version: 0.1.65(@swc/core@1.6.1)
       '@swc/jest':
         specifier: 0.2.29
@@ -5507,7 +5507,7 @@ packages:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.6.2
+      '@types/node': 16.18.96
       '@types/responselike': 1.0.3
     dev: true
 
@@ -5806,7 +5806,7 @@ packages:
   /@types/keyv@3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.96
     dev: true
 
   /@types/lodash.get@4.4.9:
@@ -6071,7 +6071,7 @@ packages:
   /@types/responselike@1.0.3:
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.96
     dev: true
 
   /@types/scheduler@0.23.0:
@@ -14143,7 +14143,7 @@ packages:
       got: 12.6.1
       registry-auth-token: 5.0.2
       registry-url: 6.0.1
-      semver: 7.5.4
+      semver: 7.6.0
     dev: true
 
   /packet-reader@1.0.0:
