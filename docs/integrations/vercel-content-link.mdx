@@ -91,13 +91,13 @@ import { vercelStegaSplit } from '@vercel/stega'
 const { cleaned, encoded } = vercelStegaSplit(text)
 ```
 
-### Block fields
+### Blocks and array fields
 
-All `blocks` fields by definition do not have plain text strings to encode. For this reason, blocks are given an additional `encodedSourceMap` key, which you can use to enable Content Link on entire sections of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
+All `blocks` and `array` fields by definition do not have plain text strings to encode. For this reason, they are given an additional `_encodedSourceMap` property, which you can use to enable Content Link on entire _sections_ of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
 
 ```ts
 <div data-vercel-edit-target>
-  <span style={{ display: "none" }}>{encodedSourceMap}</span>
+  <span style={{ display: "none" }}>{_encodedSourceMap}</span>
   {children}
 </div>
 ```
