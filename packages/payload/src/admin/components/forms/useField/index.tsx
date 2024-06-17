@@ -36,6 +36,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const showError = valid === false && submitted
 
   const prevValid = useRef(valid)
+  const prevValue = useRef(value)
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -110,6 +111,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
                 config,
                 data: getData(),
                 operation,
+                previousValue: prevValue,
                 siblingData: getSiblingData(path),
                 t,
                 user,
