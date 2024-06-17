@@ -3,7 +3,6 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { ClientCollectionConfig } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
@@ -13,6 +12,7 @@ import {
   useConfig,
   useDocumentInfo,
   useLocale,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui/client'
 import { type FormProps } from '@payloadcms/ui/forms/Form'
