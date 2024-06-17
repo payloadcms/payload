@@ -39,7 +39,7 @@
     "@aws-sdk/client-s3": "^3.142.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.40.1",
-    "@swc/cli": "^0.1.62",
+    "@swc/cli": "0.1.65",
     "@swc/jest": "0.2.29",
     "@swc/register": "0.1.10",
     "@testing-library/jest-dom": "5.17.0",
