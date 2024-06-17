@@ -9,8 +9,6 @@ import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { parseParams } from './parseParams.js'
 
-export type BuildQueryJoins = Record<string, SQL>
-
 export type BuildQueryJoinAliases = {
   condition: SQL
   table: GenericTable | PgTableWithColumns<any>

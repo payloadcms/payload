@@ -1,4 +1,7 @@
 import {
+  type Column,
+  type SQL,
+  type SQLWrapper,
   and,
   eq,
   gt,
@@ -14,8 +17,25 @@ import {
   or,
 } from 'drizzle-orm'
 
-export const operatorMap = {
-  // intersects: intersects,
+type OperatorKeys =
+  | 'and'
+  | 'contains'
+  | 'equals'
+  | 'exists'
+  | 'greater_than'
+  | 'greater_than_equal'
+  | 'in'
+  | 'isNull'
+  | 'less_than'
+  | 'less_than_equal'
+  | 'like'
+  | 'not_equals'
+  | 'not_in'
+  | 'or'
+
+export type Operators = Record<OperatorKeys, (column: Column, value: SQLWrapper | unknown) => SQL>
+
+export const operatorMap: Operators = {
   and,
   contains: ilike,
   equals: eq,
@@ -29,6 +49,7 @@ export const operatorMap = {
   like: ilike,
   not_equals: ne,
   // TODO: geojson queries
+  // intersects: intersects,
   // near: near,
   // within: within,
   // all: all,

@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -13,7 +13,6 @@ import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
 import { createJSONQuery } from './createJSONQuery/index.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
-import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
@@ -43,11 +42,11 @@ export async function parseParams({
     for (const relationOrPath of Object.keys(where)) {
       if (relationOrPath) {
         const condition = where[relationOrPath]
-        let conditionOperator: 'and' | 'or'
+        let conditionOperator: typeof and | typeof or
         if (relationOrPath.toLowerCase() === 'and') {
-          conditionOperator = 'and'
+          conditionOperator = and
         } else if (relationOrPath.toLowerCase() === 'or') {
-          conditionOperator = 'or'
+          conditionOperator = or
         }
         if (Array.isArray(condition)) {
           const builtConditions = await buildAndOrConditions({
@@ -60,7 +59,7 @@ export async function parseParams({
             where: condition,
           })
           if (builtConditions.length > 0) {
-            result = operatorMap[conditionOperator](...builtConditions)
+            result = conditionOperator(...builtConditions)
           }
         } else {
           // It's a path - and there can be multiple comparisons on a single path.
@@ -93,9 +92,9 @@ export async function parseParams({
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {
-                    constraints.push(operatorMap.like(constraintTable[col], value))
+                    constraints.push(adapter.operators.like(constraintTable[col], value))
                   } else {
-                    constraints.push(operatorMap.equals(constraintTable[col], value))
+                    constraints.push(adapter.operators.equals(constraintTable[col], value))
                   }
                 })
 
@@ -122,7 +121,7 @@ export async function parseParams({
 
                   const jsonQuery = convertPathToJSONTraversal(pathSegments)
                   const operatorKeys = {
-                    contains: { operator: 'ilike', wildcard: '%' },
+                    contains: { operator: 'like', wildcard: '%' },
                     equals: { operator: '=', wildcard: '' },
                     exists: { operator: val === true ? 'is not null' : 'is null' },
                     like: { operator: 'like', wildcard: '%' },
@@ -162,7 +161,11 @@ export async function parseParams({
 
                 if (operator === 'like') {
                   constraints.push(
-                    and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
+                    and(
+                      ...val
+                        .split(' ')
+                        .map((word) => adapter.operators.like(table[columnName], `%${word}%`)),
+                    ),
                   )
                   break
                 }
@@ -218,7 +221,7 @@ export async function parseParams({
                 }
 
                 constraints.push(
-                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                  adapter.operators[queryOperator](rawColumn || table[columnName], queryValue),
                 )
               }
             }

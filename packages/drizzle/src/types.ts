@@ -26,6 +26,7 @@ import type { PayloadRequestWithData } from 'payload/types'
 import type { QueryResult } from 'pg'
 
 import type { ChainedMethods } from './find/chainMethods.js'
+import type { Operators } from './queries/operatorMap.js'
 
 export { ChainedMethods }
 
@@ -164,6 +165,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
+  operators: Operators
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>

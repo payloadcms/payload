@@ -2,8 +2,6 @@ import type { Payload } from 'payload'
 import type { DatabaseAdapterObj } from 'payload/database'
 
 import {
-  beginTransaction,
-  commitTransaction,
   count,
   create,
   createGlobal,
@@ -25,6 +23,7 @@ import {
   migrateRefresh,
   migrateReset,
   migrateStatus,
+  operatorMap,
   queryDrafts,
   rollbackTransaction,
   updateGlobal,
@@ -32,6 +31,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
+import { like } from 'drizzle-orm'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, SQLiteAdapter } from './types.js'
@@ -67,6 +67,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       rejectInitializing = rej
     })
 
+    // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
+    const operators = { ...operatorMap, contains: like, like }
+
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       client: undefined,
@@ -82,6 +85,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      operators,
       push: args.push,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
