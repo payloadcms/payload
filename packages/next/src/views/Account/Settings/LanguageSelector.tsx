@@ -17,6 +17,7 @@ export const LanguageSelector: React.FC<{
   return (
     <ReactSelect
       inputId="language-select"
+      isClearable={false}
       onChange={async (option: Option<AcceptedLanguages>) => {
         await switchLanguage(option.value)
       }}
