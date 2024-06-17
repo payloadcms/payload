@@ -8,6 +8,7 @@ import type { TypeWithID } from './config/types'
 import { fieldAffectsData } from '../fields/config/types'
 import { getIDType } from '../utilities/getIDType'
 import { isValidID } from '../utilities/isValidID'
+import isolateObjectProperty from '../utilities/isolateObjectProperty'
 
 // Payload uses `dataloader` to solve the classic GraphQL N+1 problem.
 
@@ -117,7 +118,7 @@ const batchAndLoadDocs =
         locale,
         overrideAccess: Boolean(overrideAccess),
         pagination: false,
-        req,
+        req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
         showHiddenFields: Boolean(showHiddenFields),
         where: {
           id: {
