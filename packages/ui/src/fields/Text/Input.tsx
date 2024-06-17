@@ -1,4 +1,6 @@
 'use client'
+import type { ChangeEvent } from 'react'
+
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
@@ -102,7 +104,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
               disabled={readOnly}
               id={`field-${path?.replace(/\./g, '__')}`}
               name={path}
-              onChange={onChange}
+              onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
               onKeyDown={onKeyDown}
               placeholder={getTranslation(placeholder, i18n)}
               ref={inputRef}

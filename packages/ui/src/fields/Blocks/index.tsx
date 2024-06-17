@@ -127,7 +127,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

@@ -250,3 +250,34 @@ export const SubBlockBlock: Block = {
     },
   ],
 }
+
+export const TabBlock: Block = {
+  slug: 'tabBlock',
+  fields: [
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Tab1',
+          name: 'tab1',
+          fields: [
+            {
+              name: 'text1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'Tab2',
+          name: 'tab2',
+          fields: [
+            {
+              name: 'text2',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+}

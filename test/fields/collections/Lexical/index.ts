@@ -26,6 +26,7 @@ import {
   RichTextBlock,
   SelectFieldBlock,
   SubBlockBlock,
+  TabBlock,
   TextBlock,
   UploadAndRichTextBlock,
 } from './blocks.js'
@@ -77,6 +78,7 @@ const editorConfig: ServerEditorConfig = {
         SubBlockBlock,
         RadioButtonsBlock,
         ConditionalLayoutBlock,
+        TabBlock,
       ],
     }),
   ],

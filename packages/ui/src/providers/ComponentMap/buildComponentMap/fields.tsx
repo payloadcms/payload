@@ -146,6 +146,7 @@ export const mapFields = (args: {
         const labelProps: LabelProps = {
           label,
           required: 'required' in field ? field.required : undefined,
+          schemaPath: path,
         }
 
         const CustomLabelComponent =

@@ -273,6 +273,22 @@ export function generateLexicalRichText() {
           type: 'paragraph',
           version: 1,
         },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '666c9dfd189d72626ea301f9',
+            blockName: '',
+            tab1: {
+              text1: 'Some text1',
+            },
+            tab2: {
+              text2: 'Some text2',
+            },
+            blockType: 'tabBlock',
+          },
+        },
       ],
       direction: 'ltr',
     },

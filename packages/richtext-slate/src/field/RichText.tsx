@@ -108,7 +108,7 @@ const RichTextField: React.FC<
 
   const { formInitializing, initialValue, path, schemaPath, setValue, showError, value } = useField(
     {
-      path: pathFromContext || pathFromProps || name,
+      path: pathFromContext ?? pathFromProps ?? name,
       validate: memoizedValidate,
     },
   )

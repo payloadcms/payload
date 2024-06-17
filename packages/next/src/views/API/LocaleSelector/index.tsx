@@ -14,7 +14,7 @@ export const LocaleSelector: React.FC<{
     <SelectField
       label={t('general:locale')}
       name="locale"
-      onChange={(value) => onChange(value)}
+      onChange={(value: string) => onChange(value)}
       options={localeOptions}
       path="locale"
     />

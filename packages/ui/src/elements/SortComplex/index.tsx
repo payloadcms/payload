@@ -16,6 +16,8 @@ export type SortComplexProps = {
   sort?: string
 }
 
+import type { Option } from '../ReactSelect/index.js'
+
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
@@ -45,7 +47,7 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
   )
 
   const [sortField, setSortField] = useState(sortFields[0])
-  const [initialSort] = useState(() => ({ label: t('general:descending'), value: '-' }))
+  const [initialSort] = useState<Option>(() => ({ label: t('general:descending'), value: '-' }))
   const [sortOrder, setSortOrder] = useState(initialSort)
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
           <div className={`${baseClass}__select`}>
             <div className={`${baseClass}__label`}>{t('general:order')}</div>
             <ReactSelect
-              onChange={(incomingSort) => {
+              onChange={(incomingSort: Option) => {
                 setSortOrder(incomingSort || initialSort)
               }}
               options={sortOptions}

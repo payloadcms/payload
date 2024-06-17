@@ -65,7 +65,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
     useField<string>({
-      path: pathFromContext || pathFromProps || name,
+      path: pathFromContext ?? pathFromProps ?? name,
       validate: memoizedValidate,
     })
 

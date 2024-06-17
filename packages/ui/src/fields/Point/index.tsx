@@ -71,7 +71,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

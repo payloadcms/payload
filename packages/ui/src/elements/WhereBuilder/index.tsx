@@ -1,4 +1,6 @@
 'use client'
+import type { Operator } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 
@@ -166,9 +168,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                       or.and.map((_, andIndex) => {
                         const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
                         const initialOperator =
-                          Object.keys(
+                          (Object.keys(
                             conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
-                          )?.[0] || undefined
+                          )?.[0] as Operator) || undefined
                         const initialValue =
                           conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
                             initialOperator

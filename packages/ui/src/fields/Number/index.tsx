@@ -77,7 +77,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
     number | number[]
   >({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

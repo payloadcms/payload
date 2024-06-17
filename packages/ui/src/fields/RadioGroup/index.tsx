@@ -77,7 +77,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
