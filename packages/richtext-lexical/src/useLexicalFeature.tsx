@@ -1,8 +1,6 @@
 'use client'
 
-import { useTableCell } from '@payloadcms/ui/elements/Table'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useAddClientFunction } from '@payloadcms/ui/providers/ClientFunction'
+import { useAddClientFunction, useFieldProps, useTableCell } from '@payloadcms/ui/client'
 
 import type { FeatureProviderClient } from './field/features/types.js'
 

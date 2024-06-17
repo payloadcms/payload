@@ -1,7 +1,6 @@
-import type { EmailAdapter } from 'payload/config'
-import type { SendEmailOptions } from 'payload/types'
+import type { EmailAdapter, SendEmailOptions } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 
 export type ResendAdapterArgs = {
   apiKey: string

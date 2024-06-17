@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
-import { wait } from 'payload/utilities'
+import { getFileByPath } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'

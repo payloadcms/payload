@@ -1,13 +1,13 @@
-import type { Locale } from 'payload/config'
 import type {
   Data,
+  Locale,
   PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload'
 
+import { reduceFieldsToValues } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig

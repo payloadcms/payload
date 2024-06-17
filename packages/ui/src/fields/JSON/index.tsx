@@ -1,12 +1,12 @@
 'use client'
-import type { ClientValidate, JSONField as JSONFieldType } from 'payload/types'
+import type { ClientValidate, JSONField as JSONFieldType } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -14,9 +14,9 @@ const baseClass = 'json-field'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']

@@ -1,14 +1,10 @@
 'use client'
 
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { useConfig, useDrawerSlug, useFieldProps, useTranslation } from '@payloadcms/ui/client'
+import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

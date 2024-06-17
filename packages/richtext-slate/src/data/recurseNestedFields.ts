@@ -1,6 +1,6 @@
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
 
 import { populate } from './populate.js'
 import { recurseRichText } from './richTextRelationshipPromise.js'

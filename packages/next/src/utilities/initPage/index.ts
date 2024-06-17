@@ -1,12 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { Locale } from 'payload/config'
-import type { InitPageResult, PayloadRequestWithData, VisibleEntities } from 'payload/types'
+import type { InitPageResult, Locale, PayloadRequestWithData, VisibleEntities } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
+import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
-import { parseCookies } from 'payload/auth'
-import { createLocalReq, isEntityHidden } from 'payload/utilities'
+import { createLocalReq, isEntityHidden, parseCookies } from 'payload'
 import qs from 'qs'
 
 import type { Args } from './types.js'

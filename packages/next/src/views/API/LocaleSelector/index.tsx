@@ -1,5 +1,4 @@
-import { Select } from '@payloadcms/ui/fields/Select'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { SelectField, useTranslation } from '@payloadcms/ui/client'
 import React from 'react'
 
 export const LocaleSelector: React.FC<{
@@ -12,7 +11,7 @@ export const LocaleSelector: React.FC<{
   const { t } = useTranslation()
 
   return (
-    <Select
+    <SelectField
       label={t('general:locale')}
       name="locale"
       onChange={(value: string) => onChange(value)}

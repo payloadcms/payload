@@ -1,8 +1,6 @@
 'use client'
-import { useTableCell } from '@payloadcms/ui/elements/Table'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
+import { useConfig, useTableCell, useTranslation } from '@payloadcms/ui/client'
+import { formatDate } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 

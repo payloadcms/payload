@@ -1,10 +1,11 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type { ElementFormatType, NodeKey } from 'lexical'
 import type {
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
+  ElementFormatType,
   LexicalNode,
+  NodeKey,
   Spread,
 } from 'lexical'
 import type { JSX } from 'react'

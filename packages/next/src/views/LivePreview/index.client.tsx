@@ -1,21 +1,28 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { LivePreviewConfig } from 'payload/config'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ClientGlobalConfig,
+  Data,
+  LivePreviewConfig,
+} from 'payload'
 
-import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
-import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { SetViewActions } from '@payloadcms/ui/providers/Actions'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { OperationProvider } from '@payloadcms/ui/providers/Operation'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import {
+  DocumentControls,
+  DocumentFields,
+  Form,
+  OperationProvider,
+  SetViewActions,
+  useAuth,
+  useComponentMap,
+  useConfig,
+  useDocumentEvents,
+  useDocumentInfo,
+  useTranslation,
+} from '@payloadcms/ui/client'
+import { getFormState } from '@payloadcms/ui/shared'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'

@@ -2,18 +2,21 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { SerializedEditorState } from 'lexical'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useField } from '@payloadcms/ui/forms/useField'
-import { withCondition } from '@payloadcms/ui/forms/withCondition'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  useField,
+  useFieldProps,
+  withCondition,
+} from '@payloadcms/ui/client'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
 import './index.scss'
+import './bundled.css'
 import { LexicalProvider } from './lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'

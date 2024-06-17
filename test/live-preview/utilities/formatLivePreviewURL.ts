@@ -1,4 +1,4 @@
-import type { LivePreviewConfig } from 'payload/config'
+import type { LivePreviewConfig } from 'payload'
 
 export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   data,

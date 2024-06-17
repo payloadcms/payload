@@ -1,19 +1,19 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
 import type { CheckboxFieldProps } from './types.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
 import './index.scss'

@@ -1,8 +1,9 @@
 import type { FeatureProviderProviderServer } from '../types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { RelationshipFeatureClientComponent } from '../../../exports/client/index.js'
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createNode } from '../typeUtilities.js'
-import { RelationshipFeatureClientComponent } from './feature.client.js'
 import { relationshipPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { RelationshipNode } from './nodes/RelationshipNode.js'

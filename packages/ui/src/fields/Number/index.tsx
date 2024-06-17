@@ -1,22 +1,22 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { NumberField as NumberFieldType } from 'payload/types'
+import type { NumberField as NumberFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 

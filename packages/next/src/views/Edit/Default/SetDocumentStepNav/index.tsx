@@ -1,14 +1,16 @@
 'use client'
-import type { StepNavItem } from '@payloadcms/ui/elements/StepNav'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  type StepNavItem,
+  useConfig,
+  useDocumentInfo,
+  useEditDepth,
+  useEntityVisibility,
+  useStepNav,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { useEffect } from 'react'
 
 export const SetDocumentStepNav: React.FC<{

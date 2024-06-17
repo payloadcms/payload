@@ -1,15 +1,15 @@
-import type { Config } from 'payload/config'
-import type { Field, FileData, FileSize, Payload, TypeWithID } from 'payload/types'
+import type { Config, Field, FileData, FileSize, Payload, TypeWithID } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
-import { sanitizeFields } from 'payload/config'
+import { sanitizeFields } from 'payload'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { UploadFeatureClientComponent } from '../../../exports/client/index.js'
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createNode } from '../typeUtilities.js'
-import { UploadFeatureClientComponent } from './feature.client.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { UploadNode } from './nodes/UploadNode.js'

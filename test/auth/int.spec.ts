@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { User } from 'payload/auth'
+import type { Payload, User } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import { v4 as uuid } from 'uuid'

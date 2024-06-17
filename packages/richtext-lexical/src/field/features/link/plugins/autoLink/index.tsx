@@ -11,9 +11,9 @@ import {
   $isNodeSelection,
   $isRangeSelection,
   $isTextNode,
+  type TextNode,
   TextNode as TextNodeValue,
 } from 'lexical'
-import { type TextNode } from 'lexical'
 import { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../types.js'

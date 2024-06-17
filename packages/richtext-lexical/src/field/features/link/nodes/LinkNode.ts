@@ -1,4 +1,5 @@
-import type { BaseSelection ,
+import type {
+  BaseSelection,
   DOMConversionMap,
   DOMConversionOutput,
   EditorConfig,

@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const X: React.FC<{ className?: string }> = ({ className }) => (
+export const XIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={[className, 'icon icon--x'].filter(Boolean).join(' ')}
     height="25"

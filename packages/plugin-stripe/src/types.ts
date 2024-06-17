@@ -1,6 +1,4 @@
-import type { Payload } from 'payload'
-import type { Config as PayloadConfig } from 'payload/config'
-import type { PayloadRequest } from 'payload/types'
+import type { Payload, Config as PayloadConfig, PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
 
 export type StripeWebhookHandler<T = any> = (args: {

@@ -1,5 +1,4 @@
-import type { DeleteVersions } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { DeleteVersions, PayloadRequestWithData } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

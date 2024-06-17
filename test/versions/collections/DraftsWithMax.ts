@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import CollectionVersionButton from '../elements/CollectionVersionButton/index.js'
 import CollectionVersionsButton from '../elements/CollectionVersionsButton/index.js'

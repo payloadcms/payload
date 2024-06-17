@@ -1,6 +1,6 @@
-import type { Collection , PayloadRequestWithData } from 'payload/types'
+import type { Collection, PayloadRequestWithData } from 'payload'
 
-import { createDataloaderCacheKey } from 'payload/utilities'
+import { createDataloaderCacheKey } from 'payload'
 
 type Arguments = {
   currentDepth?: number

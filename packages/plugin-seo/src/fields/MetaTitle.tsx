@@ -1,11 +1,10 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { Options } from '@payloadcms/ui/forms/useField'
-import type { FieldType } from '@payloadcms/ui/forms/useField'
+import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
 
+import { FieldLabel } from '@payloadcms/ui/fields/FieldLabel'
 import { TextInput } from '@payloadcms/ui/fields/Text'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'

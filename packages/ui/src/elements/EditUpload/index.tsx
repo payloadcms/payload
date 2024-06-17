@@ -7,7 +7,7 @@ import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
-import { Plus } from '../../icons/Plus/index.js'
+import { PlusIcon } from '../../icons/Plus/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
@@ -215,7 +215,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 onDragEnd={onDragEnd}
                 setCheckBounds={showCrop ? setCheckBounds : false}
               >
-                <Plus />
+                <PlusIcon />
               </DraggableElement>
             )}
           </div>

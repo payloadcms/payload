@@ -1,6 +1,6 @@
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
-import { fieldAffectsData } from 'payload/types'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 

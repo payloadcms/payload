@@ -8,7 +8,7 @@ import type { Option } from '../../types.js'
 
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js'
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
-import { Edit } from '../../../../icons/Edit/index.js'
+import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
@@ -75,7 +75,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
               {t('general:editLabel', { label: '' })}
             </Tooltip>
-            <Edit className={`${baseClass}__icon`} />
+            <EditIcon className={`${baseClass}__icon`} />
           </DocumentDrawerToggler>
           <DocumentDrawer onSave={/* onSave */ null} />
         </Fragment>

@@ -1,16 +1,16 @@
-import type { Config, SanitizedConfig } from 'payload/config'
-import type { Field, FieldAffectingData } from 'payload/types'
+import type { Config, Field, FieldAffectingData, SanitizedConfig } from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
-import { sanitizeFields } from 'payload/config'
-import { deepCopyObject } from 'payload/utilities'
+import { sanitizeFields } from 'payload'
+import { deepCopyObject } from 'payload/shared'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { LinkFeatureClientComponent } from '../../../exports/client/index.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
-import { LinkFeatureClientComponent } from './feature.client.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { LinkMarkdownTransformer } from './markdownTransformer.js'
@@ -186,7 +186,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                 nodeTypes: [LinkNode.getType()],
               },
             },
-            getSubFields: ({ node, req }) => {
+            getSubFields: () => {
               return sanitizedFieldsWithoutText
             },
             getSubFieldsData: ({ node }) => {

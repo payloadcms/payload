@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { TestRecorderFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { TestRecorderFeatureClientComponent } from '../../../../exports/client/index.js'
 
 export const TestRecorderFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

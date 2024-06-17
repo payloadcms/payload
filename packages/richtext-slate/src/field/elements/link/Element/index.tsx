@@ -1,21 +1,21 @@
 'use client'
-
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { Popup } from '@payloadcms/ui/elements/Popup'
-import { Translation } from '@payloadcms/ui/elements/Translation'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
-import { deepCopyObject } from 'payload/utilities'
+import {
+  Button,
+  Popup,
+  Translation,
+  useAuth,
+  useConfig,
+  useDocumentInfo,
+  useDrawerSlug,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui/client'
+import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/shared'
+import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

@@ -1,8 +1,7 @@
-import type { DeleteVersions } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
+import type { DeleteVersions, PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
 
 import { inArray } from 'drizzle-orm'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'

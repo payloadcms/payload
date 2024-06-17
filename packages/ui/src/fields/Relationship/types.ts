@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, FieldBase, RelationshipField , SanitizedConfig } from 'payload/types'
+import type { ClientCollectionConfig, RelationshipField, SanitizedConfig } from 'payload'
 
 import type { FormFieldBase } from '../shared/index.js'
 

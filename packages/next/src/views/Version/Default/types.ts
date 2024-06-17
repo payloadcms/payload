@@ -1,5 +1,4 @@
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { Document , OptionObject } from 'payload/types'
+import type { CollectionPermission, Document, GlobalPermission, OptionObject } from 'payload'
 
 export type CompareOption = {
   label: string

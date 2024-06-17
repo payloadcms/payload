@@ -1,4 +1,4 @@
-import type { Klass, LexicalNode , LexicalNodeReplacement } from 'lexical'
+import type { Klass, LexicalNode, LexicalNodeReplacement } from 'lexical'
 
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 

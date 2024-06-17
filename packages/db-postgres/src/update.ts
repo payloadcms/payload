@@ -1,4 +1,4 @@
-import type { UpdateOne } from 'payload/database'
+import type { UpdateOne } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

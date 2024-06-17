@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { verifyEmailOperation } from 'payload/operations'
+import { verifyEmailOperation } from 'payload'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 

@@ -1,14 +1,16 @@
 'use client'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 
-import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
-import { GenerateConfirmation } from '@payloadcms/ui/elements/GenerateConfirmation'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFormFields } from '@payloadcms/ui/forms/Form'
-import { useField } from '@payloadcms/ui/forms/useField'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { text } from 'payload/fields/validations'
+import {
+  CopyToClipboard,
+  FieldLabel,
+  GenerateConfirmation,
+  useConfig,
+  useField,
+  useFormFields,
+  useTranslation,
+} from '@payloadcms/ui/client'
+import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 

@@ -2,8 +2,7 @@
 
 import type { HeadingTagType } from '@lexical/rich-text'
 
-import { $isHeadingNode } from '@lexical/rich-text'
-import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
+import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
