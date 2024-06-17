@@ -41,8 +41,6 @@
     "translateNewKeys": "tsx scripts/translateNewKeys.ts"
   },
   "dependencies": {
-    "@faceless-ui/modal": "3.0.0-beta.0",
-    "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@lexical/headless": "0.16.0",
     "@lexical/link": "0.16.0",
     "@lexical/list": "0.16.0",

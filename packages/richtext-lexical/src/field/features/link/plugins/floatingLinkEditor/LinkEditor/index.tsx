@@ -2,11 +2,16 @@
 import type { LexicalNode } from 'lexical'
 import type { Data, FormState } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui/client'
+import {
+  formatDrawerSlug,
+  useConfig,
+  useEditDepth,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import {
   $getSelection,
   $isLineBreakNode,

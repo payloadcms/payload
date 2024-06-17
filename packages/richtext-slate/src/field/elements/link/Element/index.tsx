@@ -1,7 +1,6 @@
 'use client'
 import type { FormState } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -12,6 +11,7 @@ import {
   useDocumentInfo,
   useDrawerSlug,
   useLocale,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui/client'
 import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/shared'

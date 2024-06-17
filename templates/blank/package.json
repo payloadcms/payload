@@ -9,6 +9,7 @@
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:types": "payload generate:types",
+    "ii": "pnpm --ignore-workspace install",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
@@ -32,7 +33,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "dotenv": "^16.4.5",
     "eslint": "^8",
-    "eslint-config-next": "^14.2.3",
+    "eslint-config-next": "15.0.0-rc.0",
     "typescript": "^5.4.5"
   },
   "engines": {

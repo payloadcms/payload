@@ -2,7 +2,6 @@
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { ClientCollectionConfig, FormState } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -13,6 +12,7 @@ import {
   useConfig,
   useDocumentInfo,
   useFieldProps,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui/client'
 import { getFormState } from '@payloadcms/ui/shared'
