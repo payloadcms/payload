@@ -22,13 +22,15 @@ const DefaultLogout: React.FC<{
     routes: { admin },
   } = config
 
+  const basePath = process.env.NEXT_BASE_PATH ?? ''
+
   const LinkElement = Link || 'a'
 
   return (
     <LinkElement
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
-      href={`${admin}${logoutRoute}`}
+      href={`${basePath}${admin}${logoutRoute}`}
       tabIndex={tabIndex}
     >
       <LogOutIcon />
