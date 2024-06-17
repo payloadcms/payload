@@ -7,6 +7,7 @@ import type { FieldAccess } from 'payload'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { TestButton } from './TestButton.js'
+import { Disabled } from './collections/Disabled/index.js'
 import {
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
@@ -533,6 +534,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    Disabled,
   ],
   onInit: async (payload) => {
     await payload.create({

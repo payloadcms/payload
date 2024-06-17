@@ -1,5 +1,4 @@
 'use client'
-import type { FieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
@@ -33,7 +32,6 @@ export type GroupFieldProps = FormFieldBase & {
   forceRender?: boolean
   hideGutter?: boolean
   name?: string
-  permissions: FieldPermissions
   width?: string
 }
 

@@ -27,7 +27,6 @@ import { FieldDescription } from '../FieldDescription/index.js'
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   initCollapsed?: boolean
-  permissions: FieldPermissions
   width?: string
 }
 

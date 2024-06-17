@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, FieldPermissions } from 'payload'
+import type { DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/shared'
@@ -29,7 +29,6 @@ export type TabsFieldProps = FormFieldBase & {
   forceRender?: boolean
   name?: string
   path?: string
-  permissions: FieldPermissions
   tabs?: MappedTab[]
   width?: string
 }
@@ -49,9 +48,9 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
   const {
     indexPath,
     path: pathFromContext,
-    permissions,
     readOnly: readOnlyFromContext,
     schemaPath,
+    siblingPermissions,
   } = useFieldProps()
 
   const readOnly = readOnlyFromProps || readOnlyFromContext
@@ -180,9 +179,9 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
                   margins="small"
                   path={generateTabPath()}
                   permissions={
-                    'name' in activeTabConfig && permissions?.fields?.[activeTabConfig.name]?.fields
-                      ? permissions?.fields?.[activeTabConfig.name]?.fields
-                      : permissions?.fields
+                    'name' in activeTabConfig && siblingPermissions?.[activeTabConfig.name]?.fields
+                      ? siblingPermissions[activeTabConfig.name]?.fields
+                      : siblingPermissions
                   }
                   readOnly={readOnly}
                   schemaPath={`${schemaPath ? `${schemaPath}` : ''}${activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}

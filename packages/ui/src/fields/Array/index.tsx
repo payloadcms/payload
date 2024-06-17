@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField as ArrayFieldType, FieldPermissions } from 'payload'
+import type { ArrayField as ArrayFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -40,7 +40,6 @@ export type ArrayFieldProps = FormFieldBase & {
   maxRows?: ArrayFieldType['maxRows']
   minRows?: ArrayFieldType['minRows']
   name?: string
-  permissions: FieldPermissions
   width?: string
 }
 
@@ -63,13 +62,17 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     maxRows,
     minRows: minRowsProp,
     path: pathFromProps,
-    permissions,
     readOnly: readOnlyFromProps,
     required,
     validate,
   } = props
 
-  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
+  const {
+    indexPath,
+    path: pathFromContext,
+    permissions,
+    readOnly: readOnlyFromContext,
+  } = useFieldProps()
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -109,8 +112,6 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     },
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
-
-  const { path: pathFromContext } = useFieldProps()
 
   const {
     errorPaths,
