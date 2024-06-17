@@ -500,7 +500,7 @@ describe('lexicalBlocks', () => {
 
       const newRichTextBlock = richTextField
         .locator('.lexical-block:not(.lexical-block .lexical-block)')
-        .last() // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
       await newRichTextBlock.scrollIntoViewIfNeeded()
       await expect(newRichTextBlock).toBeVisible()
 
@@ -888,13 +888,9 @@ describe('lexicalBlocks', () => {
 
     test('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
-      await wait(300)
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
-      await wait(300)
 
       await richTextField.scrollIntoViewIfNeeded()
-      await wait(300)
-
       await expect(richTextField).toBeVisible()
       await wait(300)
 
@@ -936,6 +932,81 @@ describe('lexicalBlocks', () => {
       await wait(300)
 
       await expect(requiredTooltip).toBeInViewport() // toBeVisible() doesn't work for some reason
+    })
+
+    // Reproduces https://github.com/payloadcms/payload/issues/6631
+    test('ensure tabs field within lexical block correctly loads and saves data', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const tabsBlock = richTextField.locator('.lexical-block').nth(8)
+      await wait(300)
+
+      await tabsBlock.scrollIntoViewIfNeeded()
+      await wait(300)
+
+      await expect(tabsBlock).toBeVisible()
+      await wait(300)
+
+      const tab1Text1Field = tabsBlock.locator('#field-tab1__text1')
+      await tab1Text1Field.scrollIntoViewIfNeeded()
+      await expect(tab1Text1Field).toBeVisible()
+      await expect(tab1Text1Field).toHaveValue('Some text1')
+      // change text to 'Some text1 changed'
+      await tab1Text1Field.fill('Some text1 changed')
+
+      const tab1Button = tabsBlock.locator('.tabs-field__tab-button', { hasText: 'Tab1' })
+      const tab2Button = tabsBlock.locator('.tabs-field__tab-button', { hasText: 'Tab2' })
+
+      await tab2Button.click()
+      await wait(300)
+
+      const tab2Text1Field = tabsBlock.locator('#field-tab2__text2')
+      await tab2Text1Field.scrollIntoViewIfNeeded()
+      await expect(tab2Text1Field).toBeVisible()
+      await expect(tab2Text1Field).toHaveValue('Some text2')
+      // change text to 'Some text2 changed'
+      await tab2Text1Field.fill('Some text2 changed')
+      await wait(300)
+
+      await saveDocAndAssert(page)
+      await wait(300)
+      await tabsBlock.scrollIntoViewIfNeeded()
+      await wait(300)
+      await expect(tabsBlock).toBeVisible()
+      await wait(300)
+
+      await tab1Button.click()
+      await expect(tab1Text1Field).toHaveValue('Some text1 changed')
+      await tab2Button.click()
+      await expect(tab2Text1Field).toHaveValue('Some text2 changed')
+
+      await expect(async () => {
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            overrideAccess: true,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
+            },
+          })
+        ).docs[0] as never
+
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+        const tabBlockData: SerializedBlockNode = lexicalField.root
+          .children[13] as SerializedBlockNode
+
+        expect(tabBlockData.fields.tab1.text1).toBe('Some text1 changed')
+        expect(tabBlockData.fields.tab2.text2).toBe('Some text2 changed')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 })

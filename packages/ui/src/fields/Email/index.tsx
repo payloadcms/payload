@@ -1,6 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
-import type { EmailField as EmailFieldType } from 'payload/types'
+import type { ClientValidate, EmailField as EmailFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -62,7 +61,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

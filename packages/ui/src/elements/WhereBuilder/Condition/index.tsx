@@ -19,7 +19,7 @@ export type Props = {
   fieldName: string
   fields: FieldCondition[]
   initialValue: string
-  operator: string
+  operator: Operator
   orIndex: number
   removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
   updateCondition: ({
@@ -36,6 +36,10 @@ export type Props = {
     value: string
   }) => void
 }
+
+import type { Operator } from 'payload/types'
+
+import type { Option } from '../../ReactSelect/index.js'
 
 import { RenderCustomClientComponent } from '../../../elements/RenderCustomClientComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -74,7 +78,7 @@ export const Condition: React.FC<Props> = (props) => {
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
-  const [internalOperatorOption, setInternalOperatorOption] = useState(operator)
+  const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
 
   const debouncedValue = useDebounce(internalQueryValue, 300)
@@ -124,7 +128,7 @@ export const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__field`}>
             <ReactSelect
               isClearable={false}
-              onChange={(field) => {
+              onChange={(field: Option) => {
                 setInternalField(fields.find((f) => f.value === field.value))
                 setInternalOperatorOption(undefined)
                 setInternalQueryValue(undefined)
@@ -137,7 +141,7 @@ export const Condition: React.FC<Props> = (props) => {
             <ReactSelect
               disabled={!internalField?.value && typeof internalField?.value !== 'number'}
               isClearable={false}
-              onChange={(operator) => {
+              onChange={(operator: Option<Operator>) => {
                 setInternalOperatorOption(operator.value)
               }}
               options={internalField?.operators}

@@ -3,7 +3,7 @@ title: Production Deployment
 label: Deployment
 order: 10
 desc: When your Payload based app is ready, tested, looking great, it is time to deploy. Learn how to deploy your app and what to consider before deployment.
-keywords: deployment, production, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: deployment, production, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 <Banner type="success">
@@ -48,10 +48,14 @@ wield that power responsibly before deploying to Production.
     By default, all Access Control functions require that a user is successfully logged in to
     Payload to create, read, update, or delete data.
   </strong>
-
   But, if you allow public user registration, for example, you will want to make sure that your
-  access control functions are more strict - permitting <strong>only appropriate users</strong> to
-  perform appropriate actions.
+  access control functions are more strict - permitting
+  {' '}
+  <strong>
+    only appropriate users
+  </strong>
+  {' '}
+  to perform appropriate actions.
 </Banner>
 
 ### Building the Admin panel
@@ -73,7 +77,7 @@ Payload provides the `build` NPM script. You can use it by adding a `script` to 
 }
 ```
 
-Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Admin bundle will be
+Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Payload Admin bundle will be
 created in the `build` directory.
 
 ### Setting Node to Production
@@ -181,7 +185,7 @@ _copy_ the files your users upload to a more permanent storage solution like Ama
 **To automatically send uploaded files to S3 or similar, you could:**
 
 - Write an asynchronous `beforeChange` hook for all Collections that support Uploads, which takes any uploaded `file`
-  from the Express `req` and sends it to an S3 bucket
+  from the `req` and sends it to an S3 bucket
 - Write an `afterRead` hook to save a `s3URL` field that automatically takes the `filename` stored and formats a full S3
   URL
 - Write an `afterDelete` hook that automatically deletes files from the S3 bucket

@@ -1,6 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload/types'
-import type { Where } from 'payload/types'
+import type { ClientCollectionConfig, Where } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -21,7 +20,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { Pill } from '../Pill/index.js'
-import { ReactSelect } from '../ReactSelect/index.js'
+import { type Option, ReactSelect } from '../ReactSelect/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { ViewDescription } from '../ViewDescription/index.js'
 import { baseClass } from './index.js'
@@ -83,7 +82,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
 
-  const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() =>
+  const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
     selectedCollectionConfig
       ? {
           label: getTranslation(selectedCollectionConfig.labels.singular, i18n),
@@ -118,7 +117,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     })
 
   useEffect(() => {
-    if (selectedOption) {
+    if (selectedOption && !Array.isArray(selectedOption)) {
       setSelectedCollectionConfig(
         enabledCollectionConfigs.find(({ slug }) => selectedOption.value === slug),
       )
