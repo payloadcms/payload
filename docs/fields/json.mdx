@@ -21,7 +21,7 @@ keywords: json, jsonSchema, schema, validation, fields, config, configuration, d
 
 This field uses the `monaco-react` editor syntax highlighting.
 
-### Config
+## Config
 
 | Option             | Description                                                                                                                                                                 |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,7 +43,7 @@ This field uses the `monaco-react` editor syntax highlighting.
 
 _\* An asterisk denotes that a property is required._
 
-### Admin Config
+## Admin Config
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
 
@@ -51,7 +51,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`editorOptions`** | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/typedoc/variables/editor.EditorOptions.html). |
 
-### Example
+## Example
 
 `collections/ExampleCollection.ts`
 
@@ -69,14 +69,14 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
-### JSON Schema Validation
+## JSON Schema Validation
 
 Payload JSON fields fully support the [JSON schema](https://json-schema.org/) standard. By providing a schema in your field config, the editor will be guided in the admin UI, getting typeahead for properties and their formats automatically. When the document is saved, the default validation will prevent saving any invalid data in the field according to the schema in your config.
 
 If you only provide a URL to a schema, Payload will fetch the desired schema if it is publicly available. If not, it is recommended to add the schema directly to your config or import it from another file so that it can be implemented consistently in your project.
 
 
-#### Local JSON Schema
+### Local JSON Schema
 
 `collections/ExampleCollection.ts`
 
@@ -109,7 +109,7 @@ export const ExampleCollection: CollectionConfig = {
 // Attempting to create {"foo": "not-bar"} will throw an error
 ```
 
-#### Remote JSON Schema
+### Remote JSON Schema
 
 `collections/ExampleCollection.ts`
 

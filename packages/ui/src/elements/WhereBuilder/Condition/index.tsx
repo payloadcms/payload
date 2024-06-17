@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 
 import type { FieldCondition } from '../types.js'
@@ -18,7 +19,7 @@ export type Props = {
   fieldName: string
   fields: FieldCondition[]
   initialValue: string
-  operator: string
+  operator: Operator
   orIndex: number
   removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
   updateCondition: ({
@@ -36,7 +37,11 @@ export type Props = {
   }) => void
 }
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import type { Operator } from 'payload/types'
+
+import type { Option } from '../../ReactSelect/index.js'
+
+import { RenderCustomClientComponent } from '../../../elements/RenderCustomClientComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
@@ -73,7 +78,7 @@ export const Condition: React.FC<Props> = (props) => {
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
-  const [internalOperatorOption, setInternalOperatorOption] = useState(operator)
+  const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
 
   const debouncedValue = useDebounce(internalQueryValue, 300)
@@ -81,7 +86,7 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     // This is to trigger changes when the debounced value changes
     if (
-      internalField.value &&
+      (internalField?.value || typeof internalField?.value === 'number') &&
       internalOperatorOption &&
       ![null, undefined].includes(debouncedValue)
     ) {
@@ -123,20 +128,20 @@ export const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__field`}>
             <ReactSelect
               isClearable={false}
-              onChange={(field) => {
+              onChange={(field: Option) => {
                 setInternalField(fields.find((f) => f.value === field.value))
                 setInternalOperatorOption(undefined)
                 setInternalQueryValue(undefined)
               }}
               options={fields}
-              value={fields.find((field) => internalField.value === field.value) || fields[0]}
+              value={fields.find((field) => internalField?.value === field.value) || fields[0]}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!internalField.value}
+              disabled={!internalField?.value && typeof internalField?.value !== 'number'}
               isClearable={false}
-              onChange={(operator) => {
+              onChange={(operator: Option<Operator>) => {
                 setInternalOperatorOption(operator.value)
               }}
               options={internalField?.operators}
@@ -148,7 +153,7 @@ export const Condition: React.FC<Props> = (props) => {
             />
           </div>
           <div className={`${baseClass}__value`}>
-            <RenderCustomComponent
+            <RenderCustomClientComponent
               CustomComponent={internalField?.props?.admin?.components?.Filter}
               DefaultComponent={ValueComponent}
               componentProps={{
@@ -190,8 +195,8 @@ export const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               addCondition({
-                andIndex,
-                fieldName,
+                andIndex: andIndex + 1,
+                fieldName: fields[0].value,
                 orIndex,
                 relation: 'and',
               })

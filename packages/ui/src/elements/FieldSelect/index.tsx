@@ -1,6 +1,7 @@
+'use client'
 import type { FieldWithPath } from 'payload/types'
 
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, type JSX, useState } from 'react'
 
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 

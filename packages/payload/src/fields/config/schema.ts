@@ -499,8 +499,8 @@ export const richText = baseField.keys({
       CellComponent: componentSchema.optional(),
       FieldComponent: componentSchema.optional(),
       afterReadPromise: joi.func().optional(),
+      graphQLPopulationPromises: joi.func().optional(),
       outputSchema: joi.func().optional(),
-      populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })
     .unknown(),
@@ -549,6 +549,7 @@ export const ui = joi.object().keys({
         .default({}),
       condition: joi.func(),
       custom: joi.object().pattern(joi.string(), joi.any()),
+      disableListColumn: joi.boolean().default(false),
       position: joi.string().valid('sidebar'),
       width: joi.string(),
     })

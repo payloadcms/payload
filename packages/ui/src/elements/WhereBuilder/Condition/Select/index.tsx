@@ -1,3 +1,4 @@
+'use client'
 import type { Option, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'

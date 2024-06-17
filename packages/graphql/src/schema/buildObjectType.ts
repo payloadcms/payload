@@ -41,6 +41,7 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
+import { MissingEditorProp } from 'payload/errors'
 import { tabHasName } from 'payload/types'
 import { createDataloaderCacheKey, toWords } from 'payload/utilities'
 
@@ -80,7 +81,7 @@ type Args = {
   parentName: string
 }
 
-function buildObjectType({
+export function buildObjectType({
   name,
   baseFields = {},
   config,
@@ -476,6 +477,10 @@ function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          if (!field?.editor) {
+            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+          }
+
           if (typeof field?.editor === 'function') {
             throw new Error('Attempted to access unsanitized rich text editor.')
           }
@@ -487,13 +492,13 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.populationPromises) {
+          if (editor?.graphQLPopulationPromises) {
             const fieldPromises = []
             const populationPromises = []
             const populateDepth =
               field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
 
-            editor?.populationPromises({
+            editor?.graphQLPopulationPromises({
               context,
               depth: populateDepth,
               draft: args.draft,
@@ -693,5 +698,3 @@ function buildObjectType({
 
   return newlyCreatedBlockType
 }
-
-export default buildObjectType

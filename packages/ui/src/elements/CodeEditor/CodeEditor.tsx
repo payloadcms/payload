@@ -1,3 +1,4 @@
+'use client'
 import EditorImport from '@monaco-editor/react'
 import React from 'react'
 

@@ -15,6 +15,7 @@ export interface Config {
     'object-fit': ObjectFit;
     'crop-only': CropOnly;
     'focal-only': FocalOnly;
+    'focal-no-sizes': FocalNoSize;
     media: Media;
     enlarge: Enlarge;
     reduce: Reduce;
@@ -64,6 +65,8 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     maintainedAspectRatio?: {
       url?: string | null;
@@ -187,6 +190,53 @@ export interface Media {
     };
   };
 }
+export interface AnimatedTypeMedia {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  focalX?: number
+  focalY?: number
+  sizes?: {
+    squareSmall?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedHeight?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedWidth?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedAll?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
@@ -204,6 +254,8 @@ export interface Version {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -230,6 +282,8 @@ export interface GifResize {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     small?: {
       url?: string | null;
@@ -264,6 +318,8 @@ export interface NoImageSize {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -280,6 +336,8 @@ export interface ObjectFit {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     fitContain?: {
       url?: string | null;
@@ -330,6 +388,8 @@ export interface CropOnly {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     focalTest?: {
       url?: string | null;
@@ -372,6 +432,8 @@ export interface FocalOnly {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     focalTest?: {
       url?: string | null;
@@ -401,6 +463,24 @@ export interface FocalOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "focal-no-sizes".
+ */
+export interface FocalNoSize {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "enlarge".
  */
 export interface Enlarge {
@@ -414,6 +494,8 @@ export interface Enlarge {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     accidentalSameSize?: {
       url?: string | null;
@@ -472,6 +554,8 @@ export interface Reduce {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     accidentalSameSize?: {
       url?: string | null;
@@ -522,6 +606,8 @@ export interface MediaTrim {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     trimNumber?: {
       url?: string | null;
@@ -564,6 +650,8 @@ export interface UnstoredMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -580,6 +668,8 @@ export interface ExternallyServedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -612,6 +702,8 @@ export interface Uploads1 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -629,6 +721,8 @@ export interface Uploads2 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -645,6 +739,8 @@ export interface AdminThumbnailFunction {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -661,6 +757,8 @@ export interface AdminThumbnailSize {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
   sizes?: {
     small?: {
       url?: string | null;
@@ -695,6 +793,8 @@ export interface OptionalFile {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -711,6 +811,8 @@ export interface RequiredFile {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -766,6 +868,6 @@ export interface PayloadMigration {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

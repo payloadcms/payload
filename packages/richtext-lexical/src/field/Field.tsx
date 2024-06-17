@@ -59,7 +59,7 @@ const _RichText: React.FC<
   const { path: pathFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -71,6 +71,7 @@ const _RichText: React.FC<
     className,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
+    editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
   ]
     .filter(Boolean)
     .join(' ')
@@ -84,14 +85,14 @@ const _RichText: React.FC<
         width,
       }}
     >
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}

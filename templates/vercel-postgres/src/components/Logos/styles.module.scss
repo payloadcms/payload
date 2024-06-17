@@ -1,0 +1,48 @@
+.logos {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 50vh;
+  width: 100%;
+  gap: 80px;
+
+  @media screen and (max-width: 600px) {
+    gap: 40px;
+    flex-direction: column;
+  }
+}
+
+.payloadLogo {
+  width: 100%;
+  height: auto;
+  max-width: 320px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.nextLogo {
+  width: 100%;
+  height: auto;
+  max-width: 320px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: #fff;
+}
+
+.payloadLogo,
+.nextLogo {
+  @media screen and (max-width: 1200px) {
+    width: 25vw;
+    height: auto;
+  }
+
+  @media screen and (max-width: 600px) {
+    width: 50vw;
+    justify-content: center;
+    align-items: center;
+  }
+}

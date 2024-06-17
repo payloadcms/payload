@@ -82,7 +82,9 @@
   }
 
   &__count {
-    padding: 0px 7px;
+    min-width: 22px;
+    text-align: center;
+    padding: 2px 7px;
     background-color: var(--theme-elevation-100);
     border-radius: 1px;
   }

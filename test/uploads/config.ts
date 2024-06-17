@@ -10,8 +10,10 @@ import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
+  animatedTypeMedia,
   audioSlug,
   enlargeSlug,
+  focalNoSizesSlug,
   mediaSlug,
   reduceSlug,
   relationSlug,
@@ -22,7 +24,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  serverURL: undefined,
   collections: [
     {
       slug: relationSlug,
@@ -58,13 +59,6 @@ export default buildConfigWithDefaults({
       slug: 'gif-resize',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media-gif'),
-        mimeTypes: ['image/gif'],
-        resizeOptions: {
-          position: 'center',
-          width: 200,
-          height: 200,
-        },
         formatOptions: {
           format: 'gif',
         },
@@ -82,27 +76,32 @@ export default buildConfigWithDefaults({
             width: 1000,
           },
         ],
+        mimeTypes: ['image/gif'],
+        resizeOptions: {
+          height: 200,
+          position: 'center',
+          width: 200,
+        },
+        staticDir: path.resolve(dirname, './media-gif'),
       },
     },
     {
       slug: 'no-image-sizes',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './no-image-sizes'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
           height: 200,
           position: 'center',
           width: 200,
         },
+        staticDir: path.resolve(dirname, './no-image-sizes'),
       },
     },
     {
       slug: 'object-fit',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './object-fit'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'fitContain',
@@ -129,6 +128,8 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './object-fit'),
       },
     },
     {
@@ -136,8 +137,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         focalPoint: false,
-        staticDir: path.resolve(dirname, './crop-only'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
@@ -155,6 +154,8 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './crop-only'),
       },
     },
     {
@@ -162,8 +163,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         crop: false,
-        staticDir: path.resolve(dirname, './focal-only'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
@@ -181,6 +180,18 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './focal-only'),
+      },
+    },
+    {
+      slug: focalNoSizesSlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: true,
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './focal-no-sizes'),
       },
     },
     {
@@ -281,18 +292,45 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: animatedTypeMedia,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+        imageSizes: [
+          {
+            name: 'squareSmall',
+            width: 480,
+            height: 480,
+            position: 'centre',
+            withoutEnlargement: false,
+          },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+            height: undefined,
+          },
+          {
+            name: 'undefinedWidth',
+            width: undefined,
+            height: 300,
+          },
+          {
+            name: 'undefinedAll',
+            width: undefined,
+            height: undefined,
+          },
+        ],
+      },
+    },
+    {
       slug: enlargeSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media/enlarge'),
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -325,13 +363,21 @@ export default buildConfigWithDefaults({
             width: 300,
           },
         ],
+        mimeTypes: [
+          'image/png',
+          'image/jpg',
+          'image/jpeg',
+          'image/gif',
+          'image/svg+xml',
+          'audio/mpeg',
+        ],
+        staticDir: path.resolve(dirname, './media/enlarge'),
       },
     },
     {
       slug: reduceSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media/reduce'),
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -366,15 +412,13 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
+        staticDir: path.resolve(dirname, './media/reduce'),
       },
     },
     {
       slug: 'media-trim',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './media-trim'),
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        trimOptions: 0,
         imageSizes: [
           {
             name: 'trimNumber',
@@ -398,6 +442,9 @@ export default buildConfigWithDefaults({
             width: 1024,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './media-trim'),
+        trimOptions: 0,
       },
     },
     {
@@ -431,8 +478,8 @@ export default buildConfigWithDefaults({
       slug: 'required-file',
       fields: [],
       upload: {
-        staticDir: path.resolve(dirname, './required'),
         filesRequiredOnCreate: true,
+        staticDir: path.resolve(dirname, './required'),
       },
     },
     {
@@ -444,21 +491,14 @@ export default buildConfigWithDefaults({
         },
       ],
       upload: {
-        staticDir: path.resolve(dirname, `./${versionSlug}`),
         filesRequiredOnCreate: true,
+        staticDir: path.resolve(dirname, `./${versionSlug}`),
       },
       versions: {
         drafts: true,
       },
     },
   ],
-  upload: {
-    // debug: true,
-    abortOnLimit: true,
-    limits: {
-      fileSize: 2_000_000, // 2MB
-    },
-  },
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
@@ -496,6 +536,43 @@ export default buildConfigWithDefaults({
         image: uploadedImage,
         versionedImage,
       },
+    })
+
+    // Create animated type images
+    const animatedImageFilePath = path.resolve(dirname, './animated.webp')
+    const animatedImageFile = await getFileByPath(animatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: animatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: animatedImageFile,
+    })
+
+    const nonAnimatedImageFilePath = path.resolve(dirname, './non-animated.webp')
+    const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: nonAnimatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: nonAnimatedImageFile,
     })
 
     // Create audio
@@ -542,5 +619,16 @@ export default buildConfigWithDefaults({
         name: `function-image-${imageFile.name}`,
       },
     })
+  },
+  serverURL: undefined,
+  upload: {
+    // debug: true,
+    abortOnLimit: true,
+    limits: {
+      fileSize: 2_000_000, // 2MB
+    },
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

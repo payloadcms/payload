@@ -1,3 +1,4 @@
+'use client'
 import type { I18nClient } from '@payloadcms/translations'
 
 import React from 'react'

@@ -618,3 +618,45 @@ export const Orders: CollectionConfig = {
   **req** will have the **payload** object and can be used inside your endpoint handlers for making
   calls like req.payload.find() that will make use of access control and hooks.
 </Banner>
+
+## Method Override for GET Requests
+
+Payload supports a method override feature that allows you to send GET requests using the HTTP POST method. This can be particularly useful in scenarios when the query string in a regular GET request is too long.
+
+### How to Use
+
+To use this feature, include the `X-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
+
+### Example
+
+Here is an example of how to use the method override to perform a GET request:
+
+#### Using Method Override (POST)
+
+```ts
+const res = await fetch(`${api}/${collectionSlug}`, {
+  method: 'POST',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'X-HTTP-Method-Override': 'GET',
+  },
+  body: qs.stringify({
+    depth: 1,
+    locale: 'en',
+  }),
+})
+```
+
+#### Equivalent Regular GET Request
+
+```ts
+const res = await fetch(`${api}/${collectionSlug}?depth=1&locale=en`, {
+  method: 'GET',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
+  },
+})
+```

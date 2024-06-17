@@ -2,12 +2,13 @@ import type { Config } from './types.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
-    avatar: 'default',
+    avatar: 'gravatar',
     components: {},
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
     meta: {
+      defaultOGImageType: 'dynamic',
       titleSuffix: '- Payload',
     },
     routes: {
@@ -17,6 +18,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       inactivity: '/logout-inactivity',
       login: '/login',
       logout: '/logout',
+      reset: '/reset',
       unauthorized: '/unauthorized',
     },
   },
@@ -48,6 +50,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   serverURL: '',
   telemetry: true,
   typescript: {
+    autoGenerate: true,
     outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   },
   upload: {},

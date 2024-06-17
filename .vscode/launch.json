@@ -112,6 +112,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js field-error-states",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Field Error States",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run test:int live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Live Preview Int Tests",

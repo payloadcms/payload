@@ -7,14 +7,14 @@ import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { Check } from '../../icons/Check/index.js'
 import { Line } from '../../icons/Line/index.js'
 
-type Props = {
+export type CheckboxInputProps = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
   CustomLabel?: React.ReactNode
   checked?: boolean
   className?: string
   id?: string
-  inputRef?: React.RefObject<HTMLInputElement>
+  inputRef?: React.RefObject<HTMLInputElement | null>
   label?: LabelProps['label']
   labelProps?: SanitizedLabelProps
   name?: string
@@ -26,7 +26,7 @@ type Props = {
 
 export const inputBaseClass = 'checkbox-input'
 
-export const CheckboxInput: React.FC<Props> = ({
+export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
   AfterInput,
@@ -78,6 +78,7 @@ export const CheckboxInput: React.FC<Props> = ({
       </div>
       <FieldLabel
         CustomLabel={CustomLabel}
+        htmlFor={id}
         label={label}
         required={required}
         {...(labelProps || {})}

@@ -7,19 +7,14 @@ import type {
   TFunction,
 } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
-import type { ClientConfig } from 'payload/types'
+import type { ClientConfig, LanguageOptions } from 'payload/types'
 
 import { t } from '@payloadcms/translations'
 import { importDateFNSLocale } from '@payloadcms/translations'
-import enUS from 'date-fns/locale/en-US'
+import { enUS } from 'date-fns/locale/en-US'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { useRouteCache } from '../RouteCache/index.js'
-
-export type LanguageOptions = {
-  label: string
-  value: string
-}[]
 
 type ContextType<
   TAdditionalTranslations = {},

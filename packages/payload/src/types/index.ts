@@ -7,19 +7,6 @@ import type { GeneratedTypes } from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
-export type UploadEdits = {
-  crop?: {
-    height?: number
-    width?: number
-    x?: number
-    y?: number
-  }
-  focalPoint?: {
-    x?: number
-    y?: number
-  }
-}
-
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */

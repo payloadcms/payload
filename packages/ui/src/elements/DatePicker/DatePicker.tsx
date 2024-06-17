@@ -1,3 +1,4 @@
+'use client'
 import type { ReactDatePickerProps } from 'react-datepicker'
 
 import React from 'react'

@@ -21,7 +21,7 @@ Out of the box, Payload handles the persistence of your users' preferences in a 
   that is reading or setting a preference via all provided authentication methods.
 </Banner>
 
-### Use cases
+## Use cases
 
 This API is used significantly for internal operations of the Admin panel, as mentioned above. But, if you're building your own React components for use in the Admin panel, you can allow users to set their own preferences in correspondence to their usage of your components. For example:
 
@@ -30,7 +30,7 @@ This API is used significantly for internal operations of the Admin panel, as me
 - You might want to store `recentlyAccessed` documents to give admin editors an easy shortcut back to their recently accessed documents on the `Dashboard` or similar
 - Many other use cases exist. Invent your own! Give your editors an intelligent and persistent editing experience.
 
-### Database
+## Database
 
 Payload automatically creates an internally used `payload-preferences` collection that stores user preferences. Each document in the `payload-preferences` collection contains the following shape:
 
@@ -44,15 +44,15 @@ Payload automatically creates an internally used `payload-preferences` collectio
 | `createdAt`       | A timestamp of when the preference was created.                   |
 | `updatedAt`       | A timestamp set to the last time the preference was updated.      |
 
-### APIs
+## APIs
 
 Preferences are available to both [GraphQL](/docs/graphql/overview#preferences) and [REST](/docs/rest-api/overview#) APIs.
 
-### Adding or reading Preferences in your own components
+## Adding or reading Preferences in your own components
 
 The Payload admin panel offers a `usePreferences` hook. The hook is only meant for use within the admin panel itself. It provides you with two methods:
 
-##### `getPreference`
+#### `getPreference`
 
 This async method provides an easy way to retrieve a user's preferences by `key`. It will return a promise containing the resulting preference value.
 
@@ -60,7 +60,7 @@ This async method provides an easy way to retrieve a user's preferences by `key`
 
 - `key`: the `key` of your preference to retrieve.
 
-##### `setPreference`
+#### `setPreference`
 
 Also async, this method provides you with an easy way to set a user preference. It returns `void`.
 

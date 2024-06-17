@@ -1,4 +1,4 @@
-import type { Config, SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload/config'
 
 import type { ResolvedServerFeatureMap, SanitizedServerFeatures } from '../../../features/types.js'
 import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types.js'
@@ -13,20 +13,21 @@ export const sanitizeServerFeatures = (
       html: [],
     },
     enabledFeatures: [],
-
     generatedTypes: {
       modifyOutputSchemas: [],
     },
+    getSubFields: new Map(),
+    getSubFieldsData: new Map(),
+    graphQLPopulationPromises: new Map(),
     hooks: {
       afterChange: new Map(),
       afterRead: new Map(),
       beforeChange: new Map(),
-      beforeDuplicate: new Map(),
       beforeValidate: new Map(),
     },
+    i18n: {},
     markdownTransformers: [],
     nodes: [],
-    populationPromises: new Map(),
 
     validations: new Map(),
   }
@@ -40,12 +41,23 @@ export const sanitizeServerFeatures = (
       sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
     }
 
+    if (feature?.i18n) {
+      for (const lang in feature.i18n) {
+        if (!sanitized.i18n[lang]) {
+          sanitized.i18n[lang] = {
+            lexical: {},
+          }
+        }
+        sanitized.i18n[lang].lexical[feature.key] = feature.i18n[lang]
+      }
+    }
+
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
       feature.nodes.forEach((node) => {
         const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
-        if (node?.populationPromises?.length) {
-          sanitized.populationPromises.set(nodeType, node.populationPromises)
+        if (node?.graphQLPopulationPromises?.length) {
+          sanitized.graphQLPopulationPromises.set(nodeType, node.graphQLPopulationPromises)
         }
         if (node?.validations?.length) {
           sanitized.validations.set(nodeType, node.validations)
@@ -62,11 +74,14 @@ export const sanitizeServerFeatures = (
         if (node?.hooks?.beforeChange) {
           sanitized.hooks.beforeChange.set(nodeType, node.hooks.beforeChange)
         }
-        if (node?.hooks?.beforeDuplicate) {
-          sanitized.hooks.beforeDuplicate.set(nodeType, node.hooks.beforeDuplicate)
-        }
         if (node?.hooks?.beforeValidate) {
           sanitized.hooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)
+        }
+        if (node?.getSubFields) {
+          sanitized.getSubFields.set(nodeType, node.getSubFields)
+        }
+        if (node?.getSubFieldsData) {
+          sanitized.getSubFieldsData.set(nodeType, node.getSubFieldsData)
         }
       })
     }

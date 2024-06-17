@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -87,6 +91,74 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'pg-migrations',
+      versions: true,
+      fields: [
+        {
+          name: 'relation1',
+          type: 'relationship',
+          relationTo: 'relation-a',
+        },
+        {
+          name: 'myArray',
+          type: 'array',
+          fields: [
+            {
+              name: 'relation2',
+              type: 'relationship',
+              relationTo: 'relation-b',
+            },
+            {
+              name: 'mySubArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'relation3',
+                  type: 'relationship',
+                  relationTo: 'relation-b',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'myGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'relation4',
+              type: 'relationship',
+              relationTo: 'relation-b',
+              localized: true,
+            },
+          ],
+        },
+        {
+          name: 'myBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'myBlock',
+              fields: [
+                {
+                  name: 'relation5',
+                  type: 'relationship',
+                  relationTo: 'relation-a',
+                },
+                {
+                  name: 'relation6',
+                  type: 'relationship',
+                  relationTo: 'relation-b',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       slug: 'custom-schema',
       dbName: 'customs',
       fields: [
@@ -157,7 +229,9 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
-      versions: true,
+      versions: {
+        drafts: true,
+      },
     },
   ],
   globals: [
@@ -185,6 +259,9 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

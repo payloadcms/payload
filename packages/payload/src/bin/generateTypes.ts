@@ -6,11 +6,16 @@ import type { SanitizedConfig } from '../config/types.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import Logger from '../utilities/logger.js'
 
-export async function generateTypes(config: SanitizedConfig): Promise<void> {
+export async function generateTypes(
+  config: SanitizedConfig,
+  options?: { log: boolean },
+): Promise<void> {
   const logger = Logger()
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
-  logger.info('Compiling TS types for Collections and Globals...')
+  const shouldLog = options?.log ?? true
+
+  if (shouldLog) logger.info('Compiling TS types for Collections and Globals...')
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
 
@@ -36,6 +41,18 @@ export async function generateTypes(config: SanitizedConfig): Promise<void> {
       compiled += `\n\n${declare}`
     }
   }
+
+  // Diff the compiled types against the existing types file
+  try {
+    const existingTypes = fs.readFileSync(outputFile, 'utf-8')
+
+    if (compiled === existingTypes) {
+      return
+    }
+  } catch (_) {
+    // swallow err
+  }
+
   fs.writeFileSync(outputFile, compiled)
-  logger.info(`Types written to ${outputFile}`)
+  if (shouldLog) logger.info(`Types written to ${outputFile}`)
 }

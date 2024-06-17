@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate, DateField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -13,8 +13,6 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
-
-import type { DateField } from 'payload/types'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -67,12 +65,12 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { path, setValue, showError, value } = useField<Date>({
-    path: pathFromContext || pathFromProps || name,
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <div
@@ -81,7 +79,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
         baseClass,
         className,
         showError && `${baseClass}--has-error`,
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -90,24 +88,22 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      </div>
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
+      <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!readOnly) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) setValue(incomingDate?.toISOString() || null)
           }}
           placeholder={getTranslation(placeholder, i18n)}
-          readOnly={readOnly}
+          readOnly={disabled}
           value={value}
         />
         {AfterInput}

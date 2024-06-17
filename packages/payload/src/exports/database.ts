@@ -36,6 +36,7 @@ export type {
   Init,
   Migration,
   MigrationData,
+  MigrationTemplateArgs,
   PaginatedDocs,
   QueryDrafts,
   QueryDraftsArgs,
@@ -52,7 +53,7 @@ export type {
   UpdateVersionArgs,
 } from '../database/types.js'
 
-export * from '../database/queryValidation/types.js'
+export type * from '../database/queryValidation/types.js'
 
 export { combineQueries } from '../database/combineQueries.js'
 
@@ -65,6 +66,8 @@ export { getLocalizedPaths } from '../database/getLocalizedPaths.js'
 export { createMigration } from '../database/migrations/createMigration.js'
 
 export { getMigrations } from '../database/migrations/getMigrations.js'
+
+export { getPredefinedMigration } from '../database/migrations/getPredefinedMigration.js'
 
 export { migrate } from '../database/migrations/migrate.js'
 

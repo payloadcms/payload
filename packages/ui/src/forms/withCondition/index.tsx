@@ -10,7 +10,7 @@ export const withCondition = <P extends Record<string, unknown>>(
   const CheckForCondition: React.FC<P> = (props) => {
     const { name } = props
     const { type, indexPath, path: pathFromContext } = useFieldProps()
-    const path = pathFromContext || name
+    const path = pathFromContext ?? name
 
     return (
       <WatchCondition indexPath={indexPath} name={name as string} path={path as string} type={type}>

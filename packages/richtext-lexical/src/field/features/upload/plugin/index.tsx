@@ -21,7 +21,7 @@ import type { UploadData } from '../nodes/UploadNode.js'
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
-export type InsertUploadPayload = Readonly<UploadData>
+export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>>
 
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
@@ -42,17 +42,20 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
         INSERT_UPLOAD_COMMAND,
         (payload: InsertUploadPayload) => {
           editor.update(() => {
-            const uploadNode = $createUploadNode({
-              data: {
-                fields: payload.fields,
-                relationTo: payload.relationTo,
-                value: payload.value,
-              },
-            })
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const uploadNode = $createUploadNode({
+                data: {
+                  id: payload.id,
+                  fields: payload.fields,
+                  relationTo: payload.relationTo,
+                  value: payload.value,
+                },
+              })
+              // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+              $insertNodeToNearestRoot(uploadNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
@@ -68,8 +71,6 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
               ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(uploadNode)
             }
           })
 

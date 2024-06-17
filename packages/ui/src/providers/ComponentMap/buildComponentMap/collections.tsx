@@ -6,6 +6,7 @@ import type {
   SanitizedConfig,
 } from 'payload/types'
 
+import { isReactComponentOrFunction } from 'payload/utilities'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
@@ -54,11 +55,12 @@ export const mapCollections = (args: {
     const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
-        : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
+        : typeof editViewFromConfig === 'object' &&
+            isReactComponentOrFunction(editViewFromConfig.Default)
           ? editViewFromConfig.Default
           : typeof editViewFromConfig?.Default === 'object' &&
               'Component' in editViewFromConfig.Default &&
-              typeof editViewFromConfig.Default.Component === 'function'
+              isReactComponentOrFunction(editViewFromConfig.Default.Component)
             ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
             : undefined
 
@@ -66,7 +68,7 @@ export const mapCollections = (args: {
       typeof listViewFromConfig === 'function'
         ? listViewFromConfig
         : typeof listViewFromConfig === 'object' &&
-            typeof listViewFromConfig.Component === 'function'
+            isReactComponentOrFunction(listViewFromConfig.Component)
           ? listViewFromConfig.Component
           : undefined
 

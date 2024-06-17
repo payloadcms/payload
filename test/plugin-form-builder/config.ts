@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import type { Block } from 'payload/types'
 
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
@@ -73,14 +77,31 @@ export default buildConfigWithDefaults({
         //   singular: 'Contact Form',
         //   plural: 'Contact Forms'
         // },
-        fields: [
-          {
-            name: 'custom',
-            type: 'text',
-          },
-        ],
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'custom',
+              type: 'text',
+            },
+          ]
+        },
+      },
+      formSubmissionOverrides: {
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'custom',
+              type: 'text',
+            },
+          ]
+        },
       },
       redirectRelationships: ['pages'],
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

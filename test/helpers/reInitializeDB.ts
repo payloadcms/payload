@@ -7,7 +7,7 @@ export const reInitializeDB = async ({
 }: {
   serverURL: string
   snapshotKey: string
-  uploadsDir?: string
+  uploadsDir?: string | string[]
 }) => {
   await fetch(`${serverURL}/api${path}`, {
     method: 'post',

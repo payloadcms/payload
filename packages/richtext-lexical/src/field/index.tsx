@@ -7,7 +7,7 @@ import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { GeneratedFeatureProviderComponent } from '../types.js'
+import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 import type { FeatureProviderClient } from './features/types.js'
 import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
@@ -21,12 +21,13 @@ const RichTextEditor = lazy(() =>
 
 export const RichTextField: React.FC<
   FormFieldBase & {
+    admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }
 > = (props) => {
-  const { lexicalEditorConfig, richTextComponentMap } = props
+  const { admin, lexicalEditorConfig, richTextComponentMap } = props
   const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
@@ -38,14 +39,19 @@ export const RichTextField: React.FC<
 
   let featureProviderComponents: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
     'features',
-  ) as GeneratedFeatureProviderComponent[] // TODO: Type better
+  ) as GeneratedFeatureProviderComponent[]
   // order by order
   featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
 
-  const featureComponentsWithFeaturesLength =
-    Array.from(richTextComponentMap.keys()).filter(
-      (key) => key.startsWith(`feature.`) && !key.includes('.fields.'),
-    ).length + featureProviderComponents.length
+  let featureProvidersAndComponentsToLoad = 0 // feature providers and components
+  for (const featureProvider of featureProviderComponents) {
+    const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
+      key.startsWith(`feature.${featureProvider.key}.components.`),
+    )
+
+    featureProvidersAndComponentsToLoad += 1
+    featureProvidersAndComponentsToLoad += featureComponentKeys.length
+  }
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
@@ -61,7 +67,7 @@ export const RichTextField: React.FC<
         }
       })
 
-      if (featureProvidersAndComponentsLoaded === featureComponentsWithFeaturesLength) {
+      if (featureProvidersAndComponentsLoaded === featureProvidersAndComponentsToLoad) {
         setFeatureProviders(featureProvidersLocal)
         setHasLoadedFeatures(true)
 
@@ -82,11 +88,13 @@ export const RichTextField: React.FC<
           sanitizeClientEditorConfig(
             lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
             resolvedClientFeatures,
+            admin,
           ),
         )
       }
     }
   }, [
+    admin,
     hasLoadedFeatures,
     clientFunctions,
     schemaPath,
@@ -94,7 +102,7 @@ export const RichTextField: React.FC<
     featureProviders,
     finalSanitizedEditorConfig,
     lexicalEditorConfig,
-    featureComponentsWithFeaturesLength,
+    featureProvidersAndComponentsToLoad,
   ])
 
   if (!hasLoadedFeatures) {

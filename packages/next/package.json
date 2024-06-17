@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.32",
+  "version": "3.0.0-beta.47",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -46,33 +46,32 @@
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",
-    "deep-equal": "2.2.2",
-    "file-type": "19.0.0",
+    "file-type": "17.1.6",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
     "http-status": "1.6.2",
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",
-    "react-toastify": "8.2.0",
-    "sass": "^1.71.1",
+    "sass": "1.77.4",
+    "sonner": "^1.5.0",
     "ws": "^8.16.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "18.2.74",
-    "@types/react-dom": "18.2.24",
+    "@types/busboy": "^1.5.3",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "@types/ws": "^8.5.10",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
-    "postcss-preset-env": "^9.5.0",
-    "sass-loader": "^14.1.1",
+    "postcss-preset-env": "^9.5.14",
+    "sass-loader": "14.2.1",
     "swc-loader": "^0.2.6",
     "swc-plugin-transform-remove-imports": "^1.12.1",
     "terser-webpack-plugin": "^5.3.10",
@@ -81,11 +80,11 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^14.3.0-canary.7",
+    "next": "^15.0.0-rc.0",
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=18.20.2"
+    "node": "^18.20.2 || >=20.9.0"
   },
   "publishConfig": {
     "exports": {
@@ -107,5 +106,9 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

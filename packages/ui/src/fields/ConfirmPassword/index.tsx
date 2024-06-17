@@ -50,21 +50,23 @@ export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <FieldError path={path} />
       <FieldLabel
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required
       />
-      <input
-        autoComplete="off"
-        disabled={!!disabled}
-        id="field-confirm-password"
-        name="confirm-password"
-        onChange={setValue}
-        type="password"
-        value={(value as string) || ''}
-      />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError path={path} />
+        <input
+          autoComplete="off"
+          disabled={!!disabled}
+          id="field-confirm-password"
+          name="confirm-password"
+          onChange={setValue}
+          type="password"
+          value={(value as string) || ''}
+        />
+      </div>
     </div>
   )
 }

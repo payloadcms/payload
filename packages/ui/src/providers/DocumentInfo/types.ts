@@ -26,8 +26,11 @@ export type DocumentInfoProps = {
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
   globalSlug?: SanitizedGlobalConfig['slug']
+  hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id: null | number | string
+  initialData?: Data
+  initialState?: FormState
   isEditing?: boolean
   onLoadError?: (data?: any) => Promise<void> | void
   onSave?: (data: Data) => Promise<void> | void
@@ -35,11 +38,13 @@ export type DocumentInfoProps = {
 
 export type DocumentInfoContext = DocumentInfoProps & {
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
-  getDocPermissions: () => Promise<void>
+  getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
   initialData: Data
   initialState?: FormState
+  isInitializing: boolean
+  isLoading: boolean
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (

@@ -49,7 +49,9 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
     global,
     operation,
     overrideAccess,
+    path: [],
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
   })

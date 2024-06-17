@@ -8,12 +8,11 @@ import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig } from 'payload/config'
 import { type AdminViewProps } from 'payload/types'
-import { isNumber, mergeListSearchAndWhere } from 'payload/utilities'
+import { isNumber, isReactComponentOrFunction, mergeListSearchAndWhere } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
 
-import { UnauthorizedView } from '../Unauthorized/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
@@ -41,7 +40,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   const collectionSlug = collectionConfig?.slug
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
-    return <UnauthorizedView initPageResult={initPageResult} searchParams={searchParams} />
+    notFound()
   }
 
   let listPreferences: ListPreferences
@@ -80,7 +79,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
     if (CustomList && typeof CustomList === 'function') {
       CustomListView = CustomList
-    } else if (typeof CustomList === 'object' && typeof CustomList.Component === 'function') {
+    } else if (typeof CustomList === 'object' && isReactComponentOrFunction(CustomList.Component)) {
       CustomListView = CustomList.Component
     }
 
@@ -98,7 +97,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || undefined
+        : listPreferences?.sort || collectionConfig.defaultSort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -149,8 +148,15 @@ export const ListView: React.FC<AdminViewProps> = async ({
                 DefaultComponent={DefaultListView}
                 componentProps={viewComponentProps}
                 serverOnlyProps={{
+                  collectionConfig,
+                  data,
+                  hasCreatePermission:
+                    permissions?.collections?.[collectionSlug]?.create?.permission,
                   i18n,
+                  limit,
+                  listPreferences,
                   locale: fullLocale,
+                  newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
                   params,
                   payload,
                   permissions,

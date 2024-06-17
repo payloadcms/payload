@@ -53,7 +53,9 @@ const BlocksFeatureClient: FeatureProviderProviderClient<BlocksFeatureClientProp
               }
             }),
             key: 'blocks',
-            label: 'Blocks',
+            label: ({ i18n }) => {
+              return i18n.t('lexical:blocks:label')
+            },
           },
         ],
       },

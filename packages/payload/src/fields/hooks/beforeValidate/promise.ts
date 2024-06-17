@@ -1,11 +1,14 @@
 /* eslint-disable no-param-reassign */
+import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
 import getValueWithDefault from '../../getDefaultValue.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -23,6 +26,8 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
+  parentPath: (number | string)[]
+  parentSchemaPath: string[]
   req: PayloadRequestWithData
   siblingData: Record<string, unknown>
   /**
@@ -48,10 +53,18 @@ export const promise = async <T>({
   global,
   operation,
   overrideAccess,
+  parentPath,
+  parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
+  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+    field,
+    parentPath,
+    parentSchemaPath,
+  })
+
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
@@ -229,8 +242,11 @@ export const promise = async <T>({
           operation,
           originalDoc: doc,
           overrideAccess,
+          path: fieldPath,
           previousSiblingDoc: siblingDoc,
+          previousValue: siblingData[field.name],
           req,
+          schemaPath: fieldSchemaPath,
           siblingData,
           value: siblingData[field.name],
         })
@@ -288,7 +304,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData: groupData,
         siblingDoc: groupDoc,
       })
@@ -301,7 +319,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row) => {
+        rows.forEach((row, i) => {
           promises.push(
             traverseFields({
               id,
@@ -313,7 +331,9 @@ export const promise = async <T>({
               global,
               operation,
               overrideAccess,
+              path: [...fieldPath, i],
               req,
+              schemaPath: fieldSchemaPath,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             }),
@@ -329,7 +349,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row) => {
+        rows.forEach((row, i) => {
           const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
           const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
@@ -348,7 +368,9 @@ export const promise = async <T>({
                 global,
                 operation,
                 overrideAccess,
+                path: [...fieldPath, i],
                 req,
+                schemaPath: fieldSchemaPath,
                 siblingData: row,
                 siblingDoc: rowSiblingDoc,
               }),
@@ -373,7 +395,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
       })
@@ -405,7 +429,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
       })
@@ -424,11 +450,53 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
       })
 
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.beforeValidate?.length) {
+        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            field,
+            global,
+            operation,
+            originalDoc: doc,
+            overrideAccess,
+            path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingData[field.name],
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData,
+            value: siblingData[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
       break
     }
 

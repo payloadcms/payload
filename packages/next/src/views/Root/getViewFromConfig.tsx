@@ -26,7 +26,7 @@ const baseClasses = {
 }
 
 type OneSegmentViews = {
-  [K in keyof SanitizedConfig['admin']['routes']]: AdminViewComponent
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: AdminViewComponent
 }
 
 const oneSegmentViews: OneSegmentViews = {
@@ -61,7 +61,7 @@ export const getViewFromConfig = ({
 } => {
   let ViewToRender: AdminViewComponent = null
   let templateClassName: string
-  let templateType: 'default' | 'minimal' = 'minimal'
+  let templateType: 'default' | 'minimal' | undefined
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,

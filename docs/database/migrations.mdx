@@ -24,7 +24,7 @@ Ensure you have an npm script called "payload" in your `package.json` file.
   because Payload should not be globally installed on your system.
 </Banner>
 
-### Migration file contents
+## Migration file contents
 
 Payload stores all created migrations in a folder that you can specify. By default, migrations are stored
 in `./src/migrations`.
@@ -53,7 +53,7 @@ export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 }
 ```
 
-### Migrations Directory
+## Migrations Directory
 
 Each DB adapter has an optional property `migrationDir` where you can override where you want your migrations to be
 stored/read. If this is not specified, Payload will check the default and possibly make a best effort to find your

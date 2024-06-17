@@ -54,8 +54,9 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
     readOnly: readOnlyFromContext,
     schemaPath,
   } = useFieldProps()
+
   const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext || pathFromProps || name
+  const path = pathFromContext ?? pathFromProps ?? name
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
@@ -112,6 +113,17 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
 
   const activeTabConfig = tabs[activeTabIndex]
 
+  function generateTabPath() {
+    let tabPath = path
+    if (path && activeTabConfig.name) {
+      tabPath = `${path}.${activeTabConfig.name}`
+    } else if (!path && activeTabConfig.name) {
+      tabPath = activeTabConfig.name
+    }
+
+    return tabPath
+  }
+
   return (
     <div
       className={[
@@ -167,7 +179,7 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
                       : activeTabConfig['name']
                   }
                   margins="small"
-                  path={`${path ? `${path}.` : ''}${activeTabConfig.name ? `${activeTabConfig.name}` : ''}`}
+                  path={generateTabPath()}
                   permissions={
                     'name' in activeTabConfig && permissions?.fields?.[activeTabConfig.name]?.fields
                       ? permissions?.fields?.[activeTabConfig.name]?.fields

@@ -8,7 +8,6 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { FormState, PayloadRequestWithData } from 'payload/types'
 
-import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
 import { Email } from '@payloadcms/ui/fields/Email'
 import { Password } from '@payloadcms/ui/fields/Password'
 import { Form } from '@payloadcms/ui/forms/Form'
@@ -60,7 +59,6 @@ export const LoginForm: React.FC<{
       redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : admin}
       waitForAutocomplete
     >
-      <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>
         <Email
           autoComplete="email"

@@ -1,3 +1,4 @@
+'use client'
 import { type CellComponentProps, type SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 
@@ -109,14 +110,15 @@ export const buildColumnState = (args: Args): Column[] => {
       />
     )
 
+    const fieldAffectsDataSubFields =
+      field &&
+      field.type &&
+      (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
+
     const Heading = (
       <SortColumn
         Label={Label}
-        disable={
-          ('disableSort' in field && Boolean(field.disableSort)) ||
-          fieldIsPresentationalOnly(field) ||
-          undefined
-        }
+        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         // eslint-disable-next-line react/jsx-no-duplicate-props
         label={
           'fieldComponentProps' in field && 'label' in field.fieldComponentProps

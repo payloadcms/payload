@@ -5,6 +5,7 @@ import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import React from 'react'
 
 type ElementButtonContextType = {
+  disabled?: boolean
   fieldProps: FormFieldBase & {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>

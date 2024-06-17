@@ -21,12 +21,12 @@ To swap in your own React component, first, consult the list of available compon
   normally accepts.
 </Banner>
 
-### Base Component Overrides
+## Base Component Overrides
 
 You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
 
 | Path                  | Description                                                                                                                                                                                               |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                       |
 | **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
 | **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
@@ -77,7 +77,7 @@ export default buildConfig({
 })
 ```
 
-### Collections
+## Collections
 
 You can override components on a collection-by-collection basis via the `admin.components` property.
 
@@ -202,7 +202,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-### Globals
+## Globals
 
 As with Collections, you can override components on a global-by-global basis via the `admin.components` property.
 
@@ -223,7 +223,7 @@ As your admin customizations gets more complex you may want to share state betwe
   component for the admin UI to show
 </Banner>
 
-### Styling Custom Components
+## Styling Custom Components
 
 Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling, so it blends more thoroughly into the existing admin UI.
 
@@ -233,7 +233,7 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 @import '~payload/scss';
 ```
 
-### Getting the current language
+## Getting the current language
 
 When developing custom components you can support multiple languages to be consistent with Payload's i18n support. The best way to do this is to add your translation resources to the [i18n configuration](https://payloadcms.com/docs/configuration/i18n) and import `useTranslation` from `@payloadcms/ui/providers/Translation` in your components.
 
@@ -257,7 +257,7 @@ const CustomComponent: React.FC = () => {
 }
 ```
 
-### Getting the current locale
+## Getting the current locale
 
 In any custom component you can get the selected locale with `useLocale` hook. `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 

@@ -32,7 +32,7 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 - To allow for a `Product` to deliver a downloadable asset like PDF or MP3
 - To give a layout building block the ability to feature a background image
 
-### Config
+## Config
 
 | Option               | Description                                                                                                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -56,7 +56,7 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 
 _\* An asterisk denotes that a property is required._
 
-### Example
+## Example
 
 `collections/ExampleCollection.ts`
 
@@ -76,7 +76,7 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
-### Filtering upload options
+## Filtering upload options
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
 for validating input and filtering available uploads in the UI.
@@ -93,7 +93,7 @@ called with an argument object with the following properties:
 | `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation      |
 | `user`        | An object containing the currently authenticated user                                                 |
 
-### Example
+## Example
 
 ```ts
 const uploadField = {

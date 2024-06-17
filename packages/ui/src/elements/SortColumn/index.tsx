@@ -1,6 +1,5 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 
 export type SortColumnProps = {
@@ -13,6 +12,7 @@ export type SortColumnProps = {
 import type { FieldBase } from 'payload/types'
 
 import { Chevron } from '../../icons/Chevron/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
@@ -21,8 +21,8 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, Label, disable = false, label } = props
-  const { searchParams, stringifyParams } = useSearchParams()
-  const router = useRouter()
+  const { searchParams } = useSearchParams()
+  const { refineListData } = useListQuery()
   const { t } = useTranslation()
 
   const { sort } = searchParams
@@ -38,16 +38,11 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   const setSort = useCallback(
     (newSort) => {
-      router.replace(
-        stringifyParams({
-          params: {
-            sort: newSort,
-          },
-          replace: true,
-        }),
-      )
+      refineListData({
+        sort: newSort,
+      })
     },
-    [router, stringifyParams],
+    [refineListData],
   )
 
   return (

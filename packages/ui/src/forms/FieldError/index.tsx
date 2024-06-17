@@ -20,7 +20,7 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
   } = props
 
   const { path: pathFromContext } = useFieldProps()
-  const path = pathFromContext || pathFromProps
+  const path = pathFromContext ?? pathFromProps
 
   const hasSubmitted = useFormSubmitted()
   const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
@@ -30,9 +30,9 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
   const message = messageFromProps || errorMessage
   const showMessage = showErrorFromProps || (hasSubmitted && valid === false)
 
-  if (showMessage) {
+  if (showMessage && message?.length) {
     return (
-      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0}>
+      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0} staticPositioning>
         {message}
       </Tooltip>
     )

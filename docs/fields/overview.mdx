@@ -36,7 +36,7 @@ export const Page: CollectionConfig = {
 }
 ```
 
-### Field types
+## Field types
 
 - [Array](/docs/fields/array) - for repeating content, supports nested fields
 - [Blocks](/docs/fields/blocks) - block-based fields, allowing powerful layout creation
@@ -60,19 +60,19 @@ export const Page: CollectionConfig = {
 - [Upload](/docs/fields/upload) - allows local file and image upload
 - [UI](/docs/fields/ui) - inject your own custom components and do whatever you need
 
-### Field-level hooks
+## Field-level hooks
 
 One of the most powerful parts about Payload is its ability for you to define field-level hooks that can control the logic of your fields to a fine-grained level. for more information about how to define field hooks, [click here](/docs/hooks/overview#field-hooks).
 
-### Field-level access control
+## Field-level access control
 
 In addition to being able to define access control on a document-level, you can define extremely granular permissions on a field by field level. For more information about field-level access control, [click here](/docs/access-control/overview#fields).
 
-### Field names
+## Field names
 
 Some fields use their `name` property as a unique identifier to store and retrieve from the database. `__v`, `salt`, and `hash` are all reserved field names which are sanitized from Payload's config and cannot be used.
 
-### Validation
+## Validation
 
 Field validation is enforced automatically based on the field type and other properties such as `required` or `min` and `max` value constraints on certain field types. This default behavior can be replaced by providing your own validate function for any field. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
 
@@ -91,7 +91,7 @@ There are two arguments available to custom validation functions.
 | `user`        | An object containing the currently authenticated user                                                                    |
 | `payload`     | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 
-### Example
+## Example
 
 ```ts
 import { CollectionConfig } from 'payload/types'
@@ -140,7 +140,7 @@ const field: Field = {
 }
 ```
 
-### Customizable ID
+## Customizable ID
 
 Collections ID fields are generated automatically by default. An explicit `id` field can be declared in the `fields` array to override this behavior.
 Users are then required to provide a custom ID value when creating a record through the Admin UI or API.
@@ -159,7 +159,7 @@ Example:
 }
 ```
 
-### Admin config
+## Admin config
 
 In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
 
@@ -179,11 +179,11 @@ In addition to each field's base configuration, you can define specific traits a
 | `disableListFilter` | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
 | `hidden`            | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.        |
 
-### Custom components
+## Custom components
 
 All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/components#fields).
 
-### Conditional logic
+## Conditional logic
 
 You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
 
@@ -222,7 +222,7 @@ The `condition` function should return a boolean that will control if the field 
 }
 ```
 
-### Default values
+## Default values
 
 Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
 
@@ -252,7 +252,7 @@ const field = {
   You can use async defaultValue functions to fill fields with data from API requests.
 </Banner>
 
-### Description
+## Description
 
 A description can be configured in three ways.
 
@@ -314,7 +314,7 @@ This example will display the number of characters allowed as the user types.
 
 This component will count the number of characters entered, as well as display the path of the field.
 
-### TypeScript
+## TypeScript
 
 You can import the internal Payload `Field` type as well as other common field types as follows:
 

@@ -26,8 +26,7 @@ type BuildQueryArgs = {
 }
 
 type Result = {
-  joinAliases: BuildQueryJoinAliases
-  joins: BuildQueryJoins
+  joins: BuildQueryJoinAliases
   orderBy: {
     column: GenericColumn
     order: typeof asc | typeof desc
@@ -46,8 +45,7 @@ const buildQuery = async function buildQuery({
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
   }
-  const joins: BuildQueryJoins = {}
-  const joinAliases: BuildQueryJoinAliases = []
+  const joins: BuildQueryJoinAliases = []
 
   const orderBy: Result['orderBy'] = {
     column: null,
@@ -70,7 +68,6 @@ const buildQuery = async function buildQuery({
         adapter,
         collectionPath: sortPath,
         fields,
-        joinAliases,
         joins,
         locale,
         pathSegments: sortPath.replace(/__/g, '.').split('.'),
@@ -105,7 +102,6 @@ const buildQuery = async function buildQuery({
     where = await parseParams({
       adapter,
       fields,
-      joinAliases,
       joins,
       locale,
       selectFields,
@@ -115,7 +111,6 @@ const buildQuery = async function buildQuery({
   }
 
   return {
-    joinAliases,
     joins,
     orderBy,
     selectFields,

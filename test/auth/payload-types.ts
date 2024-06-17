@@ -44,10 +44,10 @@ export interface User {
     saveToJWTString?: string | null;
     saveToJWTFalse?: string | null;
   };
-  saveToJWTTab: {
+  saveToJWTTab?: {
     test?: string | null;
   };
-  tabSaveToJWTString: {
+  tabSaveToJWTString?: {
     includedByDefault?: string | null;
   };
   tabLiftedSaveToJWT?: string | null;
@@ -156,6 +156,6 @@ export interface PayloadMigration {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

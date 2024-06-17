@@ -3,7 +3,7 @@ import type { LexicalNode } from 'lexical'
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
@@ -36,8 +36,6 @@ import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
-  const { useModal } = facelessUIImport
-
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -50,9 +48,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { i18n, t } = useTranslation()
 
-  const [stateData, setStateData] = useState<{} | (LinkFields & { text: string })>({})
+  const [stateData, setStateData] = useState<{} | (LinkFields & { id?: string; text: string })>({})
 
-  const { closeModal, toggleModal } = useModal()
+  const { closeModal, isModalOpen, toggleModal } = useModal()
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
@@ -116,6 +114,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       newTab: undefined,
       url: '',
       ...focusLinkParent.getFields(),
+      id: focusLinkParent.getID(),
       text: focusLinkParent.getTextContent(),
     }
 
@@ -319,48 +318,50 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           )}
         </div>
       </div>
-      <LinkDrawer
-        drawerSlug={drawerSlug}
-        handleModalSubmit={(fields: FormState, data: Data) => {
-          closeModal(drawerSlug)
+      {isModalOpen(drawerSlug) && (
+        <LinkDrawer
+          drawerSlug={drawerSlug}
+          handleModalSubmit={(fields: FormState, data: Data) => {
+            closeModal(drawerSlug)
 
-          const newLinkPayload = data as LinkFields & { text: string }
+            const newLinkPayload = data as LinkFields & { text: string }
 
-          const bareLinkFields: LinkFields = {
-            ...newLinkPayload,
-          }
-          delete bareLinkFields.text
+            const bareLinkFields: LinkFields = {
+              ...newLinkPayload,
+            }
+            delete bareLinkFields.text
 
-          // See: https://github.com/facebook/lexical/pull/5536. This updates autolink nodes to link nodes whenever a change was made (which is good!).
-          editor.update(() => {
-            const selection = $getSelection()
-            let linkParent = null
-            if ($isRangeSelection(selection)) {
-              linkParent = getSelectedNode(selection).getParent()
-            } else {
-              if (selectedNodes.length) {
-                linkParent = selectedNodes[0].getParent()
+            // See: https://github.com/facebook/lexical/pull/5536. This updates autolink nodes to link nodes whenever a change was made (which is good!).
+            editor.update(() => {
+              const selection = $getSelection()
+              let linkParent = null
+              if ($isRangeSelection(selection)) {
+                linkParent = getSelectedNode(selection).getParent()
+              } else {
+                if (selectedNodes.length) {
+                  linkParent = selectedNodes[0].getParent()
+                }
               }
-            }
 
-            if (linkParent && $isAutoLinkNode(linkParent)) {
-              const linkNode = $createLinkNode({
-                fields: bareLinkFields,
-              })
-              linkParent.replace(linkNode, true)
-            }
-          })
+              if (linkParent && $isAutoLinkNode(linkParent)) {
+                const linkNode = $createLinkNode({
+                  fields: bareLinkFields,
+                })
+                linkParent.replace(linkNode, true)
+              }
+            })
 
-          // Needs to happen AFTER a potential auto link => link node conversion, as otherwise, the updated text to display may be lost due to
-          // it being applied to the auto link node instead of the link node.
-          editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
-            fields: bareLinkFields,
-            selectedNodes,
-            text: newLinkPayload.text,
-          })
-        }}
-        stateData={stateData}
-      />
+            // Needs to happen AFTER a potential auto link => link node conversion, as otherwise, the updated text to display may be lost due to
+            // it being applied to the auto link node instead of the link node.
+            editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
+              fields: bareLinkFields,
+              selectedNodes,
+              text: newLinkPayload.text,
+            })
+          }}
+          stateData={stateData}
+        />
+      )}
     </React.Fragment>
   )
 }

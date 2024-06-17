@@ -25,7 +25,7 @@ keywords: point, geolocation, geospatial, geojson, 2dsphere, config, configurati
 
 The data structure in the database matches the GeoJSON structure to represent point. The Payload APIs simplifies the object data to only the [longitude, latitude] location.
 
-### Config
+## Config
 
 | Option             | Description                                                                                                                                                                               |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -50,7 +50,7 @@ _\* An asterisk denotes that a property is required._
   <strong>Note:</strong> The Point field type is currently only supported in MongoDB.
 </Banner>
 
-### Example
+## Example
 
 `collections/ExampleCollection.ts`
 
@@ -69,6 +69,6 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
-### Querying
+## Querying
 
 In order to do query based on the distance to another point, you can use the `near` operator. When querying using the near operator, the returned documents will be sorted by nearest first.

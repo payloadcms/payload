@@ -156,6 +156,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
       collection,
       config,
       data: bulkUpdateData,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -269,7 +270,10 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
           operation: 'update',
           req,
           skipValidation:
-            Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
+            shouldSaveDraft &&
+            collectionConfig.versions.drafts &&
+            !collectionConfig.versions.drafts.validate &&
+            data._status !== 'published',
         })
 
         // /////////////////////////////////////

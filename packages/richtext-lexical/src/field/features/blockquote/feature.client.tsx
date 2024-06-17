@@ -9,6 +9,7 @@ import type { FeatureProviderProviderClient } from '../types.js'
 
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote/index.js'
 import { createClientComponent } from '../createClientComponent.js'
+import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
@@ -28,7 +29,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'blockquote',
-      label: `Blockquote`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:blockquote:label')
+      },
       onSelect: ({ editor }) => {
         editor.update(() => {
           const selection = $getSelection()
@@ -50,24 +53,22 @@ const BlockquoteFeatureClient: FeatureProviderProviderClient<undefined> = (props
 
       slashMenu: {
         groups: [
-          {
-            items: [
-              {
-                Icon: BlockquoteIcon,
-                key: 'blockquote',
-                keywords: ['quote', 'blockquote'],
-                label: 'Blockquote',
-                onSelect: ({ editor }) => {
-                  editor.update(() => {
-                    const selection = $getSelection()
-                    $setBlocksType(selection, () => $createQuoteNode())
-                  })
-                },
+          slashMenuBasicGroupWithItems([
+            {
+              Icon: BlockquoteIcon,
+              key: 'blockquote',
+              keywords: ['quote', 'blockquote'],
+              label: ({ i18n }) => {
+                return i18n.t('lexical:blockquote:label')
               },
-            ],
-            key: 'basic',
-            label: 'Basic',
-          },
+              onSelect: ({ editor }) => {
+                editor.update(() => {
+                  const selection = $getSelection()
+                  $setBlocksType(selection, () => $createQuoteNode())
+                })
+              },
+            },
+          ]),
         ],
       },
       toolbarFixed: {

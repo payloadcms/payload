@@ -12,7 +12,11 @@ type BuildFindQueryArgs = {
   tableName: string
 }
 
-export type Result = DBQueryConfig<'many', true, any, any>
+export type Result = DBQueryConfig<'many', true, any, any> & {
+  with?: DBQueryConfig<'many', true, any, any> & {
+    _locales?: DBQueryConfig<'many', true, any, any>
+  }
+}
 
 // Generate the Drizzle query for findMany based on
 // a collection field structure
@@ -31,6 +35,7 @@ export const buildFindManyArgs = ({
       id: false,
       _parentID: false,
     },
+    with: {},
   }
 
   if (adapter.tables[`${tableName}_texts`]) {

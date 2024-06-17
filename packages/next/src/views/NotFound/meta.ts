@@ -4,7 +4,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { meta } from '../../utilities/meta.js'
 
-export const generateNotFoundMeta = ({
+export const generateNotFoundMeta = async ({
   config,
   i18n,
 }: {
@@ -12,8 +12,8 @@ export const generateNotFoundMeta = ({
   i18n: I18n
 }): Promise<Metadata> =>
   meta({
-    config,
     description: i18n.t('general:pageNotFound'),
     keywords: `404 ${i18n.t('general:notFound')}`,
+    serverURL: config.serverURL,
     title: i18n.t('general:notFound'),
   })

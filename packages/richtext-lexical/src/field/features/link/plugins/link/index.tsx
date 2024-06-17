@@ -16,7 +16,7 @@ import type { LinkFields } from '../../nodes/types.js'
 import type { LinkPayload } from '../floatingLinkEditor/types.js'
 
 import { validateUrl } from '../../../../lexical/utils/url.js'
-import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode.js'
+import { $toggleLink, LinkNode, TOGGLE_LINK_COMMAND } from '../../nodes/LinkNode.js'
 
 export const LinkPlugin: PluginComponent<ClientProps> = () => {
   const [editor] = useLexicalComposerContext()
@@ -29,7 +29,7 @@ export const LinkPlugin: PluginComponent<ClientProps> = () => {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
-          toggleLink(payload)
+          $toggleLink(payload)
           return true
         },
         COMMAND_PRIORITY_LOW,
