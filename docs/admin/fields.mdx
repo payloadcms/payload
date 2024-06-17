@@ -1,0 +1,194 @@
+---
+title: Customizing Fields
+label: Customizing Fields
+order: 40
+desc:
+keywords:
+---
+
+All Payload fields support the ability to swap in your own React components. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  <br />
+  Don't see a built-in field type that you need? Build it! Using a combination of custom validation
+  and custom components, you can override the entirety of how a component functions within the admin
+  panel and effectively create your own field type.
+</Banner>
+
+**Fields support the following custom components:**
+
+| Component    | Description                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| **`Filter`** | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field.    |
+| **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More](#cell-component) |
+| **`Field`**  | Swap out the field itself within all `Edit` views. [More](#field-component)                                                 |
+
+As an alternative to replacing the entire Field component, you may want to keep the majority of the default Field component and only swap components within. This allows you to replace the **`Label`** or **`Error`** within a field component or add additional components inside the field with **`beforeInput`** or **`afterInput`**. **`beforeInput`** and **`afterInput`** are allowed in any fields that don't contain other fields, except [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
+
+| Component         | Description                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| **`Label`**       | Override the default Label in the Field Component. [More](#label-component)                                     |
+| **`Error`**       | Override the default Label in the Field Component. [More](#error-component)                                     |
+| **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More](#afterinput-and-beforeinput) |
+| **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More](#afterinput-and-beforeinput)  |
+
+## Cell Component
+
+These are the props that will be passed to your custom Cell to use in your own components.
+
+| Property         | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| **`field`**      | An object that includes the field configuration.                  |
+| **`colIndex`**   | A unique number for the column in the list.                       |
+| **`collection`** | An object with the config of the collection that the field is in. |
+| **`cellData`**   | The data for the field that the cell represents.                  |
+| **`rowData`**    | An object with all the field values for the row.                  |
+
+#### Example
+
+```tsx
+import React from 'react'
+import type { Props } from 'payload/components/views/Cell'
+import './index.scss'
+
+const baseClass = 'custom-cell'
+
+const CustomCell: React.FC<Props> = (props) => {
+  const { field, colIndex, collection, cellData, rowData } = props
+
+  return <span className={baseClass}>{cellData}</span>
+}
+```
+
+## Field Component
+
+When writing your own custom components you can make use of a number of hooks to set data, get reactive changes to other fields, get the id of the document or interact with a context from a custom provider.
+
+### Sending and receiving values from the form
+
+When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
+
+```tsx
+import { useField } from 'payload/components/forms'
+
+const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
+  // highlight-start
+  const { value, setValue } = useField<string>({ path })
+  // highlight-end
+
+  return <input onChange={(e) => setValue(e.target.value)} value={value} />
+}
+```
+
+<Banner type="success">
+  For more information regarding the hooks that are available to you while you build custom
+  components, including the <strong>useField</strong> hook, [click here](/docs/admin/hooks).
+</Banner>
+
+## Label Component
+
+These are the props that will be passed to your custom Label.
+
+| Property       | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| **`htmlFor`**  | Property used to set `for` attribute for label.                  |
+| **`label`**    | Label value provided in field, it can be used with i18n.         |
+| **`required`** | A boolean value that represents if the field is required or not. |
+
+#### Example
+
+```tsx
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { getTranslation } from 'payload/utilities/getTranslation'
+
+type Props = {
+  htmlFor?: string
+  label?: Record<string, string> | false | string
+  required?: boolean
+}
+
+const CustomLabel: React.FC<Props> = (props) => {
+  const { htmlFor, label, required = false } = props
+
+  const { i18n } = useTranslation()
+
+  if (label) {
+    return (
+      <span>
+        {getTranslation(label, i18n)}
+        {required && <span className="required">*</span>}
+      </span>
+    )
+  }
+
+  return null
+}
+```
+
+## Error Component
+
+These are the props that will be passed to your custom Error.
+
+| Property        | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| **`message`**   | The error message.                                            |
+| **`showError`** | A boolean value that represents if the error should be shown. |
+
+#### Example
+
+```tsx
+import React from 'react'
+
+type Props = {
+  message: string
+  showError?: boolean
+}
+
+const CustomError: React.FC<Props> = (props) => {
+  const { message, showError } = props
+
+  if (showError) {
+    return <p style={{ color: 'red' }}>{message}</p>
+  } else return null
+}
+```
+
+## afterInput and beforeInput
+
+With these properties you can add multiple components before and after the input element. For example, you can add an absolutely positioned button to clear the current field value.
+
+#### Example
+
+```tsx
+import React from 'react'
+import { Field } from 'payload/types'
+
+import './style.scss'
+
+const ClearButton: React.FC = () => {
+  return (
+    <button
+      onClick={() => {
+        /* ... */
+      }}
+    >
+      X
+    </button>
+  )
+}
+
+const titleField: Field = {
+  name: 'title',
+  type: 'text',
+  admin: {
+    components: {
+      afterInput: [ClearButton],
+    },
+  },
+}
+
+export default titleField
+```

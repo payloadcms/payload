@@ -3,7 +3,7 @@ title: Access Control
 label: Overview
 order: 10
 desc: Payload makes it simple to define and manage access control. By declaring roles, you can set permissions and restrict what your users can interact with.
-keywords: overview, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: overview, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Access control within Payload is extremely powerful while remaining easy and intuitive to manage. Declaring who should have access to what documents is no more complex than writing a simple JavaScript function that either returns a `boolean` or a [`query`](/docs/queries/overview) constraint to restrict which documents users can interact with.
@@ -21,7 +21,7 @@ Access control within Payload is extremely powerful while remaining easy and int
 
 ## Default Settings
 
-**By default, all Collections and Globals require that a user is logged in to be able to interact in any way.** The default Access Control function evaluates the `user` from the Express `req` and returns `true` if a user is logged in, and `false` if not.
+**By default, all Collections and Globals require that a user is logged in to be able to interact in any way.** The default Access Control function evaluates the `user` from the `req` and returns `true` if a user is logged in, and `false` if not.
 
 **Default Access function:**
 
@@ -37,9 +37,11 @@ const defaultPayloadAccess = ({ req: { user } }) => {
   <strong>Note:</strong>
   <br />
   In the Local API, all Access Control functions are skipped by default, allowing your server to do
-  whatever it needs. But, you can opt back in by setting the option <strong>
+  whatever it needs. But, you can opt back in by setting the option
+  <strong>
     overrideAccess
-  </strong>{' '}
+  </strong>
+  {' '}
   to <strong>false</strong>.
 </Banner>
 

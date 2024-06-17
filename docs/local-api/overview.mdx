@@ -3,7 +3,7 @@ title: Local API
 label: Overview
 order: 10
 desc: The Payload Local API allows you to interact with your database and execute the same operations that are available through REST and GraphQL within Node, directly on your server.
-keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL
@@ -23,7 +23,7 @@ can interact directly with your database.
 Here are some common examples of how you can use the Local API:
 
 - Seeding data via Node seed scripts that you write and maintain
-- Opening custom Express routes which feature additional functionality but still rely on Payload
+- Opening custom routes which feature additional functionality but still rely on Payload
 - Within access control and hook functions
 
 ## Accessing payload
@@ -51,7 +51,7 @@ const afterChangeHook: CollectionAfterChangeHook = async () => {
 
 #### Accessing from the `req`
 
-Payload is available anywhere you have access to the Express `req` - including within your access control and hook
+Payload is available anywhere you have access to the `req` - including within your access control and hook
 functions.
 
 Example:
@@ -310,7 +310,7 @@ const result = await payload.login({
     email: 'dev@payloadcms.com',
     password: 'rip',
   },
-  req: req, // pass an Express `req` which will be provided to all hooks
+  req: req, // pass a Request object to be provided to all hooks
   res: res, // used to automatically set an HTTP-only auth cookie
   depth: 2,
   locale: 'en',
@@ -330,7 +330,7 @@ const token = await payload.forgotPassword({
     // required
     email: 'dev@payloadcms.com',
   },
-  req: req, // pass an Express `req` which will be provided to all hooks
+  req: req, // pass a Request object to be provided to all hooks
 })
 ```
 
@@ -349,7 +349,7 @@ const result = await payload.resetPassword({
     password: req.body.password, // the new password to set
     token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
   },
-  req: req, // pass an Express `req` which will be provided to all hooks
+  req: req, // pass a Request object to be provided to all hooks
   res: res, // used to automatically set an HTTP-only auth cookie
 })
 ```
@@ -364,7 +364,7 @@ const result = await payload.unlock({
     // required
     email: 'dev@payloadcms.com',
   },
-  req: req, // pass an Express `req` which will be provided to all hooks
+  req: req, // pass a Request object to be provided to all hooks
   overrideAccess: true,
 })
 ```
@@ -427,10 +427,10 @@ const result = await payload.updateGlobal({
 ## Next.js Conflict with Local API
 
 There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes within a
-separate child process, and Payload has not been initalized yet in these instances. That means that unless you
+separate child process, and Payload has not been initialized yet in these instances. That means that unless you
 explicitly initialize Payload within your operation, it will not be running and return no data / an empty object.
 
-As a workaround, we recommend leveraging the following pattern to determine and ensure Payload is initalized:
+As a workaround, we recommend leveraging the following pattern to determine and ensure Payload is initialized:
 
 ```
 import dotenv from 'dotenv'
