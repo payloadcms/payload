@@ -8,143 +8,142 @@
 
 export interface Config {
   collections: {
-    users: User;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
+    users: User
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
   globals: {
-    global: Global;
-    array: Array;
-    'default-value': DefaultValue;
-    'access-control': AccessControl;
-    'without-graphql': WithoutGraphql;
-  };
-  locale: 'en' | 'es';
+    global: Global
+    array: Array
+    'default-value': DefaultValue
+    'access-control': AccessControl
+    'without-graphql': WithoutGraphql
+  }
+  locale: 'en' | 'es'
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: string
   json?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  title?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+    | null
+  title?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array".
  */
 export interface Array {
-  id: string;
+  id: string
   array?:
     | {
-        text?: string | null;
-        id?: string | null;
+        text?: string | null
+        id?: string | null
       }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+    | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "default-value".
  */
 export interface DefaultValue {
-  id: string;
-  text?: string | null;
+  id: string
+  text?: string | null
   group?: {
-    text?: string | null;
-  };
-  updatedAt?: string | null;
-  createdAt?: string | null;
+    text?: string | null
+  }
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "access-control".
  */
 export interface AccessControl {
-  id: string;
-  title: string;
-  enabled?: boolean | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  title: string
+  enabled?: boolean | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "without-graphql".
  */
 export interface WithoutGraphql {
-  id: string;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

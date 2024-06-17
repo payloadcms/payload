@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormField, UIField } from 'payload/types'
+import type { FormField, UIField } from 'payload'
 
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'

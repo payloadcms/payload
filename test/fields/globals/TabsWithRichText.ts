@@ -5,7 +5,7 @@
  * - each tab has a different label in each language. Needs to be a LOCALIZED label, not a single label for all languages. Only then can it be reproduced
  */
 
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 

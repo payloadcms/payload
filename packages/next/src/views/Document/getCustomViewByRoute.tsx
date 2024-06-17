@@ -1,5 +1,4 @@
-import type { EditViewComponent } from 'payload/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { EditViewComponent, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 

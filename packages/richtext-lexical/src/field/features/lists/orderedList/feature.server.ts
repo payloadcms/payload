@@ -2,9 +2,10 @@ import { ListItemNode, ListNode } from '@lexical/list'
 
 import type { FeatureProviderProviderServer } from '../../types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { OrderedListFeatureClientComponent } from '../../../../exports/client/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
-import { OrderedListFeatureClientComponent } from './feature.client.js'
 import { i18n } from './i18n.js'
 import { ORDERED_LIST } from './markdownTransformer.js'
 

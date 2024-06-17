@@ -20,7 +20,7 @@ This package is now best used for implementing custom storage solutions or third
 ## Usage
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 export default buildConfig({

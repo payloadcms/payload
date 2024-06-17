@@ -1,11 +1,11 @@
 'use client'
-import type { FieldWithPath } from 'payload/types'
+import type { FieldWithPath } from 'payload'
 
 import React, { Fragment, type JSX, useState } from 'react'
 
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { useTranslation } from '../../providers/Translation/index.js'

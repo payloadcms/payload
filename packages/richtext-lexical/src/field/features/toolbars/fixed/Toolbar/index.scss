@@ -104,14 +104,13 @@ html[data-theme='dark'] {
   }
 }
 
-
 .rich-text-lexical--show-gutter {
   .fixed-toolbar {
     + .editor-container {
       > .editor-scroller > .editor {
         > .ContentEditable__root::before {
-          top: calc(var(--base) * 1.25)!important;
-          height: calc(100% - calc(var(--base) * 1.25) - 8px)!important;
+          top: calc(var(--base) * 1.25) !important;
+          height: calc(100% - calc(var(--base) * 1.25) - 8px) !important;
         }
       }
     }

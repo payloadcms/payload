@@ -1,7 +1,6 @@
 'use client'
 
-import { useListDrawer } from '@payloadcms/ui/elements/ListDrawer'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useListDrawer, useTranslation } from '@payloadcms/ui/client'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { ReactEditor, useSlate } from 'slate-react'
 

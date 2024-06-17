@@ -1,4 +1,4 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 

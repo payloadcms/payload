@@ -1,8 +1,8 @@
 import type { ObjMap } from 'graphql/jsutils/ObjMap.js'
 import type { GraphQLFieldConfig, GraphQLFieldResolver } from 'graphql/type/definition.js'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 
-import { isolateObjectProperty } from 'payload/utilities'
+import { isolateObjectProperty } from 'payload'
 
 type PayloadContext = { req: PayloadRequestWithData }
 

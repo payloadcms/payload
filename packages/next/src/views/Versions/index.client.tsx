@@ -1,16 +1,18 @@
 'use client'
-import type { PaginatedDocs } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
-import { LoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
-import { Pagination } from '@payloadcms/ui/elements/Pagination'
-import { PerPage } from '@payloadcms/ui/elements/PerPage'
-import { type Column, Table } from '@payloadcms/ui/elements/Table'
-import { SetViewActions } from '@payloadcms/ui/providers/Actions'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useListQuery } from '@payloadcms/ui/providers/ListQuery'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  type Column,
+  LoadingOverlayToggle,
+  Pagination,
+  PerPage,
+  SetViewActions,
+  Table,
+  useComponentMap,
+  useDocumentInfo,
+  useListQuery,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { useSearchParams } from 'next/navigation.js'
 import React from 'react'
 

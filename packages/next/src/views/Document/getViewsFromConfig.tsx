@@ -1,11 +1,12 @@
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { EditViewComponent } from 'payload/config'
 import type {
   AdminViewComponent,
+  CollectionPermission,
+  EditViewComponent,
+  GlobalPermission,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
 

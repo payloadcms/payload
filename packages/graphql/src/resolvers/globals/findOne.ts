@@ -1,7 +1,6 @@
-import type { Document, SanitizedGlobalConfig } from 'payload/types'
+import type { Document, SanitizedGlobalConfig } from 'payload'
 
-import { findOneOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { findOneOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

@@ -1,5 +1,5 @@
 /**
- * WARNING: This file contains exports that can only be safely used on the server.
+ * WARNING: This file contains exports that can only be safely used in Node environments.
  */
 
 export { generateTypes } from '../bin/generateTypes.js'

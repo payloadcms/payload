@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -11,7 +11,6 @@ import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { PopupList } from '../Popup/index.js'
@@ -122,7 +121,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           {t('general:delete')}
         </PopupList.Button>
         <Modal className={baseClass} slug={modalSlug}>
-          <MinimalTemplate className={`${baseClass}__template`}>
+          <div className={`${baseClass}__template`}>
             <h1>{t('general:confirmDeletion')}</h1>
             <p>
               <Translation
@@ -150,7 +149,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>
             </div>
-          </MinimalTemplate>
+          </div>
         </Modal>
       </React.Fragment>
     )

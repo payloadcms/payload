@@ -1,21 +1,24 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { Drawer } from '@payloadcms/ui/elements/Drawer'
-import { Form, type FormProps } from '@payloadcms/ui/forms/Form'
+import {
+  Drawer,
+  Form,
+  FormSubmit,
+  useAuth,
+  useConfig,
+  useDocumentInfo,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui/client'
+import { type FormProps } from '@payloadcms/ui/forms/Form'
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { deepCopyObject } from 'payload/utilities'
+import { getFormState } from '@payloadcms/ui/shared'
+import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'

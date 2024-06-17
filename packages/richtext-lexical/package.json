@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -17,26 +18,25 @@
       "require": "./src/index.ts",
       "types": "./src/index.ts"
     },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+    "./client": {
+      "import": "./src/exports/client/index.ts",
+      "require": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "files": [
-    "dist",
-    "components.js",
-    "components.d.ts"
+    "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:esbuild": "node bundle.js",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "translateNewKeys": "tsx scripts/translateNewKeys.ts"
   },
@@ -54,13 +54,11 @@
     "@lexical/utils": "0.16.0",
     "@types/uuid": "^9.0.8",
     "bson-objectid": "2.0.4",
-    "classnames": "^2.3.2",
     "deep-equal": "2.2.3",
     "json-schema": "^0.4.0",
     "lexical": "0.16.0",
-    "lodash": "4.17.21",
     "react-error-boundary": "4.0.13",
-    "uuid": "^9.0.1"
+    "uuid": "10.0.0"
   },
   "devDependencies": {
     "@lexical/eslint-plugin": "0.15.0",
@@ -72,6 +70,8 @@
     "@types/node": "20.12.5",
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "esbuild": "^0.21.4",
+    "esbuild-sass-plugin": "^3.3.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -104,10 +104,10 @@
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
       },
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+      "./client": {
+        "import": "./dist/exports/client/index.js",
+        "require": "./dist/exports/*client/index.js",
+        "types": "./dist/exports/client/index.d.ts"
       }
     },
     "main": "./dist/index.js",

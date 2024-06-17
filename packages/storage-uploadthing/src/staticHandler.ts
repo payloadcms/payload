@@ -1,5 +1,5 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { Where } from 'payload/types'
+import type { Where } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
 import { getKeyFromFilename } from './utilities.js'

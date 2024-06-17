@@ -1,7 +1,6 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
-import { accessOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { accessOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

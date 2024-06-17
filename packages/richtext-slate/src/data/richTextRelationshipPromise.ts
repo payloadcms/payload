@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData, RichTextAdapter, RichTextField } from 'payload/types'
+import type { PayloadRequestWithData, RichTextAdapter, RichTextField } from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 

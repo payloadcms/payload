@@ -1,6 +1,6 @@
-import type { Collection, Field, PayloadRequestWithData, RichTextField } from 'payload/types'
+import type { Collection, Field, PayloadRequestWithData, RichTextField } from 'payload'
 
-import { createDataloaderCacheKey } from 'payload/utilities'
+import { createDataloaderCacheKey } from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 

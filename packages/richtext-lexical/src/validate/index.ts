@@ -1,5 +1,5 @@
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
-import type { RichTextField, Validate } from 'payload/types'
+import type { RichTextField, Validate } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../field/lexical/config/types.js'
 

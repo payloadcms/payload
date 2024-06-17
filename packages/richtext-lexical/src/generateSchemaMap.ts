@@ -1,4 +1,4 @@
-import type { RichTextAdapter } from 'payload/types'
+import type { RichTextAdapter } from 'payload'
 
 import type { ResolvedServerFeatureMap } from './field/features/types.js'
 

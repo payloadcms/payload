@@ -1,7 +1,7 @@
 'use client'
+import type { Where } from 'payload'
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
+import type { PaginatedDocs } from 'payload'
 
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'

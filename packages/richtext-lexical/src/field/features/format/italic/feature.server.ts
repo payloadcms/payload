@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { ItalicFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { ItalicFeatureClientComponent } from '../../../../exports/client/index.js'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers.js'
 
 export const ItalicFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {

@@ -16,7 +16,7 @@
     right: unset;
     left: base(4.5);
   }
-  &__localizer {
+  &__localizer.localizer {
     position: absolute;
     top: 50%;
     right: base(4.5);

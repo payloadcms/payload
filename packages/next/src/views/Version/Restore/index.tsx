@@ -1,19 +1,14 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Modal, useModal } from '@payloadcms/ui/elements/Modal'
-import { Pill } from '@payloadcms/ui/elements/Pill'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
-import { requests } from '@payloadcms/ui/utilities/api'
+import { Button, Modal, Pill, useConfig, useModal, useTranslation } from '@payloadcms/ui/client'
+import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-// import { requests } from '../../../../api'
+import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 import './index.scss'
 
 const baseClass = 'restore-version'

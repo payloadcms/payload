@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
 import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared.js'
 

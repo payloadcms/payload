@@ -1,7 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
-import type { LanguageOptions } from 'payload/types'
+import type { LanguageOptions } from 'payload'
 
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { FieldLabel } from '@payloadcms/ui/client'
 import React from 'react'
 
 import { ToggleTheme } from '../ToggleTheme/index.js'

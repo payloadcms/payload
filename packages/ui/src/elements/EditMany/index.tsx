@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload/types'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -12,7 +12,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -28,9 +28,7 @@ import './index.scss'
 
 const baseClass = 'edit-many'
 
-import type { ClientCollectionConfig } from 'payload/types'
-
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export type EditManyProps = {
   collection: ClientCollectionConfig
@@ -200,7 +198,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   onClick={() => closeModal(drawerSlug)}
                   type="button"
                 >
-                  <X />
+                  <XIcon />
                 </button>
               </div>
               <Form

@@ -1,13 +1,13 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
-import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { WithServerSideProps } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
+import { DefaultTemplate } from '../../templates/Default/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 

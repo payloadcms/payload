@@ -24,17 +24,16 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-import type { FieldPermissions } from 'payload/auth'
-import type { BlockField } from 'payload/types'
+import type { BlockField, FieldPermissions } from 'payload'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]

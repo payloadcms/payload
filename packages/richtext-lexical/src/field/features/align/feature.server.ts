@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../types.js'
 
-import { AlignFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { AlignFeatureClientComponent } from '../../../exports/client/index.js'
 import { i18n } from './i18n.js'
 
 export const AlignFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {

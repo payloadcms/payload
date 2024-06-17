@@ -1,17 +1,20 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
-import { DrawerToggler, useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useListDrawer } from '@payloadcms/ui/elements/ListDrawer'
+import {
+  Button,
+  DrawerToggler,
+  useConfig,
+  useDocumentDrawer,
+  useDrawerSlug,
+  useListDrawer,
+  usePayloadAPI,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { File } from '@payloadcms/ui/graphics/File'
-import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
