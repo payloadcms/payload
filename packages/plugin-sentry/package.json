@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "build": "echo \"Build temporarily disabled.\" && exit 0",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
