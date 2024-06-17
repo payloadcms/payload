@@ -18,8 +18,6 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldPermissions } from 'payload/auth'
-
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -29,7 +27,6 @@ import { useFormInitializing, useFormProcessing } from '../../forms/Form/context
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   initCollapsed?: boolean
-  permissions: FieldPermissions
   width?: string
 }
 
