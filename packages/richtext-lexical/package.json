@@ -36,7 +36,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "translateNewKeys": "tsx scripts/translateNewKeys.ts"
   },
