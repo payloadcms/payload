@@ -429,6 +429,16 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.email = consoleEmailAdapter({ payload: this })
     }
 
+    // Warn if image resizing is enabled but sharp is not installed
+    if (
+      !this.config.sharp &&
+      this.config.collections.some((c) => c.upload.imageSizes || c.upload.formatOptions)
+    ) {
+      this.logger.warn(
+        `Image resizing is enabled for one or more collections, but sharp not installed. Please install 'sharp' and pass into the config.`,
+      )
+    }
+
     this.sendEmail = this.email['sendEmail']
 
     serverInitTelemetry(this)

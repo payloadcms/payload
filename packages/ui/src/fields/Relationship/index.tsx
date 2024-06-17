@@ -102,7 +102,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -201,11 +201,15 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               query.where.and.push(relationFilterOption)
             }
 
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            const response = await fetch(`${serverURL}${api}/${relation}`, {
+              body: qs.stringify(query),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-HTTP-Method-Override': 'GET',
               },
+              method: 'POST',
             })
 
             if (response.ok) {
@@ -326,11 +330,15 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+          const response = await fetch(`${serverURL}${api}/${relation}`, {
+            body: qs.stringify(query),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-HTTP-Method-Override': 'GET',
             },
+            method: 'POST',
           })
 
           const collection = collections.find((coll) => coll.slug === relation)
@@ -515,7 +523,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                   ? (selected) => {
                       if (selected === null) {
                         setValue(hasMany ? [] : null)
-                      } else if (hasMany) {
+                      } else if (hasMany && Array.isArray(selected)) {
                         setValue(
                           selected
                             ? selected.map((option) => {
@@ -530,12 +538,12 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                               })
                             : null,
                         )
-                      } else if (hasMultipleRelations) {
+                      } else if (hasMultipleRelations && !Array.isArray(selected)) {
                         setValue({
                           relationTo: selected.relationTo,
                           value: selected.value,
                         })
-                      } else {
+                      } else if (!Array.isArray(selected)) {
                         setValue(selected.value)
                       }
                     }

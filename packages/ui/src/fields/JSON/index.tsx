@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate, JSONField as JSONFieldType } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -11,8 +11,6 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'json-field'
-
-import type { JSONField as JSONFieldType } from 'payload/types'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -67,7 +65,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
     useField<string>({
-      path: pathFromContext || pathFromProps || name,
+      path: pathFromContext ?? pathFromProps ?? name,
       validate: memoizedValidate,
     })
 

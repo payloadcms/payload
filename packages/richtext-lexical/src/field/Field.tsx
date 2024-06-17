@@ -59,7 +59,7 @@ const _RichText: React.FC<
   const { path: pathFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

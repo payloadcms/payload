@@ -53,14 +53,17 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
         return
       }
       await requests
-        .post(`${serverURL}${api}/${slug}/${id}/duplicate?locale=${locale.code}`, {
-          body: JSON.stringify({}),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-            credentials: 'include',
+        .post(
+          `${serverURL}${api}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
+          {
+            body: JSON.stringify({}),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+              credentials: 'include',
+            },
           },
-        })
+        )
         .then(async (res) => {
           const { doc, errors, message } = await res.json()
           if (res.status < 400) {
@@ -69,7 +72,9 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
                 t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
             )
             setModified(false)
-            router.push(`${admin}/collections/${slug}/${doc.id}?locale=${locale.code}`)
+            router.push(
+              `${admin}/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+            )
           } else {
             toast.error(
               errors?.[0].message ||

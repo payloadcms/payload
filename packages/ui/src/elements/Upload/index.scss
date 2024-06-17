@@ -30,17 +30,6 @@
     }
   }
 
-  .file-details {
-    img {
-      position: relative;
-      min-width: 100%;
-      height: 100%;
-      transform: scale(var(--file-details-thumbnail--zoom));
-      top: var(--file-details-thumbnail--top-offset);
-      left: var(--file-details-thumbnail--left-offset);
-    }
-  }
-
   &__remove {
     margin: calc($baseline * 1.5) $baseline $baseline 0;
     place-self: flex-start;

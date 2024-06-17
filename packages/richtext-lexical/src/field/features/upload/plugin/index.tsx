@@ -21,7 +21,7 @@ import type { UploadData } from '../nodes/UploadNode.js'
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
-export type InsertUploadPayload = Readonly<UploadData>
+export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>>
 
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
@@ -47,6 +47,7 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
             if ($isRangeSelection(selection)) {
               const uploadNode = $createUploadNode({
                 data: {
+                  id: payload.id,
                   fields: payload.fields,
                   relationTo: payload.relationTo,
                   value: payload.value,

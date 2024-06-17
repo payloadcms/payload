@@ -41,16 +41,28 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   overrideAccess?: boolean
+  /**
+   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+   */
+  path: (number | string)[]
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: TData
-  /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
+  /** The sibling data of the document before changes being applied, only in `beforeChange`, `beforeValidate`, `beforeDuplicate` and `afterChange` field hooks. */
   previousSiblingDoc?: TData
-  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange` and `beforeValidate` hooks. */
+  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
+  /**
+   * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
+   */
+  schemaPath: string[]
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<TSiblingData>
+  /**
+   * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
+   */
+  siblingDocWithLocales?: Record<string, unknown>
   /** The value of the field. */
   value?: TValue
 }

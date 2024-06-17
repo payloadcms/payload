@@ -20,7 +20,7 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
   } = props
 
   const { path: pathFromContext } = useFieldProps()
-  const path = pathFromContext || pathFromProps
+  const path = pathFromContext ?? pathFromProps
 
   const hasSubmitted = useFormSubmitted()
   const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
