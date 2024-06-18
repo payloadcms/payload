@@ -111,7 +111,7 @@
     "bson-objectid": "2.0.4",
     "date-fns": "3.3.1",
     "deep-equal": "2.2.2",
-    "flatley": "5.2.0",
+    "is-buffer": "^2.0.5",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "qs": "6.11.2",

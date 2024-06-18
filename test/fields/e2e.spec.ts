@@ -153,12 +153,34 @@ describe('fields', () => {
       const input = '{"foo": "bar"}'
       await page.goto(url.create)
       await page.waitForURL(url.create)
-      await expect(() => expect(page.locator('.json-field .code-editor')).toBeVisible()).toPass({
+      const jsonCodeEditor = page.locator('.json-field .code-editor').first()
+      await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
-      await page.locator('.json-field .inputarea').fill(input)
+      const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+      await jsonFieldInputArea.fill(input)
+
       await saveDocAndAssert(page)
-      await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
+      const jsonField = page.locator('.json-field').first()
+      await expect(jsonField).toContainText('"foo": "bar"')
+    })
+
+    test('should not unflatten json field containing keys with dots', async () => {
+      const input = '{"foo.with.periods": "bar"}'
+
+      await page.goto(url.create)
+      await page.waitForURL(url.create)
+      const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
+      await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+      const json = page.locator('.group-field .json-field .inputarea')
+      await json.fill(input)
+
+      await saveDocAndAssert(page, '.form-submit button')
+      await expect(page.locator('.group-field .json-field')).toContainText(
+        '"foo.with.periods": "bar"',
+      )
     })
   })
 
