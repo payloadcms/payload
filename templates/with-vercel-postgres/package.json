@@ -14,17 +14,17 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-postgres": "beta",
     "@payloadcms/next": "beta",
     "@payloadcms/plugin-cloud": "beta",
     "@payloadcms/richtext-lexical": "beta",
-    "@payloadcms/storage-vercel-blob": "beta",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.0.0-rc.0",
     "payload": "beta",
     "react": "^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0-rc-f994737d14-20240522"
+    "react-dom": "^19.0.0-rc-f994737d14-20240522",
+    "@payloadcms/db-postgres": "beta",
+    "@payloadcms/storage-vercel-blob": "beta"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
@@ -32,11 +32,11 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "dotenv": "^16.4.5",
     "eslint": "^8",
-    "eslint-config-next": "^14.2.3",
+    "eslint-config-next": "15.0.0-rc.0",
     "typescript": "^5.4.5"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": "^18.20.2 || >=20.6.0"
   },
   "pnpm": {
     "overrides": {
