@@ -79,9 +79,44 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (['relationship', 'upload'].includes(field.type)) {
+  if (field.type === 'relationship' || field.type === 'upload') {
     if (val === 'null') {
       formattedValue = null
+    } else {
+      // convert the value to the idType of the relationship
+      let idType: 'number' | 'text'
+      if (typeof field.relationTo === 'string') {
+        const collection = adapter.payload.collections[field.relationTo]
+        const mixedType: 'number' | 'serial' | 'text' | 'uuid' =
+          collection.customIDType || adapter.idType
+        const typeMap = {
+          number: 'number',
+          serial: 'number',
+          text: 'text',
+          uuid: 'text',
+        }
+        idType = typeMap[mixedType]
+      } else {
+        // LIMITATION: Only cast to the first relationTo id type,
+        // otherwise we need to make the db cast which is inefficient
+        const collection = adapter.payload.collections[field.relationTo[0]]
+        idType = collection.customIDType || adapter.idType === 'uuid' ? 'text' : 'number'
+      }
+      if (Array.isArray(formattedValue)) {
+        formattedValue = formattedValue.map((value) => {
+          if (idType === 'number') {
+            return Number(value)
+          }
+          return value
+        })
+      } else {
+        if (idType === 'number') {
+          formattedValue = Number(val)
+        }
+        if (idType === 'text') {
+          formattedValue = String(val)
+        }
+      }
     }
   }
 
