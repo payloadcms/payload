@@ -75,7 +75,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
       if (foundVersions.length !== 1) {
         throw new Error(
-          `Mismatching dependency versions found: ${foundVersions.join(', ')}. All payload and @payloadcms/* packages must have the same version.`,
+          `Mismatching lexical dependency versions found: ${foundVersions.join(', ')}. All lexical and @lexical/* packages must have the same version.`,
         )
       }
     }
