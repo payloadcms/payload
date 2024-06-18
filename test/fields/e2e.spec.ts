@@ -393,11 +393,25 @@ describe('fields', () => {
       const input = '{"foo": "bar"}'
 
       await page.goto(url.create)
-      const json = page.locator('.json-field .inputarea')
+      const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+      await jsonFieldInputArea.fill(input)
+
+      await saveDocAndAssert(page, '.form-submit button')
+      const jsonField = page.locator('.json-field').first()
+      await expect(jsonField).toContainText('"foo": "bar"')
+    })
+
+    test('should not unflatten json field containing keys with dots', async () => {
+      const input = '{"foo.with.periods": "bar"}'
+
+      await page.goto(url.create)
+      const json = page.locator('.group-field .json-field .inputarea')
       await json.fill(input)
 
       await saveDocAndAssert(page, '.form-submit button')
-      await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
+      await expect(page.locator('.group-field .json-field')).toContainText(
+        '"foo.with.periods": "bar"',
+      )
     })
   })
 
