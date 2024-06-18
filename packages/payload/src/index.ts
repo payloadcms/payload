@@ -55,6 +55,7 @@ import { validateSchema } from './config/validate.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import { getDependencies } from './utilities/dependencies/getDependencies.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -357,6 +358,61 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
+    if (process.env.NODE_ENV !== 'production') {
+      // First load. First check if there are mismatching dependency versions of payload packages
+      const resolvedDependencies = await getDependencies(dirname, [
+        '@payloadcms/ui/shared',
+        'payload',
+        '@payloadcms/next/utilities',
+        '@payloadcms/richtext-lexical',
+        '@payloadcms/richtext-slate',
+        '@payloadcms/graphql',
+        '@payloadcms/plugin-cloud',
+        '@payloadcms/db-mongodb',
+        '@payloadcms/db-postgres',
+        '@payloadcms/plugin-form-builder',
+        '@payloadcms/plugin-nested-docs',
+        '@payloadcms/plugin-seo',
+        '@payloadcms/plugin-search',
+        '@payloadcms/plugin-cloud-storage',
+        '@payloadcms/plugin-stripe',
+        '@payloadcms/plugin-zapier',
+        '@payloadcms/plugin-redirects',
+        '@payloadcms/plugin-sentry',
+        '@payloadcms/bundler-webpack',
+        '@payloadcms/bundler-vite',
+        '@payloadcms/live-preview',
+        '@payloadcms/live-preview-react',
+        '@payloadcms/translations',
+        '@payloadcms/email-nodemailer',
+        '@payloadcms/email-resend',
+        '@payloadcms/storage-azure',
+        '@payloadcms/storage-s3',
+        '@payloadcms/storage-gcs',
+        '@payloadcms/storage-vercel-blob',
+        '@payloadcms/storage-uploadthing',
+      ])
+
+      // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
+      const foundVersions: {
+        [version: string]: string
+      } = {}
+      for (const [_pkg, { version }] of resolvedDependencies.resolved) {
+        if (!Object.keys(foundVersions).includes(version)) {
+          foundVersions[version] = _pkg
+        }
+      }
+      if (Object.keys(foundVersions).length !== 1) {
+        const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
+          .map(([version, pkg]) => `${pkg}@${version}`)
+          .join(', ')
+
+        throw new Error(
+          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version.`,
+        )
+      }
+    }
+
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
