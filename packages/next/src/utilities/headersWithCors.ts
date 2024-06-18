@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload'
+import type { CORSConfig, PayloadRequestWithData } from 'payload'
 
 type CorsArgs = {
   headers: Headers
@@ -9,15 +9,33 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
   const requestOrigin = req?.headers.get('Origin')
 
   if (cors) {
+    const defaultAllowedHeaders = [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'Content-Encoding',
+      'x-apollo-tracing',
+    ]
+
     headers.set('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS')
-    headers.set(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, Authorization, Content-Encoding, x-apollo-tracing',
-    )
+
+    if (typeof cors === 'object' && 'headers' in cors) {
+      headers.set(
+        'Access-Control-Allow-Headers',
+        [...defaultAllowedHeaders, ...cors.headers].filter(Boolean).join(', '),
+      )
+    } else {
+      headers.set('Access-Control-Allow-Headers', defaultAllowedHeaders.join(', '))
+    }
 
     if (cors === '*') {
       headers.set('Access-Control-Allow-Origin', '*')
-    } else if (Array.isArray(cors) && cors.indexOf(requestOrigin) > -1) {
+    } else if (
+      (Array.isArray(cors) && cors.indexOf(requestOrigin) > -1) ||
+      (typeof cors === 'object' && (cors as CORSConfig).origins.indexOf(requestOrigin) > -1)
+    ) {
       headers.set('Access-Control-Allow-Credentials', 'true')
       headers.set('Access-Control-Allow-Origin', requestOrigin)
     }
