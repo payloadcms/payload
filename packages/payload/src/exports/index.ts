@@ -354,6 +354,8 @@ export { getFileByPath } from '../uploads/getFileByPath.js'
 
 export { commitTransaction } from '../utilities/commitTransaction.js'
 
+export { getDependencies } from '../utilities/dependencies/getDependencies.js'
+
 export { initTransaction } from '../utilities/initTransaction.js'
 
 export { killTransaction } from '../utilities/killTransaction.js'

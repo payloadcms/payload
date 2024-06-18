@@ -6,11 +6,14 @@ import type {
 } from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
 import {
   afterChangeTraverseFields,
   afterReadTraverseFields,
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
+  getDependencies,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -44,8 +47,39 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot }) => {
+    if (process.env.NODE_ENV !== 'production') {
+      const resolvedDependencies = await getDependencies(dirname, [
+        'lexical',
+        '@lexical/headless',
+        '@lexical/link',
+        '@lexical/list',
+        '@lexical/mark',
+        '@lexical/markdown',
+        '@lexical/react',
+        '@lexical/rich-text',
+        '@lexical/selection',
+        '@lexical/utils',
+      ])
+
+      // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
+      const foundVersions: string[] = []
+      for (const [_pkg, { version }] of resolvedDependencies.resolved) {
+        if (!foundVersions.includes(version)) {
+          foundVersions.push(version)
+        }
+      }
+      if (foundVersions.length !== 1) {
+        throw new Error(
+          `Mismatching dependency versions found: ${foundVersions.join(', ')}. All payload and @payloadcms/* packages must have the same version.`,
+        )
+      }
+    }
+
     let features: FeatureProviderServer<unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
