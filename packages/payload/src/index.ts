@@ -394,15 +394,21 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       ])
 
       // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
-      const foundVersions: string[] = []
+      const foundVersions: {
+        [version: string]: string
+      } = {}
       for (const [_pkg, { version }] of resolvedDependencies.resolved) {
-        if (!foundVersions.includes(version)) {
-          foundVersions.push(version)
+        if (!Object.keys(foundVersions).includes(version)) {
+          foundVersions[version] = _pkg
         }
       }
-      if (foundVersions.length !== 1) {
+      if (Object.keys(foundVersions).length !== 1) {
+        const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
+          .map(([version, pkg]) => `${pkg}@${version}`)
+          .join(', ')
+
         throw new Error(
-          `Mismatching dependency versions found: ${foundVersions.join(', ')}. All payload and @payloadcms/* packages must have the same version.`,
+          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version.`,
         )
       }
     }
