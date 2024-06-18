@@ -1,7 +1,6 @@
-import flatleyImport from 'flatley'
-
 import type { Data, Fields } from './types'
-const { unflatten: flatleyUnflatten } = flatleyImport
+
+import { unflatten as flatleyUnflatten } from '../../../utilities/unflatten'
 
 type ReturnType = {
   data: Data
@@ -35,7 +34,7 @@ export const reduceFieldsToValuesWithValidation = (
   })
 
   if (unflatten) {
-    state.data = flatleyUnflatten(state.data, { safe: true })
+    state.data = flatleyUnflatten(state.data)
   }
 
   return state
