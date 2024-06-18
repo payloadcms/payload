@@ -10,7 +10,6 @@ import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'
 
-import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { parseError } from './utilities/parseError.js'
 
 /**
@@ -48,8 +47,6 @@ export async function migrateFresh(
 
   await this.dropDatabase({ adapter: this })
 
-  await createMigrationTable(this)
-
   const migrationFiles = (await readMigrationFiles({ payload })) as Migration[]
   payload.logger.debug({
     msg: `Found ${migrationFiles.length} migration files.`,
@@ -62,7 +59,8 @@ export async function migrateFresh(
     try {
       const start = Date.now()
       await initTransaction(req)
-      const db = (payload.db as DrizzleAdapter).sessions[req.transactionID].db
+      const adapter = payload.db as DrizzleAdapter
+      const db = adapter?.sessions[req.transactionID]?.db || adapter.drizzle
       await migration.up({ db, payload, req })
       await payload.create({
         collection: 'payload-migrations',

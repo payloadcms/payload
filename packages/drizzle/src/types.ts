@@ -126,7 +126,7 @@ export type Migration = MigrationData & {
     payload,
     req,
   }: {
-    db?: DrizzleTransaction
+    db?: DrizzleTransaction | LibSQLDatabase<Record<string, never>> | PostgresDB
     payload: Payload
     req: PayloadRequestWithData
   }) => Promise<boolean>
@@ -135,7 +135,7 @@ export type Migration = MigrationData & {
     payload,
     req,
   }: {
-    db?: DrizzleTransaction
+    db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
     payload: Payload
     req: PayloadRequestWithData
   }) => Promise<boolean>
@@ -159,8 +159,7 @@ export type DrizzleAdapter = BaseDatabaseAdapter & {
   fieldConstraints: Record<string, Record<string, string>>
   generateDrizzleJSON: GenerateDrizzleJSON
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
-  // TODO: figure out the type for idType
-  idType: unknown
+  idType: 'serial' | 'uuid'
   initializing: Promise<void>
   insert: Insert
   localesSuffix?: string

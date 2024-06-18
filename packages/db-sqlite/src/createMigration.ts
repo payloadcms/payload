@@ -66,13 +66,18 @@ export const createMigration: CreateMigration = async function createMigration(
 
     const sqlStatementsUp = await generateSQLiteMigration(drizzleJsonBefore, drizzleJsonAfter)
     const sqlStatementsDown = await generateSQLiteMigration(drizzleJsonAfter, drizzleJsonBefore)
+    // need to create tables as separate statements
     const sqlExecute = 'await db.run(sql`'
 
     if (sqlStatementsUp?.length) {
-      upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n').replaceAll('`', '\\`')}\`)`
+      upSQL = sqlStatementsUp
+        .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
+        .join('\n')
     }
     if (sqlStatementsDown?.length) {
-      downSQL = `${sqlExecute}\n ${sqlStatementsDown?.join('\n').replaceAll('`', '\\`')}\`)`
+      downSQL = sqlStatementsDown
+        .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
+        .join('\n')
     }
 
     if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {

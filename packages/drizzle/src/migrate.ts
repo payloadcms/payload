@@ -12,7 +12,6 @@ import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'
 
-import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
 
@@ -39,8 +38,6 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
     if (Number(migrationsInDB?.[0]?.batch) > 0) {
       latestBatch = Number(migrationsInDB[0]?.batch)
     }
-  } else {
-    await createMigrationTable(this)
   }
 
   if (migrationsInDB.find((m) => m.batch === -1)) {
@@ -91,7 +88,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
 
   try {
     await initTransaction(req)
-    const db = (payload.db as DrizzleAdapter).sessions[req.transactionID].db
+    const db = adapter?.sessions[req.transactionID]?.db || adapter.drizzle
     await migration.up({ db, payload, req })
     payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     await payload.create({

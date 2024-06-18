@@ -122,13 +122,6 @@ export type SQLiteAdapter = DrizzleAdapter & {
   resolveInitializing: () => void
   schema: Record<string, GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
-  sessions: {
-    [id: string]: {
-      db: TransactionSQLite
-      reject: () => Promise<void>
-      resolve: () => Promise<void>
-    }
-  }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
   versionsSuffix?: string
@@ -137,12 +130,12 @@ export type SQLiteAdapter = DrizzleAdapter & {
 export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = {
-  db: TransactionSQLite
+  db: LibSQLDatabase
   payload: Payload
   req?: Partial<PayloadRequestWithData>
 }
 export type MigrateDownArgs = {
-  db: TransactionSQLite
+  db: LibSQLDatabase
   payload: Payload
   req?: Partial<PayloadRequestWithData>
 }
