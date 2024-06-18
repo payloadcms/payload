@@ -130,7 +130,7 @@ function require(m) {
       'crypto',
     ],
     //packages: 'external',
-    minify: false,
+    minify: true,
     metafile: true,
     treeShaking: true,
 
