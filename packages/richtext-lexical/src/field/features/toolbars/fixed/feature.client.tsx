@@ -1,11 +1,14 @@
 'use client'
 
 import type { FeatureProviderProviderClient } from '../../types.js'
+import type { FixedToolbarFeatureProps } from './feature.server.js'
 
 import { createClientComponent } from '../../createClientComponent.js'
 import { FixedToolbarPlugin } from './Toolbar/index.js'
 
-const FixedToolbarFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
+const FixedToolbarFeatureClient: FeatureProviderProviderClient<FixedToolbarFeatureProps> = (
+  props,
+) => {
   return {
     clientFeatureProps: props,
     feature: () => ({
@@ -13,7 +16,7 @@ const FixedToolbarFeatureClient: FeatureProviderProviderClient<undefined> = (pro
       plugins: [
         {
           Component: FixedToolbarPlugin,
-          position: 'top',
+          position: 'aboveContainer',
         },
       ],
     }),

@@ -1,9 +1,8 @@
 'use client'
-import type { CustomComponent } from 'payload/config'
-import type { UIField } from 'payload/types'
+import type { CustomComponent, UIField } from 'payload'
 
+import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-// import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 import { useFormFields } from '@payloadcms/ui/forms/Form'
 import React from 'react'
 
@@ -11,7 +10,7 @@ export const LinkToDoc: CustomComponent<UIField> = () => {
   const { custom } = useFieldProps()
   const { isTestKey, nameOfIDField, stripeResourceType } = custom
 
-  const field = useFormFields(([fields]) => fields[nameOfIDField])
+  const field = useFormFields(([fields]) => (fields && fields?.[nameOfIDField]) || null)
   const { value: stripeID } = field || {}
 
   const stripeEnv = isTestKey ? 'test/' : ''
@@ -29,7 +28,7 @@ export const LinkToDoc: CustomComponent<UIField> = () => {
           >
             View in Stripe
           </span>
-          {/* <CopyToClipboard value={href} /> */}
+          <CopyToClipboard value={href} />
         </div>
         <div
           style={{

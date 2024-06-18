@@ -1,22 +1,22 @@
 'use client'
-import type { FieldBase, LabelProps } from 'payload/types'
+import type { LabelProps, SanitizedLabelProps } from 'payload'
 
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
 
-import { Check } from '../../icons/Check/index.js'
-import { Line } from '../../icons/Line/index.js'
+import { CheckIcon } from '../../icons/Check/index.js'
+import { LineIcon } from '../../icons/Line/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 
-type Props = {
+export type CheckboxInputProps = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
   CustomLabel?: React.ReactNode
   checked?: boolean
   className?: string
   id?: string
-  inputRef?: React.RefObject<HTMLInputElement>
-  label?: FieldBase['label']
-  labelProps?: LabelProps
+  inputRef?: React.RefObject<HTMLInputElement | null>
+  label?: LabelProps['label']
+  labelProps?: SanitizedLabelProps
   name?: string
   onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   partialChecked?: boolean
@@ -26,7 +26,7 @@ type Props = {
 
 export const inputBaseClass = 'checkbox-input'
 
-export const CheckboxInput: React.FC<Props> = ({
+export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
   AfterInput,
@@ -71,13 +71,14 @@ export const CheckboxInput: React.FC<Props> = ({
             .filter(Boolean)
             .join(' ')}
         >
-          {checked && <Check />}
-          {!checked && partialChecked && <Line />}
+          {checked && <CheckIcon />}
+          {!checked && partialChecked && <LineIcon />}
         </span>
         {AfterInput}
       </div>
       <FieldLabel
         CustomLabel={CustomLabel}
+        htmlFor={id}
         label={label}
         required={required}
         {...(labelProps || {})}

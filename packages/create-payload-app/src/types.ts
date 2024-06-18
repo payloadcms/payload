@@ -12,6 +12,7 @@ export interface Args extends arg.Spec {
   '--local-template': StringConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
+  '--no-git': BooleanConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
   '--template-branch': StringConstructor
@@ -64,3 +65,16 @@ export type DbDetails = {
 }
 
 export type EditorType = 'lexical' | 'slate'
+
+export type NextAppDetails = {
+  hasTopLevelLayout: boolean
+  isPayloadInstalled?: boolean
+  isSrcDir: boolean
+  nextAppDir?: string
+  nextConfigPath?: string
+  nextConfigType?: NextConfigType
+}
+
+export type NextConfigType = 'cjs' | 'esm'
+
+export type StorageAdapterType = 'localDisk' | 'payloadCloud' | 'vercelBlobStorage'

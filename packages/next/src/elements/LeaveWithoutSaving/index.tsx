@@ -1,9 +1,12 @@
 'use client'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Modal, useModal } from '@payloadcms/ui/elements/Modal'
-import { useFormModified } from '@payloadcms/ui/forms/Form'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  Button,
+  Modal,
+  useAuth,
+  useFormModified,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import React, { useCallback, useEffect } from 'react'
 
 import './index.scss'

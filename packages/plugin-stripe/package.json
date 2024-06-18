@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "3.0.0-beta.25",
+  "version": "3.0.0-beta.49",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
@@ -39,8 +39,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
@@ -52,7 +52,7 @@
     "@payloadcms/ui": "workspace:*",
     "lodash.get": "^4.4.2",
     "stripe": "^10.2.0",
-    "uuid": "^9.0.0"
+    "uuid": "10.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -61,8 +61,9 @@
     "@payloadcms/ui": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/lodash.get": "^4.4.7",
-    "@types/react": "18.2.74",
-    "@types/uuid": "^9.0.0",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/uuid": "^9.0.8",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -87,5 +88,9 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "homepage:": "https://payloadcms.com"
+  "homepage:": "https://payloadcms.com",
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+  }
 }

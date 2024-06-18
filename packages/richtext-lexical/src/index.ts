@@ -1,15 +1,30 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical'
+import type {
+  EditorConfig as LexicalEditorConfig,
+  SerializedEditorState,
+  SerializedLexicalNode,
+} from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
-import { withNullableJSONSchemaType } from 'payload/utilities'
+import {
+  afterChangeTraverseFields,
+  afterReadTraverseFields,
+  beforeChangeTraverseFields,
+  beforeValidateTraverseFields,
+  withNullableJSONSchemaType,
+} from 'payload'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
-import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider } from './types.js'
+import type {
+  AdapterProps,
+  LexicalEditorProps,
+  LexicalRichTextAdapter,
+  LexicalRichTextAdapterProvider,
+} from './types.js'
 
-import { RichTextCell } from './cell/index.js'
-import { RichTextField } from './field/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { RichTextCell, RichTextField } from './exports/client/index.js'
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
@@ -22,13 +37,16 @@ import {
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
-import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
+import { i18n } from './i18n.js'
+import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
+import { recurseNodeTree } from './recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot }) => {
+    let features: FeatureProviderServer<unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -38,15 +56,25 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           defaultEditorConfig,
           config,
         )
+        features = cloneDeep(defaultEditorFeatures)
       }
 
       finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
-      let features: FeatureProviderServer<unknown, unknown>[] =
+      const rootEditor = config.editor
+      let rootEditorFeatures: FeatureProviderServer<unknown, unknown>[] = []
+      if (typeof rootEditor === 'object' && 'features' in rootEditor) {
+        rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
+      }
+
+      features =
         props.features && typeof props.features === 'function'
-          ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
+          ? props.features({
+              defaultFeatures: cloneDeep(defaultEditorFeatures),
+              rootFeatures: rootEditorFeatures,
+            })
           : (props.features as FeatureProviderServer<unknown, unknown>[])
       if (!features) {
         features = cloneDeep(defaultEditorFeatures)
@@ -70,120 +98,594 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     }
 
+    const featureI18n = finalSanitizedEditorConfig.features.i18n
+    for (const lang in i18n) {
+      if (!featureI18n[lang]) {
+        featureI18n[lang] = {
+          lexical: {},
+        }
+      }
+
+      featureI18n[lang].lexical.general = i18n[lang]
+    }
+
     return {
       CellComponent: withMergedProps({
         Component: RichTextCell,
-        toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+        toMergeIntoProps: {
+          admin: props?.admin,
+          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+        },
       }),
       FieldComponent: withMergedProps({
         Component: RichTextField,
-        toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+        toMergeIntoProps: {
+          admin: props?.admin,
+          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+        },
       }),
       editorConfig: finalSanitizedEditorConfig,
+      features,
       generateComponentMap: getGenerateComponentMap({
         resolvedFeatureMap,
       }),
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
-      /* hooks: {
-        afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
-        afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
-        beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
-        beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
-        beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
-      },*/
-      /* // TODO: Figure out docWithLocales / originalSiblingDoc => node matching. Can't use indexes, as the order of nodes could technically change between hooks.
+      graphQLPopulationPromises({
+        context,
+        currentDepth,
+        depth,
+        draft,
+        field,
+        fieldPromises,
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        showHiddenFields,
+        siblingDoc,
+      }) {
+        // check if there are any features with nodes which have populationPromises for this field
+        if (finalSanitizedEditorConfig?.features?.graphQLPopulationPromises?.size) {
+          populateLexicalPopulationPromises({
+            context,
+            currentDepth: currentDepth ?? 0,
+            depth,
+            draft,
+            editorPopulationPromises: finalSanitizedEditorConfig.features.graphQLPopulationPromises,
+            field,
+            fieldPromises,
+            findMany,
+            flattenLocales,
+            overrideAccess,
+            populationPromises,
+            req,
+            showHiddenFields,
+            siblingDoc,
+          })
+        }
+      },
       hooks: {
         afterChange: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
-                if (afterChangeHooks?.has(node.type)) {
-                  for (const hook of afterChangeHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          async ({
+            collection,
+            context: _context,
+            global,
+            operation,
+            path,
+            req,
+            schemaPath,
+            value,
+          }) => {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
+              !finalSanitizedEditorConfig.features.getSubFields.size
+            ) {
+              return value
+            }
+            const context: any = _context
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            /**
+             * Get the originalNodeIDMap from the beforeValidate hook, which is always run before this hook.
+             */
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = context?.internal?.richText?.[path.join('.')]?.originalNodeIDMap
+
+            if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
+              return value
+            }
+
+            recurseNodeTree({
+              nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
 
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
+              if (afterChangeHooks?.has(node.type)) {
+                for (const hook of afterChangeHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(afterChange) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
+                  }
+                  node = await hook({
+                    context,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
+                    req,
+                  })
+                }
+              }
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+
+                if (subFields?.length) {
+                  await afterChangeTraverseFields({
+                    collection,
+                    context,
+                    data: originalData,
+                    doc: data,
+                    fields: subFields,
+                    global,
+                    operation,
+                    path,
+                    previousDoc: data,
+                    previousSiblingDoc: { ...data },
+                    req,
+                    schemaPath,
+                    siblingData: originalData || {},
+                    siblingDoc: { ...data },
+                  })
+                }
+              }
+            }
             return value
           },
         ],
         afterRead: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
-                if (afterReadHooks?.has(node.type)) {
-                  for (const hook of afterReadHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          /**
+           * afterRead hooks do not receive the originalNode. Thus, they can run on all nodes, not just nodes with an ID.
+           */
+          async ({
+            collection,
+            context: context,
+            currentDepth,
+            depth,
+            draft,
+            fallbackLocale,
+            fieldPromises,
+            findMany,
+            flattenLocales,
+            global,
+            locale,
+            overrideAccess,
+            path,
+            populationPromises,
+            req,
+            schemaPath,
+            showHiddenFields,
+            triggerAccessControl,
+            triggerHooks,
+            value,
+          }) => {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.afterRead.size &&
+              !finalSanitizedEditorConfig.features.getSubFields.size
+            ) {
+              return value
+            }
+            const flattenedNodes: SerializedLexicalNode[] = []
+
+            recurseNodeTree({
+              flattenedNodes,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
+
+            for (let node of flattenedNodes) {
+              const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
+              if (afterReadHooks?.has(node.type)) {
+                for (const hook of afterReadHooks.get(node.type)) {
+                  node = await hook({
+                    context,
+                    currentDepth,
+                    depth,
+                    draft,
+                    fallbackLocale,
+                    fieldPromises,
+                    findMany,
+                    flattenLocales,
+                    locale,
+                    node,
+                    overrideAccess,
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
+                    populationPromises,
+                    req,
+                    showHiddenFields,
+                    triggerAccessControl,
+                    triggerHooks,
+                  })
+                }
+              }
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+
+                if (subFields?.length) {
+                  afterReadTraverseFields({
+                    collection,
+                    context,
+                    currentDepth,
+                    depth,
+                    doc: data,
+                    draft,
+                    fallbackLocale,
+                    fieldPromises,
+                    fields: subFields,
+                    findMany,
+                    flattenLocales,
+                    global,
+                    locale,
+                    overrideAccess,
+                    path,
+                    populationPromises,
+                    req,
+                    schemaPath,
+                    showHiddenFields,
+                    siblingDoc: data,
+                    triggerAccessControl,
+                    triggerHooks,
+                  })
+                }
+              }
+            }
 
             return value
           },
         ],
         beforeChange: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
-                if (beforeChangeHooks?.has(node.type)) {
-                  for (const hook of beforeChangeHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
-                  }
-                }
-              },
+          async ({
+            collection,
+            context: _context,
+            duplicate,
+            errors,
+            field,
+            global,
+            mergeLocaleActions,
+            operation,
+            path,
+            req,
+            schemaPath,
+            siblingData,
+            siblingDocWithLocales,
+            skipValidation,
+            value,
+          }) => {
+            if (
+              !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
+              !finalSanitizedEditorConfig.features.getSubFields.size
+            ) {
+              return value
+            }
+
+            const context: any = _context
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            /**
+             * Get the originalNodeIDMap from the beforeValidate hook, which is always run before this hook.
+             */
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = context?.internal?.richText?.[path.join('.')]?.originalNodeIDMap
+
+            if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
+              return value
+            }
+
+            const originalNodeWithLocalesIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            recurseNodeTree({
+              nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
 
-            return value
-          },
-        ],
-        beforeDuplicate: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
-                if (beforeDuplicateHooks?.has(node.type)) {
-                  for (const hook of beforeDuplicateHooks.get(node.type)) {
-                    node = await hook({ context, findMany, node, operation, overrideAccess, req })
+            if (siblingDocWithLocales?.[field.name]) {
+              recurseNodeTree({
+                nodeIDMap: originalNodeWithLocalesIDMap,
+                nodes:
+                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root?.children ??
+                  [],
+              })
+            }
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
+              if (beforeChangeHooks?.has(node.type)) {
+                for (const hook of beforeChangeHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(beforeChange) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
                   }
+                  node = await hook({
+                    context,
+                    duplicate,
+                    errors,
+                    mergeLocaleActions,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
+                    req,
+                    skipValidation,
+                  })
                 }
-              },
-              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+              }
+
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
+
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const originalDataWithLocales = subFieldDataFn({
+                  node: originalNodeWithLocalesIDMap[id],
+                  req,
+                })
+
+                if (subFields?.length) {
+                  await beforeChangeTraverseFields({
+                    id,
+                    collection,
+                    context,
+                    data,
+                    doc: originalData,
+                    docWithLocales: originalDataWithLocales ?? {},
+                    duplicate,
+                    errors,
+                    fields: subFields,
+                    global,
+                    mergeLocaleActions,
+                    operation,
+                    path,
+                    req,
+                    schemaPath,
+                    siblingData: data,
+                    siblingDoc: originalData,
+                    siblingDocWithLocales: originalDataWithLocales ?? {},
+                    skipValidation,
+                  })
+                }
+              }
+            }
+
+            /**
+             * within the beforeChange hook, id's may be re-generated.
+             * Example:
+             * 1. Seed data contains IDs for block feature blocks.
+             * 2. Those are used in beforeValidate
+             * 3. in beforeChange, those IDs are regenerated, because you cannot provide IDs during document creation. See baseIDField beforeChange hook for reasoning
+             * 4. Thus, in order for all post-beforeChange hooks to receive the correct ID, we need to update the originalNodeIDMap with the new ID's, by regenerating the nodeIDMap.
+             * The reason this is not generated for every hook, is to save on performance. We know we only really have to generate it in beforeValidate, which is the first hook,
+             * and in beforeChange, which is where modifications to the provided IDs can occur.
+             */
+            const newOriginalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            const previousValue = siblingData[field.name]
+
+            recurseNodeTree({
+              nodeIDMap: newOriginalNodeIDMap,
+              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
             })
+
+            if (!context.internal) {
+              // Add to context, for other hooks to use
+              context.internal = {}
+            }
+            if (!context.internal.richText) {
+              context.internal.richText = {}
+            }
+            context.internal.richText[path.join('.')] = {
+              originalNodeIDMap: newOriginalNodeIDMap,
+            }
 
             return value
           },
         ],
         beforeValidate: [
-          async ({ context, findMany, operation, overrideAccess, req, value }) => {
-            await recurseNodesAsync({
-              callback: async (node) => {
-                const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
-                if (beforeValidateHooks?.has(node.type)) {
-                  for (const hook of beforeValidateHooks.get(node.type)) {
-                    /**
-                     * We cannot pass the originalNode here, as there is no way to map one node to a previous one, as a previous originalNode might be in a different position
-                     */ /*
-                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+          async ({
+            collection,
+            context,
+            global,
+            operation,
+            overrideAccess,
+            path,
+            previousValue,
+            req,
+            schemaPath,
+            value,
+          }) => {
+            // return value if there are NO hooks
+            if (
+              !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
+              !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
+              !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
+              !finalSanitizedEditorConfig.features.getSubFields.size
+            ) {
+              return value
+            }
+
+            /**
+             * beforeValidate is the first field hook which runs. This is where we can create the node map, which can then be used in the other hooks.
+             *
+             */
+
+            /**
+             * flattenedNodes contains all nodes in the editor, in the order they appear in the editor. They will be used for the following hooks:
+             * - afterRead
+             *
+             * The other hooks require nodes to have IDs, which is why those are ran only from the nodeIDMap. They require IDs because they have both doc/siblingDoc and data/siblingData, and
+             * thus require a reliable way to match new node data to old node data. Given that node positions can change in between hooks, this is only reliably possible for nodes which are saved with
+             * an ID.
+             */
+            //const flattenedNodes: SerializedLexicalNode[] = []
+
+            /**
+             * Only nodes with id's (so, nodes with hooks added to them) will be added to the nodeIDMap. They will be used for the following hooks:
+             * - afterChange
+             * - beforeChange
+             * - beforeValidate
+             * - beforeDuplicate
+             *
+             * Other hooks are handled by the flattenedNodes. All nodes in the nodeIDMap are part of flattenedNodes.
+             */
+
+            const originalNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
+            recurseNodeTree({
+              nodeIDMap: originalNodeIDMap,
+              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            if (!context.internal) {
+              // Add to context, for other hooks to use
+              context.internal = {}
+            }
+            if (!(context as any).internal.richText) {
+              ;(context as any).internal.richText = {}
+            }
+            ;(context as any).internal.richText[path.join('.')] = {
+              originalNodeIDMap,
+            }
+
+            /**
+             * Now that the maps for all hooks are set up, we can run the validate hook
+             */
+            if (!finalSanitizedEditorConfig.features.hooks.beforeValidate.size) {
+              return value
+            }
+            const nodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+            recurseNodeTree({
+              //flattenedNodes,
+              nodeIDMap,
+              nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            // eslint-disable-next-line prefer-const
+            for (let [id, node] of Object.entries(nodeIDMap)) {
+              const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
+              if (beforeValidateHooks?.has(node.type)) {
+                for (const hook of beforeValidateHooks.get(node.type)) {
+                  if (!originalNodeIDMap[id]) {
+                    console.warn(
+                      '(beforeValidate) No original node found for node with id',
+                      id,
+                      'node:',
+                      node,
+                      'path',
+                      path.join('.'),
+                    )
+                    continue
+                  }
+                  node = await hook({
+                    context,
+                    node,
+                    operation,
+                    originalNode: originalNodeIDMap[id],
+                    overrideAccess,
+                    parentRichTextFieldPath: path,
+                    parentRichTextFieldSchemaPath: schemaPath,
+                    req,
+                  })
                 }
               }
-            },
-            nodes: (value as SerializedEditorState)?.root?.children ?? [],
-          })
+              const subFieldFn = finalSanitizedEditorConfig.features.getSubFields.get(node.type)
+              const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData.get(
+                node.type,
+              )
 
-          return value
-        },
-      ],
-    },*/
+              if (subFieldFn) {
+                const subFields = subFieldFn({ node, req })
+                const data = subFieldDataFn({ node, req })
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+
+                if (subFields?.length) {
+                  await beforeValidateTraverseFields({
+                    id,
+                    collection,
+                    context,
+                    data,
+                    doc: originalData,
+                    fields: subFields,
+                    global,
+                    operation,
+                    overrideAccess,
+                    path,
+                    req,
+                    schemaPath,
+                    siblingData: data,
+                    siblingDoc: originalData,
+                  })
+                }
+              }
+            }
+
+            return value
+          },
+        ],
+      },
+      i18n: featureI18n,
       outputSchema: ({
         collectionIDFieldTypes,
         config,
@@ -261,41 +763,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
         return outputSchema
       },
-      populationPromises({
-        context,
-        currentDepth,
-        depth,
-        draft,
-        field,
-        fieldPromises,
-        findMany,
-        flattenLocales,
-        overrideAccess,
-        populationPromises,
-        req,
-        showHiddenFields,
-        siblingDoc,
-      }) {
-        // check if there are any features with nodes which have populationPromises for this field
-        if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
-          populateLexicalPopulationPromises({
-            context,
-            currentDepth,
-            depth,
-            draft,
-            editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
-            field,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            overrideAccess,
-            populationPromises,
-            req,
-            showHiddenFields,
-            siblingDoc,
-          })
-        }
-      },
       validate: richTextValidateHOC({
         editorConfig: finalSanitizedEditorConfig,
       }),
@@ -338,7 +805,6 @@ export { BoldFeature } from './field/features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './field/features/format/inlineCode/feature.server.js'
 
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
-export { toolbarFormatGroupWithItems } from './field/features/format/shared/toolbarFormatGroup.js'
 export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
@@ -406,16 +872,22 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
-export { toolbarAddDropdownGroupWithItems } from './field/features/shared/toolbar/addDropdownGroup.js'
-export { toolbarFeatureButtonsGroupWithItems } from './field/features/shared/toolbar/featureButtonsGroup.js'
 
-export { toolbarTextDropdownGroupWithItems } from './field/features/shared/toolbar/textDropdownGroup.js'
 export { FixedToolbarFeature } from './field/features/toolbars/fixed/feature.server.js'
 export { InlineToolbarFeature } from './field/features/toolbars/inline/feature.server.js'
 
 export type { ToolbarGroup, ToolbarGroupItem } from './field/features/toolbars/types.js'
 export { createNode } from './field/features/typeUtilities.js'
 export type {
+  AfterChangeNodeHook,
+  AfterChangeNodeHookArgs,
+  AfterReadNodeHook,
+  AfterReadNodeHookArgs,
+  BaseNodeHookArgs,
+  BeforeChangeNodeHook,
+  BeforeChangeNodeHookArgs,
+  BeforeValidateNodeHook,
+  BeforeValidateNodeHookArgs,
   ClientComponentProps,
   ClientFeature,
   ClientFeatureProviderMap,
@@ -423,8 +895,6 @@ export type {
   FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
-  FieldNodeHook,
-  FieldNodeHookArgs,
   NodeValidation,
   NodeWithHooks,
   PluginComponent,
@@ -452,14 +922,6 @@ export {
   UploadNode,
 } from './field/features/upload/nodes/UploadNode.js'
 
-export {
-  EditorConfigProvider,
-  useEditorConfigContext,
-} from './field/lexical/config/client/EditorConfigProvider.js'
-export {
-  sanitizeClientEditorConfig,
-  sanitizeClientFeatures,
-} from './field/lexical/config/client/sanitize.js'
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
@@ -489,14 +951,7 @@ export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM.js'
-export { cloneDeep } from './field/lexical/utils/cloneDeep.js'
-export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect.js'
-export { getSelectedNode } from './field/lexical/utils/getSelectedNode.js'
-export { isHTMLElement } from './field/lexical/utils/guard.js'
-export { invariant } from './field/lexical/utils/invariant.js'
-export { joinClasses } from './field/lexical/utils/joinClasses.js'
-export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode.js'
+
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -511,17 +966,8 @@ export {
   TEXT_TYPE_TO_FORMAT,
   TEXT_TYPE_TO_MODE,
 } from './field/lexical/utils/nodeFormat.js'
-export { Point, isPoint } from './field/lexical/utils/point.js'
-export { Rect } from './field/lexical/utils/rect.js'
-export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition.js'
-export { setFloatingElemPositionForLinkEditor } from './field/lexical/utils/setFloatingElemPositionForLinkEditor.js'
-export {
-  addSwipeDownListener,
-  addSwipeLeftListener,
-  addSwipeRightListener,
-  addSwipeUpListener,
-} from './field/lexical/utils/swipe.js'
+
 export { sanitizeUrl, validateUrl } from './field/lexical/utils/url.js'
-export { defaultRichTextValue } from './populate/defaultValue.js'
+export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'

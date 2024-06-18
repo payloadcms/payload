@@ -1,10 +1,7 @@
-import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection, GeneratedTypes, PayloadRequestWithData } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
-import { createOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { createOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

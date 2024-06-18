@@ -15,57 +15,92 @@ export interface Config {
     'payload-migrations': PayloadMigration
   }
   globals: {}
+  locale: 'en' | 'es' | 'de'
+  user: User & {
+    collection: 'users'
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   updatedAt: string
   createdAt: string
   email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
 export interface Page {
   id: string
   title: string
-  excerpt?: string
+  excerpt?: string | null
   slug: string
-  meta?: {
-    title?: string
-    description?: string
-    image?: string | Media
-    ogTitle?: string
+  meta: {
+    title: string
+    description?: string | null
+    image?: string | Media | null
+    ogTitle?: string | null
   }
   updatedAt: string
   createdAt: string
-  _status?: 'draft' | 'published'
+  _status?: ('draft' | 'published') | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
 export interface Media {
   id: string
-  media?: string | Media
+  media?: string | Media | null
   richText?: {
+    root: {
+      type: string
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
     [k: string]: unknown
-  }[]
+  } | null
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
     relationTo: 'users'
     value: string | User
   }
-  key?: string
+  key?: string | null
   value?:
     | {
         [k: string]: unknown
@@ -78,10 +113,19 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
-  name?: string
-  batch?: number
+  name?: string | null
+  batch?: number | null
   updatedAt: string
   createdAt: string
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

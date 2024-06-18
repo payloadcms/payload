@@ -3,7 +3,7 @@ title: Array Field
 label: Array
 order: 20
 desc: Array fields are intended for sets of repeating fields, that you define. Learn how to use array fields, see examples and options.
-keywords: array, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: array, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 <Banner>
@@ -24,7 +24,7 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 - Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
 - Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)), label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
 
-### Config
+## Config
 
 | Option              | Description                                                                                                                                                                                                                                                                        |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -49,7 +49,7 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 
 _\* An asterisk denotes that a property is required._
 
-### Admin Config
+## Admin Config
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
 
@@ -57,8 +57,9 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **`initCollapsed`**       | Set the initial collapsed state                                                                                      |
 | **`components.RowLabel`** | Function or React component to be rendered as the label on the array row. Receives `({ data, index, path })` as args |
+| **`isSortable`**          | Disable order sorting by setting this value to `false`                                                               |
 
-### Example
+## Example
 
 `collections/ExampleCollection.ts`
 

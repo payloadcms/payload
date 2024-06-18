@@ -1,3 +1,4 @@
+'use client'
 import type { Column } from '../Table/index.js'
 
 import fieldTypes from './field-types.js'
@@ -31,6 +32,8 @@ export const reduceFieldMap = (fieldMap: Column[], i18n) =>
           ...(field?.cellProps || {}),
         },
       }
+
+      if (field.admin?.disableListFilter) return reduced
 
       return [...reduced, formattedField]
     }

@@ -1,4 +1,7 @@
-import en from '../../packages/payload/src/translations/en.json'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ar } from './ar.js'
@@ -8,13 +11,13 @@ import deepMerge from './deepMerge.js'
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],
-  i18n: {
+  /*i18n: {
     fallbackLng: 'en', // default
     debug: false, // default
     resources: {
       ar: deepMerge(en, ar),
     },
-  },
+  },*/
   localization: {
     locales: [
       {
@@ -38,5 +41,8 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

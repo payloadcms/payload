@@ -1,5 +1,4 @@
-import type { FileData, TypeWithID } from 'payload/types'
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
 
@@ -54,7 +53,8 @@ export const getBeforeChangeHook =
       req.payload.logger.error(
         `There was an error while uploading files corresponding to the collection ${collection.slug} with filename ${data.filename}:`,
       )
-      req.payload.logger.error(err)
+      req.payload.logger.error({ err })
+      throw err
     }
     return data
   }

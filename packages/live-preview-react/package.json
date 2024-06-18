@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "0.2.0",
+  "version": "3.0.0-beta.49",
   "description": "The official live preview React SDK for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -23,23 +23,25 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@payloadcms/live-preview": "workspace:^0.x"
+    "@payloadcms/live-preview": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "18.2.74",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
   },
   "publishConfig": {
     "exports": {
@@ -52,5 +54,9 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

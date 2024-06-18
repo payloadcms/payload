@@ -1,13 +1,13 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { TextAreaInputProps, TextareaFieldProps } from './types.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -29,6 +29,7 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     locale,
     localized,
@@ -65,12 +66,13 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <TextareaInput
@@ -82,13 +84,14 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
       className={className}
       descriptionProps={descriptionProps}
       errorProps={errorProps}
+      label={label}
       labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={readOnly}
+      readOnly={disabled}
       required={required}
       rows={rows}
       rtl={isRTL}

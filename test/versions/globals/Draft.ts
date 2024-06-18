@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
 import GlobalVersionButton from '../elements/GlobalVersionButton/index.js'
 import GlobalVersionsButton from '../elements/GlobalVersionsButton/index.js'

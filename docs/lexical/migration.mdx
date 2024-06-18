@@ -1,0 +1,182 @@
+---
+title: Lexical Migration
+label: Migration
+order: 30
+desc: Migration from slate and payload-plugin-lexical to lexical
+keywords: lexical, rich text, editor, headless cms, migrate, migration
+---
+
+## Migrating from Slate
+
+While both Slate and Lexical save the editor state in JSON, the structure of the JSON is different.
+
+### Migration via SlateToLexicalFeature
+
+One way to handle this is to just give your lexical editor the ability to read the slate JSON.
+
+Simply add the `SlateToLexicalFeature` to your editor:
+
+```ts
+import type { CollectionConfig } from 'payload/types'
+
+import { SlateToLexicalFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+
+const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'nameOfYourRichTextField',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [...defaultFeatures, SlateToLexicalFeature({})],
+      }),
+    },
+  ],
+}
+```
+
+and done! Now, everytime this lexical editor is initialized, it converts the slate date to lexical on-the-fly. If the data is already in lexical format, it will just pass it through.
+
+This is by far the easiest way to migrate from Slate to Lexical, although it does come with a few caveats:
+
+- There is a performance hit when initializing the lexical editor
+- The editor will still output the Slate data in the output JSON, as the on-the-fly converter only runs for the admin panel
+
+The easy way to solve this: Just save the document! This overrides the slate data with the lexical data, and the next time the document is loaded, the lexical data will be used. This solves both the performance and the output issue for that specific document.
+
+### Migration via migration script
+
+The method described above does not solve the issue for all documents, though. If you want to convert all your documents to lexical, you can use a migration script. Here's a simple example:
+
+```ts
+import type { Payload } from 'payload'
+import type { YourDocumentType } from 'payload/generated-types'
+
+import {
+  cloneDeep,
+  convertSlateToLexical,
+  defaultSlateConverters,
+} from '@payloadcms/richtext-lexical'
+
+import { AnotherCustomConverter } from './lexicalFeatures/converters/AnotherCustomConverter'
+
+export async function convertAll(payload: Payload, collectionName: string, fieldName: string) {
+  const docs: YourDocumentType[] = await payload.db.collections[collectionName].find({}).exec() // Use MongoDB models directly to query all documents at once
+  console.log(`Found ${docs.length} ${collectionName} docs`)
+
+  const converters = cloneDeep([...defaultSlateConverters, AnotherCustomConverter])
+
+  // Split docs into batches of 20.
+  const batchSize = 20
+  const batches = []
+  for (let i = 0; i < docs.length; i += batchSize) {
+    batches.push(docs.slice(i, i + batchSize))
+  }
+
+  let processed = 0 // Number of processed docs
+
+  for (const batch of batches) {
+    // Process each batch asynchronously
+    const promises = batch.map(async (doc: YourDocumentType) => {
+      const richText = doc[fieldName]
+
+      if (richText && Array.isArray(richText) && !('root' in richText)) {
+        // It's Slate data - skip already-converted data
+        const converted = convertSlateToLexical({
+          converters: converters,
+          slateData: richText,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: collectionName as any,
+          depth: 0, // performance optimization. No need to run population.
+          data: {
+            [fieldName]: converted,
+          },
+        })
+      }
+    })
+
+    // Wait for all promises in the batch to complete. Resolving batches of 20 asynchronously is faster than waiting for each doc to update individually
+    await Promise.all(promises)
+
+    // Update the count of processed docs
+    processed += batch.length
+    console.log(`Converted ${processed} of ${docs.length}`)
+  }
+}
+```
+
+The `convertSlateToLexical` is the same method used in the `SlateToLexicalFeature` - it handles traversing the Slate JSON for you.
+
+Do note that this script might require adjustment depending on your document structure, especially if you have nested richText fields or localization enabled.
+
+### Converting custom Slate nodes
+
+If you have custom Slate nodes, create a custom converter for them. Here's the Upload converter as an example:
+
+```ts
+import type { SerializedUploadNode } from '../uploadNode.'
+import type { SlateNodeConverter } from '@payloadcms/richtext-lexical'
+
+export const SlateUploadConverter: SlateNodeConverter = {
+  converter({ slateNode }) {
+    return {
+      fields: {
+        ...slateNode.fields,
+      },
+      format: '',
+      relationTo: slateNode.relationTo,
+      type: 'upload',
+      value: {
+        id: slateNode.value?.id || '',
+      },
+      version: 1,
+    } as const as SerializedUploadNode
+  },
+  nodeTypes: ['upload'],
+}
+```
+
+It's pretty simple: You get a Slate node as input, and you return the lexical node. The `nodeTypes` array is used to determine which Slate nodes this converter can handle.
+
+When using a migration script, you can add your custom converters to the `converters` property of the `convertSlateToLexical` props, as seen in the example above
+
+When using the `SlateToLexicalFeature`, you can add your custom converters to the `converters` property of the `SlateToLexicalFeature` props:
+
+```ts
+import type { CollectionConfig } from 'payload/types'
+
+import {
+  SlateToLexicalFeature,
+  lexicalEditor,
+  defaultSlateConverters,
+} from '@payloadcms/richtext-lexical'
+
+import { YourCustomConverter } from '../converters/YourCustomConverter'
+
+const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'nameOfYourRichTextField',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          SlateToLexicalFeature({
+            converters: [...defaultSlateConverters, YourCustomConverter],
+          }),
+        ],
+      }),
+    },
+  ],
+}
+```
+
+## Migrating from payload-plugin-lexical
+
+Migrating from [payload-plugin-lexical](https://github.com/AlessioGr/payload-plugin-lexical) works similar to migrating from Slate.
+
+Instead of a `SlateToLexicalFeature` there is a `LexicalPluginToLexicalFeature` you can use. And instead of `convertSlateToLexical` you can use `convertLexicalPluginToLexical`.

@@ -1,9 +1,9 @@
 'use client'
-import type { DefaultCellComponentProps } from 'payload/types'
+import type { DefaultCellComponentProps } from 'payload'
 
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.scss'
 
 export const CheckboxCell: React.FC<DefaultCellComponentProps<boolean>> = ({ cellData }) => {

@@ -1,6 +1,8 @@
 import type { Payload } from 'payload'
 
-import { mapAsync } from 'payload/utilities'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+import { getFileByPath, mapAsync } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
@@ -13,6 +15,9 @@ const title = 'title'
 
 let restClient: NextRESTClient
 let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
@@ -1074,6 +1079,43 @@ describe('collections-graphql', () => {
     expect(queriedDoc2.relationToSelf.title).toEqual(draftValue)
   })
 
+  it('should query upload enabled docs', async () => {
+    const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
+
+    const mediaDoc = await payload.create({
+      collection: 'media',
+      file,
+      data: {
+        title: 'example',
+      },
+    })
+
+    // doc with upload relation
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      data: {
+        media: mediaDoc.id,
+      },
+    })
+
+    const query = `{
+      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+        media {
+          id
+          title
+        }
+      }
+    }`
+    const res = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query }),
+      })
+      .then((res) => res.json())
+    const queriedDoc = res.data.CyclicalRelationship
+    expect(queriedDoc.media.id).toEqual(mediaDoc.id)
+    expect(queriedDoc.media.title).toEqual('example')
+  })
+
   describe('Error Handler', () => {
     it('should return have an array of errors when making a bad request', async () => {
       const query = `query {
@@ -1151,7 +1193,7 @@ describe('collections-graphql', () => {
       expect(errors[1].path[0]).toEqual('test3')
       expect(errors[1].extensions.name).toEqual('ValidationError')
       expect(errors[1].extensions.data[0].message).toEqual(
-        'A user with the given email is already registered',
+        'A user with the given email is already registered.',
       )
       expect(errors[1].extensions.data[0].field).toEqual('email')
 

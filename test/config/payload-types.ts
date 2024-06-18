@@ -16,7 +16,15 @@ export interface Config {
   globals: {
     'my-global': MyGlobal
   }
+  locale: null
+  user: User & {
+    collection: 'users'
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
 export interface Page {
   id: string
   title?: string | null
@@ -32,6 +40,10 @@ export interface Page {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   updatedAt: string
@@ -43,8 +55,12 @@ export interface User {
   hash?: string | null
   loginAttempts?: number | null
   lockUntil?: string | null
-  password: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -64,6 +80,10 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null
@@ -71,9 +91,18 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "my-global".
+ */
 export interface MyGlobal {
   id: string
   title?: string | null
   updatedAt?: string | null
   createdAt?: string | null
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

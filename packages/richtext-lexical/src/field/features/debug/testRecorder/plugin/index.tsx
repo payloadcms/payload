@@ -4,7 +4,7 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
 import * as React from 'react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { PluginComponent } from '../../../types.js'
 
@@ -88,7 +88,7 @@ const formatStep = (step: Step) => {
 }
 
 export function isSelectAll(event: KeyboardEvent): boolean {
-  return event.keyCode === 65 && (IS_APPLE ? event.metaKey : event.ctrlKey)
+  return event.key.toLowerCase() === 'a' && (IS_APPLE ? event.metaKey : event.ctrlKey)
 }
 
 // stolen from LexicalSelection-test

@@ -4,6 +4,7 @@ module.exports = {
     'no-jsx-import-statements': require('./customRules/no-jsx-import-statements'),
     'no-non-retryable-assertions': require('./customRules/no-non-retryable-assertions'),
     'no-relative-monorepo-imports': require('./customRules/no-relative-monorepo-imports'),
+    'no-imports-from-exports-dir': require('./customRules/no-imports-from-exports-dir'),
     'no-flaky-assertions': require('./customRules/no-flaky-assertions'),
     'no-wait-function': {
       create: function (context) {

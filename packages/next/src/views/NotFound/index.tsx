@@ -1,11 +1,11 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
+import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
+import { HydrateClientUser } from '@payloadcms/ui/client'
 import React, { Fragment } from 'react'
 
+import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
@@ -36,6 +36,7 @@ export type GenerateViewMetadata = (args: {
 
 export const NotFoundPage = async ({
   config: configPromise,
+  params,
   searchParams,
 }: {
   config: Promise<SanitizedConfig>
@@ -60,7 +61,13 @@ export const NotFoundPage = async ({
     <Fragment>
       <HydrateClientUser permissions={initPageResult.permissions} user={initPageResult.req.user} />
       <DefaultTemplate
-        config={initPageResult.req.payload.config}
+        i18n={initPageResult.req.i18n}
+        locale={initPageResult.locale}
+        params={params}
+        payload={initPageResult.req.payload}
+        permissions={initPageResult.permissions}
+        searchParams={searchParams}
+        user={initPageResult.req.user}
         visibleEntities={initPageResult.visibleEntities}
       >
         <NotFoundClient />

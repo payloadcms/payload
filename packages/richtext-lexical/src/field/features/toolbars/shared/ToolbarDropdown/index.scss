@@ -79,7 +79,8 @@
         text-overflow: ellipsis;
       }
 
-      &:hover:not([disabled]), &.active {
+      &:hover:not([disabled]),
+      &.active {
         background-color: var(--color-base-100);
       }
 

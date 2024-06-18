@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -26,7 +26,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 // import { slateEditor } from '@payloadcms/richtext-slate'
-import { type Config, buildConfig } from 'payload/config'
+import { type Config, buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
@@ -74,9 +74,6 @@ export async function buildConfigWithDefaults(
 
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
-    secret: 'TEST_SECRET',
-    email: testEmailAdapter,
-    endpoints: [localAPIEndpoint, reInitEndpoint],
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
@@ -158,17 +155,25 @@ export async function buildConfigWithDefaults(
         }),
       ],
     }),
+    email: testEmailAdapter,
+    endpoints: [localAPIEndpoint, reInitEndpoint],
+    secret: 'TEST_SECRET',
     sharp,
     telemetry: false,
-    typescript: {
-      declare: false,
-    },
+
     ...testConfig,
+
+    typescript: {
+      declare: {
+        ignoreTSError: true,
+      },
+      ...testConfig?.typescript,
+    },
     i18n: {
       supportedLanguages: {
+        de,
         en,
         es,
-        de,
       },
       ...(testConfig?.i18n || {}),
     },

@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload'
 
 import LinkImport from 'next/link.js'
 import React from 'react'

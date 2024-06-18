@@ -1,31 +1,39 @@
-// import fs from 'fs'
-// import path from 'path'
+import { generateSchema } from '@payloadcms/graphql/utilities'
+import fs from 'fs'
+import path from 'path'
 
-// TODO: This should be ported to use configToSchema from @payloadcms/graphql
+import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
-// import { generateGraphQLSchema } from '../packages/payload/src/bin/generateGraphQLSchema.js'
-// import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+const [testConfigDir] = process.argv.slice(2)
+import { fileURLToPath } from 'url'
 
-// const [testConfigDir] = process.argv.slice(2)
+import { load } from './loader/load.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-// import { fileURLToPath } from 'url'
-// const filename = fileURLToPath(import.meta.url)
-// const dirname = path.dirname(filename)
+const loadConfig = async (configPath: string) => {
+  const configPromise = await load(configPath)
+  return configPromise
+}
 
-// let testDir
-// if (testConfigDir) {
-//   testDir = path.resolve(dirname, testConfigDir)
-//   setTestEnvPaths(testDir)
-//   generateGraphQLSchema()
-// } else {
-//   // Generate graphql schema for entire directory
-//   testDir = dirname
+let testDir
+if (testConfigDir) {
+  testDir = path.resolve(dirname, testConfigDir)
+  const config = await loadConfig(path.resolve(testDir, 'config.ts'))
 
-//   fs.readdirSync(dirname, { withFileTypes: true })
-//     .filter((f) => f.isDirectory())
-//     .forEach((dir) => {
-//       const suiteDir = path.resolve(testDir, dir.name)
-//       const configFound = setTestEnvPaths(suiteDir)
-//       if (configFound) generateGraphQLSchema()
-//     })
-// }
+  setTestEnvPaths(testDir)
+  generateSchema(config)
+} else {
+  // Generate graphql schema for entire directory
+  testDir = dirname
+
+  const config = await loadConfig(path.resolve(testDir, 'config.ts'))
+
+  fs.readdirSync(dirname, { withFileTypes: true })
+    .filter((f) => f.isDirectory())
+    .forEach((dir) => {
+      const suiteDir = path.resolve(testDir, dir.name)
+      const configFound = setTestEnvPaths(suiteDir)
+      if (configFound) generateSchema(config)
+    })
+}

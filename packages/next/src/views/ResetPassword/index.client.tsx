@@ -1,17 +1,20 @@
 'use client'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
-import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
-import { HiddenInput } from '@payloadcms/ui/fields/HiddenInput'
-import { Password } from '@payloadcms/ui/fields/Password'
-import { Form, useFormFields } from '@payloadcms/ui/forms/Form'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  ConfirmPasswordField,
+  Form,
+  FormSubmit,
+  HiddenField,
+  PasswordField,
+  useAuth,
+  useConfig,
+  useFormFields,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 type Args = {
   token: string
@@ -49,7 +52,7 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
         history.push(`${admin}`)
       } else {
         history.push(`${admin}/login`)
-        toast.success(i18n.t('general:updatedSuccessfully'), { autoClose: 3000 })
+        toast.success(i18n.t('general:updatedSuccessfully'))
       }
     },
     [fetchFullUser, history, admin, i18n],
@@ -63,8 +66,8 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       onSuccess={onSuccess}
     >
       <PasswordToConfirm />
-      <ConfirmPassword />
-      <HiddenInput forceUsePathFromProps name="token" value={token} />
+      <ConfirmPasswordField />
+      <HiddenField forceUsePathFromProps name="token" value={token} />
       <FormSubmit>{i18n.t('authentication:resetPassword')}</FormSubmit>
     </Form>
   )
@@ -72,9 +75,9 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
 
 const PasswordToConfirm = () => {
   const { t } = useTranslation()
-  const { value: confirmValue } = useFormFields(([fields]) => {
-    return fields['confirm-password']
-  })
+  const { value: confirmValue } = useFormFields(
+    ([fields]) => (fields && fields?.['confirm-password']) || null,
+  )
 
   const validate = React.useCallback(
     (value: string) => {
@@ -92,7 +95,7 @@ const PasswordToConfirm = () => {
   )
 
   return (
-    <Password
+    <PasswordField
       autoComplete="off"
       label={t('authentication:newPassword')}
       name="password"

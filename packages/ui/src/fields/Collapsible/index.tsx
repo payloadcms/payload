@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, FieldBase } from 'payload/types'
+import type { DocumentPreferences, FieldPermissions } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -18,17 +18,15 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldPermissions } from 'payload/auth'
-
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
+
+import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   initCollapsed?: boolean
-  label?: FieldBase['label']
   permissions: FieldPermissions
   width?: string
 }
@@ -41,7 +39,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     descriptionProps,
     fieldMap,
     initCollapsed = false,
-    labelProps,
+    label,
     path: pathFromProps,
     readOnly: readOnlyFromProps,
   } = props
@@ -53,7 +51,11 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     schemaPath,
     siblingPermissions,
   } = useFieldProps()
-  const path = pathFromContext || pathFromProps
+
+  const formInitializing = useFormInitializing()
+  const formProcessing = useFormProcessing()
+
+  const path = pathFromContext ?? pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
@@ -118,7 +120,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
 
   if (typeof collapsedOnMount !== 'boolean') return null
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <Fragment>
@@ -139,12 +141,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel
-                RowLabelComponent={CustomLabel}
-                i18n={i18n}
-                path={path}
-                rowLabel={labelProps.label}
-              />
+              <RowLabel RowLabelComponent={CustomLabel} i18n={i18n} path={path} rowLabel={label} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -158,7 +155,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
             margins="small"
             path={path}
             permissions={siblingPermissions}
-            readOnly={readOnly}
+            readOnly={disabled}
             schemaPath={schemaPath}
           />
         </CollapsibleElement>

@@ -3,8 +3,7 @@ import chalk from 'chalk'
 import path from 'path'
 import terminalLink from 'terminal-link'
 
-import type { ProjectTemplate } from '../types.js'
-import type { PackageManager } from '../types.js'
+import type { PackageManager, ProjectTemplate } from '../types.js'
 
 import { getValidTemplates } from '../lib/templates.js'
 

@@ -1,5 +1,5 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
-import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload/types'
+import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload'
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
@@ -63,11 +63,10 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
   }
 
   if (!cached.promise) {
-    // eslint-disable-next-line no-async-promise-executor
-    cached.promise = new Promise(async (resolve) => {
-      const resolvedConfig = await config
+    const resolvedConfig = await config
+    cached.promise = new Promise((resolve) => {
       const schema = configToSchema(resolvedConfig)
-      resolve(schema)
+      resolve(cached.graphql || schema)
     })
   }
 

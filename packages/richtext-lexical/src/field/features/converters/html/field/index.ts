@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, RichTextField } from 'payload/types'
+import type { Field, FieldAffectingData, RichTextField } from 'payload'
 
 import type { AdapterProps, LexicalRichTextAdapter } from '../../../../../types.js'
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
@@ -17,6 +17,12 @@ type Props = {
    */
   hidden?: boolean
   name: string
+  /**
+   * Whether the HTML should be stored in the database
+   *
+   * @default false
+   */
+  storeInDB?: boolean
 }
 
 /**
@@ -28,12 +34,12 @@ export const consolidateHTMLConverters = ({
   editorConfig,
 }: {
   editorConfig: SanitizedServerEditorConfig
-}) => {
+}): HTMLConverter[] => {
   const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
   const htmlConverterFeatureProps: HTMLConverterFeatureProps =
     htmlConverterFeature?.serverFeatureProps
 
-  const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
+  const defaultConvertersWithConvertersFromFeatures = [...defaultHTMLConverters]
 
   for (const converter of editorConfig.features.converters.html) {
     defaultConvertersWithConvertersFromFeatures.push(converter)
@@ -48,7 +54,89 @@ export const consolidateHTMLConverters = ({
       : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
         defaultConvertersWithConvertersFromFeatures
 
-  return finalConverters
+  // filter converters by nodeTypes. The last converter in the list wins. If there are multiple converters for the same nodeType, the last one will be used and the node types will be removed from
+  // previous converters. If previous converters do not have any nodeTypes left, they will be removed from the list.
+  // This guarantees that user-added converters which are added after the default ones will always have precedence
+  const foundNodeTypes: string[] = []
+  const filteredConverters: HTMLConverter[] = []
+  for (const converter of finalConverters.reverse()) {
+    if (!converter.nodeTypes?.length) {
+      continue
+    }
+    const newConverter: HTMLConverter = {
+      converter: converter.converter,
+      nodeTypes: [...converter.nodeTypes],
+    }
+    newConverter.nodeTypes = newConverter.nodeTypes.filter((nodeType) => {
+      if (foundNodeTypes.includes(nodeType)) {
+        return false
+      }
+      foundNodeTypes.push(nodeType)
+      return true
+    })
+
+    if (newConverter.nodeTypes.length) {
+      filteredConverters.push(newConverter)
+    }
+  }
+
+  return filteredConverters
+}
+
+// find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
+function findFieldPathAndSiblingFields(
+  fields: Field[],
+  path: string[],
+  field: FieldAffectingData,
+): {
+  path: string[]
+  siblingFields: Field[]
+} {
+  for (const curField of fields) {
+    if (curField === field) {
+      return {
+        path: [...path, curField.name],
+        siblingFields: fields,
+      }
+    }
+
+    if ('fields' in curField) {
+      const result = findFieldPathAndSiblingFields(
+        curField.fields,
+        'name' in curField ? [...path, curField.name] : [...path],
+        field,
+      )
+      if (result) {
+        return result
+      }
+    } else if ('tabs' in curField) {
+      for (const tab of curField.tabs) {
+        const result = findFieldPathAndSiblingFields(
+          tab.fields,
+          'name' in tab ? [...path, tab.name] : [...path],
+          field,
+        )
+        if (result) {
+          return result
+        }
+      }
+    } else if ('blocks' in curField) {
+      for (const block of curField.blocks) {
+        if (block?.fields?.length) {
+          const result = findFieldPathAndSiblingFields(
+            block.fields,
+            [...path, curField.name, block.slug],
+            field,
+          )
+          if (result) {
+            return result
+          }
+        }
+      }
+    }
+  }
+
+  return null
 }
 
 export const lexicalHTML: (
@@ -60,7 +148,7 @@ export const lexicalHTML: (
   lexicalFieldName: string,
   props: Props,
 ) => Field = (lexicalFieldName, props) => {
-  const { name = 'lexicalHTML', hidden = true } = props
+  const { name = 'lexicalHTML', hidden = true, storeInDB = false } = props
   return {
     name,
     type: 'code',
@@ -75,60 +163,7 @@ export const lexicalHTML: (
         async ({ collection, field, global, req, siblingData }) => {
           const fields = collection ? collection.fields : global.fields
 
-          // find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
-          function findFieldPathAndSiblingFields(
-            fields: Field[],
-            path: string[],
-          ): {
-            path: string[]
-            siblingFields: Field[]
-          } {
-            for (const curField of fields) {
-              if (curField === field) {
-                return {
-                  path: [...path, curField.name],
-                  siblingFields: fields,
-                }
-              }
-
-              if ('fields' in curField) {
-                const result = findFieldPathAndSiblingFields(
-                  curField.fields,
-                  'name' in curField ? [...path, curField.name] : [...path],
-                )
-                if (result) {
-                  return result
-                }
-              } else if ('tabs' in curField) {
-                for (const tab of curField.tabs) {
-                  const result = findFieldPathAndSiblingFields(
-                    tab.fields,
-                    'name' in tab ? [...path, tab.name] : [...path],
-                  )
-                  if (result) {
-                    return result
-                  }
-                }
-              } else if ('blocks' in curField) {
-                for (const block of curField.blocks) {
-                  if (block?.fields?.length) {
-                    const result = findFieldPathAndSiblingFields(block.fields, [
-                      ...path,
-                      curField.name,
-                      block.slug,
-                    ])
-                    if (result) {
-                      return result
-                    }
-                  }
-                }
-              }
-            }
-
-            return null
-          }
-
-          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [])
+          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field)
 
           if (!foundSiblingFields)
             throw new Error(
@@ -176,6 +211,15 @@ export const lexicalHTML: (
             data: lexicalFieldData,
             payload: req.payload,
           })
+        },
+      ],
+      beforeChange: [
+        ({ siblingData, value }) => {
+          if (storeInDB) {
+            return value
+          }
+          delete siblingData[name]
+          return null
         },
       ],
     },

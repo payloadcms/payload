@@ -3,11 +3,9 @@ import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString } from 'graph
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
-import type { GraphQLInfo } from 'payload/config'
-import type { Field, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { Field, GraphQLInfo, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
-import { toWords } from 'payload/utilities'
-import { buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionGlobalFields, toWords } from 'payload'
 
 import { docAccessResolver } from '../resolvers/globals/docAccess.js'
 import findOneResolver from '../resolvers/globals/findOne.js'
@@ -17,7 +15,7 @@ import restoreVersionResolver from '../resolvers/globals/restoreVersion.js'
 import updateResolver from '../resolvers/globals/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType } from './buildMutationInputType.js'
-import buildObjectType from './buildObjectType.js'
+import { buildObjectType } from './buildObjectType.js'
 import buildPaginatedListType from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'

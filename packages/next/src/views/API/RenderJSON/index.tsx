@@ -1,5 +1,5 @@
 'use client'
-import { Chevron } from '@payloadcms/ui/icons/Chevron'
+import { ChevronIcon } from '@payloadcms/ui/client'
 import * as React from 'react'
 
 import './index.scss'
@@ -52,9 +52,9 @@ export const RenderJSON = ({
   const objectKeys = object ? Object.keys(object) : []
   const objectLength = objectKeys.length
   const [isOpen, setIsOpen] = React.useState<boolean>(true)
-
+  const isNestedAndEmpty = isEmpty && (parentType === 'object' || parentType === 'array')
   return (
-    <li>
+    <li className={isNestedAndEmpty ? `${baseClass}__row-line--nested` : ''}>
       <button
         aria-label="toggle"
         className={`${baseClass}__list-toggle ${isEmpty ? `${baseClass}__list-toggle--empty` : ''}`}
@@ -62,7 +62,7 @@ export const RenderJSON = ({
         type="button"
       >
         {isEmpty ? null : (
-          <Chevron
+          <ChevronIcon
             className={`${baseClass}__toggle-row-icon ${baseClass}__toggle-row-icon--${
               isOpen ? 'open' : 'closed'
             }`}

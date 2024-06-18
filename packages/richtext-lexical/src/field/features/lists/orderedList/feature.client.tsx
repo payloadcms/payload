@@ -9,6 +9,7 @@ import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList/index.js'
 import { createClientComponent } from '../../createClientComponent.js'
 import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../plugin/index.js'
+import { slashMenuListGroupWithItems } from '../shared/slashMenuListGroup.js'
 import { ORDERED_LIST } from './markdownTransformer.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -41,7 +42,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return true
       },
       key: 'orderedList',
-      label: `Ordered List`,
+      label: ({ i18n }) => {
+        return i18n.t('lexical:orderedList:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
       },
@@ -68,21 +71,19 @@ const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (prop
             ],
         slashMenu: {
           groups: [
-            {
-              items: [
-                {
-                  Icon: OrderedListIcon,
-                  key: 'orderedList',
-                  keywords: ['ordered list', 'ol'],
-                  label: 'Ordered List',
-                  onSelect: ({ editor }) => {
-                    editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
-                  },
+            slashMenuListGroupWithItems([
+              {
+                Icon: OrderedListIcon,
+                key: 'orderedList',
+                keywords: ['ordered list', 'ol'],
+                label: ({ i18n }) => {
+                  return i18n.t('lexical:orderedList:label')
                 },
-              ],
-              key: 'lists',
-              label: 'Lists',
-            },
+                onSelect: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+                },
+              },
+            ]),
           ],
         },
         toolbarFixed: {

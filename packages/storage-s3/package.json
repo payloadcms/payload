@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "3.0.0-beta.25",
+  "version": "3.0.0-beta.49",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -24,9 +24,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
+    "build": "pnpm build:types && pnpm build:swc",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
@@ -43,7 +43,7 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=18.20.2"
+    "node": "^18.20.2 || >=20.9.0"
   },
   "publishConfig": {
     "exports": {

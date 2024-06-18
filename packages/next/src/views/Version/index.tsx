@@ -1,6 +1,10 @@
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { OptionObject } from 'payload/types'
-import type { Document, EditViewComponent } from 'payload/types'
+import type {
+  CollectionPermission,
+  Document,
+  EditViewComponent,
+  GlobalPermission,
+  OptionObject,
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
 import React from 'react'

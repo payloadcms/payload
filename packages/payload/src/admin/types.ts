@@ -1,3 +1,4 @@
+export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextFieldProps } from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -13,7 +14,10 @@ export type {
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
-export type { WithServerSideProps } from './elements/WithServerSideProps.js'
+export type {
+  WithServerSidePropsComponent,
+  WithServerSidePropsComponentProps,
+} from './elements/WithServerSideProps.js'
 export type { ErrorProps } from './forms/Error.js'
 export type {
   Description,
@@ -22,7 +26,8 @@ export type {
   FieldDescriptionProps,
 } from './forms/FieldDescription.js'
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
-export type { LabelProps } from './forms/Label.js'
+export type { LabelProps, SanitizedLabelProps } from './forms/Label.js'
+
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
 export type {

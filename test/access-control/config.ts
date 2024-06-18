@@ -1,27 +1,34 @@
-import type { FieldAccess } from 'payload/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { FieldAccess } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { TestButton } from './TestButton.js'
 import {
+  createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
+  fullyRestrictedSlug,
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   noAdminAccessEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
+  readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
-  restrictedSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
-  userRestrictedSlug,
+  userRestrictedCollectionSlug,
+  userRestrictedGlobalSlug,
 } from './shared.js'
 
 const openAccess = {
@@ -78,6 +85,32 @@ export default buildConfigWithDefaults({
     },
     {
       slug: readOnlyGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+    },
+    {
+      slug: userRestrictedGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: ({ req, data }) => data?.name === req.user?.email,
+      },
+    },
+    {
+      slug: readNotUpdateGlobalSlug,
       fields: [
         {
           name: 'name',
@@ -200,13 +233,19 @@ export default buildConfigWithDefaults({
         {
           name: 'userRestrictedDocs',
           type: 'relationship',
-          relationTo: userRestrictedSlug,
+          relationTo: userRestrictedCollectionSlug,
+          hasMany: true,
+        },
+        {
+          name: 'createNotUpdateDocs',
+          type: 'relationship',
+          relationTo: createNotUpdateCollectionSlug,
           hasMany: true,
         },
       ],
     },
     {
-      slug: restrictedSlug,
+      slug: fullyRestrictedSlug,
       fields: [
         {
           name: 'name',
@@ -236,7 +275,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: userRestrictedSlug,
+      slug: userRestrictedCollectionSlug,
       admin: {
         useAsTitle: 'name',
       },
@@ -254,6 +293,24 @@ export default buildConfigWithDefaults({
             equals: req.user?.email,
           },
         }),
+        delete: () => false,
+      },
+    },
+    {
+      slug: createNotUpdateCollectionSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        create: () => true,
+        read: () => true,
+        update: () => false,
         delete: () => false,
       },
     },
@@ -538,5 +595,15 @@ export default buildConfigWithDefaults({
         ],
       },
     })
+
+    await payload.updateGlobal({
+      slug: userRestrictedGlobalSlug,
+      data: {
+        name: 'dev@payloadcms.com',
+      },
+    })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

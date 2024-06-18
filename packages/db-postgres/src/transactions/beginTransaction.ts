@@ -1,4 +1,4 @@
-import type { BeginTransaction } from 'payload/database'
+import type { BeginTransaction } from 'payload'
 
 import { v4 as uuid } from 'uuid'
 
@@ -16,6 +16,11 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     let transaction: DrizzleTransaction
 
     let transactionReady: () => void
+
+    // Await initialization here
+    // Prevent race conditions where the adapter may be
+    // re-initializing, and `this.drizzle` is potentially undefined
+    await this.initializing
 
     // Drizzle only exposes a transactions API that is sufficient if you
     // can directly pass around the `tx` argument. But our operations are spread

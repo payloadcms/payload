@@ -1,4 +1,8 @@
-import type { CollectionConfig } from 'payload/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -351,10 +355,26 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'cyclical-relationship',
         },
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: 'media',
+        },
       ],
       versions: {
         drafts: true,
       },
+    },
+    {
+      slug: 'media',
+      access: openAccess,
+      upload: true,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
     },
   ],
   graphQL: {
@@ -521,5 +541,8 @@ export default buildConfigWithDefaults({
       collection: 'content-type',
       data: {},
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

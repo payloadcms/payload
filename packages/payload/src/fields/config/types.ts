@@ -11,9 +11,10 @@ import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichT
 import type {
   ConditionalDateProps,
   Description,
+  DescriptionComponent,
   ErrorProps,
   LabelProps,
-  RowLabel,
+  RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
@@ -23,12 +24,12 @@ import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
 
-export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
-  data?: Partial<T>
+  data?: Partial<TData>
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -38,58 +39,70 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
-  originalDoc?: T
+  originalDoc?: TData
   overrideAccess?: boolean
+  /**
+   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+   */
+  path: (number | string)[]
   /** The document before changes were applied, only in `afterChange` hooks. */
-  previousDoc?: T
-  /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
-  previousSiblingDoc?: T
-  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange` and `beforeValidate` hooks. */
-  previousValue?: P
+  previousDoc?: TData
+  /** The sibling data of the document before changes being applied, only in `beforeChange`, `beforeValidate`, `beforeDuplicate` and `afterChange` field hooks. */
+  previousSiblingDoc?: TData
+  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
+  previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
+  /**
+   * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
+   */
+  schemaPath: string[]
   /** The sibling data passed to a field that the hook is running against. */
-  siblingData: Partial<S>
+  siblingData: Partial<TSiblingData>
+  /**
+   * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
+   */
+  siblingDocWithLocales?: Record<string, unknown>
   /** The value of the field. */
-  value?: P
+  value?: TValue
 }
 
-export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (
-  args: FieldHookArgs<T, P, S>,
-) => P | Promise<P>
+export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = (
+  args: FieldHookArgs<TData, TValue, TSiblingData>,
+) => Promise<TValue> | TValue
 
-export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
   /**
    * The incoming data used to `create` or `update` the document with. `data` is undefined during the `read` operation.
    */
-  data?: Partial<T>
+  data?: Partial<TData>
   /**
    * The original data of the document before the `update` is applied. `doc` is undefined during the `create` operation.
    */
-  doc?: T
+  doc?: TData
   /**
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
   id?: number | string
   /** The `payload` object to interface with the payload API */
-  req: PayloadRequestWithData<U>
+  req: PayloadRequestWithData
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
-  siblingData?: Partial<P>
+  siblingData?: Partial<TSiblingData>
 }) => Promise<boolean> | boolean
 
-export type Condition<T extends TypeWithID = any, P = any> = (
-  data: Partial<T>,
-  siblingData: Partial<P>,
+export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
+  data: Partial<TData>,
+  siblingData: Partial<TSiblingData>,
   { user }: { user: PayloadRequestWithData['user'] },
 ) => boolean
 
-export type FilterOptionsProps<T = any> = {
+export type FilterOptionsProps<TData = any> = {
   /**
    * An object containing the full collection or global document currently being edited.
    */
-  data: T
+  data: TData
   /**
    * The `id` of the current document being edited. `id` is undefined during the `create` operation.
    */
@@ -108,8 +121,8 @@ export type FilterOptionsProps<T = any> = {
   user: Partial<PayloadRequestWithData['user']>
 }
 
-export type FilterOptions<T = any> =
-  | ((options: FilterOptionsProps<T>) => Promise<Where | boolean> | Where | boolean)
+export type FilterOptions<TData = any> =
+  | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
   | Where
   | null
 
@@ -117,7 +130,11 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
+    Description?: DescriptionComponent
     Field?: CustomComponent
+    /**
+     * The Filter component has to be a client component
+     */
     Filter?: React.ComponentType<any>
   }
   /**
@@ -129,6 +146,16 @@ type Admin = {
   custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view column selector.
+   * @type boolean
+   */
+  disableListColumn?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view filter options.
+   * @type boolean
+   */
+  disableListFilter?: boolean
   disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
@@ -343,10 +370,10 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   }
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
-   * By default it is bound to the collection.
+   * By default, it is bound to the collection.
    *
    * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
   type: 'group'
@@ -361,13 +388,25 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 }
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
-  admin?: Admin & {
-    initCollapsed?: boolean
-  }
   fields: Field[]
-  label: RowLabel
   type: 'collapsible'
-}
+} & (
+    | {
+        admin: Admin & {
+          components: {
+            RowLabel: RowLabelComponent
+          } & Admin['components']
+          initCollapsed?: boolean
+        }
+        label?: Required<FieldBase['label']>
+      }
+    | {
+        admin?: Admin & {
+          initCollapsed?: boolean
+        }
+        label: Required<FieldBase['label']>
+      }
+  )
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -383,7 +422,7 @@ export type NamedTab = TabBase & {
    * The slug is used by default.
    *
    * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
 }
@@ -422,12 +461,20 @@ export type UIField = {
     components?: {
       Cell?: CustomComponent
       Field: CustomComponent
+      /**
+       * The Filter component has to be a client component
+       */
       Filter?: React.ComponentType<any>
     }
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     disableBulkEdit?: boolean
+    /**
+     * Shows / hides fields from appearing in the list view column selector.
+     * @type boolean
+     */
+    disableListColumn?: boolean
     position?: string
     width?: string
   }
@@ -610,9 +657,13 @@ export type RichTextField<
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
-      RowLabel?: RowLabel
+      RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   /**
    * Customize the SQL table name
@@ -620,10 +671,10 @@ export type ArrayField = FieldBase & {
   dbName?: DBIdentifierName
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
-   * By default it is bound to the collection.
+   * By default, it is bound to the collection.
    *
    * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
   labels?: Labels
@@ -674,7 +725,7 @@ export type Block = {
    * The slug is used by default.
    *
    * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
   labels?: Labels
@@ -684,6 +735,10 @@ export type Block = {
 export type BlockField = FieldBase & {
   admin?: Admin & {
     initCollapsed?: boolean
+    /**
+     * Disable drag and drop sorting
+     */
+    isSortable?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown

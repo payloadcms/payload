@@ -9,6 +9,7 @@ module.exports = {
       rules: {
         'payload/no-jsx-import-statements': 'warn',
         'payload/no-relative-monorepo-imports': 'error',
+        'payload/no-imports-from-exports-dir': 'error',
       },
     },
     {
@@ -28,6 +29,12 @@ module.exports = {
       files: ['packages/eslint-config-payload/**'],
       rules: {
         'perfectionist/sort-objects': 'off',
+      },
+    },
+    {
+      files: ['templates/vercel-postgres/**'],
+      rules: {
+        'no-restricted-exports': 'off',
       },
     },
     {

@@ -3,7 +3,7 @@ title: Field-level Access Control
 label: Fields
 order: 30
 desc: Field-level Access Control is specified within a field's config, and allows you to define which users can create, read or update Fields.
-keywords: fields, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: fields, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Field Access Control is specified with functions inside a field's config. All field-level Controls return a boolean value to allow or deny access for the specified operation. No field-level Access Controls support returning query constraints. All Access Control functions accept one `args` argument.
@@ -47,7 +47,7 @@ Returns a boolean which allows or denies the ability to set a field's value when
 
 | Option            | Description                                                                |
 | ----------------- | -------------------------------------------------------------------------- |
-| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`data`**        | The full data passed to create the document.                               |
 | **`siblingData`** | Immediately adjacent field data passed to create the document.             |
 
@@ -59,7 +59,7 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 
 | Option            | Description                                                                |
 | ----------------- | -------------------------------------------------------------------------- |
-| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`id`**          | `id` of the document being read                                            |
 | **`doc`**         | The full document data.                                                    |
 | **`siblingData`** | Immediately adjacent field data of the document being read.                |
@@ -74,7 +74,7 @@ If `false` is returned and you attempt to update the field's value, the operatio
 
 | Option            | Description                                                                |
 | ----------------- | -------------------------------------------------------------------------- |
-| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`id`**          | `id` of the document being updated                                         |
 | **`data`**        | The full data passed to update the document.                               |
 | **`siblingData`** | Immediately adjacent field data passed to update the document with.        |

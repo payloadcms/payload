@@ -1,13 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload/types'
+import type { Field, Operator, Where } from 'payload'
 
 import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
-import { QueryError } from 'payload/errors'
-import { validOperators } from 'payload/types'
+import { QueryError } from 'payload'
+import { validOperators } from 'payload/shared'
 
 import type { GenericColumn, PostgresAdapter } from '../types.js'
-import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.js'
+import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
@@ -19,8 +19,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 type Args = {
   adapter: PostgresAdapter
   fields: Field[]
-  joinAliases: BuildQueryJoinAliases
-  joins: BuildQueryJoins
+  joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>
   tableName: string
@@ -30,7 +29,6 @@ type Args = {
 export async function parseParams({
   adapter,
   fields,
-  joinAliases,
   joins,
   locale,
   selectFields,
@@ -55,7 +53,6 @@ export async function parseParams({
           const builtConditions = await buildAndOrConditions({
             adapter,
             fields,
-            joinAliases,
             joins,
             locale,
             selectFields,
@@ -71,7 +68,7 @@ export async function parseParams({
           // So we need to loop on keys again here to handle each operator independently
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
-            for (const operator of Object.keys(pathOperators)) {
+            for (let operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
                 const {
@@ -86,7 +83,6 @@ export async function parseParams({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
-                  joinAliases,
                   joins,
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
@@ -157,6 +153,13 @@ export async function parseParams({
                   break
                 }
 
+                if (
+                  operator === 'like' &&
+                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                ) {
+                  operator = 'equals'
+                }
+
                 if (operator === 'like') {
                   constraints.push(
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
@@ -195,10 +198,10 @@ export async function parseParams({
                   operator === 'not_in'
                 ) {
                   constraints.push(
-                    sql`${notInArray(table[columnName], queryValue)} OR
+                    sql`(${notInArray(table[columnName], queryValue)} OR
                     ${table[columnName]}
                     IS
-                    NULL`,
+                    NULL)`,
                   )
 
                   break

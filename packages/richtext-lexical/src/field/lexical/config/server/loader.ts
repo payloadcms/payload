@@ -1,4 +1,4 @@
-import type { Config, SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload'
 
 import type {
   FeatureProviderServer,

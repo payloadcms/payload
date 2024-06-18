@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
@@ -41,7 +41,7 @@ describe('Rich Text', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsRichTextTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
@@ -49,7 +49,7 @@ describe('Rich Text', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsRichTextTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -115,7 +115,7 @@ describe('Rich Text', () => {
 
       // Fill values and click Confirm
       await editLinkModal.locator('#field-text').fill('link text')
-      await editLinkModal.locator('label[for="field-linkType-custom"]').click()
+      await editLinkModal.locator('label[for="field-linkType-custom-2"]').click()
       await editLinkModal.locator('#field-url').fill('')
       await wait(200)
       await editLinkModal.locator('button[type="submit"]').click()
@@ -141,7 +141,7 @@ describe('Rich Text', () => {
       await wait(400)
       // Fill values and click Confirm
       await editLinkModal.locator('#field-text').fill('link text')
-      await editLinkModal.locator('label[for="field-linkType-custom"]').click()
+      await editLinkModal.locator('label[for="field-linkType-custom-2"]').click()
       await editLinkModal.locator('#field-url').fill('https://payloadcms.com')
       await editLinkModal.locator('button[type="submit"]').click()
       await expect(editLinkModal).toBeHidden()
@@ -170,7 +170,7 @@ describe('Rich Text', () => {
 
       // Fill values and click Confirm
       await editLinkModal.locator('#field-text').fill('link text')
-      await editLinkModal.locator('label[for="field-linkType-internal"]').click()
+      await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
       await editLinkModal.locator('#field-doc .rs__control').click()
       await page.keyboard.type('dev@')
       await editLinkModal
@@ -183,8 +183,6 @@ describe('Rich Text', () => {
 
     test('should not create new url link when read only', async () => {
       await navigateToRichTextFields()
-
-      // Attempt to open link popup
       const modalTrigger = page.locator('.rich-text--read-only .rich-text__toolbar button .link')
       await expect(modalTrigger).toBeDisabled()
     })
@@ -246,7 +244,7 @@ describe('Rich Text', () => {
       const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]')
       await expect(editLinkModal).toBeVisible()
 
-      await editLinkModal.locator('label[for="field-linkType-internal"]').click()
+      await editLinkModal.locator('label[for="field-linkType-internal-2"]').click()
       await editLinkModal.locator('.relationship__wrap .rs__control').click()
 
       const menu = page.locator('.relationship__wrap .rs__menu')
@@ -421,19 +419,14 @@ describe('Rich Text', () => {
     })
     test('should not take value from previous block', async () => {
       await navigateToRichTextFields()
-
-      // check first block value
-      const textField = page.locator('#field-blocks__0__text')
-      await expect(textField).toHaveValue('Regular text')
-
-      // remove the first block
+      await page.locator('#field-blocks').scrollIntoViewIfNeeded()
+      await expect(page.locator('#field-blocks__0__text')).toBeVisible()
+      await expect(page.locator('#field-blocks__0__text')).toHaveValue('Regular text')
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
       const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
       await removeButton.click()
-
-      // check new first block value
       const richTextField = page.locator('#field-blocks__0__text')
       const richTextValue = await richTextField.innerText()
       expect(richTextValue).toContain('Rich text')

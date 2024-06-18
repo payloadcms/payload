@@ -1,8 +1,4 @@
-import type { SanitizedConfig } from 'payload/config'
-
 import React from 'react'
-
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 
 const css = `
   .graphic-logo path {
@@ -10,7 +6,7 @@ const css = `
   }
 `
 
-const PayloadLogo: React.FC = () => (
+export const PayloadLogo: React.FC = () => (
   <svg
     className="graphic-logo"
     fill="none"
@@ -31,21 +27,3 @@ const PayloadLogo: React.FC = () => (
     <path d="M17.4097 48.5454V28.1035L0.132324 38.1301L17.4097 48.5454Z" />
   </svg>
 )
-
-export const Logo: React.FC<{
-  config: SanitizedConfig
-}> = (props) => {
-  const { config } = props
-
-  const {
-    admin: {
-      components: {
-        graphics: { Logo: CustomLogo } = {
-          Logo: undefined,
-        },
-      } = {},
-    } = {},
-  } = config
-
-  return <RenderCustomComponent CustomComponent={CustomLogo} DefaultComponent={PayloadLogo} />
-}

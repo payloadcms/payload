@@ -12,8 +12,10 @@ export interface Config {
     audio: Audio
     'gif-resize': GifResize
     'no-image-sizes': NoImageSize
+    'object-fit': ObjectFit
     'crop-only': CropOnly
     'focal-only': FocalOnly
+    'focal-no-sizes': FocalNoSize
     media: Media
     enlarge: Enlarge
     reduce: Reduce
@@ -22,33 +24,186 @@ export interface Config {
     'externally-served-media': ExternallyServedMedia
     'uploads-1': Uploads1
     'uploads-2': Uploads2
-    'admin-thumbnail': AdminThumbnail
+    'admin-thumbnail-function': AdminThumbnailFunction
+    'admin-thumbnail-size': AdminThumbnailSize
     'optional-file': OptionalFile
     'required-file': RequiredFile
+    versions: Version
     users: User
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {}
+  locale: null
+  user: User & {
+    collection: 'users'
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation".
+ */
 export interface Relation {
   id: string
-  image?: string | Media
+  image?: string | Media | null
+  versionedImage?: string | Version | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
 export interface Media {
   id: string
   updatedAt: string
   createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
+  sizes?: {
+    maintainedAspectRatio?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    differentFormatFromMainImage?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    maintainedImageSize?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    maintainedImageSizeWithNewFormat?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    accidentalSameSize?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    tablet?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    mobile?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    icon?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest2?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest3?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest4?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest5?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest6?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    focalTest7?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+  }
+}
+export interface AnimatedTypeMedia {
+  id: string
+  updatedAt: string
+  createdAt: string
   url?: string
   filename?: string
   mimeType?: string
   filesize?: number
   width?: number
   height?: number
+  focalX?: number
+  focalY?: number
   sizes?: {
-    maintainedAspectRatio?: {
+    squareSmall?: {
       url?: string
       width?: number
       height?: number
@@ -56,7 +211,7 @@ export interface Media {
       filesize?: number
       filename?: string
     }
-    differentFormatFromMainImage?: {
+    undefinedHeight?: {
       url?: string
       width?: number
       height?: number
@@ -64,7 +219,7 @@ export interface Media {
       filesize?: number
       filename?: string
     }
-    maintainedImageSize?: {
+    undefinedWidth?: {
       url?: string
       width?: number
       height?: number
@@ -72,95 +227,7 @@ export interface Media {
       filesize?: number
       filename?: string
     }
-    maintainedImageSizeWithNewFormat?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    accidentalSameSize?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    tablet?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    mobile?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    icon?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest2?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest3?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest4?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest5?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest6?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
-    }
-    focalTest7?: {
+    undefinedAll?: {
       url?: string
       width?: number
       height?: number
@@ -170,363 +237,611 @@ export interface Media {
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions".
+ */
+export interface Version {
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audio".
+ */
 export interface Audio {
   id: string
-  audio?: string | Media
+  audio?: string | Media | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gif-resize".
+ */
 export interface GifResize {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
   sizes?: {
     small?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     large?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-image-sizes".
+ */
 export interface NoImageSize {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-fit".
+ */
+export interface ObjectFit {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
+  sizes?: {
+    fitContain?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    fitInside?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    fitCover?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    fitOutside?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+  }
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "crop-only".
+ */
 export interface CropOnly {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
   sizes?: {
     focalTest?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     focalTest2?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     focalTest3?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "focal-only".
+ */
 export interface FocalOnly {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
   sizes?: {
     focalTest?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     focalTest2?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     focalTest3?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "focal-no-sizes".
+ */
+export interface FocalNoSize {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enlarge".
+ */
 export interface Enlarge {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
   sizes?: {
     accidentalSameSize?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     sameSizeWithNewFormat?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     resizedLarger?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     resizedSmaller?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     widthLowerHeightLarger?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reduce".
+ */
 export interface Reduce {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
   sizes?: {
     accidentalSameSize?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     sameSizeWithNewFormat?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     resizedLarger?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     resizedSmaller?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-trim".
+ */
 export interface MediaTrim {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
   sizes?: {
     trimNumber?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     trimString?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
     trimOptions?: {
-      url?: string
-      width?: number
-      height?: number
-      mimeType?: string
-      filesize?: number
-      filename?: string
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
     }
   }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unstored-media".
+ */
 export interface UnstoredMedia {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "externally-served-media".
+ */
 export interface ExternallyServedMedia {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-1".
+ */
 export interface Uploads1 {
   id: string
-  media?: string | Uploads2
+  media?: string | Uploads2 | null
   richText?: {
+    root: {
+      type: string
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
     [k: string]: unknown
-  }[]
+  } | null
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-2".
+ */
 export interface Uploads2 {
   id: string
-  title?: string
+  title?: string | null
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
-export interface AdminThumbnail {
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-function".
+ */
+export interface AdminThumbnailFunction {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-size".
+ */
+export interface AdminThumbnailSize {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
+  sizes?: {
+    small?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    medium?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+  }
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "optional-file".
+ */
 export interface OptionalFile {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-file".
+ */
 export interface RequiredFile {
   id: string
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   updatedAt: string
   createdAt: string
   email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
     relationTo: 'users'
     value: string | User
   }
-  key?: string
+  key?: string | null
   value?:
     | {
         [k: string]: unknown
@@ -539,10 +854,19 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
-  name?: string
-  batch?: number
+  name?: string | null
+  batch?: number | null
   updatedAt: string
   createdAt: string
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

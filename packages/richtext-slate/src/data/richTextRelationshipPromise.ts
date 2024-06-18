@@ -1,11 +1,13 @@
-import type { PayloadRequestWithData, RichTextAdapter, RichTextField } from 'payload/types'
+import type { PayloadRequestWithData, RichTextAdapter, RichTextField } from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 
 import { populate } from './populate.js'
 import { recurseNestedFields } from './recurseNestedFields.js'
 
-export type Args = Parameters<RichTextAdapter<any[], AdapterArguments>['populationPromises']>[0]
+export type Args = Parameters<
+  RichTextAdapter<any[], AdapterArguments>['graphQLPopulationPromises']
+>[0]
 
 type RecurseRichTextArgs = {
   children: unknown[]

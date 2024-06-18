@@ -1,10 +1,6 @@
 @import '../../scss/styles.scss';
 
 .radio-group {
-  &__error-wrap {
-    position: relative;
-  }
-
   &--layout-horizontal {
     ul {
       display: flex;
@@ -26,6 +22,34 @@
     list-style: none;
     padding: 0;
     margin: 0;
+  }
+}
+
+.radio-group--read-only {
+  .radio-input {
+    cursor: default;
+
+    &__label {
+      color: var(--theme-elevation-400);
+    }
+
+    &--is-selected {
+      .radio-input__styled-radio {
+        &:before {
+          background-color: var(--theme-elevation-100);
+        }
+      }
+    }
+
+    &:not(.radio-input--is-selected) {
+      &:hover {
+        .radio-input__styled-radio {
+          &:before {
+            opacity: 0;
+          }
+        }
+      }
+    }
   }
 }
 

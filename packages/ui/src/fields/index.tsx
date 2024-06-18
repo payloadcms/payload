@@ -1,4 +1,4 @@
-import type { FieldTypes } from 'payload/config'
+import type { FieldTypes } from 'payload'
 
 import { ArrayField as array } from './Array/index.js'
 import { BlocksField as blocks } from './Blocks/index.js'

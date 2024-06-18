@@ -15,13 +15,24 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationship
     'relationship-localized': RelationshipLocalized
     dummy: Dummy
+    nested: Nested
+    'localized-sort': LocalizedSort
+    'blocks-same-name': BlocksSameName
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {
     'global-array': GlobalArray
   }
+  locale: 'en' | 'es' | 'pt' | 'ar'
+  user: User & {
+    collection: 'users'
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   relation?: (string | null) | LocalizedPost
@@ -34,16 +45,28 @@ export interface User {
   hash?: string | null
   loginAttempts?: number | null
   lockUntil?: string | null
-  password: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
 export interface LocalizedPost {
   id: string
   title?: string | null
   description?: string | null
   localizedCheckbox?: boolean | null
+  children?: (string | LocalizedPost)[] | null
+  group?: {
+    children?: string | null
+  }
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields".
+ */
 export interface ArrayField {
   id: string
   items?:
@@ -55,6 +78,10 @@ export interface ArrayField {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-required".
+ */
 export interface LocalizedRequired {
   id: string
   title: string
@@ -75,6 +102,10 @@ export interface LocalizedRequired {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-localized-relationship".
+ */
 export interface WithLocalizedRelationship {
   id: string
   localizedRelationship?: (string | null) | LocalizedPost
@@ -103,12 +134,20 @@ export interface WithLocalizedRelationship {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dummy".
+ */
 export interface Dummy {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-localized".
+ */
 export interface RelationshipLocalized {
   id: string
   relationship?: (string | null) | LocalizedPost
@@ -143,6 +182,69 @@ export interface RelationshipLocalized {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested".
+ */
+export interface Nested {
+  id: string
+  blocks?:
+    | {
+        array?:
+          | {
+              text?: string | null
+              textNotLocalized?: string | null
+              id?: string | null
+            }[]
+          | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-sort".
+ */
+export interface LocalizedSort {
+  id: string
+  title?: string | null
+  date?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-same-name".
+ */
+export interface BlocksSameName {
+  id: string
+  blocks?:
+    | (
+        | {
+            title?: string | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'block_first'
+          }
+        | {
+            title?: string | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'block_second'
+          }
+      )[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -162,6 +264,10 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null
@@ -169,6 +275,10 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-array".
+ */
 export interface GlobalArray {
   id: string
   array?:
@@ -179,4 +289,9 @@ export interface GlobalArray {
     | null
   updatedAt?: string | null
   createdAt?: string | null
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

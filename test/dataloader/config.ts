@@ -1,4 +1,10 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { slateEditor } from '@payloadcms/richtext-slate'
+
+import type { Post } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -77,8 +83,11 @@ export default buildConfigWithDefaults({
       user,
     })
   },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })
 
-export const postDoc = {
+export const postDoc: Pick<Post, 'title'> = {
   title: 'test post',
 }

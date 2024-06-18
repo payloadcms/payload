@@ -1,9 +1,9 @@
-import type { Permissions } from 'payload/auth'
 import type {
+  Permissions,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
 
@@ -46,7 +46,7 @@ export const handleAdminPage = ({
       }
     }
 
-    if (!permissions.canAccessAdmin && !isAdminAuthRoute(route, adminRoute)) {
+    if (!permissions.canAccessAdmin && !isAdminAuthRoute(config, route, adminRoute)) {
       notFound()
     }
 

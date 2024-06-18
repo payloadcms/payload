@@ -1,7 +1,9 @@
 import type { FeatureProviderProviderServer } from '../types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { HorizontalRuleFeatureClientComponent } from '../../../exports/client/index.js'
 import { createNode } from '../typeUtilities.js'
-import { HorizontalRuleFeatureClientComponent } from './feature.client.js'
+import { i18n } from './i18n.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 import { HorizontalRuleNode } from './nodes/HorizontalRuleNode.js'
 
@@ -12,7 +14,7 @@ export const HorizontalRuleFeature: FeatureProviderProviderServer<undefined, und
     feature: () => {
       return {
         ClientComponent: HorizontalRuleFeatureClientComponent,
-        clientFeatureProps: null,
+        i18n,
         markdownTransformers: [MarkdownTransformer],
         nodes: [
           createNode({

@@ -8,6 +8,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
+import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
@@ -195,6 +196,9 @@ export function fieldsToJSONSchema(
           }
 
           case 'richText': {
+            if (!field?.editor) {
+              throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+            }
             if (typeof field.editor === 'function') {
               throw new Error('Attempted to access unsanitized rich text editor.')
             }
@@ -466,7 +470,13 @@ export function fieldsToJSONSchema(
                   additionalProperties: false,
                   ...childSchema,
                 })
-                requiredFieldNames.add(tab.name)
+
+                // If the named tab has any required fields then we mark this as required otherwise it should be optional
+                const hasRequiredFields = tab.fields.some((subField) => fieldIsRequired(subField))
+
+                if (hasRequiredFields) {
+                  requiredFieldNames.add(tab.name)
+                }
               } else {
                 Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
                   fieldSchemas.set(propName, propSchema)

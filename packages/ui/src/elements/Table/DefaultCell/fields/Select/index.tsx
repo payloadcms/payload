@@ -1,10 +1,11 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { optionsAreObjects } from 'payload/types'
+import { optionsAreObjects } from 'payload/shared'
 import React from 'react'
+
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface SelectCellProps extends DefaultCellComponentProps<any> {
   options: CellComponentProps['options']

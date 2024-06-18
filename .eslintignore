@@ -11,3 +11,4 @@
 playwright.config.ts
 jest.config.js
 test/live-preview/next-app
+tsconfig.tsbuildinfo

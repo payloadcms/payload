@@ -3,8 +3,9 @@ import type React from 'react'
 import type { FeatureProviderProviderServer } from '../../types.js'
 import type { LexicalPluginNodeConverterProvider } from './converter/types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { LexicalPluginToLexicalFeatureClientComponent } from '../../../../exports/client/index.js'
 import { defaultConverters } from './converter/defaultConverters.js'
-import { LexicalPluginToLexicalFeatureClientComponent } from './feature.client.js'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 export type LexicalPluginToLexicalFeatureProps = {

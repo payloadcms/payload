@@ -1,5 +1,4 @@
-import type { GroupField, TextField } from 'payload/types'
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 
 import path from 'path'
 
@@ -41,7 +40,7 @@ export const getFields = ({
     },
   }
 
-  const fields = [...collection.fields]
+  const fields = [...collection.fields, ...(adapter.fields || [])]
 
   // Inject a hook into all URL fields to generate URLs
 
@@ -107,6 +106,7 @@ export const getFields = ({
           name: size.name,
           type: 'group',
           fields: [
+            ...(adapter.fields || []),
             {
               ...(existingSizeURLField || {}),
               ...baseURLField,

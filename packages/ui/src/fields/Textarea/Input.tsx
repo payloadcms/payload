@@ -1,13 +1,13 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -54,36 +54,38 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      {BeforeInput}
-      <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
-        <div className="textarea-inner">
-          <div className="textarea-clone" data-value={value || placeholder || ''} />
-          <textarea
-            className="textarea-element"
-            data-rtl={rtl}
-            disabled={readOnly}
-            id={`field-${path.replace(/\./g, '__')}`}
-            name={path}
-            onChange={onChange}
-            placeholder={getTranslation(placeholder, i18n)}
-            rows={rows}
-            value={value || ''}
-          />
-        </div>
-      </label>
-      {AfterInput}
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        {BeforeInput}
+        <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
+          <div className="textarea-inner">
+            <div className="textarea-clone" data-value={value || placeholder || ''} />
+            <textarea
+              className="textarea-element"
+              data-rtl={rtl}
+              disabled={readOnly}
+              id={`field-${path.replace(/\./g, '__')}`}
+              name={path}
+              onChange={onChange}
+              placeholder={getTranslation(placeholder, i18n)}
+              rows={rows}
+              value={value || ''}
+            />
+          </div>
+        </label>
+        {AfterInput}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
+      </div>
     </div>
   )
 }

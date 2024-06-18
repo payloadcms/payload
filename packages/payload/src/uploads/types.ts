@@ -1,5 +1,6 @@
 import type { ResizeOptions, Sharp } from 'sharp'
 
+import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequestWithData } from '../types/index.js'
 
 export type FileSize = {
@@ -17,6 +18,8 @@ export type FileSizes = {
 export type FileData = {
   filename: string
   filesize: number
+  focalX?: number
+  focalY?: number
   height: number
   mimeType: string
   sizes: FileSizes
@@ -121,28 +124,8 @@ export type UploadConfig = {
    */
   handlers?: ((
     req: PayloadRequestWithData,
-    args: { params: { collection: string; filename: string } },
-  ) => Promise<Response> | Response | null)[]
-  /**
-   * Image sizes to generate when uploading an image.
-   * @example
-   * ```ts
-   * imageSizes: [
-   *  {
-   *    name: 'small',
-   *    width: 100,
-   *    height: 100,
-   *    formatOptions: {
-   *      format: 'jpeg',
-   *      options: {
-   *        quality: 80,
-   *      }
-   *    }
-   *   }
-   * ]
-   * ```
-   * @default undefined
-   */
+    args: { doc: TypeWithID; params: { collection: string; filename: string } },
+  ) => Promise<Response> | Response)[]
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
@@ -161,11 +144,6 @@ export type UploadConfig = {
    * @default undefined
    */
   staticDir?: string
-  /**
-   * Sharp trim options for the original image.
-   * @link https://sharp.pixelplumbing.com/api-resize#trim
-   * @default undefined
-   */
   trimOptions?: ImageUploadTrimOptions
 }
 
@@ -201,4 +179,17 @@ export type FileToSave = {
    * The path to save the file.
    */
   path: string
+}
+
+export type UploadEdits = {
+  crop?: {
+    height?: number
+    width?: number
+    x?: number
+    y?: number
+  }
+  focalPoint?: {
+    x?: number
+    y?: number
+  }
 }

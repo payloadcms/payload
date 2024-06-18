@@ -1,14 +1,14 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useIntersect } from '@payloadcms/ui/hooks/useIntersect'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { canUseDOM } from '@payloadcms/ui/utilities/canUseDOM'
-import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
 import React, { useEffect, useState } from 'react'
 
+import { useIntersect } from '../../../../../hooks/useIntersect.js'
+import { useConfig } from '../../../../../providers/Config/index.js'
+import { useTranslation } from '../../../../../providers/Translation/index.js'
+import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
+import { formatDocTitle } from '../../../../../utilities/formatDocTitle.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import './index.scss'
 
@@ -37,9 +37,8 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
   useEffect(() => {
-    if (cellData && isAboveViewport && !hasRequested) {
+    if ((cellData || typeof cellData === 'number') && isAboveViewport && !hasRequested) {
       const formattedValues: Value[] = []
-
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData]
       arrayCellData
         .slice(0, arrayCellData.length < totalToShow ? arrayCellData.length : totalToShow)
@@ -70,6 +69,13 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     hasRequested,
     getRelationships,
   ])
+
+  useEffect(() => {
+    if (hasRequested) {
+      setHasRequested(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cellData])
 
   return (
     <div className={baseClass} ref={intersectionRef}>

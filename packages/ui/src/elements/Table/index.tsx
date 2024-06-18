@@ -1,11 +1,9 @@
 'use client'
-import type { CellComponentProps, FieldBase } from 'payload/types'
+import type { CellComponentProps, FieldBase, FieldTypes } from 'payload'
 
 import React from 'react'
 
 export * from './TableCellProvider/index.js'
-
-import type { FieldTypes } from 'payload/config'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
@@ -21,6 +19,7 @@ export type Column = {
   Label: React.ReactNode
   accessor: string
   active: boolean
+  admin?: FieldBase['admin']
   cellProps?: Partial<CellComponentProps>
   components: {
     Cell: React.ReactNode

@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldHook, ImageSize } from 'payload/types'
+import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
 import type { GenerateFileURL, GeneratedAdapter } from '../types.js'
 
@@ -20,6 +20,7 @@ export const getAfterReadHook =
     if (disablePayloadAccessControl && filename) {
       url = await adapter.generateURL({
         collection,
+        data,
         filename,
         prefix,
       })

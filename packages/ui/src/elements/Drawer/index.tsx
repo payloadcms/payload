@@ -1,10 +1,10 @@
 'use client'
-import * as facelessUIImport from '@faceless-ui/modal'
+import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { EditDepthContext, useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -26,8 +26,6 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   onClick,
   ...rest
 }) => {
-  const { Modal, useModal } = facelessUIImport
-
   const { openModal } = useModal()
 
   const handleClick = useCallback(
@@ -54,8 +52,6 @@ export const Drawer: React.FC<Props> = ({
   hoverTitle,
   title,
 }) => {
-  const { Modal, useModal } = facelessUIImport
-
   const { t } = useTranslation()
   const { closeModal, modalState } = useModal()
   const drawerDepth = useEditDepth()
@@ -115,7 +111,7 @@ export const Drawer: React.FC<Props> = ({
                     onClick={() => closeModal(slug)}
                     type="button"
                   >
-                    <X />
+                    <XIcon />
                   </button>
                 </div>
               )}

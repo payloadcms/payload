@@ -1,29 +1,26 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate, JSONField as JSONFieldType } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { FieldBase, JSONField as JSONFieldType } from 'payload/types'
-
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-
 import type { FormFieldBase } from '../shared/index.js'
+
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']
   jsonSchema?: Record<string, unknown>
-  label?: FieldBase['label']
   name?: string
   path?: string
   width?: string
@@ -65,12 +62,14 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { initialValue, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
-  })
+  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+    useField<string>({
+      path: pathFromContext ?? pathFromProps ?? name,
+      validate: memoizedValidate,
+    })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleMount = useCallback(
     (editor, monaco) => {
@@ -93,7 +92,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) return
+      if (disabled) return
       setStringValue(val)
 
       try {
@@ -104,14 +103,16 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [disabled, setValue, setStringValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue) return
+    if (hasLoadedValue || value === undefined) return
+
     setStringValue(
       value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
     )
+
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
 
@@ -122,7 +123,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        disabled && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -131,21 +132,22 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div>
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={disabled}
           value={stringValue}
         />
         {AfterInput}

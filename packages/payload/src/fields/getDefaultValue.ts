@@ -1,4 +1,3 @@
-import type { User } from '../auth/index.js'
 import type { PayloadRequestWithData } from '../types/index.js'
 
 import { deepCopyObject } from '../utilities/deepCopyObject.js'

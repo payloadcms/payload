@@ -1,10 +1,10 @@
 'use client'
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { CollectionPermission, GlobalPermission, SanitizedCollectionConfig } from 'payload'
 
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import React, { Fragment } from 'react'
+import { getTranslation } from '@payloadcms/translations'
+import React, { Fragment, useEffect } from 'react'
 
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDate } from '../../utilities/formatDate.js'
@@ -14,9 +14,9 @@ import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
-import { Publish } from '../Publish/index.js'
-import { Save } from '../Save/index.js'
-import { SaveDraft } from '../SaveDraft/index.js'
+import { PublishButton } from '../PublishButton/index.js'
+import { SaveButton } from '../SaveButton/index.js'
+import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import './index.scss'
 
@@ -26,6 +26,7 @@ export const DocumentControls: React.FC<{
   apiURL: string
   data?: any
   disableActions?: boolean
+  hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id?: number | string
   isAccountView?: boolean
@@ -62,6 +63,19 @@ export const DocumentControls: React.FC<{
     routes: { admin: adminRoute },
   } = config
 
+  // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
+  const [updatedAt, setUpdatedAt] = React.useState<string>('')
+  const [createdAt, setCreatedAt] = React.useState<string>('')
+
+  useEffect(() => {
+    if (data?.updatedAt) {
+      setUpdatedAt(formatDate({ date: data.updatedAt, i18n, pattern: dateFormat }))
+    }
+    if (data?.createdAt) {
+      setCreatedAt(formatDate({ date: data.createdAt, i18n, pattern: dateFormat }))
+    }
+  }, [data, i18n, dateFormat])
+
   const hasCreatePermission =
     permissions && 'create' in permissions && permissions.create?.permission
 
@@ -72,6 +86,9 @@ export const DocumentControls: React.FC<{
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
   )
 
+  const unsavedDraftWithValidations =
+    !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -81,10 +98,10 @@ export const DocumentControls: React.FC<{
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
                   {i18n.t('general:creatingNewLabel', {
-                    label:
-                      typeof collectionConfig?.labels?.singular === 'string'
-                        ? collectionConfig.labels.singular
-                        : i18n.t('general:document'),
+                    label: getTranslation(
+                      collectionConfig?.labels?.singular ?? i18n.t('general:document'),
+                      i18n,
+                    ),
                   })}
                 </p>
               </li>
@@ -101,7 +118,8 @@ export const DocumentControls: React.FC<{
                   </li>
                 )}
                 {((collectionConfig?.versions?.drafts &&
-                  collectionConfig?.versions?.drafts?.autosave) ||
+                  collectionConfig?.versions?.drafts?.autosave &&
+                  !unsavedDraftWithValidations) ||
                   (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
                     <li className={`${baseClass}__list-item`}>
@@ -121,35 +139,19 @@ export const DocumentControls: React.FC<{
                   className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
                     .filter(Boolean)
                     .join(' ')}
-                  title={
-                    data?.updatedAt
-                      ? formatDate({ date: data?.updatedAt, i18n, pattern: dateFormat })
-                      : ''
-                  }
+                  title={data?.updatedAt ? updatedAt : ''}
                 >
                   <p className={`${baseClass}__label`}>{i18n.t('general:lastModified')}:&nbsp;</p>
-                  {data?.updatedAt && (
-                    <p className={`${baseClass}__value`}>
-                      {formatDate({ date: data?.updatedAt, i18n, pattern: dateFormat })}
-                    </p>
-                  )}
+                  {data?.updatedAt && <p className={`${baseClass}__value`}>{updatedAt}</p>}
                 </li>
                 <li
                   className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
                     .filter(Boolean)
                     .join(' ')}
-                  title={
-                    data?.createdAt
-                      ? formatDate({ date: data?.createdAt, i18n, pattern: dateFormat })
-                      : ''
-                  }
+                  title={data?.createdAt ? createdAt : ''}
                 >
                   <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
-                  {data?.createdAt && (
-                    <p className={`${baseClass}__value`}>
-                      {formatDate({ date: data?.createdAt, i18n, pattern: dateFormat })}
-                    </p>
-                  )}
+                  {data?.createdAt && <p className={`${baseClass}__value`}>{createdAt}</p>}
                 </li>
               </Fragment>
             )}
@@ -166,14 +168,15 @@ export const DocumentControls: React.FC<{
                   <React.Fragment>
                     {((collectionConfig?.versions?.drafts &&
                       !collectionConfig?.versions?.drafts?.autosave) ||
+                      unsavedDraftWithValidations ||
                       (globalConfig?.versions?.drafts &&
                         !globalConfig?.versions?.drafts?.autosave)) && (
-                      <SaveDraft CustomComponent={componentMap.SaveDraftButton} />
+                      <SaveDraftButton CustomComponent={componentMap.SaveDraftButton} />
                     )}
-                    <Publish CustomComponent={componentMap.PublishButton} />
+                    <PublishButton CustomComponent={componentMap.PublishButton} />
                   </React.Fragment>
                 ) : (
-                  <Save CustomComponent={componentMap.SaveButton} />
+                  <SaveButton CustomComponent={componentMap.SaveButton} />
                 )}
               </React.Fragment>
             )}

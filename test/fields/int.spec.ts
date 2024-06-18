@@ -1,7 +1,6 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { Payload } from 'payload'
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs, Payload } from 'payload'
 
 import { reload } from '@payloadcms/next/utilities'
 
@@ -905,6 +904,37 @@ describe('Fields', () => {
           text: 'Hello world',
         },
       })
+    })
+
+    it('should query a subfield within a localized group', async () => {
+      const text = 'find this'
+      const hit = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          localizedGroup: {
+            text,
+          },
+        },
+      })
+      const miss = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          localizedGroup: {
+            text: 'do not find this',
+          },
+        },
+      })
+      const result = await payload.find({
+        collection: groupFieldsSlug,
+        where: {
+          'localizedGroup.text': { equals: text },
+        },
+      })
+
+      const resultIDs = result.docs.map(({ id }) => id)
+
+      expect(resultIDs).toContain(hit.id)
+      expect(resultIDs).not.toContain(miss.id)
     })
   })
 

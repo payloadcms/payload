@@ -1,12 +1,13 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.25",
+  "version": "3.0.0-beta.49",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/ui"
   },
+  "sideEffects": false,
   "type": "module",
   "exports": {
     "./assets": {
@@ -14,6 +15,11 @@
       "require": "./src/assets/index.ts",
       "default": "./src/assets/index.ts",
       "types": "./src/assets/index.tsx"
+    },
+    "./client": {
+      "import": "./src/exports/client/index.ts",
+      "require": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts"
     },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
@@ -57,11 +63,10 @@
       "default": "./src/providers/*/index.tsx",
       "types": "./src/providers/*/index.tsx"
     },
-    "./templates/*": {
-      "import": "./src/templates/*/index.tsx",
-      "require": "./src/templates/*/index.tsx",
-      "default": "./src/templates/*/index.tsx",
-      "types": "./src/templates/*/index.tsx"
+    "./shared": {
+      "import": "./src/exports/shared/index.ts",
+      "require": "./src/exports/shared/index.ts",
+      "types": "./src/exports/shared/index.ts"
     },
     "./utilities/*": {
       "import": "./src/utilities/*.ts",
@@ -74,17 +79,20 @@
       "require": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./scss/app.scss": "./src/scss/app.scss"
+    "./scss/app.scss": "./src/scss/app.scss",
+    "./styles.css": "./dist/styles.css"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
+    "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
+    "build:esbuild": "node bundle.js",
+    "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:webpack": "webpack --config webpack.config.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -94,9 +102,9 @@
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
-    "@faceless-ui/modal": "2.0.2",
-    "@faceless-ui/scroll-info": "1.3.0",
-    "@faceless-ui/window-info": "2.1.2",
+    "@faceless-ui/modal": "3.0.0-beta.0",
+    "@faceless-ui/scroll-info": "2.0.0-beta.0",
+    "@faceless-ui/window-info": "3.0.0-beta.0",
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
@@ -108,57 +116,62 @@
     "object-to-formdata": "4.5.1",
     "qs": "6.11.2",
     "react-animate-height": "2.1.2",
-    "react-datepicker": "6.2.0",
+    "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.7.4",
-    "react-toastify": "10.0.4",
-    "use-context-selector": "1.4.1",
-    "uuid": "9.0.1"
+    "react-select": "5.8.0",
+    "scheduler": "0.25.0-rc-f994737d14-20240522",
+    "sonner": "^1.5.0",
+    "use-context-selector": "2.0.0",
+    "uuid": "10.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",
-    "@types/react": "18.2.74",
-    "@types/react-datepicker": "4.11.2",
-    "@types/react-dom": "18.2.24",
-    "@types/uuid": "8.3.4",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-datepicker": "6.2.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/uuid": "^9.0.8",
+    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "css-loader": "^6.10.0",
-    "css-minimizer-webpack-plugin": "^6.0.0",
+    "esbuild": "^0.21.4",
+    "esbuild-sass-plugin": "^3.3.0",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
-    "postcss-preset-env": "^9.5.0",
-    "sass-loader": "^14.1.1",
+    "postcss-preset-env": "^9.5.14",
+    "sass-loader": "14.2.1",
     "swc-loader": "^0.2.6",
-    "swc-plugin-transform-remove-imports": "^1.12.1",
-    "terser-webpack-plugin": "^5.3.10",
-    "webpack": "^5.78.0",
-    "webpack-cli": "^5.1.4"
+    "turbopack": "^0.0.1"
   },
   "peerDependencies": {
-    "next": "^14.3.0-canary.7",
+    "next": "^15.0.0-rc.0",
     "payload": "workspace:*",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
   },
   "engines": {
-    "node": ">=18.20.2"
+    "node": "^18.20.2 || >=20.9.0"
   },
   "publishConfig": {
     "exports": {
-      ".": "./dist/exports/index.js",
       "./assets/*": "./dist/assets/*",
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
-      },
       "./assets": {
         "import": "./dist/assets/index.js",
         "require": "./dist/assets/index.js",
         "default": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts"
+      },
+      "./client": {
+        "import": "./dist/exports/client/index.js",
+        "require": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",
@@ -202,11 +215,10 @@
         "default": "./dist/providers/*/index.js",
         "types": "./dist/providers/*/index.d.ts"
       },
-      "./templates/*": {
-        "import": "./dist/templates/*/index.js",
-        "require": "./dist/templates/*/index.js",
-        "default": "./dist/templates/*/index.js",
-        "types": "./dist/templates/*/index.d.ts"
+      "./shared": {
+        "import": "./dist/exports/shared/index.js",
+        "require": "./dist/exports/shared/index.js",
+        "types": "./dist/exports/shared/index.d.ts"
       },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",
@@ -224,7 +236,12 @@
         "require": "./dist/scss/styles.scss",
         "default": "./dist/scss/styles.scss"
       },
-      "./scss/app.scss": "./dist/scss/app.scss"
+      "./scss/app.scss": "./dist/scss/app.scss",
+      "./styles.css": "./dist/styles.css"
     }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

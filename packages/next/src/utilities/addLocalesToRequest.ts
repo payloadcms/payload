@@ -3,7 +3,7 @@ import type {
   PayloadRequestData,
   PayloadRequestWithData,
   SanitizedConfig,
-} from 'payload/types'
+} from 'payload'
 
 /**
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams
@@ -62,7 +62,7 @@ export const sanitizeLocales = ({
   locale,
   localization,
 }: SanitizeLocalesArgs): SanitizeLocalesReturn => {
-  if (fallbackLocale === 'none') {
+  if (['none', 'null'].includes(fallbackLocale)) {
     fallbackLocale = 'null'
   } else if (localization && !localization.localeCodes.includes(fallbackLocale)) {
     fallbackLocale = localization.defaultLocale

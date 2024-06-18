@@ -1,6 +1,8 @@
 import type { FeatureProviderProviderServer } from '../types.js'
 
-import { ParagraphFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { ParagraphFeatureClientComponent } from '../../../exports/client/index.js'
+import { i18n } from './i18n.js'
 
 export const ParagraphFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {
@@ -8,6 +10,7 @@ export const ParagraphFeature: FeatureProviderProviderServer<undefined, undefine
       return {
         ClientComponent: ParagraphFeatureClientComponent,
         clientFeatureProps: null,
+        i18n,
         serverFeatureProps: props,
       }
     },

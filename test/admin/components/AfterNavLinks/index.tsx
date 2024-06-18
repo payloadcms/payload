@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import LinkImport from 'next/link.js'

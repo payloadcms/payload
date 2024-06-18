@@ -1,4 +1,4 @@
-import type { DocumentTabComponent } from 'payload/types'
+import type { DocumentTabComponent } from 'payload'
 
 import React from 'react'
 

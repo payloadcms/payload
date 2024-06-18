@@ -10,7 +10,7 @@
   will-change: transform;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background-color: var(--theme-elevation-100);
     .icon {
       opacity: 1;
     }
@@ -25,7 +25,7 @@
 
   html[data-theme='dark'] & {
     .icon {
-      filter: invert(1);
+      background-image: url(../../../ui/icons/Add/light.svg);
     }
   }
 }

@@ -1,21 +1,27 @@
-import type { EditViewComponent } from 'payload/config'
-import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
-import type { DocumentPermissions } from 'payload/types'
-import type { AdminViewProps } from 'payload/types'
+import type {
+  AdminViewComponent,
+  AdminViewProps,
+  EditViewComponent,
+  ServerSideEditViewProps,
+} from 'payload'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
-import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
-import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
+} from '@payloadcms/ui/client'
+import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
-import { docAccessOperation } from 'payload/operations'
+import QueryString from 'qs'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
+import { getDocumentData } from './getDocumentData.js'
+import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
@@ -52,44 +58,46 @@ export const Document: React.FC<AdminViewProps> = async ({
   const collectionSlug = collectionConfig?.slug || undefined
   const globalSlug = globalConfig?.slug || undefined
 
-  const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
+  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
   let ViewOverride: EditViewComponent
   let CustomView: EditViewComponent
   let DefaultView: EditViewComponent
   let ErrorView: AdminViewComponent
 
-  let docPermissions: DocumentPermissions
-  let hasSavePermission: boolean
   let apiURL: string
   let action: string
+
+  const { data, formState } = await getDocumentData({
+    id,
+    collectionConfig,
+    globalConfig,
+    locale,
+    req,
+  })
+
+  const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
+    id,
+    collectionConfig,
+    data,
+    globalConfig,
+    req,
+  })
 
   if (collectionConfig) {
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
       notFound()
     }
 
-    try {
-      docPermissions = await docAccessOperation({
-        id,
-        collection: {
-          config: collectionConfig,
-        },
-        req,
-      })
-    } catch (error) {
-      notFound()
-    }
-
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
-
-    hasSavePermission =
-      (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
-      (!isEditing && permissions?.collections?.[collectionSlug]?.create?.permission)
-
-    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
-      collectionConfig.versions?.drafts ? '&draft=true' : ''
-    }`
+    const apiQueryParams = QueryString.stringify(
+      {
+        draft: collectionConfig.versions?.drafts ? 'true' : undefined,
+        locale: locale?.code,
+      },
+      { addQueryPrefix: true },
+    )
+    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
     const editConfig = collectionConfig?.admin?.components?.views?.Edit
     ViewOverride = typeof editConfig === 'function' ? editConfig : null
@@ -117,13 +125,16 @@ export const Document: React.FC<AdminViewProps> = async ({
       notFound()
     }
 
-    docPermissions = permissions?.globals?.[globalSlug]
-    hasSavePermission = isEditing && docPermissions?.update?.permission
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
-    apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${
-      globalConfig.versions?.drafts ? '&draft=true' : ''
-    }`
+    const apiQueryParams = QueryString.stringify(
+      {
+        draft: globalConfig.versions?.drafts ? 'true' : undefined,
+        locale: locale?.code,
+      },
+      { addQueryPrefix: true },
+    )
+    apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
     const editConfig = globalConfig?.admin?.components?.views?.Edit
     ViewOverride = typeof editConfig === 'function' ? editConfig : null
@@ -154,15 +165,17 @@ export const Document: React.FC<AdminViewProps> = async ({
     hasSavePermission &&
     ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+  const validateDraftData =
+    collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
 
-  if (shouldAutosave && !id && collectionSlug) {
+  if (shouldAutosave && !validateDraftData && !id && collectionSlug) {
     const doc = await payload.create({
       collection: collectionSlug,
       data: {},
       depth: 0,
       draft: true,
       fallbackLocale: null,
-      locale: locale.code,
+      locale: locale?.code,
       req,
       user,
     })
@@ -190,8 +203,11 @@ export const Document: React.FC<AdminViewProps> = async ({
       disableActions={false}
       docPermissions={docPermissions}
       globalSlug={globalConfig?.slug}
+      hasPublishPermission={hasPublishPermission}
       hasSavePermission={hasSavePermission}
       id={id}
+      initialData={data}
+      initialState={formState}
       isEditing={isEditing}
     >
       {!ViewOverride && (
@@ -204,12 +220,15 @@ export const Document: React.FC<AdminViewProps> = async ({
         />
       )}
       <HydrateClientUser permissions={permissions} user={user} />
-      <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
+      <EditDepthProvider
+        depth={1}
+        key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
+      >
         <FormQueryParamsProvider
           initialParams={{
             depth: 0,
             'fallback-locale': 'null',
-            locale: locale.code,
+            locale: locale?.code,
             uploadEdits: undefined,
           }}
         >
@@ -220,6 +239,15 @@ export const Document: React.FC<AdminViewProps> = async ({
               CustomComponent={ViewOverride || CustomView}
               DefaultComponent={DefaultView}
               componentProps={viewComponentProps}
+              serverOnlyProps={{
+                i18n,
+                locale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+              }}
             />
           )}
         </FormQueryParamsProvider>

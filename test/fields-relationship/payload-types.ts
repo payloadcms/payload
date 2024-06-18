@@ -9,6 +9,8 @@
 export interface Config {
   collections: {
     'fields-relationship': FieldsRelationship
+    'relation-filter-false': RelationFilterFalse
+    'relation-filter-true': RelationFilterTrue
     'relation-one': RelationOne
     'relation-two': RelationTwo
     'relation-restricted': RelationRestricted
@@ -16,12 +18,23 @@ export interface Config {
     'relation-updated-externally': RelationUpdatedExternally
     'collection-1': Collection1
     'collection-2': Collection2
+    videos: Video
+    podcasts: Podcast
+    'mixed-media': MixedMedia
     users: User
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {}
+  locale: null
+  user: User & {
+    collection: 'users'
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-relationship".
+ */
 export interface FieldsRelationship {
   id: string
   relationship?: (string | null) | RelationOne
@@ -58,6 +71,14 @@ export interface FieldsRelationship {
             value: string | RelationWithTitle
           }
         | {
+            relationTo: 'relation-filter-false'
+            value: string | RelationFilterFalse
+          }
+        | {
+            relationTo: 'relation-filter-true'
+            value: string | RelationFilterTrue
+          }
+        | {
             relationTo: 'relation-one'
             value: string | RelationOne
           }
@@ -68,24 +89,40 @@ export interface FieldsRelationship {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-one".
+ */
 export interface RelationOne {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-two".
+ */
 export interface RelationTwo {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted".
+ */
 export interface RelationRestricted {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-with-title".
+ */
 export interface RelationWithTitle {
   id: string
   name?: string | null
@@ -95,6 +132,30 @@ export interface RelationWithTitle {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-false".
+ */
+export interface RelationFilterFalse {
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-true".
+ */
+export interface RelationFilterTrue {
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-updated-externally".
+ */
 export interface RelationUpdatedExternally {
   id: string
   relationPrePopulate?: (string | null) | Collection1
@@ -114,18 +175,71 @@ export interface RelationUpdatedExternally {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-1".
+ */
 export interface Collection1 {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-2".
+ */
 export interface Collection2 {
   id: string
   name?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts".
+ */
+export interface Podcast {
+  id: number
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mixed-media".
+ */
+export interface MixedMedia {
+  id: string
+  relatedMedia?:
+    | (
+        | {
+            relationTo: 'videos'
+            value: number | Video
+          }
+        | {
+            relationTo: 'podcasts'
+            value: number | Podcast
+          }
+      )[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   updatedAt: string
@@ -137,8 +251,12 @@ export interface User {
   hash?: string | null
   loginAttempts?: number | null
   lockUntil?: string | null
-  password: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -158,10 +276,19 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null
   batch?: number | null
   updatedAt: string
   createdAt: string
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

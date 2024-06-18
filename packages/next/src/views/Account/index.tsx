@@ -1,23 +1,32 @@
-import type { ServerSideEditViewProps } from 'payload/types'
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps, ServerSideEditViewProps } from 'payload'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
-import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import {
+  DocumentInfoProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
+} from '@payloadcms/ui/client'
+import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { getDocumentData } from '../Document/getDocumentData.js'
+import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
 
 export { generateAccountMetadata } from './meta.js'
 
-export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export const Account: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
+    languageOptions,
     locale,
     permissions,
+    req,
     req: {
       i18n,
       payload,
@@ -32,11 +41,24 @@ export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, sear
     serverURL,
   } = config
 
-  const collectionPermissions = permissions?.collections?.[userSlug]
-
   const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
 
-  if (collectionConfig) {
+  if (collectionConfig && user?.id) {
+    const { docPermissions, hasPublishPermission, hasSavePermission } =
+      await getDocumentPermissions({
+        id: user.id,
+        collectionConfig,
+        data: user,
+        req,
+      })
+
+    const { data, formState } = await getDocumentData({
+      id: user.id,
+      collectionConfig,
+      locale,
+      req,
+    })
+
     const viewComponentProps: ServerSideEditViewProps = {
       initPageResult,
       params,
@@ -46,13 +68,16 @@ export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, sear
 
     return (
       <DocumentInfoProvider
-        AfterFields={<Settings />}
+        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} />}
         action={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         collectionSlug={userSlug}
-        docPermissions={collectionPermissions}
-        hasSavePermission={collectionPermissions?.update?.permission}
-        id={user?.id}
+        docPermissions={docPermissions}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        id={user?.id.toString()}
+        initialData={data}
+        initialState={formState}
         isEditing
       >
         <DocumentHeader
@@ -67,7 +92,7 @@ export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, sear
           initialParams={{
             depth: 0,
             'fallback-locale': 'null',
-            locale: locale.code,
+            locale: locale?.code,
             uploadEdits: undefined,
           }}
         >
@@ -77,6 +102,15 @@ export const Account: React.FC<AdminViewProps> = ({ initPageResult, params, sear
             }
             DefaultComponent={EditView}
             componentProps={viewComponentProps}
+            serverOnlyProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
           />
         </FormQueryParamsProvider>
       </DocumentInfoProvider>

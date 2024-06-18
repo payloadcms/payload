@@ -4,7 +4,7 @@ import type { NodeKey } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
-import { mergeRegister } from '@lexical/utils'
+import { addClassNamesToElement, mergeRegister, removeClassNamesFromElement } from '@lexical/utils'
 import {
   $getNodeByKey,
   $getSelection,
@@ -18,6 +18,8 @@ import { useCallback, useEffect } from 'react'
 
 import { $isHorizontalRuleNode } from '../nodes/HorizontalRuleNode.js'
 
+const isSelectedClassName = 'selected'
+
 /**
  * React component rendered in the lexical editor, WITHIN the hr element created by createDOM of the HorizontalRuleNode.
  *
@@ -27,7 +29,7 @@ export function HorizontalRuleComponent({ nodeKey }: { nodeKey: NodeKey }) {
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const onDelete = useCallback(
+  const $onDelete = useCallback(
     (event: KeyboardEvent) => {
       if (isSelected && $isNodeSelection($getSelection())) {
         event.preventDefault()
@@ -61,15 +63,19 @@ export function HorizontalRuleComponent({ nodeKey }: { nodeKey: NodeKey }) {
         },
         COMMAND_PRIORITY_LOW,
       ),
-      editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
     )
-  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected])
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected])
 
   useEffect(() => {
     const hrElem = editor.getElementByKey(nodeKey)
     if (hrElem !== null) {
-      hrElem.className = isSelected ? 'selected' : ''
+      if (isSelected) {
+        addClassNamesToElement(hrElem, isSelectedClassName)
+      } else {
+        removeClassNamesFromElement(hrElem, isSelectedClassName)
+      }
     }
   }, [editor, isSelected, nodeKey])
 

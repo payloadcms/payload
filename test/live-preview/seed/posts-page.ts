@@ -1,5 +1,7 @@
 import type { Page } from '../payload-types.js'
 
+import { postsSlug } from '../shared.js'
+
 export const postsPage: Partial<Page> = {
   title: 'Posts',
   slug: 'live-preview/posts',
@@ -53,7 +55,7 @@ export const postsPage: Partial<Page> = {
         },
       ],
       populateBy: 'collection',
-      relationTo: 'posts',
+      relationTo: postsSlug,
       limit: 10,
       categories: [],
     },

@@ -1,14 +1,11 @@
 import type { StepNavItem } from '@payloadcms/ui/elements/StepNav'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
+import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui/client'
+import { formatDate } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{

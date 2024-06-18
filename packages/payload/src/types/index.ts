@@ -7,20 +7,7 @@ import type { GeneratedTypes } from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
-export type UploadEdits = {
-  crop?: {
-    height?: number
-    width?: number
-    x?: number
-    y?: number
-  }
-  focalPoint?: {
-    x?: number
-    y?: number
-  }
-}
-
-export type CustomPayloadRequestProperties<U = unknown> = {
+export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
@@ -60,8 +47,8 @@ export type CustomPayloadRequestProperties<U = unknown> = {
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
    */
   transactionIDPromise?: Promise<void>
-  /** The signed in user */
-  user: (U & GeneratedTypes['user']) | null
+  /** The signed-in user */
+  user: GeneratedTypes['user'] | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
@@ -78,10 +65,10 @@ export type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest<U = unknown> = Partial<Request> &
+export type PayloadRequest = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
-  CustomPayloadRequestProperties<U>
-export type PayloadRequestWithData<U = unknown> = PayloadRequest<U> & PayloadRequestData
+  CustomPayloadRequestProperties
+export type PayloadRequestWithData = PayloadRequest & PayloadRequestData
 export interface RequestContext {
   [key: string]: unknown
 }

@@ -15,9 +15,7 @@ import type {
   PgTransaction,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { BaseDatabaseAdapter, Payload, PayloadRequestWithData } from 'payload'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
@@ -69,14 +67,17 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
    */
   fieldConstraints: Record<string, Record<string, string>>
   idType: Args['idType']
+  initializing: Promise<void>
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   pgSchema?: { table: PgTableFn } | PgSchema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
+  resolveInitializing: () => void
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
   sessions: {

@@ -1,6 +1,7 @@
 import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { InlineToolbarFeatureClientComponent } from './feature.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { InlineToolbarFeatureClientComponent } from '../../../../exports/client/index.js'
 
 export const InlineToolbarFeature: FeatureProviderProviderServer<undefined, undefined> = (
   props,
@@ -9,7 +10,6 @@ export const InlineToolbarFeature: FeatureProviderProviderServer<undefined, unde
     feature: () => {
       return {
         ClientComponent: InlineToolbarFeatureClientComponent,
-        clientFeatureProps: null,
         serverFeatureProps: props,
       }
     },

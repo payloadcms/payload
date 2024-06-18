@@ -6,7 +6,7 @@ import type { FieldType, Options } from './types.js'
 
 export type { FieldType, Options }
 
-import useThrottledEffect from '../../hooks/useThrottledEffect.js'
+import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -16,6 +16,7 @@ import { useFieldProps } from '../FieldPropsProvider/index.js'
 import {
   useForm,
   useFormFields,
+  useFormInitializing,
   useFormModified,
   useFormProcessing,
   useFormSubmitted,
@@ -36,6 +37,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
+  const initializing = useFormInitializing()
   const { user } = useAuth()
   const { id } = useDocumentInfo()
   const operation = useOperation()
@@ -108,6 +110,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
+      formInitializing: initializing,
       formProcessing: processing,
       formSubmitted: submitted,
       initialValue,
@@ -137,6 +140,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       readOnly,
       permissions,
       filterOptions,
+      initializing,
     ],
   )
 

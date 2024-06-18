@@ -3,20 +3,21 @@ import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useEffect, useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
-import type { Option } from './types.js'
-import type { Props as ReactSelectAdapterProps } from './types.js'
+import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
-import { Chevron } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
-import { MultiValue } from './MultiValue/index.js'
+import { DropdownIndicator } from './DropdownIndicator/index.js'
+import { Input } from './Input/index.js'
+import { MultiValue, generateMultiValueDraggableID } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
 import { SingleValue } from './SingleValue/index.js'
@@ -31,6 +32,12 @@ const createOption = (label: string) => ({
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
   const [inputValue, setInputValue] = React.useState('') // for creatable select
+  const uuid = useId()
+  const [hasMounted, setHasMounted] = React.useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   const {
     className,
@@ -43,7 +50,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isCreatable,
     isLoading,
     isSearchable = true,
-    noOptionsMessage,
+    noOptionsMessage = () => t('general:noOptions'),
     numberOnly = false,
     onChange,
     onMenuClose,
@@ -54,9 +61,15 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     value,
   } = props
 
+  const loadingMessage = () => t('general:loading') + '...'
+
   const classes = [className, 'react-select', showError && 'react-select--error']
     .filter(Boolean)
     .join(' ')
+
+  if (!hasMounted) {
+    return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
+  }
 
   if (!isCreatable) {
     return (
@@ -71,7 +84,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         components={{
           ClearIndicator,
           Control,
-          DropdownIndicator: Chevron,
+          DropdownIndicator,
+          Input,
           MultiValue,
           MultiValueLabel,
           MultiValueRemove,
@@ -81,9 +95,11 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         }}
         filterOption={filterOption}
         getOptionValue={getOptionValue}
+        instanceId={uuid}
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}
+        loadingMessage={loadingMessage}
         menuPlacement="auto"
         noOptionsMessage={noOptionsMessage}
         onChange={onChange}
@@ -141,7 +157,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       components={{
         ClearIndicator,
         Control,
-        DropdownIndicator: Chevron,
+        DropdownIndicator,
+        Input,
         MultiValue,
         MultiValueLabel,
         MultiValueRemove,
@@ -151,9 +168,11 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       }}
       filterOption={filterOption}
       inputValue={inputValue}
+      instanceId={uuid}
       isClearable={isClearable}
       isDisabled={disabled}
       isSearchable={isSearchable}
+      loadingMessage={loadingMessage}
       menuPlacement="auto"
       noOptionsMessage={noOptionsMessage}
       onChange={onChange}
@@ -168,18 +187,19 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 }
 
 const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
-  const { onChange, value } = props
+  const { getOptionValue, onChange, value } = props
 
-  let ids: string[] = []
-  if (value)
-    ids = Array.isArray(value)
-      ? value.map((item) => item?.id ?? `${item?.value}`)
-      : [value?.id || `${value?.value}`]
+  let draggableIDs: string[] = []
+  if (value) {
+    draggableIDs = (Array.isArray(value) ? value : [value]).map((optionValue) => {
+      return generateMultiValueDraggableID(optionValue, getOptionValue)
+    })
+  }
 
   return (
     <DraggableSortable
       className="react-select-container"
-      ids={ids}
+      ids={draggableIDs}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         let sorted = value
         if (value && Array.isArray(value)) {

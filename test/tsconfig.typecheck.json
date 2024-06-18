@@ -1,11 +1,8 @@
 {
   "compilerOptions": {
     "noEmit": true,
-    // Ideally, this should be "." once we get rid of all relative package paths
-    "rootDir": "..",
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "./just-in-case",
+    "rootDir": ".",
+    "baseUrl": ".",
     "target": "esnext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -17,25 +14,89 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": false,
     "types": ["jest", "node", "@types/jest"],
-    "incremental": true,
+    // "incremental": true,
     "isolatedModules": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "paths": {}
+    "paths": {
+      "@payload-config": ["./_community/config.ts"]
+    }
   },
-  "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
+  "exclude": ["dist", "build", "temp", "node_modules"],
   "include": [
     // "./test/_community/**/*.ts"
-    "./**/*.ts"
-    // "/**/*.ts",
+    // "./_community/**/*.ts"
+    "/**/*.ts"
     // "../packages/**/src/**/*.ts",
     // "../packages/**/src/**/*.tsx"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../packages/create-payload-app"
+    },
+    {
+      "path": "../packages/db-mongodb"
+    },
+    {
+      "path": "../packages/db-postgres"
+    },
+    {
+      "path": "../packages/graphql"
+    },
+    {
+      "path": "../packages/live-preview"
+    },
+    {
+      "path": "../packages/live-preview-react"
+    },
+    {
+      "path": "../packages/next"
+    },
+    {
+      "path": "../packages/payload"
+    },
+    {
+      "path": "../packages/plugin-cloud-storage"
+    },
+    {
+      "path": "../packages/plugin-cloud"
+    },
+    {
+      "path": "../packages/plugin-form-builder"
+    },
+    {
+      "path": "../packages/plugin-nested-docs"
+    },
+    {
+      "path": "../packages/plugin-redirects"
+    },
+    {
+      "path": "../packages/plugin-search"
+    },
+    {
+      "path": "../packages/plugin-sentry"
+    },
+    {
+      "path": "../packages/plugin-seo"
+    },
+    {
+      "path": "../packages/plugin-stripe"
+    },
+    {
+      "path": "../packages/richtext-slate"
+    },
+    {
+      "path": "../packages/richtext-lexical"
+    },
+    {
+      "path": "../packages/translations"
+    },
+    {
+      "path": "../packages/ui"
+    }
+  ]
 }

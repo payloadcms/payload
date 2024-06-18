@@ -1,19 +1,20 @@
 'use client'
-import type { BaseSelection } from 'lexical'
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
-import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
-import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { File } from '@payloadcms/ui/graphics/File'
-import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  Button,
+  DrawerToggler,
+  File,
+  useConfig,
+  useDocumentDrawer,
+  useDrawerSlug,
+  usePayloadAPI,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import {
   $getNodeByKey,
   $getSelection,
@@ -105,7 +106,7 @@ const Component: React.FC<ElementProps> = (props) => {
     [setParams, cacheBust, closeDrawer],
   )
 
-  const onDelete = useCallback(
+  const $onDelete = useCallback(
     (payload: KeyboardEvent) => {
       if (isSelected && $isNodeSelection($getSelection())) {
         const event: KeyboardEvent = payload
@@ -145,10 +146,10 @@ const Component: React.FC<ElementProps> = (props) => {
     return mergeRegister(
       editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
 
-      editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
     )
-  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected, onClick])
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')

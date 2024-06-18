@@ -21,7 +21,8 @@ export type LinkFields = {
 export type SerializedLinkNode = Spread<
   {
     fields: LinkFields
+    id?: string // optional if AutoLinkNode
   },
   SerializedElementNode
 >
-export type SerializedAutoLinkNode = SerializedLinkNode
+export type SerializedAutoLinkNode = Omit<SerializedLinkNode, 'id'>

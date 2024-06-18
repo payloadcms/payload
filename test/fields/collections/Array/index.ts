@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { arrayFieldsSlug } from '../../slugs.js'
 import { ArrayRowLabel } from './LabelComponent.js'
@@ -137,6 +137,21 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       minRows: 2,
+      type: 'array',
+    },
+    {
+      name: 'disableSort',
+      defaultValue: arrayDefaultValue,
+      admin: {
+        isSortable: false,
+      },
+      fields: [
+        {
+          name: 'text',
+          required: true,
+          type: 'text',
+        },
+      ],
       type: 'array',
     },
   ],

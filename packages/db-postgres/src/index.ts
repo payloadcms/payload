@@ -1,9 +1,8 @@
-import type { Payload } from 'payload'
-import type { DatabaseAdapterObj } from 'payload/database'
+import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload/database'
+import { createDatabaseAdapter } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
 
@@ -49,6 +48,13 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
+    let resolveInitializing
+    let rejectInitializing
+
+    const initializing = new Promise<void>((res, rej) => {
+      resolveInitializing = res
+      rejectInitializing = rej
+    })
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
@@ -56,6 +62,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       enums: {},
       fieldConstraints: {},
       idType: postgresIDType,
+      initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       pgSchema: undefined,
@@ -101,6 +108,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       migrationDir,
       payload,
       queryDrafts,
+      rejectInitializing,
+      resolveInitializing,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,

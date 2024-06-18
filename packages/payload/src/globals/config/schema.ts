@@ -6,6 +6,7 @@ import {
   customViewSchema,
   livePreviewSchema,
 } from '../../config/shared/componentSchema.js'
+import { openGraphSchema } from '../../config/shared/openGraphSchema.js'
 
 const globalSchema = joi
   .object()
@@ -19,6 +20,7 @@ const globalSchema = joi
     admin: joi.object({
       components: joi.object({
         elements: joi.object({
+          Description: componentSchema,
           PreviewButton: componentSchema,
           PublishButton: componentSchema,
           SaveButton: componentSchema,
@@ -40,13 +42,19 @@ const globalSchema = joi
         }),
       }),
       custom: joi.object().pattern(joi.string(), joi.any()),
-      description: joi.alternatives().try(joi.string(), componentSchema),
+      description: joi
+        .alternatives()
+        .try(joi.func(), joi.object().pattern(joi.string(), [joi.string()]), joi.string()),
       group: joi
         .alternatives()
         .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
       hidden: joi.alternatives().try(joi.boolean(), joi.func()),
       hideAPIURL: joi.boolean(),
       livePreview: joi.object(livePreviewSchema),
+      meta: joi.object({
+        description: joi.string(),
+        openGraph: openGraphSchema,
+      }),
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),
@@ -82,6 +90,7 @@ const globalSchema = joi
                 interval: joi.number(),
               }),
             ),
+            validate: joi.boolean(),
           }),
           joi.boolean(),
         ),

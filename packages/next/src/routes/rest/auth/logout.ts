@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
-import { generateExpiredPayloadCookie } from 'payload/auth'
-import { logoutOperation } from 'payload/operations'
+import { generateExpiredPayloadCookie, logoutOperation } from 'payload'
 
 import type { CollectionRouteHandler } from '../types.js'
 

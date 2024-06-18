@@ -1,9 +1,9 @@
-import type { Payload } from 'payload'
 import type {
   CollectionAfterChangeHook,
   CollectionConfig,
+  Payload,
   PayloadRequestWithData,
-} from 'payload/types'
+} from 'payload'
 
 export type DocToSync = {
   [key: string]: any

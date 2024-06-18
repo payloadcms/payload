@@ -1,11 +1,9 @@
 'use client'
 
-import type { EditViewProps } from 'payload/types'
+import type { EditViewProps } from 'payload'
 
-import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
-import { useAllFormFields } from '@payloadcms/ui/forms/Form'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { ShimmerEffect, useAllFormFields, useDocumentEvents } from '@payloadcms/ui/client'
+import { reduceFieldsToValues } from '@payloadcms/ui/shared'
 import React, { useEffect } from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'
@@ -32,10 +30,11 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
   const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
 
   const prevWindowType =
-    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>()
+    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
   const [fields] = useAllFormFields()
 
+  // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page
   // Or it could be a separate popup window
   // We need to transmit data to both accordingly
@@ -82,6 +81,25 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     fieldSchemaJSON,
     mostRecentUpdate,
   ])
+
+  // To support SSR, we transmit a `window.postMessage` event without a payload
+  // This is because the event will ultimately trigger a server-side roundtrip
+  // i.e., save, save draft, autosave, etc. will fire `router.refresh()`
+  useEffect(() => {
+    const message = {
+      type: 'payload-document-event',
+    }
+
+    // Post message to external popup window
+    if (previewWindowType === 'popup' && popupRef.current) {
+      popupRef.current.postMessage(message, url)
+    }
+
+    // Post message to embedded iframe
+    if (previewWindowType === 'iframe' && iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage(message, url)
+    }
+  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url])
 
   if (previewWindowType === 'iframe') {
     return (

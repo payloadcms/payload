@@ -1,5 +1,4 @@
-import type { Payload, RequestContext } from '../../../index.js'
-import type { GeneratedTypes } from '../../../index.js'
+import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequestWithData } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'

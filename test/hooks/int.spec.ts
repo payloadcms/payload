@@ -1,12 +1,13 @@
 import type { Payload } from 'payload'
 
-import { AuthenticationError } from 'payload/errors'
+import { AuthenticationError } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { NestedAfterReadHook } from './payload-types.js'
 
 import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
@@ -35,22 +36,23 @@ describe('Hooks', () => {
       await payload.db.destroy()
     }
   })
+  if (isMongoose(payload)) {
+    describe('transform actions', () => {
+      it('should create and not throw an error', async () => {
+        // the collection has hooks that will cause an error if transform actions is not handled properly
+        const doc = await payload.create({
+          collection: transformSlug,
+          data: {
+            localizedTransform: [2, 8],
+            transform: [2, 8],
+          },
+        })
 
-  describe('transform actions', () => {
-    it('should create and not throw an error', async () => {
-      // the collection has hooks that will cause an error if transform actions is not handled properly
-      const doc = await payload.create({
-        collection: transformSlug,
-        data: {
-          localizedTransform: [2, 8],
-          transform: [2, 8],
-        },
+        expect(doc.transform).toBeDefined()
+        expect(doc.localizedTransform).toBeDefined()
       })
-
-      expect(doc.transform).toBeDefined()
-      expect(doc.localizedTransform).toBeDefined()
     })
-  })
+  }
 
   describe('hook execution', () => {
     let doc

@@ -7,6 +7,16 @@
  */
 
 export interface Config {
+  collections: {
+    users: User
+    'api-keys': ApiKey
+    'public-users': PublicUser
+    relationsCollection: RelationsCollection
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: null
   user:
     | (User & {
         collection: 'users'
@@ -17,15 +27,6 @@ export interface Config {
     | (PublicUser & {
         collection: 'public-users'
       })
-  collections: {
-    users: User
-    'api-keys': ApiKey
-    'public-users': PublicUser
-    relationsCollection: RelationsCollection
-    'payload-preferences': PayloadPreference
-    'payload-migrations': PayloadMigration
-  }
-  globals: {}
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -43,10 +44,10 @@ export interface User {
     saveToJWTString?: string | null
     saveToJWTFalse?: string | null
   }
-  saveToJWTTab: {
+  saveToJWTTab?: {
     test?: string | null
   }
-  tabSaveToJWTString: {
+  tabSaveToJWTString?: {
     includedByDefault?: string | null
   }
   tabLiftedSaveToJWT?: string | null
@@ -151,4 +152,9 @@ export interface PayloadMigration {
   batch?: number | null
   updatedAt: string
   createdAt: string
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }

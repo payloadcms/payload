@@ -12,7 +12,7 @@ import type {
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
-import React from 'react'
+import React, { type JSX } from 'react'
 
 export type BlockFields = {
   /** Block form data */

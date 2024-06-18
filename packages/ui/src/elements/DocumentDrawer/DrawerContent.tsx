@@ -1,14 +1,14 @@
 'use client'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
 import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -27,8 +27,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   drawerSlug,
   onSave: onSaveFromProps,
 }) => {
-  const { useModal } = facelessUIImport
-
   const config = useConfig()
 
   const {
@@ -50,7 +48,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
   const isEditing = Boolean(docID)
   const apiURL = docID
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}?locale=${locale.code}`
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
     : null
   const action = `${serverURL}${apiRoute}/${collectionSlug}${
     isEditing ? `/${docID}` : ''
@@ -100,7 +98,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               onClick={() => toggleModal(drawerSlug)}
               type="button"
             >
-              <X />
+              <XIcon />
             </button>
           </div>
           <DocumentTitle />
@@ -111,12 +109,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      // Do NOT pass in the docPermissions we have here. This is because the permissions we have here do not have their where: { } returns resolved.
-      // If we set it to null though, the DocumentInfoProvider will fully-fetch the permissions from the server, and the where: { } returns will be resolved.
-      docPermissions={null}
-      // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
-      hasSavePermission={null}
-      // isLoading,
       id={docID}
       isEditing={isEditing}
       onLoadError={onLoadError}

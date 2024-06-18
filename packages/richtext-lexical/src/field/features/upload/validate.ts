@@ -1,5 +1,5 @@
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import { isValidID } from 'payload/utilities'
+import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../types.js'
 import type { UploadFeatureProps } from './feature.server.js'
@@ -38,7 +38,7 @@ export const uploadValidation = (
 
     const collection = props?.collections[node.relationTo]
 
-    if (!collection.fields?.length) {
+    if (!collection?.fields?.length) {
       return true
     }
 
@@ -60,7 +60,7 @@ export const uploadValidation = (
     }
 
     if (errorPaths.length) {
-      return 'Upload fields validation failed: ' + errorPaths.join(', ')
+      return 'The following fields are invalid: ' + errorPaths.join(', ')
     }
 
     return true

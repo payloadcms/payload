@@ -1,6 +1,6 @@
 import type { AcceptedLanguages, LanguagePreference } from '../types.js'
 
-export const rtlLanguages = ['ar', 'fa'] as const
+export const rtlLanguages = ['ar', 'fa', 'he'] as const
 
 export const acceptedLanguages = [
   'ar',
@@ -12,6 +12,7 @@ export const acceptedLanguages = [
   'es',
   'fa',
   'fr',
+  'he',
   'hr',
   'hu',
   'it',
@@ -24,7 +25,7 @@ export const acceptedLanguages = [
   'pt',
   'ro',
   'rs',
-  'rsLatin',
+  'rs-latin',
   'ru',
   'sk',
   'sv',
@@ -68,7 +69,6 @@ export const acceptedLanguages = [
    * 'gl',
    * 'gu',
    * 'ha-Latn',
-   * 'he',
    * 'hi',
    * 'hr',
    * 'hy',

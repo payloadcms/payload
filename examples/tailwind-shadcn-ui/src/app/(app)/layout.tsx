@@ -1,6 +1,8 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+
 import { cn } from '@/lib/utils'
 import { Inter as FontSans } from 'next/font/google'
+import React from 'react'
 
 type LayoutProps = {
   children: ReactNode
@@ -15,7 +17,7 @@ const fontSans = FontSans({
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <html>
+    <html lang="en">
       <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
         {children}
       </body>

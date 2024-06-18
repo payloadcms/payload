@@ -8,6 +8,7 @@
 
 export interface Config {
   collections: {
+    uploads: Upload
     posts: Post
     users: User
     'hidden-collection': HiddenCollection
@@ -19,6 +20,9 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOne
     'group-two-collection-twos': GroupTwoCollectionTwo
     geo: Geo
+    customIdTab: CustomIdTab
+    customIdRow: CustomIdRow
+    'disable-duplicate': DisableDuplicate
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
@@ -31,7 +35,34 @@ export interface Config {
     'group-globals-one': GroupGlobalsOne
     'group-globals-two': GroupGlobalsTwo
   }
+  locale: 'es' | 'en'
+  user: User & {
+    collection: 'users'
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
 export interface Post {
   id: string
   title?: string | null
@@ -46,11 +77,19 @@ export interface Post {
     title?: string | null
   }
   relationship?: (string | null) | Post
+  customCell?: string | null
   sidebarField?: string | null
+  descriptionAsString?: string | null
+  descriptionAsFunction?: string | null
+  descriptionAsComponent?: string | null
   updatedAt: string
   createdAt: string
   _status?: ('draft' | 'published') | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   textField?: string | null
@@ -64,55 +103,91 @@ export interface User {
   hash?: string | null
   loginAttempts?: number | null
   lockUntil?: string | null
-  password: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-collection".
+ */
 export interface HiddenCollection {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-no-api-view".
+ */
 export interface CollectionNoApiView {
   id: string
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views-one".
+ */
 export interface CustomViewsOne {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views-two".
+ */
 export interface CustomViewsTwo {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-one-collection-ones".
+ */
 export interface GroupOneCollectionOne {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-one-collection-twos".
+ */
 export interface GroupOneCollectionTwo {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-two-collection-ones".
+ */
 export interface GroupTwoCollectionOne {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-two-collection-twos".
+ */
 export interface GroupTwoCollectionTwo {
   id: string
   title?: string | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "geo".
+ */
 export interface Geo {
   id: string
   /**
@@ -123,6 +198,44 @@ export interface Geo {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customIdTab".
+ */
+export interface CustomIdTab {
+  id: string | null
+  title?: string | null
+  description?: string | null
+  number?: number | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customIdRow".
+ */
+export interface CustomIdRow {
+  id: string | null
+  title?: string | null
+  description?: string | null
+  number?: number | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-duplicate".
+ */
+export interface DisableDuplicate {
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -142,6 +255,10 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null
@@ -149,17 +266,29 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-global".
+ */
 export interface HiddenGlobal {
   id: string
   title?: string | null
   updatedAt?: string | null
   createdAt?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-no-api-view".
+ */
 export interface GlobalNoApiView {
   id: string
   updatedAt?: string | null
   createdAt?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global".
+ */
 export interface Global {
   id: string
   title?: string | null
@@ -168,27 +297,48 @@ export interface Global {
   updatedAt?: string | null
   createdAt?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-views-one".
+ */
 export interface CustomGlobalViewsOne {
   id: string
   title?: string | null
   updatedAt?: string | null
   createdAt?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-views-two".
+ */
 export interface CustomGlobalViewsTwo {
   id: string
   title?: string | null
   updatedAt?: string | null
   createdAt?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-globals-one".
+ */
 export interface GroupGlobalsOne {
   id: string
   title?: string | null
   updatedAt?: string | null
   createdAt?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-globals-two".
+ */
 export interface GroupGlobalsTwo {
   id: string
   title?: string | null
   updatedAt?: string | null
   createdAt?: string | null
+}
+
+declare module 'payload' {
+  // @ts-ignore
+  export interface GeneratedTypes extends Config {}
 }
