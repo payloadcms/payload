@@ -41,9 +41,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/exports/index.ts",
-      "require": "./src/exports/index.ts",
-      "types": "./src/exports/index.ts"
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
     },
     "./shared": {
       "import": "./src/exports/shared.ts",
@@ -61,8 +61,8 @@
       "types": "./src/exports/i18n/*.ts"
     }
   },
-  "main": "./src/exports/index.ts",
-  "types": "./src/exports/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "bin": {
     "payload": "bin.js"
   },
@@ -155,9 +155,9 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/exports/index.js",
-        "require": "./dist/exports/index.js",
-        "types": "./dist/exports/index.d.ts"
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
       },
       "./node": {
         "import": "./dist/exports/node.js",
@@ -175,8 +175,8 @@
         "types": "./dist/exports/i18n/*.d.ts"
       }
     },
-    "main": "./dist/exports/index.js",
+    "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
-    "types": "./dist/exports/index.d.ts"
+    "types": "./dist/index.d.ts"
   }
 }
