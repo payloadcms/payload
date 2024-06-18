@@ -18,15 +18,6 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
       return
     }
 
-    const queries = Object.values(schema)
-      .map((table: any) => {
-        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
-      })
-      .join('')
-
-    await db.execute({
-      drizzle: db.drizzle,
-      raw: queries,
-    })
+    await db.dropDatabase({ adapter: db })
   }
 }
