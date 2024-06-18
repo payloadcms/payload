@@ -184,6 +184,7 @@ const Form: React.FC<Props> = (props) => {
               config,
               data,
               operation,
+              previousValue: field.previousValue,
               siblingData: contextRef.current.getSiblingData(path),
               t,
               user,
