@@ -21,8 +21,7 @@ import type {
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequestWithData} from 'payload'
 import type { Pool, PoolConfig, QueryResult } from 'pg'
 
 export type Args = {

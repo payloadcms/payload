@@ -2,12 +2,11 @@
 import type { SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
-import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload/types'
+import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
-import { APIError } from 'payload/errors'
-import { fieldAffectsData, tabHasName } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { APIError, flattenTopLevelFields } from 'payload'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'

@@ -1,5 +1,5 @@
 'use client'
-import { Chevron } from '@payloadcms/ui/icons/Chevron'
+import { ChevronIcon } from '@payloadcms/ui/client'
 import * as React from 'react'
 
 import './index.scss'
@@ -62,7 +62,7 @@ export const RenderJSON = ({
         type="button"
       >
         {isEmpty ? null : (
-          <Chevron
+          <ChevronIcon
             className={`${baseClass}__toggle-row-icon ${baseClass}__toggle-row-icon--${
               isOpen ? 'open' : 'closed'
             }`}

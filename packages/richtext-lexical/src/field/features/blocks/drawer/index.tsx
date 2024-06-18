@@ -1,12 +1,14 @@
 'use client'
 import type { LexicalCommand, LexicalEditor } from 'lexical'
 
-import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { BlocksDrawer } from '@payloadcms/ui/fields/Blocks/BlocksDrawer'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  BlocksDrawer,
+  formatDrawerSlug,
+  useEditDepth,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui/client'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 

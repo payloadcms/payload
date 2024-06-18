@@ -8,775 +8,774 @@
 
 export interface Config {
   collections: {
-    users: User;
-    pages: Page;
-    posts: Post;
-    ssr: Ssr;
-    'ssr-autosave': SsrAutosave;
-    tenants: Tenant;
-    categories: Category;
-    media: Media;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
+    users: User
+    pages: Page
+    posts: Post
+    ssr: Ssr
+    'ssr-autosave': SsrAutosave
+    tenants: Tenant
+    categories: Category
+    media: Media
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
   globals: {
-    header: Header;
-    footer: Footer;
-  };
-  locale: null;
+    header: Header
+    footer: Footer
+  }
+  locale: null
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
-  slug: string;
-  tenant?: (string | null) | Tenant;
-  title: string;
+  id: string
+  slug: string
+  tenant?: (string | null) | Tenant
+  title: string
   hero: {
-    type: 'none' | 'highImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'lowImpact'
     richText?:
       | {
-          [k: string]: unknown;
+          [k: string]: unknown
         }[]
-      | null;
-    media?: string | Media | null;
-  };
+      | null
+    media?: string | Media | null
+  }
   layout?:
     | (
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             richText?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
+              | null
             links?:
               | {
                   link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'cta'
           }
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             columns?:
               | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null
                   richText?:
                     | {
-                        [k: string]: unknown;
+                        [k: string]: unknown
                       }[]
-                    | null;
-                  enableLink?: boolean | null;
+                    | null
+                  enableLink?: boolean | null
                   link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('default' | 'primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'content'
           }
         | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
+            invertBackground?: boolean | null
+            position?: ('default' | 'fullscreen') | null
+            media: string | Media
+            id?: string | null
+            blockName?: string | null
+            blockType: 'mediaBlock'
           }
         | {
             introContent?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
+              | null
+            populateBy?: ('collection' | 'selection') | null
+            relationTo?: 'posts' | null
+            categories?: (string | Category)[] | null
+            limit?: number | null
             selectedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
+              | null
             populatedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
+              | null
+            populatedDocsTotal?: number | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'archive'
           }
       )[]
-    | null;
+    | null
   richTextSlate?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }[]
-    | null;
+    | null
   richTextLexical?: {
     root: {
-      type: string;
+      type: string
       children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  relationshipAsUpload?: string | Media | null;
-  relationshipMonoHasOne?: (string | null) | Post;
-  relationshipMonoHasMany?: (string | Post)[] | null;
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  relationshipAsUpload?: string | Media | null
+  relationshipMonoHasOne?: (string | null) | Post
+  relationshipMonoHasMany?: (string | Post)[] | null
   relationshipPolyHasOne?: {
-    relationTo: 'posts';
-    value: string | Post;
-  } | null;
+    relationTo: 'posts'
+    value: string | Post
+  } | null
   relationshipPolyHasMany?:
     | {
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'posts'
+        value: string | Post
       }[]
-    | null;
+    | null
   arrayOfRelationships?:
     | {
-        uploadInArray?: string | Media | null;
+        uploadInArray?: string | Media | null
         richTextInArray?: {
           root: {
-            type: string;
+            type: string
             children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        relationshipInArrayMonoHasOne?: (string | null) | Post;
-        relationshipInArrayMonoHasMany?: (string | Post)[] | null;
+              type: string
+              version: number
+              [k: string]: unknown
+            }[]
+            direction: ('ltr' | 'rtl') | null
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+            indent: number
+            version: number
+          }
+          [k: string]: unknown
+        } | null
+        relationshipInArrayMonoHasOne?: (string | null) | Post
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null
         relationshipInArrayPolyHasOne?: {
-          relationTo: 'posts';
-          value: string | Post;
-        } | null;
+          relationTo: 'posts'
+          value: string | Post
+        } | null
         relationshipInArrayPolyHasMany?:
           | {
-              relationTo: 'posts';
-              value: string | Post;
+              relationTo: 'posts'
+              value: string | Post
             }[]
-          | null;
-        id?: string | null;
+          | null
+        id?: string | null
       }[]
-    | null;
+    | null
   tab?: {
-    relationshipInTab?: (string | null) | Post;
-  };
+    relationshipInTab?: (string | null) | Post
+  }
   meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | Media | null;
-  };
-  updatedAt: string;
-  createdAt: string;
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tenants".
  */
 export interface Tenant {
-  id: string;
-  title: string;
-  clientURL: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  clientURL: string
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  id: string
+  alt: string
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
-  slug: string;
-  tenant?: (string | null) | Tenant;
-  title: string;
+  id: string
+  slug: string
+  tenant?: (string | null) | Tenant
+  title: string
   hero: {
-    type: 'none' | 'highImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'lowImpact'
     richText?:
       | {
-          [k: string]: unknown;
+          [k: string]: unknown
         }[]
-      | null;
-    media?: string | Media | null;
-  };
+      | null
+    media?: string | Media | null
+  }
   layout?:
     | (
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             richText?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
+              | null
             links?:
               | {
                   link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'cta'
           }
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             columns?:
               | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null
                   richText?:
                     | {
-                        [k: string]: unknown;
+                        [k: string]: unknown
                       }[]
-                    | null;
-                  enableLink?: boolean | null;
+                    | null
+                  enableLink?: boolean | null
                   link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('default' | 'primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'content'
           }
         | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
+            invertBackground?: boolean | null
+            position?: ('default' | 'fullscreen') | null
+            media: string | Media
+            id?: string | null
+            blockName?: string | null
+            blockType: 'mediaBlock'
           }
         | {
             introContent?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
+              | null
+            populateBy?: ('collection' | 'selection') | null
+            relationTo?: 'posts' | null
+            categories?: (string | Category)[] | null
+            limit?: number | null
             selectedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
+              | null
             populatedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
+              | null
+            populatedDocsTotal?: number | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'archive'
           }
       )[]
-    | null;
-  relatedPosts?: (string | Post)[] | null;
+    | null
+  relatedPosts?: (string | Post)[] | null
   meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | Media | null;
-  };
-  updatedAt: string;
-  createdAt: string;
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr".
  */
 export interface Ssr {
-  id: string;
-  slug: string;
-  tenant?: (string | null) | Tenant;
-  title: string;
+  id: string
+  slug: string
+  tenant?: (string | null) | Tenant
+  title: string
   hero: {
-    type: 'none' | 'highImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'lowImpact'
     richText?:
       | {
-          [k: string]: unknown;
+          [k: string]: unknown
         }[]
-      | null;
-    media?: string | Media | null;
-  };
+      | null
+    media?: string | Media | null
+  }
   layout?:
     | (
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             richText?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
+              | null
             links?:
               | {
                   link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'cta'
           }
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             columns?:
               | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null
                   richText?:
                     | {
-                        [k: string]: unknown;
+                        [k: string]: unknown
                       }[]
-                    | null;
-                  enableLink?: boolean | null;
+                    | null
+                  enableLink?: boolean | null
                   link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('default' | 'primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'content'
           }
         | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
+            invertBackground?: boolean | null
+            position?: ('default' | 'fullscreen') | null
+            media: string | Media
+            id?: string | null
+            blockName?: string | null
+            blockType: 'mediaBlock'
           }
         | {
             introContent?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
+              | null
+            populateBy?: ('collection' | 'selection') | null
+            relationTo?: 'posts' | null
+            categories?: (string | Category)[] | null
+            limit?: number | null
             selectedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
+              | null
             populatedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
+              | null
+            populatedDocsTotal?: number | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'archive'
           }
       )[]
-    | null;
+    | null
   meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | Media | null;
-  };
-  updatedAt: string;
-  createdAt: string;
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr-autosave".
  */
 export interface SsrAutosave {
-  id: string;
-  slug: string;
-  tenant?: (string | null) | Tenant;
-  title: string;
+  id: string
+  slug: string
+  tenant?: (string | null) | Tenant
+  title: string
   hero: {
-    type: 'none' | 'highImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'lowImpact'
     richText?:
       | {
-          [k: string]: unknown;
+          [k: string]: unknown
         }[]
-      | null;
-    media?: string | Media | null;
-  };
+      | null
+    media?: string | Media | null
+  }
   layout?:
     | (
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             richText?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
+              | null
             links?:
               | {
                   link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'cta'
           }
         | {
-            invertBackground?: boolean | null;
+            invertBackground?: boolean | null
             columns?:
               | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null
                   richText?:
                     | {
-                        [k: string]: unknown;
+                        [k: string]: unknown
                       }[]
-                    | null;
-                  enableLink?: boolean | null;
+                    | null
+                  enableLink?: boolean | null
                   link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
                     reference?:
                       | ({
-                          relationTo: 'posts';
-                          value: string | Post;
+                          relationTo: 'posts'
+                          value: string | Post
                         } | null)
                       | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('default' | 'primary' | 'secondary') | null
+                  }
+                  id?: string | null
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'content'
           }
         | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
+            invertBackground?: boolean | null
+            position?: ('default' | 'fullscreen') | null
+            media: string | Media
+            id?: string | null
+            blockName?: string | null
+            blockType: 'mediaBlock'
           }
         | {
             introContent?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
+              | null
+            populateBy?: ('collection' | 'selection') | null
+            relationTo?: 'posts' | null
+            categories?: (string | Category)[] | null
+            limit?: number | null
             selectedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
+              | null
             populatedDocs?:
               | {
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'posts'
+                  value: string | Post
                 }[]
-              | null;
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
+              | null
+            populatedDocsTotal?: number | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'archive'
           }
       )[]
-    | null;
+    | null
   meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | Media | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
+  id: string
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
+          type?: ('reference' | 'custom') | null
+          newTab?: boolean | null
           reference?:
             | ({
-                relationTo: 'posts';
-                value: string | Post;
+                relationTo: 'posts'
+                value: string | Post
               } | null)
             | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null);
-          url?: string | null;
-          label: string;
-          appearance?: ('default' | 'primary' | 'secondary') | null;
-        };
-        id?: string | null;
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
+          url?: string | null
+          label: string
+          appearance?: ('default' | 'primary' | 'secondary') | null
+        }
+        id?: string | null
       }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+    | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: string;
+  id: string
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
+          type?: ('reference' | 'custom') | null
+          newTab?: boolean | null
           reference?:
             | ({
-                relationTo: 'posts';
-                value: string | Post;
+                relationTo: 'posts'
+                value: string | Post
               } | null)
             | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null);
-          url?: string | null;
-          label: string;
-          appearance?: ('default' | 'primary' | 'secondary') | null;
-        };
-        id?: string | null;
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
+          url?: string | null
+          label: string
+          appearance?: ('default' | 'primary' | 'secondary') | null
+        }
+        id?: string | null
       }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+    | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

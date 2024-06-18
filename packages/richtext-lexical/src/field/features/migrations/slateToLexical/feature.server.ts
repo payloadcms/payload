@@ -3,8 +3,9 @@ import type React from 'react'
 import type { FeatureProviderProviderServer } from '../../types.js'
 import type { SlateNodeConverterProvider } from './converter/types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { SlateToLexicalFeatureClientComponent } from '../../../../exports/client/index.js'
 import { defaultSlateConverters } from './converter/defaultConverters.js'
-import { SlateToLexicalFeatureClientComponent } from './feature.client.js'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 export type SlateToLexicalFeatureProps = {

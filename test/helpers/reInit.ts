@@ -1,4 +1,4 @@
-import type { Endpoint, PayloadHandler } from 'payload/config'
+import type { Endpoint, PayloadHandler } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'

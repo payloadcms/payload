@@ -1,13 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
-import {
-  commitTransaction,
-  initTransaction,
-  killTransaction,
-  readMigrationFiles,
-} from 'payload/database'
+import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'

@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'

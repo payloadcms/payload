@@ -9,8 +9,8 @@ import 'react-datepicker/dist/react-datepicker.css'
 
 import type { Props } from './types.js'
 
-import { Calendar as CalendarIcon } from '../../icons/Calendar/index.js'
-import { X as XIcon } from '../../icons/X/index.js'
+import { CalendarIcon } from '../../icons/Calendar/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormattedLocale } from './getFormattedLocale.js'
 import './index.scss'

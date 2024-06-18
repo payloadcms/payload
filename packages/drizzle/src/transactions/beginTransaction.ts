@@ -1,4 +1,4 @@
-import type { BeginTransaction } from 'payload/database'
+import type { BeginTransaction } from 'payload'
 
 import { v4 as uuid } from 'uuid'
 

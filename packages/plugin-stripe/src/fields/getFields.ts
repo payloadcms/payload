@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field } from 'payload'
 
 import type { SanitizedStripePluginConfig } from '../types.js'
 

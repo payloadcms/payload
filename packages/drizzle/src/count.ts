@@ -1,5 +1,5 @@
-import type { Count } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Count } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

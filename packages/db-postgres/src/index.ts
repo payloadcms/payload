@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { DatabaseAdapterObj } from 'payload/database'
+import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
@@ -33,7 +32,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { createDatabaseAdapter } from 'payload/database'
+import { createDatabaseAdapter } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
 

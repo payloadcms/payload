@@ -1,4 +1,4 @@
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 

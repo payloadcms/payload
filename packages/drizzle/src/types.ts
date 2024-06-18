@@ -13,7 +13,7 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
 import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
 import type { Result } from 'drizzle-orm/sqlite-core/session'
-import type { BaseDatabaseAdapter, MigrationData, MigrationTemplateArgs } from 'payload/database'
+import type { BaseDatabaseAdapter, MigrationData, MigrationTemplateArgs } from 'payload'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 
@@ -22,7 +22,7 @@ export { BuildQueryJoinAliases }
 import type { ResultSet } from '@libsql/client'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 import type { QueryResult } from 'pg'
 
 import type { ChainedMethods } from './find/chainMethods.js'

@@ -37,7 +37,7 @@ export type Props = {
   }) => void
 }
 
-import type { Operator } from 'payload/types'
+import type { Operator } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 

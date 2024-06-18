@@ -1,11 +1,11 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig } from 'payload/types'
+import type { FormState, SanitizedCollectionConfig } from 'payload'
 
-import { isImage } from 'payload/utilities'
+import { isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -73,7 +73,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     path: 'file',
     validate,
   })
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [_crop, setCrop] = useState({ x: 0, y: 0 })
 
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value

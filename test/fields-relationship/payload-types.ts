@@ -8,288 +8,287 @@
 
 export interface Config {
   collections: {
-    'fields-relationship': FieldsRelationship;
-    'relation-filter-false': RelationFilterFalse;
-    'relation-filter-true': RelationFilterTrue;
-    'relation-one': RelationOne;
-    'relation-two': RelationTwo;
-    'relation-restricted': RelationRestricted;
-    'relation-with-title': RelationWithTitle;
-    'relation-updated-externally': RelationUpdatedExternally;
-    'collection-1': Collection1;
-    'collection-2': Collection2;
-    videos: Video;
-    podcasts: Podcast;
-    'mixed-media': MixedMedia;
-    users: User;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
-  locale: null;
+    'fields-relationship': FieldsRelationship
+    'relation-filter-false': RelationFilterFalse
+    'relation-filter-true': RelationFilterTrue
+    'relation-one': RelationOne
+    'relation-two': RelationTwo
+    'relation-restricted': RelationRestricted
+    'relation-with-title': RelationWithTitle
+    'relation-updated-externally': RelationUpdatedExternally
+    'collection-1': Collection1
+    'collection-2': Collection2
+    videos: Video
+    podcasts: Podcast
+    'mixed-media': MixedMedia
+    users: User
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: null
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fields-relationship".
  */
 export interface FieldsRelationship {
-  id: string;
-  relationship?: (string | null) | RelationOne;
-  relationshipHasMany?: (string | RelationOne)[] | null;
+  id: string
+  relationship?: (string | null) | RelationOne
+  relationshipHasMany?: (string | RelationOne)[] | null
   relationshipMultiple?:
     | ({
-        relationTo: 'relation-one';
-        value: string | RelationOne;
+        relationTo: 'relation-one'
+        value: string | RelationOne
       } | null)
     | ({
-        relationTo: 'relation-two';
-        value: string | RelationTwo;
-      } | null);
+        relationTo: 'relation-two'
+        value: string | RelationTwo
+      } | null)
   relationshipHasManyMultiple?:
     | (
         | {
-            relationTo: 'relation-one';
-            value: string | RelationOne;
+            relationTo: 'relation-one'
+            value: string | RelationOne
           }
         | {
-            relationTo: 'relation-two';
-            value: string | RelationTwo;
+            relationTo: 'relation-two'
+            value: string | RelationTwo
           }
       )[]
-    | null;
-  relationshipRestricted?: (string | null) | RelationRestricted;
-  relationshipWithTitle?: (string | null) | RelationWithTitle;
-  relationshipFiltered?: (string | null) | RelationOne;
-  relationshipFilteredAsync?: (string | null) | RelationOne;
+    | null
+  relationshipRestricted?: (string | null) | RelationRestricted
+  relationshipWithTitle?: (string | null) | RelationWithTitle
+  relationshipFiltered?: (string | null) | RelationOne
+  relationshipFilteredAsync?: (string | null) | RelationOne
   relationshipManyFiltered?:
     | (
         | {
-            relationTo: 'relation-with-title';
-            value: string | RelationWithTitle;
+            relationTo: 'relation-with-title'
+            value: string | RelationWithTitle
           }
         | {
-            relationTo: 'relation-filter-false';
-            value: string | RelationFilterFalse;
+            relationTo: 'relation-filter-false'
+            value: string | RelationFilterFalse
           }
         | {
-            relationTo: 'relation-filter-true';
-            value: string | RelationFilterTrue;
+            relationTo: 'relation-filter-true'
+            value: string | RelationFilterTrue
           }
         | {
-            relationTo: 'relation-one';
-            value: string | RelationOne;
+            relationTo: 'relation-one'
+            value: string | RelationOne
           }
       )[]
-    | null;
-  filter?: string | null;
-  relationshipReadOnly?: (string | null) | RelationOne;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  filter?: string | null
+  relationshipReadOnly?: (string | null) | RelationOne
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-one".
  */
 export interface RelationOne {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-two".
  */
 export interface RelationTwo {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-restricted".
  */
 export interface RelationRestricted {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-with-title".
  */
 export interface RelationWithTitle {
-  id: string;
-  name?: string | null;
+  id: string
+  name?: string | null
   meta?: {
-    title?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
+    title?: string | null
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-filter-false".
  */
 export interface RelationFilterFalse {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-filter-true".
  */
 export interface RelationFilterTrue {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-updated-externally".
  */
 export interface RelationUpdatedExternally {
-  id: string;
-  relationPrePopulate?: (string | null) | Collection1;
-  relationHasMany?: (string | Collection1)[] | null;
+  id: string
+  relationPrePopulate?: (string | null) | Collection1
+  relationHasMany?: (string | Collection1)[] | null
   relationToManyHasMany?:
     | (
         | {
-            relationTo: 'collection-1';
-            value: string | Collection1;
+            relationTo: 'collection-1'
+            value: string | Collection1
           }
         | {
-            relationTo: 'collection-2';
-            value: string | Collection2;
+            relationTo: 'collection-2'
+            value: string | Collection2
           }
       )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-1".
  */
 export interface Collection1 {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-2".
  */
 export interface Collection2 {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "videos".
  */
 export interface Video {
-  id: number;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  title?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcasts".
  */
 export interface Podcast {
-  id: number;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  title?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "mixed-media".
  */
 export interface MixedMedia {
-  id: string;
+  id: string
   relatedMedia?:
     | (
         | {
-            relationTo: 'videos';
-            value: number | Video;
+            relationTo: 'videos'
+            value: number | Video
           }
         | {
-            relationTo: 'podcasts';
-            value: number | Podcast;
+            relationTo: 'podcasts'
+            value: number | Podcast
           }
       )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

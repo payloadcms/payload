@@ -90,7 +90,7 @@ describe('array-update', () => {
           },
           {
             id: doc.arrayOfFields?.[1].id,
-            required: doc.arrayOfFields?.[1].required as string,
+            required: doc.arrayOfFields?.[1].required,
             // NOTE - not passing optional field. It should persist
             // because we're passing ID
           },

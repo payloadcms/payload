@@ -1,14 +1,14 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, DateField } from 'payload/types'
+import type { ClientValidate, DateField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -16,10 +16,10 @@ const baseClass = 'date-time-field'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type DateFieldProps = FormFieldBase & {
   date?: DateField['admin']['date']

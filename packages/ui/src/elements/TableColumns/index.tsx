@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, SanitizedCollectionConfig } from 'payload/types'
+import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 

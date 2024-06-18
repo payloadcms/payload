@@ -4,7 +4,7 @@ import type {
   Field as FieldSchema,
   FormState,
   PayloadRequestWithData,
-} from 'payload/types'
+} from 'payload'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'

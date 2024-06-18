@@ -36,7 +36,11 @@
   }
 }
 
-.rich-text-lexical--show-gutter > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor {
+.rich-text-lexical--show-gutter
+  > .rich-text-lexical__wrap
+  > .editor-container
+  > .editor-scroller
+  > .editor {
   > .draggable-block-target-line {
     left: 3rem;
   }
@@ -63,10 +67,11 @@
   }
 }
 
-
 .rich-text-lexical {
   .ContentEditable__root > * {
     will-change: margin-top, margin-bottom;
-    transition: margin-top 0.08s, margin-bottom 0.08s;
+    transition:
+      margin-top 0.08s,
+      margin-bottom 0.08s;
   }
 }

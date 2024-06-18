@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload'
 
 export type Context = {
   headers: {

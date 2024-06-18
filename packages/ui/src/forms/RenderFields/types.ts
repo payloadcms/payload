@@ -1,4 +1,4 @@
-import type { FieldPermissions, Operation } from 'payload/types'
+import type { FieldPermissions, Operation } from 'payload'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 

@@ -10,7 +10,6 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
@@ -18,7 +17,7 @@ import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload'
 
 import { toast } from 'sonner'
 
@@ -122,7 +121,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
         {t('version:unpublish')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <MinimalTemplate className={`${baseClass}__template`}>
+        <div className={`${baseClass}__template`}>
           <h1>{t('version:confirmUnpublish')}</h1>
           <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
           <Button
@@ -136,7 +135,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
           <Button id="confirm-unpublish" onClick={submitted ? undefined : handleUnpublish}>
             {submitted ? t('version:unpublishing') : t('general:confirm')}
           </Button>
-        </MinimalTemplate>
+        </div>
       </Modal>
     </React.Fragment>
   )

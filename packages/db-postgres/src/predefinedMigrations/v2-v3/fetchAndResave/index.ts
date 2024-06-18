@@ -1,6 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Payload } from 'payload'
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, Payload, PayloadRequestWithData } from 'payload'
 
 import { upsertRow } from '@payloadcms/drizzle'
 

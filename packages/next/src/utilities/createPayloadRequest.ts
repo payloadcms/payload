@@ -1,8 +1,7 @@
-import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { executeAuthStrategies , parseCookies } from 'payload/auth'
-import { getDataLoader } from 'payload/utilities'
+import { executeAuthStrategies, getDataLoader, parseCookies } from 'payload'
 import qs from 'qs'
 import { URL } from 'url'
 

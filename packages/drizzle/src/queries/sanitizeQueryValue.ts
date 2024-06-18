@@ -1,6 +1,5 @@
-import { APIError } from 'payload/errors'
-import { type Field, type TabAsField, fieldAffectsData } from 'payload/types'
-import { createArrayFromCommaDelineated } from 'payload/utilities'
+import { APIError, type Field, type TabAsField, createArrayFromCommaDelineated } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../types.js'
 
@@ -89,7 +88,7 @@ export const sanitizeQueryValue = ({
         const collection = adapter.payload.collections[field.relationTo]
         const mixedType: 'number' | 'serial' | 'text' | 'uuid' =
           collection.customIDType || adapter.idType
-        const typeMap = {
+        const typeMap: Record<string, 'number' | 'text'> = {
           number: 'number',
           serial: 'number',
           text: 'text',

@@ -3,7 +3,6 @@
 $lexical-contenteditable-top-padding: 8px;
 $lexical-contenteditable-bottom-padding: 8px;
 
-
 .ContentEditable__root {
   border: 0;
   font-size: 15px;
@@ -25,7 +24,6 @@ $lexical-contenteditable-bottom-padding: 8px;
   }
 }
 
-
 @media (max-width: 768px) {
   .ContentEditable__root {
     padding-left: 0;
@@ -34,7 +32,11 @@ $lexical-contenteditable-bottom-padding: 8px;
 }
 
 @media (min-width: 769px) {
-  .rich-text-lexical--show-gutter > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor {
+  .rich-text-lexical--show-gutter
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor {
     > .ContentEditable__root {
       padding-left: 3rem;
     }
@@ -43,7 +45,9 @@ $lexical-contenteditable-bottom-padding: 8px;
       position: absolute;
       top: $lexical-contenteditable-top-padding;
       left: 0;
-      height: calc(100% - #{$lexical-contenteditable-top-padding} - #{$lexical-contenteditable-bottom-padding});
+      height: calc(
+        100% - #{$lexical-contenteditable-top-padding} - #{$lexical-contenteditable-bottom-padding}
+      );
       border-left: 1px solid var(--theme-elevation-100);
     }
   }
@@ -52,13 +56,21 @@ $lexical-contenteditable-bottom-padding: 8px;
 html[data-theme='light'] {
   .rich-text-lexical.rich-text-lexical--show-gutter {
     &.error:not(:hover) {
-      > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > .ContentEditable__root::before {
+      > .rich-text-lexical__wrap
+        > .editor-container
+        > .editor-scroller
+        > .editor
+        > .ContentEditable__root::before {
         border-left: 2px solid var(--theme-error-400);
       }
     }
 
     &.error:hover {
-      > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > .ContentEditable__root::before {
+      > .rich-text-lexical__wrap
+        > .editor-container
+        > .editor-scroller
+        > .editor
+        > .ContentEditable__root::before {
         border-left: 2px solid var(--theme-error-500);
       }
     }
@@ -68,7 +80,11 @@ html[data-theme='light'] {
 html[data-theme='dark'] {
   .rich-text-lexical.rich-text-lexical--show-gutter {
     &.error {
-      > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > .ContentEditable__root::before {
+      > .rich-text-lexical__wrap
+        > .editor-container
+        > .editor-scroller
+        > .editor
+        > .ContentEditable__root::before {
         border-left: 2px solid var(--theme-error-500);
       }
     }

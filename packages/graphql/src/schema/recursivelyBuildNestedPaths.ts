@@ -1,6 +1,6 @@
-import type { FieldWithSubFields, TabsField } from 'payload/types'
+import type { FieldWithSubFields, TabsField } from 'payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'
 

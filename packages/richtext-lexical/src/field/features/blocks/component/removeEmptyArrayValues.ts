@@ -1,4 +1,4 @@
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 /**
  * By default, if an array field is empty, it will be included in the form state with a value of 0.

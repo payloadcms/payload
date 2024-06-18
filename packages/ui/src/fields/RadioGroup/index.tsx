@@ -1,15 +1,15 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { Option } from 'payload/types'
+import type { Option } from 'payload'
 
-import { optionIsObject } from 'payload/types'
+import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 import './index.scss'
@@ -18,9 +18,9 @@ const baseClass = 'radio-group'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type RadioFieldProps = FormFieldBase & {
   layout?: 'horizontal' | 'vertical'

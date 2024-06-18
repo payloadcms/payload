@@ -2,7 +2,7 @@ import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
   PayloadRequestWithData,
-} from 'payload/types'
+} from 'payload'
 
 interface Args {
   endpoint: string

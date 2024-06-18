@@ -1,5 +1,4 @@
-import type { User } from 'payload/auth'
-import type { UIField } from 'payload/types'
+import type { UIField, User } from 'payload'
 
 import { useAuth } from '@payloadcms/ui/providers/Auth'
 import React, { useEffect, useState } from 'react'

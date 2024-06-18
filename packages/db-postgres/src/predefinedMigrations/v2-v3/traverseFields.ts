@@ -1,7 +1,7 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Payload } from 'payload'
+import type { Field, Payload } from 'payload'
 
-import { type Field, tabHasName } from 'payload/types'
+import { tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../../types.js'

@@ -1,5 +1,4 @@
-import type { Config } from 'payload/config'
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Config, Field } from 'payload'
 
 import type { RedirectsPluginConfig } from './types.js'
 
