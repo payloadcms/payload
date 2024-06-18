@@ -391,7 +391,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       '@payloadcms/storage-vercel-blob',
       '@payloadcms/storage-uploadthing',
     ])
-    console.log('resolvedDependencies', resolvedDependencies)
 
     // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
     const foundVersions: string[] = []
