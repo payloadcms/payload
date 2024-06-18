@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
-import type { Field, TabAsField } from 'payload/types'
+import type { Field, TabAsField } from 'payload'
 
 import {
   createTableName,
@@ -9,13 +9,18 @@ import {
   validateExistingBlockIsIdentical,
 } from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
-import { foreignKey, index } from 'drizzle-orm/sqlite-core'
-import { integer } from 'drizzle-orm/sqlite-core'
-import { numeric, text } from 'drizzle-orm/sqlite-core'
-import { SQLiteTextBuilder } from 'drizzle-orm/sqlite-core'
-import { SQLiteIntegerBuilder, SQLiteNumericBuilder } from 'drizzle-orm/sqlite-core'
-import { InvalidConfiguration } from 'payload/errors'
-import { fieldAffectsData, optionIsObject } from 'payload/types'
+import {
+  SQLiteIntegerBuilder,
+  SQLiteNumericBuilder,
+  SQLiteTextBuilder,
+  foreignKey,
+  index,
+  integer,
+  numeric,
+  text,
+} from 'drizzle-orm/sqlite-core'
+import { InvalidConfiguration } from 'payload'
+import { fieldAffectsData, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, SQLiteAdapter } from '../types.js'

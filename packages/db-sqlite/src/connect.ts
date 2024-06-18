@@ -1,4 +1,4 @@
-import type { Connect } from 'payload/database'
+import type { Connect } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { type LibSQLDatabase, drizzle } from 'drizzle-orm/libsql'

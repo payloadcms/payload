@@ -8,16 +8,19 @@ import type {
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/sqlite-core'
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 import { createTableName } from '@payloadcms/drizzle'
-import { sql } from 'drizzle-orm'
-import { relations } from 'drizzle-orm'
-import { index, numeric } from 'drizzle-orm/sqlite-core'
-import { foreignKey, unique } from 'drizzle-orm/sqlite-core'
-import { integer } from 'drizzle-orm/sqlite-core'
-import { text } from 'drizzle-orm/sqlite-core'
-import { sqliteTable } from 'drizzle-orm/sqlite-core'
+import { relations, sql } from 'drizzle-orm'
+import {
+  foreignKey,
+  index,
+  integer,
+  numeric,
+  sqliteTable,
+  text,
+  unique,
+} from 'drizzle-orm/sqlite-core'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, SQLiteAdapter } from '../types.js'

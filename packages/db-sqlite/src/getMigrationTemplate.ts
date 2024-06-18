@@ -1,4 +1,4 @@
-import type { MigrationTemplateArgs } from 'payload/database'
+import type { MigrationTemplateArgs } from 'payload'
 
 export const getMigrationTemplate = ({
   downSQL,

@@ -1,8 +1,8 @@
 import type { SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
 
 import { integer, numeric, text } from 'drizzle-orm/sqlite-core'
-import { type Field, fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { type Field, flattenTopLevelFields } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { IDType, SQLiteAdapter } from '../types.js'
 

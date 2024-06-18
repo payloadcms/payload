@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { DatabaseAdapterObj } from 'payload/database'
+import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   count,
@@ -32,7 +31,7 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import { like } from 'drizzle-orm'
-import { createDatabaseAdapter } from 'payload/database'
+import { createDatabaseAdapter } from 'payload'
 
 import type { Args, SQLiteAdapter } from './types.js'
 

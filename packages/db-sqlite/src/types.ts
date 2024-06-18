@@ -11,8 +11,7 @@ import type {
   SQLiteTableWithColumns,
 } from 'drizzle-orm/sqlite-core'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
 import {
   type ColumnDataType,

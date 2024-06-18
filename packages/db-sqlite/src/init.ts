@@ -1,8 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { Init } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Init, SanitizedCollectionConfig } from 'payload'
 
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { SQLiteAdapter } from './types.js'
