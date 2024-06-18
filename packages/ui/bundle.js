@@ -19,6 +19,45 @@ const removeCSSImports = {
   },
 }
 
+// This plugin ensures there is only one "use client" directive at the top of the file
+// and removes any existing directives which are not at the top, for example due to banner inserting
+// itself before the directive.
+const useClientPlugin = {
+  name: 'use-client',
+  setup(build) {
+    // Temporarily disable file writing
+    const originalWrite = build.initialOptions.write
+    build.initialOptions.write = false
+
+    build.onEnd((result) => {
+      if (result.outputFiles && result.outputFiles.length > 0) {
+        const directive = `"use client";`
+        const directiveRegex = /"use client";/g
+
+        result.outputFiles.forEach((file) => {
+          let contents = file.text
+          contents = contents.replace(directiveRegex, '') // Remove existing use client directives
+          contents = directive + '\n' + contents // Prepend our use client directive
+
+          if (originalWrite) {
+            const filePath = path.join(build.initialOptions.outdir, file.path.split('/').pop())
+
+            const dirPath = path.dirname(filePath)
+            if (!fs.existsSync(dirPath)) {
+              fs.mkdirSync(dirPath, { recursive: true })
+            }
+
+            // Write the modified contents to file manually instead of using esbuild's write option
+            fs.writeFileSync(filePath, contents, 'utf8')
+          }
+        })
+      } else {
+        console.error('No output files are available to process in useClientPlugin.')
+      }
+    })
+  },
+}
+
 // Bundle only the .scss files into a single css file
 await esbuild
   .build({
@@ -40,7 +79,9 @@ await esbuild
 
     console.log('styles.css bundled successfully')
   })
-  .catch(() => process.exit(1))
+  .catch((e) => {
+    throw e
+  })
 
 // Bundle `client.ts`
 const resultClient = await esbuild
@@ -53,6 +94,22 @@ const resultClient = await esbuild
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
+    write: true, // required for useClientPlugin
+    banner: {
+      js: `// Workaround for react-datepicker and other cjs dependencies potentially inserting require("react") statements
+import * as requireReact from 'react';
+import * as requireReactDom from 'react-dom';
+
+function require(m) {
+ if (m === 'react') return requireReact;
+ if (m === 'react-dom') return requireReactDom;
+ throw new Error(\`Unknown module \${m}\`);
+}
+// Workaround end
+`, // react-datepicker fails due to require("react") statements making it to the browser, which is not supported.
+      // This is a workaround to get it to work, without having to mark react-dateopicker as external
+      // See https://stackoverflow.com/questions/68423950/when-using-esbuild-with-external-react-i-get-dynamic-require-of-react-is-not-s
+    },
     external: [
       '*.scss',
       '*.css',
@@ -80,6 +137,7 @@ const resultClient = await esbuild
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
       removeCSSImports,
+      useClientPlugin, // required for banner to work
       /*commonjs({
         ignore: ['date-fns', '@floating-ui/react'],
       }),*/
@@ -90,7 +148,9 @@ const resultClient = await esbuild
     console.log('client.ts bundled successfully')
     return res
   })
-  .catch(() => process.exit(1))
+  .catch((e) => {
+    throw e
+  })
 
 const resultShared = await esbuild
   .build({
@@ -134,7 +194,9 @@ const resultShared = await esbuild
     console.log('shared.ts bundled successfully')
     return res
   })
-  .catch(() => process.exit(1))
+  .catch((e) => {
+    throw e
+  })
 
 fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
 fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))
