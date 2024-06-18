@@ -73,7 +73,7 @@ The following options are available:
 | **`serverURL`**            | A string used to define the absolute URL of your app including the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port |
 | **`collections`**          | An array of Collections for Payload to manage. [More details](./collections). |
 | **`globals`**              | An array of Globals for Payload to manage. [More details](./globals). |
-| **`cors`**                 | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
+| **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More](#cors) |
 | **`localization`**         | Opt-in and control how Payload handles the translation of your content into multiple locales. [More details](./localization). |
 | **`graphQL`**              | Manage GraphQL-specific functionality, including custom queries and mutations, query complexity limits, etc. [More details](../graphql/overview#graphql-options). |
 | **`cookiePrefix`**         | A string that will be prefixed to all cookies that Payload sets. |
@@ -179,3 +179,37 @@ When `PAYLOAD_CONFIG_PATH` is set, Payload will use this path to load the config
 Payload collects **completely anonymous** telemetry data about general usage. This data is super important to us and helps us accurately understand how we're growing and what we can do to build the software into everything that it can possibly be. The telemetry that we collect also help us demonstrate our growth in an accurate manner, which helps us as we seek investment to build and scale our team. If we can accurately demonstrate our growth, we can more effectively continue to support Payload as free and open-source software. To opt out of telemetry, you can pass `telemetry: false` within your Payload Config.
 
 For more information about what we track, take a look at our [privacy policy](/privacy).
+
+## Cross-origin resource sharing (CORS)
+
+Cross-origin resource sharing (CORS) can be configured with either a whitelist array of URLS to allow CORS requests from, a wildcard string (`*`) to accept incoming requests from any domain, or a object with the following properties:
+
+| Option    | Description                                                                                                                                                                        |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `origins` | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
+| `headers  | A list of allowed headers that will be appended in `Access-Control-Allow-Headers`. |
+
+Here's an example showing how to allow incoming requests from any domain:
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  // ...
+  cors: '*'
+})
+```
+
+Here's an example showing how to append a new header (`x-custom-header`) in `Access-Control-Allow-Headers`:
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  // ...
+  cors: {
+    origins: ['http://localhost:3000']
+    headers: ['x-custom-header']
+  }
+})
+```

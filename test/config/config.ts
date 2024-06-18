@@ -113,4 +113,8 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  cors: {
+    origins: '*',
+    headers: ['x-custom-header'],
+  },
 })

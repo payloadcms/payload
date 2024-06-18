@@ -1,13 +1,16 @@
 import type { BlockField, Payload } from 'payload'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 
+let restClient: NextRESTClient
 let payload: Payload
 
 describe('Config', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {
@@ -89,6 +92,13 @@ describe('Config', () => {
       expect(field.custom).toEqual({
         description: 'The title of my global',
       })
+    })
+  })
+
+  describe('cors config', () => {
+    it('includes a custom header in Access-Control-Allow-Headers', async () => {
+      const response = await restClient.GET(`/pages`)
+      expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-custom-header')
     })
   })
 })
