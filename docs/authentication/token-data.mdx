@@ -1,0 +1,68 @@
+---
+title: Token Data
+label: Token Data
+order: 70
+desc: Storing data for read on the request object.
+keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+You can specify what data gets encoded to the Cookie/JWT-Token by setting `saveToJWT` property on fields within your auth collection.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  fields: [
+    {
+      // will be stored in the JWT
+      saveToJWT: true,
+      type: 'text',
+      name: 'name',
+    },
+    {
+      // the entire object will be stored in the JWT
+      // tab fields can do the same thing!
+      saveToJWT: true,
+      type: 'group',
+      name: 'group1',
+      fields: [
+        {
+          type: 'text',
+          name: 'includeField',
+        },
+        {
+          // will be omitted from the JWT
+          saveToJWT: false,
+          type: 'text',
+          name: 'omitField',
+        },
+      ]
+    },
+    {
+      type: 'group',
+      name: 'group2',
+      fields: [
+        {
+          // will be stored in the JWT
+          // but stored at the top level
+          saveToJWT: true,
+          type: 'text',
+          name: 'includeField',
+        },
+        {
+          type: 'text',
+          name: 'omitField',
+        },
+      ]
+    },
+  ]
+}
+```
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  <br/>
+  If you wish to use a different key other than the field `name`, you can define `saveToJWT` as a string.
+</Banner>
