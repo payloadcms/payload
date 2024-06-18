@@ -9,7 +9,6 @@
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:types": "payload generate:types",
-    "ii": "pnpm --ignore-workspace install",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
@@ -37,7 +36,7 @@
     "typescript": "^5.4.5"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": "^18.20.2 || >=20.6.0"
   },
   "pnpm": {
     "overrides": {

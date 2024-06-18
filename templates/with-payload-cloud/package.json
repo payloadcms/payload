@@ -32,11 +32,11 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "dotenv": "^16.4.5",
     "eslint": "^8",
-    "eslint-config-next": "^14.2.3",
+    "eslint-config-next": "15.0.0-rc.0",
     "typescript": "^5.4.5"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": "^18.20.2 || >=20.6.0"
   },
   "pnpm": {
     "overrides": {
