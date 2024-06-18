@@ -16,6 +16,7 @@ interface Opts {
   delimiter?: string
   object?: any
   overwrite?: boolean
+  recursive?: boolean
 }
 
 export const unflatten = (target, opts?: Opts) => {
@@ -23,6 +24,7 @@ export const unflatten = (target, opts?: Opts) => {
 
   const delimiter = opts.delimiter || '.'
   const overwrite = opts.overwrite || false
+  const recursive = opts.recursive || false
   const result = {}
 
   const isbuffer = isBuffer(target)
@@ -71,8 +73,7 @@ export const unflatten = (target, opts?: Opts) => {
     }
 
     // unflatten again for 'messy objects'
-    recipient[key1] =
-      target[key] && typeof target[key] !== 'object' ? unflatten(target[key], opts) : target[key]
+    recipient[key1] = recursive ? unflatten(target[key], opts) : target[key]
   })
 
   return result
