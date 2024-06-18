@@ -34,7 +34,9 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
       headers.set('Access-Control-Allow-Origin', '*')
     } else if (
       (Array.isArray(cors) && cors.indexOf(requestOrigin) > -1) ||
-      (typeof cors === 'object' && (cors as CORSConfig).origins.indexOf(requestOrigin) > -1)
+      (!Array.isArray(cors) &&
+        typeof cors === 'object' &&
+        (cors as CORSConfig).origins.indexOf(requestOrigin) > -1)
     ) {
       headers.set('Access-Control-Allow-Credentials', 'true')
       headers.set('Access-Control-Allow-Origin', requestOrigin)
