@@ -2,7 +2,7 @@
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 
-import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui/client'
+import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { RichTextPlugin } from '../types.js'

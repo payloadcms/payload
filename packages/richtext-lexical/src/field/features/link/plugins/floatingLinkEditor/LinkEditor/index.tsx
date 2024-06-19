@@ -5,13 +5,7 @@ import type { Data, FormState } from 'payload'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  formatDrawerSlug,
-  useConfig,
-  useEditDepth,
-  useModal,
-  useTranslation,
-} from '@payloadcms/ui/client'
+import { formatDrawerSlug, useConfig, useEditDepth, useModal, useTranslation } from '@payloadcms/ui'
 import {
   $getSelection,
   $isLineBreakNode,

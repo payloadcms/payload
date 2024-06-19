@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { useAddClientFunction, useFieldProps, useTableCell } from '@payloadcms/ui/client'
+import { useAddClientFunction, useFieldProps, useTableCell } from '@payloadcms/ui'
 
 const useLexicalFeatureProp = <T,>(featureKey: string, componentKey: string, prop: T) => {
   const { schemaPath: schemaPathFromFieldProps } = useFieldProps()

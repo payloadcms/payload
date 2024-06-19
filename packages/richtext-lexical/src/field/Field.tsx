@@ -9,7 +9,7 @@ import {
   useField,
   useFieldProps,
   withCondition,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 

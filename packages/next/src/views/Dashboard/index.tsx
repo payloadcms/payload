@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/utilities/groupNavItems'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui/client'
+import { HydrateClientUser } from '@payloadcms/ui'
 import { EntityType, RenderCustomComponent, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'

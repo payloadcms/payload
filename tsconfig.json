@@ -75,7 +75,7 @@
       "@payloadcms/ui/utilities/*": [
         "./packages/ui/src/utilities/*.ts"
       ],
-      "@payloadcms/ui/client": [
+      "@payloadcms/ui": [
         "./packages/ui/src/exports/client/index.ts"
       ],
       "@payloadcms/ui/shared": [

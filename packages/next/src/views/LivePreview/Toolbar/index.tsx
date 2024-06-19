@@ -2,7 +2,7 @@
 import type { EditViewProps } from 'payload'
 
 import { useDraggable } from '@dnd-kit/core'
-import { DragHandleIcon } from '@payloadcms/ui/client'
+import { DragHandleIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'

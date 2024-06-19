@@ -3,7 +3,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { Option } from '@payloadcms/ui/elements/ReactSelect'
 import type { LanguageOptions } from 'payload'
 
-import { ReactSelect, useTranslation } from '@payloadcms/ui/client'
+import { ReactSelect, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 export const LanguageSelector: React.FC<{

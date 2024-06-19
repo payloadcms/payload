@@ -9,17 +9,24 @@
   },
   "sideEffects": false,
   "type": "module",
+  "main": "./src/exports/client/index.ts",
+  "types": "./src/exports/client/index.ts",
   "exports": {
+    ".": {
+      "import": "./src/exports/client/index.ts",
+      "require": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts"
+    },
+    "./shared": {
+      "import": "./src/exports/shared/index.ts",
+      "require": "./src/exports/shared/index.ts",
+      "types": "./src/exports/shared/index.ts"
+    },
     "./assets": {
       "import": "./src/assets/index.ts",
       "require": "./src/assets/index.ts",
       "default": "./src/assets/index.ts",
       "types": "./src/assets/index.tsx"
-    },
-    "./client": {
-      "import": "./src/exports/client/index.ts",
-      "require": "./src/exports/client/index.ts",
-      "types": "./src/exports/client/index.ts"
     },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
@@ -62,11 +69,6 @@
       "require": "./src/providers/*/index.tsx",
       "default": "./src/providers/*/index.tsx",
       "types": "./src/providers/*/index.tsx"
-    },
-    "./shared": {
-      "import": "./src/exports/shared/index.ts",
-      "require": "./src/exports/shared/index.ts",
-      "types": "./src/exports/shared/index.ts"
     },
     "./utilities/*": {
       "import": "./src/utilities/*.ts",
@@ -160,18 +162,25 @@
     "node": "^18.20.2 || >=20.9.0"
   },
   "publishConfig": {
+    "main": "./dist/exports/client/index.js",
+    "types": "./dist/exports/client/index.d.ts",
     "exports": {
+      ".": {
+        "import": "./dist/exports/client/index.js",
+        "require": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared/index.js",
+        "require": "./dist/exports/shared/index.js",
+        "types": "./dist/exports/shared/index.d.ts"
+      },
       "./assets/*": "./dist/assets/*",
       "./assets": {
         "import": "./dist/assets/index.js",
         "require": "./dist/assets/index.js",
         "default": "./dist/assets/index.js",
         "types": "./dist/assets/index.d.ts"
-      },
-      "./client": {
-        "import": "./dist/exports/client/index.js",
-        "require": "./dist/exports/client/index.js",
-        "types": "./dist/exports/client/index.d.ts"
       },
       "./elements/*": {
         "import": "./dist/elements/*/index.js",
@@ -214,11 +223,6 @@
         "require": "./dist/providers/*/index.js",
         "default": "./dist/providers/*/index.js",
         "types": "./dist/providers/*/index.d.ts"
-      },
-      "./shared": {
-        "import": "./dist/exports/shared/index.js",
-        "require": "./dist/exports/shared/index.js",
-        "types": "./dist/exports/shared/index.d.ts"
       },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",

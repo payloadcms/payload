@@ -2,7 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useScrollInfo, useThrottledEffect, useTranslation } from '@payloadcms/ui/client'
+import { useScrollInfo, useThrottledEffect, useTranslation } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 

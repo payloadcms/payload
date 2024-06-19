@@ -10,7 +10,7 @@ import {
   useEntityVisibility,
   useStepNav,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { useEffect } from 'react'
 
 export const SetDocumentStepNav: React.FC<{

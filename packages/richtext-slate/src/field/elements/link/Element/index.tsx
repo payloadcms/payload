@@ -13,7 +13,7 @@ import {
   useLocale,
   useModal,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/shared'
 import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'

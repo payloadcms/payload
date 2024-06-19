@@ -10,7 +10,7 @@ import {
   useDocumentInfo,
   useFieldProps,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'

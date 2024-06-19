@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
-import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui/client'
+import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
 import { formatDocTitle } from '@payloadcms/ui/shared'
 import { useEffect, useRef } from 'react'
 

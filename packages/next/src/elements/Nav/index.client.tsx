@@ -11,7 +11,7 @@ import {
   useEntityVisibility,
   useNav,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'

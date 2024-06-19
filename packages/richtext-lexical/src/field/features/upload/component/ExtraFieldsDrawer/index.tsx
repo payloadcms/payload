@@ -14,7 +14,7 @@ import {
   useFieldProps,
   useModal,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import { $getNodeByKey } from 'lexical'
 import { deepCopyObject } from 'payload/shared'

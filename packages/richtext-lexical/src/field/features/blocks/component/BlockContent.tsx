@@ -14,7 +14,7 @@ import {
   useDocumentInfo,
   useFormSubmitted,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import isDeepEqual from 'deep-equal'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'

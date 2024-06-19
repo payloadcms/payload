@@ -15,7 +15,7 @@ import {
   PasswordField,
   useConfig,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { email, password } from 'payload/shared'
 
 import './index.scss'

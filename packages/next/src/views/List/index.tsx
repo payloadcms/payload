@@ -5,7 +5,7 @@ import {
   ListInfoProvider,
   ListQueryProvider,
   TableColumnsProvider,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'

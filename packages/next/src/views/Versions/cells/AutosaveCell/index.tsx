@@ -1,5 +1,5 @@
 'use client'
-import { Pill, useTableCell, useTranslation } from '@payloadcms/ui/client'
+import { Pill, useTableCell, useTranslation } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 export const AutosaveCell: React.FC = () => {

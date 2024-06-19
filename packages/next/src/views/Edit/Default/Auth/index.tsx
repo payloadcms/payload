@@ -11,7 +11,7 @@ import {
   useFormFields,
   useFormModified,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

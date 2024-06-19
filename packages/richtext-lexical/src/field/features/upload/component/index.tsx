@@ -14,7 +14,7 @@ import {
   useDrawerSlug,
   usePayloadAPI,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,

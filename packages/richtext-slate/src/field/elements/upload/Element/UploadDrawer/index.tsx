@@ -14,7 +14,7 @@ import {
   useLocale,
   useModal,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { type FormProps } from '@payloadcms/ui/forms/Form'
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { getFormState } from '@payloadcms/ui/shared'

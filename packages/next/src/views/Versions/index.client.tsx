@@ -12,7 +12,7 @@ import {
   useDocumentInfo,
   useListQuery,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
 import React from 'react'
 

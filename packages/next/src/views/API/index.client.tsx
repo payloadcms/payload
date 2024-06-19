@@ -13,7 +13,7 @@ import {
   useDocumentInfo,
   useLocale,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'
