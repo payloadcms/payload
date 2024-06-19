@@ -8,8 +8,8 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import type { FeatureProviderServer } from './field/features/types.js'
-import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
+import type { FeatureProviderServer } from './features/types.js'
+import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
 export type LexicalFieldAdminProps = {
   /**
