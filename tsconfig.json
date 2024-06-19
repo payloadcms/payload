@@ -67,8 +67,6 @@
   },
   "exclude": [
     "dist",
-    "**/dist",
-    "dist/*",
     "build",
     "temp",
     "node_modules"
