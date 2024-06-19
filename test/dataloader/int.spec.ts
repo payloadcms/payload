@@ -32,7 +32,7 @@ describe('dataloader', () => {
     })
 
     it('should allow multiple parallel queries', async () => {
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 100; i++) {
         const query = `
           query {
             Shops {
