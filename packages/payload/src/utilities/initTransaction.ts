@@ -22,6 +22,8 @@ export async function initTransaction(req: PayloadRequest): Promise<boolean> {
       if (transactionID) {
         req.transactionID = transactionID
       }
+
+      return transactionID
     })
     await req.transactionID
     return !!req.transactionID
