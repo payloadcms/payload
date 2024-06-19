@@ -193,10 +193,9 @@ jobs:
         database:
           - mongodb
           - postgres
-          #          - postgres-custom-schema # disabled until drizzle update that supports custom schema
+          - postgres-custom-schema
           - postgres-uuid
           - supabase
-          - sqlite
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
