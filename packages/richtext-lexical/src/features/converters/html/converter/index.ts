@@ -1,26 +1,58 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
+
+import { createLocalReq } from 'payload'
 
 import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
+
+export type ConvertLexicalToHTMLArgs = {
+  converters: HTMLConverter[]
+  data: SerializedEditorState
+} & (
+  | {
+      /**
+       * This payload property will only be used if req is undefined.
+       */
+      payload?: Payload
+      /**
+       * When the converter is called, req CAN be passed in depending on where it's run.
+       * If this is undefined and config is passed through, lexical will create a new req object for you. If this is null or
+       * config is undefined, lexical will not create a new req object for you and local API / server-side-only
+       * functionality will be disabled.
+       */
+      req?: null | undefined
+    }
+  | {
+      /**
+       * This payload property will only be used if req is undefined.
+       */
+      payload?: never
+      /**
+       * When the converter is called, req CAN be passed in depending on where it's run.
+       * If this is undefined and config is passed through, lexical will create a new req object for you. If this is null or
+       * config is undefined, lexical will not create a new req object for you and local API / server-side-only
+       * functionality will be disabled.
+       */
+      req: PayloadRequest
+    }
+)
 
 export async function convertLexicalToHTML({
   converters,
   data,
   payload,
-}: {
-  converters: HTMLConverter[]
-  data: SerializedEditorState
-  /**
-   * When the converter is called, payload CAN be passed in depending on where it's run.
-   */
-  payload: Payload | null
-}): Promise<string> {
+  req,
+}: ConvertLexicalToHTMLArgs): Promise<string> {
   if (data?.root?.children?.length) {
+    if (req === undefined && payload) {
+      req = await createLocalReq({}, payload)
+    }
+
     return await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: data?.root?.children,
       parent: data?.root,
-      payload,
+      req,
     })
   }
   return ''
@@ -30,15 +62,15 @@ export async function convertLexicalNodesToHTML({
   converters,
   lexicalNodes,
   parent,
-  payload,
+  req,
 }: {
   converters: HTMLConverter[]
   lexicalNodes: SerializedLexicalNode[]
   parent: SerializedLexicalNodeWithParent
   /**
-   * When the converter is called, payload CAN be passed in depending on where it's run.
+   * When the converter is called, req CAN be passed in depending on where it's run.
    */
-  payload: Payload | null
+  req: PayloadRequest | null
 }): Promise<string> {
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
 
@@ -55,7 +87,7 @@ export async function convertLexicalNodesToHTML({
               converters,
               node,
               parent,
-              payload,
+              req,
             })
           }
           return '<span>unknown node</span>'
@@ -65,7 +97,7 @@ export async function convertLexicalNodesToHTML({
           converters,
           node,
           parent,
-          payload,
+          req,
         })
       } catch (error) {
         console.error('Error converting lexical node to HTML:', error, 'node:', node)

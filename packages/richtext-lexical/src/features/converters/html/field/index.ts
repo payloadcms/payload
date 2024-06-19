@@ -209,7 +209,7 @@ export const lexicalHTML: (
           return await convertLexicalToHTML({
             converters: finalConverters,
             data: lexicalFieldData,
-            payload: req.payload,
+            req,
           })
         },
       ],
