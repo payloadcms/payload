@@ -6,8 +6,7 @@ desc: Manage your data and customize the Admin Panel by swapping in your own Rea
 keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-
-Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) admin panel to manage your users and data. It is highly performant, even with 100+ fields, and fully secure behind your application's [Access Control](../access-control/overview). Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
+Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) admin panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
 
 The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components). Everything from simple field labels to entire views can be modified or replaced to meet the needs of your editors.
 
@@ -56,7 +55,7 @@ app/
 
 All Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. For example, `layout.tsx` file within this directory is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes.
 
-The `admin` directory contains all the _pages_ related to the interface itself, while the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), respectively. All [admin routes are configurable](#custom-admin-routes) to meet your application's requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, while the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), respectively. All [admin routes are configurable](#customizing-routes) to meet your application's requirements.
 
 The `custom.scss` file is where you can add or override styles to the Admin Panel. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
@@ -67,7 +66,7 @@ All auto-generated files will contain the following comments at the top of each 
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 ```
 
-## Options
+## Admin Options
 
 All admin-specific options for the Admin Panel are defined in your Payload config under the `admin` key:
 
@@ -82,7 +81,8 @@ All admin-specific options for the Admin Panel are defined in your Payload confi
 | `autoLogin`       | Used to automate admin log-in for dev and demonstration convenience. [More](../authentication/config).                                                                                                                                                                      |
 | `livePreview`     | Enable real-time editing for instant visual feedback of your front-end application. [More](../live-preview/overview).                                                                                                                                                       |
 | `components`      | Component overrides that affect the entirety of the Admin Panel. [More](./components).                                                                                                                                                                                      |
-| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More](#custom-admin-routes).                                                                                                                                                                              |
+| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More](#customizing-routes).                                                                                                                                                                               |
+| `custom`          | Any custom properties you wish to pass to the Admin Panel.                                                                                                                                                                                                                  |
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -98,6 +98,7 @@ To specify which Collection to allow to login to the Admin Panel, pass the `admi
 import { buildConfig } from 'payload/config'
 
 const config = buildConfig({
+  // ...
   admin: {
     user: 'admins', // highlight-line
   },
@@ -128,9 +129,67 @@ It is also possible to allow multiple user types into the Admin Panel with limit
 
 To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to define granular access. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
 
+## Customizing Routes
+
+You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application by simply specifying the desired path in your Payload config.
+
+#### Root
+
+You can configure custom paths for the following root-level routes through the `routes` key:
+
+| Option             | Default route           | Description                           |
+| ------------------ | ----------------------- | ------------------------------------- |
+| `admin`            | `/admin`                | The Admin Panel itself.               |
+| `api`              | `/api`                  | The REST API base path.               |
+| `graphQL`          | `/graphql`              | The GraphQL API base path.            |
+| `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
+
+Here is an example of how you might change the root path for the Admin Panel itself:
+
+```ts
+import { buildConfig } from 'payload/config'
+
+const config = buildConfig({
+  // ...
+  routes: {
+    admin: '/custom-admin-route' // highlight-line
+  }
+})
+```
+
+#### Admin
+
+You can also configure custom paths for the following admin-level routes through the `admin.routes` key:
+
+| Option            | Default route           | Description                                     |
+| ----------------- | ----------------------- | ----------------------------------------------- |
+| `account`         | `/account`              | The user's account page.                        |
+| `createFirstUser` | `/create-first-user`    | The page to create the first user.              |
+| `forgot`          | `/forgot`               | The password reset page.                        |
+| `inactivity`      | `/logout-inactivity`    | The page to redirect to after inactivity.       |
+| `login`           | `/login`                | The login page.                                 |
+| `logout`          | `/logout`               | The logout page.                                |
+| `reset`           | `/reset`                | The password reset page.                        |
+| `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
+
+Here is an example of how you might change the path for the user's account page:
+
+```ts
+import { buildConfig } from 'payload/config'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    routes: {
+      account: '/my-account' // highlight-line
+    }
+  },
+})
+```
+
 ## I18n
 
-The Payload Admin Panel is translated in over 30 languages and counting. Languages are automatically detected based on the user's browser and all text displays in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
+The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
 
 <Banner>
   <strong>Note:</strong>
@@ -139,35 +198,6 @@ The Payload Admin Panel is translated in over 30 languages and counting. Languag
   [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 </Banner>
 
-## Light and dark modes
+## Light and Dark Modes
 
 Users in the Admin Panel have access to choosing between light mode and dark mode for their editing experience. The setting is managed while logged into the admin UI within the user account page and will be stored with the browser. By default, the operating system preference is detected and used.
-
-## Custom admin routes
-
-You can configure custom routes in the Admin Panel for the following routes:
-
-| Option            | Default route                                                                                                                                                                                                                                                                 |
-| ----------------- | ----------------------- |
-| `account`         | `/account`              |
-| `createFirstUser` | `/create-first-user`    |
-| `forgot`          | `/forgot`               |
-| `inactivity`      | `/logout-inactivity`    |
-| `login`           | `/login`                |
-| `logout`          | `/logout`               |
-| `reset`           | `/reset`                |
-| `unauthorized`    | `/unauthorized`         |
-
-`payload.config.js`:
-
-```ts
-import { buildConfig } from 'payload/config'
-
-const config = buildConfig({
-  admin: {
-    routes: {
-      admin: '/custom-admin-route'
-    }
-  },
-})
-```
