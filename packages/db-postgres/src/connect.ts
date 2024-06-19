@@ -1,12 +1,11 @@
 import type { Connect, Payload } from 'payload'
 
-import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
-import { pushDevSchema } from './utilities/pushDevSchema.js'
+import { pushDevSchema } from '../../drizzle/src/utilities/pushDevSchema.js'
 
 const connectWithReconnect = async function ({
   adapter,
@@ -71,12 +70,7 @@ export const connect: Connect = async function connect(
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
-        await this.drizzle.execute(
-          sql.raw(`
-          drop schema if exists ${this.schemaName || 'public'} cascade;
-          create schema ${this.schemaName || 'public'};
-        `),
-        )
+        await this.dropDatabase({ adapter: this })
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }

@@ -1,3 +1,4 @@
+import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { Payload, PayloadRequestWithData } from 'payload'
 
@@ -38,7 +39,7 @@ type Args = {
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as PostgresAdapter
-  const db = adapter.sessions[req.transactionID]?.db
+  const db = adapter.sessions[req.transactionID].db as TransactionPg
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema

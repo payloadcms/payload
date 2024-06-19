@@ -1,24 +1,28 @@
 import type {
+  BuildQueryJoinAliases,
+  DrizzleAdapter,
+  PostgresDB,
+  TransactionPg,
+} from '@payloadcms/drizzle/types'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type {
   ColumnBaseConfig,
   ColumnDataType,
   DrizzleConfig,
-  ExtractTablesWithRelations,
   Relation,
   Relations,
+  SQL,
 } from 'drizzle-orm'
-import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
 import type {
   PgColumn,
   PgEnum,
+  PgInsertOnConflictDoUpdateConfig,
   PgSchema,
   PgTableWithColumns,
-  PgTransaction,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { BaseDatabaseAdapter, Payload, PayloadRequestWithData } from 'payload'
-import type { Pool, PoolConfig } from 'pg'
-
-export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
+import type { Payload, PayloadRequestWithData} from 'payload'
+import type { Pool, PoolConfig, QueryResult } from 'pg'
 
 export type Args = {
   idType?: 'serial' | 'uuid'
@@ -45,29 +49,63 @@ export type GenericTable = PgTableWithColumns<{
   columns: GenericColumns
   dialect: string
   name: string
-  schema: undefined
+  schema: string
 }>
 
 export type GenericEnum = PgEnum<[string, ...string[]]>
 
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
-export type DrizzleTransaction = PgTransaction<
-  NodePgQueryResultHKT,
-  Record<string, unknown>,
-  ExtractTablesWithRelations<Record<string, unknown>>
->
+export type CountDistinct = (args: {
+  db: PostgresDB | TransactionPg
+  joins: BuildQueryJoinAliases
+  tableName: string
+  where: SQL
+}) => Promise<number>
 
-export type PostgresAdapter = BaseDatabaseAdapter & {
-  drizzle: DrizzleDB
+export type DeleteWhere = (args: {
+  db: PostgresDB | TransactionPg
+  tableName: string
+  where: SQL
+}) => Promise<void>
+
+export type DropDatabase = (args: { adapter: PostgresAdapter }) => Promise<void>
+
+export type Execute<T> = (args: {
+  db?: PostgresDB | TransactionPg
+  drizzle?: PostgresDB
+  raw?: string
+  sql?: SQL<unknown>
+}) => Promise<QueryResult<Record<string, T>>>
+
+export type GenerateDrizzleJSON = (args: {
+  schema: Record<string, GenericRelation | GenericTable>
+}) => PgSchema
+
+export type Insert = (args: {
+  db: PostgresDB | TransactionPg
+  onConflictDoUpdate?: PgInsertOnConflictDoUpdateConfig<any>
+  tableName: string
+  values: Record<string, unknown> | Record<string, unknown>[]
+}) => Promise<Record<string, unknown>[]>
+
+export type PostgresAdapter = DrizzleAdapter & {
+  countDistinct: CountDistinct
+  defaultDrizzleSnapshot: DrizzleSnapshotJSON
+  deleteWhere: DeleteWhere
+  drizzle: PostgresDB
+  dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
+  execute: Execute<unknown>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  generateDrizzleJSON: GenerateDrizzleJSON
   idType: Args['idType']
   initializing: Promise<void>
+  insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   pgSchema?: { table: PgTableFn } | PgSchema
@@ -75,51 +113,51 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   poolOptions: Args['pool']
   push: boolean
   rejectInitializing: () => void
-  relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
-      db: DrizzleTransaction
+      db: PostgresDB | TransactionPg
       reject: () => Promise<void>
       resolve: () => Promise<void>
     }
   }
   tableNameMap: Map<string, string>
-  tables: Record<string, GenericTable | PgTableWithColumns<any>>
+  tables: Record<string, GenericTable>
   versionsSuffix?: string
 }
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
-
-export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
 export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
 export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'migrationDir' | 'pool'>,
-      BaseDatabaseAdapter {
-    drizzle: DrizzleDB
+    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
+      DrizzleAdapter {
     enums: Record<string, GenericEnum>
+    /**
+     * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
+     * Used for returning properly formed errors from unique fields
+     */
     fieldConstraints: Record<string, Record<string, string>>
-    localeSuffix?: string
+    idType: Args['idType']
+    initializing: Promise<void>
+    localesSuffix?: string
+    logger: DrizzleConfig['logger']
+    pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
+    poolOptions: Args['pool']
     push: boolean
-    relations: Record<string, GenericRelation>
+    rejectInitializing: () => void
     relationshipsSuffix?: string
+    resolveInitializing: () => void
     schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-    sessions: {
-      [id: string]: {
-        db: DrizzleTransaction
-        reject: () => Promise<void>
-        resolve: () => Promise<void>
-      }
-    }
-    tables: Record<string, GenericTable>
+    schemaName?: Args['schemaName']
+    tableNameMap: Map<string, string>
     versionsSuffix?: string
   }
 }

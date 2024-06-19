@@ -54,11 +54,6 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-b',
-        },
-        {
           name: 'richText',
           type: 'richText',
         },

@@ -8,8 +8,8 @@ import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
+import { createTableName } from '../../drizzle/src/createTableName.js'
 import { buildTable } from './schema/build.js'
-import { createTableName } from './schema/createTableName.js'
 
 export const init: Init = function init(this: PostgresAdapter) {
   if (this.schemaName) {
@@ -17,7 +17,6 @@ export const init: Init = function init(this: PostgresAdapter) {
   } else {
     this.pgSchema = { table: pgTable }
   }
-
   if (this.payload.config.localization) {
     this.enums.enum__locales = pgEnum(
       '_locales',
