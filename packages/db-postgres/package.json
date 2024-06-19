@@ -14,18 +14,18 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./types": {
       "import": "./src/types.ts",
-      "require": "./src/types.ts",
-      "types": "./src/types.ts"
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
     },
     "./migration-utils": {
       "import": "./src/exports/migration-utils.ts",
-      "require": "./src/exports/migration-utils.ts",
-      "types": "./src/exports/migration-utils.ts"
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
     }
   },
   "main": "./src/index.ts",
@@ -68,18 +68,18 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "./types": {
         "import": "./dist/types.js",
-        "require": "./dist/types.js",
-        "types": "./dist/types.d.ts"
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
       },
       "./migration-utils": {
         "import": "./dist/exports/migration-utils.js",
-        "require": "./dist/exports/migration-utils.js",
-        "types": "./dist/exports/migration-utils.d.ts"
+        "types": "./dist/exports/migration-utils.d.ts",
+        "default": "./dist/exports/migration-utils.js"
       }
     },
     "main": "./dist/index.js",

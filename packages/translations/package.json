@@ -11,19 +11,22 @@
   "exports": {
     ".": {
       "import": "./src/exports/index.ts",
-      "require": "./src/exports/index.ts"
+      "types": "./src/exports/index.ts",
+      "default": "./src/exports/index.ts"
     },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts"
+    "./all": {
+      "import": "./src/exports/all.ts",
+      "types": "./src/exports/all.ts",
+      "default": "./src/exports/all.ts"
     },
     "./languages/*": {
       "import": "./src/languages/*.ts",
-      "require": "./src/languages/*.ts"
+      "types": "./src/languages/*.ts",
+      "default": "./src/languages/*.ts"
     }
   },
   "main": "./src/exports/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/exports/index.ts",
   "files": [
     "dist"
   ],
@@ -50,18 +53,18 @@
     "exports": {
       ".": {
         "import": "./dist/exports/index.js",
-        "require": "./dist/exports/index.js",
-        "types": "./dist/exports/*.d.ts"
+        "types": "./dist/exports/index.d.ts",
+        "default": "./dist/exports/index.js"
       },
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+      "./all": {
+        "import": "./dist/exports/all.js",
+        "types": "./dist/exports/all.d.ts",
+        "default": "./dist/exports/all.js"
       },
       "./languages/*": {
         "import": "./dist/languages/*.js",
-        "require": "./dist/languages/*.js",
-        "types": "./dist/languages/*.d.ts"
+        "types": "./dist/languages/*.d.ts",
+        "default": "./dist/languages/*.js"
       }
     },
     "main": "./dist/exports/index.js",
