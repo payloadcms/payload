@@ -8,9 +8,17 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 The [Payload Admin](./overview) panel is designed to be as minimal and straightforward as possible to allow easy customization and control. In order for Payload to support this level of customization without introducing versioning or future-proofing issues, Payload provides a pattern for you to supply your own React components via your Payload config.
 
-<Banner type="warning">
-  All Custom Components in the Admin Panel are [React Server Components](https://react.dev/reference/rsc/server-components). This means they are rendered on the server
-</Banner>
+## Concepts
+
+The Admin Panel fully supports [React Server Components](https://react.dev/reference/rsc/server-components). This has a couple of implications that are important to understand:
+
+1. **Client Config**
+
+    One rule of [Server Components](https://react.dev/reference/rsc/server-components) is that [you cannot pass non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) between the server and the client. Since the Payload Config contains many functions and other non-serializable data, it is not possible to pass the entire config to the client. Instead, we generate a safe subset of your config that can be accessed from any client component through the `useClientConfig()` hook. [More](./components).
+
+1. **Component Map**
+
+    All [Custom Components](./components)  in Payload are [Server Components](https://react.dev/reference/rsc/server-components) by default. This is because components themselves cannot be passed from the server to the client, and the Payload Config exposes Custom Components nearly everywhere. For this reason, the Admin Panel pre-renders all Custom Components into a "Component Map" and passes them to the client through props as "slots". [More](./components).
 
 To swap in your own React component, first, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
 
