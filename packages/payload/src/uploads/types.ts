@@ -96,7 +96,7 @@ export type UploadConfig = {
   handlers?: ((
     req: PayloadRequestWithData,
     args: { doc: TypeWithID; params: { collection: string; filename: string } },
-  ) => Promise<Response> | Response)[]
+  ) => Promise<Response> | Response | null)[]
   imageSizes?: ImageSize[]
   mimeTypes?: string[]
   resizeOptions?: ResizeOptions
