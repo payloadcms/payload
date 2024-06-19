@@ -133,7 +133,7 @@ To do this, add a `roles` or similar field to your auth-enabled Collection, then
 
 You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application by simply specifying the desired path in your Payload config.
 
-#### Root
+#### Root-level routes
 
 You can configure custom paths for the following root-level routes through the `routes` key:
 
@@ -157,7 +157,7 @@ const config = buildConfig({
 })
 ```
 
-#### Admin
+#### Admin-level routes
 
 You can also configure custom paths for the following admin-level routes through the `admin.routes` key:
 
@@ -186,6 +186,12 @@ const config = buildConfig({
   },
 })
 ```
+
+<Banner type="success">
+  <strong>Note:</strong>
+  <br />
+  You can also customize document-level routes such as a Collection's `/:id/api` view. See [Views](./views) for more information.
+</Banner>
 
 ## I18n
 
