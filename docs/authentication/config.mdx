@@ -166,31 +166,6 @@ Example:
 }
 ```
 
-### Strategies
-
-As of Payload `1.0.0`, you can add additional authentication strategies to Payload easily by passing them to your collection's `auth.strategies` array.
-
-Behind the scenes, Payload uses PassportJS to power its local authentication strategy, so most strategies listed on the PassportJS website will work seamlessly. Combined with adding custom components to the admin panel's `Login` view, you can create advanced authentication strategies directly within Payload.
-
-<Banner type="warning">
-  This is an advanced feature, so only attempt this if you are an experienced developer. Otherwise,
-  just let Payload's built-in authentication handle user auth for you.
-</Banner>
-
-The `strategies` property is an array that takes objects with the following properties:
-
-**`strategy`**
-
-This property can accept a Passport strategy directly, or you can pass a function that takes a `payload` argument, and returns a Passport strategy.
-
-**`name`**
-
-If you pass a strategy to the `strategy` property directly, the `name` property is optional and allows you to override the strategy's built-in name.
-
-However, if you pass a function to `strategy`, `name` is a required property.
-
-In either case, Payload will prefix the strategy name with the collection `slug` that the strategy is passed to.
-
 ### Admin autologin
 
 For testing and demo purposes you may want to skip forcing the admin user to login in order to access the panel.
