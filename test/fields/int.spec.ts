@@ -79,9 +79,11 @@ describe('Fields', () => {
     })
 
     it('creates with default values', () => {
-      expect(doc.text).toEqual(text)
-      expect(doc.defaultFunction).toEqual(defaultText)
-      expect(doc.defaultAsync).toEqual(defaultText)
+      expect(doc.text).toStrictEqual(text)
+      expect(doc.defaultString).toStrictEqual(defaultText)
+      expect(doc.defaultEmptyString).toStrictEqual('')
+      expect(doc.defaultFunction).toStrictEqual(defaultText)
+      expect(doc.defaultAsync).toStrictEqual(defaultText)
     })
 
     it('should populate default values in beforeValidate hook', async () => {
@@ -118,16 +120,16 @@ describe('Fields', () => {
       const hit = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           hasMany: ['one', 'five'],
+          text: 'required',
         },
       })
 
       const miss = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           hasMany: ['two'],
+          text: 'required',
         },
       })
 
@@ -950,15 +952,15 @@ describe('Fields', () => {
 
     it('should hot module reload and still be able to create', async () => {
       const testDoc1 = await payload.findByID({
-        collection: tabsFieldsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
       })
 
       await reload(payload.config, payload)
 
       const testDoc2 = await payload.findByID({
-        collection: tabsFieldsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
       })
 
       expect(testDoc1.id).toStrictEqual(testDoc2.id)
