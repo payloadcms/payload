@@ -1,5 +1,5 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui'
 import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'

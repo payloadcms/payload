@@ -53,7 +53,9 @@ import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'
 export { PopupList }
 export { Popup } from '../../elements/Popup/index.js'
 export { PublishMany } from '../../elements/PublishMany/index.js'
-export { ReactSelect } from '../../elements/ReactSelect/index.js'
+export { DefaultPublishButton, PublishButton } from '../../elements/PublishButton/index.js'
+
+export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
 export { RenderTitle } from '../../elements/RenderTitle/index.js'
 export { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
@@ -100,10 +102,16 @@ export { RichText as RichTextField } from '../../fields/RichText/index.js'
 export { Row as RowField } from '../../fields/Row/index.js'
 export { Select as SelectField, type SelectFieldProps } from '../../fields/Select/index.js'
 export { Tabs as TabsField, type TabsFieldProps } from '../../fields/Tabs/index.js'
-export { Text as TextField } from '../../fields/Text/index.js'
-export { Textarea as TextareaField } from '../../fields/Textarea/index.js'
+export { Text as TextField, TextInput } from '../../fields/Text/index.js'
+export type { TextFieldProps, TextInputProps } from '../../fields/Text/index.js'
+
+export { Textarea as TextareaField, TextareaInput } from '../../fields/Textarea/index.js'
+export type { TextAreaInputProps, TextareaFieldProps } from '../../fields/Textarea/index.js'
+
 export { UI as UIField } from '../../fields/UI/index.js'
-export { Upload as UploadField } from '../../fields/Upload/index.js'
+export { Upload as UploadField, UploadInput } from '../../fields/Upload/index.js'
+export type { UploadFieldProps, UploadInputProps } from '../../fields/Upload/index.js'
+
 export { fieldBaseClass } from '../../fields/shared/index.js'
 
 // forms
@@ -122,10 +130,15 @@ export {
 export { Form, type FormProps } from '../../forms/Form/index.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
-export { RowLabel } from '../../forms/RowLabel/index.js'
+export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'
+export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/index.js'
+
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 export { useField } from '../../forms/useField/index.js'
+export type { FormFieldBase } from '../../fields/shared/index.js'
+export type { FieldType, Options } from '../../forms/useField/types.js'
+
 export { withCondition } from '../../forms/withCondition/index.js'
 
 // graphics
@@ -158,11 +171,24 @@ export { ActionsProvider, SetViewActions, useActions } from '../../providers/Act
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
-export type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+export type {
+  ActionMap,
+  CollectionComponentMap,
+  ComponentMap,
+  ConfigComponentMapBase,
+  FieldComponentProps,
+  FieldMap,
+  GlobalComponentMap,
+  MappedField,
+  MappedTab,
+  ReducedBlock,
+} from '../../providers/ComponentMap/buildComponentMap/types.js'
 export { ComponentMapProvider, useComponentMap } from '../../providers/ComponentMap/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
+
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,

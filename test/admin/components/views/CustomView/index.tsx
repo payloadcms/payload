@@ -5,7 +5,7 @@ import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import { Button } from '@payloadcms/ui/elements/Button'
+import { Button } from '@payloadcms/ui'
 
 import { customNestedViewPath, customViewTitle } from '../../../shared.js'
 import { ClientForm } from './index.client.js'

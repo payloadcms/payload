@@ -1,10 +1,10 @@
-import { Button } from '@payloadcms/ui/elements/Button'
+import { Button } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../../../../../packages/payload/types.js'
-
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+import type { AdminViewProps } from 'payload'
 
 import {
   customParamViewPath,

@@ -2,10 +2,7 @@
 
 import type { FormField, UIField } from 'payload'
 
-import { useAllFormFields } from '@payloadcms/ui/forms/Form'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useAllFormFields, useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'

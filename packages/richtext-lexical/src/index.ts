@@ -5,7 +5,7 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 
-import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
+import { withMergedProps } from '@payloadcms/ui/shared'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import {

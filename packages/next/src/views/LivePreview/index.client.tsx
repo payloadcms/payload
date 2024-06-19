@@ -1,5 +1,5 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type {
   ClientCollectionConfig,

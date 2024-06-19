@@ -1,16 +1,17 @@
 'use client'
 
-import type { UploadInputProps } from '@payloadcms/ui/fields/Upload'
-import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
+import type { FieldType, Options, UploadInputProps } from '@payloadcms/ui'
 
-import { FieldLabel } from '@payloadcms/ui/fields/FieldLabel'
-import { UploadInput } from '@payloadcms/ui/fields/Upload'
-import { useAllFormFields } from '@payloadcms/ui/forms/Form'
-import { useField } from '@payloadcms/ui/forms/useField'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  FieldLabel,
+  UploadInput,
+  useAllFormFields,
+  useConfig,
+  useDocumentInfo,
+  useField,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
