@@ -104,7 +104,7 @@
       },
       "./client": {
         "import": "./dist/exports/client/index.js",
-        "require": "./dist/exports/*client/index.js",
+        "require": "./dist/exports/client/index.js",
         "types": "./dist/exports/client/index.d.ts"
       }
     },
