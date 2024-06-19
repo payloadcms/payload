@@ -1,10 +1,10 @@
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextAdapter } from 'payload'
 
-import type { PopulationPromise } from '../field/features/types.js'
+import type { PopulationPromise } from '../features/types.js'
 import type { AdapterProps } from '../types.js'
 
-import { recurseNodes } from '../forEachNodeRecursively.js'
+import { recurseNodes } from '../utilities/forEachNodeRecursively.js'
 
 export type Args = Parameters<
   RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']

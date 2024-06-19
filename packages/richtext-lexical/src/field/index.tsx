@@ -5,13 +5,13 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
+import type { FeatureProviderClient } from '../features/types.js'
+import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
-import type { FeatureProviderClient } from './features/types.js'
-import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
-import { defaultEditorLexicalConfig } from './lexical/config/client/default.js'
-import { loadClientFeatures } from './lexical/config/client/loader.js'
-import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize.js'
+import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
+import { loadClientFeatures } from '../lexical/config/client/loader.js'
+import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
 
 const RichTextEditor = lazy(() =>
   import('./Field.js').then((module) => ({ default: module.RichText })),

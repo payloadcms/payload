@@ -7,14 +7,14 @@ import { useClientFunctions, useTableCell } from '@payloadcms/ui'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
-import type { FeatureProviderClient } from '../field/features/types.js'
-import type { SanitizedClientEditorConfig } from '../field/lexical/config/types.js'
+import type { FeatureProviderClient } from '../features/types.js'
+import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 
-import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default.js'
-import { loadClientFeatures } from '../field/lexical/config/client/loader.js'
-import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize.js'
-import { getEnabledNodes } from '../field/lexical/nodes/index.js'
+import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
+import { loadClientFeatures } from '../lexical/config/client/loader.js'
+import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
+import { getEnabledNodes } from '../lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<
   CellComponentProps & {
