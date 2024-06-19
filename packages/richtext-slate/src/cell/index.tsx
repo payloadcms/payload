@@ -1,7 +1,7 @@
 'use client'
 import type { DefaultCellComponentProps } from 'payload'
 
-import { useTableCell } from '@payloadcms/ui/client'
+import { useTableCell } from '@payloadcms/ui'
 import React from 'react'
 
 export const RichTextCell: React.FC<DefaultCellComponentProps<any[]>> = () => {

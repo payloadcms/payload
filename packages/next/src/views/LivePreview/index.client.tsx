@@ -21,7 +21,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React, { Fragment, useCallback } from 'react'
 

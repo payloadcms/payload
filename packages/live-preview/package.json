@@ -13,6 +13,7 @@
   "type": "module",
   "exports": {
     ".": {
+      "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     }
@@ -38,8 +39,8 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "main": "./dist/index.js",

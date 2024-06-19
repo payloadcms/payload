@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, Translation } from '@payloadcms/ui/client'
+import { Button, Translation } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 

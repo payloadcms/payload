@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui/client'
+import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
 

@@ -15,13 +15,13 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./client": {
       "import": "./src/exports/client/index.ts",
-      "require": "./src/exports/client/index.ts",
-      "types": "./src/exports/client/index.ts"
+      "types": "./src/exports/client/index.ts",
+      "default": "./src/exports/client/index.ts"
     }
   },
   "main": "./src/index.ts",
@@ -99,13 +99,13 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "./client": {
         "import": "./dist/exports/client/index.js",
-        "require": "./dist/exports/*client/index.js",
-        "types": "./dist/exports/client/index.d.ts"
+        "types": "./dist/exports/client/index.d.ts",
+        "default": "./dist/exports/client/index.js"
       }
     },
     "main": "./dist/index.js",

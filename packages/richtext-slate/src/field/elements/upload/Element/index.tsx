@@ -13,7 +13,7 @@ import {
   useListDrawer,
   usePayloadAPI,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { File } from '@payloadcms/ui/graphics/File'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'

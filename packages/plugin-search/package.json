@@ -26,8 +26,8 @@
     },
     "./*": {
       "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+      "types": "./src/exports/*.ts",
+      "default": "./src/exports/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -63,13 +63,13 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "./*": {
         "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+        "types": "./dist/exports/*.d.ts",
+        "default": "./dist/exports/*.js"
       }
     },
     "main": "./dist/index.js",

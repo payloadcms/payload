@@ -10,7 +10,7 @@ import {
   EditDepthProvider,
   FormQueryParamsProvider,
   HydrateClientUser,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import QueryString from 'qs'

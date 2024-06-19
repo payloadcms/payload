@@ -6,7 +6,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { Gutter, RenderTitle } from '@payloadcms/ui/client'
+import { Gutter, RenderTitle } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 import { DocumentTabs } from './Tabs/index.js'

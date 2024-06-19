@@ -8,7 +8,7 @@ import {
   useEditDepth,
   useModal,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 

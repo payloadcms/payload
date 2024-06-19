@@ -7,7 +7,7 @@ import {
   useConfig,
   useDocumentInfo,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'

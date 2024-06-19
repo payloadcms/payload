@@ -11,17 +11,37 @@
   "exports": {
     ".": {
       "import": "./src/index.js",
-      "require": "./src/index.js",
-      "types": "./src/index.js"
+      "types": "./src/index.js",
+      "default": "./src/index.js"
     },
     "./withPayload": {
       "import": "./src/withPayload.js",
-      "require": "./src/withPayload.js"
+      "default": "./src/withPayload.js"
     },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
+    "./routes": {
+      "import": "./src/exports/routes.ts",
+      "types": "./src/exports/routes.ts",
+      "default": "./src/exports/routes.ts"
+    },
+    "./templates": {
+      "import": "./src/exports/templates.ts",
+      "types": "./src/exports/templates.ts",
+      "default": "./src/exports/templates.ts"
+    },
+    "./utilities": {
+      "import": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts",
+      "default": "./src/exports/utilities.ts"
+    },
+    "./views": {
+      "import": "./src/exports/views.ts",
+      "types": "./src/exports/views.ts",
+      "default": "./src/exports/views.ts"
     }
   },
   "main": "./src/index.js",
@@ -90,22 +110,42 @@
     "exports": {
       "./css": {
         "import": "./dist/prod/styles.css",
-        "require": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
       },
       "./withPayload": {
         "import": "./dist/withPayload.js",
-        "require": "./dist/cjs/withPayload.cjs"
+        "require": "./dist/cjs/withPayload.cjs",
+        "default": "./dist/withPayload.js"
       },
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
+      "./routes": {
+        "import": "./dist/exports/routes.js",
+        "types": "./dist/exports/routes.d.ts",
+        "default": "./dist/exports/routes.js"
+      },
+      "./templates": {
+        "import": "./dist/exports/templates.js",
+        "types": "./dist/exports/templates.d.ts",
+        "default": "./dist/exports/templates.js"
+      },
+      "./utilities": {
+        "import": "./dist/exports/utilities.js",
+        "types": "./dist/exports/utilities.d.ts",
+        "default": "./dist/exports/utilities.js"
+      },
+      "./views": {
+        "import": "./dist/exports/views.js",
+        "types": "./dist/exports/views.d.ts",
+        "default": "./dist/exports/views.js"
       }
     },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "types": "./dist/index.js"
   },
   "overrides": {
     "@types/react": "npm:types-react@19.0.0-beta.2",

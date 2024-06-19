@@ -1,9 +1,9 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui/client'
+import type { FormProps } from '@payloadcms/ui'
 import type { FormState, PayloadRequestWithData } from 'payload'
 
-import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui/client'
+import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui'
 import { email } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 

@@ -9,7 +9,7 @@ import {
   useDocumentInfo,
   usePayloadAPI,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React, { useState } from 'react'
 
