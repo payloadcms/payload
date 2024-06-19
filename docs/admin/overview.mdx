@@ -60,13 +60,13 @@ Finally, the `custom.scss` file is where you can add or override styles to the A
 All auto-generated files will contain the following comments at the top of each file:
 
 ```tsx
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */,
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 ```
 
 ## Admin Options
 
-All admin-specific options for the Admin Panel are defined in your Payload config under the `admin` key:
+All admin-specific options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` key:
 
 | Option            | Description                                                                                                                                                                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -92,7 +92,7 @@ All admin-specific options for the Admin Panel are defined in your Payload confi
 To specify which Collection to allow to login to the Admin Panel, pass the `admin.user` key equal to the slug of any auth-enabled Collection:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
@@ -128,7 +128,7 @@ To do this, add a `roles` or similar field to your auth-enabled Collection, then
 
 ## Customizing Routes
 
-You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application by simply specifying the desired path in your Payload config.
+You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application simply by specifying the desired paths in your config.
 
 #### Root-level Routes
 
@@ -144,7 +144,7 @@ You can configure custom paths for the following root-level routes through the `
 Here is an example of how you might change the root path for the Admin Panel itself:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
@@ -177,7 +177,7 @@ You can also configure custom paths for the following admin-level routes through
 Here is an example of how you might change the path for the user's account page:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...

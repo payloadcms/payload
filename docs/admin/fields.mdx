@@ -49,7 +49,7 @@ These are the props that will be passed to your custom Cell to use in your own c
 
 ```tsx
 import React from 'react'
-import type { Props } from 'payload/components/views/Cell'
+import type { CellProps } from 'payload'
 import './index.scss'
 
 const baseClass = 'custom-cell'
@@ -70,7 +70,8 @@ When writing your own custom components you can make use of a number of hooks to
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```tsx
-import { useField } from 'payload/components/forms'
+'use client'
+import { useField } from '@payloadcms/ui'
 
 const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
   // highlight-start
@@ -99,10 +100,10 @@ These are the props that will be passed to your custom Label.
 #### Example
 
 ```tsx
+'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
-
-import { getTranslation } from 'payload/utilities/getTranslation'
+import { useTranslation } from '@payloadcms/ui'
+import { getTranslation } from '@payloadcms/translations'
 
 type Props = {
   htmlFor?: string
@@ -164,7 +165,7 @@ With these properties you can add multiple components before and after the input
 
 ```tsx
 import React from 'react'
-import { Field } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import './style.scss'
 

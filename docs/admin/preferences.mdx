@@ -73,9 +73,10 @@ Also async, this method provides you with an easy way to set a user preference. 
 
 Here is an example for how you can utilize `usePreferences` within your custom Admin panel components. Note - this example is not fully useful and is more just a reference for how to utilize the Preferences API. In this case, we are demonstrating how to set and retrieve a user's last used colors history within a `ColorPicker` or similar type component.
 
-```
+```tsx
+'use client'
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { usePreferences } from 'payload/components/preferences';
+import { usePreferences } from '@payloadcms/ui'
 
 const lastUsedColorsPreferenceKey = 'last-used-colors';
 

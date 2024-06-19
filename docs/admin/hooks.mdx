@@ -15,7 +15,8 @@ The `useField` hook is used internally within every applicable Payload field com
 Outside of internal use, its most common use-case is in custom `Field` components. When you build a custom React `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```tsx
-import { useField } from 'payload/components/forms'
+'use client'
+import { useField } from '@payloadcms/ui'
 
 type Props = { path: string }
 
@@ -66,7 +67,8 @@ Thanks to the awesome package [`use-context-selector`](https://github.com/dai-sh
 You can pass a Redux-like selector into the hook, which will ensure that you retrieve only the field that you want. The selector takes an argument with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
 
 ```tsx
-import { useFormFields } from 'payload/components/forms'
+'use client'
+import type { useFormFields } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Get only the `amount` field state, and only cause a rerender when that field changes
@@ -88,7 +90,8 @@ const MyComponent: React.FC = () => {
 You can do lots of powerful stuff by retrieving the full form state, like using built-in helper functions to reduce field state to values only, or to retrieve sibling data by path.
 
 ```tsx
-import { useAllFormFields, reduceFieldsToValues, getSiblingData } from 'payload/components/forms';
+'use client'
+import { useAllFormFields, reduceFieldsToValues, getSiblingData } from '@payloadcms/ui'
 
 const ExampleComponent: React.FC = () => {
   // the `fields` const will be equal to all fields' state,
@@ -649,9 +652,10 @@ The `useCollapsible` hook allows you to control parent collapsibles:
 **Example:**
 
 ```tsx
+'use client'
 import React from 'react'
 
-import { useCollapsible } from 'payload/components/utilities'
+import { useCollapsible } from '@payloadcms/ui'
 
 const CustomComponent: React.FC = () => {
   const { isCollapsed, toggle } = useCollapsible()
@@ -687,7 +691,8 @@ The `useDocumentInfo` hook provides lots of information about the document curre
 **Example:**
 
 ```tsx
-import { useDocumentInfo } from 'payload/components/utilities'
+'use client'
+import { useDocumentInfo } from '@payloadcms/ui'
 
 const LinkFromCategoryToPosts: React.FC = () => {
   // highlight-start
@@ -712,7 +717,8 @@ const LinkFromCategoryToPosts: React.FC = () => {
 In any custom component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
-import { useLocale } from 'payload/components/utilities'
+'use client'
+import { useLocale } from '@payloadcms/ui'
 
 const Greeting: React.FC = () => {
   // highlight-start
@@ -743,8 +749,9 @@ Useful to retrieve info about the currently logged in user as well as methods fo
 | **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
-import { useAuth } from 'payload/components/utilities'
-import { User } from '../payload-types.ts'
+'use client'
+import { useAuth } from '@payloadcms/ui'
+import type { User } from '../payload-types.ts'
 
 const Greeting: React.FC = () => {
   // highlight-start
@@ -757,10 +764,11 @@ const Greeting: React.FC = () => {
 
 ## useConfig
 
-Used to easily fetch the full Payload config.
+Used to easily fetch the Payload Client Config.
 
 ```tsx
-import { useConfig } from 'payload/components/utilities'
+'use client'
+import { useConfig } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -776,7 +784,8 @@ const MyComponent: React.FC = () => {
 Sends back how many editing levels "deep" the current component is. Edit depth is relevant while adding new documents / editing documents in modal windows and other cases.
 
 ```tsx
-import { useEditDepth } from 'payload/components/utilities'
+'use client'
+import { useEditDepth } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -796,7 +805,8 @@ Returns methods to set and get user preferences. More info can be found [here](h
 Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
 
 ```tsx
-import { useTheme } from 'payload/components/utilities'
+'use client'
+import { useTheme } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -824,7 +834,8 @@ const MyComponent: React.FC = () => {
 Returns methods to manipulate table columns
 
 ```tsx
-import { useTableColumns } from 'payload/components/hooks'
+'use client'
+import { useTableColumns } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -855,7 +866,8 @@ The `useDocumentEvents` hook provides a way of subscribing to cross-document eve
 **Example:**
 
 ```tsx
-import { useDocumentEvents } from 'payload/components/hooks'
+'use client'
+import { useDocumentEvents } from '@payloadcms/ui'
 
 const ListenForUpdates: React.FC = () => {
   const { mostRecentUpdate } = useDocumentEvents()
