@@ -21,7 +21,7 @@ export const BlockquoteFeature: FeatureProviderProviderServer<undefined, undefin
           createNode({
             converters: {
               html: {
-                converter: async ({ converters, node, parent, payload }) => {
+                converter: async ({ converters, node, parent, req }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
@@ -29,7 +29,7 @@ export const BlockquoteFeature: FeatureProviderProviderServer<undefined, undefin
                       ...node,
                       parent,
                     },
-                    payload,
+                    req,
                   })
 
                   return `<blockquote>${childrenText}</blockquote>`

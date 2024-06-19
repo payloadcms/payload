@@ -1,5 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   converter: ({
@@ -7,16 +7,16 @@ export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNod
     converters,
     node,
     parent,
-    payload,
+    req,
   }: {
     childIndex: number
     converters: HTMLConverter[]
     node: T
     parent: SerializedLexicalNodeWithParent
     /**
-     * When the converter is called, payload CAN be passed in depending on where it's run.
+     * When the converter is called, req CAN be passed in depending on where it's run.
      */
-    payload: Payload | null
+    req: PayloadRequest | null
   }) => Promise<string> | string
   nodeTypes: string[]
 }

@@ -36,7 +36,7 @@ export const HeadingFeature: FeatureProviderProviderServer<
           createNode({
             converters: {
               html: {
-                converter: async ({ converters, node, parent, payload }) => {
+                converter: async ({ converters, node, parent, req }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
@@ -44,7 +44,7 @@ export const HeadingFeature: FeatureProviderProviderServer<
                       ...node,
                       parent,
                     },
-                    payload,
+                    req,
                   })
 
                   return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'

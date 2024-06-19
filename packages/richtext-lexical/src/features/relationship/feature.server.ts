@@ -84,7 +84,7 @@ export const RelationshipFeature: FeatureProviderProviderServer<
                   populationPromises.push(
                     populate({
                       id,
-                      collection,
+                      collectionSlug: collection.config.slug,
                       currentDepth,
                       data: node,
                       depth: populateDepth,

@@ -101,18 +101,28 @@ export const UploadFeature: FeatureProviderProviderServer<
           createNode({
             converters: {
               html: {
-                converter: async ({ node, payload }) => {
+                converter: async ({ node, req }) => {
                   // @ts-expect-error
                   const id = node?.value?.id || node?.value // for backwards-compatibility
 
-                  if (payload) {
-                    let uploadDocument: TypeWithID & FileData
+                  if (req?.payload) {
+                    const uploadDocument: {
+                      value?: TypeWithID & FileData
+                    } = {}
 
                     try {
-                      uploadDocument = (await payload.findByID({
+                      await populate({
                         id,
-                        collection: node.relationTo,
-                      })) as TypeWithID & FileData
+                        collectionSlug: node.relationTo,
+                        currentDepth: 0,
+                        data: uploadDocument,
+                        depth: 1,
+                        draft: false,
+                        key: 'value',
+                        overrideAccess: false,
+                        req,
+                        showHiddenFields: false,
+                      })
                     } catch (ignored) {
                       // eslint-disable-next-line no-console
                       console.error(
@@ -124,20 +134,23 @@ export const UploadFeature: FeatureProviderProviderServer<
                       return `<img />`
                     }
 
-                    const url = getAbsoluteURL(uploadDocument?.url, payload)
+                    const url = getAbsoluteURL(uploadDocument?.value?.url, req?.payload)
 
                     /**
                      * If the upload is not an image, return a link to the upload
                      */
-                    if (!uploadDocument?.mimeType?.startsWith('image')) {
-                      return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.filename}</a>`
+                    if (!uploadDocument?.value?.mimeType?.startsWith('image')) {
+                      return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.value?.filename}</a>`
                     }
 
                     /**
                      * If the upload is a simple image with no different sizes, return a simple img tag
                      */
-                    if (!uploadDocument?.sizes || !Object.keys(uploadDocument?.sizes).length) {
-                      return `<img src="${url}" alt="${uploadDocument?.filename}" width="${uploadDocument?.width}"  height="${uploadDocument?.height}"/>`
+                    if (
+                      !uploadDocument?.value?.sizes ||
+                      !Object.keys(uploadDocument?.value?.sizes).length
+                    ) {
+                      return `<img src="${url}" alt="${uploadDocument?.value?.filename}" width="${uploadDocument?.value?.width}"  height="${uploadDocument?.value?.height}"/>`
                     }
 
                     /**
@@ -146,10 +159,10 @@ export const UploadFeature: FeatureProviderProviderServer<
                     let pictureHTML = '<picture>'
 
                     // Iterate through each size in the data.sizes object
-                    for (const size in uploadDocument.sizes) {
+                    for (const size in uploadDocument.value?.sizes) {
                       const imageSize: FileSize & {
                         url?: string
-                      } = uploadDocument.sizes[size]
+                      } = uploadDocument.value?.sizes[size]
 
                       // Skip if any property of the size object is null
                       if (
@@ -162,13 +175,13 @@ export const UploadFeature: FeatureProviderProviderServer<
                       ) {
                         continue
                       }
-                      const imageSizeURL = getAbsoluteURL(imageSize?.url, payload)
+                      const imageSizeURL = getAbsoluteURL(imageSize?.url, req?.payload)
 
                       pictureHTML += `<source srcset="${imageSizeURL}" media="(max-width: ${imageSize.width}px)" type="${imageSize.mimeType}">`
                     }
 
                     // Add the default img tag
-                    pictureHTML += `<img src="${url}" alt="Image" width="${uploadDocument.width}" height="${uploadDocument.height}">`
+                    pictureHTML += `<img src="${url}" alt="Image" width="${uploadDocument.value?.width}" height="${uploadDocument.value?.height}">`
                     pictureHTML += '</picture>'
                     return pictureHTML
                   } else {
@@ -228,7 +241,7 @@ export const UploadFeature: FeatureProviderProviderServer<
                   populationPromises.push(
                     populate({
                       id,
-                      collection,
+                      collectionSlug: collection.config.slug,
                       currentDepth,
                       data: node,
                       depth: populateDepth,
