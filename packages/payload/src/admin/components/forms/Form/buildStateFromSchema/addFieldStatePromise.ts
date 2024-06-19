@@ -196,10 +196,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         await Promise.all(promises)
 
         // Add values to field state
-        if (valueWithDefault === null) {
-          fieldState.value = null
+        if (Array.isArray(valueWithDefault) && valueWithDefault.length === 0) {
+          fieldState.value = undefined
           fieldState.previousValue = fieldState.value
-          fieldState.initialValue = null
+          fieldState.initialValue = undefined
         } else {
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
           fieldState.previousValue = fieldState.value
@@ -315,10 +315,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         await Promise.all(promises)
 
         // Add values to field state
-        if (valueWithDefault === null) {
-          fieldState.value = null
+        if (Array.isArray(valueWithDefault) && valueWithDefault.length === 0) {
+          fieldState.value = undefined
           fieldState.previousValue = fieldState.value
-          fieldState.initialValue = null
+          fieldState.initialValue = undefined
         } else {
           fieldState.value = forceFullValue ? blocksValue : blocksValue.length
           fieldState.previousValue = fieldState.value
