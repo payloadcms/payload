@@ -18,10 +18,30 @@
       "import": "./src/withPayload.js",
       "require": "./src/withPayload.js"
     },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "require": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts"
+    },
+    "./routes": {
+      "import": "./src/exports/routes.ts",
+      "require": "./src/exports/routes.ts",
+      "types": "./src/exports/routes.ts"
+    },
+    "./templates": {
+      "import": "./src/exports/templates.ts",
+      "require": "./src/exports/templates.ts",
+      "types": "./src/exports/templates.ts"
+    },
+    "./utilities": {
+      "import": "./src/exports/utilities.ts",
+      "require": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts"
+    },
+    "./views": {
+      "import": "./src/exports/views.ts",
+      "require": "./src/exports/views.ts",
+      "types": "./src/exports/views.ts"
     }
   },
   "main": "./src/index.js",
@@ -97,15 +117,35 @@
         "import": "./dist/withPayload.js",
         "require": "./dist/cjs/withPayload.cjs"
       },
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "require": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts"
+      },
+      "./routes": {
+        "import": "./dist/exports/routes.js",
+        "require": "./dist/exports/routes.js",
+        "types": "./dist/exports/routes.d.ts"
+      },
+      "./templates": {
+        "import": "./dist/exports/templates.js",
+        "require": "./dist/exports/templates.js",
+        "types": "./dist/exports/templates.d.ts"
+      },
+      "./utilities": {
+        "import": "./dist/exports/utilities.js",
+        "require": "./dist/exports/utilities.js",
+        "types": "./dist/exports/utilities.d.ts"
+      },
+      "./views": {
+        "import": "./dist/exports/views.js",
+        "require": "./dist/exports/views.js",
+        "types": "./dist/exports/views.d.ts"
       }
     },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "types": "./dist/index.js"
   },
   "overrides": {
     "@types/react": "npm:types-react@19.0.0-beta.2",
