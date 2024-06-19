@@ -13,9 +13,7 @@ The Admin Panel is designed to [white-label your brand](https://payloadcms.com/b
 The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components) and the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation).
 
 <Banner type="success">
-  The Admin Panel is meant to be simple enough to give you a solid starting point without too much
-  complexity, so that you can get started quickly as you fine-tune to meet the of your application and your
-  editors.
+  The Payload Admin panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](./components).
 </Banner>
 
 <LightDarkImage
@@ -86,7 +84,6 @@ All admin-specific options for the Admin Panel are defined in your Payload confi
 
 <Banner type="success">
   <strong>Note:</strong>
-  <br />
   These are the _root-level_ options for the Admin Panel. You can also customize the admin options of any Collection or Global through their respective `admin` keys.
 </Banner>
 
@@ -189,8 +186,7 @@ const config = buildConfig({
 
 <Banner type="success">
   <strong>Note:</strong>
-  <br />
-  You can also customize document-level routes such as a Collection's `/:id/api` view. See [Views](./views) for more information.
+  You can also customize routes for Collections and Globals via the `admin.components.views` API. See [Views](./views) for more information.
 </Banner>
 
 ## I18n
@@ -199,7 +195,6 @@ The Payload Admin Panel is translated in over [30 languages and counting](https:
 
 <Banner>
   <strong>Note:</strong>
-  <br />
   If there is a language that Payload does not yet support, we accept code
   [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 </Banner>

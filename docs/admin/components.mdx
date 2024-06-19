@@ -6,52 +6,38 @@ desc: Fully customize your Admin Panel by swapping in your own React components.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The [Payload Admin](./overview) panel is designed to be as minimal and straightforward as possible to allow easy customization and control. In order for Payload to support this level of customization without introducing versioning or future-proofing issues, Payload provides a pattern for you to supply your own React components via your Payload config.
+The [Payload Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components via your Payload config.
 
-## Concepts
-
-The Admin Panel fully supports [React Server Components](https://react.dev/reference/rsc/server-components). This has a couple of implications that are important to understand:
-
-1. **Client Config**
-
-    One rule of [Server Components](https://react.dev/reference/rsc/server-components) is that [you cannot pass non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) between the server and the client. Since the Payload Config contains many functions and other non-serializable data, it is not possible to pass the entire config to the client. Instead, we generate a safe subset of your config that can be accessed from any client component through the `useClientConfig()` hook. [More](./components).
-
-1. **Component Map**
-
-    All [Custom Components](./components)  in Payload are [Server Components](https://react.dev/reference/rsc/server-components) by default. This is because components themselves cannot be passed from the server to the client, and the Payload Config exposes Custom Components nearly everywhere. For this reason, the Admin Panel pre-renders all Custom Components into a "Component Map" and passes them to the client through props as "slots". [More](./components).
-
-To swap in your own React component, first, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, rendered on the server at compile time. This means that you can freely use the [Local API](../local-api) directly in the front-end.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  Custom components will automatically be provided with all props that the default component
-  normally accepts.
+  <strong>Note:</strong>
+  Client components are still fully supported, simply import and render them within any server component. Ensure they include the `use client` directive and are not passed any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types).
 </Banner>
 
-## Base Component Overrides
+To swap in your own React component, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component(s) accordingly.
 
-You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
+## Custom Root Components
+
+You can override a set of root components through the `admin.components` property. The following options are available:
 
 | Path                  | Description                                                                                                                                                                                               |
 |-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                       |
-| **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
-| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
-| **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
-| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx) |
-| **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
-| **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
-| **`logout.Button`**   | A custom React component.                                                                                                                                                                                 |
-| **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                        |
-| **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view.                                                                                                                                               |
-| **`providers`**       | Define your own provider components that will wrap the [Admin Panel](./overview). [More](#custom-providers)                                                                                               |
-| **`actions`**         | Array of custom components to be rendered in the [Admin Panel](./overview) header, providing additional interactivity and functionality.                                                                  |
+| **`BeforeNavLinks`**  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
+| **`AfterNavLinks`**   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
+| **`BeforeDashboard`** | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
+| **`AfterDashboard`**  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx).|
+| **`BeforeLogin`**     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
+| **`AfterLogin`**      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
+| **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                               |
+| **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                        |
+| **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                     |
+| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire [Admin Panel](./overview). [More](#custom-providers).                             |
+| **`actions`**         | An array of Custom Components to be rendered in the [Admin Panel](./overview) header, providing additional interactivity and functionality.                                                                  |
 | **`views`**           | Override or create new [Views](./views) within the [Admin Panel](./overview).                                                                                                                             |
 
 Here is a full example showing how to swap some of these components for your own.
-
-`payload.config.js`
 
 ```ts
 import { buildConfig } from 'payload/config'
@@ -85,9 +71,9 @@ export default buildConfig({
 })
 ```
 
-## Collections
+## Custom Collection Components
 
-You can override components on a collection-by-collection basis via the `admin.components` property.
+You can override components on a Collection-by-Collection basis via the `admin.components` property on any Collection config:
 
 | Path                       | Description                                                                                                            |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -106,9 +92,10 @@ Here is a full example showing how to swap some of these components for your own
 `CustomSaveButton.tsx`
 
 ```tsx
+import React from 'react'
 import { CustomSaveButtonProps } from 'payload/types'
 
-const CustomSaveButton: CustomSaveButtonProps = ({
+export const CustomSaveButton: CustomSaveButtonProps = ({
   DefaultButton,
   label,
   save
@@ -125,6 +112,7 @@ const CustomSaveButton: CustomSaveButtonProps = ({
 `CustomSaveDraftButton.tsx`
 
 ```tsx
+import React from 'react'
 import { CustomSaveDraftButtonProps } from 'payload/types'
 
 export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
@@ -146,6 +134,7 @@ export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
 `CustomPublishButton.tsx`
 
 ```tsx
+import React from 'react'
 import { CustomPreviewButtonProps } from 'payload/types'
 
 export const CustomPublishButton: CustomPublishButtonProps = ({
@@ -167,6 +156,7 @@ export const CustomPublishButton: CustomPublishButtonProps = ({
 `CustomPreviewButton`
 
 ```tsx
+import React from 'react'
 import { CustomPreviewButtonProps } from 'payload/types'
 
 export const CustomPreviewButton: CustomPreviewButtonProps = ({
@@ -187,9 +177,7 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 
 `collection.ts`
 
-```tsx
-import * as React from 'react'
-
+```ts
 import { CustomSaveButton } from './CustomSaveButton'
 import { CustomSaveDraftButton } from './CustomSaveDraftButton'
 import { CustomPublishButton } from './CustomPublishButton'
@@ -210,21 +198,38 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-## Globals
+## Custom Global Components
 
-As with Collections, you can override components on a global-by-global basis via the `admin.components` property.
+You can override components on a Global-by-Global basis via the `admin.components` property on any Global config:
 
 | Path                           | Description                                                                                                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled.                                    |
 | **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
 | **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 | **`views`**                    | Override or create new [Views](./views) within the [Admin Panel](./overview).                                          |
 
-## Custom providers
+## Custom Providers
 
-As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the [Admin Panel](./overview). Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. See the [React Context](https://reactjs.org/docs/context.html) docs to learn more.
+As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the [Admin Panel](./overview). Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. See the [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) docs to learn more.
+
+```tsx
+'use client'
+import React, { createContext, useContext } from 'react'
+
+const MyCustomContext = React.createContext(myCustomValue)
+
+export const MyProvider: React.FC = ({ children }) => {
+  return (
+    <MyCustomContext.Provider value={myCustomValue}>
+      {children}
+    </MyCustomContext.Provider>
+  )
+}
+
+export const useMyCustomContext = () => useContext(MyCustomContext)
+```
 
 <Banner type="warning">
   <strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider
@@ -241,7 +246,7 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 @import '~payload/scss';
 ```
 
-## Getting the current language
+## Getting the Current Language
 
 When developing custom components you can support multiple languages to be consistent with Payload's i18n support. The best way to do this is to add your translation resources to the [i18n configuration](https://payloadcms.com/docs/configuration/i18n) and import `useTranslation` from `@payloadcms/ui/providers/Translation` in your components.
 
@@ -265,7 +270,7 @@ const CustomComponent: React.FC = () => {
 }
 ```
 
-## Getting the current locale
+## Getting the Current Locale
 
 In any custom component you can get the selected locale with `useLocale` hook. `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
