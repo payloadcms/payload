@@ -1,0 +1,25 @@
+---
+title: Lexical Building Custom Features
+label: Custom Features
+order: 40
+desc: Building custom lexical features
+keywords: lexical, rich text, editor, headless cms, feature, features
+---
+
+Lexical features are self-contained, which means every piece of functionality for your feature is defined in two interfaces:
+one for server-only functionality, and another one for client-only functionality.
+
+Within payload, the convention is to name those feature.server.ts and feature.client.ts. The "main" feature resides in feature.server.ts which is
+what the user will import, and the client feature is imported by the server feature and server-rendered there. That way, we still maintain a clear
+boundary between server and client code, but everything your feature needs is defined in basically one place. Whether it's a toolbar entry, a button,
+a new node, literally anything, you can semantically contain it within one feature.
+
+## Server Feature
+
+In order to get started with a new feature, you should start with the server feature which is the entry-point of your feature.
+
+### Example myFeature/feature.server.ts:
+
+```ts
+
+```
