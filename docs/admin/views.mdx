@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-### Root
+## Custom Root Views
 
 You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views by default, all of which can be overridden:
 
@@ -76,7 +76,7 @@ To add a _new_ view to the [Admin Panel](./overview), simply add another key to 
 
 For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components). For more examples regarding how to customize components, [look at the following examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
 
-### Collections
+## Custom Collection Views
 
 To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views by default, all of which can be overridden:
 
@@ -152,7 +152,7 @@ Here's an example of how you can customize nested views within the `Edit` view i
 
 You can also add _new_ tabs to the `Edit` view by adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
 
-### Globals
+## Custom Global Views
 
 To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views by default, all of which can be overridden:
 

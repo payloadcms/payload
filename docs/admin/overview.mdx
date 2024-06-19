@@ -8,7 +8,7 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) admin panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
 
-The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components). Everything from simple field labels to entire views can be modified or replaced to meet the needs of your editors.
+The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to meet the needs of your editors.
 
 The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components) and the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation).
 
@@ -51,11 +51,11 @@ app/
   If you are not familiar with Next.js project structure, you can [learn more about it here](https://nextjs.org/docs/getting-started/project-structure).
 </Banner>
 
-All Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. For example, `layout.tsx` file within this directory is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes.
+All Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes, among other things.
 
 The `admin` directory contains all the _pages_ related to the interface itself, while the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), respectively. All [admin routes are configurable](#customizing-routes) to meet your application's requirements.
 
-The `custom.scss` file is where you can add or override styles to the Admin Panel. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
+Finally, the `custom.scss` file is where you can add or override styles to the Admin Panel. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
 All auto-generated files will contain the following comments at the top of each file:
 
@@ -130,7 +130,7 @@ To do this, add a `roles` or similar field to your auth-enabled Collection, then
 
 You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application by simply specifying the desired path in your Payload config.
 
-#### Root-level routes
+#### Root-level Routes
 
 You can configure custom paths for the following root-level routes through the `routes` key:
 
@@ -154,7 +154,12 @@ const config = buildConfig({
 })
 ```
 
-#### Admin-level routes
+<Banner type="success">
+  <strong>Note:</strong>
+  You can also swap out entire views out for your own. See [Views](./views) for more information.
+</Banner>
+
+#### Admin-level Routes
 
 You can also configure custom paths for the following admin-level routes through the `admin.routes` key:
 
@@ -186,7 +191,7 @@ const config = buildConfig({
 
 <Banner type="success">
   <strong>Note:</strong>
-  You can also customize routes for Collections and Globals via the `admin.components.views` API. See [Views](./views) for more information.
+  You can also swap out entire views out for your own. See [Views](./views) for more information.
 </Banner>
 
 ## I18n

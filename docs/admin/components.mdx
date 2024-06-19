@@ -8,11 +8,11 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 The [Payload Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components via your Payload config.
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, rendered on the server at compile time. This means that you can freely use the [Local API](../local-api) directly in the front-end.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This means that you can freely use the [Local API](../local-api) directly in the front-end. Custom Components are available for nearly every part of the Admin Panel for granular control.
 
 <Banner type="success">
   <strong>Note:</strong>
-  Client components are still fully supported, simply import and render them within any server component. Ensure they include the `use client` directive and are not passed any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types).
+  Client Components are also fully supported. To use Client Components in your app, simply import them into a Server Component, and render them. Ensure your Client Component includes the `use client` directive and is not passed any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types).
 </Banner>
 
 To swap in your own React component, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component(s) accordingly.
@@ -71,6 +71,31 @@ export default buildConfig({
 })
 ```
 
+### Custom Providers
+
+You can add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) to any Payload app through Custom Providers. As you add more and more Custom Components to your [Admin Panel](./overview), you may want to share state across all of them. To do this, simply add `admin.components.providers` to your Payload config:
+
+```tsx
+'use client'
+import React, { createContext, useContext } from 'react'
+
+const MyCustomContext = React.createContext(myCustomValue)
+
+export const MyProvider: React.FC = ({ children }) => {
+  return (
+    <MyCustomContext.Provider value={myCustomValue}>
+      {children}
+    </MyCustomContext.Provider>
+  )
+}
+
+export const useMyCustomContext = () => useContext(MyCustomContext)
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong> Custom Providers are by definition Client Components. This means they must include the `use client` directive at the top of their files and cannot use server-only code.
+</Banner>
+
 ## Custom Collection Components
 
 You can override components on a Collection-by-Collection basis via the `admin.components` property on any Collection config:
@@ -87,9 +112,9 @@ You can override components on a Collection-by-Collection basis via the `admin.c
 | **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 | **`views`**                | Override or create new [Views](./views) within the [Admin Panel](./overview).                                          |
 
-Here is a full example showing how to swap some of these components for your own:
+Here is a full example showing how to swap some of these components for your own.
 
-`CustomSaveButton.tsx`
+`CustomSaveButton.tsx`:
 
 ```tsx
 import React from 'react'
@@ -109,7 +134,7 @@ export const CustomSaveButton: CustomSaveButtonProps = ({
 }
 ```
 
-`CustomSaveDraftButton.tsx`
+`CustomSaveDraftButton.tsx`:
 
 ```tsx
 import React from 'react'
@@ -131,7 +156,7 @@ export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
 }
 ```
 
-`CustomPublishButton.tsx`
+`CustomPublishButton.tsx`:
 
 ```tsx
 import React from 'react'
@@ -153,7 +178,7 @@ export const CustomPublishButton: CustomPublishButtonProps = ({
 }
 ```
 
-`CustomPreviewButton`
+`CustomPreviewButton.tsx`:
 
 ```tsx
 import React from 'react'
@@ -175,7 +200,7 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 }
 ```
 
-`collection.ts`
+`collection.ts`:
 
 ```ts
 import { CustomSaveButton } from './CustomSaveButton'
@@ -210,35 +235,9 @@ You can override components on a Global-by-Global basis via the `admin.component
 | **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 | **`views`**                    | Override or create new [Views](./views) within the [Admin Panel](./overview).                                          |
 
-## Custom Providers
-
-As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the [Admin Panel](./overview). Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. See the [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) docs to learn more.
-
-```tsx
-'use client'
-import React, { createContext, useContext } from 'react'
-
-const MyCustomContext = React.createContext(myCustomValue)
-
-export const MyProvider: React.FC = ({ children }) => {
-  return (
-    <MyCustomContext.Provider value={myCustomValue}>
-      {children}
-    </MyCustomContext.Provider>
-  )
-}
-
-export const useMyCustomContext = () => useContext(MyCustomContext)
-```
-
-<Banner type="warning">
-  <strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider
-  component for the admin UI to show
-</Banner>
-
 ## Styling Custom Components
 
-Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling, so it blends more thoroughly into the existing admin UI.
+Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-in styling so it blends more thoroughly into the existing admin UI.
 
 To make use of Payload SCSS variables / mixins to use directly in your own components, you can import them as follows:
 
