@@ -1,6 +1,6 @@
 'use client'
 
-import type { EntityToGroup } from '@payloadcms/ui/utilities/groupNavItems'
+import type { EntityToGroup } from '@payloadcms/ui/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 import {

@@ -1,6 +1,6 @@
 import type { EditViewComponent } from 'payload'
 
-import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
+import { SetStepNav } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 

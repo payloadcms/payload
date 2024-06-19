@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'

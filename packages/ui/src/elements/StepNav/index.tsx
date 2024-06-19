@@ -1,7 +1,6 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React, { Fragment } from 'react'
 
 import { PayloadIcon } from '../../graphics/Icon/index.js'
@@ -11,6 +10,8 @@ import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
 import type { StepNavItem } from './types.js'
+
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 
 const baseClass = 'step-nav'
 

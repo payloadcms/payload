@@ -20,56 +20,35 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
-    "./assets": {
-      "import": "./src/assets/index.ts",
-      "types": "./src/assets/index.ts",
-      "default": "./src/assets/index.ts"
-    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
+    "./utilities/buildComponentMap": {
+      "import": "./src/utilities/buildComponentMap.ts",
+      "types": "./src/utilities/buildComponentMap.ts",
+      "default": "./src/utilities/buildComponentMap.ts"
+    },
+    "./utilities/buildFormState": {
+      "import": "./src/utilities/buildFormState.ts",
+      "types": "./src/utilities/buildFormState.ts",
+      "default": "./src/utilities/buildFormState.ts"
+    },
+    "./utilities/buildFieldSchemaMap/traverseFields": {
+      "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
+      "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
+      "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
+    },
+    "./forms/buildStateFromSchema": {
+      "import": "./src/forms/buildStateFromSchema/index.tsx",
+      "types": "./src/forms/buildStateFromSchema/index.tsx",
+      "default": "./src/forms/buildStateFromSchema/index.tsx"
+    },
     "./scss/app.scss": "./src/scss/app.scss",
-    "./styles.css": "./dist/styles.css",
-    "./elements/*": {
-      "import": "./src/elements/*/index.tsx",
-      "types": "./src/elements/*/index.tsx",
-      "default": "./src/elements/*/index.tsx"
-    },
-    "./fields/*": {
-      "import": "./src/fields/*/index.tsx",
-      "types": "./src/fields/*/index.tsx",
-      "default": "./src/fields/*/index.tsx"
-    },
-    "./forms/*": {
-      "import": "./src/forms/*/index.tsx",
-      "types": "./src/forms/*/index.tsx",
-      "default": "./src/forms/*/index.tsx"
-    },
-    "./graphics/*": {
-      "import": "./src/graphics/*/index.tsx",
-      "types": "./src/graphics/*/index.tsx",
-      "default": "./src/graphics/*/index.tsx"
-    },
-    "./hooks/*": {
-      "import": "./src/hooks/*.ts",
-      "types": "./src/hooks/*.ts",
-      "default": "./src/hooks/*.ts"
-    },
-    "./icons/*": {
-      "import": "./src/icons/*/index.tsx",
-      "types": "./src/icons/*/index.tsx",
-      "default": "./src/icons/*/index.tsx"
-    },
-    "./providers/*": {
-      "import": "./src/providers/*/index.tsx",
-      "types": "./src/providers/*/index.tsx",
-      "default": "./src/providers/*/index.tsx"
-    },
-    "./utilities/*": {
-      "import": "./src/utilities/*.ts",
-      "types": "./src/utilities/*.ts",
-      "default": "./src/utilities/*.ts"
+    "./assets": {
+      "import": "./src/assets/index.ts",
+      "types": "./src/assets/index.ts",
+      "default": "./src/assets/index.ts"
     }
   },
   "main": "./src/exports/client/index.ts",
@@ -178,7 +157,6 @@
         "types": "./dist/assets/index.d.ts",
         "default": "./dist/assets/index.js"
       },
-      "./assets/*": "./dist/assets/*",
       "./elements/*": {
         "import": "./dist/elements/*/index.js",
         "types": "./dist/elements/*/index.d.ts",

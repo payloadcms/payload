@@ -1,6 +1,6 @@
 'use client'
 
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useFieldProps } from '@payloadcms/ui'
 import React from 'react'
 
 const CustomLabel = ({ schemaPath }) => {

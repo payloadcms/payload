@@ -1,4 +1,4 @@
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { FieldMap, ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { CollapsedPreferences, Data, FormState } from 'payload'
 

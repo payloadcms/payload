@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/fields/config.ts"
+        "./test/_community/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -45,41 +45,11 @@
       "@payloadcms/live-preview-react": [
         "./packages/live-preview-react/src/index.ts"
       ],
-      "@payloadcms/ui/assets": [
-        "./packages/ui/src/assets/index.ts"
-      ],
-      "@payloadcms/ui/elements/*": [
-        "./packages/ui/src/elements/*/index.tsx"
-      ],
-      "@payloadcms/ui/fields/*": [
-        "./packages/ui/src/fields/*/index.tsx"
-      ],
-      "@payloadcms/ui/forms/*": [
-        "./packages/ui/src/forms/*/index.tsx"
-      ],
-      "@payloadcms/ui/graphics/*": [
-        "./packages/ui/src/graphics/*/index.tsx"
-      ],
-      "@payloadcms/ui/hooks/*": [
-        "./packages/ui/src/hooks/*.ts"
-      ],
-      "@payloadcms/ui/icons/*": [
-        "./packages/ui/src/icons/*/index.tsx"
-      ],
-      "@payloadcms/ui/providers/*": [
-        "./packages/ui/src/providers/*/index.tsx"
-      ],
-      "@payloadcms/ui/templates/*": [
-        "./packages/ui/src/templates/*/index.tsx"
-      ],
-      "@payloadcms/ui/utilities/*": [
-        "./packages/ui/src/utilities/*.ts"
-      ],
       "@payloadcms/ui": [
         "./packages/ui/src/exports/client/index.ts"
       ],
       "@payloadcms/ui/shared": [
-        "packages/ui/src/exports/shared/index.ts"
+        "./packages/ui/src/exports/shared/index.ts"
       ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"

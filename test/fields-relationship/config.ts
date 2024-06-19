@@ -4,7 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { CollectionConfig, FilterOptionsProps } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
+import { withMergedProps } from '@payloadcms/ui/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

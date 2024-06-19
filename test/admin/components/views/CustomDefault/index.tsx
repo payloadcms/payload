@@ -7,8 +7,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { AdminViewProps } from 'payload'
 
-import { Button } from '@payloadcms/ui/elements/Button'
-import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
+import { Button, SetStepNav } from '@payloadcms/ui'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'

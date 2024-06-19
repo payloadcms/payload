@@ -13,7 +13,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 import type { AdminViewProps } from 'payload'
 
 import { MinimalTemplate } from '@payloadcms/next/templates'
-import { Button } from '@payloadcms/ui/elements/Button'
+import { Button } from '@payloadcms/ui'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'

@@ -1,4 +1,4 @@
-import type { StepNavItem } from '@payloadcms/ui/elements/StepNav'
+import type { StepNavItem } from '@payloadcms/ui'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'

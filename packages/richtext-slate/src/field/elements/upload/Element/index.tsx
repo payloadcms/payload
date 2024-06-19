@@ -1,12 +1,13 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   DrawerToggler,
+  File,
   useConfig,
   useDocumentDrawer,
   useDrawerSlug,
@@ -14,7 +15,6 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { File } from '@payloadcms/ui/graphics/File'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'

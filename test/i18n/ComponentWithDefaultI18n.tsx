@@ -1,5 +1,5 @@
 'use client'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 export const ComponentWithDefaultI18n = () => {
