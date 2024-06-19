@@ -13,7 +13,7 @@ import {
   useFieldProps,
   useFormSubmitted,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode.js'

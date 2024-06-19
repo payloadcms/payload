@@ -42,12 +42,23 @@ const TextFields: CollectionConfig = {
       },
     },
     {
+      name: 'defaultString',
+      type: 'text',
+      defaultValue: defaultText,
+    },
+    {
+      name: 'defaultEmptyString',
+      type: 'text',
+      defaultValue: '',
+    },
+    {
       name: 'defaultFunction',
       type: 'text',
       defaultValue: () => defaultText,
     },
     {
       name: 'defaultAsync',
+      type: 'text',
       defaultValue: async (): Promise<string> => {
         return new Promise((resolve) =>
           setTimeout(() => {
@@ -55,7 +66,6 @@ const TextFields: CollectionConfig = {
           }, 1),
         )
       },
-      type: 'text',
     },
     {
       name: 'overrideLength',

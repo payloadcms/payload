@@ -14,7 +14,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormQueryParams,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'

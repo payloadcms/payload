@@ -2,7 +2,7 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui/client'
+import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
 import { EntityType, WithServerSideProps } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 

@@ -93,7 +93,7 @@ export const text = baseField.keys({
       .try(joi.object().pattern(joi.string(), [joi.string()]), joi.string()),
     rtl: joi.boolean(),
   }),
-  defaultValue: joi.alternatives().try(joi.string(), joi.func()),
+  defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
   hasMany: joi.boolean().default(false),
   maxLength: joi.number(),
   maxRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
@@ -149,7 +149,7 @@ export const textarea = baseField.keys({
     rows: joi.number(),
     rtl: joi.boolean(),
   }),
-  defaultValue: joi.alternatives().try(joi.string(), joi.func()),
+  defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
   maxLength: joi.number(),
   minLength: joi.number(),
 })
@@ -167,7 +167,7 @@ export const email = baseField.keys({
     }),
     placeholder: joi.string(),
   }),
-  defaultValue: joi.alternatives().try(joi.string(), joi.func()),
+  defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
   maxLength: joi.number(),
   minLength: joi.number(),
 })
@@ -183,7 +183,7 @@ export const code = baseField.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
     language: joi.string(),
   }),
-  defaultValue: joi.alternatives().try(joi.string(), joi.func()),
+  defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
 })
 
 export const json = baseField.keys({

@@ -2,7 +2,7 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui/client'
+import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'

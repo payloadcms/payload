@@ -2,7 +2,7 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
-import { RootProvider } from '@payloadcms/ui/client'
+import { RootProvider } from '@payloadcms/ui'
 import { buildComponentMap } from '@payloadcms/ui/providers/ComponentMap/buildComponentMap'
 import '@payloadcms/ui/scss/app.scss'
 import { Merriweather } from 'next/font/google'

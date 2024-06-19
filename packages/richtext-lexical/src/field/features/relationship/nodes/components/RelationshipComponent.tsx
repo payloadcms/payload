@@ -5,13 +5,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  useConfig,
-  useDocumentDrawer,
-  usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui/client'
+import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,

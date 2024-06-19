@@ -1,7 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
-import { type Column, SortColumn } from '@payloadcms/ui/client'
+import { type Column, SortColumn } from '@payloadcms/ui'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'

@@ -1,7 +1,6 @@
 import type { Data, FormState } from 'payload'
 
-import flatleyImport from 'flatley'
-const { unflatten: flatleyUnflatten } = flatleyImport
+import { unflatten as flatleyUnflatten } from './unflatten.js'
 
 type ReturnType = {
   data: Data
@@ -35,7 +34,7 @@ export const reduceFieldsToValuesWithValidation = (
   })
 
   if (unflatten) {
-    state.data = flatleyUnflatten(state.data, { safe: true })
+    state.data = flatleyUnflatten(state.data)
   }
 
   return state

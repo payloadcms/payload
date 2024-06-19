@@ -503,6 +503,7 @@ jobs:
 
   generated-templates:
     needs: build
+    if: false # Needs to pull in tgz files from build
     runs-on: ubuntu-latest
 
     steps:

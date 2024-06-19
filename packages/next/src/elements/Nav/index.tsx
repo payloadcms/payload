@@ -1,6 +1,6 @@
 import type { ServerProps } from 'payload'
 
-import { Logout } from '@payloadcms/ui/client'
+import { Logout } from '@payloadcms/ui'
 import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'

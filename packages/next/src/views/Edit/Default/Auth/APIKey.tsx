@@ -9,7 +9,7 @@ import {
   useField,
   useFormFields,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
