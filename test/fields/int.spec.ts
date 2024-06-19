@@ -82,8 +82,13 @@ describe('Fields', () => {
 
     it('creates with default values', () => {
       expect(doc.text).toEqual(text)
+      expect(doc.defaultString).toEqual(defaultText)
       expect(doc.defaultFunction).toEqual(defaultText)
       expect(doc.defaultAsync).toEqual(defaultText)
+    })
+
+    it('supports empty strings as default value', () => {
+      expect(doc.defaultEmptyString).toEqual('')
     })
 
     it('should populate default values in beforeValidate hook', async () => {
