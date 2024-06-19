@@ -1,6 +1,8 @@
 import type { CommitTransaction } from 'payload/database'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
+  if (id instanceof Promise) return
+
   // if the session was deleted it has already been aborted
   if (!this.sessions[id]) {
     return
