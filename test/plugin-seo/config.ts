@@ -47,6 +47,24 @@ export default buildConfigWithDefaults({
   plugins: [
     seoPlugin({
       collections: ['pages'],
+      fieldOverrides: {
+        title: {
+          required: true,
+        },
+      },
+      fields: [
+        {
+          name: 'ogTitle',
+          type: 'text',
+          label: 'og:title',
+        },
+      ],
+      generateDescription: ({ doc }: any) => doc?.excerpt?.value || 'generated description',
+      generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
+      generateURL: ({ doc, locale }: any) =>
+        `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug?.value || ''}`,
+      tabbedUI: true,
+      uploadsCollection: 'media',
     }),
   ],
   typescript: {
