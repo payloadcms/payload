@@ -82,6 +82,8 @@ describe('Fields', () => {
 
     it('creates with default values', () => {
       expect(doc.text).toEqual(text)
+      expect(doc.defaultString).toEqual(defaultText)
+      expect(doc.defaultEmptyString).toEqual('')
       expect(doc.defaultFunction).toEqual(defaultText)
       expect(doc.defaultAsync).toEqual(defaultText)
     })
