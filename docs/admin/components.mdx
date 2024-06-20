@@ -8,36 +8,40 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 The [Payload Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for both easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This means that you can freely use the [Local API](../local-api) directly in the front-end. Custom Components are available for nearly every part of the Admin Panel for granular control.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This means that you can freely use the [Local API](../local-api) directly in the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
   <strong>Note:</strong>
-  Client Components are also fully supported. To use Client Components in your app, simply import them into a Server Component and render them. Ensure your Client Component includes the `use client` directive and is not passed any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types).
+  Client Components continue to be fully supported. To use Client Components in your app, simply import them into a Server Component and render them. Ensure your Client Component includes the `use client` directive and is not passed any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types).
 </Banner>
 
 To swap in your own Custom Component, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component(s) accordingly.
 
 ## Custom Root Components
 
-You can override a set of root components through the `admin.components` property. The following options are available:
+Root Components are those that effect the Admin Panel generally. You can override a set of Root Components through the `admin.components` property of the [Payload Config](../getting-started/overview). The following options are available:
 
-| Path                  | Description                                                                                                                                                                                               |
-|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                       |
+| Path                  | Description                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
 | **`BeforeNavLinks`**  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
 | **`AfterNavLinks`**   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
 | **`BeforeDashboard`** | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
 | **`AfterDashboard`**  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx).|
 | **`BeforeLogin`**     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
 | **`AfterLogin`**      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
-| **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                               |
-| **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                        |
-| **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                     |
-| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire [Admin Panel](./overview). [More](#custom-providers).                             |
-| **`actions`**         | An array of Custom Components to be rendered in the [Admin Panel](./overview) header, providing additional interactivity and functionality.                                                                  |
-| **`views`**           | Override or create new [Views](./views) within the [Admin Panel](./overview).                                                                                                                             |
+| **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
+| **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
+| **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
+| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire [Admin Panel](./overview). [More](#custom-providers).                                       |
+| **`actions`**         | An array of Custom Components to be rendered in the header of the [Admin Panel](./overview), providing additional interactivity and functionality.                                                                  |
+| **`views`**           | Override or create new view within the [Admin Panel](./overview). [More](./views).                                                                                                                                  |
 
-Here is an example showing how to swap some of these components for your own:
+<Banner type="info">
+  <strong>Note:</strong> You can also use the `admin.components` property on any Collection or Global config to set [Custom Collection Components](#custom-collection-components) and [Custom Global Components](#custom-global-components), respectively.
+</Banner>
+
+Here is an example showing how to swap some of the Root Components for your own:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -100,7 +104,7 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 
 ## Custom Collection Components
 
-You can override components on a Collection-by-Collection basis via the `admin.components` property on any Collection config:
+Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview). You can override a set of Collection Components through the `admin.components` property on any [Collection Config](../configuration/collections). The following options are available:
 
 | Path                       | Description                                                                                                            |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -112,9 +116,9 @@ You can override components on a Collection-by-Collection basis via the `admin.c
 | **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
 | **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-| **`views`**                | Override or create new [Views](./views) within the [Admin Panel](./overview).                                          |
+| **`views`**                | Override or create new view within the [Admin Panel](./overview). [More](./views).                                     |
 
-Here is an example showing how to swap some of these components for your own.
+Here is an example showing how to swap some of the Collection Components for your own.
 
 `CustomSaveButton.tsx`:
 
@@ -146,7 +150,7 @@ export const MyCollection: SanitizedCollectionConfig = {
   admin: {
     components: {
       edit: {
-        SaveButton: CustomSaveButton,
+        SaveButton: CustomSaveButton, // highlight-line
       },
     },
   },
@@ -155,7 +159,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 ## Custom Global Components
 
-You can override components on a Global-by-Global basis via the `admin.components` property on any Global config:
+Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview). You can override a set of Global Components through the `admin.components` property on any [Global Config](../configuration/globals). The following options are available:
 
 | Path                           | Description                                                                                                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
@@ -163,17 +167,32 @@ You can override components on a Global-by-Global basis via the `admin.component
 | **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
 | **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-| **`views`**                    | Override or create new [Views](./views) within the [Admin Panel](./overview).                                          |
+| **`views`**                    | Override or create new view within the [Admin Panel](./overview). [More](./views).                                     |
 
 ## Styling Custom Components
 
-Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-in styling so it blends more thoroughly into the existing admin UI.
+Payload exposes its [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) so that you can style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes.
 
-To make use of Payload SCSS variables / mixins to use directly in your own components, you can import them as follows:
+For example, to colorize your component you can use the following CSS:
 
+```scss
+.my-component {
+  background-color: var(--theme-elevation-500);
+}
 ```
+
+<Banner type="info">
+  <strong>Note:</strong>
+  For a full list of available CSS Variables, inspect the `:root` element in the Admin Panel.
+</Banner>
+
+Payload also exports its [SCSS](https://sass-lang.com) variables and mixins for reuse. To make use of Payload's SCSS library directly in your Custom Components, you can import it as follows:
+
+```scss
 @import '~payload/scss';
 ```
+
+You can also set global CSS to easily control or override app-wide styles. More on that [here](./customizing-css).
 
 ## Getting the Current Language
 
@@ -185,9 +204,7 @@ For example:
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
 const CustomComponent: React.FC = () => {
-  // highlight-start
-  const { t, i18n } = useTranslation()
-  // highlight-end
+  const { t, i18n } = useTranslation() // highlight-line
 
   return (
     <ul>
@@ -207,9 +224,7 @@ In any custom component you can get the selected locale with `useLocale` hook. `
 import { useLocale } from '@payloadcms/ui'
 
 const Greeting: React.FC = () => {
-  // highlight-start
-  const locale = useLocale()
-  // highlight-end
+  const locale = useLocale() // highlight-line
 
   const trans = {
     en: 'Hello',
