@@ -600,7 +600,7 @@ describe('Versions', () => {
         const result = await payload.db.queryDrafts({
           collection,
           where: {
-            id: {
+            parent: {
               in: drafts.docs.map(({ id }) => id),
             },
             // appendVersionToQueryKey,
@@ -684,6 +684,13 @@ describe('Versions', () => {
           data: {
             description: 'B',
             title: 'B',
+          },
+        })
+
+        const result = await payload.find({
+          collection: 'version-posts',
+          where: {
+            updatedAt: { less_than_equal: '2027-01-01T00:00:00.000Z' },
           },
         })
 
