@@ -64,9 +64,51 @@ export const MyProvider: React.FC<{children?: any}= ({ children }) ={
 
 Instead, use the new `beforeDuplicate` field-level hook which take the usual field hook arguments.
 
-
+#### Old
 ```tsx
-// TODO: add snippet here of old vs new
+// payload.config.ts
+
+import type { CollectionConfig } from 'payload/types'
+
+export const PostsCollection: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    hooks: {
+      beforeDuplicate: ({ data }) => {
+        return {
+          ...data,
+          title: `${data.title}-duplicate`
+        }
+      }
+    }
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+  ],
+}
+```
+
+#### New
+```tsx
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+
+export const PostsCollection: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      hooks: {
+        beforeDuplicate: [
+          ({ data }) => `${data.text}-duplicate`
+        ],
+      },
+    },
+  ],
+}
 ```
 
 6. Import all Payload React components via the `@payloadcms/ui` package instead of `payload`:
