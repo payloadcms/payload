@@ -103,7 +103,7 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
       hooks: {
         beforeDuplicate: [
-          ({ data }) => `${data.text}-duplicate`
+          ({ data }) => `${data.title}-duplicate`
         ],
       },
     },
