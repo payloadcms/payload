@@ -408,6 +408,7 @@ export const MyClientComponent = {
       >
         Increment
       </button>
+      <span>Count: {count}</span>
     </div>
   )
 }
@@ -474,6 +475,7 @@ export const ServerRenderedDescription = () => <ClientRenderedDescription />
 
 
 // file: components/ClientRenderedDescription.tsx
+'use client'
 import React from 'react'
 import type { DescriptionComponent } from 'payload'
 import { useFieldProps, useFormFields } from '@payloadcms/ui'
@@ -532,6 +534,7 @@ export const ServerRenderedCollapsibleLabel = () => <ClientCollapsibleLabel />
 
 
 // file: components/ClientCollapsibleLabel.tsx
+'use client'
 import React from 'react'
 import { useFieldProps, useFormFields } from '@payloadcms/ui'
 
@@ -585,6 +588,7 @@ export const ServerRenderedTitleCell = () => <ClientTitleCell />
 
 
 // file: components/ClientTitleCell.tsx
+'use client'
 import React from 'react'
 import { useTableCell } from '@payloadcms/ui'
 
@@ -643,6 +647,7 @@ export const ServerRenderedArrayRowLabel = () => <ClientArrayRowLabel />
 
 
 // file: components/ClientArrayRowLabel.tsx
+'use client'
 import React from 'react'
 import { useRowLabel } from '@payloadcms/ui'
 
