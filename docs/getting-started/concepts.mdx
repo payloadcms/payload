@@ -135,9 +135,9 @@ If you were to query the Posts endpoint at, say, `http://localhost:3000/api/post
 }
 ```
 
-Notice how the `user.author` is fully populated, but `user.author.department` is left as a document ID? That's because the User collection counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
+Notice how the `post.author` is fully populated, but `post.author.department` is left as a document ID? That's because the User collection counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
 
-To populate `user.author.department` in it's entirety you could specify `?depth=2` or _higher_.
+To populate `post.author.department` in it's entirety you could specify `?depth=2` or _higher_.
 
 ```
 // ?depth=2
