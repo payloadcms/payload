@@ -10,8 +10,14 @@ export const subscribe = <T>(args: {
   const { apiRoute, callback, depth, initialData, serverURL } = args
 
   const onMessage = async (event: MessageEvent) => {
-    const mergedData = await handleMessage<T>({ apiRoute, depth, event, initialData, serverURL })
-    callback(mergedData)
+    if (
+      event.origin === serverURL &&
+      typeof event.data === 'object' &&
+      event.data.type === 'payload-live-preview'
+    ) {
+      const mergedData = await handleMessage<T>({ apiRoute, depth, event, initialData, serverURL })
+      callback(mergedData)
+    }
   }
 
   if (typeof window !== 'undefined') {
