@@ -32,7 +32,7 @@ export function groupNavItems(
     (groups, entityToGroup) => {
       if (
         permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read
-          .permission
+          ?.permission
       ) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
         if (entityToGroup.entity.admin.group) {
