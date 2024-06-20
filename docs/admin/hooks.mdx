@@ -114,7 +114,7 @@ const ExampleComponent: React.FC = () => {
 
 #### Updating other fields' values
 
-If you are building a custom component, then you should use `setValue` which is returned from the `useField` hook to programmatically set your field's value. But if you're looking to update _another_ field's value, you can use `dispatchFields` returned from `useFormFields`.
+If you are building a Custom Component, then you should use `setValue` which is returned from the `useField` hook to programmatically set your field's value. But if you're looking to update _another_ field's value, you can use `dispatchFields` returned from `useFormFields`.
 
 You can send the following actions to the `dispatchFields` function.
 
@@ -397,7 +397,7 @@ export const CustomArrayManager = () => {
 }`}
 </pre>
 
-  <p>An example config to go along with the custom component</p>
+  <p>An example config to go along with the Custom Component</p>
   <pre>
 {`const ExampleCollection = {
   slug: "example-collection",
@@ -494,7 +494,7 @@ export const CustomArrayManager = () => {
 }`}
 </pre>
 
-  <p>An example config to go along with the custom component</p>
+  <p>An example config to go along with the Custom Component</p>
   <pre>
 {`const ExampleCollection = {
   slug: "example-collection",
@@ -604,7 +604,7 @@ export const CustomArrayManager = () => {
 }`}
 </pre>
 
-  <p>An example config to go along with the custom component</p>
+  <p>An example config to go along with the Custom Component</p>
   <pre>
 {`const ExampleCollection = {
   slug: "example-collection",
@@ -714,7 +714,7 @@ const LinkFromCategoryToPosts: React.FC = () => {
 
 ## useLocale
 
-In any custom component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
 'use client'

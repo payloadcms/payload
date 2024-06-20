@@ -6,31 +6,43 @@ desc:
 keywords:
 ---
 
+Views are the individual pages that make up the [Admin Panel](./overview), such as the Dashboard, List, and Edit views. One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./components) that can either replace built-in ones, or add entirely new ones.
+
+To swap in your own Custom Views, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
+
+There are three types of views in Payload:
+
+- [Root Views](#custom-root-views)
+- [Collection Views](#custom-collection-views)
+- [Global Views](#custom-global-views)
+
 ## Custom Root Views
 
-You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views by default, all of which can be overridden:
+Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views. You can easily swap Root Views with your own, or [create entirely new ones](#adding-new-root-views), through the `admin.components.views` property of your [Payload Config](../configuration/overview).
+
+Here is an example showing what it might look like to swap out Root Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    components: {
+      views: {
+        Dashboard: MyCustomDashboardView, // highlight-line
+      },
+    },
+  },
+})
+```
+
+The following options are available:
 
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
 | **`Account`**   | The Account view is used to show the currently logged in user's Account page. |
 | **`Dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
-
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. For example:
-
-```ts
-// payload.config.ts
-{
-  // ...
-  admin: {
-    components: {
-      views: {
-        Account: MyCustomAccountView,
-        Dashboard: MyCustomDashboardView,
-      },
-    },
-  },
-}
-```
 
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
@@ -44,25 +56,28 @@ For more granular control, pass a configuration object instead. Payload exposes 
 
 _\* An asterisk denotes that a property is required._
 
-#### Adding new root views
+#### Adding New Root Views
 
-To add a _new_ view to the [Admin Panel](./overview), simply add another key to the `views` object with at least a `path` and `Component` property. For example:
+To add a _new_ Root View to the [Admin Panel](./overview), simply add another key to the `views` object with at least a `path` and `Component` property. For example:
 
 ```ts
-// payload.config.ts
-{
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
   // ...
   admin: {
     components: {
       views: {
+        // highlight-start
         MyCustomView: {
           Component: MyCustomView,
           path: '/my-custom-view',
         },
+        // highlight-end
       },
     },
   },
-}
+})
 ```
 
 <Banner type="warning">
@@ -74,7 +89,7 @@ To add a _new_ view to the [Admin Panel](./overview), simply add another key to 
   route.
 </Banner>
 
-For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components). For more examples regarding how to customize components, [look at the following examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
+For help on how to build your own custom view components, see [Building Custom Views](#building-custom-views).
 
 ## Custom Collection Views
 
@@ -85,7 +100,7 @@ To swap out entire views on collections, you can use the `admin.components.views
 | **`Edit`** | The Edit view is used to edit a single document for a given collection.   |
 | **`List`** | The List view is used to show a list of documents for a given collection. |
 
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, tabs, etc, _as well as all nested routes_.
+To swap out any of these views, simply pass in your Custom Component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, tabs, etc, _as well as all nested routes_.
 
 ```ts
 // Collection.ts
@@ -102,7 +117,7 @@ To swap out any of these views, simply pass in your custom component to the `adm
 }
 ```
 
-For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components).
+For help on how to build your own custom view components, see [Building Custom Views](#building-custom-views).
 
 **Customizing Nested Views within 'Edit' in Collections**
 
@@ -160,7 +175,7 @@ To swap out views for globals, you can use the `admin.components.views` property
 | ---------- | ------------------------------------------------------------------- |
 | **`Edit`** | The Edit view is used to edit a single document for a given Global. |
 
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, and tabs, _as well as all nested views_.
+To swap out any of these views, simply pass in your Custom Component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, and tabs, _as well as all nested views_.
 
 ```ts
 // Global.ts
@@ -176,7 +191,7 @@ To swap out any of these views, simply pass in your custom component to the `adm
 }
 ```
 
-For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components).
+For help on how to build your own Custom Views, see [Building Custom Views](#building-custom-views).
 
 **Customizing Nested Views within 'Edit' in Globals**
 
@@ -288,9 +303,9 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-### Building Custom View Components
+### Building Custom Views
 
-Your custom view components will be provided with the following props:
+Your Custom Views will be provided with the following props:
 
 | Prop                    | Description                                                                  |
 | ----------------------- | ---------------------------------------------------------------------------- |
@@ -303,13 +318,3 @@ Your custom view components will be provided with the following props:
   It's up to you to secure your custom views. If your view requires a user to be logged in or to
   have certain access rights, you should handle that within your view component yourself.
 </Banner>
-
-### Examples
-
-You can find examples of custom views in the [Payload source code `/test/admin/components/views` folder](https://github.com/payloadcms/payload/tree/main/test/admin/components/views). There, you'll find two custom views:
-
-1. A custom view that uses the `DefaultTemplate`, which is the built-in Payload template that displays the sidebar and "eyebrow nav"
-1. A custom view that uses the `MinimalTemplate` - which is just a centered template used for things like logging in or out
-
-To see how to pass in your custom views to create custom views of your own, take a look at the `admin.components.views` property of the [Payload test admin config](https://github.com/payloadcms/payload/blob/main/test/admin/config.ts).
-
