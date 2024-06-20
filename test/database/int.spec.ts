@@ -74,6 +74,53 @@ describe('database', () => {
     })
   })
 
+  describe('timestamps', () => {
+    it('should have createdAt and updatedAt timetstamps to the millisecond', async () => {
+      const result = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const createdAtDate = new Date(result.createdAt)
+
+      expect(createdAtDate.getMilliseconds()).toBeDefined()
+    })
+
+    it('should allow createdAt to be set in create', async () => {
+      const createdAt = new Date('2021-01-01T00:00:00.000Z')
+      const result = await payload.create({
+        collection: 'posts',
+        data: {
+          createdAt,
+          title: 'hello',
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: 'posts',
+      })
+
+      expect(result.createdAt).toStrictEqual(createdAt.toISOString())
+      expect(doc.createdAt).toStrictEqual(createdAt.toISOString())
+    })
+
+    it('updatedAt cannot be set in create', async () => {
+      const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
+      const result = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'hello',
+          updatedAt,
+        },
+      })
+
+      expect(result.updatedAt).not.toStrictEqual(updatedAt)
+    })
+  })
+
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
