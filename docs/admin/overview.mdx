@@ -132,7 +132,7 @@ You have full control over the routes that Payload binds itself to. This include
 
 #### Root-level Routes
 
-You can configure custom paths for the following root-level routes through the `routes` property:
+Root-level routes are those that are not behind the `/admin` path. You can configure custom paths for the following root-level routes through the `routes` property:
 
 | Option             | Default route           | Description                           |
 | ------------------ | ----------------------- | ------------------------------------- |
@@ -191,7 +191,7 @@ const config = buildConfig({
 
 <Banner type="success">
   <strong>Note:</strong>
-  You can also swap out entire _views_ out for your own using the `admin.views` property of the Payload config. See [Custom Views](./views) for more information.
+  You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload config. See [Custom Views](./views) for more information.
 </Banner>
 
 ## I18n

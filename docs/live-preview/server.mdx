@@ -40,8 +40,9 @@ import config from '../payload.config'
 export default async function Page() {
   const payload = await getPayloadHMR({ config })
 
-  const page = await payload.find({
+  const page = await payload.findByID({
     collection: 'pages',
+    id: '123',
     draft: true
   })
 
