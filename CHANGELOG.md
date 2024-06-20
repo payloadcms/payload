@@ -1,3 +1,25 @@
+## [2.22.0](https://github.com/payloadcms/payload/compare/v2.21.0...v2.22.0) (2024-06-20)
+
+
+### Features
+
+* passes prev value through to validate functions ([#6805](https://github.com/payloadcms/payload/issues/6805)) ([0a51de7](https://github.com/payloadcms/payload/commit/0a51de7623d7c7790db52f0cc3e431b5ec3436f2))
+
+
+### Bug Fixes
+
+* adjust json field schema for defaultValue ([#6872](https://github.com/payloadcms/payload/issues/6872)) ([58427ff](https://github.com/payloadcms/payload/commit/58427ffae3e0c1159fae817850b4c1770f43b9b9))
+* array row validation messages ([#6780](https://github.com/payloadcms/payload/issues/6780)) ([68ea693](https://github.com/payloadcms/payload/commit/68ea693a88714951661464917d5df10a416a5ca0))
+* cannot use empty string in defaultValue on text-like fields ([#6842](https://github.com/payloadcms/payload/issues/6842)) ([3364385](https://github.com/payloadcms/payload/commit/336438506ce5e54065f59a0352531e0255f5313d))
+* corrects redirect with lonely slash on login ([#6784](https://github.com/payloadcms/payload/issues/6784)) ([dae56e6](https://github.com/payloadcms/payload/commit/dae56e60eef9e6456d9c51e7fc3b995a32e56f5e))
+* **db-postgres:** cascade delete FKs on hasMany relationships ([#6735](https://github.com/payloadcms/payload/issues/6735)) ([9ecc6c8](https://github.com/payloadcms/payload/commit/9ecc6c889929a07d1163919eac14c9b33b90208a))
+* **payload, db-mongodb:** querying relationships with `in` & `not_in` ([#6773](https://github.com/payloadcms/payload/issues/6773)) ([f6ba3be](https://github.com/payloadcms/payload/commit/f6ba3befaeb02edca66f04fbc2ea91d2d2549d08)), closes [#6741](https://github.com/payloadcms/payload/issues/6741)
+* **plugin-cloud-storage:** missing error handling for invalid plugin config, leading to unexpected webpack errors ([#6786](https://github.com/payloadcms/payload/issues/6786)) ([015aafd](https://github.com/payloadcms/payload/commit/015aafda758938028c37a96e9b5fe62902757b09))
+* **ui:** withinCollapsible always false from useCollapsible provider ([#6783](https://github.com/payloadcms/payload/issues/6783)) ([9f0aaf0](https://github.com/payloadcms/payload/commit/9f0aaf066e76210a85faf43b2b5dc5129ccf3879)), closes [#6760](https://github.com/payloadcms/payload/issues/6760)
+* unflattening json objects containing keys with periods ([#6834](https://github.com/payloadcms/payload/issues/6834)) ([025306f](https://github.com/payloadcms/payload/commit/025306f9e685c030956dad3b0f0158c1dce49668)), closes [#5378](https://github.com/payloadcms/payload/issues/5378)
+* upgrade swc, fixing swc issues on linux ([#6809](https://github.com/payloadcms/payload/issues/6809)) ([1c986a9](https://github.com/payloadcms/payload/commit/1c986a98321163c921cb071a160b6fa9fc8bd9ee))
+
+
 ## [2.21.0](https://github.com/payloadcms/payload/compare/v2.20.0...v2.21.0) (2024-06-14)
 
 
