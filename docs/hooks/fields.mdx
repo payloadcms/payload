@@ -212,14 +212,14 @@ user-friendly.
 Payload exports a type for field hooks which can be accessed and used as follows:
 
 ```ts
-import type { FieldHook } from 'payload/types'
+import type { FieldHookArgs } from 'payload/types'
 
-// Field hook type is a generic that takes three arguments:
+// Field hook args type is a generic that takes three arguments:
 // 1: The document type
 // 2: The value type
 // 3: The sibling data type
 
-type ExampleFieldHook = FieldHook<ExampleDocumentType, string, SiblingDataType>
+type ExampleFieldHook = FieldHookArgs<ExampleDocumentType, string, SiblingDataType>
 
 const exampleFieldHook: ExampleFieldHook = (args) => {
   const {
