@@ -149,10 +149,10 @@ export const buildTable = ({
 
   if (timestamps) {
     columns.createdAt = text('created_at')
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
       .notNull()
     columns.updatedAt = text('updated_at')
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
       .notNull()
   }
 
