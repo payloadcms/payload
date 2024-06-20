@@ -64,10 +64,9 @@ export const MyProvider: React.FC<{children?: any}= ({ children }) ={
 
 Instead, use the new `beforeDuplicate` field-level hook which take the usual field hook arguments.
 
-#### Old
 ```tsx
-// payload.config.ts
-
+// ❌ Before
+// file: collections/Posts.ts
 import type { CollectionConfig } from 'payload/types'
 
 export const PostsCollection: CollectionConfig = {
@@ -91,9 +90,10 @@ export const PostsCollection: CollectionConfig = {
 }
 ```
 
-#### New
 ```tsx
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+// ✅ After
+// file: collections/Posts.ts
+import type { CollectionConfig } from 'payload'
 
 export const PostsCollection: CollectionConfig = {
   slug: 'posts',
@@ -326,7 +326,7 @@ import {
   BlocksDrawer,
   Column,
   ComponentMap,
-  DefaultBlockImage,  
+  DefaultBlockImage,
   DeleteMany,
   DocumentControls,
   DocumentFields,
@@ -359,7 +359,7 @@ import {
   SetStepNav,
   SetViewActions,
   SortColumn,
-  StepNavItem,  
+  StepNavItem,
   UnpublishMany,
   ViewDescription,
   WatchChildErrors,
@@ -374,18 +374,42 @@ import {
 All Custom Components are now server-rendered, and therefore, cannot use state or hooks directly. If you’re using Custom Components in your app that requires state or hooks, define your component in a separate file with the `'use client'` directive at the top, then render *that* client component within your server component. Remember you can only pass serializable props to this component, so props cannot be blindly spread.
 
 ```tsx
+// file: components/MyServerComponent.tsx
 import React from 'react'
 import type { ServerOnlyProps } from './types.ts'
-import MyClientComponent from './client.tsx'
+import { MyClientComponent } from './MyClientComponent.tsx'
 
 export const MyServerComponent: React.FC<ServerOnlyProps= (serverOnlyProps) ={
-    const clientOnlyProps = {
-      // ... sanitize server-only props here as needed
-    }
+  const clientOnlyProps = {
+    // ... sanitize server-only props here as needed
+  }
 
-    return (
-      <MyClientComponent {...clientOnlyProps} />
-    )
+  return (
+    <MyClientComponent {...clientOnlyProps} />
+  )
+}
+
+
+// file: components/MyClientComponent.tsx
+'use client'
+import React from 'react'
+
+export const MyClientComponent = {
+  const [count, setCount] = React.useState(0)
+
+  return (
+    <div>
+      <h1>This component uses state, it MUST be a client component</h1>
+      <button
+        type="button"
+        onClick(() => {
+          setCount(prevCount => prevCount + 1)
+        })
+      >
+        Increment
+      </button>
+    </div>
+  )
 }
 ```
 
@@ -395,9 +419,10 @@ Use `admin.custom` properties will be available in both server and client bundle
 
 
 ```tsx
-// payload.config.ts
+// file: payload.config.ts
+import { buildConfig } from 'payload'
 
-buildConfig({
+export default buildConfig({
   // Server Only
   custom: {
     someProperty: 'value'
@@ -416,18 +441,51 @@ This is because we cannot pass your `description` function to the client for exe
 
 
 ```tsx
-// TODO: add config snippet for total clarity
+// file: payload.config.ts
+import { buildConfig } from 'payload'
+import  { ServerRenderedDescription } from './components/ServerRenderedDescription.tsx'
 
+export default buildConfig({
+  // ...
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          admin: {
+            description: ServerRenderedDescription
+          }
+        },
+      ]
+    }
+  ]
+  // ...
+})
+
+
+// file: components/ServerRenderedDescription.tsx
 import React from 'react'
-// TODO: get rest of imports
 
-export const CustomFieldDescriptionComponent: DescriptionComponent = () ={
+import { ClientRenderedDescription } from './ClientRenderedDescription.tsx'
+
+export const ServerRenderedDescription = () => <ClientRenderedDescription />
+
+
+// file: components/ClientRenderedDescription.tsx
+import React from 'react'
+import type { DescriptionComponent } from 'payload'
+import { useFieldProps, useFormFields } from '@payloadcms/ui'
+
+export const ClientRenderedDescription: DescriptionComponent = () ={
   const { path } = useFieldProps()
-  const { value } = useFormFields(([fields]) =fields[path])
+  const { value } = useFormFields(([fields]) => fields[path])
+  const customDescription = `Component description: ${path} - ${value}`
 
   return (
     <div>
-      {`Component description: ${path} - ${value}`}
+      {customDescription}
     </div>
   )
 }
@@ -439,19 +497,50 @@ This is because we cannot pass your `label` function to the client for execution
 
 
 ```tsx
-// TODO: add config snippet for total clarity
+// file: payload.config.ts
+import { buildConfig } from 'payload'
+import  { ServerRenderedCollapsibleLabel } from './components/ServerRenderedCollapsibleLabel.tsx'
+
+export default buildConfig({
+  // ...
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          type: 'collapsible',
+          label: ServerRenderedCollapsibleLabel
+          fields: [
+            {
+              name: 'fieldInCollapsible',
+              type: 'text',
+            }
+          ]
+        },
+      ]
+    }
+  ]
+  // ...
+})
+
+
+// file: components/ServerRenderedCollapsibleLabel.tsx
 import React from 'react'
-// TODO: get rest of imports
+import { ClientCollapsibleLabel } from './ClientCollapsibleLabel.tsx'
 
-export const CustomFieldLabelComponent: LabelComponent = () => {
+export const ServerRenderedCollapsibleLabel = () => <ClientCollapsibleLabel />
+
+
+// file: components/ClientCollapsibleLabel.tsx
+import React from 'react'
+import { useFieldProps, useFormFields } from '@payloadcms/ui'
+
+export const ClientCollapsibleLabel = () => {
   const { path } = useFieldProps()
-  const { value } = useFormFields(([fields]) =fields[path])
+  const { value } = useFormFields(([fields]) => fields[path])
+  const customLabel = `${value?.fieldInCollapsible || 'Untitled Collapsible'}`
 
-  return (
-    <div>
-      {`Component label: ${path} - ${value}`}
-    </div>
-  )
+  return <div>{customLabel}</div>
 }
 ```
 
@@ -461,17 +550,51 @@ If using a custom component, you must now get the data yourself via the `useTabl
 
 
 ```tsx
-// TODO: add config snippet for total clarity
+// file: payload.config.ts
+import { buildConfig } from 'payload'
+import  { ServerRenderedTitleCell } from './components/ServerRenderedTitleCell.tsx'
 
+export default buildConfig({
+  // ...
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          admin: {
+            components: {
+              Cell: ServerRenderedTitleCell
+            }
+          }
+        }
+      ]
+    }
+  ]
+  // ...
+})
+
+
+// file: components/ServerRenderedTitleCell.tsx
 import React from 'react'
-// TODO: get rest of imports
 
-export const CustomCellComponent: CellComponent = () ={
+import { ClientTitleCell } from './ClientTitleCell.tsx'
+
+export const ServerRenderedTitleCell = () => <ClientTitleCell />
+
+
+// file: components/ClientTitleCell.tsx
+import React from 'react'
+import { useTableCell } from '@payloadcms/ui'
+
+export const ClientTitleCell: CellComponent = () ={
   const { cellData, rowData } = useTableCell()
+  const customCellText = `Component cell: ${cellData}`
 
   return (
     <div>
-      {`Component cell: ${cellData}`}
+      {customCellText}
     </div>
   )
 }
@@ -480,48 +603,53 @@ export const CustomCellComponent: CellComponent = () ={
 12. `admin.components.RowLabel` no longer accepts a function, instead use a custom component and make use of the `useRowLabel` hook:
 
 ```tsx
-// ❌ Before
+// file: payload.config.ts
+import { buildConfig } from 'payload'
+import  { ServerRenderedArrayRowLabel } from './components/ServerRenderedArrayRowLabel.tsx'
 
-// Field config
-{
-  type: 'array',
-  admin: {
-    components: {
-      RowLabel: ({ data }) ={
-        console.log(data)
-        return data?.title || 'Untitled'
-      },
+export default buildConfig({
+  // ...
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'people',
+          type: 'array',
+          admin: {
+            components: {
+              RowLabel: ServerRenderedArrayRowLabel
+            }
+          },
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            }
+          ]
+        }
+      ]
     }
-  }
-}
-```
+  ]
+  // ...
+})
 
-```tsx
-// ✅ After
 
-// Field config
-{
-  type: 'array',
-  admin: {
-    components: {
-      RowLabel: ArrayRowLabel
-    }
-  }
-}
-
-// Custom Component
-'use client'
-
-import type { RowLabelComponent } from 'payload/types'
-
-import { useRowLabel } from '@payloadcms/ui/forms/RowLabel/Context'
+// file: components/ServerRenderedArrayRowLabel.tsx
 import React from 'react'
+import { ClientRowLabel } from './ClientRowLabel.tsx'
 
-export const ArrayRowLabel: RowLabelComponent = () ={
-  const { data } = useRowLabel<{ title: string }>()
-  return (
-    <div>{data.title || 'Untitled'}</div>
-  )
+export const ServerRenderedArrayRowLabel = () => <ClientArrayRowLabel />
+
+
+// file: components/ClientArrayRowLabel.tsx
+import React from 'react'
+import { useRowLabel } from '@payloadcms/ui'
+
+export const ClientArrayRowLabel = () => {
+  const { data } = useRowLabel()
+
+  return <div>{data?.name || 'No Name'}</div>
 }
 ```
 
