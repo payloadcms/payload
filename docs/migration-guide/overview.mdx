@@ -33,6 +33,7 @@ Instead for any global styles you can:
 
 ```tsx
 // payload.config.js
+import { MyProvider } from './providers/MyProvider'
 
 //...
 admin: {
@@ -44,20 +45,18 @@ admin: {
 },
 //...
 
-// MyProvider.tsx
+// providers/MyProvider.tsx
 
 import React from 'react'
 import './globals.css'
 
-const MyProvider: React.FC<{children?: any}= ({ children }) ={
+export const MyProvider: React.FC<{children?: any}= ({ children }) ={
   return (
     <React.fragment>
       {children}
     </React.fragment>
   )
 }
-
-export default Provider
 ```
 
 4. The `admin.indexHTML` property has been removed.
@@ -78,9 +77,254 @@ If you were previously importing components into your app from the `payload` pac
 - Migrate your component (if necessary, see next bullet)
 
 ```tsx
-import { Button } from '@payloadcms/ui/elements/Button'
+import {
+  // Form Fields
+  ArrayField,
+  BlocksField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  ConfirmPasswordField,
+  DateTimeField,
+  EmailField,
+  GroupField,
+  HiddenField,
+  JSONField,
+  NumberField,
+  PasswordField,
+  PointField,
+  RadioGroupField,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectField,
+  TabsField,
+  TextField,
+  TextareaField,
+  UIField,
+  Upload,
+  UploadField,
 
-// TODO: Add new full list of exports
+  // Input Elements
+  HiddenInput,
+  TextInput,
+  TextareaInput,
+  UploadInput,
+
+  // Hooks
+  useActions,
+  useAddClientFunction,
+  useAllFormFields,
+  useAuth,
+  useClientFunctions,
+  useComponentMap,
+  useConfig,
+  useDebounce,
+  useDebouncedCallback,
+  useDebouncedEffect,
+  useDelay,
+  useDelayedRender,
+  useDocumentDrawer,
+  useDocumentEvents,
+  useDocumentInfo,
+  useDrawerSlug,
+  useEditDepth,
+  useEntityVisibility,
+  useField,
+  useFieldComponents,
+  useFieldProps,
+  useForm,
+  useFormFields,
+  useFormInitializing,
+  useFormModified,
+  useFormProcessing,
+  useFormQueryParams,
+  useFormSubmitted,
+  useHotkey,
+  useIntersect,
+  useListDrawer,
+  useListInfo,
+  useListQuery,
+  useLocale,
+  useModal,
+  useNav,
+  useOperation,
+  useParams,
+  usePayloadAPI,
+  usePreferences,
+  useResize,
+  useRouteCache,
+  useRowLabel,
+  useScrollInfo,
+  useSearchParams,
+  useSelection,
+  useStepNav,
+  useTableCell,
+  useTheme,
+  useThrottledEffect,
+  useTranslation,
+  useUseTitleField,
+  useWatchForm,
+  useWindowInfo,
+
+  // Providers
+  ActionsProvider,
+  AuthProvider,
+  ClientFunctionProvider,
+  ComponentMapProvider,
+  ConfigProvider,
+  DocumentEventsProvider,
+  DocumentInfoProvider,
+  EditDepthProvider,
+  EntityVisibilityProvider,
+  FieldComponentsProvider,
+  FieldPropsProvider,
+  FormQueryParamsProvider,
+  ListInfoProvider,
+  ListQueryProvider,
+  LocaleProvider,
+  OperationProvider,
+  ParamsProvider,
+  PreferencesProvider,
+  RelationshipProvider,
+  RootProvider,
+  RouteCacheProvider,
+  RowLabelProvider,
+  ScrollInfoProvider,
+  SearchParamsProvider,
+  SelectionProvider,
+  TableCellProvider,
+  TableColumnsProvider,
+  ThemeProvider,
+  TranslationProvider,
+  WindowInfoProvider,
+
+  // View Components
+  Account,
+  Logout,
+
+  // Elements
+  Button,
+  Card,
+  Collapsible,
+  CopyToClipboard,
+  DefaultPublishButton,
+  Drawer,
+  DrawerToggler,
+  ErrorPill,
+  Gutter,
+  Hamburger,
+  LoadingOverlay,
+  LoadingOverlayToggle,
+  Modal,
+  NavGroup,
+  NavToggler,
+  Pagination,
+  PerPage,
+  Pill,
+  Popup,
+  PopupList,
+  PublishButton,
+  RenderTitle,
+  RowLabel,
+  ShimmerEffect,
+  StaggeredShimmers,
+  Table,
+  Thumbnail,
+  Tooltip,
+  Translation,
+
+  // Icons
+  CalendarIcon,
+  CheckIcon,
+  ChevronIcon,
+  CloseMenuIcon,
+  CodeBlockIcon,
+  CopyIcon,
+  DragHandleIcon,
+  EditIcon,
+  LineIcon,
+  LinkIcon,
+  LogOutIcon,
+  MenuIcon,
+  MinimizeMaximizeIcon,
+  MoreIcon,
+  PlusIcon,
+  SearchIcon,
+  SwapIcon,
+  XIcon,
+
+  // Constant Variables
+  defaultTheme,
+  fieldBaseClass,
+
+  // TS Types
+  ActionMap,
+  CollectionComponentMap,
+  ColumnPreferences,
+  ConfigComponentMapBase,
+  DocumentInfoContext,
+  DocumentInfoProps,
+  FieldType,
+  FieldComponentProps,
+  FormProps,
+  RowLabelProps,
+  SelectFieldProps,
+  TabsFieldProps,
+  TextAreaInputProps,
+  TextFieldProps,
+  TextInputProps,
+  TextareaFieldProps,
+  Theme,
+  UploadFieldProps,
+  UploadInputProps,
+
+  // Other Exports
+  AppHeader,
+  BlocksDrawer,
+  Column,
+  ComponentMap,
+  DefaultBlockImage,  
+  DeleteMany,
+  DocumentControls,
+  DocumentFields,
+  EditMany,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldMap,
+  File,
+  Form,
+  FormFieldBase,
+  FormLoadingOverlayToggle,
+  FormSubmit,
+  GenerateConfirmation,
+  GlobalComponentMap,
+  HydrateClientUser,
+  ListControls,
+  ListSelection,
+  MappedField,
+  MappedTab,
+  NullifyLocaleField,
+  Options,
+  PublishMany,
+  ReactSelect,
+  ReactSelectOption,
+  ReducedBlock,
+  RenderFields,
+  SectionTitle,
+  Select,
+  SetStepNav,
+  SetViewActions,
+  SortColumn,
+  StepNavItem,  
+  UnpublishMany,
+  ViewDescription,
+  WatchChildErrors,
+  formatDrawerSlug,
+  toast,
+  withCondition,
+} from '@payloadcms/ui'
 ```
 
 7. Migrate all Custom Components to Server Components.
