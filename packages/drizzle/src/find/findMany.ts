@@ -19,7 +19,7 @@ type Args = Omit<FindArgs, 'collection'> & {
 export const findMany = async function find({
   adapter,
   fields,
-  limit: limitArg,
+  limit: limitArg = 10,
   locale,
   page = 1,
   pagination,
@@ -30,13 +30,16 @@ export const findMany = async function find({
   where: whereArg,
 }: Args) {
   const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
-
-  const limit = limitArg ?? 10
+  let limit = limitArg
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
+
+  if (adapter.name === 'sqlite' && limit === 0) {
+    limit = -1
+  }
 
   const { joins, orderBy, selectFields, where } = await buildQuery({
     adapter,
@@ -102,11 +105,7 @@ export const findMany = async function find({
       findManyArgs.where = inArray(adapter.tables[tableName].id, orderedIDs)
     }
   } else {
-    findManyArgs.limit = limitArg === 0 ? undefined : limitArg
-
-    if (adapter.name === 'sqlite' && !findManyArgs.limit) {
-      findManyArgs.limit = -1
-    }
+    findManyArgs.limit = limit
 
     const offset = skip || (page - 1) * limitArg
 
@@ -161,7 +160,7 @@ export const findMany = async function find({
     docs,
     hasNextPage,
     hasPrevPage,
-    limit,
+    limit: limitArg,
     nextPage: hasNextPage ? page + 1 : null,
     page,
     pagingCounter,
