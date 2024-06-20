@@ -239,7 +239,7 @@ export const seoPlugin =
             const args: Parameters<GenerateImage>[0] =
               reqWithData.data as unknown as Parameters<GenerateImage>[0]
             const result = pluginConfig.generateImage ? await pluginConfig.generateImage(args) : ''
-            return new Response(result, { status: 200 })
+            return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
           path: '/plugin-seo/generate-image',
