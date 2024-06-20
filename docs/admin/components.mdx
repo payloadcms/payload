@@ -313,12 +313,20 @@ export const MyComponent: React.FC = () => {
 }
 ```
 
-<Banner type="success">
-  You can also apply global CSS to easily control or override app-wide styles, or drill into Payload's own component styles. More on that [here](./customizing-css).
-</Banner>
-
-Payload also exports its [SCSS](https://sass-lang.com) variables and mixins for reuse if you prefer that. To make use of Payload's SCSS library directly in your Custom Components, you can import it as follows:
+Payload also exports its [SCSS](https://sass-lang.com) library for reuse which includes mixins, etc. To use this, simply import it as follows into your `.scss` file:
 
 ```scss
 @import '~payload/scss';
+
+.my-component {
+  @include mid-break {
+    background-color: var(--theme-elevation-900);
+  }
+}
+
 ```
+
+<Banner type="success">
+  <strong>Note:</strong>
+  You can also drill into Payload's own component styles, or easily apply global, app-wide CSS. More on that [here](./customizing-css).
+</Banner>
