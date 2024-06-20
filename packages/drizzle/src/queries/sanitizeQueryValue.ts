@@ -67,15 +67,11 @@ export const sanitizeQueryValue = ({
 
   if (field.type === 'date' && operator !== 'exists') {
     if (typeof val === 'string') {
-      formattedValue = new Date(val)
+      formattedValue = new Date(val).toISOString()
       if (Number.isNaN(Date.parse(formattedValue))) {
         return { operator, value: undefined }
       }
-    }
-
-    if (typeof val === 'number') {
-      formattedValue = new Date(val)
-    }
+    } else if (typeof val === 'number') formattedValue = new Date(val).toISOString()
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
