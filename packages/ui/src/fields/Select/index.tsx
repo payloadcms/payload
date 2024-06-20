@@ -63,7 +63,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     width,
   } = props
 
-  const [options] = useState(formatOptions(optionsFromProps))
+  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
