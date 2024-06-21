@@ -41,7 +41,6 @@ export { UploadFeatureClientComponent } from '../../features/upload/feature.clie
 
 export { RichTextField } from '../../field/index.js'
 export {
-  type EditorConfigContextType,
   EditorConfigProvider,
   useEditorConfigContext,
 } from '../../lexical/config/client/EditorConfigProvider.js'
@@ -71,3 +70,54 @@ export {
   addSwipeRightListener,
   addSwipeUpListener,
 } from '../../lexical/utils/swipe.js'
+export { createClientFeature } from '../../utilities/createClientFeature.js'
+
+export {
+  DETAIL_TYPE_TO_DETAIL,
+  DOUBLE_LINE_BREAK,
+  ELEMENT_FORMAT_TO_TYPE,
+  ELEMENT_TYPE_TO_FORMAT,
+  IS_ALL_FORMATTING,
+  LTR_REGEX,
+  NON_BREAKING_SPACE,
+  NodeFormat,
+  RTL_REGEX,
+  TEXT_MODE_TO_TYPE,
+  TEXT_TYPE_TO_FORMAT,
+  TEXT_TYPE_TO_MODE,
+} from '../../lexical/utils/nodeFormat.js'
+
+export { ENABLE_SLASH_MENU_COMMAND } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
+
+export { getEnabledNodes } from '../../lexical/nodes/index.js'
+
+export {
+  $createUploadNode,
+  $isUploadNode,
+  UploadNode,
+} from '../../features/upload/nodes/UploadNode.js'
+
+export {
+  $createRelationshipNode,
+  $isRelationshipNode,
+  RelationshipNode,
+} from '../../features/relationship/nodes/RelationshipNode.js'
+
+export {
+  $createLinkNode,
+  $isLinkNode,
+  LinkNode,
+  TOGGLE_LINK_COMMAND,
+} from '../../features/link/nodes/LinkNode.js'
+
+export {
+  $createAutoLinkNode,
+  $isAutoLinkNode,
+  AutoLinkNode,
+} from '../../features/link/nodes/AutoLinkNode.js'
+
+export {
+  $createBlockNode,
+  $isBlockNode,
+  BlockNode,
+} from '../../features/blocks/nodes/BlocksNode.js'
