@@ -4,6 +4,6 @@ import { UnknownConverterClient } from './client.js'
 import { _UnknownConverter } from './converter.js'
 
 export const UnknownConverter: LexicalPluginNodeConverterProvider = {
-  ClientComponent: UnknownConverterClient,
+  ClientFeature: UnknownConverterClient,
   converter: _UnknownConverter,
 }

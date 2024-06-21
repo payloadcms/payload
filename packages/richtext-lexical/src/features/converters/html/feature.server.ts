@@ -1,5 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types.js'
 import type { HTMLConverter } from './converter/types.js'
+
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 
 export type HTMLConverterFeatureProps = {
   converters?:
@@ -7,18 +8,8 @@ export type HTMLConverterFeatureProps = {
     | HTMLConverter[]
 }
 
-export const HTMLConverterFeature: FeatureProviderProviderServer<
-  HTMLConverterFeatureProps,
-  undefined
-> = (props) => {
-  return {
-    feature: () => {
-      return {
-        clientFeatureProps: null,
-        serverFeatureProps: props,
-      }
-    },
-    key: 'htmlConverter',
-    serverFeatureProps: props,
-  }
-}
+// This is just used to save the props on the richText field
+export const HTMLConverterFeature = createServerFeature({
+  feature: {},
+  key: 'htmlConverter',
+})

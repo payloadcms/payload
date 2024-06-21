@@ -1,20 +1,13 @@
-import type { FeatureProviderProviderServer } from '../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { ParagraphFeatureClientComponent } from '../../exports/client/index.js'
+import { ParagraphFeatureClient } from '../../exports/client/index.js'
+import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { i18n } from './i18n.js'
 
-export const ParagraphFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
-  return {
-    feature: () => {
-      return {
-        ClientComponent: ParagraphFeatureClientComponent,
-        clientFeatureProps: null,
-        i18n,
-        serverFeatureProps: props,
-      }
-    },
-    key: 'paragraph',
-    serverFeatureProps: props,
-  }
-}
+export const ParagraphFeature = createServerFeature({
+  feature: {
+    ClientFeature: ParagraphFeatureClient,
+    clientFeatureProps: null,
+    i18n,
+  },
+  key: 'paragraph',
+})

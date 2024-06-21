@@ -87,7 +87,7 @@ export const BlocksDrawerComponent: React.FC = () => {
 
   const reducedBlocks = (
     editorConfig?.resolvedFeatureMap?.get('blocks')
-      ?.clientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
   )?.reducedBlocks
 
   useEffect(() => {

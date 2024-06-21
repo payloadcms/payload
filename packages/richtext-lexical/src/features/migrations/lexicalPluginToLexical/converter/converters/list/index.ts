@@ -4,6 +4,6 @@ import { ListConverterClient } from './client.js'
 import { _ListConverter } from './converter.js'
 
 export const ListConverter: LexicalPluginNodeConverterProvider = {
-  ClientComponent: ListConverterClient,
+  ClientFeature: ListConverterClient,
   converter: _ListConverter,
 }

@@ -4,6 +4,6 @@ import { UploadConverterClient } from './client.js'
 import { _UploadConverter } from './converter.js'
 
 export const UploadConverter: LexicalPluginNodeConverterProvider = {
-  ClientComponent: UploadConverterClient,
+  ClientFeature: UploadConverterClient,
   converter: _UploadConverter,
 }

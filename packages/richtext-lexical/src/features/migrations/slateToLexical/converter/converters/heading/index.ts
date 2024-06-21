@@ -4,6 +4,6 @@ import { HeadingConverterClient } from './client.js'
 import { _SlateHeadingConverter } from './converter.js'
 
 export const SlateHeadingConverter: SlateNodeConverterProvider = {
-  ClientComponent: HeadingConverterClient,
+  ClientFeature: HeadingConverterClient,
   converter: _SlateHeadingConverter,
 }

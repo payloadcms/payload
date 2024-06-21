@@ -4,6 +4,6 @@ import { UnorderedListConverterClient } from './client.js'
 import { _SlateUnorderedListConverter } from './converter.js'
 
 export const SlateUnorderedListConverter: SlateNodeConverterProvider = {
-  ClientComponent: UnorderedListConverterClient,
+  ClientFeature: UnorderedListConverterClient,
   converter: _SlateUnorderedListConverter,
 }

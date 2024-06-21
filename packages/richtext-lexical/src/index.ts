@@ -83,7 +83,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     }
 
-    let features: FeatureProviderServer<unknown, unknown>[] = []
+    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -101,7 +101,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
       const rootEditor = config.editor
-      let rootEditorFeatures: FeatureProviderServer<unknown, unknown>[] = []
+      let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []
       if (typeof rootEditor === 'object' && 'features' in rootEditor) {
         rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
       }
@@ -112,7 +112,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               defaultFeatures: cloneDeep(defaultEditorFeatures),
               rootFeatures: rootEditorFeatures,
             })
-          : (props.features as FeatureProviderServer<unknown, unknown>[])
+          : (props.features as FeatureProviderServer<unknown, unknown, unknown>[])
       if (!features) {
         features = cloneDeep(defaultEditorFeatures)
       }

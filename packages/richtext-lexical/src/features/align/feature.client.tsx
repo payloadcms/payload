@@ -3,13 +3,12 @@
 import { $isElementNode, $isRangeSelection, FORMAT_ELEMENT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../types.js'
 
 import { AlignCenterIcon } from '../../lexical/ui/icons/AlignCenter/index.js'
 import { AlignJustifyIcon } from '../../lexical/ui/icons/AlignJustify/index.js'
 import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft/index.js'
 import { AlignRightIcon } from '../../lexical/ui/icons/AlignRight/index.js'
-import { createClientComponent } from '../createClientComponent.js'
+import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { toolbarAlignGroupWithItems } from './toolbarAlignGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -149,19 +148,11 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
-      toolbarFixed: {
-        groups: toolbarGroups,
-      },
-      toolbarInline: {
-        groups: toolbarGroups,
-      },
-    }),
-  }
-}
-
-export const AlignFeatureClientComponent = createClientComponent(AlignFeatureClient)
+export const AlignFeatureClient = createClientFeature({
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

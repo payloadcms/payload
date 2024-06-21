@@ -79,11 +79,19 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
   }
 }) => Promise<string | true> | string | true
 
-export type FeatureProviderProviderServer<ServerFeatureProps, ClientFeatureProps> = (
-  props?: ServerFeatureProps,
-) => FeatureProviderServer<ServerFeatureProps, ClientFeatureProps>
+export type FeatureProviderProviderServer<
+  UnSanitizedServerFeatureProps = undefined,
+  ServerFeatureProps = UnSanitizedServerFeatureProps,
+  ClientFeatureProps = undefined,
+> = (
+  props?: UnSanitizedServerFeatureProps,
+) => FeatureProviderServer<UnSanitizedServerFeatureProps, ServerFeatureProps, ClientFeatureProps>
 
-export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
+export type FeatureProviderServer<
+  UnSanitizedServerFeatureProps = undefined,
+  ServerFeatureProps = UnSanitizedServerFeatureProps,
+  ClientFeatureProps = undefined,
+> = {
   /** Keys of dependencies needed for this feature. These dependencies do not have to be loaded first */
   dependencies?: string[]
   /** Keys of priority dependencies needed for this feature. These dependencies have to be loaded first and are available in the `feature` property*/
@@ -94,44 +102,52 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
   /**
    * This is being called during the payload sanitization process
    */
-  feature: (props: {
-    config: SanitizedConfig
-    /** unSanitizedEditorConfig.features, but mapped */
-    featureProviderMap: ServerFeatureProviderMap
-    isRoot?: boolean
-    // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
-    resolvedFeatures: ResolvedServerFeatureMap
-    // unSanitized EditorConfig,
-    unSanitizedEditorConfig: ServerEditorConfig
-  }) =>
-    | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
+  feature:
+    | ((props: {
+        config: SanitizedConfig
+        /** unSanitizedEditorConfig.features, but mapped */
+        featureProviderMap: ServerFeatureProviderMap
+        isRoot?: boolean
+        // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
+        resolvedFeatures: ResolvedServerFeatureMap
+        // unSanitized EditorConfig,
+        unSanitizedEditorConfig: ServerEditorConfig
+      }) =>
+        | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
+        | ServerFeature<ServerFeatureProps, ClientFeatureProps>)
     | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
-  serverFeatureProps: ServerFeatureProps
+  serverFeatureProps: UnSanitizedServerFeatureProps
 }
 
-export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props: ClientComponentProps<ClientFeatureProps>,
-) => FeatureProviderClient<ClientFeatureProps>
+export type FeatureProviderProviderClient<
+  UnSanitizedClientFeatureProps = undefined,
+  ClientFeatureProps = UnSanitizedClientFeatureProps,
+> = (props: ClientComponentProps<ClientFeatureProps>) => FeatureProviderClient<ClientFeatureProps>
 
 /**
  * No dependencies => Features need to be sorted on the server first, then sent to client in right order
  */
-export type FeatureProviderClient<ClientFeatureProps> = {
+export type FeatureProviderClient<
+  UnSanitizedClientFeatureProps = undefined,
+  ClientFeatureProps = UnSanitizedClientFeatureProps,
+> = {
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
-  clientFeatureProps: ClientComponentProps<ClientFeatureProps>
-  feature: (props: {
-    clientFunctions: Record<string, any>
-    /** unSanitizedEditorConfig.features, but mapped */
-    featureProviderMap: ClientFeatureProviderMap
-    // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
-    resolvedFeatures: ResolvedClientFeatureMap
-    // unSanitized EditorConfig,
-    unSanitizedEditorConfig: ClientEditorConfig
-  }) => ClientFeature<ClientFeatureProps>
+  clientFeatureProps: ClientComponentProps<UnSanitizedClientFeatureProps>
+  feature:
+    | ((props: {
+        clientFunctions: Record<string, any>
+        /** unSanitizedEditorConfig.features, but mapped */
+        featureProviderMap: ClientFeatureProviderMap
+        // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
+        resolvedFeatures: ResolvedClientFeatureMap
+        // unSanitized EditorConfig,
+        unSanitizedEditorConfig: ClientEditorConfig
+      }) => ClientFeature<ClientFeatureProps>)
+    | ClientFeature<ClientFeatureProps>
 }
 
 export type PluginComponent<ClientFeatureProps = any> = React.FC<{
@@ -143,10 +159,6 @@ export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
 }>
 
 export type ClientFeature<ClientFeatureProps> = {
-  /**
-   * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
-   */
-  clientFeatureProps: ClientComponentProps<ClientFeatureProps>
   hooks?: {
     load?: ({
       incomingEditorState,
@@ -195,6 +207,10 @@ export type ClientFeature<ClientFeatureProps> = {
         position: 'belowContainer' // Determines at which position the Component will be added.
       }
   >
+  /**
+   * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
+   */
+  sanitizedClientFeatureProps?: ClientComponentProps<ClientFeatureProps>
   slashMenu?: {
     /**
      * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
@@ -374,7 +390,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientComponent?: React.FC<ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: React.FC<ClientComponentProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
@@ -440,7 +456,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   nodes?: Array<NodeWithHooks>
 
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
-  serverFeatureProps: ServerProps
+  sanitizedServerFeatureProps?: ServerProps
 }
 
 export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = ServerFeature<
@@ -464,8 +480,8 @@ export type ResolvedClientFeature<ClientFeatureProps> = ClientFeature<ClientFeat
 export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<unknown, unknown>>
 export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown>>
 
-export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown>>
-export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown>>
+export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown, unknown>>
+export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown, unknown>>
 
 /**
  * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality

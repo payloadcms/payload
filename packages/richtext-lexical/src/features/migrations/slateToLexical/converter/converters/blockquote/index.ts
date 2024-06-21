@@ -4,6 +4,6 @@ import { BlockquoteConverterClient } from './client.js'
 import { _SlateBlockquoteConverter } from './converter.js'
 
 export const SlateBlockquoteConverter: SlateNodeConverterProvider = {
-  ClientComponent: BlockquoteConverterClient,
+  ClientFeature: BlockquoteConverterClient,
   converter: _SlateBlockquoteConverter,
 }

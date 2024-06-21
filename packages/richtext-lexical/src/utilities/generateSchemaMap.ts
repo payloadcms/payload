@@ -15,7 +15,7 @@ export const getGenerateSchemaMap =
       const schemas = resolvedFeature.generateSchemaMap({
         config,
         i18n,
-        props: resolvedFeature.serverFeatureProps,
+        props: resolvedFeature.sanitizedServerFeatureProps,
         schemaMap,
         schemaPath,
       })

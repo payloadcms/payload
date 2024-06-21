@@ -4,6 +4,6 @@ import { LinkConverterClient } from './client.js'
 import { _SlateLinkConverter } from './converter.js'
 
 export const SlateLinkConverter: SlateNodeConverterProvider = {
-  ClientComponent: LinkConverterClient,
+  ClientFeature: LinkConverterClient,
   converter: _SlateLinkConverter,
 }

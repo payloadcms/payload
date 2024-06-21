@@ -32,6 +32,6 @@ export type LexicalPluginNodeConverterClientComponent = React.FC<{
 }>
 
 export type LexicalPluginNodeConverterProvider = {
-  ClientComponent: LexicalPluginNodeConverterClientComponent
+  ClientFeature: LexicalPluginNodeConverterClientComponent
   converter: LexicalPluginNodeConverter
 }

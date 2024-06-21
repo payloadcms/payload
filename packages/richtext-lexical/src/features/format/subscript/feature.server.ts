@@ -1,17 +1,10 @@
-import type { FeatureProviderProviderServer } from '../../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { SubscriptFeatureClientComponent } from '../../../exports/client/index.js'
+import { SubscriptFeatureClient } from '../../../exports/client/index.js'
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 
-export const SubscriptFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
-  return {
-    feature: () => {
-      return {
-        ClientComponent: SubscriptFeatureClientComponent,
-        serverFeatureProps: props,
-      }
-    },
-    key: 'subscript',
-    serverFeatureProps: props,
-  }
-}
+export const SubscriptFeature = createServerFeature({
+  feature: {
+    ClientFeature: SubscriptFeatureClient,
+  },
+  key: 'subscript',
+})
