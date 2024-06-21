@@ -2,7 +2,11 @@ import type { SharpOptions } from 'sharp'
 
 import sharp from 'sharp'
 
-export default async function cropImage({ cropData, file }) {
+export const percentToPixel = (value: string, dimension: number): number => {
+  if (!value) return 0
+  return Math.floor((parseFloat(value) / 100) * dimension)
+}
+export default async function cropImage({ cropData, dimensions, file }) {
   try {
     const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
 
@@ -14,8 +18,8 @@ export default async function cropImage({ cropData, file }) {
 
     const formattedCropData: sharp.Region = {
       height: Number(heightPixels),
-      left: Number(x),
-      top: Number(y),
+      left: percentToPixel(x, dimensions.width),
+      top: percentToPixel(y, dimensions.height),
       width: Number(widthPixels),
     }
 

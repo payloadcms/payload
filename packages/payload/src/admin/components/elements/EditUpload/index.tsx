@@ -62,28 +62,40 @@ export const EditUpload: React.FC<{
   const imageRef = useRef<HTMLImageElement | undefined>()
   const cropRef = useRef<HTMLDivElement | undefined>()
 
-  const heightRef = useRef<HTMLInputElement | undefined>()
-  const widthRef = useRef<HTMLInputElement | undefined>()
+  const heightRef = useRef<HTMLInputElement | null>(null)
+  const widthRef = useRef<HTMLInputElement | null>(null)
 
   const [crop, setCrop] = useState<CropType>({
-    height: uploadEdits?.crop?.height || 100,
-    heightPixels: originalHeight,
+    height: 100,
+    heightPixels: 0,
     unit: '%',
-    width: uploadEdits?.crop?.width || 100,
-    widthPixels: originalWidth,
-    x: uploadEdits?.crop?.x || 0,
-    y: uploadEdits?.crop?.y || 0,
+    width: 100,
+    widthPixels: 0,
+    x: 0,
+    y: 0,
   })
 
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false)
+
   useEffect(() => {
-    setCrop({
-      height: 100,
-      unit: '%',
-      width: 100,
-      x: 0,
-      y: 0,
-    })
-  }, [fileSrc])
+    if (imageLoaded) {
+      setCrop({
+        height: 100,
+        heightPixels: Number(heightRef.current?.value ?? 0),
+        unit: '%',
+        width: 100,
+        widthPixels: Number(widthRef.current?.value ?? 0),
+        x: 0,
+        y: 0,
+      })
+    }
+  }, [fileSrc, imageLoaded, uploadEdits?.crop])
+
+  const onImageLoad = (e) => {
+    setOriginalHeight(e.currentTarget.naturalHeight)
+    setOriginalWidth(e.currentTarget.naturalWidth)
+    setImageLoaded(true)
+  }
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
@@ -118,8 +130,8 @@ export const EditUpload: React.FC<{
       crop: crop
         ? {
             ...crop,
-            heightPixels: Number(heightRef.current.value),
-            widthPixels: Number(widthRef.current.value),
+            heightPixels: Number(heightRef.current?.value ?? crop.heightPixels),
+            widthPixels: Number(widthRef.current?.value ?? crop.widthPixels),
           }
         : undefined,
       focalPoint: focalPosition ? focalPosition : undefined,
@@ -192,10 +204,7 @@ export const EditUpload: React.FC<{
               >
                 <img
                   alt={t('upload:setCropArea')}
-                  onLoad={(e) => {
-                    setOriginalHeight(e.currentTarget.naturalHeight)
-                    setOriginalWidth(e.currentTarget.naturalWidth)
-                  }}
+                  onLoad={onImageLoad}
                   ref={imageRef}
                   src={fileSrcToUse}
                 />
@@ -203,10 +212,7 @@ export const EditUpload: React.FC<{
             ) : (
               <img
                 alt={t('upload:setFocalPoint')}
-                onLoad={(e) => {
-                  setOriginalHeight(e.currentTarget.naturalHeight)
-                  setOriginalWidth(e.currentTarget.naturalWidth)
-                }}
+                onLoad={onImageLoad}
                 ref={imageRef}
                 src={fileSrcToUse}
               />
@@ -239,8 +245,10 @@ export const EditUpload: React.FC<{
                       onClick={() =>
                         setCrop({
                           height: 100,
+                          heightPixels: originalHeight,
                           unit: '%',
                           width: 100,
+                          widthPixels: originalWidth,
                           x: 0,
                           y: 0,
                         })
