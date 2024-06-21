@@ -66,14 +66,31 @@ The following options are available:
 | **`views`**           | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                                                                                                                 |
 
 <Banner type="success">
-  <strong>Note:</strong> You can also use the `admin.components` property on any Collection Config or Global Config to set [Custom Collection Components](#custom-collection-components) and [Custom Global Components](#custom-global-components), respectively.
+  <strong>Note:</strong> You can also use the `admin.components` property on any Collection Config or Global Config to set [Custom Collection Components](#custom-collection-components) or [Custom Global Components](#custom-global-components).
 </Banner>
 
 ### Custom Providers
 
-You can add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) to any Payload app through Custom Providers. As you add more and more Custom Components to your [Admin Panel](./overview), you may want to share state across all of them.
+You can add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) to any Payload app through Custom Providers. As you add more and more Custom Components to your [Admin Panel](./overview), this is a great may to share state across all of them.
 
-To do this, simply add `admin.components.providers` to your config:
+To do this, add `admin.components.providers` to your config:
+
+```ts
+import { buildConfig } from 'payload'
+
+import { MyProvider } from './MyProvider'
+
+export default buildConfig({
+  // ...
+  admin: {
+    components: {
+      providers: [MyProvider], // highlight-line
+    },
+  },
+})
+```
+
+Then build your Custom Provider as follows:
 
 ```tsx
 'use client'
@@ -177,11 +194,12 @@ Here is an example:
 ```tsx
 import React from 'react'
 
-export default async function MyComponent({ payload, user }) {
+const MyServerComponent = async ({
+  payload // highlight-line
+}) => {
   const page = await payload.findByID({
     collection: 'pages',
     id: '123',
-    user,
   })
 
   return (
@@ -197,7 +215,7 @@ Each Custom Component receives the following props by default:
 | `payload`                 | The [Payload](../local-api/overview) class.                                                           |
 | `i18n`                    | The [i18n](../i18n) object.                                                                           |
 
-Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For a full list of available props, consult the documentation related to the specific component you are working with.
+Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For example, [Custom Views](./views) receive the `user` prop. For a full list of available props, consult the documentation related to the specific component you are working with.
 
 <Banner type="success">
   See [Root Components](#custom-root-components), [Collection Components](#custom-collection-components), [Global Components](#custom-global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
@@ -205,10 +223,10 @@ Custom Components also receive various other props that are specific to the cont
 
 #### Client Components
 
-When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object, simply define your component in a new file with the `use client` directive at the top:
+When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object. To do this, simply define your component in a new file with the `use client` directive at the top:
 
 ```tsx
-'use client'
+'use client' // highlight-line
 import React, { useState } from 'react'
 
 export const MyClientComponent: React.FC = () => {

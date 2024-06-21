@@ -53,7 +53,7 @@ app/
 
 As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes, etc.
 
-The `admin` directory contains all the _pages_ related to the interface itself. The `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). And all [admin routes are easily configurable](#customizing-routes) to meet your application's requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, and the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's requirements.
 
 Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
@@ -66,7 +66,20 @@ All auto-generated files will contain the following comments at the top of each 
 
 ## Admin Options
 
-All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` key:
+All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` key.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+})
+```
+
+The following options are available for the Admin Panel:
 
 | Option            | Description                                                                                                                                                                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -132,16 +145,9 @@ You have full control over the routes that Payload binds itself to. This include
 
 #### Root-level Routes
 
-Root-level routes are those that are not behind the `/admin` path. You can configure custom paths for the following root-level routes through the `routes` property:
+Root-level routes are those that are not behind the `/admin` path, such as the REST API and GraphQL APIs, or the root path of the Admin Panel itself.
 
-| Option             | Default route           | Description                           |
-| ------------------ | ----------------------- | ------------------------------------- |
-| `admin`            | `/admin`                | The Admin Panel itself.               |
-| `api`              | `/api`                  | The REST API base path.               |
-| `graphQL`          | `/graphql`              | The GraphQL API base path.            |
-| `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
-
-Here is an example of how you might change the root path for the Admin Panel itself:
+Here is an example of how you might modify root-level routes:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -154,6 +160,20 @@ const config = buildConfig({
 })
 ```
 
+You can configure custom paths for the following root-level routes through the `routes` property of your [Payload Config](../configuration/overview):
+
+| Option             | Default route           | Description                           |
+| ------------------ | ----------------------- | ------------------------------------- |
+| `admin`            | `/admin`                | The Admin Panel itself.               |
+| `api`              | `/api`                  | The REST API base path.               |
+| `graphQL`          | `/graphql`              | The GraphQL API base path.            |
+| `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  The `routes` key is defined in the _top-level_ of your [Payload Config](../configuration/overview), _outside_ the `admin` key. To customize the Admin Panel routes, use [admin-level routes](#admin-level-routes) instead.
+</Banner>
+
 <Banner type="success">
   <strong>Note:</strong>
    You can easily add _new_ routes to the Admin Panel through the `endpoints` property of the Payload Config. See [Custom Endpoints](../rest-api/overview#custom-endpoints) for more information.
@@ -161,20 +181,9 @@ const config = buildConfig({
 
 #### Admin-level Routes
 
-Admin-level routes are those behind the `/admin` path. You can configure custom paths for the following admin-level routes through the `admin.routes` property of your [Payload Config](../configuration/overview):
+Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
 
-| Option            | Default route           | Description                                     |
-| ----------------- | ----------------------- | ----------------------------------------------- |
-| `account`         | `/account`              | The user's account page.                        |
-| `createFirstUser` | `/create-first-user`    | The page to create the first user.              |
-| `forgot`          | `/forgot`               | The password reset page.                        |
-| `inactivity`      | `/logout-inactivity`    | The page to redirect to after inactivity.       |
-| `login`           | `/login`                | The login page.                                 |
-| `logout`          | `/logout`               | The logout page.                                |
-| `reset`           | `/reset`                | The password reset page.                        |
-| `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
-
-Here is an example of how you might change the path for the user's account page:
+Here is an example of how you might modify admin-level routes:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -188,6 +197,19 @@ const config = buildConfig({
   },
 })
 ```
+
+You can configure custom paths for the following admin-level routes through the `admin.routes` property of your [Payload Config](../configuration/overview):
+
+| Option            | Default route           | Description                                     |
+| ----------------- | ----------------------- | ----------------------------------------------- |
+| `account`         | `/account`              | The user's account page.                        |
+| `createFirstUser` | `/create-first-user`    | The page to create the first user.              |
+| `forgot`          | `/forgot`               | The password reset page.                        |
+| `inactivity`      | `/logout-inactivity`    | The page to redirect to after inactivity.       |
+| `login`           | `/login`                | The login page.                                 |
+| `logout`          | `/logout`               | The logout page.                                |
+| `reset`           | `/reset`                | The password reset page.                        |
+| `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
 
 <Banner type="success">
   <strong>Note:</strong>

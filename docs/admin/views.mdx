@@ -94,7 +94,7 @@ The above example shows how to add a new [Root View](#custom-root-views), but th
 
 ## Custom Collection Views
 
-Collection Views are views that are scoped under the `/collections` route, such as the List and Edit views. You can easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Collection Config](../collections/overview).
+Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views. You can easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Collection Config](../collections/overview).
 
 Here is an example showing what it might look like to swap out Collection Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
 
@@ -115,7 +115,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 <Banner type="warning">
   <strong>Note:</strong>
-  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#custom-document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View specifically, use the `Edit.Default` key instead.
+  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#custom-document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
 </Banner>
 
 The following options are available:
@@ -132,7 +132,7 @@ The following options are available:
 
 ## Custom Global Views
 
-Global Views are views that are scoped under the `/globals` route, such as the Edit View. You can easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Global Config](../globals/overview).
+Global Views are views that are scoped under the `/globals` route, such as the Document Edit View. You can easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Global Config](../globals/overview).
 
 Here is an example showing what it might look like to swap out Global Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
 
@@ -153,7 +153,7 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
 
 <Banner type="warning">
   <strong>Note:</strong>
-  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#custom-document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View specifically, use the `Edit.Default` key instead.
+  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#custom-document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
 </Banner>
 
 The following options are available:
@@ -211,7 +211,7 @@ The following options are available:
 
 #### Document Tabs
 
-Each Document View can be given a new tab in the Edit View, if desired. Tabs are completely configurable, from simply changing the label to swapping out the entire component. To add or customize tabs in the Edit View, use the `Component.Tab` key:
+Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `Component.Tab` key:
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -246,12 +246,28 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 <Banner type="warning">
  <strong>Note:</strong>
- This applies to _both_ Collection _and_ Global configs.
+ This applies to _both_ Collections _and_ Globals.
 </Banner>
 
 ### Building Custom Views
 
-Custom Views are [Custom Components](./components) rendered at a high-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
+Custom Views are just [Custom Components](./components) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload/types'
+import { MyCustomView } from './MyCustomView'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      views: {
+        Edit: MyCustomView, // highlight-line
+      },
+    },
+  },
+}
+```
 
 Your Custom Views will be provided with the following props:
 

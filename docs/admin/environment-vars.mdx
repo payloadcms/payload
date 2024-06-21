@@ -5,6 +5,10 @@ order: 100
 desc: NEEDS TO BE WRITTEN
 ---
 
+Environment variables are a way to store sensitive information that your application needs to function. This could be anything from API keys to database credentials. Payload allows you to provide environment variables to your [Admin Panel](./overview) that can be accessed by your [Custom Components](./components) and [Custom Endpoints](../rest-api/overview#custom-endpoints).
+
+For security and safety reasons, the Admin Panel not **not** include environment variables in client-side bundle by default. But, Payload provides a mechanism to expose environment variables to the client-side bundle when needed.
+
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
@@ -12,8 +16,6 @@ desc: NEEDS TO BE WRITTEN
   make sure that you're not accidentally leaking anything that an outside attacker could exploit. Only keys
   that are safe for anyone to read in plain text should be provided to your [Admin Panel](./overview).
 </Banner>
-
-For security and safety reasons, the [Admin Panel](./overview) not **not** include environment variables in client-side bundle by default.
 
 ## Client-side Environments
 
