@@ -2,18 +2,18 @@
 title: The Admin Panel
 label: Overview
 order: 10
-desc: Manage your data and customize the Admin Panel by swapping in your own React components. Create, modify or remove views, fields, styles and much more.
+desc: Manage your data and customize the Payload Admin Panel by swapping in your own React components. Create, modify or remove views, fields, styles and much more.
 keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload dynamically generates a beautiful, fully functional Admin Panel to manage your users and data. The Payload Admin Panel is highly performant, even with 100+ fields, and is written fully in TypeScript. It is built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app) and fully supports [React Server Components](https://react.dev/reference/rsc/server-components) which enables the use of the [Local API](/docs/local-api/overview) on the front-end.
+Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) admin panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
 
-You can endlessly customize and extend the Admin UI by swapping your own in [Custom Components](./components) for everything from field labels to entire views. You can also modify built-in views, build your own fields, [swap out Payload branding for your own](https://payloadcms.com/blog/white-label-admin-ui), and so much more.
+The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to meet the needs of your editors.
+
+The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components) and the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production).
 
 <Banner type="success">
-  The Admin Panel is meant to be simple enough to give you a starting point but not bring too much
-  complexity, so that you can easily customize it to suit the needs of your application and your
-  editors.
+  The Payload Admin Panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](./components).
 </Banner>
 
 <LightDarkImage
@@ -23,106 +23,209 @@ You can endlessly customize and extend the Admin UI by swapping your own in [Cus
   caption="Redesigned Admin Panel with a collapsible sidebar that's open by default, providing greater extensibility and enhanced horizontal real estate."
 />
 
+## Project Structure
+
+The Admin Panel serves as the entire HTTP layer for Payload, providing a full CRUD interface for your app. This means that both the [REST](../rest-api/overview) and [GraphQL](../graphql/overview) APIs are Next.js routes that exist directly alongside your front-end application.
+
+Once you [install Payload](../getting-started/installation), the following files and directories will be created in your app:
+
+```plaintext
+app/
+├─ (payload)/
+├── admin/
+├─── [[...segments]]/
+├──── page.tsx
+├──── not-found.tsx
+├── api/
+├─── [...slug]/
+├──── route.ts
+├── graphql/
+├──── route.ts
+├── graphql-playground/
+├──── route.ts
+├── custom.scss
+├── layout.tsx
+```
+
+<Banner type="info">
+  If you are not familiar with Next.js project structure, you can [learn more about it here](https://nextjs.org/docs/getting-started/project-structure).
+</Banner>
+
+As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes, etc.
+
+The `admin` directory contains all the _pages_ related to the interface itself, and the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's requirements.
+
+Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
+
+All auto-generated files will contain the following comments at the top of each file:
+
+```tsx
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */,
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+```
+
 ## Admin Options
 
-All high-level options for the Admin Panel are defined in your Payload config under the `admin` key:
+All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` key.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+})
+```
+
+The following options are available for the Admin Panel:
 
 | Option            | Description                                                                                                                                                                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user`            | The `slug` of a Collection that you want to be used to log in to the Admin Panel. [More](/docs/admin/overview#the-admin-user-collection)                                                                                                                                    |
+| `user`            | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                                                                                                                                        |
 | `buildPath`       | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                                                                                                                                  |
-| `meta`            | Base meta data to use for the Admin Panel. Included properties are `titleSuffix`, `icons`, and `openGraph`. Can be overridden on a per collection or per global basis.                                                                                                      |
+| `meta`            | Base metadata to use for the Admin Panel. Included properties are `titleSuffix`, `icons`, and `openGraph`. Can be overridden on a per Collection or per Global basis.                                                                                                       |
 | `disable`         | If set to `true`, the entire Admin Panel will be disabled.                                                                                                                                                                                                                  |
-| `dateFormat`      | Global date format that will be used for all dates in the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                                              |
+| `dateFormat`      | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                                             |
 | `avatar`          | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                                                                                                                                    |
-| `autoLogin`       | Used to automate admin log-in for dev and demonstration convenience. [More](/docs/authentication/config).                                                                                                                                                                   |
-| `livePreview`     | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                                                                                                    |
-| `components`      | Component overrides that affect the entirety of the Admin Panel. [More](/docs/admin/components)                                                                                                                                                                             |
-| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More](#custom-admin-panel-routes)                                                                                                                                                                         |
+| `autoLogin`       | Used to automate admin log-in for dev and demonstration convenience. [More details](../authentication/config).                                                                                                                                                                      |
+| `livePreview`     | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                                                                       |
+| `components`      | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                                                                                                                                      |
+| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                                                                                                                               |
+| `custom`          | Any custom properties you wish to pass to the Admin Panel.                                                                                                                                                                                                                  |
+
+<Banner type="success">
+  <strong>Note:</strong>
+  These are the _root-level_ options for the Admin Panel. You can also customize the admin options of any Collection or Global through their respective `admin` keys.
+</Banner>
 
 ### The Admin User Collection
 
-<Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  The Admin Panel can only be used by a single auth-enabled Collection. To enable authentication for a Collection, simply set `auth: true` in the Collection's configuration. See [Authentication](/docs/authentication/overview) for more information.
-</Banner>
-
-To specify which Collection to allow to login to the Admin Panel, pass the `admin.user` key equal to the slug of any auth-enabled Collection. See [Authentication](/docs/authentication/overview) for more information.
-
-`payload.config.js`:
+To specify which Collection to allow to login to the Admin Panel, pass the `admin.user` key equal to the slug of any auth-enabled Collection:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 const config = buildConfig({
+  // ...
   admin: {
     user: 'admins', // highlight-line
   },
 })
 ```
 
-<Banner type="info">
-  By default, if you have not specified a Collection, Payload will automatically provide a `User` Collection with access the Admin Panel. You can customize or override the fields and settings of the default `User` Collection by adding your own Collection with `slug: 'users'`. Doing this will force Payload to use your provided `User` Collection instead of its default version.
-</Banner>
-
 <Banner type="warning">
-  <strong>Note:</strong>
+  <strong>Important:</strong>
   <br />
-  You can use whatever Collection you'd like to access the Admin Panel as long as the Collection supports [Authentication](/docs/authentication/overview). It doesn't need to be called `users`. For example, you could use a Collection called `admins` or `editors` instead.
+  The Admin Panel can only be used by a single auth-enabled Collection. To enable authentication for a Collection, simply set `auth: true` in the Collection's configuration. See [Authentication](../authentication/overview) for more information.
 </Banner>
 
-For example, you may wish to have two Collections that both support Authentication:
+By default, if you have not specified a Collection, Payload will automatically provide a `User` Collection with access to the Admin Panel. You can customize or override the fields and settings of the default `User` Collection by adding your own Collection with `slug: 'users'`. Doing this will force Payload to use your provided `User` Collection instead of its default version.
+
+You can use whatever Collection you'd like to access the Admin Panel as long as the Collection supports [Authentication](/docs/authentication/overview). It doesn't need to be called `users`. For example, you may wish to have two Collections that both support authentication:
 
 - `admins` - meant to have a higher level of permissions to manage your data and access the Admin Panel
 - `customers` - meant for end users of your app that should not be allowed to log into the Admin Panel
 
-This is totally possible. For the above scenario, by specifying `admin: { user: 'admins' }`, your Admin Panel will use `admins`. Any users logged in as `customers` will not be able to log in via the Admin Panel.
+To do this, specify `admin: { user: 'admins' }` in your config. This will provide access to the Admin Panel to only `admins`. Any users authenticated as `customers` will be prevented from accessing the Admin Panel.  See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
 
-### Restricting user access
+#### Role-based access control
 
-It is also possible to allow _multiple admin user types_ into the Admin Panel with limited permissions. To do this, add a `roles` or similar field to your auth-enabled Collection and use the `access.admin` property to limit access. See [Access Control](/docs/access-control/overview) for full details. For a working example, check out the [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
+It is also possible to allow multiple user types into the Admin Panel with limited permissions. For example, you may wish to have two roles within the `admins` Collection:
 
-### I18n
+- `super-admin` - full access to the Admin Panel to perform any action
+- `editor` - limited access to the Admin Panel to only manage content
 
-The Payload Admin Panel is translated in over 30 languages and counting. Languages are automatically detected based on the user's browser and all text displays in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
+To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
 
-<Banner>
-  <strong>Note:</strong>
-  <br />
-  If there is a language that Payload does not yet support, we accept code
-  [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
-</Banner>
+## Customizing Routes
 
-### Light and dark modes
+You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application simply by specifying the desired paths in your config.
 
-Users in the Admin Panel have access to choosing between light mode and dark mode for their editing experience. The setting is managed while logged into the admin UI within the user account page and will be stored with the browser. By default, the operating system preference is detected and used.
+#### Root-level Routes
 
-### Custom admin panel routes
+Root-level routes are those that are not behind the `/admin` path, such as the REST API and GraphQL APIs, or the root path of the Admin Panel itself.
 
-You can configure custom routes in the Admin Panel for the following routes:
-
-| Option            | Default route                                                                                                                                                                                                                                                                 |
-| ----------------- | ----------------------- |
-| `account`         | `/account`              |
-| `createFirstUser` | `/create-first-user`    |
-| `forgot`          | `/forgot`               |
-| `inactivity`      | `/logout-inactivity`    |
-| `login`           | `/login`                |
-| `logout`          | `/logout`               |
-| `reset`           | `/reset`                |
-| `unauthorized`    | `/unauthorized`         |
-
-`payload.config.js`:
+Here is an example of how you might modify root-level routes:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 const config = buildConfig({
+  // ...
+  routes: {
+    admin: '/custom-admin-route' // highlight-line
+  }
+})
+```
+
+You can configure custom paths for the following root-level routes through the `routes` property of your [Payload Config](../configuration/overview):
+
+| Option             | Default route           | Description                           |
+| ------------------ | ----------------------- | ------------------------------------- |
+| `admin`            | `/admin`                | The Admin Panel itself.               |
+| `api`              | `/api`                  | The REST API base path.               |
+| `graphQL`          | `/graphql`              | The GraphQL API base path.            |
+| `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  The `routes` key is defined in the _top-level_ of your [Payload Config](../configuration/overview), _outside_ the `admin` key. To customize the Admin Panel routes, use [admin-level routes](#admin-level-routes) instead.
+</Banner>
+
+<Banner type="success">
+  <strong>Note:</strong>
+   You can easily add _new_ routes to the Admin Panel through the `endpoints` property of the Payload Config. See [Custom Endpoints](../rest-api/overview#custom-endpoints) for more information.
+</Banner>
+
+#### Admin-level Routes
+
+Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
+
+Here is an example of how you might modify admin-level routes:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
   admin: {
     routes: {
-      admin: '/custom-admin-route'
+      account: '/my-account' // highlight-line
     }
   },
 })
 ```
+
+You can configure custom paths for the following admin-level routes through the `admin.routes` property of your [Payload Config](../configuration/overview):
+
+| Option            | Default route           | Description                                     |
+| ----------------- | ----------------------- | ----------------------------------------------- |
+| `account`         | `/account`              | The user's account page.                        |
+| `createFirstUser` | `/create-first-user`    | The page to create the first user.              |
+| `forgot`          | `/forgot`               | The password reset page.                        |
+| `inactivity`      | `/logout-inactivity`    | The page to redirect to after inactivity.       |
+| `login`           | `/login`                | The login page.                                 |
+| `logout`          | `/logout`               | The logout page.                                |
+| `reset`           | `/reset`                | The password reset page.                        |
+| `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
+
+<Banner type="success">
+  <strong>Note:</strong>
+  You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](./views) for more information.
+</Banner>
+
+## I18n
+
+The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
+
+<Banner>
+  <strong>Note:</strong>
+  If there is a language that Payload does not yet support, we accept code
+  [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
+</Banner>
+
+## Light and Dark Modes
+
+Users in the Admin Panel have the ability to choose between light mode and dark mode for their editing experience. Users can select their preferred theme from their account page. Once selected, it is saved to their user's preferences and persisted across sessions and devices. If no theme was selected, the Admin Panel will automatically detect the operation system's theme and use that as the default.

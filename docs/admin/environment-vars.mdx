@@ -1,27 +1,78 @@
 ---
-title: Environment Variables in Admin UI
+title: Environment Variables in the Admin Panel
 label: Environment Variables
 order: 100
 desc: NEEDS TO BE WRITTEN
 ---
 
-## Admin environment vars
+Environment variables are a way to store sensitive information that your application needs to function. This could be anything from API keys to database credentials. Payload allows you to provide environment variables to your [Admin Panel](./overview) that can be accessed by your [Custom Components](./components) and [Custom Endpoints](../rest-api/overview#custom-endpoints).
+
+For security and safety reasons, the Admin Panel not **not** include environment variables in client-side bundle by default. But, Payload provides a mechanism to expose environment variables to the client-side bundle when needed.
 
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
   Be careful about what variables you provide to your client-side code. Analyze every single one to
-  make sure that you're not accidentally leaking anything that an attacker could exploit. Only keys
-  that are safe for anyone to read in plain text should be provided to your Admin panel.
+  make sure that you're not accidentally leaking anything that an outside attacker could exploit. Only keys
+  that are safe for anyone to read in plain text should be provided to your [Admin Panel](./overview).
 </Banner>
 
-By default, `env` variables are **not** provided to the Admin panel for security and safety reasons.
-But, Payload provides you with a way to still provide `env` vars to your frontend code.
+## Client-side Environments
 
-**Payload will automatically supply any present `env` variables that are prefixed with `PAYLOAD_PUBLIC_` directly to the Admin panel.**
+If you are building [Custom Components](./components) that are using Client Components and need to access environment variables from the client-side, you can do so by prefixing your environment variables with `NEXT_PUBLIC_`.
 
 For example, if you've got the following environment variable:
 
-`PAYLOAD_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXX`
+```bash
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXX
+```
 
-This key will automatically be made available to the Payload bundle and can be referenced in your Admin component code as `process.env.PAYLOAD_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
+This key will automatically be made available to the client-side Payload bundle and can be referenced in your Custom Component as follows:
+
+```tsx
+'use client'
+import React from 'react'
+
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+const MyClientComponent = () => {
+  // do something with the key
+
+  return (
+    <p>
+      My Client Component
+    </p>
+  )
+}
+```
+
+<Banner type="info">
+  <strong>Note:</strong>
+  For more information on how to use environment variables in the [Admin Panel](./overview), see the [Next.js documentation](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables).
+</Banner>
+
+## Server-side Environments
+
+All [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Components](./components) that are Server Components are unaffected by this restriction and can access any environment variables you provide. For example, if you've got the following environment variable:
+
+```bash
+STRIPE_SECRET=sk_test_XXXXXXXXXXXXXXXXXX
+```
+
+This key will be available to your Server Components as follows:
+
+```tsx
+import React from 'react'
+
+const stripeSecret = process.env.STRIPE_SECRET
+
+const MyServerComponent = async () => {
+  // do something with the secret
+
+  return (
+    <p>
+      My Server Component
+    </p>
+  )
+}
+```
