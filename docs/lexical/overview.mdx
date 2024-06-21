@@ -32,7 +32,7 @@ npm install @payloadcms/richtext-lexical
 Once you have it installed, you can pass it to your top-level Payload config as follows:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({
@@ -47,7 +47,7 @@ export default buildConfig({
 You can also override Lexical settings on a field-by-field basis as follows:
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const Pages: CollectionConfig = {
