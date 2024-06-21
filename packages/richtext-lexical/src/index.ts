@@ -78,7 +78,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           .join(', ')
 
         throw new Error(
-          `Mismatching lexical dependency versions found: ${formattedVersionsWithPackageNameString}. All lexical and @lexical/* packages must have the same version.`,
+          `Mismatching lexical dependency versions found: ${formattedVersionsWithPackageNameString}. All lexical and @lexical/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all lexical and @lexical/* packages have the same version.`,
         )
       }
     }
