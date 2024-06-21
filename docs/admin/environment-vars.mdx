@@ -15,7 +15,7 @@ desc: NEEDS TO BE WRITTEN
 
 For security and safety reasons, the [Admin Panel](./overview) not **not** include environment variables in client-side bundle by default.
 
-## Client Components
+## Client-side Environments
 
 If you are building [Custom Components](./components) that are using Client Components and need to access environment variables from the client-side, you can do so by prefixing your environment variables with `NEXT_PUBLIC_`.
 
@@ -49,7 +49,7 @@ const MyClientComponent = () => {
   For more information on how to use environment variables in the [Admin Panel](./overview), see the [Next.js documentation](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables).
 </Banner>
 
-## Server Components
+## Server-side Environments
 
 All [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Components](./components) that are Server Components are unaffected by this restriction and can access any environment variables you provide. For example, if you've got the following environment variable:
 
