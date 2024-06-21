@@ -5,7 +5,7 @@ import type { HTMLConverter } from '../types.js'
 import { convertLexicalNodesToHTML } from '../index.js'
 
 export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
-  async converter({ converters, node, parent, payload }) {
+  async converter({ converters, node, parent, req }) {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: node.children,
@@ -13,7 +13,7 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
         ...node,
         parent,
       },
-      payload,
+      req,
     })
     return `<p>${childrenText}</p>`
   },

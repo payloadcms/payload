@@ -11,15 +11,15 @@ const FixedToolbarFeatureClient: FeatureProviderProviderClient<FixedToolbarFeatu
 ) => {
   return {
     clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
+    feature: {
       plugins: [
         {
           Component: FixedToolbarPlugin,
           position: 'aboveContainer',
         },
       ],
-    }),
+      sanitizedClientFeatureProps: props,
+    },
   }
 }
 

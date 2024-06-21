@@ -6,7 +6,12 @@ desc: Make use of all of the powerful React hooks that Payload provides.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload provides a variety of powerful hooks that can be used within your own React components. With them, you can interface with Payload itself and build just about any type of complex customization you can think of—directly in familiar React code.
+Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](./fields). With them, you can interface with Payload itself and build just about any type of complex customization you can think of.
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](./components#client-components).
+</Banner>
 
 ## useField
 
@@ -15,41 +20,53 @@ The `useField` hook is used internally within every applicable Payload field com
 Outside of internal use, its most common use-case is in custom `Field` components. When you build a custom React `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```tsx
-import { useField } from 'payload/components/forms'
+'use client'
+import { useField } from '@payloadcms/ui'
 
-type Props = { path: string }
-
-const CustomTextField: React.FC<Props> = ({ path }) => {
+const CustomTextField: React.FC = ({ name }) => {
   // highlight-start
-  const { value, setValue } = useField<string>({ path })
+  const { value, setValue, path } = useField({ path: name })
   // highlight-end
 
-  return <input onChange={(e) => setValue(e.target.value)} value={value.path} />
+  return (
+    <input
+      onChange={(e) => setValue(e.target.value)}
+      value={value.path}
+    />
+  )
 }
 ```
 
-The `useField` hook accepts an `args` object and sends back information and helpers for you to make use of:
+The `useField` hook accepts the following arguments:
+
+| Property          | Description                                                                                                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `disableFormData` | If `true`, the field will not be included in the form data when the form is submitted.                                                                                                                                         |
+| `hasRows`         |                                                                                                           |
+| `path`            | If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldPath` hook.                                                                                                                         |
+| `validate`        | If you do not provide a `validate` function, the field will be validated _on the client_ before submitting to the server.                                                                                                     |
+
+Here is what `useField` hook returns:
 
 ```ts
-const field = useField<string>({
-  path: 'fieldPathHere', // required
-  validate: myValidateFunc, // optional
-  disableFormData?: false, // if true, the field's data will be ignored
-  condition?: myConditionHere, // optional, used to skip validation if condition fails
-})
-
-// Here is what `useField` sends back
-const {
-  showError, // whether or not the field should show as errored
-  errorMessage, // the error message to show, if showError
-  value, // the current value of the field from the form
-  formSubmitted, // if the form has been submitted
-  formProcessing, // if the form is currently processing
-  setValue, // method to set the field's value in form state
-  initialValue, // the initial value that the field mounted with
-} = field;
-
-// The rest of your component goes here
+type FieldResult<T> = {
+  errorMessage?: string
+  errorPaths?: string[]
+  filterOptions?: FilterOptionsResult
+  formInitializing: boolean
+  formProcessing: boolean
+  formSubmitted: boolean
+  initialValue?: T
+  path: string
+  permissions: FieldPermissions
+  readOnly?: boolean
+  rows?: Row[]
+  schemaPath: string
+  setValue: (val: unknown, disableModifyingForm?: boolean) => voi
+  showError: boolean
+  valid?: boolean
+  value: T
+}
 ```
 
 ## useFormFields
@@ -66,7 +83,8 @@ Thanks to the awesome package [`use-context-selector`](https://github.com/dai-sh
 You can pass a Redux-like selector into the hook, which will ensure that you retrieve only the field that you want. The selector takes an argument with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
 
 ```tsx
-import { useFormFields } from 'payload/components/forms'
+'use client'
+import type { useFormFields } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Get only the `amount` field state, and only cause a rerender when that field changes
@@ -88,7 +106,8 @@ const MyComponent: React.FC = () => {
 You can do lots of powerful stuff by retrieving the full form state, like using built-in helper functions to reduce field state to values only, or to retrieve sibling data by path.
 
 ```tsx
-import { useAllFormFields, reduceFieldsToValues, getSiblingData } from 'payload/components/forms';
+'use client'
+import { useAllFormFields, reduceFieldsToValues, getSiblingData } from '@payloadcms/ui'
 
 const ExampleComponent: React.FC = () => {
   // the `fields` const will be equal to all fields' state,
@@ -111,7 +130,7 @@ const ExampleComponent: React.FC = () => {
 
 #### Updating other fields' values
 
-If you are building a custom component, then you should use `setValue` which is returned from the `useField` hook to programmatically set your field's value. But if you're looking to update _another_ field's value, you can use `dispatchFields` returned from `useFormFields`.
+If you are building a Custom Component, then you should use `setValue` which is returned from the `useField` hook to programmatically set your field's value. But if you're looking to update _another_ field's value, you can use `dispatchFields` returned from `useFormFields`.
 
 You can send the following actions to the `dispatchFields` function.
 
@@ -141,7 +160,7 @@ The `useForm` hook can be used to interact with the form itself, and sends back 
   up-to-date. They will be removed from this hook's response in an upcoming version.
 </Banner>
 
-The `useForm` hook returns an object with the following properties: |
+The `useForm` hook returns an object with the following properties:
 
 <TableWithDrawers
   columns={[
@@ -394,7 +413,7 @@ export const CustomArrayManager = () => {
 }`}
 </pre>
 
-  <p>An example config to go along with the custom component</p>
+  <p>An example config to go along with the Custom Component</p>
   <pre>
 {`const ExampleCollection = {
   slug: "example-collection",
@@ -491,7 +510,7 @@ export const CustomArrayManager = () => {
 }`}
 </pre>
 
-  <p>An example config to go along with the custom component</p>
+  <p>An example config to go along with the Custom Component</p>
   <pre>
 {`const ExampleCollection = {
   slug: "example-collection",
@@ -601,7 +620,7 @@ export const CustomArrayManager = () => {
 }`}
 </pre>
 
-  <p>An example config to go along with the custom component</p>
+  <p>An example config to go along with the Custom Component</p>
   <pre>
 {`const ExampleCollection = {
   slug: "example-collection",
@@ -639,19 +658,20 @@ export const CustomArrayManager = () => {
 
 The `useCollapsible` hook allows you to control parent collapsibles:
 
-| Property                  | Description                                                                                                  |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------ | --- |
-| **`isCollapsed`**         | State of the collapsible. `true` if open, `false` if collapsed                                               |
-| **`isVisible`**           | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise |
-| **`toggle`**              | Toggles the state of the nearest collapsible                                                                 |
-| **`isWithinCollapsible`** | Determine when you are within another collaspible                                                            |     |
+| Property                  | Description                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **`isCollapsed`**         | State of the collapsible. `true` if open, `false` if collapsed.                                               |
+| **`isVisible`**           | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise. |
+| **`toggle`**              | Toggles the state of the nearest collapsible.                                                                 |
+| **`isWithinCollapsible`** | Determine when you are within another collapsible.                                                            |
 
 **Example:**
 
 ```tsx
+'use client'
 import React from 'react'
 
-import { useCollapsible } from 'payload/components/utilities'
+import { useCollapsible } from '@payloadcms/ui'
 
 const CustomComponent: React.FC = () => {
   const { isCollapsed, toggle } = useCollapsible()
@@ -673,8 +693,8 @@ The `useDocumentInfo` hook provides lots of information about the document curre
 
 | Property                  | Description                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`collection`**          | If the doc is a collection, its collection config will be returned                                                 |
-| **`global`**              | If the doc is a global, its global config will be returned                                                         |
+| **`collection`**          | If the doc is a collection, its Collection Config will be returned                                                 |
+| **`global`**              | If the doc is a global, its Global Config will be returned                                                         |
 | **`id`**                  | If the doc is a collection, its ID will be returned                                                                |
 | **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences                                 |
 | **`versions`**            | Versions of the current doc                                                                                        |
@@ -687,7 +707,8 @@ The `useDocumentInfo` hook provides lots of information about the document curre
 **Example:**
 
 ```tsx
-import { useDocumentInfo } from 'payload/components/utilities'
+'use client'
+import { useDocumentInfo } from '@payloadcms/ui'
 
 const LinkFromCategoryToPosts: React.FC = () => {
   // highlight-start
@@ -709,10 +730,11 @@ const LinkFromCategoryToPosts: React.FC = () => {
 
 ## useLocale
 
-In any custom component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
-import { useLocale } from 'payload/components/utilities'
+'use client'
+import { useLocale } from '@payloadcms/ui'
 
 const Greeting: React.FC = () => {
   // highlight-start
@@ -743,8 +765,9 @@ Useful to retrieve info about the currently logged in user as well as methods fo
 | **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
-import { useAuth } from 'payload/components/utilities'
-import { User } from '../payload-types.ts'
+'use client'
+import { useAuth } from '@payloadcms/ui'
+import type { User } from '../payload-types.ts'
 
 const Greeting: React.FC = () => {
   // highlight-start
@@ -757,10 +780,11 @@ const Greeting: React.FC = () => {
 
 ## useConfig
 
-Used to easily fetch the full Payload config.
+Used to easily fetch the Payload Client Config.
 
 ```tsx
-import { useConfig } from 'payload/components/utilities'
+'use client'
+import { useConfig } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -776,7 +800,8 @@ const MyComponent: React.FC = () => {
 Sends back how many editing levels "deep" the current component is. Edit depth is relevant while adding new documents / editing documents in modal windows and other cases.
 
 ```tsx
-import { useEditDepth } from 'payload/components/utilities'
+'use client'
+import { useEditDepth } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -796,7 +821,8 @@ Returns methods to set and get user preferences. More info can be found [here](h
 Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
 
 ```tsx
-import { useTheme } from 'payload/components/utilities'
+'use client'
+import { useTheme } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -824,7 +850,8 @@ const MyComponent: React.FC = () => {
 Returns methods to manipulate table columns
 
 ```tsx
-import { useTableColumns } from 'payload/components/hooks'
+'use client'
+import { useTableColumns } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
@@ -855,7 +882,8 @@ The `useDocumentEvents` hook provides a way of subscribing to cross-document eve
 **Example:**
 
 ```tsx
-import { useDocumentEvents } from 'payload/components/hooks'
+'use client'
+import { useDocumentEvents } from '@payloadcms/ui'
 
 const ListenForUpdates: React.FC = () => {
   const { mostRecentUpdate } = useDocumentEvents()

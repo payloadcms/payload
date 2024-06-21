@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from '../index.js'
-import type { AuthStrategyFunctionArgs, User } from './index.js'
+import type { AuthStrategyFunctionArgs } from './index.js'
 
 export const executeAuthStrategies = async (
   args: AuthStrategyFunctionArgs,

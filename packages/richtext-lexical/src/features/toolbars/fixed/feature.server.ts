@@ -22,6 +22,7 @@ export type FixedToolbarFeatureProps = {
 
 export const FixedToolbarFeature: FeatureProviderProviderServer<
   FixedToolbarFeatureProps,
+  FixedToolbarFeatureProps,
   FixedToolbarFeatureProps
 > = (props) => {
   return {
@@ -36,9 +37,9 @@ export const FixedToolbarFeature: FeatureProviderProviderServer<
       }
 
       return {
-        ClientComponent: FixedToolbarFeatureClientComponent,
+        ClientFeature: FixedToolbarFeatureClientComponent,
         clientFeatureProps: sanitizedProps,
-        serverFeatureProps: sanitizedProps,
+        sanitizedServerFeatureProps: sanitizedProps,
       }
     },
     key: 'toolbarFixed',

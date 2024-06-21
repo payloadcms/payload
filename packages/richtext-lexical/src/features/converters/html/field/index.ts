@@ -37,7 +37,7 @@ export const consolidateHTMLConverters = ({
 }): HTMLConverter[] => {
   const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
   const htmlConverterFeatureProps: HTMLConverterFeatureProps =
-    htmlConverterFeature?.serverFeatureProps
+    htmlConverterFeature?.sanitizedServerFeatureProps
 
   const defaultConvertersWithConvertersFromFeatures = [...defaultHTMLConverters]
 
@@ -209,7 +209,7 @@ export const lexicalHTML: (
           return await convertLexicalToHTML({
             converters: finalConverters,
             data: lexicalFieldData,
-            payload: req.payload,
+            req,
           })
         },
       ],

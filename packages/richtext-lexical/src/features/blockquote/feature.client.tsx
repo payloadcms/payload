@@ -5,10 +5,9 @@ import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../types.js'
 
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote/index.js'
-import { createClientComponent } from '../createClientComponent.js'
+import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
@@ -43,42 +42,34 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const BlockquoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
-      markdownTransformers: [MarkdownTransformer],
-      nodes: [QuoteNode],
+export const BlockquoteFeatureClient = createClientFeature({
+  markdownTransformers: [MarkdownTransformer],
+  nodes: [QuoteNode],
 
-      slashMenu: {
-        groups: [
-          slashMenuBasicGroupWithItems([
-            {
-              Icon: BlockquoteIcon,
-              key: 'blockquote',
-              keywords: ['quote', 'blockquote'],
-              label: ({ i18n }) => {
-                return i18n.t('lexical:blockquote:label')
-              },
-              onSelect: ({ editor }) => {
-                editor.update(() => {
-                  const selection = $getSelection()
-                  $setBlocksType(selection, () => $createQuoteNode())
-                })
-              },
-            },
-          ]),
-        ],
-      },
-      toolbarFixed: {
-        groups: toolbarGroups,
-      },
-      toolbarInline: {
-        groups: toolbarGroups,
-      },
-    }),
-  }
-}
-
-export const BlockquoteFeatureClientComponent = createClientComponent(BlockquoteFeatureClient)
+  slashMenu: {
+    groups: [
+      slashMenuBasicGroupWithItems([
+        {
+          Icon: BlockquoteIcon,
+          key: 'blockquote',
+          keywords: ['quote', 'blockquote'],
+          label: ({ i18n }) => {
+            return i18n.t('lexical:blockquote:label')
+          },
+          onSelect: ({ editor }) => {
+            editor.update(() => {
+              const selection = $getSelection()
+              $setBlocksType(selection, () => $createQuoteNode())
+            })
+          },
+        },
+      ]),
+    ],
+  },
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

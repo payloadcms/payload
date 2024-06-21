@@ -1,19 +1,12 @@
-import type { FeatureProviderProviderServer } from '../../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { ItalicFeatureClientComponent } from '../../../exports/client/index.js'
+import { ItalicFeatureClient } from '../../../exports/client/index.js'
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers.js'
 
-export const ItalicFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
-  return {
-    feature: () => {
-      return {
-        ClientComponent: ItalicFeatureClientComponent,
-        markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
-        serverFeatureProps: props,
-      }
-    },
-    key: 'italic',
-    serverFeatureProps: props,
-  }
-}
+export const ItalicFeature = createServerFeature({
+  feature: {
+    ClientFeature: ItalicFeatureClient,
+    markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
+  },
+  key: 'italic',
+})

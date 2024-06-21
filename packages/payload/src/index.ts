@@ -69,7 +69,6 @@ const dirname = path.dirname(filename)
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   /**
    * @description Authorization and Authentication using headers and cookies to run auth user strategies
-   * @returns cookies: Map<string, string>
    * @returns permissions: Permissions
    * @returns user: User
    */
@@ -408,7 +407,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
           .join(', ')
 
         throw new Error(
-          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version.`,
+          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all payload and @payloadcms/* packages have the same version.`,
         )
       }
     }

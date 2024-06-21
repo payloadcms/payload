@@ -61,7 +61,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const reducedBlock: ReducedBlock = (
     editorConfig?.resolvedFeatureMap?.get('blocks')
-      ?.clientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
   )?.reducedBlocks?.find((block) => block.slug === formData?.blockType)
 
   const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath)

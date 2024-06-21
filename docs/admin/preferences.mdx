@@ -2,17 +2,18 @@
 title: Managing User Preferences
 label: Preferences
 order: 50
-desc: Store the preferences of your users as they interact with the Admin panel.
+desc: Store the preferences of your users as they interact with the Admin Panel.
 keywords: admin, preferences, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-As your users interact with your Admin panel, you might want to store their preferences in a persistent manner, so that when they revisit the Admin panel, they can pick right back up where they left off.
+As your users interact with the [Admin Panel](./overview), you might want to store their preferences in a persistent manner, so that when they revisit the Admin Panel in a different session or from a different device, they can pick right back up where they left off.
 
 Out of the box, Payload handles the persistence of your users' preferences in a handful of ways, including:
 
-1. Collection `List` view active columns, and their order, that users define
-1. Their last active locale
-1. The "collapsed" state of blocks, on a document level, as users edit or interact with documents
+1. Columns in the Collection List View: their active state and order
+1. The user's last active [Locale](../configuration/localization)
+1. The "collapsed" state of `blocks`, `array`, and `collapsible` fields
+1. The last-known state of the `Nav` component, etc.
 
 <Banner type="warning">
   <strong>Important:</strong>
@@ -23,7 +24,7 @@ Out of the box, Payload handles the persistence of your users' preferences in a 
 
 ## Use cases
 
-This API is used significantly for internal operations of the Admin panel, as mentioned above. But, if you're building your own React components for use in the Admin panel, you can allow users to set their own preferences in correspondence to their usage of your components. For example:
+This API is used significantly for internal operations of the Admin Panel, as mentioned above. But, if you're building your own React components for use in the Admin Panel, you can allow users to set their own preferences in correspondence to their usage of your components. For example:
 
 - If you have built a "color picker", you could "remember" the last used colors that the user has set for easy access next time
 - If you've built a custom `Nav` component, and you've built in an "accordion-style" UI, you might want to store the `collapsed` state of each Nav collapsible item. This way, if an editor returns to the panel, their `Nav` state is persisted automatically
@@ -32,14 +33,14 @@ This API is used significantly for internal operations of the Admin panel, as me
 
 ## Database
 
-Payload automatically creates an internally used `payload-preferences` collection that stores user preferences. Each document in the `payload-preferences` collection contains the following shape:
+Payload automatically creates an internally used `payload-preferences` Collection that stores user preferences. Each document in the `payload-preferences` Collection contains the following shape:
 
 | Key               | Value                                                             |
 | ----------------- | ----------------------------------------------------------------- |
 | `id`              | A unique ID for each preference stored.                           |
 | `key`             | A unique `key` that corresponds to the preference.                |
 | `user.value`      | The ID of the `user` that is storing its preference.              |
-| `user.relationTo` | The `slug` of the collection that the `user` is logged in as.     |
+| `user.relationTo` | The `slug` of the Collection that the `user` is logged in as.     |
 | `value`           | The value of the preference. Can be any data shape that you need. |
 | `createdAt`       | A timestamp of when the preference was created.                   |
 | `updatedAt`       | A timestamp set to the last time the preference was updated.      |
@@ -50,7 +51,7 @@ Preferences are available to both [GraphQL](/docs/graphql/overview#preferences) 
 
 ## Adding or reading Preferences in your own components
 
-The Payload admin panel offers a `usePreferences` hook. The hook is only meant for use within the admin panel itself. It provides you with two methods:
+The Payload Admin Panel offers a `usePreferences` hook. The hook is only meant for use within the Admin Panel itself. It provides you with two methods:
 
 #### `getPreference`
 
@@ -71,11 +72,12 @@ Also async, this method provides you with an easy way to set a user preference. 
 
 ## Example
 
-Here is an example for how you can utilize `usePreferences` within your custom Admin panel components. Note - this example is not fully useful and is more just a reference for how to utilize the Preferences API. In this case, we are demonstrating how to set and retrieve a user's last used colors history within a `ColorPicker` or similar type component.
+Here is an example for how you can utilize `usePreferences` within your custom Admin Panel components. Note - this example is not fully useful and is more just a reference for how to utilize the Preferences API. In this case, we are demonstrating how to set and retrieve a user's last used colors history within a `ColorPicker` or similar type component.
 
-```
+```tsx
+'use client'
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { usePreferences } from 'payload/components/preferences';
+import { usePreferences } from '@payloadcms/ui'
 
 const lastUsedColorsPreferenceKey = 'last-used-colors';
 

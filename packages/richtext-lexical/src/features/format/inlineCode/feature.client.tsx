@@ -3,10 +3,9 @@
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { CodeIcon } from '../../../lexical/ui/icons/Code/index.js'
-import { createClientComponent } from '../../createClientComponent.js'
+import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
 import { INLINE_CODE } from './markdownTransformers.js'
 
@@ -29,23 +28,12 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => {
-      return {
-        clientFeatureProps: props,
-        markdownTransformers: [INLINE_CODE],
-
-        toolbarFixed: {
-          groups: toolbarGroups,
-        },
-        toolbarInline: {
-          groups: toolbarGroups,
-        },
-      }
-    },
-  }
-}
-
-export const InlineCodeFeatureClientComponent = createClientComponent(InlineCodeFeatureClient)
+export const InlineCodeFeatureClient = createClientFeature({
+  markdownTransformers: [INLINE_CODE],
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

@@ -34,7 +34,9 @@ export const RichTextCell: React.FC<
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
 
-  const [featureProviders, setFeatureProviders] = useState<FeatureProviderClient<unknown>[]>([])
+  const [featureProviders, setFeatureProviders] = useState<
+    FeatureProviderClient<unknown, unknown>[]
+  >([])
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
@@ -55,7 +57,7 @@ export const RichTextCell: React.FC<
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
-      const featureProvidersLocal: FeatureProviderClient<unknown>[] = []
+      const featureProvidersLocal: FeatureProviderClient<unknown, unknown>[] = []
       let featureProvidersAndComponentsLoaded = 0 // feature providers and components only
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
@@ -179,7 +181,7 @@ export const RichTextCell: React.FC<
                       return FeatureComponent
                     })
                   : null}
-                {featureProvider.ClientComponent}
+                {featureProvider.ClientFeature}
               </React.Fragment>
             )
           })}

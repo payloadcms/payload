@@ -4,6 +4,6 @@ import { IndentConverterClient } from './client.js'
 import { _SlateIndentConverter } from './converter.js'
 
 export const SlateIndentConverter: SlateNodeConverterProvider = {
-  ClientComponent: IndentConverterClient,
+  ClientConverter: IndentConverterClient,
   converter: _SlateIndentConverter,
 }

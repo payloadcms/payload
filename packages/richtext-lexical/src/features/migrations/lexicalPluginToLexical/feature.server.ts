@@ -1,10 +1,10 @@
 import type React from 'react'
 
-import type { FeatureProviderProviderServer } from '../../types.js'
 import type { LexicalPluginNodeConverterProvider } from './converter/types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { LexicalPluginToLexicalFeatureClientComponent } from '../../../exports/client/index.js'
+import { LexicalPluginToLexicalFeatureClient } from '../../../exports/client/index.js'
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { defaultConverters } from './converter/defaultConverters.js'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
@@ -18,40 +18,36 @@ export type LexicalPluginToLexicalFeatureProps = {
     | LexicalPluginNodeConverterProvider[]
 }
 
-export const LexicalPluginToLexicalFeature: FeatureProviderProviderServer<
-  LexicalPluginToLexicalFeatureProps,
-  null
-> = (props) => {
-  if (!props) {
-    props = {}
-  }
+export const LexicalPluginToLexicalFeature =
+  createServerFeature<LexicalPluginToLexicalFeatureProps>({
+    feature: ({ props }) => {
+      if (!props) {
+        props = {}
+      }
 
-  let converters: LexicalPluginNodeConverterProvider[] = []
+      let converters: LexicalPluginNodeConverterProvider[] = []
 
-  if (props?.converters && typeof props?.converters === 'function') {
-    converters = props.converters({ defaultConverters })
-  } else if (props.converters && typeof props?.converters !== 'function') {
-    converters = props.converters
-  } else {
-    converters = defaultConverters
-  }
+      if (props?.converters && typeof props?.converters === 'function') {
+        converters = props.converters({ defaultConverters })
+      } else if (props.converters && typeof props?.converters !== 'function') {
+        converters = props.converters
+      } else {
+        converters = defaultConverters
+      }
 
-  props.converters = converters
+      props.converters = converters
 
-  return {
-    feature: () => {
       return {
-        ClientComponent: LexicalPluginToLexicalFeatureClientComponent,
-        clientFeatureProps: null,
+        ClientFeature: LexicalPluginToLexicalFeatureClient,
         generateComponentMap: () => {
           const map: {
             [key: string]: React.FC
           } = {}
 
           for (const converter of converters) {
-            if (converter.ClientComponent) {
+            if (converter.ClientConverter) {
               const key = converter.converter.nodeTypes.join('-')
-              map[key] = converter.ClientComponent
+              map[key] = converter.ClientConverter
             }
           }
 
@@ -62,10 +58,8 @@ export const LexicalPluginToLexicalFeature: FeatureProviderProviderServer<
             node: UnknownConvertedNode,
           },
         ],
-        serverFeatureProps: props,
+        sanitizedServerFeatureProps: props,
       }
     },
     key: 'lexicalPluginToLexical',
-    serverFeatureProps: props,
-  }
-}
+  })

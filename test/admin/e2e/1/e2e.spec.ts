@@ -34,6 +34,7 @@ import {
   slugPluralLabel,
 } from '../../shared.js'
 import {
+  customFieldsSlug,
   customIdCollectionId,
   customViews2CollectionSlug,
   disableDuplicateSlug,
@@ -70,6 +71,7 @@ describe('admin1', () => {
   let postsUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let customFieldsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getAdminRoutes>
@@ -89,6 +91,7 @@ describe('admin1', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
     const context = await browser.newContext()
@@ -478,6 +481,16 @@ describe('admin1', () => {
       const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
 
       await expect(customTab).toBeVisible()
+    })
+  })
+
+  describe('custom fields', () => {
+    describe('select field', () => {
+      test('should render custom select options', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.locator('#field-customSelectField .rs__control').click()
+        await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
+      })
     })
   })
 

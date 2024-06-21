@@ -24,7 +24,6 @@ const UploadFeatureClient: FeatureProviderProviderClient<UploadFeaturePropsClien
   return {
     clientFeatureProps: props,
     feature: () => ({
-      clientFeatureProps: props,
       nodes: [UploadNode],
       plugins: [
         {
@@ -32,6 +31,7 @@ const UploadFeatureClient: FeatureProviderProviderClient<UploadFeaturePropsClien
           position: 'normal',
         },
       ],
+      sanitizedClientFeatureProps: props,
       slashMenu: {
         groups: [
           slashMenuBasicGroupWithItems([

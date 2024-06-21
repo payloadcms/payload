@@ -6,31 +6,44 @@ desc:
 keywords:
 ---
 
-### Root
+Views are the individual pages that make up the [Admin Panel](./overview), such as the Dashboard, List, and Edit views. One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./components) that can either replace built-in ones or be entirely new.
 
-You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views by default, all of which can be overridden:
+To swap in your own Custom Views, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
+
+There are four types of views in Payload:
+
+- [Root Views](#custom-root-views)
+- [Collection Views](#custom-collection-views)
+- [Global Views](#custom-global-views)
+- [Document Views](#custom-document-views)
+
+## Custom Root Views
+
+Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views. You can easily swap Root Views with your own or [create entirely new ones](#adding-new-root-views) through the `admin.components.views` property of your [Payload Config](../configuration/overview).
+
+Here is an example showing what it might look like to swap out Root Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    components: {
+      views: {
+        Dashboard: MyCustomDashboardView, // highlight-line
+      },
+    },
+  },
+})
+```
+
+The following options are available:
 
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
 | **`Account`**   | The Account view is used to show the currently logged in user's Account page. |
 | **`Dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
-
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. For example:
-
-```ts
-// payload.config.ts
-{
-  // ...
-  admin: {
-    components: {
-      views: {
-        Account: MyCustomAccountView,
-        Dashboard: MyCustomDashboardView,
-      },
-    },
-  },
-}
-```
 
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
@@ -39,26 +52,61 @@ For more granular control, pass a configuration object instead. Payload exposes 
 | **`Component`** \* | Pass in the component that should be rendered when a user navigates to this route.                                                                                                         |
 | **`path`** \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
 | **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
-| **`strict`**       | When true, a path that has a trailing slash will only match a location.pathname with a trailing slash. This has no effect when there are additional URL segments in the location.pathname. |
+| **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
 | **`sensitive`**    | When true, will match if the path is case sensitive.                                                                                                                                       |
 
 _\* An asterisk denotes that a property is required._
 
-#### Adding new root views
+#### Adding New Views
 
-To add a _new_ view to the [Admin Panel](./overview), simply add another key to the `views` object with at least a `path` and `Component` property. For example:
+To add a _new_ views to the [Admin Panel](./overview), simply add your own key to the `views` object with at least a `path` and `Component` property. For example:
 
 ```ts
-// payload.config.ts
-{
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
   // ...
   admin: {
     components: {
       views: {
+        // highlight-start
         MyCustomView: {
+        // highlight-end
           Component: MyCustomView,
           path: '/my-custom-view',
         },
+      },
+    },
+  },
+})
+```
+
+The above example shows how to add a new [Root View](#custom-root-views), but the pattern is the same for [Collection Views](#custom-collection-views), [Global Views](#custom-global-views), and [Document Views](#custom-document-views). For help on how to build your own Custom Views, see [Building Custom Views](#building-custom-views).
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  Routes are cascading, so unless explicitly given the `exact` property, they will
+  match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
+  routes in your application. Alternatively, define your nested route _before_ your parent
+  route.
+</Banner>
+
+## Custom Collection Views
+
+Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views. You can easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Collection Config](../collections/overview).
+
+Here is an example showing what it might look like to swap out Collection Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload/types'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      views: {
+        Edit: MyCustomEditView, // highlight-line
       },
     },
   },
@@ -67,199 +115,107 @@ To add a _new_ view to the [Admin Panel](./overview), simply add another key to 
 
 <Banner type="warning">
   <strong>Note:</strong>
-  <br />
-  Routes are cascading. This means that unless explicitly given the `exact` property, they will
-  match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
-  routes in your application. Alternatively, you could define your nested route _before_ your parent
-  route.
+  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#custom-document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
 </Banner>
 
-For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components). For more examples regarding how to customize components, [look at the following examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
+The following options are available:
 
-### Collections
+| Property   | Description                                                                                                       |
+| ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| **`Edit`** | The Edit View is used to edit a single document for any given Collection. [More details](#custom-document-views).     |
+| **`List`** | The List View is used to show a list of documents for any given Collection.                                         |
 
-To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views by default, all of which can be overridden:
+<Banner type="success">
+  <strong>Note:</strong>
+  You can also add _new_ Collection Views to the config by adding a new key to the `views` object with at least a `path` and `Component` property. See [Adding New Views](#adding-new-views) for more information.
+</Banner>
 
-| Property   | Description                                                               |
-| ---------- | ------------------------------------------------------------------------- |
-| **`Edit`** | The Edit view is used to edit a single document for a given collection.   |
-| **`List`** | The List view is used to show a list of documents for a given collection. |
+## Custom Global Views
 
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, tabs, etc, _as well as all nested routes_.
+Global Views are views that are scoped under the `/globals` route, such as the Document Edit View. You can easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Global Config](../globals/overview).
+
+Here is an example showing what it might look like to swap out Global Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
 
 ```ts
-// Collection.ts
-{
+import type { SanitizedGlobalConfig } from 'payload/types'
+
+export const MyGlobalConfig: SanitizedGlobalConfig = {
   // ...
   admin: {
     components: {
       views: {
-        Edit: MyCustomEditView,
-        List: MyCustomListView,
+        Edit: MyCustomEditView, // highlight-line
       },
     },
   },
-}
+})
 ```
 
-For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components).
+<Banner type="warning">
+  <strong>Note:</strong>
+  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#custom-document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
+</Banner>
 
-**Customizing Nested Views within 'Edit' in Collections**
-
-The `Edit` view in collections consists of several nested views, each serving a unique purpose. You can customize these nested views using the `admin.components.views.Edit` property in the collection's configuration. This approach allows you to replace specific nested views while keeping the overall structure of the `Edit` view intact, including the page breadcrumbs, title, tabs, etc.
-
-Here's an example of how you can customize nested views within the `Edit` view in collections, including the use of the `actions` property:
-
-```ts
-// Collection.ts
-{
-  // ...
-  admin: {
-    components: {
-      views: {
-        Edit: {
-          Default: {
-            Component: MyCustomDefaultTab,
-            actions: [CollectionEditButton], // Custom actions for the default edit view
-          },
-          API: {
-            Component: MyCustomAPIView,
-            actions: [CollectionAPIButton], // Custom actions for API view
-          },
-          LivePreview: {
-            Component: MyCustomLivePreviewView,
-            actions: [CollectionLivePreviewButton], // Custom actions for Live Preview
-          },
-          Version: {
-            Component: MyCustomVersionView,
-            actions: [CollectionVersionButton], // Custom actions for Version view
-          },
-          Versions: {
-            Component: MyCustomVersionsView,
-            actions: [CollectionVersionsButton], // Custom actions for Versions view
-          },
-        },
-        List: {
-          actions: [CollectionListButton],
-        },
-      },
-    },
-  },
-}
-```
-
-**Adding New Tabs to 'Edit' View**
-
-You can also add _new_ tabs to the `Edit` view by adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
-
-### Globals
-
-To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views by default, all of which can be overridden:
+The following options are available:
 
 | Property   | Description                                                         |
 | ---------- | ------------------------------------------------------------------- |
-| **`Edit`** | The Edit view is used to edit a single document for a given Global. |
+| **`Edit`** | The Edit View is used to edit a single document for any given Global. [More details](#custom-document-views). |
 
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, and tabs, _as well as all nested views_.
+<Banner type="success">
+  <strong>Note:</strong>
+  You can also add _new_ Global Views to the config by adding a new key to the `views` object with at least a `path` and `Component` property. See [Adding New Views](#adding-new-views) for more information.
+</Banner>
 
-```ts
-// Global.ts
-{
-  // ...
-  admin: {
-    components: {
-      views: {
-        Edit: MyCustomEditView,
-      },
-    },
-  },
-}
-```
+## Custom Document Views
 
-For help on how to build your own custom view components, see [Building Custom View Components](#building-custom-view-components).
+Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View. You can easily swap out Document Views with your own or [create entirely new ones](#adding-new-document-views) through the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview).
 
-**Customizing Nested Views within 'Edit' in Globals**
+This approach allows you to replace specific nested views while keeping the overall structure of the Edit View intact, including the title, tabs, etc. If you need to replace the _entire_ Edit View, including the nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#custom-collection-views) or [Custom Global Views](#custom-global-views) for more information.
 
-Similar to collections, Globals allow for detailed customization within the `Edit` view. This includes the ability to swap specific nested views while maintaining the overall structure of the `Edit` view. You can use the `admin.components.views.Edit` property in the Globals configuration to achieve this, and this will only replace the nested view, leaving the page breadcrumbs, title, and tabs intact.
-
-Here's how you can customize nested views within the `Edit` view in Globals, including the use of the `actions` property:
+Here's an example showing what it might look like to swap out Document Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
 
 ```ts
-// Global.ts
-{
+import type { SanitizedCollectionConfig } from 'payload/types'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
   admin: {
     components: {
       views: {
         Edit: {
-          Default: {
-            Component: MyCustomGlobalDefaultTab,
-            actions: [GlobalEditButton], // Custom actions for the default edit view
-          },
           API: {
-            Component: MyCustomGlobalAPIView,
-            actions: [GlobalAPIButton], // Custom actions for API view
-          },
-          LivePreview: {
-            Component: MyCustomGlobalLivePreviewView,
-            actions: [GlobalLivePreviewButton], // Custom actions for Live Preview
-          },
-          Version: {
-            Component: MyCustomGlobalVersionView,
-            actions: [GlobalVersionButton], // Custom actions for Version view
-          },
-          Versions: {
-            Component: MyCustomGlobalVersionsView,
-            actions: [GlobalVersionsButton], // Custom actions for Versions view
+            Component: MyCustomAPIView, // highlight-line
           },
         },
       },
     },
   },
-}
+})
 ```
 
-You can also add _new_ tabs to the `Edit` view by adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
+<Banner type="warning">
+ <strong>Note:</strong>
+ This applies to _both_ Collection _and_ Global configs.
+</Banner>
 
-### Custom Tabs
-
-You can easily swap individual collection or global edit views. To do this, pass an _object_ to the `admin.components.views.Edit` property of the config. Payload renders the following views by default, all of which can be overridden:
+The following options are available:
 
 | Property          | Description                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **`Default`**     | The Default view is the primary view in which your document is edited.                                                      |
-| **`Versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions)                     |
+| **`Versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions).                    |
 | **`Version`**     | The Version view is used to view a single version of a single document for a given collection. [More details](../versions). |
 | **`API`**         | The API view is used to display the REST API JSON response for a given document.                                            |
-| **`LivePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview)                         |
+| **`LivePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview).                        |
 
-Here is an example:
+#### Document Tabs
 
-```ts
-// Collection.ts or Global.ts
-export const MyCollection: SanitizedCollectionConfig = {
-  slug: 'my-collection',
-  admin: {
-    components: {
-      views: {
-        Edit: {
-          // You can also define `components.views.Edit` as a component, this will override _all_ nested views
-          Default: MyCustomDefaultTab,
-          Versions: MyCustomVersionsTab,
-          Version: MyCustomVersionTab,
-          API: MyCustomAPITab,
-          LivePreview: MyCustomLivePreviewTab,
-        },
-      },
-    },
-  },
-}
-```
-
-To add a _new_ tab to the `Edit` view, simply add another key to `components.views.Edit[key]` with at least a `path` and `Component` property. For example:
+Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `Component.Tab` key:
 
 ```ts
-// `Collection.ts` or `Global.ts`
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 export const MyCollection: SanitizedCollectionConfig = {
   slug: 'my-collection',
   admin: {
@@ -269,17 +225,17 @@ export const MyCollection: SanitizedCollectionConfig = {
           MyCustomTab: {
             Component: MyCustomTab,
             path: '/my-custom-tab',
-            // You an swap the entire tab component out for your own
-            Tab: MyCustomTab,
+            Tab: MyCustomTab // highlight-line
           },
           AnotherCustomView: {
             Component: AnotherCustomView,
             path: '/another-custom-view',
-            // Or you can use the default tab component and just pass in your own label and href
+            // highlight-start
             Tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
-            },
+            }
+            // highlight-end
           },
         },
       },
@@ -288,14 +244,44 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-### Building Custom View Components
+<Banner type="warning">
+ <strong>Note:</strong>
+ This applies to _both_ Collections _and_ Globals.
+</Banner>
 
-Your custom view components will be provided with the following props:
+### Building Custom Views
 
-| Prop                    | Description                                                                  |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| **`user`**              | The currently logged in user. Will be `null` if no user is logged in.        |
-| **`canAccessAdmin`** \* | If the currently logged in user is allowed to access the [Admin Panel](./overview) or not. |
+Custom Views are just [Custom Components](./components) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload/types'
+import { MyCustomView } from './MyCustomView'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      views: {
+        Edit: MyCustomView, // highlight-line
+      },
+    },
+  },
+}
+```
+
+Your Custom Views will be provided with the following props:
+
+| Prop                      | Description                                                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `payload`                 | The [Payload](../local-api/overview) class.                                                                                            |
+| `i18n`                    | The [i18n](../configuration/i18n) object.                                                                                              |
+| `user`                    | The currently logged in user.                                                                                                          |
+| `locale`                  | The current [Locale](../configuration/localization) of the [Admin Panel](./overview).                                                  |
+| `navGroups`               | The grouped navigation items according to `admin.group` in your [Collection Config](../collections/overview) or [Global Config](../globals/overview). |
+| `params`                  | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
+| `permissions`             | The permissions of the currently logged in user.                                                                                       |
+| `searchParams`            | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
+| `visibleEntities`         | The current user's visible entities according to your [Access Control](../access-control/overview).                                    |
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -303,13 +289,3 @@ Your custom view components will be provided with the following props:
   It's up to you to secure your custom views. If your view requires a user to be logged in or to
   have certain access rights, you should handle that within your view component yourself.
 </Banner>
-
-### Examples
-
-You can find examples of custom views in the [Payload source code `/test/admin/components/views` folder](https://github.com/payloadcms/payload/tree/main/test/admin/components/views). There, you'll find two custom views:
-
-1. A custom view that uses the `DefaultTemplate`, which is the built-in Payload template that displays the sidebar and "eyebrow nav"
-1. A custom view that uses the `MinimalTemplate` - which is just a centered template used for things like logging in or out
-
-To see how to pass in your custom views to create custom views of your own, take a look at the `admin.components.views` property of the [Payload test admin config](https://github.com/payloadcms/payload/blob/main/test/admin/config.ts).
-
