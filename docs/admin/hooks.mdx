@@ -6,7 +6,12 @@ desc: Make use of all of the powerful React hooks that Payload provides.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload provides a variety of powerful hooks that can be used within your own React components. With them, you can interface with Payload itself and build just about any type of complex customization you can think of—directly in familiar React code.
+Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components). With them, you can interface with Payload itself and build just about any type of complex customization you can think of.
+
+<Banner type="warning">
+  <strong>Remember:</strong>
+  All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](./components#client-components).
+</Banner>
 
 ## useField
 
@@ -18,39 +23,50 @@ Outside of internal use, its most common use-case is in custom `Field` component
 'use client'
 import { useField } from '@payloadcms/ui'
 
-type Props = { path: string }
-
-const CustomTextField: React.FC<Props> = ({ path }) => {
+const CustomTextField: React.FC = ({ name }) => {
   // highlight-start
-  const { value, setValue } = useField<string>({ path })
+  const { value, setValue, path } = useField({ path: name })
   // highlight-end
 
-  return <input onChange={(e) => setValue(e.target.value)} value={value.path} />
+  return (
+    <input
+      onChange={(e) => setValue(e.target.value)}
+      value={value.path}
+    />
+  )
 }
 ```
 
-The `useField` hook accepts an `args` object and sends back information and helpers for you to make use of:
+The `useField` hook accepts the following arguments:
+
+| Property          | Description                                                                                                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `disableFormData` | If `true`, the field will not be included in the form data when the form is submitted.                                                                                                                                         |
+| `hasRows`         |                                                                                                           |
+| `path`            | If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldPath` hook.                                                                                                                         |
+| `validate`        | If you do not provide a `validate` function, the field will be validated _on the client_ before submitting to the server.                                                                                                     |
+
+Here is what `useField` hook returns:
 
 ```ts
-const field = useField<string>({
-  path: 'fieldPathHere', // required
-  validate: myValidateFunc, // optional
-  disableFormData?: false, // if true, the field's data will be ignored
-  condition?: myConditionHere, // optional, used to skip validation if condition fails
-})
-
-// Here is what `useField` sends back
-const {
-  showError, // whether or not the field should show as errored
-  errorMessage, // the error message to show, if showError
-  value, // the current value of the field from the form
-  formSubmitted, // if the form has been submitted
-  formProcessing, // if the form is currently processing
-  setValue, // method to set the field's value in form state
-  initialValue, // the initial value that the field mounted with
-} = field;
-
-// The rest of your component goes here
+type FieldResult<T> = {
+  errorMessage?: string
+  errorPaths?: string[]
+  filterOptions?: FilterOptionsResult
+  formInitializing: boolean
+  formProcessing: boolean
+  formSubmitted: boolean
+  initialValue?: T
+  path: string
+  permissions: FieldPermissions
+  readOnly?: boolean
+  rows?: Row[]
+  schemaPath: string
+  setValue: (val: unknown, disableModifyingForm?: boolean) => voi
+  showError: boolean
+  valid?: boolean
+  value: T
+}
 ```
 
 ## useFormFields
@@ -144,7 +160,7 @@ The `useForm` hook can be used to interact with the form itself, and sends back 
   up-to-date. They will be removed from this hook's response in an upcoming version.
 </Banner>
 
-The `useForm` hook returns an object with the following properties: |
+The `useForm` hook returns an object with the following properties:
 
 <TableWithDrawers
   columns={[

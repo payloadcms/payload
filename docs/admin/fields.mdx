@@ -75,7 +75,7 @@ import { useField } from '@payloadcms/ui'
 
 const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
   // highlight-start
-  const { value, setValue } = useField<string>({ path })
+  const { value, setValue } = useField({ path })
   // highlight-end
 
   return <input onChange={(e) => setValue(e.target.value)} value={value} />
