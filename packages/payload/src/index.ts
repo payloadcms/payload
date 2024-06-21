@@ -69,7 +69,6 @@ const dirname = path.dirname(filename)
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   /**
    * @description Authorization and Authentication using headers and cookies to run auth user strategies
-   * @returns cookies: Map<string, string>
    * @returns permissions: Permissions
    * @returns user: User
    */

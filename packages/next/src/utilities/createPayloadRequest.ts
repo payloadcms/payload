@@ -98,7 +98,6 @@ export const createPayloadRequest = async ({
   req.payloadDataLoader = getDataLoader(req)
 
   req.user = await executeAuthStrategies({
-    cookies,
     headers: req.headers,
     isGraphQL,
     payload,
