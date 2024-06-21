@@ -61,7 +61,7 @@
     "slate": "0.91.4",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
-    "typescript": "5.4.5",
+    "typescript": "5.5.2",
     "uploadthing": "^6.10.1"
   },
   "overrides": {

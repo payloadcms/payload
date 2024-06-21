@@ -595,7 +595,7 @@ export const getPayload = async (options: InitOptions): Promise<BasePayload<Gene
   return cached.payload
 }
 
-type GeneratedTypes = {
+export interface GeneratedTypes {
   collections: {
     [slug: number | string | symbol]: TypeWithID & Record<string, unknown>
   }
@@ -612,9 +612,9 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-type DatabaseAdapter = BaseDatabaseAdapter
+export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 
-export type { DatabaseAdapter, GeneratedTypes, Payload, RequestContext }
+export type { Payload, RequestContext }
 
 export * from './types/index.js'
 export type * from './admin/types.js'
