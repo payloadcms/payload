@@ -9,13 +9,13 @@ const InlineToolbarFeatureClient: FeatureProviderProviderClient<undefined> = (pr
   return {
     clientFeatureProps: props,
     feature: () => ({
-      clientFeatureProps: props,
       plugins: [
         {
           Component: InlineToolbarPlugin,
           position: 'floatingAnchorElem',
         },
       ],
+      sanitizedClientFeatureProps: props,
     }),
   }
 }

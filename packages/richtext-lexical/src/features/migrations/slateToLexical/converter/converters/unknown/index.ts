@@ -4,6 +4,6 @@ import { UnknownConverterClient } from './client.js'
 import { _SlateUnknownConverter } from './converter.js'
 
 export const SlateUnknownConverter: SlateNodeConverterProvider = {
-  ClientComponent: UnknownConverterClient,
+  ClientConverter: UnknownConverterClient,
   converter: _SlateUnknownConverter,
 }

@@ -1,49 +1,42 @@
 import { QuoteNode } from '@lexical/rich-text'
 
-import type { FeatureProviderProviderServer } from '../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { BlockquoteFeatureClientComponent } from '../../exports/client/index.js'
+import { BlockquoteFeatureClient } from '../../exports/client/index.js'
+import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
 import { i18n } from './i18n.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
-export const BlockquoteFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
-  return {
-    feature: () => {
-      return {
-        ClientComponent: BlockquoteFeatureClientComponent,
-        clientFeatureProps: null,
-        i18n,
-        markdownTransformers: [MarkdownTransformer],
-        nodes: [
-          createNode({
-            converters: {
-              html: {
-                converter: async ({ converters, node, parent, req }) => {
-                  const childrenText = await convertLexicalNodesToHTML({
-                    converters,
-                    lexicalNodes: node.children,
-                    parent: {
-                      ...node,
-                      parent,
-                    },
-                    req,
-                  })
-
-                  return `<blockquote>${childrenText}</blockquote>`
+export const BlockquoteFeature = createServerFeature({
+  feature: {
+    ClientFeature: BlockquoteFeatureClient,
+    clientFeatureProps: null,
+    i18n,
+    markdownTransformers: [MarkdownTransformer],
+    nodes: [
+      createNode({
+        converters: {
+          html: {
+            converter: async ({ converters, node, parent, req }) => {
+              const childrenText = await convertLexicalNodesToHTML({
+                converters,
+                lexicalNodes: node.children,
+                parent: {
+                  ...node,
+                  parent,
                 },
-                nodeTypes: [QuoteNode.getType()],
-              },
+                req,
+              })
+
+              return `<blockquote>${childrenText}</blockquote>`
             },
-            node: QuoteNode,
-          }),
-        ],
-        serverFeatureProps: props,
-      }
-    },
-    key: 'blockquote',
-    serverFeatureProps: props,
-  }
-}
+            nodeTypes: [QuoteNode.getType()],
+          },
+        },
+        node: QuoteNode,
+      }),
+    ],
+  },
+  key: 'blockquote',
+})

@@ -12,12 +12,12 @@ type DependencyGraph = {
     dependencies: string[]
     dependenciesPriority: string[]
     dependenciesSoft: string[]
-    featureProvider: FeatureProviderServer<unknown, unknown>
+    featureProvider: FeatureProviderServer<unknown, unknown, unknown>
   }
 }
 
 function createDependencyGraph(
-  featureProviders: FeatureProviderServer<unknown, unknown>[],
+  featureProviders: FeatureProviderServer<unknown, unknown, unknown>[],
 ): DependencyGraph {
   const graph: DependencyGraph = {}
   for (const fp of featureProviders) {
@@ -32,11 +32,11 @@ function createDependencyGraph(
 }
 
 function topologicallySortFeatures(
-  featureProviders: FeatureProviderServer<unknown, unknown>[],
-): FeatureProviderServer<unknown, unknown>[] {
+  featureProviders: FeatureProviderServer<unknown, unknown, unknown>[],
+): FeatureProviderServer<unknown, unknown, unknown>[] {
   const graph = createDependencyGraph(featureProviders)
   const visited: { [key: string]: boolean } = {}
-  const stack: FeatureProviderServer<unknown, unknown>[] = []
+  const stack: FeatureProviderServer<unknown, unknown, unknown>[] = []
 
   for (const key in graph) {
     if (!visited[key]) {
@@ -51,7 +51,7 @@ function visit(
   graph: DependencyGraph,
   key: string,
   visited: { [key: string]: boolean },
-  stack: FeatureProviderServer<unknown, unknown>[],
+  stack: FeatureProviderServer<unknown, unknown, unknown>[],
   currentPath: string[] = [],
 ) {
   if (!graph[key]) {
@@ -100,8 +100,8 @@ function visit(
 }
 
 export function sortFeaturesForOptimalLoading(
-  featureProviders: FeatureProviderServer<unknown, unknown>[],
-): FeatureProviderServer<unknown, unknown>[] {
+  featureProviders: FeatureProviderServer<unknown, unknown, unknown>[],
+): FeatureProviderServer<unknown, unknown, unknown>[] {
   return topologicallySortFeatures(featureProviders)
 }
 
@@ -127,7 +127,7 @@ export async function loadFeatures({
 
   const featureProviderMap: ServerFeatureProviderMap = new Map(
     unSanitizedEditorConfig.features.map(
-      (f) => [f.key, f] as [string, FeatureProviderServer<unknown, unknown>],
+      (f) => [f.key, f] as [string, FeatureProviderServer<unknown, unknown, unknown>],
     ),
   )
 
@@ -173,13 +173,16 @@ export async function loadFeatures({
       }
     }
 
-    const feature = await featureProvider.feature({
-      config,
-      featureProviderMap,
-      isRoot,
-      resolvedFeatures,
-      unSanitizedEditorConfig,
-    })
+    const feature =
+      typeof featureProvider.feature === 'function'
+        ? await featureProvider.feature({
+            config,
+            featureProviderMap,
+            isRoot,
+            resolvedFeatures,
+            unSanitizedEditorConfig,
+          })
+        : featureProvider.feature
     resolvedFeatures.set(featureProvider.key, {
       ...feature,
       dependencies: featureProvider.dependencies,

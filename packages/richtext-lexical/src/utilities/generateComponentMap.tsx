@@ -22,7 +22,7 @@ export const getGenerateComponentMap =
       `features`,
       resolvedFeatureMapArray
         .map(([featureKey, resolvedFeature]) => {
-          const ClientComponent = resolvedFeature.ClientComponent
+          const ClientComponent = resolvedFeature.ClientFeature
           const clientComponentProps = resolvedFeature.clientFeatureProps
 
           /**
@@ -35,7 +35,7 @@ export const getGenerateComponentMap =
             const components = resolvedFeature.generateComponentMap({
               config,
               i18n,
-              props: resolvedFeature.serverFeatureProps,
+              props: resolvedFeature.sanitizedServerFeatureProps,
               schemaPath,
             })
 
@@ -66,7 +66,7 @@ export const getGenerateComponentMap =
             const schemas = resolvedFeature.generateSchemaMap({
               config,
               i18n,
-              props: resolvedFeature.serverFeatureProps,
+              props: resolvedFeature.sanitizedServerFeatureProps,
               schemaMap: new Map(),
               schemaPath,
             })
@@ -93,7 +93,7 @@ export const getGenerateComponentMap =
           }
 
           return {
-            ClientComponent:
+            ClientFeature:
               clientComponentProps && typeof clientComponentProps === 'object' ? (
                 <ClientComponent
                   {...clientComponentProps}

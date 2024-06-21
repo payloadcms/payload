@@ -6,13 +6,12 @@ import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../types.js'
 import type { ExclusiveLinkCollectionsProps } from './feature.server.js'
 import type { LinkFields } from './nodes/types.js'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link/index.js'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode.js'
-import { createClientComponent } from '../createClientComponent.js'
+import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { toolbarFeatureButtonsGroupWithItems } from '../shared/toolbar/featureButtonsGroup.js'
 import { LinkMarkdownTransformer } from './markdownTransformer.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
@@ -80,39 +79,31 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
-      markdownTransformers: [LinkMarkdownTransformer],
-      nodes: [LinkNode, AutoLinkNode],
-      plugins: [
-        {
-          Component: LinkPlugin,
-          position: 'normal',
-        },
-        {
-          Component: AutoLinkPlugin,
-          position: 'normal',
-        },
-        {
-          Component: ClickableLinkPlugin,
-          position: 'normal',
-        },
-        {
-          Component: FloatingLinkEditorPlugin,
-          position: 'floatingAnchorElem',
-        },
-      ],
-      toolbarFixed: {
-        groups: toolbarGroups,
-      },
-      toolbarInline: {
-        groups: toolbarGroups,
-      },
-    }),
-  }
-}
-
-export const LinkFeatureClientComponent = createClientComponent(LinkFeatureClient)
+export const LinkFeatureClient = createClientFeature({
+  markdownTransformers: [LinkMarkdownTransformer],
+  nodes: [LinkNode, AutoLinkNode],
+  plugins: [
+    {
+      Component: LinkPlugin,
+      position: 'normal',
+    },
+    {
+      Component: AutoLinkPlugin,
+      position: 'normal',
+    },
+    {
+      Component: ClickableLinkPlugin,
+      position: 'normal',
+    },
+    {
+      Component: FloatingLinkEditorPlugin,
+      position: 'floatingAnchorElem',
+    },
+  ],
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

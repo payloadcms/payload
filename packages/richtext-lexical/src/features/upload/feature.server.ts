@@ -39,6 +39,7 @@ function getAbsoluteURL(url: string, payload: Payload): string {
 
 export const UploadFeature: FeatureProviderProviderServer<
   UploadFeatureProps,
+  UploadFeatureProps,
   UploadFeaturePropsClient
 > = (props) => {
   if (!props) {
@@ -72,7 +73,7 @@ export const UploadFeature: FeatureProviderProviderServer<
       }
 
       return {
-        ClientComponent: UploadFeatureClientComponent,
+        ClientFeature: UploadFeatureClientComponent,
         clientFeatureProps: clientProps,
         generateSchemaMap: ({ config, i18n, props }) => {
           if (!props?.collections) return null
@@ -261,7 +262,7 @@ export const UploadFeature: FeatureProviderProviderServer<
             validations: [uploadValidation(props)],
           }),
         ],
-        serverFeatureProps: props,
+        sanitizedServerFeatureProps: props,
       }
     },
     key: 'upload',

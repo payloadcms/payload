@@ -1,22 +1,13 @@
-import type { FeatureProviderProviderServer } from '../../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { StrikethroughFeatureClientComponent } from '../../../exports/client/index.js'
+import { StrikethroughFeatureClient } from '../../../exports/client/index.js'
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { STRIKETHROUGH } from './markdownTransformers.js'
 
-export const StrikethroughFeature: FeatureProviderProviderServer<undefined, undefined> = (
-  props,
-) => {
-  return {
-    feature: () => {
-      return {
-        ClientComponent: StrikethroughFeatureClientComponent,
+export const StrikethroughFeature = createServerFeature({
+  feature: {
+    ClientFeature: StrikethroughFeatureClient,
 
-        markdownTransformers: [STRIKETHROUGH],
-        serverFeatureProps: props,
-      }
-    },
-    key: 'strikethrough',
-    serverFeatureProps: props,
-  }
-}
+    markdownTransformers: [STRIKETHROUGH],
+  },
+  key: 'strikethrough',
+})

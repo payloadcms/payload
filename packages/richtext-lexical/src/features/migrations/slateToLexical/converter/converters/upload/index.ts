@@ -4,6 +4,6 @@ import { UploadConverterClient } from './client.js'
 import { _SlateUploadConverter } from './converter.js'
 
 export const SlateUploadConverter: SlateNodeConverterProvider = {
-  ClientComponent: UploadConverterClient,
+  ClientConverter: UploadConverterClient,
   converter: _SlateUploadConverter,
 }

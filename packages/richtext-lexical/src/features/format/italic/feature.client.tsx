@@ -3,10 +3,9 @@
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { ItalicIcon } from '../../../lexical/ui/icons/Italic/index.js'
-import { createClientComponent } from '../../createClientComponent.js'
+import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers.js'
 
@@ -29,23 +28,12 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => {
-      return {
-        clientFeatureProps: props,
-
-        markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
-        toolbarFixed: {
-          groups: toolbarGroups,
-        },
-        toolbarInline: {
-          groups: toolbarGroups,
-        },
-      }
-    },
-  }
-}
-
-export const ItalicFeatureClientComponent = createClientComponent(ItalicFeatureClient)
+export const ItalicFeatureClient = createClientFeature({
+  markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

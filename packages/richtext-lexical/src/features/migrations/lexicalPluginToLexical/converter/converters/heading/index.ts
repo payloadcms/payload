@@ -4,6 +4,6 @@ import { HeadingConverterClient } from './client.js'
 import { _HeadingConverter } from './converter.js'
 
 export const HeadingConverter: LexicalPluginNodeConverterProvider = {
-  ClientComponent: HeadingConverterClient,
+  ClientConverter: HeadingConverterClient,
   converter: _HeadingConverter,
 }

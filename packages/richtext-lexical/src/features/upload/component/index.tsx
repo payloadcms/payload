@@ -153,7 +153,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
-      ?.clientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
+      ?.sanitizedClientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   return (

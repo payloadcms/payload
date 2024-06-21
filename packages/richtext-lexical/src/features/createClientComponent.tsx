@@ -9,7 +9,7 @@ import { useLexicalFeature } from '../utilities/useLexicalFeature.js'
  */
 export const createClientComponent = <ClientFeatureProps,>(
   clientFeature: FeatureProviderProviderClient<ClientFeatureProps>,
-): ServerFeature<unknown, ClientFeatureProps>['ClientComponent'] => {
+): ServerFeature<unknown, ClientFeatureProps>['ClientFeature'] => {
   return (props) => {
     useLexicalFeature(props.featureKey, clientFeature(props))
     return null

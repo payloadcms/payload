@@ -30,7 +30,7 @@ export const defaultEditorLexicalConfig: LexicalEditorConfig = {
   theme: LexicalEditorTheme,
 }
 
-export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = [
+export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = [
   BoldFeature(),
   ItalicFeature(),
   UnderlineFeature(),

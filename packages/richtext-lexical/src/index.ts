@@ -83,7 +83,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     }
 
-    let features: FeatureProviderServer<unknown, unknown>[] = []
+    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -101,7 +101,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
       const rootEditor = config.editor
-      let rootEditorFeatures: FeatureProviderServer<unknown, unknown>[] = []
+      let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []
       if (typeof rootEditor === 'object' && 'features' in rootEditor) {
         rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
       }
@@ -112,7 +112,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               defaultFeatures: cloneDeep(defaultEditorFeatures),
               rootFeatures: rootEditorFeatures,
             })
-          : (props.features as FeatureProviderServer<unknown, unknown>[])
+          : (props.features as FeatureProviderServer<unknown, unknown, unknown>[])
       if (!features) {
         features = cloneDeep(defaultEditorFeatures)
       }
@@ -277,8 +277,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
@@ -375,7 +375,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
+                const data = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
@@ -508,12 +508,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
-                const originalDataWithLocales = subFieldDataFn({
-                  node: originalNodeWithLocalesIDMap[id],
-                  req,
-                })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const originalDataWithLocales =
+                  subFieldDataFn({
+                    node: originalNodeWithLocalesIDMap[id],
+                    req,
+                  }) ?? {}
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
@@ -694,8 +695,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
@@ -999,3 +1000,6 @@ export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
+
+export { createClientFeature } from './utilities/createClientFeature.js'
+export { createServerFeature } from './utilities/createServerFeature.js'
