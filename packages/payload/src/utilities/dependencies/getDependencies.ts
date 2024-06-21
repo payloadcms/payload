@@ -16,9 +16,13 @@
 
 import { findUp } from 'find-up'
 import { existsSync, promises as fs } from 'fs'
-import { dirname } from 'path'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { resolveFrom } from './resolveFrom.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export type NecessaryDependencies = {
   missing: string[]
@@ -49,12 +53,31 @@ export async function getDependencies(
       try {
         const pkgPath = await fs.realpath(resolveFrom(baseDir, pkg))
 
-        const pkgDir = dirname(pkgPath)
+        const pkgDir = path.dirname(pkgPath)
 
         let packageJsonFilePath = null
 
-        await findUp('package.json', { type: 'file', cwd: pkgDir }).then((path) => {
-          packageJsonFilePath = path
+        const processCwd = process.cwd()
+        const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
+
+        // if node_modules is in payloadPkgDirname, go to parent dir which contains node_modules
+        if (payloadPkgDirname.includes('node_modules')) {
+          payloadPkgDirname.split('node_modules').slice(0, -1)
+        }
+
+        await findUp('package.json', { type: 'file', cwd: pkgDir }).then((foundPath) => {
+          if (foundPath) {
+            const resolvedFoundPath = path.resolve(foundPath)
+            const resolvedCwd = path.resolve(processCwd)
+
+            if (
+              resolvedFoundPath.startsWith(resolvedCwd) ||
+              resolvedFoundPath.startsWith(payloadPkgDirname)
+            ) {
+              // We don't want to match node modules outside the user's project. Checking for both process.cwd and dirname is a reliable way to do this.
+              packageJsonFilePath = foundPath
+            }
+          }
         })
 
         if (packageJsonFilePath && existsSync(packageJsonFilePath)) {
