@@ -12,7 +12,7 @@ All Custom Components in Payload are [React Server Components](https://react.dev
 
 <Banner type="success">
   <strong>Note:</strong>
-  Client Components continue to be fully supported. To use Client Components in your app, simply import them into a Server Component and render them. Ensure your Client Component includes the `use client` directive and is not passed any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types).
+  Client Components continue to be fully supported. To use Client Components in your app, simply import them into a Server Component and render them. Ensure your Client Component includes the `use client` directive and that any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) are sanitized. [More details](#client-components).
 </Banner>
 
 To swap in your own Custom Component, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
@@ -26,7 +26,7 @@ There are four main types of Custom Components in Payload:
 
 ## Custom Root Components
 
-Root Components are those that effect the Admin Panel generally. You can override Root Components through the `admin.components` property of the [Payload Config](../getting-started/overview).
+Root Components are those that effect the [Admin Panel](./overview) generally. You can override Root Components through the `admin.components` property of the [Payload Config](../getting-started/overview).
 
 Here is an example showing what it might look like to swap out Root Components for your own Custom Components. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
 
@@ -61,9 +61,9 @@ The following options are available:
 | **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
 | **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
 | **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
-| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire [Admin Panel](./overview). [More](#custom-providers).                                       |
+| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire [Admin Panel](./overview). [More details](#custom-providers).                                       |
 | **`actions`**         | An array of Custom Components to be rendered in the header of the [Admin Panel](./overview), providing additional interactivity and functionality.                                                                  |
-| **`views`**           | Override or create new views within the [Admin Panel](./overview). [More](./views).                                                                                                                                 |
+| **`views`**           | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                                                                                                                 |
 
 <Banner type="success">
   <strong>Note:</strong> You can also use the `admin.components` property on any Collection or Global config to set [Custom Collection Components](#custom-collection-components) and [Custom Global Components](#custom-global-components), respectively.
@@ -131,7 +131,7 @@ The following options are available:
 | **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a Custom Component. Drafts must be enabled and autosave must be disabled. |
 | **`edit.PublishButton`**   | Replace the default `Publish` button with a Custom Component. Drafts must be enabled.                                  |
 | **`edit.PreviewButton`**   | Replace the default `Preview` button with a Custom Component.                                                          |
-| **`views`**                | Override or create new views within the [Admin Panel](./overview). [More](./views).                                     |
+| **`views`**                | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                     |
 
 ## Custom Global Components
 
@@ -164,7 +164,7 @@ The following options are available:
 | **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a Custom Component. Drafts must be enabled and autosave must be disabled. |
 | **`elements.PublishButton`**   | Replace the default `Publish` button with a Custom Component. Drafts must be enabled.                                  |
 | **`elements.PreviewButton`**   | Replace the default `Preview` button with a Custom Component.                                                          |
-| **`views`**                    | Override or create new views within the [Admin Panel](./overview). [More](./views).                                     |
+| **`views`**                    | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                     |
 
 ## Building Custom Components
 
@@ -228,6 +228,11 @@ export default function MyServerComponent() {
   )
 }
 ```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). Before rendering your Client Component from a Server Component, ensure that any props passed to it are appropriately sanitized.
+</Banner>
 
 #### Using Hooks
 
