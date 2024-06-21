@@ -29,7 +29,7 @@ At the top of your Payload config you can define all the options to manage Graph
 Everything that can be done to a Collection via the REST or Local API can be done with GraphQL (outside of uploading files, which is REST-only). If you have a collection as follows:
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload'
 
 export const PublicUser: CollectionConfig = {
   slug: 'public-users',
@@ -44,32 +44,32 @@ export const PublicUser: CollectionConfig = {
 
 | Query Name              | Operation           |
 | ------------------      | ------------------- |
-| **`PublicUser`**        | `findByID`          |
-| **`PublicUsers`**       | `find`              |
-| **`countPublicUsers`**  | `count`             |
-| **`mePublicUser`**      | `me` auth operation |
+| `PublicUser`        | `findByID`          |
+| `PublicUsers`       | `find`              |
+| `countPublicUsers`  | `count`             |
+| `mePublicUser`      | `me` auth operation |
 
 **And the following mutations:**
 
 | Query Name                     | Operation                       |
 | ------------------------------ | ------------------------------- |
-| **`createPublicUser`**         | `create`                        |
-| **`updatePublicUser`**         | `update`                        |
-| **`deletePublicUser`**         | `delete`                        |
-| **`forgotPasswordPublicUser`** | `forgotPassword` auth operation |
-| **`resetPasswordPublicUser`**  | `resetPassword` auth operation  |
-| **`unlockPublicUser`**         | `unlock` auth operation         |
-| **`verifyPublicUser`**         | `verify` auth operation         |
-| **`loginPublicUser`**          | `login` auth operation          |
-| **`logoutPublicUser`**         | `logout` auth operation         |
-| **`refreshTokenPublicUser`**   | `refresh` auth operation        |
+| `createPublicUser`         | `create`                        |
+| `updatePublicUser`         | `update`                        |
+| `deletePublicUser`         | `delete`                        |
+| `forgotPasswordPublicUser` | `forgotPassword` auth operation |
+| `resetPasswordPublicUser`  | `resetPassword` auth operation  |
+| `unlockPublicUser`         | `unlock` auth operation         |
+| `verifyPublicUser`         | `verify` auth operation         |
+| `loginPublicUser`          | `login` auth operation          |
+| `logoutPublicUser`         | `logout` auth operation         |
+| `refreshTokenPublicUser`   | `refresh` auth operation        |
 
 ## Globals
 
 Globals are also fully supported. For example:
 
 ```ts
-import { GlobalConfig } from 'payload/types';
+import type { GlobalConfig } from 'payload';
 
 const Header: GlobalConfig = {
   slug: 'header',
@@ -83,13 +83,13 @@ const Header: GlobalConfig = {
 
 | Query Name   | Operation |
 | ------------ | --------- |
-| **`Header`** | `findOne` |
+| `Header` | `findOne` |
 
 **And the following mutation:**
 
 | Query Name         | Operation |
 | ------------------ | --------- |
-| **`updateHeader`** | `update`  |
+| `updateHeader` | `update`  |
 
 ## Preferences
 
@@ -99,14 +99,14 @@ User [preferences](/docs/admin/overview#preferences) for the admin panel are als
 
 | Query Name       | Operation |
 | ---------------- | --------- |
-| **`Preference`** | `findOne` |
+| `Preference` | `findOne` |
 
 **And the following mutations:**
 
 | Query Name             | Operation |
 | ---------------------- | --------- |
-| **`updatePreference`** | `update`  |
-| **`deletePreference`** | `delete`  |
+| `updatePreference` | `update`  |
+| `deletePreference` | `delete`  |
 
 ## GraphQL Playground
 
@@ -119,7 +119,7 @@ You can even log in using the `login[collection-singular-label-here]` mutation t
   <br />
   To see more regarding how the above queries and mutations are used, visit your GraphQL playground
   (by default at
-  [http://localhost:3000/api/graphql-playground](http://localhost:3000/api/graphql-playground))
+  [`${SERVER_URL}/api/graphql-playground`](http://localhost:3000/api/graphql-playground))
   while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to
   see a ton of detail about how GraphQL operates within Payload.
 </Banner>
