@@ -277,8 +277,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
@@ -375,7 +375,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
+                const data = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
@@ -508,12 +508,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
-                const originalDataWithLocales = subFieldDataFn({
-                  node: originalNodeWithLocalesIDMap[id],
-                  req,
-                })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const originalDataWithLocales =
+                  subFieldDataFn({
+                    node: originalNodeWithLocalesIDMap[id],
+                    req,
+                  }) ?? {}
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
@@ -694,8 +695,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
