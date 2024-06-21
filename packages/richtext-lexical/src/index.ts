@@ -1000,3 +1000,6 @@ export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
+
+export { createClientFeature } from './utilities/createClientFeature.js'
+export { createServerFeature } from './utilities/createServerFeature.js'

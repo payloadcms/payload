@@ -4,6 +4,6 @@ import { ListItemConverterClient } from './client.js'
 import { _SlateListItemConverter } from './converter.js'
 
 export const SlateListItemConverter: SlateNodeConverterProvider = {
-  ClientFeature: ListItemConverterClient,
+  ClientConverter: ListItemConverterClient,
   converter: _SlateListItemConverter,
 }

@@ -4,6 +4,6 @@ import { RelationshipConverterClient } from './client.js'
 import { _SlateRelationshipConverter } from './converter.js'
 
 export const SlateRelationshipConverter: SlateNodeConverterProvider = {
-  ClientFeature: RelationshipConverterClient,
+  ClientConverter: RelationshipConverterClient,
   converter: _SlateRelationshipConverter,
 }

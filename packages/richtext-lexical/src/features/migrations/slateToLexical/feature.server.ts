@@ -43,9 +43,9 @@ export const SlateToLexicalFeature = createServerFeature<SlateToLexicalFeaturePr
         } = {}
 
         for (const converter of converters) {
-          if (converter.ClientFeature) {
+          if (converter.ClientConverter) {
             const key = converter.converter.nodeTypes.join('-')
-            map[key] = converter.ClientFeature
+            map[key] = converter.ClientConverter
           }
         }
 

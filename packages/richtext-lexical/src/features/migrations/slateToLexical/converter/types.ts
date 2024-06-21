@@ -28,6 +28,6 @@ export type SlateNodeConverterClientComponent = React.FC<{
 }>
 
 export type SlateNodeConverterProvider = {
-  ClientFeature: SlateNodeConverterClientComponent
+  ClientConverter: SlateNodeConverterClientComponent
   converter: SlateNodeConverter
 }
