@@ -116,18 +116,6 @@ export {
   AutoLinkNode,
 } from '../../features/link/nodes/AutoLinkNode.js'
 
-export { consolidateHTMLConverters } from '../../features/converters/html/field/index.js'
-
-export {
-  convertLexicalNodesToHTML,
-  convertLexicalToHTML,
-} from '../../features/converters/html/converter/index.js'
-
-export { defaultHTMLConverters } from '../../features/converters/html/converter/defaultConverters.js'
-export { LinebreakHTMLConverter } from '../../features/converters/html/converter/converters/linebreak.js'
-export { ParagraphHTMLConverter } from '../../features/converters/html/converter/converters/paragraph.js'
-export { TextHTMLConverter } from '../../features/converters/html/converter/converters/text.js'
-
 export {
   $createBlockNode,
   $isBlockNode,
