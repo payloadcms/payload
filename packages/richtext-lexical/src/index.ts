@@ -812,8 +812,6 @@ export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
 export {
-  $createBlockNode,
-  $isBlockNode,
   type BlockFields,
   BlockNode,
   type SerializedBlockNode,
@@ -850,17 +848,8 @@ export { HorizontalRuleFeature } from './features/horizontalRule/feature.server.
 export { IndentFeature } from './features/indent/feature.server.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/feature.server.js'
 
-export {
-  $createAutoLinkNode,
-  $isAutoLinkNode,
-  AutoLinkNode,
-} from './features/link/nodes/AutoLinkNode.js'
-export {
-  $createLinkNode,
-  $isLinkNode,
-  LinkNode,
-  TOGGLE_LINK_COMMAND,
-} from './features/link/nodes/LinkNode.js'
+export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
+export { LinkNode } from './features/link/nodes/LinkNode.js'
 export type {
   LinkFields,
   SerializedAutoLinkNode,
@@ -898,8 +887,6 @@ export {
   type RelationshipFeatureProps,
 } from './features/relationship/feature.server.js'
 export {
-  $createRelationshipNode,
-  $isRelationshipNode,
   type RelationshipData,
   RelationshipNode,
   type SerializedRelationshipNode,
@@ -909,7 +896,7 @@ export { FixedToolbarFeature } from './features/toolbars/fixed/feature.server.js
 export { InlineToolbarFeature } from './features/toolbars/inline/feature.server.js'
 
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
-export { createNode } from './features/typeUtilities.js'
+export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
@@ -947,33 +934,31 @@ export { UploadFeature } from './features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './features/upload/feature.server.js'
 export {
-  $createUploadNode,
-  $isUploadNode,
   type SerializedUploadNode,
   type UploadData,
   UploadNode,
 } from './features/upload/nodes/UploadNode.js'
 
+export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
 } from './lexical/config/server/default.js'
-export { loadFeatures, sortFeaturesForOptimalLoading } from './lexical/config/server/loader.js'
 
+export { loadFeatures, sortFeaturesForOptimalLoading } from './lexical/config/server/loader.js'
 export {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './lexical/config/server/sanitize.js'
+
 export type {
   ClientEditorConfig,
   SanitizedClientEditorConfig,
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-
 export { getEnabledNodes } from './lexical/nodes/index.js'
-export { ENABLE_SLASH_MENU_COMMAND } from './lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
 export type { AdapterProps }
 
 export type {
@@ -995,11 +980,10 @@ export {
   TEXT_TYPE_TO_FORMAT,
   TEXT_TYPE_TO_MODE,
 } from './lexical/utils/nodeFormat.js'
-
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
+
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 
-export { createClientFeature } from './utilities/createClientFeature.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
