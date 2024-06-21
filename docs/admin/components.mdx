@@ -170,19 +170,18 @@ The following options are available:
 
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly in the front-end.
 
-To do this, we first need to "get Payload". This is done by importing `getPayloadHMR` from `@payloadcms/next` and passing it your Payload config. This function will return a cached, HMR-enabled Payload instance that you can use to interact with your data:
+To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class, the [`i18n`](../configuration/i18n) object, etc. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself like you would from an external application.
+
+Here is an example:
 
 ```tsx
 import React from 'react'
-import { getPayloadHMR } from '@payloadcms/next'
-import config from '../payload.config'
 
-export default async function MyComponent() {
-  const payload = await getPayloadHMR({ config }) // highlight-line
-
+export default async function MyComponent({ payload, user }) {
   const page = await payload.findByID({
     collection: 'pages',
-    id: '123'
+    id: '123',
+    user,
   })
 
   return (
@@ -191,11 +190,20 @@ export default async function MyComponent() {
 }
 ```
 
+Each Custom Component receives the following props by default:
+
+| Prop                      | Description                                                                                           |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `payload`                 | The [Payload](../local-api/overview) class.                                                           |
+| `i18n`                    | The [i18n](../i18n) object.                                                                           |
+
+Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For a full list of available props, consult the documentation related to the specific component you are working with.
+
 <Banner type="success">
-  See [Root Components](#custom-root-components), [Collection Components](#custom-collection-components), and [Global Components](#custom-global-components) for a complete list of all available components.
+  See [Root Components](#custom-root-components), [Collection Components](#custom-collection-components), [Global Components](#custom-global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
 </Banner>
 
-## Client Components
+#### Client Components
 
 When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object, simply define your component in a new file with the `use client` directive at the top:
 
@@ -258,15 +266,30 @@ export const MyClientComponent: React.FC = () => {
 
 #### Getting the Current Language
 
-In any Custom Component you can support multiple languages to be consistent with Payload's [i18n](../configuration/i18n) support. The best way to do this is to add your translation resources to the [i18n config](../configuration/i18n) and import `useTranslation` from `@payloadcms/ui` in your components.
+All Custom Components can support multiple languages to be consistent with Payload's [Internationalization](../configuration/i18n). To do this, first add your translation resources to the [I18n Config](../configuration/i18n).
 
-For example:
+From any Server Component, you can translate resources using the `getTranslation` function from `@payloadcms/translations`. All Server Components automatically receive the `i18n` object as a prop by default.
+
+```tsx
+import React from 'react'
+import { getTranslation } from '@payloadcms/translations'
+
+export default async function MyServerComponent({ i18n }) {
+  const translatedTitle = getTranslation(myTranslation, i18n) // highlight-line
+
+  return (
+    <p>{translatedTitle}</p>
+  )
+}
+```
+
+The best way to do this within a Client Component is to import the `useTranslation` hook from `@payloadcms/ui`:
 
 ```tsx
 import React from 'react'
 import { useTranslation } from '@payloadcms/ui'
 
-const CustomComponent: React.FC = () => {
+export const MyClientComponent: React.FC = () => {
   const { t, i18n } = useTranslation() // highlight-line
 
   return (
@@ -279,9 +302,31 @@ const CustomComponent: React.FC = () => {
 }
 ```
 
+<Banner type="success">
+  See the [Hooks](./hooks) documentation for a full list of available hooks.
+</Banner>
+
 #### Getting the Current Locale
 
-In any Custom Component you can get the selected locale with `useLocale` hook. `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+All [Custom Views](./views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). All Custom Views automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
+
+```tsx
+import React from 'react'
+
+export default async function MyServerComponent({ payload, locale }) {
+  const localizedPage = await payload.findByID({
+    collection: 'pages',
+    id: '123',
+    locale,
+  })
+
+  return (
+    <p>{localizedPage.title}</p>
+  )
+}
+```
+
+The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`:
 
 ```tsx
 import React from 'react'
@@ -301,19 +346,15 @@ const Greeting: React.FC = () => {
 }
 ```
 
-## Styling Custom Components
+<Banner type="success">
+  See the [Hooks](./hooks) documentation for a full list of available hooks.
+</Banner>
 
-Payload exposes its [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) so that you can style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes.
+#### Styling Custom Components
 
-For example, to colorize your component you can use the following CSS:
+Payload has a robust [CSS Library](./customizing-css) that you can style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Component matches the existing design system, and so that it automatically adapts to any theme changes.
 
-```scss
-.my-component {
-  background-color: var(--theme-elevation-500);
-}
-```
-
-Then, simply import your `.css` or `.scss` file into your Custom Component:
+To apply custom styles, simply import your own `.css` or `.scss` file into your Custom Component:
 
 ```tsx
 import './index.scss'
@@ -324,6 +365,14 @@ export const MyComponent: React.FC = () => {
       My Custom Component
     </div>
   )
+}
+```
+
+Then to colorize your Custom Component's background, for example, you can use the following CSS:
+
+```scss
+.my-component {
+  background-color: var(--theme-elevation-500);
 }
 ```
 
