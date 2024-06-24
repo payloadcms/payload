@@ -1,4 +1,5 @@
-import type { DefaultCellComponentProps } from 'payload/types'
+'use client'
+import type { DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 

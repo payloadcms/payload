@@ -1,7 +1,7 @@
 'use client'
-import type { FormState } from 'payload/types'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
@@ -12,7 +12,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -28,9 +28,7 @@ import './index.scss'
 
 const baseClass = 'edit-many'
 
-import type { ClientCollectionConfig } from 'payload/types'
-
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export type EditManyProps = {
   collection: ClientCollectionConfig
@@ -55,7 +53,8 @@ const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disab
     </FormSubmit>
   )
 }
-const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+
+const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -76,7 +75,8 @@ const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disa
     </FormSubmit>
   )
 }
-const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+
+const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -98,8 +98,6 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { useModal } = facelessUIImport
-
   const { collection: { slug, labels: { plural } } = {}, collection, fieldMap } = props
 
   const { permissions } = useAuth()
@@ -200,7 +198,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   onClick={() => closeModal(drawerSlug)}
                   type="button"
                 >
-                  <X />
+                  <XIcon />
                 </button>
               </div>
               <Form
@@ -219,11 +217,11 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                       <div className={`${baseClass}__document-actions`}>
                         {collection?.versions?.drafts ? (
                           <React.Fragment>
-                            <Publish
+                            <PublishButton
                               action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
-                            <SaveDraft
+                            <SaveDraftButton
                               action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />

@@ -1,46 +1,19 @@
 'use client'
-import type { LabelFunction } from 'payload/config'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, createContext, useContext, useState } from 'react'
+import React, { Fragment } from 'react'
 
-import { Icon } from '../../graphics/Icon/index.js'
+import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
-
 export { SetStepNav } from './SetStepNav.js'
+import type { StepNavItem } from './types.js'
 
-export type StepNavItem = {
-  label: LabelFunction | Record<string, string> | string
-  url?: string
-}
-
-export type ContextType = {
-  setStepNav: (items: StepNavItem[]) => void
-  stepNav: StepNavItem[]
-}
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 
 const baseClass = 'step-nav'
-
-const Context = createContext({} as ContextType)
-
-const StepNavProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const [stepNav, setStepNav] = useState([])
-
-  return (
-    <Context.Provider
-      value={{
-        setStepNav,
-        stepNav,
-      }}
-    >
-      {children}
-    </Context.Provider>
-  )
-}
-
-const useStepNav = (): ContextType => useContext(Context)
 
 const StepNav: React.FC<{
   Link?: React.ComponentType
@@ -56,6 +29,12 @@ const StepNav: React.FC<{
     routes: { admin },
   } = config
 
+  const { componentMap } = useComponentMap()
+
+  const { t } = useTranslation()
+
+  const Icon = componentMap?.Icon || <PayloadIcon />
+
   const LinkElement = Link || 'a'
 
   return (
@@ -63,7 +42,7 @@ const StepNav: React.FC<{
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
           <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
-            <Icon />
+            <span title={t('general:dashboard')}>{Icon}</span>
           </LinkElement>
           <span>/</span>
           {stepNav.map((item, i) => {
@@ -92,11 +71,13 @@ const StepNav: React.FC<{
         </nav>
       ) : (
         <div className={[baseClass, className].filter(Boolean).join(' ')}>
-          <Icon />
+          <div className={`${baseClass}__home`}>
+            <span title={t('general:dashboard')}>{Icon}</span>
+          </div>
         </div>
       )}
     </Fragment>
   )
 }
 
-export { StepNav, StepNavProvider, useStepNav }
+export { StepNav, StepNavItem, StepNavProvider, useStepNav }

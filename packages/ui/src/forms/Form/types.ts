@@ -1,6 +1,4 @@
-import type { User } from 'payload/auth'
-import type { Field, FormField, FormState } from 'payload/types'
-import type { Data } from 'payload/types'
+import type { Data, Field, FormField, FormState, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -33,8 +31,13 @@ export type FormProps = (
    * feature of the Lexical Rich Text field)
    */
   fields?: Field[]
-  handleResponse?: (res: Response) => void
+  handleResponse?: (
+    res: Response,
+    successToast: (value: string) => void,
+    errorToast: (value: string) => void,
+  ) => void
   initialState?: FormState
+  isInitializing?: boolean
   log?: boolean
   onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
@@ -197,6 +200,7 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
+  initializing: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     data,

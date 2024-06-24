@@ -11,7 +11,7 @@ export async function getHeader(): Promise<Header> {
       slug: 'header',
     })
 
-    return header as Header
+    return header
   } catch (err) {
     console.error(err)
   }

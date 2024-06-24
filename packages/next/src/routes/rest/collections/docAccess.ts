@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { docAccessOperation } from 'payload/operations'
+import { docAccessOperation } from 'payload'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 

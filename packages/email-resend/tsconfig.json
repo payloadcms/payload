@@ -6,15 +6,9 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "strict": true,
+    "strict": true
   },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "src/**/*.spec.ts",
-  ],
+  "exclude": ["dist", "node_modules", "src/**/*.spec.ts"],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [
-    { "path": "../payload" },
-  ]
+  "references": [{ "path": "../payload" }]
 }

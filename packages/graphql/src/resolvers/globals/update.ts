@@ -1,13 +1,12 @@
-import type { GlobalSlug } from 'payload'
 import type {
   DataFromGlobalSlug,
+  GlobalSlug,
   PayloadRequestWithData,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
-import { updateOperationGlobal } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { isolateObjectProperty, updateOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 

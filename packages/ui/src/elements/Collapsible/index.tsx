@@ -7,8 +7,8 @@ import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { Chevron } from '../../icons/Chevron/index.js'
-import { DragHandle } from '../../icons/DragHandle/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 import { CollapsibleProvider, useCollapsible } from './provider.js'
@@ -78,7 +78,7 @@ export const Collapsible: React.FC<Props> = ({
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
             >
-              <DragHandle />
+              <DragHandleIcon />
             </div>
           )}
           <button
@@ -108,7 +108,7 @@ export const Collapsible: React.FC<Props> = ({
           <div className={`${baseClass}__actions-wrap`}>
             {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
             <div className={`${baseClass}__indicator`}>
-              <Chevron direction={!isCollapsed ? 'up' : undefined} />
+              <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import type { FieldPermissions } from 'payload/auth'
+import type { FieldPermissions } from 'payload'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'

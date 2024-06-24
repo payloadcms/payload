@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
@@ -18,13 +18,6 @@ export const SSR: CollectionConfig = {
     create: () => true,
     update: () => true,
     delete: () => true,
-  },
-  versions: {
-    drafts: {
-      autosave: {
-        interval: 375,
-      },
-    },
   },
   admin: {
     useAsTitle: 'title',

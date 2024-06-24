@@ -17,6 +17,8 @@
   // Use a pseudo element for the accessability so that it doesn't take up DOM space
   // Also because the parent element has `overflow: hidden` which would clip an outline
   &__home {
+    width: 18px;
+    height: 18px;
     position: relative;
 
     &:focus-visible {
@@ -61,6 +63,15 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  @include mid-break {
+    .step-nav {
+      &__home {
+        width: 16px;
+        height: 16px;
+      }
+    }
   }
 
   @include small-break {

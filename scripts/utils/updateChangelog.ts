@@ -51,7 +51,7 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
   const calculatedBump = bump || recommendedBump
 
-  const proposedReleaseVersion = semver.inc(fromVersion, calculatedBump, undefined, tag)
+  const proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
 
   console.log({
     tag,

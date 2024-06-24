@@ -3,7 +3,7 @@ title: Plugins
 label: Overview
 order: 10
 desc: Plugins provide a great way to modularize Payload functionalities into easy-to-use enhancements and extensions of your Payload apps.
-keywords: plugins, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: plugins, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Payload comes with a built-in Plugins infrastructure that allows developers to build their own modular and easily reusable sets of functionality.
@@ -27,7 +27,7 @@ Writing plugins is no more complex than writing regular JavaScript. If you know 
 - Integrate all `upload`-enabled collections with a third-party file host like S3 or Cloudinary
 - Add custom endpoints or GraphQL queries / mutations with any type of custom functionality that you can think of
 
-### How to install plugins
+## How to install plugins
 
 The base Payload config allows for a `plugins` property which takes an `array` of [`Plugins`](https://github.com/payloadcms/payload/blob/main/packages/payload/src/config/types.ts).
 
@@ -39,12 +39,7 @@ import passwordProtect from 'payload-password-protect'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
-import { viteBundler } from '@payloadcms/bundler-vite'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-
-
 const config = buildConfig({
-  bundler: webpackBundler() // or viteBundler(),
   collections: [
     {
       slug: 'pages',
@@ -82,7 +77,7 @@ const config = buildConfig({
 export default config
 ```
 
-#### When Plugins are initialized
+### When Plugins are initialized
 
 Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and had default options merged in.
 
@@ -142,7 +137,7 @@ const addLastModified: Plugin = (incomingConfig: Config): Config => {
 export default addLastModified
 ```
 
-### Available Plugins
+## Available Plugins
 
 You can discover existing plugins by browsing the `payload-plugin` topic on [GitHub](https://github.com/topics/payload-plugin).
 

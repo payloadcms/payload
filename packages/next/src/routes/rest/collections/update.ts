@@ -1,9 +1,9 @@
-import type { Where } from 'payload/types'
+import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { updateOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { updateOperation } from 'payload'
+import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 

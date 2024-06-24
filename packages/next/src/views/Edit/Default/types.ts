@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig

@@ -1,7 +1,10 @@
-import type { CollectionConfig } from 'payload/types'
-import type { FilterOptionsProps } from 'payload/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { CollectionConfig, FilterOptionsProps } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
+import { withMergedProps } from '@payloadcms/ui/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -9,6 +12,8 @@ import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js'
 import {
   collection1Slug,
   collection2Slug,
+  mixedMediaCollectionSlug,
+  podcastCollectionSlug,
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
@@ -17,6 +22,7 @@ import {
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
   slug,
+  videoCollectionSlug,
 } from './collectionSlugs.js'
 
 export interface FieldsRelationship {
@@ -325,6 +331,51 @@ export default buildConfigWithDefaults({
       ],
       slug: collection2Slug,
     },
+    {
+      slug: videoCollectionSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+          required: true,
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: podcastCollectionSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+          required: true,
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: mixedMediaCollectionSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relatedMedia',
+          relationTo: [videoCollectionSlug, podcastCollectionSlug],
+          hasMany: true,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -461,5 +512,25 @@ export default buildConfigWithDefaults({
         },
       })
     }
+
+    for (let i = 0; i < 2; i++) {
+      await payload.create({
+        collection: videoCollectionSlug,
+        data: {
+          id: i,
+          title: `Video ${i}`,
+        },
+      })
+      await payload.create({
+        collection: podcastCollectionSlug,
+        data: {
+          id: i,
+          title: `Podcast ${i}`,
+        },
+      })
+    }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

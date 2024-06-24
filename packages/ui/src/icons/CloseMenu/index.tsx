@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const CloseMenu: React.FC = () => (
+export const CloseMenuIcon: React.FC = () => (
   <svg
     className="icon icon--close-menu"
     fill="none"

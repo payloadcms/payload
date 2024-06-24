@@ -8,235 +8,234 @@
 
 export interface Config {
   collections: {
-    posts: Post;
-    postsLocalized: PostsLocalized;
-    relation: Relation;
-    'strict-access': StrictAccess;
-    chained: Chained;
-    'custom-id': CustomId;
-    'custom-id-number': CustomIdNumber;
-    screenings: Screening;
-    movies: Movie;
-    directors: Director;
-    movieReviews: MovieReview;
-    'polymorphic-relationships': PolymorphicRelationship;
-    tree: Tree;
-    users: User;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
-  locale: 'en' | 'de';
+    posts: Post
+    postsLocalized: PostsLocalized
+    relation: Relation
+    'strict-access': StrictAccess
+    chained: Chained
+    'custom-id': CustomId
+    'custom-id-number': CustomIdNumber
+    screenings: Screening
+    movies: Movie
+    directors: Director
+    movieReviews: MovieReview
+    'polymorphic-relationships': PolymorphicRelationship
+    tree: Tree
+    users: User
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: 'en' | 'de'
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
-  title?: string | null;
-  description?: string | null;
-  number?: number | null;
-  relationField?: (string | null) | Relation;
-  defaultAccessRelation?: (string | null) | StrictAccess;
-  chainedRelation?: (string | null) | Chained;
-  maxDepthRelation?: (string | null) | Relation;
-  customIdRelation?: (string | null) | CustomId;
-  customIdNumberRelation?: (number | null) | CustomIdNumber;
-  filteredRelation?: (string | null) | Relation;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title?: string | null
+  description?: string | null
+  number?: number | null
+  relationField?: (string | null) | Relation
+  defaultAccessRelation?: (string | null) | StrictAccess
+  chainedRelation?: (string | null) | Chained
+  maxDepthRelation?: (string | null) | Relation
+  customIdRelation?: (string | null) | CustomId
+  customIdNumberRelation?: (number | null) | CustomIdNumber
+  filteredRelation?: (string | null) | Relation
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation".
  */
 export interface Relation {
-  id: string;
-  name?: string | null;
-  disableRelation: boolean;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  disableRelation: boolean
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "strict-access".
  */
 export interface StrictAccess {
-  id: string;
-  name?: string | null;
-  disableRelation: boolean;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  disableRelation: boolean
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "chained".
  */
 export interface Chained {
-  id: string;
-  name?: string | null;
-  relation?: (string | null) | Chained;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  relation?: (string | null) | Chained
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-id".
  */
 export interface CustomId {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-id-number".
  */
 export interface CustomIdNumber {
-  id: number;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "postsLocalized".
  */
 export interface PostsLocalized {
-  id: string;
-  title?: string | null;
-  relationField?: (string | null) | Relation;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title?: string | null
+  relationField?: (string | null) | Relation
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "screenings".
  */
 export interface Screening {
-  id: string;
-  name?: string | null;
-  movie?: (string | null) | Movie;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  movie?: (string | null) | Movie
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "movies".
  */
 export interface Movie {
-  id: string;
-  name?: string | null;
-  director?: (string | null) | Director;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  director?: (string | null) | Director
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "directors".
  */
 export interface Director {
-  id: string;
-  name?: string | null;
-  movies?: (string | Movie)[] | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  movies?: (string | Movie)[] | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "movieReviews".
  */
 export interface MovieReview {
-  id: string;
-  movieReviewer: string | User;
-  likes?: (string | User)[] | null;
-  visibility: 'followers' | 'public';
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  movieReviewer: string | User
+  likes?: (string | User)[] | null
+  visibility: 'followers' | 'public'
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "polymorphic-relationships".
  */
 export interface PolymorphicRelationship {
-  id: string;
+  id: string
   polymorphic?: {
-    relationTo: 'movies';
-    value: string | Movie;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
+    relationTo: 'movies'
+    value: string | Movie
+  } | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tree".
  */
 export interface Tree {
-  id: string;
-  text?: string | null;
-  parent?: (string | null) | Tree;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  text?: string | null
+  parent?: (string | null) | Tree
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

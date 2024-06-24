@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
-import { ValidationError } from 'payload/errors'
+import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -20,6 +20,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   data,
   db,
   fields,
+  ignoreResult,
   operation,
   path = '',
   req,
@@ -323,6 +324,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       : error
   }
 
+  if (ignoreResult) return data as T
+
   // //////////////////////////////////
   // RETRIEVE NEWLY UPDATED ROW
   // //////////////////////////////////
@@ -343,6 +346,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   // //////////////////////////////////
 
   const result = transform<T>({
+    adapter,
     config: adapter.payload.config,
     data: doc,
     fields,

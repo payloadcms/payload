@@ -1,5 +1,5 @@
 import type { SelectField } from 'payload-plugin-form-builder/dist/types'
-import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form';
+import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form'
 
 import React from 'react'
 import { Controller } from 'react-hook-form'

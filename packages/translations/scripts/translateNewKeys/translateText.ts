@@ -12,7 +12,7 @@ export async function translateText(text: string, targetLang: string) {
       max_tokens: 150,
       messages: [
         {
-          content: `Only respond with the translation of the text you receive. The original language is English and the translation language is ${targetLang}. Only respond with the translation - do not say anything else. If you cannot translate the text, respond with "[SKIPPED]"`,
+          content: `Only respond with the translation of the text you receive. The original language is English and the translation language is ${targetLang}. Use formal and professional language. Only respond with the translation - do not say anything else. If you cannot translate the text, respond with "[SKIPPED]"`,
           role: 'system',
         },
         {

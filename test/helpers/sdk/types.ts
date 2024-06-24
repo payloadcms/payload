@@ -1,4 +1,4 @@
-import type { TypeWithID, Where, WhereField } from 'payload/types'
+import type { TypeWithID, Where, WhereField } from 'payload'
 import type { DeepPartial, MarkOptional } from 'ts-essentials'
 
 type CollectionDoc = {

@@ -4,15 +4,18 @@ import type {
   EditViewProps,
   SanitizedCollectionConfig,
   SanitizedConfig,
-} from 'payload/types'
+} from 'payload'
 
+import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { CollectionComponentMap } from './types.js'
 
-import { ViewDescription } from '../../../elements/ViewDescription/index.js'
+// Need to import from client barrel file
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { ViewDescription } from '../../../exports/client/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
@@ -54,11 +57,12 @@ export const mapCollections = (args: {
     const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
-        : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
+        : typeof editViewFromConfig === 'object' &&
+            isReactComponentOrFunction(editViewFromConfig.Default)
           ? editViewFromConfig.Default
           : typeof editViewFromConfig?.Default === 'object' &&
               'Component' in editViewFromConfig.Default &&
-              typeof editViewFromConfig.Default.Component === 'function'
+              isReactComponentOrFunction(editViewFromConfig.Default.Component)
             ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
             : undefined
 
@@ -66,7 +70,7 @@ export const mapCollections = (args: {
       typeof listViewFromConfig === 'function'
         ? listViewFromConfig
         : typeof listViewFromConfig === 'object' &&
-            typeof listViewFromConfig.Component === 'function'
+            isReactComponentOrFunction(listViewFromConfig.Component)
           ? listViewFromConfig.Component
           : undefined
 

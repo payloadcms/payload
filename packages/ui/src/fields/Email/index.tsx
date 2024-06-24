@@ -1,19 +1,18 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
-import type { EmailField as EmailFieldType } from 'payload/types'
+import type { ClientValidate, EmailField as EmailFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -60,16 +59,17 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+      className={[fieldBaseClass, 'email', className, showError && 'error', disabled && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -77,18 +77,18 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div>
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
         <input
           autoComplete={autoComplete}
-          disabled={readOnly}
+          disabled={disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

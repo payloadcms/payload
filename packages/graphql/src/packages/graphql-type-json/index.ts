@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from 'graphql'
-import { Kind, print } from 'graphql/language'
+import { Kind, print } from 'graphql/language/index.js'
 
 function identity(value) {
   return value

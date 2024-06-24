@@ -4,8 +4,7 @@ import chalk from 'chalk'
 import { Syntax, parseModule } from 'esprima-next'
 import fs from 'fs'
 
-import { warning } from '../utils/log.js'
-import { log } from '../utils/log.js'
+import { log, warning } from '../utils/log.js'
 
 export const withPayloadStatement = {
   cjs: `const { withPayload } = require('@payloadcms/next/withPayload')\n`,

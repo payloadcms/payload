@@ -1,5 +1,4 @@
-import type { Count } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Count, SanitizedCollectionConfig } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -21,7 +20,7 @@ export const count: Count = async function count(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const table = this.tables[tableName]
 
-  const { joinAliases, joins, where } = await buildQuery({
+  const { joins, where } = await buildQuery({
     adapter: this,
     fields: collectionConfig.fields,
     locale,
@@ -30,13 +29,6 @@ export const count: Count = async function count(
   })
 
   const selectCountMethods: ChainedMethods = []
-
-  joinAliases.forEach(({ condition, table }) => {
-    selectCountMethods.push({
-      args: [table, condition],
-      method: 'leftJoin',
-    })
-  })
 
   Object.entries(joins).forEach(([joinTable, condition]) => {
     if (joinTable) {

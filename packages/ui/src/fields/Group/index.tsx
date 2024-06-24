@@ -1,5 +1,4 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
@@ -9,13 +8,17 @@ import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { useFormSubmitted } from '../../forms/Form/context.js'
+import {
+  useFormInitializing,
+  useFormProcessing,
+  useFormSubmitted,
+} from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
 import { useTabs } from '../Tabs/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -29,7 +32,6 @@ export type GroupFieldProps = FormFieldBase & {
   forceRender?: boolean
   hideGutter?: boolean
   name?: string
-  permissions: FieldPermissions
   width?: string
 }
 
@@ -54,10 +56,12 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
   const { errorPaths } = useField({ path })
+  const formInitializing = useFormInitializing()
+  const formProcessing = useFormProcessing()
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const readOnly = readOnlyFromProps || readOnlyFromContext
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
@@ -108,7 +112,7 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
               margins="small"
               path={path}
               permissions={permissions?.fields}
-              readOnly={readOnly}
+              readOnly={disabled}
               schemaPath={schemaPath}
             />
           </div>

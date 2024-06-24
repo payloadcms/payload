@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useNav } from '../Nav/context.js'
 import './index.scss'
@@ -68,7 +68,7 @@ export const NavGroup: React.FC<Props> = ({ children, label }) => {
         >
           <div className={`${baseClass}__label`}>{label}</div>
           <div className={`${baseClass}__indicator`}>
-            <Chevron
+            <ChevronIcon
               className={`${baseClass}__indicator`}
               direction={!collapsed ? 'up' : undefined}
             />

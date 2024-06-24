@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -60,12 +60,13 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -80,7 +81,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!disabled) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -93,7 +94,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [disabled, setValue],
   )
 
   // useEffect update valueToRender:
@@ -140,7 +141,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={formProcessing || readOnly}
+      readOnly={disabled}
       required={required}
       rtl={renderRTL}
       showError={showError}

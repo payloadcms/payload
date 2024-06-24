@@ -9,6 +9,7 @@ import type GraphQL from 'graphql'
 import type { Metadata as NextMetadata } from 'next'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
+import type { JSX } from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
@@ -70,6 +71,77 @@ export type LivePreviewConfig = {
         payload: Payload
       }) => Promise<string> | string)
     | string
+}
+
+export type OGImageConfig = {
+  alt?: string
+  height?: number | string
+  type?: string
+  url: string
+  width?: number | string
+}
+
+export type OpenGraphConfig = {
+  description?: string
+  images?: OGImageConfig | OGImageConfig[]
+  siteName?: string
+  title?: string
+}
+
+export type IconConfig = {
+  color?: string
+  /**
+   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
+   */
+  fetchPriority?: 'auto' | 'high' | 'low'
+  media?: string
+  /** defaults to rel="icon" */
+  rel?: string
+  sizes?: string
+  type?: string
+  url: string
+}
+
+export type MetaConfig = {
+  /**
+   * When `static`, a pre-made image will be used for all pages.
+   * When `dynamic`, a unique image will be generated for each page based on page content and given overrides.
+   * When `off`, no Open Graph images will be generated and the `/api/og` endpoint will be disabled. You can still provide custom images using the `openGraph.images` property.
+   * @default 'dynamic'
+   */
+  defaultOGImageType?: 'dynamic' | 'off' | 'static'
+  /**
+   * Overrides the auto-generated <meta name="description"> of admin pages
+   * @example `"This is my custom CMS built with Payload."`
+   */
+  description?: string
+  /**
+   * Icons to be rendered by devices and browsers.
+   *
+   * For example browser tabs, phone home screens, and search engine results.
+   */
+  icons?: IconConfig[]
+  /**
+   * Overrides the auto-generated <meta name="keywords"> of admin pages
+   * @example `"CMS, Payload, Custom"`
+   */
+  keywords?: string
+  /**
+   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
+   *
+   * For example when sharing the Admin Panel on social media or through messaging services.
+   */
+  openGraph?: OpenGraphConfig
+  /**
+   * Overrides the auto-generated <title> of admin pages
+   * @example `"My Admin Panel"`
+   */
+  title?: string
+  /**
+   * String to append to the auto-generated <title> of admin pages
+   * @example `" - Custom CMS"`
+   */
+  titleSuffix?: string
 }
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
@@ -254,6 +326,7 @@ export type EditViewConfig =
 export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
+  [key: string]: unknown
   i18n: I18nClient
   locale?: Locale
   params?: { [key: string]: string | string[] | undefined }
@@ -477,26 +550,7 @@ export type Config = {
       globals?: string[]
     }
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
-    meta?: {
-      /**
-       * An array of Next.js metadata objects that represent icons to be used by devices and browsers.
-       *
-       * For example browser tabs, phone home screens, and search engine results.
-       * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
-       */
-      icons?: NextMetadata['icons']
-      /**
-       * Public path to an image
-       *
-       * This image may be displayed as preview when the link is shared on social media
-       */
-      ogImage?: string
-      /**
-       * String to append to the <title> of admin pages
-       * @example `" - My Brand"`
-       */
-      titleSuffix?: string
-    }
+    meta?: MetaConfig
     routes?: {
       /** The route for the account page. */
       account?: string
@@ -510,6 +564,8 @@ export type Config = {
       login?: string
       /** The route for the logout page. */
       logout?: string
+      /** The route for the reset password page. */
+      reset?: string
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
@@ -561,7 +617,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapterProvider<any, any, any>
+  editor?: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -665,6 +721,12 @@ export type Config = {
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
+    /**
+     * Automatically generate types during development
+     * @default true
+     */
+    autoGenerate?: boolean
+
     /** Disable declare block in generated types file */
     declare?:
       | {
@@ -678,6 +740,7 @@ export type Config = {
           ignoreTSError?: boolean
         }
       | false
+
     /** Filename to write the generated types to */
     outputFile?: string
   }
@@ -693,7 +756,7 @@ export type SanitizedConfig = Omit<
 > & {
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>

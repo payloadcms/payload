@@ -1,5 +1,5 @@
-import type { PaginatedDocs } from 'payload/database'
-import type { fieldSchemaToJSON } from 'payload/utilities'
+import type { PaginatedDocs } from 'payload'
+import type { fieldSchemaToJSON } from 'payload/shared'
 
 import type { PopulationsByCollection, UpdatedDocument } from './types.js'
 

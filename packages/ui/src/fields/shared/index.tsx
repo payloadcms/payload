@@ -1,13 +1,14 @@
-import type { User } from 'payload/auth'
-import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import type {
   DocumentPreferences,
   ErrorProps,
   FieldDescriptionProps,
   LabelProps,
+  Locale,
   SanitizedLabelProps,
+  SanitizedLocalizationConfig,
+  User,
   Validate,
-} from 'payload/types'
+} from 'payload'
 
 export const fieldBaseClass = 'field-type'
 

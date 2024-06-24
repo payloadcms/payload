@@ -5,7 +5,7 @@ This adapter allows you to send emails using the [Resend](https://resend.com) RE
 ## Installation
 
 ```sh
-pnpm add @payloadcms/email-resend`
+pnpm add @payloadcms/email-resend
 ```
 
 ## Usage
