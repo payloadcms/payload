@@ -59,6 +59,7 @@ const resultClient = await esbuild
       '@payloadcms/graphql',
       '@payloadcms/translations',
       'deep-equal',
+      'dequal',
       'react-toastify',
 
       //'side-channel',

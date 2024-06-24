@@ -15,7 +15,7 @@ import {
   useFormSubmitted,
   useTranslation,
 } from '@payloadcms/ui'
-import { dequal } from 'dequal/lite'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 

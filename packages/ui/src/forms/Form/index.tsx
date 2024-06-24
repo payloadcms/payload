@@ -2,7 +2,7 @@
 import type { FormState } from 'payload'
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import isDeepEqual from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import { wait } from 'payload/shared'
@@ -157,7 +157,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
     await Promise.all(validationPromises)
 
-    if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
+    if (!dequal(contextRef.current.fields, validatedFieldState)) {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 

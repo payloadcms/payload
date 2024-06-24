@@ -118,6 +118,7 @@ function require(m) {
       '@payloadcms/graphql',
       '@payloadcms/translations',
       'deep-equal',
+      'dequal',
       'react-toastify',
 
       //'side-channel',
@@ -171,6 +172,7 @@ const resultShared = await esbuild
       '@payloadcms/graphql',
       '@payloadcms/translations',
       'deep-equal',
+      'dequal',
       'react-toastify',
       'payload',
       'payload/*',
