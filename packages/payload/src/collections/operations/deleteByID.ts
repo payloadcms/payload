@@ -1,6 +1,6 @@
-import type { GeneratedTypes } from '../../index.js'
-import type { Document, PayloadRequestWithData } from '../../types/index.js'
-import type { BeforeOperationHook, Collection } from '../config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
+import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -24,9 +24,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
+export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
-): Promise<Document> => {
+): Promise<DataFromCollectionSlug<TSlug>> => {
   let args = incomingArgs
 
   try {
@@ -130,7 +130,7 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // Delete document
     // /////////////////////////////////////
 
-    let result = await req.payload.db.deleteOne({
+    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
       req,
       where: { id: { equals: id } },
@@ -202,7 +202,7 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'deleteByID',

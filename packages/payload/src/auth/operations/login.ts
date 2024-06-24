@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
-import type { Collection } from '../../collections/config/types.js'
-import type { GeneratedTypes } from '../../index.js'
+import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
 import type { User } from '../types.js'
 
@@ -36,9 +36,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const loginOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
+export const loginOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
-): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> => {
+): Promise<Result & { user: DataFromCollectionSlug<TSlug> }> => {
   let args = incomingArgs
 
   try {
@@ -230,7 +230,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
         })) || user
     }, Promise.resolve())
 
-    let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
+    let result: Result & { user: DataFromCollectionSlug<TSlug> } = {
       exp: (jwt.decode(token) as jwt.JwtPayload).exp,
       token,
       user,
@@ -240,7 +240,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: args.collection?.config,
       operation: 'login',

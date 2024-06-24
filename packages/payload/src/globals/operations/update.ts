@@ -1,8 +1,8 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../index.js'
+import type { GlobalSlug } from '../../index.js'
 import type { PayloadRequestWithData, Where } from '../../types/index.js'
-import type { SanitizedGlobalConfig } from '../config/types.js'
+import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
@@ -15,9 +15,9 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
-type Args<T extends { [field: number | string | symbol]: unknown }> = {
+type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
-  data: DeepPartial<Omit<T, 'id'>>
+  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
@@ -27,9 +27,9 @@ type Args<T extends { [field: number | string | symbol]: unknown }> = {
   slug: string
 }
 
-export const updateOperation = async <TSlug extends keyof GeneratedTypes['globals']>(
-  args: Args<GeneratedTypes['globals'][TSlug]>,
-): Promise<GeneratedTypes['globals'][TSlug]> => {
+export const updateOperation = async <TSlug extends GlobalSlug>(
+  args: Args<TSlug>,
+): Promise<DataFromGlobalSlug<TSlug>> => {
   const {
     slug,
     autosave,

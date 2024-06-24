@@ -1,18 +1,18 @@
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequestWithData } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { verifyEmailOperation } from '../verifyEmail.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
   context?: RequestContext
   req?: PayloadRequestWithData
   token: string
 }
 
-async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
+async function localVerifyEmail<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {

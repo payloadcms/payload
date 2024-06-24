@@ -1,31 +1,27 @@
-import type { MarkOptional } from 'ts-essentials'
-
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
+import type { DataFromCollectionSlug, RequiredDataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
-  data: MarkOptional<
-    GeneratedTypes['collections'][TSlug],
-    'createdAt' | 'id' | 'sizes' | 'updatedAt'
-  >
+  data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   file?: File
   filePath?: string
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req?: PayloadRequestWithData
@@ -34,10 +30,10 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
+export default async function createLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<GeneratedTypes['collections'][TSlug]> {
+): Promise<DataFromCollectionSlug<TSlug>> {
   const {
     collection: collectionSlug,
     data,

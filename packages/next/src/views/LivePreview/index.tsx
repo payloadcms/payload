@@ -23,7 +23,7 @@ export const LivePreviewView: EditViewComponent = async (props) => {
     } = {},
   } = initPageResult
 
-  let data: TypeWithID
+  let data: Record<string, unknown> | TypeWithID
 
   try {
     if (collectionConfig) {

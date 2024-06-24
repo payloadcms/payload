@@ -1,4 +1,12 @@
-import type { Config, Field, FileData, FileSize, Payload, TypeWithID } from 'payload'
+import type {
+  CollectionSlug,
+  Config,
+  Field,
+  FileData,
+  FileSize,
+  Payload,
+  TypeWithID,
+} from 'payload'
 
 import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload'
@@ -17,7 +25,7 @@ import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
   collections?: {
-    [collection: string]: {
+    [collection: CollectionSlug]: {
       fields: Field[]
     }
   }

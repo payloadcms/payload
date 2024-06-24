@@ -1,4 +1,4 @@
-import type { Field, FieldAffectingData, SanitizedConfig } from 'payload'
+import type { CollectionSlug, Field, FieldAffectingData, SanitizedConfig } from 'payload'
 
 import { getBaseFields } from '../../drawer/baseFields.js'
 
@@ -10,8 +10,8 @@ export function transformExtraFields(
     | ((args: { config: SanitizedConfig; defaultFields: FieldAffectingData[] }) => Field[])
     | Field[],
   config: SanitizedConfig,
-  enabledCollections?: false | string[],
-  disabledCollections?: false | string[],
+  enabledCollections?: CollectionSlug[],
+  disabledCollections?: CollectionSlug[],
   maxDepth?: number,
 ): Field[] {
   const baseFields: FieldAffectingData[] = getBaseFields(

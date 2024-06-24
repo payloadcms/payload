@@ -1,27 +1,28 @@
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData } from '../../../types/index.js'
+import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<T extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   id: string
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
-  slug: string
+  slug: TSlug
   user?: Document
 }
 
-export default async function restoreVersionLocal<T extends keyof GeneratedTypes['globals']>(
+export default async function restoreVersionLocal<TSlug extends GlobalSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<GeneratedTypes['globals'][T]> {
+  options: Options<TSlug>,
+): Promise<DataFromGlobalSlug<TSlug>> {
   const { id, slug: globalSlug, depth, overrideAccess = true, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
