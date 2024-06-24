@@ -35,7 +35,7 @@ const baseClass = 'relationship'
 
 export { RelationshipFieldProps }
 
-const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
+const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -606,4 +606,4 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   )
 }
 
-export const Relationship = withCondition(RelationshipField)
+export const RelationshipField = withCondition(_RelationshipField)

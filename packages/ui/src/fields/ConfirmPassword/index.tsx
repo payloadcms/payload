@@ -15,7 +15,7 @@ export type ConfirmPasswordFieldProps = {
   disabled?: boolean
 }
 
-export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
+export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
   const { disabled } = props
 
   const password = useFormFields<FormField>(([fields]) => fields?.password)
