@@ -151,7 +151,7 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequestWithData
 }) => any
 
-export type AfterOperationHook<TOperationGeneric extends CollectionSlug> = (
+export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string> = (
   arg: AfterOperationArg<TOperationGeneric>,
 ) =>
   | Awaited<

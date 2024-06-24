@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 export const afterOperationSlug = 'afterOperation'
 
-export const AfterOperationCollection: CollectionConfig<'afterOperation'> = {
+export const AfterOperationCollection: CollectionConfig = {
   slug: afterOperationSlug,
   hooks: {
     // beforeRead: [(operation) => operation.doc],
@@ -12,7 +12,6 @@ export const AfterOperationCollection: CollectionConfig<'afterOperation'> = {
           if ('docs' in result) {
             return {
               ...result,
-              // @ts-expect-error
               docs: result.docs?.map((doc) => ({
                 ...doc,
                 title: 'Title created',
