@@ -34,6 +34,7 @@ export const saveVersion = async ({
   const versionData = deepCopyObject(doc)
   if (draft) versionData._status = 'draft'
   if (versionData._id) delete versionData._id
+  if (versionData.id) delete versionData.id
 
   try {
     if (autosave) {
