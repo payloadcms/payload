@@ -6,14 +6,38 @@ desc: Manage and customize internationalization support in your CMS editor exper
 keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Not only does Payload support managing localized content, it also has internationalization support so that admin users can work in their preferred language. It comes included by default and can be extended in your config.
+Not only does Payload support managing localized content, it also has internationalization support so that admin users can work in their preferred language. 
+
+By default, Payload comes with English installed as the language it uses. But, you can import and pass other languages to the Payload config as well. It's best to only support the languages that you need, because that way, the bundled JavaScript is kept to a minimum for your project.
+
+Here's an example for how to pass additional languages to Payload for use in translating:
+
+```ts
+import { buildConfig } from 'payload'
+import { en } from 'payload/i18n/en'
+import { de } from 'payload/i18n/de'
+
+export default buildConfig({
+  /**
+   * Payload accepts specific translations to use.
+   * This is completely optional and will default to English if not provided
+   */
+  i18n: {
+    // Payload will support either English or German,
+    // able to be specified in preferences on a user-by-user basis
+    supportedLanguages: { en, de },
+  },
+
+  // .. the rest of your config
+})
+```
 
 While Payload's built-in features come translated, you may want to also translate parts of your project's configuration too. This is possible in places like collections and globals labels and groups, field labels, descriptions and input placeholder text. The admin UI will display all the correct translations you provide based on the user's language.
 
 Here is an example of a simple collection supporting both English and Spanish editors:
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
@@ -65,12 +89,12 @@ After a user logs in, they can change their language selection in the `/account`
   <strong>Note:</strong>
   <br />
   If there is a language that Payload does not yet support, we accept code
-  [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
+  [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md). You can also make and import your own translation files.
 </Banner>
 
-## Node Express
+## Backend Translations
 
-Payload's backend uses express middleware to set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
+Payload's backend will set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
 Anywhere in your Payload app that you have access to the `req` object, you can access payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
@@ -81,7 +105,7 @@ In your Payload config, you can add translations and customize the settings in `
 **Example Payload config extending i18n:**
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   //...

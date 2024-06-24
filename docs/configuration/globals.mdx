@@ -33,7 +33,7 @@ _\* An asterisk denotes that a property is required._
 ### Simple Global example
 
 ```ts
-import { GlobalConfig } from 'payload/types'
+import { GlobalConfig } from 'payload'
 
 const Nav: GlobalConfig = {
   slug: 'nav',
@@ -90,7 +90,7 @@ If the function is specified, a Preview button will automatically appear in the 
 **Example global with preview function:**
 
 ```ts
-import { GlobalConfig } from 'payload/types'
+import { GlobalConfig } from 'payload'
 
 export const MyGlobal: GlobalConfig = {
   slug: 'my-global',
@@ -130,7 +130,7 @@ Globals support all field types that Payload has to offer—including simple fie
 You can import global types as follows:
 
 ```ts
-import { GlobalConfig } from 'payload/types'
+import { GlobalConfig } from 'payload'
 
 // This is the type used for incoming global configs.
 // Only the bare minimum properties are marked as required.
