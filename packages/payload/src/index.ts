@@ -621,9 +621,9 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-type DatabaseAdapter = BaseDatabaseAdapter
+export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 
-export type { DatabaseAdapter, Payload, RequestContext }
+export type { Payload, RequestContext }
 
 export * from './types/index.js'
 export type * from './admin/types.js'
