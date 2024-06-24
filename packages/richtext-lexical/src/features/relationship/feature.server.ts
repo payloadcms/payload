@@ -1,6 +1,6 @@
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { CollectionSlug } from 'packages/payload/src/index.js'
+import type { CollectionSlug } from 'payload'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RelationshipFeatureClient } from '../../exports/client/index.js'
 import { populate } from '../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
