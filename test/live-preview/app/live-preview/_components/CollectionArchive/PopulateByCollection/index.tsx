@@ -1,6 +1,5 @@
 'use client'
 
-import qs from 'qs'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Post } from '../../../../../payload-types.js'
@@ -86,29 +85,23 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
       }
     }, 500)
 
-    const searchQuery = qs.stringify(
-      {
-        depth: 1,
-        limit,
-        page,
-        sort,
-        where: {
-          ...(catsFromProps && catsFromProps?.length > 0
-            ? {
-                categories: {
-                  in:
-                    typeof catsFromProps === 'string'
-                      ? [catsFromProps]
-                      : catsFromProps
-                          .map((cat) => (typeof cat === 'object' && cat !== null ? cat.id : cat))
-                          .join(','),
-                },
-              }
-            : {}),
-        },
-      },
-      { encode: false },
-    )
+    const params = new URLSearchParams()
+
+    // Add parameters with single values
+    params.append('depth', '1')
+    params.append('limit', String(limit))
+    params.append('page', String(page))
+    params.append('sort', sort)
+
+    // Handling the 'where' part which is more complex due to nested structure
+    if (catsFromProps && catsFromProps.length > 0) {
+      const categories = Array.isArray(catsFromProps)
+        ? catsFromProps.map((cat) => (typeof cat === 'object' && cat !== null ? cat.id : cat))
+        : [catsFromProps]
+      params.append('where[categories][in]', categories.join(','))
+    }
+
+    const searchQuery = params.toString()
 
     const makeRequest = async () => {
       try {
