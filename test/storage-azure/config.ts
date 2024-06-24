@@ -45,7 +45,4 @@ export default buildConfigWithDefaults({
     }),
   ],
   upload: uploadOptions,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
 })

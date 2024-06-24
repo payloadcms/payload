@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
 
 import { codeFieldsSlug } from '../../slugs.js'
 

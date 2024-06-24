@@ -6,15 +6,11 @@ import './index.scss'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
-  boundingRef?: React.RefObject<HTMLElement | null>
+  boundingRef?: React.RefObject<HTMLElement>
   children: React.ReactNode
   className?: string
   delay?: number
   show?: boolean
-  /**
-   * If the tooltip position should not change depending on if the toolbar is outside the boundingRef. @default false
-   */
-  staticPositioning?: boolean
 }
 
 export const Tooltip: React.FC<Props> = (props) => {
@@ -25,7 +21,6 @@ export const Tooltip: React.FC<Props> = (props) => {
     className,
     delay = 350,
     show: showFromProps = true,
-    staticPositioning = false,
   } = props
 
   const [show, setShow] = React.useState(showFromProps)
@@ -33,14 +28,11 @@ export const Tooltip: React.FC<Props> = (props) => {
 
   const getTitleAttribute = (content) => (typeof content === 'string' ? content : '')
 
-  const [ref, intersectionEntry] = useIntersect(
-    {
-      root: boundingRef?.current || null,
-      rootMargin: '-145px 0px 0px 100px',
-      threshold: 0,
-    },
-    staticPositioning,
-  )
+  const [ref, intersectionEntry] = useIntersect({
+    root: boundingRef?.current || null,
+    rootMargin: '-145px 0px 0px 100px',
+    threshold: 0,
+  })
 
   useEffect(() => {
     let timerId: NodeJS.Timeout
@@ -60,25 +52,22 @@ export const Tooltip: React.FC<Props> = (props) => {
   }, [showFromProps, delay])
 
   useEffect(() => {
-    if (staticPositioning) return
     setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
-  }, [intersectionEntry, staticPositioning])
+  }, [intersectionEntry])
 
-  // The first aside is always on top. The purpose of that is that it can reliably be used for the interaction observer (as it's not moving around), to calculate the position of the actual tooltip.
   return (
     <React.Fragment>
-      {!staticPositioning && (
-        <aside
-          aria-hidden="true"
-          className={['tooltip', className, `tooltip--caret-${alignCaret}`, 'tooltip--position-top']
-            .filter(Boolean)
-            .join(' ')}
-          ref={ref}
-          style={{ opacity: '0' }}
-        >
-          <div className="tooltip-content">{children}</div>
-        </aside>
-      )}
+      <aside
+        aria-hidden="true"
+        className={['tooltip', className, `tooltip--caret-${alignCaret}`, 'tooltip--position-top']
+          .filter(Boolean)
+          .join(' ')}
+        ref={ref}
+        title={getTitleAttribute(children)}
+      >
+        <div className="tooltip-content">{children}</div>
+      </aside>
+
       <aside
         className={[
           'tooltip',

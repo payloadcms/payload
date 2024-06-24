@@ -14,7 +14,7 @@ npm install @payloadcms/db-mongodb
 ## Usage
 
 ```ts
-import { buildConfig } from 'payload'
+import { buildConfig } from 'payload/config'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default buildConfig({

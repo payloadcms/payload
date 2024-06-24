@@ -1,13 +1,13 @@
-'use client'
 import React from 'react'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { CopyIcon } from '../../icons/Copy/index.js'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { Copy } from '../../icons/Copy/index.js'
 import { MoreIcon } from '../../icons/More/index.js'
-import { PlusIcon } from '../../icons/Plus/index.js'
-import { XIcon } from '../../icons/X/index.js'
+import { Plus } from '../../icons/Plus/index.js'
+import { X } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Popup, PopupList } from '../Popup/index.js'
+import { PopupList } from '../Popup/index.js'
+import { Popup } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'array-actions'
@@ -53,7 +53,7 @@ export const ArrayAction: React.FC<Props> = ({
                 }}
               >
                 <div className={`${baseClass}__action-chevron`}>
-                  <ChevronIcon direction="up" />
+                  <Chevron direction="up" />
                 </div>
                 {t('general:moveUp')}
               </PopupList.Button>
@@ -67,7 +67,7 @@ export const ArrayAction: React.FC<Props> = ({
                 }}
               >
                 <div className={`${baseClass}__action-chevron`}>
-                  <ChevronIcon />
+                  <Chevron />
                 </div>
                 {t('general:moveDown')}
               </PopupList.Button>
@@ -81,7 +81,7 @@ export const ArrayAction: React.FC<Props> = ({
                     close()
                   }}
                 >
-                  <PlusIcon />
+                  <Plus />
                   {t('general:addBelow')}
                 </PopupList.Button>
                 <PopupList.Button
@@ -91,7 +91,7 @@ export const ArrayAction: React.FC<Props> = ({
                     close()
                   }}
                 >
-                  <CopyIcon />
+                  <Copy />
                   {t('general:duplicate')}
                 </PopupList.Button>
               </React.Fragment>
@@ -103,7 +103,7 @@ export const ArrayAction: React.FC<Props> = ({
                 close()
               }}
             >
-              <XIcon />
+              <X />
               {t('general:remove')}
             </PopupList.Button>
           </PopupList.ButtonGroup>

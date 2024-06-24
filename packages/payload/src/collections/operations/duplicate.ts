@@ -205,10 +205,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       global: null,
       operation,
       req,
-      skipValidation:
-        shouldSaveDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
+      skipValidation: shouldSaveDraft,
     })
 
     // set req.locale back to the original locale

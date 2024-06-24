@@ -1,4 +1,5 @@
-import { deepMerge, isReactServerComponentOrFunction, serverProps } from 'payload/shared'
+import { serverProps } from 'payload/config'
+import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
 /**
@@ -18,30 +19,23 @@ import React from 'react'
  * // <OriginalComponent customProp="value" someExtraValue={5} />
  *
  * @returns A higher-order component with combined properties.
- *
- * @param Component - The original component to wrap.
- * @param sanitizeServerOnlyProps - If true, server-only props will be removed from the merged props. @default true if the component is not a server component, false otherwise.
- * @param toMergeIntoProps - The properties to merge into the passed props.
  */
 export function withMergedProps<ToMergeIntoProps, CompleteReturnProps>({
   Component,
-  sanitizeServerOnlyProps,
+  sanitizeServerOnlyProps = true,
   toMergeIntoProps,
 }: {
   Component: React.FC<CompleteReturnProps>
   sanitizeServerOnlyProps?: boolean
   toMergeIntoProps: ToMergeIntoProps
 }): React.FC<CompleteReturnProps> {
-  if (sanitizeServerOnlyProps === undefined) {
-    sanitizeServerOnlyProps = !isReactServerComponentOrFunction(Component)
-  }
   // A wrapper around the args.Component to inject the args.toMergeArgs as props, which are merged with the passed props
   const MergedPropsComponent: React.FC<CompleteReturnProps> = (passedProps) => {
     const mergedProps = deepMerge(passedProps, toMergeIntoProps)
 
     if (sanitizeServerOnlyProps) {
       serverProps.forEach((prop) => {
-        delete mergedProps[prop]
+        delete (mergedProps)[prop]
       })
     }
 

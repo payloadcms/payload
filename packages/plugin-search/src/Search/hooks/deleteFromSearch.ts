@@ -1,4 +1,4 @@
-import type { CollectionAfterDeleteHook } from 'payload'
+import type { CollectionAfterDeleteHook } from 'payload/types'
 
 export const deleteFromSearch: CollectionAfterDeleteHook = async ({
   doc,

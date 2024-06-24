@@ -1,4 +1,4 @@
-import type { RadioField, SelectField } from 'payload'
+import type { RadioField, SelectField } from 'payload/types'
 
 import formatName from './formatName.js'
 

@@ -1,6 +1,6 @@
 // Keep these in sync with the CSS variables in the `_css` directory
 
-export default {
+module.exports = {
   breakpoints: {
     l: 1440,
     m: 1024,

@@ -1,4 +1,4 @@
-import type { Field, FormState } from 'payload'
+import type { Field, FormState } from 'payload/types'
 
 // import { buildPathSegments } from './buildPathSegments'
 import { getFieldStateFromPaths } from './getFieldStateFromPaths.js'

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { RelationshipField, UploadField } from 'payload'
+import type { RelationshipField, UploadField } from 'payload/types'
 
 type Args = {
   field: RelationshipField | UploadField
@@ -30,6 +30,10 @@ export const transformRelationship = ({ field, locale, ref, relations }: Args) =
             value: matchedRelation[1],
           }
         }
+      } else {
+        // Handle hasOne
+        const relatedData = relation[`${field.relationTo}ID`]
+        result = relatedData
       }
     }
   } else {

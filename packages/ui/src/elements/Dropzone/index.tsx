@@ -1,4 +1,3 @@
-'use client'
 import React from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'

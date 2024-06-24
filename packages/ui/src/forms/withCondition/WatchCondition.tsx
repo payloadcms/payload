@@ -1,7 +1,8 @@
 'use client'
-import type { FieldTypes } from 'payload'
+import type { FieldTypes } from 'payload/config'
 
-import React, { Fragment } from 'react'
+import React from 'react'
+import { Fragment } from 'react'
 
 import { useFormFields } from '../Form/context.js'
 

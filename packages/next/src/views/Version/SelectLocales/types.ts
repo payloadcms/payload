@@ -1,4 +1,4 @@
-import type { OptionObject } from 'payload'
+import type { OptionObject } from 'payload/types'
 
 export type Props = {
   onChange: (options: OptionObject[]) => void

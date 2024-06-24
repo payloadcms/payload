@@ -1,10 +1,11 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import React from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { Button } from '../Button/index.js'
 import { Translation } from '../Translation/index.js'
 import './index.scss'
@@ -17,6 +18,8 @@ export type GenerateConfirmationProps = {
 }
 
 export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { highlightField, setKey } = props
 
   const { id } = useDocumentInfo()
@@ -28,7 +31,7 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
   const handleGenerate = () => {
     setKey()
     toggleModal(modalSlug)
-    toast.success(t('authentication:newAPIKeyGenerated'))
+    toast.success(t('authentication:newAPIKeyGenerated'), { autoClose: 3000 })
     highlightField(true)
   }
 
@@ -44,7 +47,7 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
         {t('authentication:generateNewAPIKey')}
       </Button>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
+        <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('authentication:confirmGeneration')}</h1>
           <p>
             <Translation
@@ -66,7 +69,7 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
             {t('general:cancel')}
           </Button>
           <Button onClick={handleGenerate}>{t('authentication:generate')}</Button>
-        </div>
+        </MinimalTemplate>
       </Modal>
     </React.Fragment>
   )

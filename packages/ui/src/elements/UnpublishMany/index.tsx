@@ -1,8 +1,9 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
+import { toast } from 'react-toastify'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -10,6 +11,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
@@ -17,9 +19,7 @@ import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-import type { ClientCollectionConfig } from 'payload'
-
-import { toast } from 'sonner'
+import type { ClientCollectionConfig } from 'payload/types'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
@@ -27,6 +27,7 @@ export type UnpublishManyProps = {
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { Modal, useModal } = facelessUIImport
 
   const {
     routes: { api },
@@ -121,7 +122,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
         {t('version:unpublish')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
+        <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('version:confirmUnpublish')}</h1>
           <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
           <Button
@@ -135,7 +136,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
           <Button id="confirm-unpublish" onClick={submitted ? undefined : handleUnpublish}>
             {submitted ? t('version:unpublishing') : t('general:confirm')}
           </Button>
-        </div>
+        </MinimalTemplate>
       </Modal>
     </React.Fragment>
   )

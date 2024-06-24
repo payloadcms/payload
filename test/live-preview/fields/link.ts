@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field } from 'payload/types'
 
 import { pagesSlug, postsSlug } from '../shared.js'
 import deepMerge from '../utilities/deepMerge.js'

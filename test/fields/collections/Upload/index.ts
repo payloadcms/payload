@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
 
 import path from 'path'
 import { fileURLToPath } from 'url'

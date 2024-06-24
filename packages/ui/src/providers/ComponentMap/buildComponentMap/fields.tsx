@@ -1,17 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
+import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
-  CustomComponent,
   Field,
   FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
   Option,
   SanitizedConfig,
-} from 'payload'
+} from 'payload/types'
 
-import { MissingEditorProp } from 'payload'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -44,21 +43,8 @@ import type {
   ReducedBlock,
 } from './types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { FieldDescription } from '../../../exports/client/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { HiddenInput } from '../../../exports/client/index.js'
-
-function generateFieldPath(parentPath, name) {
-  let tabPath = parentPath || ''
-  if (parentPath && name) {
-    tabPath = `${parentPath}.${name}`
-  } else if (!parentPath && name) {
-    tabPath = name
-  }
-
-  return tabPath
-}
+import { HiddenInput } from '../../../fields/HiddenInput/index.js'
+import { FieldDescription } from '../../../forms/FieldDescription/index.js'
 
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated
@@ -89,7 +75,7 @@ export const mapFields = (args: {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let CustomFieldComponent: CustomComponent<FieldComponentProps> = field.admin?.components?.Field
 
-    let CustomCellComponent = field.admin?.components?.Cell
+    const CustomCellComponent = field.admin?.components?.Cell
 
     const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
 
@@ -103,10 +89,9 @@ export const mapFields = (args: {
 
         const isFieldAffectingData = fieldAffectsData(field)
 
-        const path = generateFieldPath(
-          parentPath,
-          isFieldAffectingData && 'name' in field ? field.name : '',
-        )
+        const path = `${parentPath ? `${parentPath}.` : ''}${
+          field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
+        }`
 
         const AfterInput =
           ('admin' in field &&
@@ -146,7 +131,6 @@ export const mapFields = (args: {
         const labelProps: LabelProps = {
           label,
           required: 'required' in field ? field.required : undefined,
-          schemaPath: path,
         }
 
         const CustomLabelComponent =
@@ -254,7 +238,6 @@ export const mapFields = (args: {
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
-          schemaPath: path,
         }
 
         switch (field.type) {
@@ -473,7 +456,6 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
-              hideGutter: field.admin?.hideGutter,
               readOnly: field.admin?.readOnly,
               style: field.admin?.style,
               width: field.admin?.width,
@@ -542,7 +524,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
-              isSortable: field.admin?.isSortable,
               readOnly: field.admin?.readOnly,
               relationTo: field.relationTo,
               required: field.required,
@@ -583,9 +564,6 @@ export const mapFields = (args: {
               style: field.admin?.style,
               width: field.admin?.width,
             }
-            if (!field?.editor) {
-              throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-            }
             if (typeof field?.editor === 'function') {
               throw new Error('Attempted to access unsanitized rich text editor.')
             }
@@ -609,7 +587,9 @@ export const mapFields = (args: {
             }
 
             if (RichTextCellComponent) {
-              CustomCellComponent = RichTextCellComponent
+              cellComponentProps.CellComponentOverride = (
+                <WithServerSideProps Component={RichTextCellComponent} />
+              )
             }
 
             fieldComponentProps = richTextField
@@ -807,7 +787,6 @@ export const mapFields = (args: {
       CustomField: null,
       cellComponentProps: {
         name: 'id',
-        schemaPath: 'id',
       },
       disableBulkEdit: true,
       fieldComponentProps: {

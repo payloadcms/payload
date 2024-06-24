@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { LogOutIcon } from '../../icons/LogOut/index.js'
+import { LogOut } from '../../icons/LogOut/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -22,18 +22,16 @@ const DefaultLogout: React.FC<{
     routes: { admin },
   } = config
 
-  const basePath = process.env.NEXT_BASE_PATH ?? ''
-
   const LinkElement = Link || 'a'
 
   return (
     <LinkElement
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
-      href={`${basePath}${admin}${logoutRoute}`}
+      href={`${admin}${logoutRoute}`}
       tabIndex={tabIndex}
     >
-      <LogOutIcon />
+      <LogOut />
     </LinkElement>
   )
 }

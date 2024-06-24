@@ -1,4 +1,5 @@
-import type { PayloadRequestWithData, UpdateGlobal } from 'payload'
+import type { UpdateGlobal } from 'payload/database'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 

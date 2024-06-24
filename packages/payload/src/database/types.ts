@@ -430,9 +430,3 @@ export type DBIdentifierName =
       tableName?: string
     }) => string)
   | string
-
-export type MigrationTemplateArgs = {
-  downSQL?: string
-  imports?: string
-  upSQL?: string
-}

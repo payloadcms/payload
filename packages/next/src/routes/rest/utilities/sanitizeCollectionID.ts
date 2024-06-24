@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload } from 'payload/types'
 
 type Args = {
   collectionSlug: string

@@ -1,4 +1,5 @@
-import type { AdminViewComponent, SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload/config'
+import type { AdminViewComponent } from 'payload/types'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 
@@ -25,7 +26,7 @@ const baseClasses = {
 }
 
 type OneSegmentViews = {
-  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: AdminViewComponent
+  [K in keyof SanitizedConfig['admin']['routes']]: AdminViewComponent
 }
 
 const oneSegmentViews: OneSegmentViews = {

@@ -14,12 +14,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 }): Promise<Metadata> => {
   const { t } = i18n
 
-  const entityLabel = collectionConfig
-    ? getTranslation(collectionConfig.labels.singular, i18n)
-    : globalConfig
-      ? getTranslation(globalConfig.label, i18n)
-      : ''
-
   let title: string = ''
   let description: string = ''
   const keywords: string = ''
@@ -29,7 +23,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   if (collectionConfig) {
     const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
     const titleFromData = data?.[useAsTitle]
-    title = `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`
+    title = `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${getTranslation(collectionConfig.labels.plural, i18n)}`
     description = t('version:viewingVersions', {
       documentTitle: data?.[useAsTitle],
       entitySlug: collectionConfig.slug,
@@ -37,17 +31,14 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   }
 
   if (globalConfig) {
-    title = `${t('version:versions')} - ${entityLabel}`
+    title = `${t('version:versions')} - ${getTranslation(globalConfig.label, i18n)}`
     description = t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug })
   }
 
   return meta({
-    ...(config.admin.meta || {}),
+    config,
     description,
     keywords,
-    serverURL: config.serverURL,
     title,
-    ...(collectionConfig?.admin.meta || {}),
-    ...(globalConfig?.admin.meta || {}),
   })
 }

@@ -1,20 +1,25 @@
 'use client'
+import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
 import type {
   AcceptedLanguages,
-  ClientTranslationKeys,
   ClientTranslationsObject,
-  I18nClient,
   Language,
   TFunction,
 } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
-import type { ClientConfig, LanguageOptions } from 'payload'
+import type { ClientConfig } from 'payload/types'
 
-import { importDateFNSLocale, t } from '@payloadcms/translations'
-import { enUS } from 'date-fns/locale/en-US'
+import { t } from '@payloadcms/translations'
+import { importDateFNSLocale } from '@payloadcms/translations'
+import enUS from 'date-fns/locale/en-US'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { useRouteCache } from '../RouteCache/index.js'
+
+export type LanguageOptions = {
+  label: string
+  value: string
+}[]
 
 type ContextType<
   TAdditionalTranslations = {},

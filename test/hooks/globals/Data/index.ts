@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import type { GlobalConfig } from 'payload'
+import type { GlobalConfig } from 'payload/types'
 
 export const dataHooksGlobalSlug = 'data-hooks-global'
 

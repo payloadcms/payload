@@ -1,18 +1,20 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload/types'
 
-import { initI18n, rtlLanguages } from '@payloadcms/translations'
-import { RootProvider } from '@payloadcms/ui'
+import { rtlLanguages } from '@payloadcms/translations'
+import { initI18n } from '@payloadcms/translations'
+import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
 import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import { Merriweather } from 'next/font/google'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { createClientConfig, parseCookies } from 'payload'
+import { parseCookies } from 'payload/auth'
+import { createClientConfig } from 'payload/config'
 import React from 'react'
+import 'react-toastify/dist/ReactToastify.css'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultListView } from '../../views/List/Default/index.js'
 
@@ -47,20 +49,12 @@ export const RootLayout = async ({
     headers,
   })
 
-  const theme = getRequestTheme({
-    config,
-    cookies,
-    headers,
-  })
-
   const payload = await getPayloadHMR({ config })
-
   const i18n: I18nClient = await initI18n({
     config: config.i18n,
     context: 'client',
     language: languageCode,
   })
-
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
@@ -100,7 +94,7 @@ export const RootLayout = async ({
   })
 
   return (
-    <html className={merriweather.variable} data-theme={theme} dir={dir} lang={languageCode}>
+    <html className={merriweather.variable} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
           componentMap={componentMap}
@@ -111,7 +105,6 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           // eslint-disable-next-line react/jsx-no-bind
           switchLanguageServerAction={switchLanguageServerAction}
-          theme={theme}
           translations={i18n.translations}
         >
           {wrappedChildren}

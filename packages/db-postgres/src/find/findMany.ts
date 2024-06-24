@@ -1,4 +1,5 @@
-import type { Field, FindArgs, PayloadRequestWithData, TypeWithID } from 'payload'
+import type { FindArgs } from 'payload/database'
+import type { Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { inArray, sql } from 'drizzle-orm'
 
@@ -40,7 +41,7 @@ export const findMany = async function find({
   let hasNextPage: boolean
   let pagingCounter: number
 
-  const { joins, orderBy, selectFields, where } = await buildQuery({
+  const { joinAliases, joins, orderBy, selectFields, where } = await buildQuery({
     adapter,
     fields,
     locale,
@@ -75,6 +76,7 @@ export const findMany = async function find({
     adapter,
     chainedMethods: selectDistinctMethods,
     db,
+    joinAliases,
     joins,
     selectFields,
     tableName,
@@ -120,11 +122,21 @@ export const findMany = async function find({
 
   if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
     const selectCountMethods: ChainedMethods = []
-    joins.forEach(({ condition, table }) => {
+
+    joinAliases.forEach(({ condition, table }) => {
       selectCountMethods.push({
         args: [table, condition],
         method: 'leftJoin',
       })
+    })
+
+    Object.entries(joins).forEach(([joinTable, condition]) => {
+      if (joinTable) {
+        selectCountMethods.push({
+          args: [adapter.tables[joinTable], condition],
+          method: 'leftJoin',
+        })
+      }
     })
 
     const countResult = await chainMethods({
@@ -132,7 +144,7 @@ export const findMany = async function find({
       query: db
         .select({
           count: sql<number>`count
-            (DISTINCT ${adapter.tables[tableName].id})`,
+              (DISTINCT ${adapter.tables[tableName].id})`,
         })
         .from(table)
         .where(where),
@@ -160,7 +172,6 @@ export const findMany = async function find({
 
   const docs = rawDocs.map((data: TypeWithID) => {
     return transform({
-      adapter,
       config: adapter.payload.config,
       data,
       fields,

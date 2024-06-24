@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
@@ -18,13 +18,6 @@ export const Posts: CollectionConfig = {
     listSearchableFields: ['id', 'title', 'description', 'number'],
     preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
-    meta: {
-      description: 'This is a custom meta description for posts',
-      openGraph: {
-        title: 'This is a custom OG title for posts',
-        description: 'This is a custom OG description for posts',
-      },
-    },
   },
   fields: [
     {

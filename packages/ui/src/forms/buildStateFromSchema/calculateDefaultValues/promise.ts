@@ -1,7 +1,13 @@
-import type { Data, Field, TabAsField, User } from 'payload'
+import type { Data } from 'payload/types'
 
-import { getDefaultValue } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import {
+  type Field,
+  type PayloadRequestWithData,
+  type TabAsField,
+  fieldAffectsData,
+  tabHasName,
+} from 'payload/types'
+import { getDefaultValue } from 'payload/utilities'
 
 import { iterateFields } from './iterateFields.js'
 
@@ -9,9 +15,8 @@ type Args<T> = {
   data: T
   field: Field | TabAsField
   id?: number | string
-  locale: string | undefined
+  req: PayloadRequestWithData
   siblingData: Data
-  user: User
 }
 
 // TODO: Make this works for rich text subfields
@@ -19,9 +24,8 @@ export const defaultValuePromise = async <T>({
   id,
   data,
   field,
-  locale,
+  req,
   siblingData,
-  user,
 }: Args<T>): Promise<void> => {
   if (fieldAffectsData(field)) {
     if (
@@ -30,8 +34,8 @@ export const defaultValuePromise = async <T>({
     ) {
       siblingData[field.name] = await getDefaultValue({
         defaultValue: field.defaultValue,
-        locale,
-        user,
+        locale: req.locale,
+        user: req.user,
         value: siblingData[field.name],
       })
     }
@@ -48,9 +52,8 @@ export const defaultValuePromise = async <T>({
         id,
         data,
         fields: field.fields,
-        locale,
+        req,
         siblingData: groupData,
-        user,
       })
 
       break
@@ -67,9 +70,8 @@ export const defaultValuePromise = async <T>({
               id,
               data,
               fields: field.fields,
-              locale,
+              req,
               siblingData: row,
-              user,
             }),
           )
         })
@@ -95,9 +97,8 @@ export const defaultValuePromise = async <T>({
                 id,
                 data,
                 fields: block.fields,
-                locale,
+                req,
                 siblingData: row,
-                user,
               }),
             )
           }
@@ -114,9 +115,8 @@ export const defaultValuePromise = async <T>({
         id,
         data,
         fields: field.fields,
-        locale,
+        req,
         siblingData,
-        user,
       })
 
       break
@@ -136,9 +136,8 @@ export const defaultValuePromise = async <T>({
         id,
         data,
         fields: field.fields,
-        locale,
+        req,
         siblingData: tabSiblingData,
-        user,
       })
 
       break
@@ -149,9 +148,8 @@ export const defaultValuePromise = async <T>({
         id,
         data,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        locale,
+        req,
         siblingData,
-        user,
       })
 
       break

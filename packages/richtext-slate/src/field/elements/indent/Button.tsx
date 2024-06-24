@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React from 'react'
+import { useCallback } from 'react'
 import { Editor, Element, Text, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 

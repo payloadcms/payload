@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatDate } from '@payloadcms/ui/shared'
+import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
@@ -40,12 +40,9 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   }
 
   return meta({
-    ...(config.admin.meta || {}),
+    config,
     description,
     keywords,
-    serverURL: config.serverURL,
     title,
-    ...(collectionConfig?.admin.meta || {}),
-    ...(globalConfig?.admin.meta || {}),
   })
 }

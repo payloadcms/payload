@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
@@ -37,8 +37,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
   useEffect(() => {
-    if ((cellData || typeof cellData === 'number') && isAboveViewport && !hasRequested) {
+    if (cellData && isAboveViewport && !hasRequested) {
       const formattedValues: Value[] = []
+
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData]
       arrayCellData
         .slice(0, arrayCellData.length < totalToShow ? arrayCellData.length : totalToShow)
@@ -69,13 +70,6 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     hasRequested,
     getRelationships,
   ])
-
-  useEffect(() => {
-    if (hasRequested) {
-      setHasRequested(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cellData])
 
   return (
     <div className={baseClass} ref={intersectionRef}>

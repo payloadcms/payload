@@ -2,8 +2,7 @@ import type { Payload } from 'payload'
 
 import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
 import path from 'path'
-import { getFileByPath } from 'payload'
-import { fieldSchemaToJSON } from 'payload/shared'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -20,6 +19,8 @@ const schemaJSON = fieldSchemaToJSON(Pages.fields)
 
 let payload: Payload
 let restClient: NextRESTClient
+
+import { fieldSchemaToJSON } from 'payload/utilities'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 

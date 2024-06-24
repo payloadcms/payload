@@ -1,9 +1,11 @@
 'use client'
 
-import type { EditViewProps } from 'payload'
+import type { EditViewProps } from 'payload/types'
 
-import { ShimmerEffect, useAllFormFields, useDocumentEvents } from '@payloadcms/ui'
-import { reduceFieldsToValues } from '@payloadcms/ui/shared'
+import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
+import { useAllFormFields } from '@payloadcms/ui/forms/Form'
+import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
+import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import React, { useEffect } from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'
@@ -30,7 +32,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
   const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
 
   const prevWindowType =
-    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
+    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>()
 
   const [fields] = useAllFormFields()
 

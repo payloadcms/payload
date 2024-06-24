@@ -14,7 +14,7 @@ Simply import and install the plugin to make it work:
 
 ```ts
 import { relationshipsAsObjectID } from '@payloadcms/plugin-relationship-object-ids'
-import { buildConfig } from 'payload'
+import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   // your config here

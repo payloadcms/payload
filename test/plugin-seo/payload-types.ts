@@ -46,9 +46,11 @@ export interface Page {
   title: string;
   excerpt?: string | null;
   slug: string;
-  meta?: {
-    title?: string | null;
+  meta: {
+    title: string;
     description?: string | null;
+    image?: string | Media | null;
+    ogTitle?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -85,8 +87,6 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

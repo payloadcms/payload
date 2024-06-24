@@ -1,6 +1,5 @@
 import { parseAndModifyConfigContent, withPayloadStatement } from './wrap-next-config.js'
 import * as p from '@clack/prompts'
-import { jest } from '@jest/globals'
 
 const esmConfigs = {
   defaultNextConfig: `/** @type {import('next').NextConfig} */

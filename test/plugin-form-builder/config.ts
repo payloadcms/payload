@@ -1,8 +1,4 @@
-import { fileURLToPath } from 'node:url'
-import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-import type { Block } from 'payload'
+import type { Block } from 'payload/types'
 
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
 import { slateEditor } from '@payloadcms/richtext-slate'
@@ -77,31 +73,14 @@ export default buildConfigWithDefaults({
         //   singular: 'Contact Form',
         //   plural: 'Contact Forms'
         // },
-        fields: ({ defaultFields }) => {
-          return [
-            ...defaultFields,
-            {
-              name: 'custom',
-              type: 'text',
-            },
-          ]
-        },
-      },
-      formSubmissionOverrides: {
-        fields: ({ defaultFields }) => {
-          return [
-            ...defaultFields,
-            {
-              name: 'custom',
-              type: 'text',
-            },
-          ]
-        },
+        fields: [
+          {
+            name: 'custom',
+            type: 'text',
+          },
+        ],
       },
       redirectRelationships: ['pages'],
     }),
   ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
 })

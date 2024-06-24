@@ -1,4 +1,4 @@
-import type { Where } from 'payload'
+import type { Where } from 'payload/types'
 
 import config from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'

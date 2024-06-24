@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload'
+import type { Field } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../../types.js'
@@ -354,10 +354,7 @@ export const traverseFields = ({
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
 
-      if (
-        field.localized &&
-        (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany))
-      ) {
+      if (field.localized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (localeData === null) {
@@ -379,8 +376,7 @@ export const traverseFields = ({
             })
           })
         }
-        return
-      } else if (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany)) {
+      } else {
         if (fieldData === null || (Array.isArray(fieldData) && fieldData.length === 0)) {
           relationshipsToDelete.push({ path: relationshipPath })
           return
@@ -394,30 +390,9 @@ export const traverseFields = ({
           field,
           relationships,
         })
-        return
-      } else {
-        if (
-          !field.localized &&
-          fieldData &&
-          typeof fieldData === 'object' &&
-          'id' in fieldData &&
-          fieldData?.id
-        ) {
-          fieldData = fieldData.id
-        } else if (field.localized) {
-          if (typeof fieldData === 'object') {
-            Object.entries(fieldData).forEach(([localeKey, localeData]) => {
-              if (typeof localeData === 'object') {
-                if (localeData && 'id' in localeData && localeData?.id) {
-                  fieldData[localeKey] = localeData.id
-                }
-              } else {
-                fieldData[localeKey] = localeData
-              }
-            })
-          }
-        }
       }
+
+      return
     }
 
     if (field.type === 'text' && field.hasMany) {

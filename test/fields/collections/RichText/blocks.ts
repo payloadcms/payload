@@ -1,4 +1,4 @@
-import type { Block } from 'payload'
+import type { Block } from 'payload/types'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 

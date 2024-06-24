@@ -1,8 +1,8 @@
 import type { ExecSyncOptions } from 'child_process'
-import type execa from 'execa'
 
 import chalk from 'chalk'
 import { exec as execOrig, execSync } from 'child_process'
+import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
@@ -36,11 +36,8 @@ async function main() {
     'ui',
     'next',
     'db-mongodb',
-    'db-postgres',
     'richtext-lexical',
     'translations',
-    'plugin-cloud',
-    'graphql',
   ]
 
   const packageDetails = await getPackageDetails(packageWhitelist)
@@ -48,7 +45,7 @@ async function main() {
   // Prebuild all packages
   header(`\n🔨 Prebuilding all packages...`)
 
-  //await execa('pnpm', ['install'], execaOpts)
+  await execa('pnpm', ['install'], execaOpts)
 
   const filtered = packageDetails.filter((p): p is Exclude<typeof p, null> => p !== null)
 
@@ -57,7 +54,7 @@ async function main() {
 ${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
 `)
 
-  //execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
+  execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
 
   header(`\n 📦 Packing all packages to ${dest}...`)
 

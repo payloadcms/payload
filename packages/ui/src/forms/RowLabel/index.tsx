@@ -1,14 +1,13 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { RowLabelProps } from './types.js'
-export type { RowLabelProps }
+import type { Props } from './types.js'
 
 import { RowLabelProvider } from '../RowLabel/Context/index.js'
 
 const baseClass = 'row-label'
 
-export const RowLabel: React.FC<RowLabelProps> = (props) => {
+export const RowLabel: React.FC<Props> = (props) => {
   const { RowLabelComponent, className, i18n, path, rowLabel, rowNumber } = props
 
   if (RowLabelComponent) {

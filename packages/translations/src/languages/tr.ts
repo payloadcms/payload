@@ -111,7 +111,6 @@ export const trTranslations: DefaultTranslationsObject = {
     unauthorized: 'Bu işlemi gerçekleştirmek için lütfen giriş yapın.',
     unknown: 'Bilinmeyen bir hata oluştu.',
     unspecific: 'Bir hata oluştu.',
-    userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
     valueMustBeUnique: 'Değer benzersiz olmalıdır',
@@ -276,7 +275,6 @@ export const trTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Bu sayfada kal',
     submissionSuccessful: 'Gönderme başarılı',
     submit: 'Gönder',
-    submitting: 'Gönderiliyor...',
     success: 'Başarı',
     successfullyCreated: '{{label}} başarıyla oluşturuldu.',
     successfullyDuplicated: '{{label}} başarıyla kopyalandı.',

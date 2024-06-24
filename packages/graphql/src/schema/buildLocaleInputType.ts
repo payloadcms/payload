@@ -1,5 +1,5 @@
 import type { GraphQLScalarType } from 'graphql'
-import type { SanitizedLocalizationConfig } from 'payload'
+import type { SanitizedLocalizationConfig } from 'payload/config'
 
 import { GraphQLEnumType } from 'graphql'
 

@@ -1,4 +1,3 @@
-'use client'
 import { ArrayCell } from './Array/index.js'
 import { BlocksCell } from './Blocks/index.js'
 import { CheckboxCell } from './Checkbox/index.js'

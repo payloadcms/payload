@@ -1,9 +1,8 @@
-import type { Config } from 'payload'
+import type { Config } from 'payload/config'
 import type { Payload } from 'payload'
 import nodemailer from 'nodemailer'
-import { jest } from '@jest/globals'
 
-import { defaults } from 'payload'
+import { defaults } from 'payload/config'
 
 import { payloadCloudEmail } from './email.js'
 
@@ -12,7 +11,7 @@ describe('email', () => {
   const skipVerify = true
   const defaultDomain = 'test.com'
   const apiKey = 'test'
-  let createTransportSpy: jest.Spied<any>
+  let createTransportSpy: jest.SpyInstance
 
   const mockedPayload: Payload = jest.fn() as unknown as Payload
 

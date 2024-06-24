@@ -1,4 +1,4 @@
-import type { EditViewComponent } from 'payload'
+import type { EditViewComponent } from 'payload/types'
 
 import React from 'react'
 

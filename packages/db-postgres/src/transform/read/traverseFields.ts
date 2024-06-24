@@ -1,10 +1,9 @@
 /* eslint-disable no-param-reassign */
-import type { Field, TabAsField } from 'payload'
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload/config'
+import type { Field, TabAsField } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData } from 'payload/types'
 
-import type { PostgresAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
 import { transformHasManyNumber } from './hasManyNumber.js'
@@ -12,10 +11,6 @@ import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
 
 type TraverseFieldsArgs = {
-  /**
-   * The DB adapter
-   */
-  adapter: PostgresAdapter
   /**
    * Pre-formatted blocks map
    */
@@ -65,7 +60,6 @@ type TraverseFieldsArgs = {
 // Traverse fields recursively, transforming data
 // for each field type into required Payload shape
 export const traverseFields = <T extends Record<string, unknown>>({
-  adapter,
   blocks,
   config,
   dataRef,
@@ -83,7 +77,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
   const formatted = fields.reduce((result, field) => {
     if (field.type === 'tabs') {
       traverseFields({
-        adapter,
         blocks,
         config,
         dataRef,
@@ -104,7 +97,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
       (field.type === 'tab' && !('name' in field))
     ) {
       traverseFields({
-        adapter,
         blocks,
         config,
         dataRef,
@@ -122,11 +114,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (fieldAffectsData(field)) {
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
-      const localizedFieldData = {}
-      const valuesToTransform: {
-        ref: Record<string, unknown>
-        table: Record<string, unknown>
-      }[] = []
 
       if (fieldPrefix) {
         deletions.push(() => delete table[fieldName])
@@ -147,7 +134,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 }
 
                 const rowResult = traverseFields<T>({
-                  adapter,
                   blocks,
                   config,
                   dataRef: data,
@@ -182,7 +168,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
               }
 
               return traverseFields<T>({
-                adapter,
                 blocks,
                 config,
                 dataRef: row,
@@ -227,7 +212,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
                 if (block) {
                   const blockResult = traverseFields<T>({
-                    adapter,
                     blocks,
                     config,
                     dataRef: row,
@@ -259,7 +243,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
               if (block) {
                 return traverseFields<T>({
-                  adapter,
                   blocks,
                   config,
                   dataRef: row,
@@ -283,63 +266,49 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       if (field.type === 'relationship' || field.type === 'upload') {
-        if (typeof field.relationTo === 'string' && !('hasMany' in field && field.hasMany)) {
-          if (
-            field.localized &&
-            config.localization &&
-            config.localization.locales &&
-            Array.isArray(table?._locales)
-          ) {
-            table._locales.forEach((localeRow) => {
-              result[field.name] = { [localeRow._locale]: localeRow[fieldName] }
-            })
-          } else {
-            valuesToTransform.push({ ref: result, table })
-          }
-        } else {
-          const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
-          if (!relationPathMatch) {
-            if ('hasMany' in field && field.hasMany) {
-              if (field.localized && config.localization && config.localization.locales) {
-                result[field.name] = {
-                  [config.localization.defaultLocale]: [],
-                }
-              } else {
-                result[field.name] = []
+        const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
+        if (!relationPathMatch) {
+          if ('hasMany' in field && field.hasMany) {
+            if (field.localized && config.localization && config.localization.locales) {
+              result[field.name] = {
+                [config.localization.defaultLocale]: [],
               }
+            } else {
+              result[field.name] = []
             }
-
-            return result
           }
 
-          if (field.localized) {
-            result[field.name] = {}
-            const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
-
-            relationPathMatch.forEach((row) => {
-              if (typeof row.locale === 'string') {
-                if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
-                relationsByLocale[row.locale].push(row)
-              }
-            })
-
-            Object.entries(relationsByLocale).forEach(([locale, relations]) => {
-              transformRelationship({
-                field,
-                locale,
-                ref: result,
-                relations,
-              })
-            })
-          } else {
-            transformRelationship({
-              field,
-              ref: result,
-              relations: relationPathMatch,
-            })
-          }
           return result
         }
+
+        if (field.localized) {
+          result[field.name] = {}
+          const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
+
+          relationPathMatch.forEach((row) => {
+            if (typeof row.locale === 'string') {
+              if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
+              relationsByLocale[row.locale].push(row)
+            }
+          })
+
+          Object.entries(relationsByLocale).forEach(([locale, relations]) => {
+            transformRelationship({
+              field,
+              locale,
+              ref: result,
+              relations,
+            })
+          })
+        } else {
+          transformRelationship({
+            field,
+            ref: result,
+            relations: relationPathMatch,
+          })
+        }
+
+        return result
       }
 
       if (field.type === 'text' && field?.hasMany) {
@@ -428,6 +397,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
+      const localizedFieldData = {}
+      const valuesToTransform: {
+        ref: Record<string, unknown>
+        table: Record<string, unknown>
+      }[] = []
+
       if (field.localized && Array.isArray(table._locales)) {
         table._locales.forEach((localeRow) => {
           valuesToTransform.push({ ref: localizedFieldData, table: localeRow })
@@ -439,7 +414,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
       valuesToTransform.forEach(({ ref, table }) => {
         const fieldData = table[`${fieldPrefix || ''}${field.name}`]
         const locale = table?._locale
-        let val = fieldData
 
         switch (field.type) {
           case 'tab':
@@ -454,7 +428,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
-                  adapter,
                   blocks,
                   config,
                   dataRef: groupLocaleData as Record<string, unknown>,
@@ -475,7 +448,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
               const groupData = {}
 
               ref[field.name] = traverseFields<Record<string, unknown>>({
-                adapter,
                 blocks,
                 config,
                 dataRef: groupData as Record<string, unknown>,
@@ -493,54 +465,64 @@ export const traverseFields = <T extends Record<string, unknown>>({
               }
             }
 
-            return
+            break
           }
 
           case 'text': {
+            let val = fieldData
             if (typeof fieldData === 'string') {
               val = String(fieldData)
+            }
+
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break
           }
 
           case 'number': {
+            let val = fieldData
             if (typeof fieldData === 'string') {
               val = Number.parseFloat(fieldData)
+            }
+
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break
           }
 
           case 'date': {
+            let val = fieldData
+
             if (typeof fieldData === 'string') {
               val = new Date(fieldData).toISOString()
             }
 
-            break
-          }
-
-          case 'relationship':
-          case 'upload': {
-            if (
-              val &&
-              typeof field.relationTo === 'string' &&
-              adapter.payload.collections[field.relationTo].customIDType === 'number'
-            ) {
-              val = Number(val)
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break
           }
 
           default: {
+            if (typeof locale === 'string') {
+              ref[locale] = fieldData
+            } else {
+              result[field.name] = fieldData
+            }
+
             break
           }
-        }
-        if (typeof locale === 'string') {
-          ref[locale] = val
-        } else {
-          result[field.name] = val
         }
       })
 

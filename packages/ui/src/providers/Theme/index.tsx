@@ -17,28 +17,17 @@ const initialContext: ThemeContext = {
 
 const Context = createContext(initialContext)
 
-function setCookie(cname, cvalue, exdays) {
-  const d = new Date()
-  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
-  const expires = 'expires=' + d.toUTCString()
-  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
-}
+const localStorageKey = 'payload-theme'
 
-const getTheme = (
-  cookieKey,
-): {
+const getTheme = (): {
   theme: Theme
-  themeFromCookies: null | string
+  themeFromStorage: null | string
 } => {
   let theme: Theme
+  const themeFromStorage = window.localStorage.getItem(localStorageKey)
 
-  const themeFromCookies = window.document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${cookieKey}=`))
-    ?.split('=')[1]
-
-  if (themeFromCookies === 'light' || themeFromCookies === 'dark') {
-    theme = themeFromCookies
+  if (themeFromStorage === 'light' || themeFromStorage === 'dark') {
+    theme = themeFromStorage
   } else {
     theme =
       window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -47,50 +36,40 @@ const getTheme = (
   }
 
   document.documentElement.setAttribute('data-theme', theme)
-
-  return { theme, themeFromCookies }
+  return { theme, themeFromStorage }
 }
 
-export const defaultTheme = 'light'
+const defaultTheme = 'light'
 
-export const ThemeProvider: React.FC<{
-  children?: React.ReactNode
-  cookiePrefix?: string
-  theme?: Theme
-}> = ({ children, cookiePrefix, theme: initialTheme }) => {
-  const cookieKey = `${cookiePrefix || 'payload'}-theme`
-
-  const [theme, setThemeState] = useState<Theme>(initialTheme || defaultTheme)
+export const ThemeProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const [theme, setThemeState] = useState<Theme>(defaultTheme)
 
   const [autoMode, setAutoMode] = useState<boolean>()
 
   useEffect(() => {
-    const { theme, themeFromCookies } = getTheme(cookieKey)
+    const { theme, themeFromStorage } = getTheme()
     setThemeState(theme)
-    setAutoMode(!themeFromCookies)
-  }, [cookieKey])
+    setAutoMode(!themeFromStorage)
+  }, [])
 
-  const setTheme = useCallback(
-    (themeToSet: 'auto' | Theme) => {
-      if (themeToSet === 'light' || themeToSet === 'dark') {
-        setThemeState(themeToSet)
-        setAutoMode(false)
-        setCookie(cookieKey, themeToSet, 365)
-        document.documentElement.setAttribute('data-theme', themeToSet)
-      } else if (themeToSet === 'auto') {
-        // to delete the cookie, we set an expired date
-        setCookie(cookieKey, themeToSet, -1)
-        const themeFromOS =
-          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light'
-        document.documentElement.setAttribute('data-theme', themeFromOS)
-        setAutoMode(true)
-        setThemeState(themeFromOS)
-      }
-    },
-    [cookieKey],
-  )
+  const setTheme = useCallback((themeToSet: 'auto' | Theme) => {
+    if (themeToSet === 'light' || themeToSet === 'dark') {
+      setThemeState(themeToSet)
+      setAutoMode(false)
+      window.localStorage.setItem(localStorageKey, themeToSet)
+      document.documentElement.setAttribute('data-theme', themeToSet)
+    } else if (themeToSet === 'auto') {
+      const existingThemeFromStorage = window.localStorage.getItem(localStorageKey)
+      if (existingThemeFromStorage) window.localStorage.removeItem(localStorageKey)
+      const themeFromOS =
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+      document.documentElement.setAttribute('data-theme', themeFromOS)
+      setAutoMode(true)
+      setThemeState(themeFromOS)
+    }
+  }, [])
 
   return <Context.Provider value={{ autoMode, setTheme, theme }}>{children}</Context.Provider>
 }

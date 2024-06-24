@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const SearchIcon: React.FC = () => (
+export const Search: React.FC = () => (
   <svg
     className="icon icon--search"
     fill="none"

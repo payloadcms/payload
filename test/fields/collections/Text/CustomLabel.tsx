@@ -1,13 +1,10 @@
 'use client'
 
-import { useFieldProps } from '@payloadcms/ui'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React from 'react'
 
-const CustomLabel = ({ schemaPath }) => {
-  const { path: pathFromContext } = useFieldProps()
-
-  const path = pathFromContext ?? schemaPath // pathFromContext will be undefined in list view
-
+const CustomLabel = () => {
+  const { path } = useFieldProps()
   return (
     <label className="custom-label" htmlFor={`field-${path.replace(/\./g, '__')}`}>
       #label

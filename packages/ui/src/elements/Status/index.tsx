@@ -1,13 +1,14 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
@@ -15,6 +16,8 @@ import './index.scss'
 const baseClass = 'status'
 
 export const Status: React.FC = () => {
+  const { Modal, useModal } = facelessUIImport
+
   const {
     id,
     collectionSlug,
@@ -150,7 +153,7 @@ export const Status: React.FC = () => {
                 {t('version:unpublish')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
-                <div className={`${baseClass}__modal-template`}>
+                <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>{t('version:confirmUnpublish')}</h1>
                   <p>{t('version:aboutToUnpublish')}</p>
                   <Button
@@ -163,7 +166,7 @@ export const Status: React.FC = () => {
                   <Button onClick={processing ? undefined : () => performAction('unpublish')}>
                     {t(processing ? 'version:unpublishing' : 'general:confirm')}
                   </Button>
-                </div>
+                </MinimalTemplate>
               </Modal>
             </React.Fragment>
           )}
@@ -179,7 +182,7 @@ export const Status: React.FC = () => {
                 {t('version:revertToPublished')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
-                <div className={`${baseClass}__modal-template`}>
+                <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>{t('version:confirmRevertToSaved')}</h1>
                   <p>{t('version:aboutToRevertToPublished')}</p>
                   <Button
@@ -195,7 +198,7 @@ export const Status: React.FC = () => {
                   >
                     {t(processing ? 'version:reverting' : 'general:confirm')}
                   </Button>
-                </div>
+                </MinimalTemplate>
               </Modal>
             </React.Fragment>
           )}

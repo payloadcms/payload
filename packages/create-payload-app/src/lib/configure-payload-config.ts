@@ -1,24 +1,21 @@
 import fse from 'fs-extra'
 import globby from 'globby'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-import type { DbType, StorageAdapterType } from '../types.js'
+import type { DbDetails } from '../types.js'
 
 import { warning } from '../utils/log.js'
-import { dbReplacements, storageReplacements } from './replacements.js'
+import { dbReplacements } from './packages.js'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
-  dbType?: DbType
-  envNames?: {
-    dbUri: string
-  }
-  packageJsonName?: string
+  dbDetails: DbDetails | undefined
   projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
-  sharp?: boolean
-  storageAdapter?: StorageAdapterType
 }): Promise<void> {
-  if (!args.dbType) {
+  if (!args.dbDetails) {
     return
   }
 
@@ -31,7 +28,7 @@ export async function configurePayloadConfig(args: {
     try {
       const packageObj = await fse.readJson(packageJsonPath)
 
-      const dbPackage = dbReplacements[args.dbType]
+      const dbPackage = dbReplacements[args.dbDetails.type]
 
       // Delete all other db adapters
       Object.values(dbReplacements).forEach((p) => {
@@ -42,24 +39,6 @@ export async function configurePayloadConfig(args: {
 
       // Set version of db adapter to match payload version
       packageObj.dependencies[dbPackage.packageName] = packageObj.dependencies['payload']
-
-      if (args.storageAdapter) {
-        const storagePackage = storageReplacements[args.storageAdapter]
-
-        if (storagePackage?.packageName) {
-          // Set version of storage adapter to match payload version
-          packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
-        }
-      }
-
-      // Sharp provided by default, only remove if explicitly set to false
-      if (args.sharp === false) {
-        delete packageObj.dependencies['sharp']
-      }
-
-      if (args.packageJsonName) {
-        packageObj.name = args.packageJsonName
-      }
 
       await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
     } catch (err: unknown) {
@@ -87,54 +66,35 @@ export async function configurePayloadConfig(args: {
     }
 
     const configContent = fse.readFileSync(payloadConfigPath, 'utf-8')
-    let configLines = configContent.split('\n')
+    const configLines = configContent.split('\n')
 
-    // DB Replacement
-    const dbReplacement = dbReplacements[args.dbType]
+    const dbReplacement = dbReplacements[args.dbDetails.type]
 
-    configLines = replaceInConfigLines({
-      endMatch: `// database-adapter-config-end`,
-      lines: configLines,
-      replacement: dbReplacement.configReplacement(args.envNames?.dbUri),
-      startMatch: `// database-adapter-config-start`,
-    })
+    let dbConfigStartLineIndex: number | undefined
+    let dbConfigEndLineIndex: number | undefined
 
-    configLines = replaceInConfigLines({
-      lines: configLines,
-      replacement: [dbReplacement.importReplacement],
-      startMatch: '// database-adapter-import',
-    })
-
-    // Storage Adapter Replacement
-    if (args.storageAdapter) {
-      const replacement = storageReplacements[args.storageAdapter]
-      configLines = replaceInConfigLines({
-        lines: configLines,
-        replacement: replacement.configReplacement,
-        startMatch: '// storage-adapter-placeholder',
-      })
-
-      if (replacement?.importReplacement !== undefined) {
-        configLines = replaceInConfigLines({
-          lines: configLines,
-          replacement: [replacement.importReplacement],
-          startMatch: '// storage-adapter-import-placeholder',
-        })
+    configLines.forEach((l, i) => {
+      if (l.includes('// database-adapter-import')) {
+        configLines[i] = dbReplacement.importReplacement
       }
-    }
 
-    // Sharp Replacement (provided by default, only remove if explicitly set to false)
-    if (args.sharp === false) {
-      configLines = replaceInConfigLines({
-        lines: configLines,
-        replacement: [],
-        startMatch: 'sharp,',
-      })
-      configLines = replaceInConfigLines({
-        lines: configLines,
-        replacement: [],
-        startMatch: "import sharp from 'sharp'",
-      })
+      if (l.includes('// database-adapter-config-start')) {
+        dbConfigStartLineIndex = i
+      }
+      if (l.includes('// database-adapter-config-end')) {
+        dbConfigEndLineIndex = i
+      }
+    })
+
+    if (!dbConfigStartLineIndex || !dbConfigEndLineIndex) {
+      warning('Unable to update payload.config.ts with database adapter import')
+    } else {
+      // Replaces lines between `// database-adapter-config-start` and `// database-adapter-config-end`
+      configLines.splice(
+        dbConfigStartLineIndex,
+        dbConfigEndLineIndex - dbConfigStartLineIndex + 1,
+        ...dbReplacement.configReplacement,
+      )
     }
 
     fse.writeFileSync(payloadConfigPath, configLines.join('\n'))
@@ -143,31 +103,4 @@ export async function configurePayloadConfig(args: {
       `Unable to update payload.config.ts with plugins: ${err instanceof Error ? err.message : ''}`,
     )
   }
-}
-
-function replaceInConfigLines({
-  endMatch,
-  lines,
-  replacement,
-  startMatch,
-}: {
-  /** Optional endMatch to replace multiple lines */
-  endMatch?: string
-  lines: string[]
-  replacement: string[]
-  startMatch: string
-}) {
-  if (!replacement) {
-    return lines
-  }
-
-  const startIndex = lines.findIndex((l) => l.includes(startMatch))
-  const endIndex = endMatch ? lines.findIndex((l) => l.includes(endMatch)) : startIndex
-
-  if (startIndex === -1 || endIndex === -1) {
-    return lines
-  }
-
-  lines.splice(startIndex, endIndex - startIndex + 1, ...replacement)
-  return lines
 }

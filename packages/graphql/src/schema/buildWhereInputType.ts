@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import type { Field, FieldAffectingData } from 'payload'
+import type { Field, FieldAffectingData } from 'payload/types'
 
 import { GraphQLInputObjectType, GraphQLList } from 'graphql'
-import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/types'
+import { flattenTopLevelFields } from 'payload/utilities'
 
 import formatName from '../utilities/formatName.js'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'

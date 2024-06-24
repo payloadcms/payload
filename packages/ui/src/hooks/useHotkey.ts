@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable no-shadow */
-import { useModal } from '@faceless-ui/modal'
-import { setsAreEqual } from 'payload/shared'
+import * as facelessUIImport from '@faceless-ui/modal'
+import { setsAreEqual } from 'payload/utilities'
 import { useCallback, useEffect } from 'react'
 
 // Required to be outside of hook, else debounce would be necessary
@@ -74,6 +74,8 @@ export const useHotkey = (
   },
   func: (e: KeyboardEvent) => void,
 ): void => {
+  const { useModal } = facelessUIImport
+
   const { cmdCtrlKey, editDepth, keyCodes } = options
 
   const { modalState } = useModal()
@@ -108,7 +110,7 @@ export const useHotkey = (
       ) {
         // get the maximum edit depth by counting the number of open drawers. modalState is and object which contains the state of all drawers.
         const maxEditDepth =
-          Object.keys(modalState).filter((key) => modalState[key]?.isOpen)?.length + 1 || 1
+          Object.keys(modalState).filter((key) => modalState[key]?.isOpen)?.length + 1 ?? 1
 
         if (maxEditDepth !== editDepth) {
           // We only want to execute the hotkey from the most top-level drawer / edit depth.

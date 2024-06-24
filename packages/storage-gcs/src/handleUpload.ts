@@ -1,6 +1,6 @@
 import type { Storage } from '@google-cloud/storage'
 import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
 
 import path from 'path'
 

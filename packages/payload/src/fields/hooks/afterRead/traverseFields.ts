@@ -23,10 +23,8 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: null | string
   overrideAccess: boolean
-  path: (number | string)[]
   populationPromises: Promise<void>[]
   req: PayloadRequestWithData
-  schemaPath: string[]
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
   triggerAccessControl?: boolean
@@ -48,10 +46,8 @@ export const traverseFields = ({
   global,
   locale,
   overrideAccess,
-  path,
   populationPromises,
   req,
-  schemaPath,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
@@ -74,8 +70,6 @@ export const traverseFields = ({
         global,
         locale,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
         populationPromises,
         req,
         showHiddenFields,

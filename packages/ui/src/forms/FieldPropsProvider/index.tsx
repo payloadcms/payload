@@ -1,5 +1,6 @@
 'use client'
-import type { FieldPermissions, FieldTypes } from 'payload'
+import type { FieldTypes } from 'payload/config'
+import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
@@ -17,13 +18,13 @@ export type FieldPropsContextType = {
 }
 
 const FieldPropsContext = React.createContext<FieldPropsContextType>({
-  type: undefined as keyof FieldTypes,
+  type: '' as keyof FieldTypes,
   custom: {},
-  indexPath: undefined,
-  path: undefined,
+  indexPath: '',
+  path: '',
   permissions: {} as FieldPermissions,
   readOnly: false,
-  schemaPath: undefined,
+  schemaPath: '',
   siblingPermissions: {},
 })
 
@@ -31,7 +32,6 @@ export type Props = {
   children: React.ReactNode
   custom?: Record<any, string>
   indexPath?: string
-  isForceRendered?: boolean
   path: string
   permissions?: FieldPermissions
   readOnly: boolean

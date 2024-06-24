@@ -1,9 +1,4 @@
-import type { CollectionConfig } from 'payload'
-
-import { fileURLToPath } from 'node:url'
-import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import ArrayFields from './collections/Array/index.js'
@@ -27,7 +22,6 @@ import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
-import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
@@ -71,7 +65,6 @@ export const collectionSlugs: CollectionConfig[] = [
   RelationshipFields,
   RichTextFields,
   SelectFields,
-  TabsFields2,
   TabsFields,
   TextFields,
   Uploads,
@@ -107,8 +100,5 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await clearAndSeedEverything(payload)
     }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -1,5 +1,5 @@
 'use client'
-import { useConfig } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface PopupMessage {

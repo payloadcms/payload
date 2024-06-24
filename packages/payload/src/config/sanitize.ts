@@ -17,7 +17,6 @@ import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
-import { deepMerge } from '../utilities/deepMerge.js'
 import { isPlainObject } from '../utilities/isPlainObject.js'
 import { defaults } from './defaults.js'
 
@@ -54,13 +53,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
-  }
-
-  if (process.env.NEXT_BASE_PATH) {
-    if (!incomingConfig?.routes?.api) {
-      // check for incomingConfig, as configWithDefaults will always have a default value for routes.api
-      configWithDefaults.routes.api = process.env.NEXT_BASE_PATH + '/api'
-    }
   }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
@@ -162,9 +154,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config: config as SanitizedConfig,
       isRoot: true,
     })
-    if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
-      config.i18n.translations = deepMerge(config.i18n.translations, config.editor.i18n)
-    }
   }
 
   const promises: Promise<void>[] = []

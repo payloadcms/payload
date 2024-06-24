@@ -1,8 +1,10 @@
-import type { EditViewComponent, PaginatedDocs } from 'payload'
+import type { PaginatedDocs } from 'payload/database'
+import type { EditViewComponent } from 'payload/types'
 
-import { Gutter, ListQueryProvider } from '@payloadcms/ui'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
 import { notFound } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
+import { isNumber } from 'payload/utilities'
 import React from 'react'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'

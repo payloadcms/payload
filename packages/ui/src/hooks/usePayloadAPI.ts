@@ -24,7 +24,7 @@ type Options = {
 
 type UsePayloadAPI = (url: string, options?: Options) => Result
 
-export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
+const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const { initialData, initialParams = {} } = options
 
   const { i18n } = useTranslation()
@@ -102,3 +102,5 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
 
   return [{ data, isError, isLoading }, { setParams }]
 }
+
+export default usePayloadAPI

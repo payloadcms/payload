@@ -1,5 +1,5 @@
-import { SanitizedConfig, sanitizeConfig } from 'payload'
-import { Config } from 'payload'
+import { SanitizedConfig, sanitizeConfig } from 'payload/config'
+import { Config } from 'payload/config'
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
 let config: SanitizedConfig

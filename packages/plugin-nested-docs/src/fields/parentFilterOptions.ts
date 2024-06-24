@@ -1,4 +1,4 @@
-import type { FilterOptions } from 'payload'
+import type { FilterOptions } from 'payload/types'
 
 export const parentFilterOptions: (breadcrumbsFieldSlug?: string) => FilterOptions =
   (breadcrumbsFieldSlug = 'breadcrumbs') =>

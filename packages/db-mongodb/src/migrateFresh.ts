@@ -1,6 +1,11 @@
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequestWithData } from 'payload/types'
 
-import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
+import {
+  commitTransaction,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload/database'
 import prompts from 'prompts'
 
 import type { MongooseAdapter } from './index.js'

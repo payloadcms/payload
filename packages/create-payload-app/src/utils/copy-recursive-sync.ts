@@ -3,8 +3,6 @@ import path from 'path'
 
 /**
  * Recursively copy files from src to dest
- *
- * @internal
  */
 export function copyRecursiveSync(src: string, dest: string, debug?: boolean) {
   const exists = fs.existsSync(src)

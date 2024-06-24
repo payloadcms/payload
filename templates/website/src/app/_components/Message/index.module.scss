@@ -1,0 +1,46 @@
+@import '../../_css/common';
+
+.message {
+  padding: calc(var(--base) / 1.5);
+  line-height: 1.25;
+  width: 100%;
+}
+
+.default {
+  background-color: var(--theme-elevation-100);
+  color: var(--theme-elevation-1000);
+}
+
+.warning {
+  background-color: var(--theme-warning-500);
+  color: var(--theme-warning-900);
+}
+
+.error {
+  background-color: var(--theme-error-500);
+  color: var(--theme-error-900);
+}
+
+.success {
+  background-color: var(--theme-success-500);
+  color: var(--theme-success-900);
+}
+
+:global([data-theme='dark']) {
+  .default {
+    background-color: var(--theme-elevation-900);
+    color: var(--theme-elevation-100);
+  }
+
+  .warning {
+    color: var(--theme-warning-100);
+  }
+
+  .error {
+    color: var(--theme-error-100);
+  }
+
+  .success {
+    color: var(--theme-success-100);
+  }
+}

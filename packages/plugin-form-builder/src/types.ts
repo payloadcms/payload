@@ -1,4 +1,4 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type { Block, CollectionConfig, Field } from 'payload/types'
 
 export interface BlockConfig {
   block: Block
@@ -39,13 +39,12 @@ export interface FieldsConfig {
 
 export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
-export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
 export type FormBuilderPluginConfig = {
   beforeEmail?: BeforeEmail
   fields?: FieldsConfig
-  formOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields: FieldsOverride }
-  formSubmissionOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields: FieldsOverride }
+  formOverrides?: Partial<CollectionConfig>
+  formSubmissionOverrides?: Partial<CollectionConfig>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }

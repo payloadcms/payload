@@ -1,5 +1,7 @@
 import type { MongooseQueryOptions } from 'mongoose'
-import type { Document, FindOne, PayloadRequestWithData } from 'payload'
+import type { FindOne } from 'payload/database'
+import type { PayloadRequestWithData } from 'payload/types'
+import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 

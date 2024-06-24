@@ -1,4 +1,3 @@
-'use client'
 import type { MultiValueProps } from 'react-select'
 
 import React from 'react'
@@ -16,7 +15,6 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
 
   return (
     <div className={baseClass}>
-      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
       <SelectComponents.MultiValueLabel
         {...props}
         innerProps={{

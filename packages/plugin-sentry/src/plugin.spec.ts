@@ -1,5 +1,5 @@
-import type { Config } from 'payload'
-import { defaults } from 'payload'
+import type { Config } from 'payload/config'
+import { defaults } from 'payload/config'
 
 import { sentryPlugin } from './plugin'
 

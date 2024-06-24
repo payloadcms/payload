@@ -1,16 +1,13 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 
-import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { GlobalComponentMap } from './types.js'
 
-// Need to import from client barrel file
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { ViewDescription } from '../../../exports/client/index.js'
+import { ViewDescription } from '../../../elements/ViewDescription/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
@@ -70,12 +67,11 @@ export const mapGlobals = ({
     const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
-        : typeof editViewFromConfig === 'object' &&
-            isReactComponentOrFunction(editViewFromConfig.Default)
+        : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
           ? editViewFromConfig.Default
           : typeof editViewFromConfig?.Default === 'object' &&
               'Component' in editViewFromConfig.Default &&
-              isReactComponentOrFunction(editViewFromConfig.Default.Component)
+              typeof editViewFromConfig.Default.Component === 'function'
             ? editViewFromConfig.Default.Component
             : undefined
 

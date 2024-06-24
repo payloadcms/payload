@@ -1,12 +1,12 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
 import React, { useId } from 'react'
 
 import type { Column } from '../Table/index.js'
 
-import { PlusIcon } from '../../icons/Plus/index.js'
-import { XIcon } from '../../icons/X/index.js'
+import { Plus } from '../../icons/Plus/index.js'
+import { X } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { Pill } from '../Pill/index.js'
@@ -63,7 +63,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               .filter(Boolean)
               .join(' ')}
             draggable
-            icon={active ? <XIcon /> : <PlusIcon />}
+            icon={active ? <X /> : <Plus />}
             id={accessor}
             key={`${collectionSlug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {

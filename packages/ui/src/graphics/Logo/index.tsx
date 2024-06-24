@@ -1,4 +1,8 @@
+import type { ServerProps } from 'payload/config'
+
 import React from 'react'
+
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 
 const css = `
   .graphic-logo path {
@@ -6,7 +10,7 @@ const css = `
   }
 `
 
-export const PayloadLogo: React.FC = () => (
+const PayloadLogo: React.FC = () => (
   <svg
     className="graphic-logo"
     fill="none"
@@ -27,3 +31,33 @@ export const PayloadLogo: React.FC = () => (
     <path d="M17.4097 48.5454V28.1035L0.132324 38.1301L17.4097 48.5454Z" />
   </svg>
 )
+
+export const Logo: React.FC<ServerProps> = (props) => {
+  const { i18n, locale, params, payload, permissions, searchParams, user } = props
+
+  const {
+    admin: {
+      components: {
+        graphics: { Logo: CustomLogo } = {
+          Logo: undefined,
+        },
+      } = {},
+    } = {},
+  } = payload.config
+
+  return (
+    <RenderCustomComponent
+      CustomComponent={CustomLogo}
+      DefaultComponent={PayloadLogo}
+      serverOnlyProps={{
+        i18n,
+        locale,
+        params,
+        payload,
+        permissions,
+        searchParams,
+        user,
+      }}
+    />
+  )
+}

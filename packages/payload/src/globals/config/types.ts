@@ -15,12 +15,12 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LivePreviewConfig,
-  OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { GeneratedTypes, GlobalSlug } from '../../index.js'
-import type { PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../types/index.js'
+import type { Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes['globals'][TSlug]
@@ -128,10 +128,6 @@ export type GlobalAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
   /**
    * Function to generate custom preview URL
    */

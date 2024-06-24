@@ -1,4 +1,4 @@
-import type { UploadEdits } from 'payload'
+import type { UploadEdits } from 'payload/types'
 
 export type FormQueryParamsContext = {
   dispatchFormQueryParams: (action: Action) => void

@@ -1,18 +1,18 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { CodeField as CodeFieldType } from 'payload'
+import type { CodeField as CodeFieldType } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -64,13 +64,12 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { path, setValue, showError, value } = useField({
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <div
@@ -79,7 +78,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -88,20 +87,20 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <div>
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
-          onChange={disabled ? () => null : (val) => setValue(val)}
+          onChange={readOnly ? () => null : (val) => setValue(val)}
           options={editorOptions}
-          readOnly={disabled}
+          readOnly={readOnly}
           value={(value as string) || ''}
         />
         {AfterInput}

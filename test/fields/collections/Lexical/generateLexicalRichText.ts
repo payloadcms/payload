@@ -28,7 +28,6 @@ export function generateLexicalRichText() {
           format: '',
           type: 'upload',
           version: 2,
-          id: '665d105a91e1c337ba8308dd',
           fields: {
             caption: {
               root: {
@@ -272,22 +271,6 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
-        },
-        {
-          format: '',
-          type: 'block',
-          version: 2,
-          fields: {
-            id: '666c9dfd189d72626ea301f9',
-            blockName: '',
-            tab1: {
-              text1: 'Some text1',
-            },
-            tab2: {
-              text2: 'Some text2',
-            },
-            blockType: 'tabBlock',
-          },
         },
       ],
       direction: 'ltr',

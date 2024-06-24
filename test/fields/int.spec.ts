@@ -1,6 +1,7 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { PaginatedDocs, Payload } from 'payload'
+import type { Payload } from 'payload'
+import type { PaginatedDocs } from 'payload/database'
 
 import { reload } from '@payloadcms/next/utilities'
 
@@ -79,11 +80,9 @@ describe('Fields', () => {
     })
 
     it('creates with default values', () => {
-      expect(doc.text).toStrictEqual(text)
-      expect(doc.defaultString).toStrictEqual(defaultText)
-      expect(doc.defaultEmptyString).toStrictEqual('')
-      expect(doc.defaultFunction).toStrictEqual(defaultText)
-      expect(doc.defaultAsync).toStrictEqual(defaultText)
+      expect(doc.text).toEqual(text)
+      expect(doc.defaultFunction).toEqual(defaultText)
+      expect(doc.defaultAsync).toEqual(defaultText)
     })
 
     it('should populate default values in beforeValidate hook', async () => {
@@ -120,16 +119,16 @@ describe('Fields', () => {
       const hit = await payload.create({
         collection: 'text-fields',
         data: {
-          hasMany: ['one', 'five'],
           text: 'required',
+          hasMany: ['one', 'five'],
         },
       })
 
       const miss = await payload.create({
         collection: 'text-fields',
         data: {
-          hasMany: ['two'],
           text: 'required',
+          hasMany: ['two'],
         },
       })
 
@@ -907,37 +906,6 @@ describe('Fields', () => {
         },
       })
     })
-
-    it('should query a subfield within a localized group', async () => {
-      const text = 'find this'
-      const hit = await payload.create({
-        collection: groupFieldsSlug,
-        data: {
-          localizedGroup: {
-            text,
-          },
-        },
-      })
-      const miss = await payload.create({
-        collection: groupFieldsSlug,
-        data: {
-          localizedGroup: {
-            text: 'do not find this',
-          },
-        },
-      })
-      const result = await payload.find({
-        collection: groupFieldsSlug,
-        where: {
-          'localizedGroup.text': { equals: text },
-        },
-      })
-
-      const resultIDs = result.docs.map(({ id }) => id)
-
-      expect(resultIDs).toContain(hit.id)
-      expect(resultIDs).not.toContain(miss.id)
-    })
   })
 
   describe('tabs', () => {
@@ -952,15 +920,15 @@ describe('Fields', () => {
 
     it('should hot module reload and still be able to create', async () => {
       const testDoc1 = await payload.findByID({
-        id: document.id,
         collection: tabsFieldsSlug,
+        id: document.id,
       })
 
       await reload(payload.config, payload)
 
       const testDoc2 = await payload.findByID({
-        id: document.id,
         collection: tabsFieldsSlug,
+        id: document.id,
       })
 
       expect(testDoc1.id).toStrictEqual(testDoc2.id)

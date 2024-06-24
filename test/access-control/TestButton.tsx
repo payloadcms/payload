@@ -1,6 +1,7 @@
 'use client'
-
-import { useAuth, useForm, useTranslation } from '@payloadcms/ui'
+import { useForm } from '@payloadcms/ui/forms/Form'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
 export const TestButton: React.FC = () => {

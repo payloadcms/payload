@@ -1,28 +1,20 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
-import type {
-  ClientCollectionConfig,
-  ClientConfig,
-  ClientGlobalConfig,
-  Data,
-  LivePreviewConfig,
-} from 'payload'
+import type { LivePreviewConfig } from 'payload/config'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
 
-import {
-  DocumentControls,
-  DocumentFields,
-  Form,
-  OperationProvider,
-  SetViewActions,
-  useAuth,
-  useComponentMap,
-  useConfig,
-  useDocumentEvents,
-  useDocumentInfo,
-  useTranslation,
-} from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
+import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
+import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { OperationProvider } from '@payloadcms/ui/providers/Operation'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
@@ -69,38 +61,28 @@ const PreviewView: React.FC<Props> = ({
     docPermissions,
     getDocPreferences,
     globalSlug,
-    hasPublishPermission,
     hasSavePermission,
     initialData,
     initialState,
-    isEditing,
-    isInitializing,
     onSave: onSaveFromProps,
   } = useDocumentInfo()
 
   const operation = id ? 'update' : 'create'
 
-  const {
-    admin: { user: userSlug },
-  } = useConfig()
   const { t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
-  const { refreshCookieAsync, user } = useAuth()
-  const { reportUpdate } = useDocumentEvents()
 
   const onSave = useCallback(
     (json) => {
-      reportUpdate({
-        id,
-        entitySlug: collectionSlug,
-        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
-      })
+      // reportUpdate({
+      //   id,
+      //   entitySlug: collectionConfig.slug,
+      //   updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      // })
 
-      // If we're editing the doc of the logged-in user,
-      // Refresh the cookie to get new permissions
-      if (user && collectionSlug === userSlug && id === user.id) {
-        void refreshCookieAsync()
-      }
+      // if (auth && id === user.id) {
+      //   await refreshCookieAsync()
+      // }
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -109,7 +91,12 @@ const PreviewView: React.FC<Props> = ({
         })
       }
     },
-    [collectionSlug, id, onSaveFromProps, refreshCookieAsync, reportUpdate, user, userSlug],
+    [
+      id,
+      onSaveFromProps,
+      // refreshCookieAsync,
+      //  reportUpdate
+    ],
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
@@ -131,6 +118,11 @@ const PreviewView: React.FC<Props> = ({
     [serverURL, apiRoute, id, operation, schemaPath, getDocPreferences],
   )
 
+  // Allow the `DocumentInfoProvider` to hydrate
+  if (!collectionSlug && !globalSlug) {
+    return <LoadingOverlay />
+  }
+
   return (
     <Fragment>
       <OperationProvider operation={operation}>
@@ -139,7 +131,6 @@ const PreviewView: React.FC<Props> = ({
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={initialState}
-          isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
@@ -168,10 +159,9 @@ const PreviewView: React.FC<Props> = ({
             apiURL={apiURL}
             data={initialData}
             disableActions={disableActions}
-            hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
-            isEditing={isEditing}
+            isEditing={Boolean(id)}
             permissions={docPermissions}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />

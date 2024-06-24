@@ -1,4 +1,4 @@
-import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload'
+import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload/types'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 

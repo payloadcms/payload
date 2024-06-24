@@ -1,6 +1,7 @@
-import type { FindGlobal, PayloadRequestWithData } from 'payload'
+import type { FindGlobal } from 'payload/database'
+import type { PayloadRequestWithData } from 'payload/types'
 
-import { combineQueries } from 'payload'
+import { combineQueries } from 'payload/database'
 
 import type { MongooseAdapter } from './index.js'
 

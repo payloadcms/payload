@@ -1,6 +1,7 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
 
-import { createBreadcrumbsField, createParentField } from '@payloadcms/plugin-nested-docs'
+import { createBreadcrumbsField } from '@payloadcms/plugin-nested-docs'
+import { createParentField } from '@payloadcms/plugin-nested-docs'
 
 export const Categories: CollectionConfig = {
   access: {

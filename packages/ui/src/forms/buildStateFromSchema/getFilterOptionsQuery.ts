@@ -1,4 +1,4 @@
-import type { FilterOptions, FilterOptionsProps, Where } from 'payload'
+import type { FilterOptions, FilterOptionsProps, Where } from 'payload/types'
 
 export const getFilterOptionsQuery = async (
   filterOptions: FilterOptions,

@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import type { Config } from 'payload/config'
 
 import type { SearchPluginConfig } from './types.js'
 

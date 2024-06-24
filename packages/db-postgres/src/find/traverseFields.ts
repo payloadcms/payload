@@ -1,16 +1,16 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload'
+import type { Field } from 'payload/types'
 
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 type TraverseFieldArgs = {
-  _locales: Result
+  _locales: Record<string, unknown>
   adapter: PostgresAdapter
-  currentArgs: Result
+  currentArgs: Record<string, unknown>
   currentTableName: string
   depth?: number
   fields: Field[]
@@ -31,19 +31,6 @@ export const traverseFields = ({
   topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
-    // handle simple relationship
-    if (
-      depth > 0 &&
-      (field.type === 'upload' ||
-        (field.type === 'relationship' && !field.hasMany && typeof field.relationTo === 'string'))
-    ) {
-      if (field.localized) {
-        _locales.with[`${path}${field.name}`] = true
-      } else {
-        currentArgs.with[`${path}${field.name}`] = true
-      }
-    }
-
     if (field.type === 'collapsible' || field.type === 'row') {
       traverseFields({
         _locales,
@@ -97,19 +84,11 @@ export const traverseFields = ({
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
-          if (adapter.tables[arrayTableNameWithLocales]) {
-            withArray.with._locales = {
-              columns: {
-                id: false,
-                _parentID: false,
-              },
-              with: {},
-            }
-          }
+          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
-            _locales: withArray.with._locales,
+            _locales,
             adapter,
             currentArgs: withArray,
             currentTableName: arrayTableName,
@@ -158,14 +137,12 @@ export const traverseFields = ({
               )
 
               if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
-                withBlock.with._locales = {
-                  with: {},
-                }
+                withBlock.with._locales = _locales
               }
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({
-                _locales: withBlock.with._locales,
+                _locales,
                 adapter,
                 currentArgs: withBlock,
                 currentTableName: tableName,

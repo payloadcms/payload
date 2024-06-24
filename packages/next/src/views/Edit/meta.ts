@@ -15,40 +15,34 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 }): Promise<Metadata> => {
   const { t } = i18n
 
-  const entityLabel = collectionConfig
-    ? getTranslation(collectionConfig.labels.singular, i18n)
-    : globalConfig
-      ? getTranslation(globalConfig.label, i18n)
-      : ''
+  let description: string = ''
+  let title: string = ''
+  let keywords: string = ''
 
-  const metaTitle = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+  if (collectionConfig) {
+    description = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
+      collectionConfig.labels.singular,
+      i18n,
+    )}`
 
-  const ogTitle = `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`
+    title = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
+      collectionConfig.labels.singular,
+      i18n,
+    )}`
 
-  const description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+    keywords = `${getTranslation(collectionConfig.labels.singular, i18n)}, Payload, CMS`
+  }
 
-  const keywords = `${entityLabel}, Payload, CMS`
-
-  const baseOGOverrides = config.admin.meta.openGraph || {}
-
-  const entityOGOverrides = collectionConfig
-    ? collectionConfig.admin?.meta?.openGraph
-    : globalConfig
-      ? globalConfig.admin?.meta?.openGraph
-      : {}
+  if (globalConfig) {
+    description = getTranslation(globalConfig.label, i18n)
+    keywords = `${getTranslation(globalConfig.label, i18n)}, Payload, CMS`
+    title = getTranslation(globalConfig.label, i18n)
+  }
 
   return meta({
-    ...(config.admin.meta || {}),
+    config,
     description,
     keywords,
-    openGraph: {
-      title: ogTitle,
-      ...baseOGOverrides,
-      ...entityOGOverrides,
-    },
-    ...(collectionConfig?.admin.meta || {}),
-    ...(globalConfig?.admin.meta || {}),
-    serverURL: config.serverURL,
-    title: metaTitle,
+    title,
   })
 }

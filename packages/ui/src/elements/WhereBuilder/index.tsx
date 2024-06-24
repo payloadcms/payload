@@ -1,6 +1,3 @@
-'use client'
-import type { Operator } from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 
@@ -88,9 +85,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     return []
   })
 
-  const addCondition = React.useCallback(
-    ({ andIndex, fieldName, orIndex, relation }) => {
-      const newConditions = [...conditions]
+  const addCondition = React.useCallback(({ andIndex, fieldName, orIndex, relation }) => {
+    setConditions((prevConditions) => {
+      const newConditions = [...prevConditions]
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, { [fieldName]: {} })
       } else {
@@ -102,45 +99,47 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           ],
         })
       }
-      setConditions(newConditions)
-    },
-    [conditions],
-  )
+
+      return newConditions
+    })
+  }, [])
 
   const updateCondition = React.useCallback(
-    ({ andIndex, fieldName, operator, orIndex, value: valueArg }) => {
-      const existingRowCondition = conditions[orIndex].and[andIndex]
-      if (typeof existingRowCondition === 'object' && fieldName && operator) {
-        const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
-        const newRowCondition = {
-          [fieldName]: operator ? { [operator]: value } : {},
-        }
+    ({ andIndex, fieldName: fieldNameArg, operator: operatorArg, orIndex, value: valueArg }) => {
+      setConditions((prevConditions) => {
+        const newConditions = [...prevConditions]
+        if (typeof newConditions[orIndex].and[andIndex] === 'object') {
+          const fieldName = fieldNameArg
+          const operator = operatorArg
+          const value = valueArg ?? (operator ? newConditions[orIndex].and[andIndex][operator] : '')
 
-        if (JSON.stringify(existingRowCondition) !== JSON.stringify(newRowCondition)) {
-          conditions[orIndex].and[andIndex] = newRowCondition
-          setConditions(conditions)
-          if (![null, undefined].includes(value)) {
-            // only update query when field/operator/value are filled out
+          if (fieldName && operator && ![null, undefined].includes(value)) {
+            newConditions[orIndex].and[andIndex] = {
+              [fieldName]: operator ? { [operator]: value } : {},
+            }
             setShouldUpdateQuery(true)
           }
         }
-      }
+
+        return newConditions
+      })
     },
-    [conditions],
+    [],
   )
 
-  const removeCondition = React.useCallback(
-    ({ andIndex, orIndex }) => {
-      const newConditions = [...conditions]
+  const removeCondition = React.useCallback(({ andIndex, orIndex }) => {
+    setConditions((prevConditions) => {
+      const newConditions = [...prevConditions]
       newConditions[orIndex].and.splice(andIndex, 1)
+
       if (newConditions[orIndex].and.length === 0) {
         newConditions.splice(orIndex, 1)
       }
-      setConditions(newConditions)
-      setShouldUpdateQuery(true)
-    },
-    [conditions],
-  )
+
+      return newConditions
+    })
+    setShouldUpdateQuery(true)
+  }, [])
 
   React.useEffect(() => {
     if (shouldUpdateQuery) {
@@ -157,48 +156,44 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             {t('general:filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
           </div>
           <ul className={`${baseClass}__or-filters`}>
-            {conditions.map((or, orIndex) => {
-              const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
+            {conditions.map((or, orIndex) => (
+              <li key={orIndex}>
+                {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
+                <ul className={`${baseClass}__and-filters`}>
+                  {Array.isArray(or?.and) &&
+                    or.and.map((_, andIndex) => {
+                      const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
+                      const initialOperator =
+                        Object.keys(
+                          conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
+                        )?.[0] || undefined
+                      const initialValue =
+                        conditions[orIndex].and[andIndex]?.[initialFieldName]?.[initialOperator] ||
+                        ''
 
-              return (
-                <li key={compoundOrKey}>
-                  {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
-                  <ul className={`${baseClass}__and-filters`}>
-                    {Array.isArray(or?.and) &&
-                      or.and.map((_, andIndex) => {
-                        const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
-                        const initialOperator =
-                          (Object.keys(
-                            conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
-                          )?.[0] as Operator) || undefined
-                        const initialValue =
-                          conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
-                            initialOperator
-                          ] || ''
-
-                        return (
-                          <li key={andIndex}>
-                            {andIndex !== 0 && (
-                              <div className={`${baseClass}__label`}>{t('general:and')}</div>
-                            )}
-                            <Condition
-                              addCondition={addCondition}
-                              andIndex={andIndex}
-                              fieldName={initialFieldName}
-                              fields={reducedFields}
-                              initialValue={initialValue}
-                              operator={initialOperator}
-                              orIndex={orIndex}
-                              removeCondition={removeCondition}
-                              updateCondition={updateCondition}
-                            />
-                          </li>
-                        )
-                      })}
-                  </ul>
-                </li>
-              )
-            })}
+                      return (
+                        <li key={andIndex}>
+                          {andIndex !== 0 && (
+                            <div className={`${baseClass}__label`}>{t('general:and')}</div>
+                          )}
+                          <Condition
+                            addCondition={addCondition}
+                            andIndex={andIndex}
+                            fieldName={initialFieldName}
+                            fields={reducedFields}
+                            initialValue={initialValue}
+                            key={andIndex}
+                            operator={initialOperator}
+                            orIndex={orIndex}
+                            removeCondition={removeCondition}
+                            updateCondition={updateCondition}
+                          />
+                        </li>
+                      )
+                    })}
+                </ul>
+              </li>
+            ))}
           </ul>
           <Button
             buttonStyle="icon-label"

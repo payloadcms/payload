@@ -1,11 +1,11 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewProps } from 'payload/types'
 
 import LinkImport from 'next/link.js'
 import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import { Button } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
 
 import { customNestedViewPath, customViewTitle } from '../../../shared.js'
 import { ClientForm } from './index.client.js'

@@ -1,12 +1,13 @@
 import type { TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type { Payload } from 'payload'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload/database'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter } from 'payload/database'
 
 import type { CollectionModel, GlobalModel } from './types.js'
 

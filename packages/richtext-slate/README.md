@@ -14,7 +14,7 @@ npm install @payloadcms/richtext-slate
 ## Usage
 
 ```ts
-import { buildConfig } from 'payload'
+import { buildConfig } from 'payload/config'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export default buildConfig({

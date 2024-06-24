@@ -1,11 +1,11 @@
 import type { I18n } from '@payloadcms/translations'
+import type { User } from 'payload/auth'
+import type { PaginatedDocs } from 'payload/database'
 import type {
-  PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-  User,
-} from 'payload'
+} from 'payload/types'
 
 export type DefaultVersionsViewProps = {
   canAccessAdmin: boolean

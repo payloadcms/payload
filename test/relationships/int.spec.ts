@@ -1,4 +1,5 @@
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload } from 'payload'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { randomBytes } from 'crypto'
 
@@ -612,7 +613,7 @@ describe('Relationships', () => {
           },
         })
 
-        thirdLevelID = thirdLevelDoc.id
+        thirdLevelID = thirdLevelDoc.id as string
 
         const secondLevelDoc = await payload.create({
           collection: 'chained',
@@ -622,7 +623,7 @@ describe('Relationships', () => {
           },
         })
 
-        secondLevelID = secondLevelDoc.id
+        secondLevelID = secondLevelDoc.id as string
 
         const firstLevelDoc = await payload.create({
           collection: 'chained',
@@ -632,7 +633,7 @@ describe('Relationships', () => {
           },
         })
 
-        firstLevelID = firstLevelDoc.id
+        firstLevelID = firstLevelDoc.id as string
       })
 
       it('should allow querying one level deep', async () => {

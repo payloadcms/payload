@@ -7,9 +7,8 @@ export const generateForgotPasswordMetadata: GenerateViewMetadata = async ({
   i18n: { t },
 }) =>
   meta({
+    config,
     description: t('authentication:forgotPassword'),
     keywords: t('authentication:forgotPassword'),
     title: t('authentication:forgotPassword'),
-    ...(config.admin.meta || {}),
-    serverURL: config.serverURL,
   })

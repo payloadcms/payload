@@ -18,7 +18,7 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from 'payload'
+} from 'payload/types'
 
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
 

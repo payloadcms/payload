@@ -1,0 +1,25 @@
+.ContentEditable__root {
+  border: 0;
+  font-size: 15px;
+  display: block;
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding-top: 8px;
+
+  &:focus-visible {
+    outline: none !important;
+  }
+
+  & > * {
+    transition: transform 0.2s ease-in-out;
+    // will-change: transform; // breaks cursor rendering for empty paragraph blocks in safari, and creates other issues
+  }
+}
+
+@media (max-width: 1025px) {
+  .ContentEditable__root {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+}

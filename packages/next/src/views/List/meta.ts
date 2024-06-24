@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -23,11 +23,9 @@ export const generateListMetadata = async (
   }
 
   return meta({
-    ...(config.admin.meta || {}),
+    config,
     description,
     keywords,
-    serverURL: config.serverURL,
     title,
-    ...(collectionConfig.admin.meta || {}),
   })
 }

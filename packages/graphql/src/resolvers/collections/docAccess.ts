@@ -1,11 +1,8 @@
-import type {
-  Collection,
-  CollectionPermission,
-  GlobalPermission,
-  PayloadRequestWithData,
-} from 'payload'
+import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { Collection, PayloadRequestWithData } from 'payload/types'
 
-import { docAccessOperation, isolateObjectProperty } from 'payload'
+import { docAccessOperation } from 'payload/operations'
+import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 

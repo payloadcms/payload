@@ -9,7 +9,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:accountOfCurrentUser',
   'authentication:alreadyActivated',
   'authentication:alreadyLoggedIn',
-  'authentication:apiKey',
   'authentication:authenticated',
   'authentication:backToLogin',
   'authentication:beginCreateFirstUser',
@@ -70,7 +69,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unauthorized',
   'error:unknown',
   'error:unspecific',
-  'error:userEmailAlreadyRegistered',
   'error:tokenNotProvided',
   'error:unPublishingDocument',
 
@@ -214,7 +212,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:stayOnThisPage',
   'general:submissionSuccessful',
   'general:submit',
-  'general:submitting',
   'general:success',
   'general:successfullyCreated',
   'general:successfullyDuplicated',

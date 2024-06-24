@@ -1,8 +1,8 @@
 'use client'
-import type { EditViewProps } from 'payload'
+import type { EditViewProps } from 'payload/types'
 
 import { useDraggable } from '@dnd-kit/core'
-import { DragHandleIcon } from '@payloadcms/ui'
+import { DragHandle } from '@payloadcms/ui/icons/DragHandle'
 import React from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'
@@ -40,7 +40,7 @@ const DraggableToolbar: React.FC<EditViewProps> = (props) => {
         ref={setNodeRef}
         type="button"
       >
-        <DragHandleIcon />
+        <DragHandle />
       </button>
       <ToolbarControls {...props} />
     </div>

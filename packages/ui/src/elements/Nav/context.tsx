@@ -1,5 +1,5 @@
 'use client'
-import { useWindowInfo } from '@faceless-ui/window-info'
+import * as facelessUIImport from '@faceless-ui/window-info'
 import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'
 
@@ -7,7 +7,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 
 type NavContextType = {
   navOpen: boolean
-  navRef: React.RefObject<HTMLDivElement | null>
+  navRef: React.RefObject<HTMLDivElement>
   setNavOpen: (value: boolean) => void
 }
 
@@ -32,6 +32,8 @@ const getNavPreference = async (getPreference): Promise<boolean> => {
 export const NavProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
+  const { useWindowInfo } = facelessUIImport
+
   const {
     breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()

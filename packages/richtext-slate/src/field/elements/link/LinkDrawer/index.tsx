@@ -1,20 +1,18 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import {
-  Drawer,
-  Form,
-  FormSubmit,
-  RenderFields,
-  useConfig,
-  useDocumentInfo,
-  useEditDepth,
-  useFieldProps,
-  useHotkey,
-  useTranslation,
-} from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import { Drawer } from '@payloadcms/ui/elements/Drawer'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useHotkey } from '@payloadcms/ui/hooks/useHotkey'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'

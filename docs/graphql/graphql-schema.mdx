@@ -3,26 +3,20 @@ title: GraphQL Schema
 label: GraphQL Schema
 order: 30
 desc: Output your own GraphQL schema based on your collections and globals to a file.
-keywords: headless cms, typescript, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+keywords: headless cms, typescript, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-In Payload the schema is controlled by your collections and globals. All you need to do is run the generate command and the entire schema will be created for you.
+When working with GraphQL it is useful to have the schema for development of other projects that need to call on your GraphQL endpoint. In Payload the schema is controlled by your collections and globals and is made available to the developer or third parties, it is not necessary for developers using Payload to write schema types manually.
 
-## Schema generation script
+### Schema generation script
 
-Install `@payloadcms/graphql` as a dev dependency:
+Run the following command in a Payload project to generate your project's GraphQL schema from Payload:
 
-```bash
-pnpm add @payloadcms/graphql --save-dev
+```
+payload generate:graphQLSchema
 ```
 
-Run the following command to generate the schema:
-
-```bash
-pnpm payload-graphql generate:schema
-```
-
-## Custom Field Schemas
+### Custom Field Schemas
 
 For `array`, `block`, `group` and named `tab` fields, you can generate top level reusable interfaces. The following group field config:
 
@@ -30,7 +24,7 @@ For `array`, `block`, `group` and named `tab` fields, you can generate top level
 {
   type: 'group',
   name: 'meta',
-  interfaceName: 'SharedMeta', // highlight-line
+  interfaceName: 'SharedMeta', <-- here!!
   fields: [
     {
       name: 'title',
@@ -47,13 +41,13 @@ For `array`, `block`, `group` and named `tab` fields, you can generate top level
 will generate:
 
 ```ts
-// A top level reusable type will be generated
+// a top level reusable type!!
 type SharedMeta {
   title: String
   description: String
 }
 
-// And will be referenced inside the generated schema
+// example usage inside collection schema
 type Collection1 {
   // ...other fields
   meta: SharedMeta
@@ -62,7 +56,7 @@ type Collection1 {
 
 The above example outputs all your definitions to a file relative from your payload config as `./graphql/schema.graphql`. By default, the file will be output to your current working directory as `schema.graphql`.
 
-### Adding an NPM script
+#### Adding an NPM script
 
 <Banner type="warning">
   <strong>Important</strong>
@@ -70,18 +64,16 @@ The above example outputs all your definitions to a file relative from your payl
   Payload needs to be able to find your config to generate your GraphQL schema.
 </Banner>
 
-Payload will automatically try and locate your config, but might not always be able to find it. For example, if you are working in a `/src` directory or similar, you need to tell Payload where to find your config manually by using an environment variable.
+Payload will automatically try and locate your config, but might not always be able to find it. For example, if you are working in a `/src` directory or similar, you need to tell Payload where to find your config manually by using an environment variable. If this applies to you, you can create an NPM script to make generating your types easier.
 
-If this applies to you, create an NPM script to make generating types easier:
+To add an NPM script to generate your types and show Payload where to find your config, open your `package.json` and update the `scripts` property to the following:
 
 ```json
-// package.json
-
 {
   "scripts": {
-    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload-graphql generate:schema"
+    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema"
   }
 }
 ```
 
-Now you can run `pnpm generate:graphQLSchema` to easily generate your schema.
+Now you can run `yarn generate:graphQLSchema` to easily generate your schema.

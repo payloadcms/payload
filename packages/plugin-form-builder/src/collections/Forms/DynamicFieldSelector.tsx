@@ -1,8 +1,9 @@
 'use client'
 
-import type { TextFieldProps } from '@payloadcms/ui'
+import type { TextFieldProps } from '@payloadcms/ui/fields/Text'
 
-import { SelectField, useForm } from '@payloadcms/ui'
+import { Select } from '@payloadcms/ui/fields/Select'
+import { useForm } from '@payloadcms/ui/forms/Form'
 import React, { useEffect, useState } from 'react'
 
 import type { SelectFieldOption } from '../../types.js'
@@ -36,5 +37,5 @@ export const DynamicFieldSelector: React.FC<TextFieldProps> = (props) => {
 
   // TODO: label from config is Record<string, string> | false | string
   //  but the FormFieldBase type has only label?: string, changing FormFieldBase breaks other ui components
-  return <SelectField {...props} options={options} />
+  return <Select {...props} options={options} />
 }

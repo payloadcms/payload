@@ -25,7 +25,7 @@ type Args = {
 /**
  * This function is responsible for the following actions, in order:
  * - Remove hidden fields from response
- * - Flatten locales into requested locale. If the input doc contains all locales, the output doc after this function will only contain the requested locale.
+ * - Flatten locales into requested locale
  * - Sanitize outgoing data (point field, etc.)
  * - Execute field hooks
  * - Execute read access control
@@ -77,10 +77,8 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     global,
     locale,
     overrideAccess,
-    path: [],
     populationPromises,
     req,
-    schemaPath: [],
     showHiddenFields,
     siblingDoc: doc,
   })

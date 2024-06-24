@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload'
+import type { Collection, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
 
 export type BaseRouteHandler = ({
   req,

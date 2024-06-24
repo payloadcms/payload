@@ -1,26 +1,24 @@
 'use client'
 
-import {
-  CheckboxField,
-  CopyToClipboard,
-  Form,
-  Gutter,
-  MinimizeMaximizeIcon,
-  NumberField as NumberInput,
-  SetViewActions,
-  useComponentMap,
-  useConfig,
-  useDocumentInfo,
-  useLocale,
-  useTranslation,
-} from '@payloadcms/ui'
+import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
+import { NumberField as NumberInput } from '@payloadcms/ui/fields/Number'
+import { Select } from '@payloadcms/ui/fields/Select'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { MinimizeMaximize } from '@payloadcms/ui/icons/MinimizeMaximize'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
-import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 import './index.scss'
 
@@ -161,21 +159,29 @@ export const APIViewClient: React.FC = () => {
           <div className={`${baseClass}__form-fields`}>
             <div className={`${baseClass}__filter-query-checkboxes`}>
               {draftsEnabled && (
-                <CheckboxField
+                <Checkbox
                   label={t('version:draft')}
                   name="draft"
                   onChange={() => setDraft(!draft)}
                   path="draft"
                 />
               )}
-              <CheckboxField
+              <Checkbox
                 label={t('authentication:authenticated')}
                 name="authenticated"
                 onChange={() => setAuthenticated(!authenticated)}
                 path="authenticated"
               />
             </div>
-            {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
+            {localeOptions && (
+              <Select
+                label={t('general:locale')}
+                name="locale"
+                onChange={(value) => setLocale(value)}
+                options={localeOptions}
+                path="locale"
+              />
+            )}
             <NumberInput
               label={t('general:depth')}
               max={10}
@@ -196,7 +202,7 @@ export const APIViewClient: React.FC = () => {
             onClick={() => setFullscreen(!fullscreen)}
             type="button"
           >
-            <MinimizeMaximizeIcon isMinimized={!fullscreen} />
+            <MinimizeMaximize isMinimized={!fullscreen} />
           </button>
         </div>
         <div className={`${baseClass}__results`}>

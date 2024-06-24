@@ -5,7 +5,6 @@ import { fileURLToPath, pathToFileURL } from 'url'
 
 import { CLIENT_EXTENSIONS } from './clientExtensions.js'
 import { compile } from './compile.js'
-import { specifiersToIgnore } from './ignores.js'
 import { resolveOriginalPath } from './resolveOriginalPath.js'
 
 interface ResolveContext {
@@ -56,15 +55,13 @@ const TS_EXTENSIONS: string[] = [
 export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   const isTS = TS_EXTENSIONS.some((ext) => specifier.endsWith(ext))
   const isClient = CLIENT_EXTENSIONS.some((ext) => specifier.endsWith(ext))
-  const shouldIgnore = specifiersToIgnore.includes(specifier)
 
-  // If it's a client file, or a file to be ignored is resolved,
-  // we'll set `format: 'ignore'`
+  // If a client file is resolved, we'll set `format: client`
   // and short circuit, so the load step
   // will return source code of empty object
-  if (isClient || shouldIgnore) {
+  if (isClient) {
     return {
-      format: 'ignore',
+      format: 'client',
       shortCircuit: true,
       // No need to resolve the URL using nextResolve. We ignore client files anyway.
       // Additionally, nextResolve throws an error if the URL is a TS path, so we'd have to use TypeScript's resolveModuleName to resolve the URL, which is unnecessary
@@ -114,12 +111,11 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
 
   if (resolvedModule) {
     const resolvedIsTS = TS_EXTENSIONS.includes(resolvedModule.extension)
-    const resolvedPath = await resolveOriginalPath(resolvedModule.resolvedFileName)
 
     return {
       format: resolvedIsTS ? 'ts' : undefined,
       shortCircuit: true,
-      url: pathToFileURL(resolvedPath ?? resolvedModule.resolvedFileName).href, // The typescript module resolver does not resolve to the original path, but to the symlinked path, if present. This can cause issues
+      url: pathToFileURL(await resolveOriginalPath(resolvedModule.resolvedFileName)).href, // The typescript module resolver does not resolve to the original path, but to the symlinked path, if present. This can cause issues
     }
   }
 
@@ -151,7 +147,7 @@ const swcOptions = {
   paths: undefined,
 }
 export const load: LoadFn = async (url, context, nextLoad) => {
-  if (context.format === 'ignore') {
+  if (context.format === 'client') {
     const rawSource = 'export default {}'
 
     return {

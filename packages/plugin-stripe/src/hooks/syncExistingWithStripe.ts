@@ -1,6 +1,6 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
 
-import { APIError } from 'payload'
+import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'

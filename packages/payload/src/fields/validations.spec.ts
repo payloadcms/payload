@@ -1,11 +1,10 @@
 import type { ValidateOptions } from './config/types.js'
-import { jest } from '@jest/globals'
 
 import { number, password, point, relationship, select, text, textarea } from './validations.js'
 
 const t = jest.fn((string) => string)
 
-let options: ValidateOptions<any, any, any> = {
+let options: ValidateOptions<any, any> = {
   data: undefined,
   operation: 'create',
   siblingData: undefined,

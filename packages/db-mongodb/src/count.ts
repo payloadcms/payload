@@ -1,7 +1,8 @@
 import type { QueryOptions } from 'mongoose'
-import type { Count, PayloadRequestWithData } from 'payload'
+import type { Count } from 'payload/database'
+import type { PayloadRequestWithData } from 'payload/types'
 
-import { flattenWhereToOperators } from 'payload'
+import { flattenWhereToOperators } from 'payload/database'
 
 import type { MongooseAdapter } from './index.js'
 

@@ -167,8 +167,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       global: globalConfig,
       operation: 'update',
       req,
-      skipValidation:
-        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
+      skipValidation: shouldSaveDraft,
     })
 
     // /////////////////////////////////////

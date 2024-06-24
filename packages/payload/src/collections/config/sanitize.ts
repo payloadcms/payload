@@ -15,7 +15,6 @@ import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
-import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults } from './defaults.js'
 
 export const sanitizeCollection = async (
@@ -85,18 +84,13 @@ export const sanitizeCollection = async (
       if (sanitized.versions.drafts === true) {
         sanitized.versions.drafts = {
           autosave: false,
-          validate: false,
         }
       }
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
-          interval: versionDefaults.autosaveInterval,
+          interval: 2000,
         }
-      }
-
-      if (sanitized.versions.drafts.validate === undefined) {
-        sanitized.versions.drafts.validate = false
       }
 
       sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)

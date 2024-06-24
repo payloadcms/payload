@@ -1,11 +1,11 @@
+import type { FieldTypes } from 'payload/config'
 import type {
   BlockField,
   CellComponentProps,
-  FieldTypes,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
-} from 'payload'
+} from 'payload/types'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
 import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'

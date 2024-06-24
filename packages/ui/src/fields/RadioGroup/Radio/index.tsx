@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject } from 'payload'
+import type { OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -37,7 +37,6 @@ export const Radio: React.FC<{
           checked={isSelected}
           disabled={readOnly}
           id={id}
-          name={path}
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
           type="radio"
         />

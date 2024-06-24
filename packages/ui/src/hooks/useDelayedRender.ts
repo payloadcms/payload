@@ -36,8 +36,7 @@ export const useDelayedRender: useDelayedRenderT = ({
   const [isMounted, setIsMounted] = React.useState(false)
   const [isUnmounting, setIsUnmounting] = React.useState(false)
   const onMountTimestampRef = React.useRef(0)
-  const unmountTimeoutRef: React.MutableRefObject<NodeJS.Timeout | undefined> =
-    React.useRef(undefined)
+  const unmountTimeoutRef: React.MutableRefObject<NodeJS.Timeout | undefined> = React.useRef()
 
   const unmount = React.useCallback(() => {
     setIsUnmounting(true)

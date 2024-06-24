@@ -1,19 +1,15 @@
 'use client'
 
-import {
-  Button,
-  CheckboxField,
-  ConfirmPasswordField,
-  EmailField,
-  PasswordField,
-  useConfig,
-  useDocumentInfo,
-  useFormFields,
-  useFormModified,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
+import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
+import { Email } from '@payloadcms/ui/fields/Email'
+import { Password } from '@payloadcms/ui/fields/Password'
+import { useFormFields, useFormModified } from '@payloadcms/ui/forms/Form'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
@@ -36,11 +32,10 @@ export const Auth: React.FC<Props> = (props) => {
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
-  const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
+  const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { isInitializing } = useDocumentInfo()
 
   const {
     routes: { api },
@@ -74,7 +69,7 @@ export const Auth: React.FC<Props> = (props) => {
     })
 
     if (response.status === 200) {
-      toast.success(t('authentication:successfullyUnlocked'))
+      toast.success(t('authentication:successfullyUnlocked'), { autoClose: 3000 })
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
@@ -90,15 +85,12 @@ export const Auth: React.FC<Props> = (props) => {
     return null
   }
 
-  const disabled = readOnly || isInitializing
-
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <EmailField
+          <Email
             autoComplete="email"
-            disabled={disabled}
             label={t('general:email')}
             name="email"
             readOnly={readOnly}
@@ -106,21 +98,22 @@ export const Auth: React.FC<Props> = (props) => {
           />
           {(changingPassword || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
-              <PasswordField
+              <Password
                 autoComplete="off"
-                disabled={disabled}
+                disabled={readOnly}
                 label={t('authentication:newPassword')}
                 name="password"
                 required
               />
-              <ConfirmPasswordField disabled={readOnly} />
+              <ConfirmPassword disabled={readOnly} />
             </div>
           )}
+
           <div className={`${baseClass}__controls`}>
             {changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
-                disabled={disabled}
+                disabled={readOnly}
                 onClick={() => handleChangePassword(false)}
                 size="small"
               >
@@ -130,7 +123,7 @@ export const Auth: React.FC<Props> = (props) => {
             {!changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
-                disabled={disabled}
+                disabled={readOnly}
                 id="change-password"
                 onClick={() => handleChangePassword(true)}
                 size="small"
@@ -141,7 +134,7 @@ export const Auth: React.FC<Props> = (props) => {
             {operation === 'update' && (
               <Button
                 buttonStyle="secondary"
-                disabled={disabled}
+                disabled={readOnly}
                 onClick={() => unlock()}
                 size="small"
               >
@@ -153,8 +146,7 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          <CheckboxField
-            disabled={disabled}
+          <Checkbox
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
             readOnly={readOnly}
@@ -163,12 +155,7 @@ export const Auth: React.FC<Props> = (props) => {
         </div>
       )}
       {verify && (
-        <CheckboxField
-          disabled={disabled}
-          label={t('authentication:verified')}
-          name="_verified"
-          readOnly={readOnly}
-        />
+        <Checkbox label={t('authentication:verified')} name="_verified" readOnly={readOnly} />
       )}
     </div>
   )

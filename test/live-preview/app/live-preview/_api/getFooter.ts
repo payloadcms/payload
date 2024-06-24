@@ -11,7 +11,7 @@ export async function getFooter(): Promise<Footer> {
       slug: 'footer',
     })
 
-    return footer
+    return footer as Footer
   } catch (err) {
     console.error(err)
   }

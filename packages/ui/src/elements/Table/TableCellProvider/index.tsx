@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import React from 'react'
 
@@ -8,6 +8,7 @@ export type ITableCellContext = {
   cellProps?: Partial<CellComponentProps>
   columnIndex?: number
   customCellContext: DefaultCellComponentProps['customCellContext']
+  richTextComponentMap?: DefaultCellComponentProps['richTextComponentMap']
   rowData: DefaultCellComponentProps['rowData']
 }
 
@@ -19,9 +20,18 @@ export const TableCellProvider: React.FC<{
   children: React.ReactNode
   columnIndex?: number
   customCellContext?: DefaultCellComponentProps['customCellContext']
+  richTextComponentMap?: DefaultCellComponentProps['richTextComponentMap']
   rowData?: DefaultCellComponentProps['rowData']
 }> = (props) => {
-  const { cellData, cellProps, children, columnIndex, customCellContext, rowData } = props
+  const {
+    cellData,
+    cellProps,
+    children,
+    columnIndex,
+    customCellContext,
+    richTextComponentMap,
+    rowData,
+  } = props
 
   const contextToInherit = useTableCell()
 
@@ -34,6 +44,7 @@ export const TableCellProvider: React.FC<{
         customCellContext,
         rowData,
         ...contextToInherit,
+        richTextComponentMap,
       }}
     >
       {children}

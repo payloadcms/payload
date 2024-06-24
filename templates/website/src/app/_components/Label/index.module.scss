@@ -1,0 +1,5 @@
+@import '../../_css/type.scss';
+
+.label {
+  @extend %label;
+}

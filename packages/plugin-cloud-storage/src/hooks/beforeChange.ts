@@ -1,4 +1,5 @@
-import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
+import type { FileData, TypeWithID } from 'payload/types'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
 
 import type { GeneratedAdapter } from '../types.js'
 

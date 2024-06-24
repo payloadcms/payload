@@ -1,91 +1,43 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { MetaConfig } from 'payload'
+import type { SanitizedConfig } from 'payload/types'
 
-import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
-import QueryString from 'qs'
+import { payloadFaviconDark, payloadFaviconLight, payloadOgImage } from '@payloadcms/ui/assets'
 
-const defaultOpenGraph = {
-  description:
-    'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
-  siteName: 'Payload App',
-  title: 'Payload App',
-}
+export const meta = async (args: {
+  config: SanitizedConfig
+  description?: string
+  keywords?: string
+  title: string
+}): Promise<Metadata> => {
+  const { config, description = '', keywords = 'CMS, Admin, Dashboard', title } = args
 
-export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
-  const {
-    defaultOGImageType,
-    description,
-    icons: customIcons,
-    keywords,
-    openGraph: openGraphFromProps,
-    serverURL,
-    title,
-    titleSuffix,
-  } = args
+  const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
+
+  const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
+
+  const customIcons = config.admin.meta.icons as Metadata['icons']
+
+  let icons = customIcons ?? []
 
   const payloadIcons: Icon[] = [
     {
       type: 'image/png',
       rel: 'icon',
       sizes: '32x32',
-      url: typeof payloadFaviconDark === 'object' ? payloadFaviconDark?.src : payloadFaviconDark,
+      url: payloadFaviconDark?.src,
     },
     {
       type: 'image/png',
       media: '(prefers-color-scheme: dark)',
       rel: 'icon',
       sizes: '32x32',
-      url: typeof payloadFaviconLight === 'object' ? payloadFaviconLight?.src : payloadFaviconLight,
+      url: payloadFaviconLight?.src,
     },
   ]
 
-  let icons = customIcons ?? payloadIcons // TODO: fix this type assertion
-
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = payloadIcons.concat(customIcons) // TODO: fix this type assertion
-  }
-
-  const metaTitle = `${title} ${titleSuffix}`
-
-  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
-
-  const mergedOpenGraph: Metadata['openGraph'] = {
-    ...(defaultOpenGraph || {}),
-    ...(defaultOGImageType === 'dynamic'
-      ? {
-          images: [
-            {
-              alt: ogTitle,
-              height: 630,
-              url: `/api/og${QueryString.stringify(
-                {
-                  description: openGraphFromProps?.description || defaultOpenGraph.description,
-                  title: ogTitle,
-                },
-                {
-                  addQueryPrefix: true,
-                },
-              )}`,
-              width: 1200,
-            },
-          ],
-        }
-      : {}),
-    ...(defaultOGImageType === 'static'
-      ? {
-          images: [
-            {
-              alt: ogTitle,
-              height: 480,
-              url: typeof staticOGImage === 'object' ? staticOGImage?.src : staticOGImage,
-              width: 640,
-            },
-          ],
-        }
-      : {}),
-    title: ogTitle,
-    ...(openGraphFromProps || {}),
+    icons = payloadIcons.concat(customIcons)
   }
 
   return Promise.resolve({
@@ -93,11 +45,23 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
     icons,
     keywords,
     metadataBase: new URL(
-      serverURL ||
+      config?.serverURL ||
         process.env.PAYLOAD_PUBLIC_SERVER_URL ||
         `http://localhost:${process.env.PORT || 3000}`,
     ),
-    openGraph: mergedOpenGraph,
-    title: metaTitle,
+    openGraph: {
+      type: 'website',
+      description,
+      images: [
+        {
+          alt: `${title} ${titleSuffix}`,
+          height: 630,
+          url: ogImage,
+          width: 1200,
+        },
+      ],
+      title: `${title} ${titleSuffix}`,
+    },
+    title: `${title} ${titleSuffix}`,
   })
 }

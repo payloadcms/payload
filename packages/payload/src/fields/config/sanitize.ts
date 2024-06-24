@@ -8,7 +8,6 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
-import { deepMerge } from '../../utilities/deepMerge.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
@@ -158,7 +157,7 @@ export const sanitizeFields = async ({
             // config.editor should be sanitized at this point
             field.editor = _config.editor
           } else {
-            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+            throw new MissingEditorProp(field)
           }
         }
 
@@ -169,9 +168,24 @@ export const sanitizeFields = async ({
           })
         }
 
-        if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
-          config.i18n.translations = deepMerge(config.i18n.translations, field.editor.i18n)
+        // Add editor adapter hooks to field hooks
+        if (!field.hooks) field.hooks = {}
+
+        const mergeHooks = (hookName: keyof typeof field.editor.hooks) => {
+          if (typeof field.editor === 'function') return
+
+          if (field.editor?.hooks?.[hookName]?.length) {
+            field.hooks[hookName] = field.hooks[hookName]
+              ? field.hooks[hookName].concat(field.editor.hooks[hookName])
+              : [...field.editor.hooks[hookName]]
+          }
         }
+
+        mergeHooks('afterRead')
+        mergeHooks('afterChange')
+        mergeHooks('beforeChange')
+        mergeHooks('beforeValidate')
+        mergeHooks('beforeDuplicate')
       }
       if (richTextSanitizationPromises) {
         richTextSanitizationPromises.push(sanitizeRichText)

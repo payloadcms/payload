@@ -9,8 +9,10 @@ const dirname = path.dirname(filename)
 const customJestConfig = {
   ...jestBaseConfig,
   testMatch: ['<rootDir>/**/*int.spec.ts'],
-  setupFiles: ['<rootDir>/jest.setup.env.js'],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: [
+    //path.resolve(dirname, './helpers/startMemoryDB.ts'),
+    '<rootDir>/jest.setup.ts',
+  ],
   globalSetup: path.resolve(dirname, './helpers/startMemoryDB.ts'),
   moduleNameMapper: {
     '\\.(css|scss)$': '<rootDir>/helpers/mocks/emptyModule.js',

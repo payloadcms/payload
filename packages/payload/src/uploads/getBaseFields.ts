@@ -149,25 +149,6 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     height,
   ]
 
-  // Add focal point fields if not disabled
-  if (
-    uploadOptions.focalPoint !== false ||
-    uploadOptions.imageSizes ||
-    uploadOptions.resizeOptions
-  ) {
-    uploadFields = uploadFields.concat(
-      ['focalX', 'focalY'].map((name) => {
-        return {
-          name,
-          type: 'number',
-          admin: {
-            hidden: true,
-          },
-        }
-      }),
-    )
-  }
-
   if (uploadOptions.mimeTypes) {
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
@@ -192,7 +173,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               hooks: {
                 afterRead: [
                   ({ data, value }) => {
-                    if (value && size.height && size.width) return value
+                    if (value) return value
 
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 

@@ -1,6 +1,7 @@
-import type { Collection } from 'payload'
+import type { Collection } from 'payload/types'
 
-import { isolateObjectProperty, verifyEmailOperation } from 'payload'
+import { verifyEmailOperation } from 'payload/operations'
+import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 

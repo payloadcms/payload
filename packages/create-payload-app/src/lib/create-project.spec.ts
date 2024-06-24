@@ -2,10 +2,9 @@ import fse from 'fs-extra'
 import path from 'path'
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { createProject } from './create-project.js'
-import { dbReplacements } from './replacements.js'
+import { dbReplacements } from './packages.js'
 import { getValidTemplates } from './templates.js'
 import globby from 'globby'
-import { jest } from '@jest/globals'
 
 import tempDirectory from 'temp-dir'
 
@@ -30,7 +29,7 @@ describe('createProject', () => {
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
-      '--local-template': 'blank-3.0',
+      '--local-template': 'blank',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
@@ -125,7 +124,7 @@ describe('createProject', () => {
 
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+        expect(content).toContain(dbReplacement.configReplacement.join('\n'))
       })
     })
   })

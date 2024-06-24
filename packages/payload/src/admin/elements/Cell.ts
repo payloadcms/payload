@@ -12,6 +12,13 @@ import type {
 export type RowData = Record<string, any>
 
 export type CellComponentProps = {
+  /**
+   * A custom component to override the default cell component. If this is not set, the React component will be
+   * taken from cellComponents based on the field type.
+   *
+   * This is used to provide the RichText cell component for the RichText field.
+   */
+  CellComponentOverride?: React.ReactNode
   blocks?: {
     labels: BlockField['labels']
     slug: string
@@ -32,7 +39,6 @@ export type CellComponentProps = {
   options?: SelectField['options']
   relationTo?: RelationshipField['relationTo']
   richTextComponentMap?: Map<string, React.ReactNode> // any should be MappedField
-  schemaPath: string
 }
 
 export type DefaultCellComponentProps<T = any> = CellComponentProps & {

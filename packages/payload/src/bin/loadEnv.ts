@@ -1,25 +1,22 @@
-import nextEnvImport from '@next/env'
-const { loadEnvConfig } = nextEnvImport
-import { findUpStop, findUpSync } from 'find-up'
+import dotenv from 'dotenv'
+import findUp from 'find-up'
+import fs from 'fs'
+import path from 'path'
 
 /**
- * Try to find user's env files and load it. Uses the same algorithm next.js uses to parse env files, meaning this also supports .env.local, .env.development, .env.production, etc.
+ * Try to find user's .env and load it
  */
-export function loadEnv(path?: string) {
-  if (path?.length) {
-    loadEnvConfig(path, true)
-    return
-  }
+export function loadEnv() {
+  const envPath = findUp.sync('.env')
 
-  const { loadedEnvFiles } = loadEnvConfig(process.cwd(), true) // assuming this won't run in production
-
-  if (!loadedEnvFiles?.length) {
-    // use findUp to find the env file. So, run loadEnvConfig for every directory upwards
-    findUpSync((dir) => {
-      const { loadedEnvFiles } = loadEnvConfig(dir, true)
-      if (loadedEnvFiles?.length) {
-        return findUpStop
-      }
-    })
+  if (envPath) {
+    dotenv.config({ path: envPath })
+  } else {
+    const cwdPath = path.resolve(process.cwd(), '.env')
+    if (fs.existsSync(cwdPath)) {
+      dotenv.config({
+        path: cwdPath,
+      })
+    }
   }
 }

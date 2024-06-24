@@ -1,14 +1,15 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, LanguageOptions } from 'payload'
+import type { ClientConfig } from 'payload/types'
 
-import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
-import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
-import { WindowInfoProvider } from '@faceless-ui/window-info'
+import * as facelessUIImport from '@faceless-ui/modal'
+import * as facelessUIImport3 from '@faceless-ui/scroll-info'
+import * as facelessUIImport2 from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
+import { Slide, ToastContainer } from 'react-toastify'
 
 import type { ComponentMap } from '../ComponentMap/buildComponentMap/types.js'
-import type { Theme } from '../Theme/index.js'
+import type { LanguageOptions } from '../Translation/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
@@ -27,7 +28,6 @@ import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ThemeProvider } from '../Theme/index.js'
-import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 
 type Props = {
@@ -39,7 +39,6 @@ type Props = {
   languageCode: string
   languageOptions: LanguageOptions
   switchLanguageServerAction?: (lang: string) => Promise<void>
-  theme: Theme
   translations: I18nClient['translations']
 }
 
@@ -52,9 +51,15 @@ export const RootProvider: React.FC<Props> = ({
   languageCode,
   languageOptions,
   switchLanguageServerAction,
-  theme,
   translations,
 }) => {
+  const { ModalContainer, ModalProvider } = facelessUIImport || {
+    ModalContainer: React.Fragment,
+    ModalProvider: React.Fragment,
+  }
+  const { WindowInfoProvider } = facelessUIImport2 || { WindowInfoProvider: React.Fragment }
+  const { ScrollInfoProvider } = facelessUIImport3 || { ScrollInfoProvider: React.Fragment }
+
   return (
     <Fragment>
       <RouteCache>
@@ -83,7 +88,7 @@ export const RootProvider: React.FC<Props> = ({
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <AuthProvider>
                             <PreferencesProvider>
-                              <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
+                              <ThemeProvider>
                                 <ParamsProvider>
                                   <LocaleProvider>
                                     <StepNavProvider>
@@ -112,7 +117,7 @@ export const RootProvider: React.FC<Props> = ({
           </ComponentMapProvider>
         </ConfigProvider>
       </RouteCache>
-      <ToastContainer />
+      <ToastContainer icon={false} position="bottom-center" transition={Slide} />
     </Fragment>
   )
 }

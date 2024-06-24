@@ -1,11 +1,10 @@
-'use client'
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 // 1. Skips fields that are hidden, disabled, or presentational-only (i.e. `ui` fields)
 // 2. Maps through top-level `tabs` fields and filters out the same
 export const filterFields = (fieldMap: FieldMap): FieldMap => {
   const shouldSkipField = (field: MappedField): boolean =>
-    (field.type !== 'ui' && field.disabled === true) || field?.disableListColumn === true
+    field.type !== 'ui' && field.disabled === true
 
   const fields: FieldMap = fieldMap.reduce((formatted, field) => {
     if (shouldSkipField(field)) {

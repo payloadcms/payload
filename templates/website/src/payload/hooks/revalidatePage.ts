@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook } from 'payload/types'
+import type { AfterChangeHook } from 'payload/dist/collections/config/types'
 
 // ensure that the home page is revalidated at '/' instead of '/home'
 export const formatAppURL = ({ doc }): string => {
@@ -9,7 +9,7 @@ export const formatAppURL = ({ doc }): string => {
 
 // Revalidate the page in the background, so the user doesn't have to wait
 // Notice that the hook itself is not async and we are not awaiting `revalidate`
-export const revalidatePage: CollectionAfterChangeHook = ({ doc, req }) => {
+export const revalidatePage: AfterChangeHook = ({ doc, req }) => {
   const revalidate = async (): Promise<void> => {
     let url
 
@@ -29,7 +29,7 @@ export const revalidatePage: CollectionAfterChangeHook = ({ doc, req }) => {
     }
   }
 
-  void revalidate()
+  revalidate()
 
   return doc
 }

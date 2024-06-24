@@ -1,8 +1,7 @@
-import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { AdminViewProps } from 'payload'
+import type { AdminViewProps } from 'payload/types'
 
-import { HydrateClientUser } from '@payloadcms/ui'
-import { EntityType, RenderCustomComponent, groupNavItems } from '@payloadcms/ui/shared'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -29,46 +28,10 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
-  const collections = config.collections.filter(
-    (collection) =>
-      permissions?.collections?.[collection.slug]?.read?.permission &&
-      visibleEntities.collections.includes(collection.slug),
-  )
-
-  const globals = config.globals.filter(
-    (global) =>
-      permissions?.globals?.[global.slug]?.read?.permission &&
-      visibleEntities.globals.includes(global.slug),
-  )
-
-  const navGroups = groupNavItems(
-    [
-      ...(collections.map((collection) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.collection,
-          entity: collection,
-        }
-
-        return entityToGroup
-      }) ?? []),
-      ...(globals.map((global) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.global,
-          entity: global,
-        }
-
-        return entityToGroup
-      }) ?? []),
-    ],
-    permissions,
-    i18n,
-  )
-
   const viewComponentProps: DashboardProps = {
     Link,
     i18n,
     locale,
-    navGroups,
     params,
     payload,
     permissions,

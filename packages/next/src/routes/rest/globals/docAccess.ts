@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { docAccessOperationGlobal } from 'payload'
+import { docAccessOperationGlobal } from 'payload/operations'
 
 import type { GlobalRouteHandler } from '../types.js'
 

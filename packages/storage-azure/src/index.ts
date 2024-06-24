@@ -5,7 +5,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload'
+import type { Config, Plugin } from 'payload/config'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'

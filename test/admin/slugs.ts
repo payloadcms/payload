@@ -11,7 +11,6 @@ export const hiddenCollectionSlug = 'hidden-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
 export const uploadCollectionSlug = 'uploads'
-export const customFieldsSlug = 'custom-fields'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -24,7 +23,6 @@ export const collectionSlugs = [
   group2Collection2Slug,
   hiddenCollectionSlug,
   noApiViewCollectionSlug,
-  customFieldsSlug,
   disableDuplicateSlug,
 ]
 

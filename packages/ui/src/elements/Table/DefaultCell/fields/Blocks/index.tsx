@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

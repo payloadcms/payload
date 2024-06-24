@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import { useState } from 'react'
 

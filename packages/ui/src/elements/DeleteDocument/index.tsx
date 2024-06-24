@@ -1,16 +1,17 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { PopupList } from '../Popup/index.js'
@@ -30,6 +31,7 @@ export type Props = {
 
 export const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
+  const { Modal, useModal } = facelessUIImport
 
   const {
     routes: { admin, api },
@@ -121,7 +123,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           {t('general:delete')}
         </PopupList.Button>
         <Modal className={baseClass} slug={modalSlug}>
-          <div className={`${baseClass}__template`}>
+          <MinimalTemplate className={`${baseClass}__template`}>
             <h1>{t('general:confirmDeletion')}</h1>
             <p>
               <Translation
@@ -149,7 +151,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>
             </div>
-          </div>
+          </MinimalTemplate>
         </Modal>
       </React.Fragment>
     )

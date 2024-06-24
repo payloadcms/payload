@@ -1,8 +1,7 @@
-'use client'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { Chevron } from '../../../icons/Chevron/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.scss'
@@ -28,7 +27,7 @@ export const LocalizerLabel: React.FC<{
         {`${getTranslation(locale.label, i18n)}`}
       </span>
       &nbsp;
-      <ChevronIcon className={`${baseClass}__chevron`} />
+      <Chevron className={`${baseClass}__chevron`} />
     </div>
   )
 }

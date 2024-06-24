@@ -1,16 +1,14 @@
 'use client'
-import type { OptionObject } from 'payload'
+import type { OptionObject } from 'payload/types'
 
-import {
-  Gutter,
-  SetViewActions,
-  useComponentMap,
-  useConfig,
-  useDocumentInfo,
-  usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import React, { useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'

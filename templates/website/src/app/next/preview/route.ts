@@ -1,10 +1,8 @@
-import jwt from 'jsonwebtoken'
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-const payloadToken = 'payload-token'
+import { payloadToken } from '../../_api/token'
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export async function GET(
   req: Request & {
     cookies: {
@@ -16,23 +14,36 @@ export async function GET(
 ): Promise<Response> {
   const token = req.cookies.get(payloadToken)?.value
   const { searchParams } = new URL(req.url)
-  const path = searchParams.get('path')
+  const url = searchParams.get('url')
+  const secret = searchParams.get('secret')
 
-  if (!path) {
-    return new Response('No path provided', { status: 404 })
+  if (!url) {
+    return new Response('No URL provided', { status: 404 })
   }
 
   if (!token) {
     new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  const user = jwt.decode(token, process.env.PAYLOAD_SECRET)
+  // validate the Payload token
+  const userReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/me`, {
+    headers: {
+      Authorization: `JWT ${token}`,
+    },
+  })
 
-  if (!user) {
+  const userRes = await userReq.json()
+
+  if (!userReq.ok || !userRes?.user) {
     draftMode().disable()
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
+  if (secret !== process.env.NEXT_PRIVATE_DRAFT_SECRET) {
+    return new Response('Invalid token', { status: 401 })
+  }
+
   draftMode().enable()
-  redirect(path)
+
+  redirect(url)
 }

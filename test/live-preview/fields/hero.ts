@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field } from 'payload/types'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 

@@ -151,7 +151,6 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       collection,
       config,
       data,
-      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -246,11 +245,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       global: null,
       operation: 'update',
       req,
-      skipValidation:
-        shouldSaveDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate &&
-        data._status !== 'published',
+      skipValidation: Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
     })
 
     // /////////////////////////////////////

@@ -1,6 +1,7 @@
 'use client'
 
-import { useField, useForm } from '@payloadcms/ui'
+import { useForm } from '@payloadcms/ui/forms/Form'
+import { useField } from '@payloadcms/ui/forms/useField'
 import * as React from 'react'
 
 import { blockFieldsSlug } from '../../../../slugs.js'

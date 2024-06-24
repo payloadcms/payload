@@ -1,8 +1,9 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -18,16 +19,15 @@ import type {
 import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
-  openCreateDocDrawer,
   openDocControls,
   openDocDrawer,
   saveDocAndAssert,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
-  mixedMediaCollectionSlug,
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
@@ -142,13 +142,19 @@ describe('fields - relationship', () => {
 
   test('should create relationship', async () => {
     await page.goto(url.create)
+
     const field = page.locator('#field-relationship')
-    await expect(field.locator('input')).toBeEnabled()
+
     await field.click({ delay: 100 })
+
     const options = page.locator('.rs__option')
+
     await expect(options).toHaveCount(2) // two docs
+
+    // Select a relationship
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
+
     await saveDocAndAssert(page)
   })
 
@@ -181,20 +187,30 @@ describe('fields - relationship', () => {
 
   test('should create hasMany relationship', async () => {
     await page.goto(url.create)
+
     const field = page.locator('#field-relationshipHasMany')
-    await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
+
     const options = page.locator('.rs__option')
+
     await expect(options).toHaveCount(2) // Two relationship options
+
     const values = page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')
+
+    // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click()
     await expect(values).toHaveText([relationOneDoc.id])
     await expect(values).not.toHaveText([anotherRelationOneDoc.id])
+
+    // Add second relationship
     await field.click({ delay: 100 })
     await options.locator(`text=${anotherRelationOneDoc.id}`).click()
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
+
+    // No options left
     await field.locator('.rs__input').click({ delay: 100 })
     await expect(page.locator('.rs__menu')).toHaveText('No options')
+
     await saveDocAndAssert(page)
     await wait(200)
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
@@ -233,7 +249,7 @@ describe('fields - relationship', () => {
 
     await openDocControls(page)
     await page.locator('#action-duplicate').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('.Toastify')).toContainText('successfully')
     const field = page.locator('#field-relationship .relationship--single-value__text')
 
     await expect(field).toHaveText(relationOneDoc.id)
@@ -242,30 +258,49 @@ describe('fields - relationship', () => {
   async function runFilterOptionsTest(fieldName: string) {
     await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
+
+    // fill the first relation field
     const field = page.locator('#field-relationship')
-    await expect(field.locator('input')).toBeEnabled()
+
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
+
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
+
+    // then verify that the filtered field's options match
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     let filteredOptions = filteredField.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await filteredOptions.nth(0).click()
     await expect(filteredField).toContainText(relationOneDoc.id)
+
+    // change the first relation field
     await field.click({ delay: 100 })
     await options.nth(1).click()
     await expect(field).toContainText(anotherRelationOneDoc.id)
-    await wait(2000) // Need to wait form state to come back before clicking save
+
+    // Need to wait form state to come back
+    // before clicking save
+    await wait(2000)
+
+    // Now, save the document. This should fail, as the filitered field doesn't match the selected relationship value
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(`is invalid: ${fieldName}`)
+    await expect(page.locator('.Toastify')).toContainText(`is invalid: ${fieldName}`)
+
+    // then verify that the filtered field's options match
     filteredField = page.locator(`#field-${fieldName} .react-select`)
+
     await filteredField.click({ delay: 100 })
+
     filteredOptions = filteredField.locator('.rs__option')
+
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await filteredOptions.nth(1).click()
     await expect(filteredField).toContainText(anotherRelationOneDoc.id)
+
+    // Now, saving the document should succeed
     await saveDocAndAssert(page)
   }
 
@@ -362,26 +397,6 @@ describe('fields - relationship', () => {
     await expect(options).toContainText('truth')
   })
 
-  test('should allow docs with same ID but different collections to be selectable', async () => {
-    const mixedMedia = new AdminUrlUtil(serverURL, mixedMediaCollectionSlug)
-    await page.goto(mixedMedia.create)
-    // wait for relationship options to load
-    const podcastsFilterOptionsReq = page.waitForResponse(/api\/podcasts/)
-    const videosFilterOptionsReq = page.waitForResponse(/api\/videos/)
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relatedMedia .rs__control').click()
-    await podcastsFilterOptionsReq
-    await videosFilterOptionsReq
-
-    const options = page.locator('.rs__option')
-    await expect(options).toHaveCount(4) // 4 docs
-    await options.locator(`text=Video 0`).click()
-
-    await page.locator('#field-relatedMedia .rs__control').click()
-    const remainingOptions = page.locator('.rs__option')
-    await expect(remainingOptions).toHaveCount(3) // 3 docs
-  })
-
   // TODO: Flaky test in CI - fix.
   test.skip('should open document drawer from read-only relationships', async () => {
     const editURL = url.edit(docWithExistingRelations.id)
@@ -399,20 +414,33 @@ describe('fields - relationship', () => {
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
-    await openCreateDocDrawer(page, '#field-relationshipHasMany')
+
+    const field = page.locator('#field-relationshipHasMany')
+
+    // open the document drawer
+    const addNewButton = field.locator(
+      'button.relationship-add-new__add-button.doc-drawer__toggler',
+    )
+    await addNewButton.click()
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
+
+    // fill in the field and save the document, keep the drawer open for further testing
     const drawerField = documentDrawer.locator('#field-name')
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('.Toastify')).toContainText('successfully')
+
+    // count the number of values in the field to ensure only one was added
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
     ).toHaveCount(1)
+
+    // save the same document again to ensure the relationship field doesn't receive duplicative values
     await drawerField.fill('Updated document')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Updated successfully')
+    await expect(page.locator('.Toastify')).toContainText('Updated successfully')
     await page.locator('.doc-drawer__header-close').click()
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
@@ -422,9 +450,12 @@ describe('fields - relationship', () => {
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
+
       const field = page.locator('#field-relationship')
-      await expect(field.locator('input')).toBeEnabled()
+
+      // Check dropdown options
       await field.click({ delay: 100 })
+
       await expect(page.locator('.rs__option--is-selected')).toHaveCount(1)
       await expect(page.locator('.rs__option--is-selected')).toHaveText(relationOneDoc.id)
     })
@@ -500,51 +531,6 @@ describe('fields - relationship', () => {
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle')
       await expect(relationship).toHaveText(relationWithTitle.name)
     })
-
-    test('should update relationship values on page change in list view', async () => {
-      await clearCollectionDocs(slug)
-      // create new docs to paginate to
-      for (let i = 0; i < 10; i++) {
-        await payload.create({
-          collection: slug,
-          data: {
-            relationshipHasManyMultiple: [
-              {
-                relationTo: relationOneSlug,
-                value: relationOneDoc.id,
-              },
-            ],
-          },
-        })
-      }
-
-      for (let i = 0; i < 10; i++) {
-        await payload.create({
-          collection: slug,
-          data: {
-            relationshipHasManyMultiple: [
-              {
-                relationTo: relationTwoSlug,
-                value: relationTwoDoc.id,
-              },
-            ],
-          },
-        })
-      }
-
-      await page.goto(url.list)
-
-      // check first doc on first page
-      const relationship = page.locator('.row-1 .cell-relationshipHasManyMultiple')
-      await expect(relationship).toHaveText(relationTwoDoc.id)
-
-      const paginator = page.locator('.clickable-arrow--right')
-      await paginator.click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
-
-      // check first doc on second page (should be different)
-      await expect(relationship).toContainText(relationOneDoc.id)
-    })
   })
 
   describe('externally update relationship field', () => {
@@ -567,58 +553,6 @@ describe('fields - relationship', () => {
       await expect(
         page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value'),
       ).toHaveCount(15)
-    })
-  })
-
-  describe('field relationship with many items', () => {
-    beforeEach(async () => {
-      const relations: string[] = []
-      const batchSize = 10
-      const totalRelations = 300
-      const totalBatches = Math.ceil(totalRelations / batchSize)
-      for (let i = 0; i < totalBatches; i++) {
-        const batchPromises: Promise<RelationOne>[] = []
-        const start = i * batchSize
-        const end = Math.min(start + batchSize, totalRelations)
-
-        for (let j = start; j < end; j++) {
-          batchPromises.push(
-            payload.create({
-              collection: relationOneSlug,
-              data: {
-                name: 'relation',
-              },
-            }),
-          )
-        }
-
-        const batchRelations = await Promise.all(batchPromises)
-        relations.push(...batchRelations.map((doc) => doc.id))
-      }
-
-      await payload.update({
-        id: docWithExistingRelations.id,
-        collection: slug,
-        data: {
-          relationshipHasMany: relations,
-        },
-      })
-    })
-
-    test('should update with new relationship', async () => {
-      await page.goto(url.edit(docWithExistingRelations.id))
-
-      const field = page.locator('#field-relationshipHasMany')
-      const dropdownIndicator = field.locator('.dropdown-indicator')
-      await dropdownIndicator.click({ delay: 100 })
-
-      const options = page.locator('.rs__option')
-      await expect(options).toHaveCount(2)
-
-      await options.nth(0).click()
-      await expect(field).toContainText(relationOneDoc.id)
-
-      await saveDocAndAssert(page)
     })
   })
 })

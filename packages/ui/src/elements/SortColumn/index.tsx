@@ -1,5 +1,6 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
+import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 
 export type SortColumnProps = {
@@ -9,10 +10,9 @@ export type SortColumnProps = {
   name: string
 }
 
-import type { FieldBase } from 'payload'
+import type { FieldBase } from 'payload/types'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
+import { Chevron } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
@@ -21,8 +21,8 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, Label, disable = false, label } = props
-  const { searchParams } = useSearchParams()
-  const { refineListData } = useListQuery()
+  const { searchParams, stringifyParams } = useSearchParams()
+  const router = useRouter()
   const { t } = useTranslation()
 
   const { sort } = searchParams
@@ -38,11 +38,16 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   const setSort = useCallback(
     (newSort) => {
-      refineListData({
-        sort: newSort,
-      })
+      router.replace(
+        stringifyParams({
+          params: {
+            sort: newSort,
+          },
+          replace: true,
+        }),
+      )
     },
-    [refineListData],
+    [router, stringifyParams],
   )
 
   return (
@@ -59,7 +64,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             onClick={() => setSort(asc)}
             type="button"
           >
-            <ChevronIcon direction="up" />
+            <Chevron direction="up" />
           </button>
           <button
             aria-label={t('general:sortByLabelDirection', {
@@ -70,7 +75,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             onClick={() => setSort(desc)}
             type="button"
           >
-            <ChevronIcon />
+            <Chevron />
           </button>
         </div>
       )}

@@ -1,4 +1,4 @@
-import type { CollectionAfterLoginHook } from 'payload'
+import type { CollectionAfterLoginHook } from 'payload/types'
 
 export const afterLoginHook: CollectionAfterLoginHook = async ({ req, user }) => {
   return req.payload.update({

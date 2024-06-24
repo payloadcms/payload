@@ -1,4 +1,4 @@
-import type { FormState } from 'payload'
+import type { FormState } from 'payload/types'
 
 type Result = {
   remainingFields: FormState

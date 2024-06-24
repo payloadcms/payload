@@ -1,4 +1,4 @@
-import type { Operator, Option } from 'payload'
+import type { Operator, Option } from 'payload/types'
 
 export type Props = {
   disabled?: boolean

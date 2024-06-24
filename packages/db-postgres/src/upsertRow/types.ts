@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, PayloadRequestWithData } from 'payload'
+import type { Field, PayloadRequestWithData } from 'payload/types'
 
 import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types.js'
 
@@ -8,11 +8,6 @@ type BaseArgs = {
   data: Record<string, unknown>
   db: DrizzleDB
   fields: Field[]
-  /**
-   * When true, skips reading the data back from the database and returns the input data
-   * @default false
-   */
-  ignoreResult?: boolean
   path?: string
   req: PayloadRequestWithData
   tableName: string

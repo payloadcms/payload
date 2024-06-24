@@ -1,6 +1,7 @@
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
-import { fileTypeFromBuffer } from 'file-type'
+import fileType from 'file-type'
+const { fromBuffer } = fileType
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import sanitize from 'sanitize-filename'
@@ -8,24 +9,22 @@ import sanitize from 'sanitize-filename'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequestWithData } from '../types/index.js'
-import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
+import type { FileData, FileToSave, ProbedImageSize } from './types.js'
 
 import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
-import { canResizeImage } from './canResizeImage.js'
-import { cropImage } from './cropImage.js'
+import canResizeImage from './canResizeImage.js'
+import cropImage from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
-import { getSafeFileName } from './getSafeFilename.js'
-import { resizeAndTransformImageSizes } from './imageResizer.js'
-import { isImage } from './isImage.js'
+import getSafeFileName from './getSafeFilename.js'
+import resizeAndTransformImageSizes from './imageResizer.js'
+import isImage from './isImage.js'
 
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
-  operation: 'create' | 'update'
-  originalDoc?: T
   overwriteExistingFiles?: boolean
   req: PayloadRequestWithData
   throwOnMissingFile?: boolean
@@ -39,8 +38,6 @@ type Result<T> = Promise<{
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
-  operation,
-  originalDoc,
   overwriteExistingFiles,
   req,
   throwOnMissingFile,
@@ -56,22 +53,10 @@ export const generateFileData = async <T>({
 
   let file = req.file
 
-  const uploadEdits = parseUploadEditsFromReqOrIncomingData({
-    data,
-    operation,
-    originalDoc,
-    req,
-  })
+  const uploadEdits = req.query['uploadEdits'] || {}
 
-  const {
-    disableLocalStorage,
-    focalPoint: focalPointEnabled = true,
-    formatOptions,
-    imageSizes,
-    resizeOptions,
-    staticDir,
-    trimOptions,
-  } = collectionConfig.upload
+  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
+    collectionConfig.upload
 
   const staticPath = staticDir
 
@@ -113,7 +98,7 @@ export const generateFileData = async <T>({
   let newData = data
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp'
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -127,29 +112,27 @@ export const generateFileData = async <T>({
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimatedType) sharpOptions.animated = true
+    if (fileIsAnimated) sharpOptions.animated = true
 
-    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
+    if (fileHasAdjustments && sharp) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
         sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
-      if (fileHasAdjustments) {
-        if (resizeOptions) {
-          sharpFile = sharpFile.resize(resizeOptions)
-        }
-        if (formatOptions) {
-          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-        }
-        if (trimOptions) {
-          sharpFile = sharpFile.trim(trimOptions)
-        }
+      if (resizeOptions) {
+        sharpFile = sharpFile.resize(resizeOptions)
+      }
+      if (formatOptions) {
+        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
+      }
+      if (trimOptions) {
+        sharpFile = sharpFile.trim(trimOptions)
       }
     }
 
@@ -162,7 +145,7 @@ export const generateFileData = async <T>({
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
+      ;({ ext, mime } = await fromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
       fileData.filesize = fileBuffer.info.size
@@ -217,10 +200,6 @@ export const generateFileData = async <T>({
       }
       fileData.width = info.width
       fileData.height = info.height
-      if (fileIsAnimatedType) {
-        const metadata = await sharpFile.metadata()
-        fileData.height = metadata.pages ? info.height / metadata.pages : info.height
-      }
       fileData.filesize = info.size
 
       if (file.tempFilePath) {
@@ -249,9 +228,9 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
+    if (Array.isArray(imageSizes) && fileSupportsResize && sharp) {
       req.payloadUploadSizes = {}
-      const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
+      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
         dimensions: !cropData
           ? dimensions
@@ -266,16 +245,13 @@ export const generateFileData = async <T>({
         savedFilename: fsSafeName || file.name,
         sharp,
         staticPath,
-        uploadEdits,
       })
 
       fileData.sizes = sizeData
-      fileData.focalX = focalPoint?.x
-      fileData.focalY = focalPoint?.y
       filesToSave.push(...sizesToSave)
     }
   } catch (err) {
-    req.payload.logger.error(err)
+    console.error(err)
     throw new FileUploadError(req.t)
   }
 
@@ -288,51 +264,4 @@ export const generateFileData = async <T>({
     data: newData,
     files: filesToSave,
   }
-}
-
-/**
- * Parse upload edits from req or incoming data
- */
-function parseUploadEditsFromReqOrIncomingData(args: {
-  data: unknown
-  operation: 'create' | 'update'
-  originalDoc: unknown
-  req: PayloadRequestWithData
-}): UploadEdits {
-  const { data, operation, originalDoc, req } = args
-
-  // Get intended focal point change from query string or incoming data
-  const {
-    uploadEdits = {},
-  }: {
-    uploadEdits?: UploadEdits
-  } = req.query || {}
-
-  if (uploadEdits.focalPoint) return uploadEdits
-
-  const incomingData = data as FileData
-  const origDoc = originalDoc as FileData
-
-  // If no change in focal point, return undefined.
-  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
-    return undefined
-  }
-
-  if (incomingData?.focalX && incomingData?.focalY) {
-    uploadEdits.focalPoint = {
-      x: incomingData.focalX,
-      y: incomingData.focalY,
-    }
-    return uploadEdits
-  }
-
-  // If no focal point is set, default to center
-  if (operation === 'create') {
-    uploadEdits.focalPoint = {
-      x: 50,
-      y: 50,
-    }
-  }
-  return uploadEdits
 }

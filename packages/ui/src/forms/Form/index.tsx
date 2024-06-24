@@ -1,14 +1,14 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState } from 'payload/types'
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import isDeepEqual from 'deep-equal'
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { wait } from 'payload/shared'
+import { wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import type {
   Context as FormContextType,
@@ -18,7 +18,7 @@ import type {
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
+import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -33,7 +33,6 @@ import {
   FormContext,
   FormFieldsContext,
   FormWatchContext,
-  InitializingContext,
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
@@ -61,7 +60,6 @@ export const Form: React.FC<FormProps> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
-    isInitializing: initializingFromProps,
     onChange,
     onSubmit,
     onSuccess,
@@ -88,16 +86,13 @@ export const Form: React.FC<FormProps> = (props) => {
   } = config
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
-  const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
-  const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
-
   /**
    * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
    * which calls the fieldReducer, which then updates the state.
@@ -180,33 +175,6 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      // create new toast promise which will resolve manually later
-      let successToast, errorToast
-      const promise = new Promise((resolve, reject) => {
-        successToast = resolve
-        errorToast = reject
-      })
-
-      const hasFormSubmitAction =
-        actionArg || typeof action === 'string' || typeof action === 'function'
-
-      if (redirect || disableSuccessStatus || !hasFormSubmitAction) {
-        // Do not show submitting toast, as the promise toast may never disappear under these conditions.
-        // Instead, make successToast() or errorToast() throw toast.success / toast.error
-        successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
-      } else {
-        toast.promise(promise, {
-          error: (data) => {
-            return data as string
-          },
-          loading: t('general:submitting'),
-          success: (data) => {
-            return data as string
-          },
-        })
-      }
-
       if (e) {
         e.stopPropagation()
         e.preventDefault()
@@ -246,7 +214,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If not valid, prevent submission
       if (!isValid) {
-        errorToast(t('error:correctInvalidFields'))
+        toast.error(t('error:correctInvalidFields'))
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
@@ -261,15 +229,6 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         onSubmit(fields, data)
-      }
-
-      if (!hasFormSubmitAction) {
-        // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
-        // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
-        setProcessing(false)
-        setSubmitted(true)
-        setDisabled(false)
-        return
       }
 
       const formData = contextRef.current.createFormData(overrides)
@@ -297,7 +256,7 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res, successToast, errorToast)
+          handleResponse(res)
           return
         }
 
@@ -308,6 +267,7 @@ export const Form: React.FC<FormProps> = (props) => {
         let json: Record<string, any> = {}
 
         if (isJSON) json = await res.json()
+
         if (res.status < 400) {
           if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
@@ -316,7 +276,7 @@ export const Form: React.FC<FormProps> = (props) => {
           if (redirect) {
             router.push(redirect)
           } else if (!disableSuccessStatus) {
-            successToast(json.message || t('general:submissionSuccessful'))
+            toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
           }
         } else {
           setProcessing(false)
@@ -324,7 +284,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
-            errorToast(json.message)
+            toast.error(json.message)
 
             return
           }
@@ -363,7 +323,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              errorToast(err.message || t('error:unknown'))
+              toast.error(err.message || t('error:unknown'))
             })
 
             return
@@ -371,15 +331,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
           const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
 
-          errorToast(message)
+          toast.error(message)
         }
       } catch (err) {
-        console.error('Error submitting form', err)
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
 
-        errorToast(err.message)
+        toast.error(err)
       }
     },
     [
@@ -529,12 +488,6 @@ export const Form: React.FC<FormProps> = (props) => {
     [getFieldStateBySchemaPath, dispatchFields],
   )
 
-  useEffect(() => {
-    if (initializingFromProps !== undefined) {
-      setInitializing(initializingFromProps)
-    }
-  }, [initializingFromProps])
-
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
   contextRef.current.getField = getField
@@ -556,15 +509,6 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.removeFieldRow = removeFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
-  contextRef.current.initializing = initializing
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
-  }, [disabledFromProps])
 
   useEffect(() => {
     if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
@@ -573,7 +517,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: initialState })
+      dispatchFields({ type: 'REPLACE_STATE', state: initialState })
     }
   }, [initialState, dispatchFields])
 
@@ -634,7 +578,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   return (
     <form
-      action={method ? actionString : (action as string)}
+      action={method ? actionString : action}
       className={classes}
       method={method}
       noValidate
@@ -649,15 +593,13 @@ export const Form: React.FC<FormProps> = (props) => {
           }}
         >
           <SubmittedContext.Provider value={submitted}>
-            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-              <ProcessingContext.Provider value={processing}>
-                <ModifiedContext.Provider value={modified}>
-                  <FormFieldsContext.Provider value={fieldsReducer}>
-                    {children}
-                  </FormFieldsContext.Provider>
-                </ModifiedContext.Provider>
-              </ProcessingContext.Provider>
-            </InitializingContext.Provider>
+            <ProcessingContext.Provider value={processing}>
+              <ModifiedContext.Provider value={modified}>
+                <FormFieldsContext.Provider value={fieldsReducer}>
+                  {children}
+                </FormFieldsContext.Provider>
+              </ModifiedContext.Provider>
+            </ProcessingContext.Provider>
           </SubmittedContext.Provider>
         </FormWatchContext.Provider>
       </FormContext.Provider>

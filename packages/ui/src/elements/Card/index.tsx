@@ -1,4 +1,3 @@
-'use client'
 import type { ElementType } from 'react'
 
 import React from 'react'

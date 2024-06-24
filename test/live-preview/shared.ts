@@ -4,8 +4,6 @@ export const tenantsSlug = 'tenants'
 
 export const ssrPagesSlug = 'ssr'
 
-export const ssrAutosavePagesSlug = 'ssr-autosave'
-
 export const postsSlug = 'posts'
 
 export const mobileBreakpoint = {
@@ -13,13 +11,6 @@ export const mobileBreakpoint = {
   name: 'mobile',
   width: 375,
   height: 667,
-}
-
-export const desktopBreakpoint = {
-  label: 'Desktop',
-  name: 'desktop',
-  width: 1920,
-  height: 1080,
 }
 
 export const renderedPageTitleID = 'rendered-page-title'

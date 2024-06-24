@@ -1,9 +1,11 @@
 'use client'
-import type { ElementType, HTMLAttributes } from 'react'
+import type { ElementType } from 'react'
 
 import LinkWithDefault from 'next/link.js'
 const Link = LinkWithDefault.default
 import React from 'react' // TODO: abstract this out to support all routers
+
+import type { HTMLAttributes } from 'react'
 
 export type PillProps = {
   alignIcon?: 'left' | 'right'
@@ -106,7 +108,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
-      href={to || null}
+      href={to || ''}
       onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >

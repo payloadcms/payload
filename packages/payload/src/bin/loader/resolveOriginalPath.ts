@@ -13,22 +13,21 @@ export async function resolveOriginalPath(filePath: string) {
   try {
     // Normalize and split the path
     const parts = path.resolve(filePath).split(path.sep)
-    let currentPath = parts[0] || '/'
+
+    let currentPath = '/'
     // skip the first slash
     for (const part of parts.slice(1)) {
       currentPath = path.join(currentPath, part)
+
       // Check if the current path component is a symlink
       const stats = await fs.lstat(currentPath)
       if (stats.isSymbolicLink()) {
         // Resolve the symlink
         const resolvedLink = await fs.readlink(currentPath)
-        if (!path.isAbsolute(resolvedLink)) {
-          currentPath = path.join(path.dirname(currentPath), resolvedLink)
-        } else {
-          currentPath = resolvedLink
-        }
+        currentPath = path.join(path.dirname(currentPath), resolvedLink)
       }
     }
+
     return currentPath
   } catch (error) {
     console.error('Error resolving path:', error)

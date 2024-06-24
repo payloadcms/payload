@@ -2,11 +2,7 @@
 /* eslint-disable no-shadow */
 import { useEffect, useRef, useState } from 'react'
 
-type Intersect = [
-  setNode: React.Dispatch<HTMLElement>,
-  entry: IntersectionObserverEntry,
-  node: HTMLElement,
-]
+type Intersect = [setNode: React.Dispatch<Element>, entry: IntersectionObserverEntry]
 
 export const useIntersect = (
   { root = null, rootMargin = '0px', threshold = 0 } = {},
@@ -16,7 +12,7 @@ export const useIntersect = (
   const [node, setNode] = useState(null)
 
   const observer = useRef(
-    typeof window !== 'undefined' && 'IntersectionObserver' in window && !disable
+    typeof window !== 'undefined' && 'IntersectionObserver' in window
       ? new window.IntersectionObserver(([ent]) => updateEntry(ent), {
           root,
           rootMargin,
@@ -37,5 +33,5 @@ export const useIntersect = (
     return () => currentObserver.disconnect()
   }, [node, disable])
 
-  return [setNode, entry, node]
+  return [setNode, entry]
 }

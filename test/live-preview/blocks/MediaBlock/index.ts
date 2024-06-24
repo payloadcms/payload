@@ -1,4 +1,4 @@
-import type { Block } from 'payload'
+import type { Block } from 'payload/types'
 
 import { invertBackground } from '../../fields/invertBackground.js'
 

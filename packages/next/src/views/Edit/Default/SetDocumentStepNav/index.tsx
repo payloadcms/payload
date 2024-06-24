@@ -1,16 +1,14 @@
 'use client'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { StepNavItem } from '@payloadcms/ui/elements/StepNav'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  type StepNavItem,
-  useConfig,
-  useDocumentInfo,
-  useEditDepth,
-  useEntityVisibility,
-  useStepNav,
-  useTranslation,
-} from '@payloadcms/ui'
+import { useStepNav } from '@payloadcms/ui/elements/StepNav'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useEffect } from 'react'
 
 export const SetDocumentStepNav: React.FC<{
@@ -26,7 +24,7 @@ export const SetDocumentStepNav: React.FC<{
 
   const view: string | undefined = props?.view || undefined
 
-  const { isEditing, isInitializing, title } = useDocumentInfo()
+  const { isEditing, title } = useDocumentInfo()
   const { isEntityVisible } = useEntityVisibility()
   const isVisible = isEntityVisible({ collectionSlug, globalSlug })
 
@@ -43,41 +41,38 @@ export const SetDocumentStepNav: React.FC<{
   useEffect(() => {
     const nav: StepNavItem[] = []
 
-    if (!isInitializing) {
-      if (collectionSlug) {
-        nav.push({
-          label: getTranslation(pluralLabel, i18n),
-          url: isVisible ? `${admin}/collections/${collectionSlug}` : undefined,
-        })
+    if (collectionSlug) {
+      nav.push({
+        label: getTranslation(pluralLabel, i18n),
+        url: isVisible ? `${admin}/collections/${collectionSlug}` : undefined,
+      })
 
-        if (isEditing) {
-          nav.push({
-            label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
-            url: isVisible ? `${admin}/collections/${collectionSlug}/${id}` : undefined,
-          })
-        } else {
-          nav.push({
-            label: t('general:createNew'),
-          })
-        }
-      } else if (globalSlug) {
+      if (isEditing) {
         nav.push({
-          label: title,
-          url: isVisible ? `${admin}/globals/${globalSlug}` : undefined,
+          label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
+          url: isVisible ? `${admin}/collections/${collectionSlug}/${id}` : undefined,
+        })
+      } else {
+        nav.push({
+          label: t('general:createNew'),
         })
       }
-
-      if (view) {
-        nav.push({
-          label: view,
-        })
-      }
-
-      if (drawerDepth <= 1) setStepNav(nav)
+    } else if (globalSlug) {
+      nav.push({
+        label: title,
+        url: isVisible ? `${admin}/globals/${globalSlug}` : undefined,
+      })
     }
+
+    if (view) {
+      nav.push({
+        label: view,
+      })
+    }
+
+    if (drawerDepth <= 1) setStepNav(nav)
   }, [
     setStepNav,
-    isInitializing,
     isEditing,
     pluralLabel,
     id,

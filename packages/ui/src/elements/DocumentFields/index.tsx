@@ -1,5 +1,5 @@
 'use client'
-import type { Description, DocumentPermissions } from 'payload'
+import type { Description, DocumentPermissions } from 'payload/types'
 
 import React from 'react'
 
@@ -62,7 +62,6 @@ export const DocumentFields: React.FC<Args> = ({
             <RenderFields
               className={`${baseClass}__fields`}
               fieldMap={mainFields}
-              forceRender={10}
               path=""
               permissions={docPermissions?.fields}
               readOnly={readOnly}
@@ -77,7 +76,6 @@ export const DocumentFields: React.FC<Args> = ({
               <div className={`${baseClass}__sidebar-fields`}>
                 <RenderFields
                   fieldMap={sidebarFields}
-                  forceRender={10}
                   path=""
                   permissions={docPermissions?.fields}
                   readOnly={readOnly}

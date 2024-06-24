@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "3.0.0-beta.53",
+  "version": "3.0.0-beta.32",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -14,8 +14,8 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
     }
   },
   "main": "./src/index.ts",
@@ -24,8 +24,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:types && pnpm build:swc",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
@@ -40,14 +40,14 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=18.20.2"
   },
   "publishConfig": {
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
       }
     },
     "main": "./dist/index.js",

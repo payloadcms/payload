@@ -12,13 +12,15 @@ interface Resize {
   size?: Size
 }
 
-export const useResize = (element: HTMLElement): Resize => {
+export const useResize = (ref: React.MutableRefObject<HTMLElement>): Resize => {
   const [size, setSize] = useState<Size>()
 
   useEffect(() => {
     let observer: any // eslint-disable-line
 
-    if (element) {
+    const { current: currentRef } = ref
+
+    if (currentRef) {
       observer = new ResizeObserver((entries) => {
         entries.forEach((entry) => {
           const {
@@ -51,15 +53,15 @@ export const useResize = (element: HTMLElement): Resize => {
         })
       })
 
-      observer.observe(element)
+      observer.observe(currentRef)
     }
 
     return () => {
       if (observer) {
-        observer.unobserve(element)
+        observer.unobserve(currentRef)
       }
     }
-  }, [element])
+  }, [ref])
 
   return {
     size,

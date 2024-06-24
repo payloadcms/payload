@@ -1,6 +1,8 @@
-import type { Collection } from 'payload'
+import type { Collection } from 'payload/types'
 
-import { generateExpiredPayloadCookie, isolateObjectProperty, logoutOperation } from 'payload'
+import { generateExpiredPayloadCookie } from 'payload/auth'
+import { logoutOperation } from 'payload/operations'
+import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 

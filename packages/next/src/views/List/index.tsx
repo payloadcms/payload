@@ -1,19 +1,19 @@
-import type { AdminViewProps, Where } from 'payload'
+import type { Where } from 'payload/types'
 
-import {
-  HydrateClientUser,
-  ListInfoProvider,
-  ListQueryProvider,
-  TableColumnsProvider,
-} from '@payloadcms/ui'
-import { RenderCustomComponent } from '@payloadcms/ui/shared'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
+import { TableColumnsProvider } from '@payloadcms/ui/elements/TableColumns'
+import { ListInfoProvider } from '@payloadcms/ui/providers/ListInfo'
+import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
-import { isNumber, isReactComponentOrFunction } from 'payload/shared'
+import { createClientCollectionConfig } from 'payload/config'
+import { type AdminViewProps } from 'payload/types'
+import { isNumber, mergeListSearchAndWhere } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
 
+import { UnauthorizedView } from '../Unauthorized/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
@@ -41,7 +41,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   const collectionSlug = collectionConfig?.slug
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
-    notFound()
+    return <UnauthorizedView initPageResult={initPageResult} searchParams={searchParams} />
   }
 
   let listPreferences: ListPreferences
@@ -80,7 +80,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
     if (CustomList && typeof CustomList === 'function') {
       CustomListView = CustomList
-    } else if (typeof CustomList === 'object' && isReactComponentOrFunction(CustomList.Component)) {
+    } else if (typeof CustomList === 'object' && typeof CustomList.Component === 'function') {
       CustomListView = CustomList.Component
     }
 
@@ -98,7 +98,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || collectionConfig.defaultSort || undefined
+        : listPreferences?.sort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -149,15 +149,8 @@ export const ListView: React.FC<AdminViewProps> = async ({
                 DefaultComponent={DefaultListView}
                 componentProps={viewComponentProps}
                 serverOnlyProps={{
-                  collectionConfig,
-                  data,
-                  hasCreatePermission:
-                    permissions?.collections?.[collectionSlug]?.create?.permission,
                   i18n,
-                  limit,
-                  listPreferences,
                   locale: fullLocale,
-                  newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
                   params,
                   payload,
                   permissions,

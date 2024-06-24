@@ -1,29 +1,30 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { buildConfig } from 'payload'
-import { fileURLToPath } from 'url'
-import sharp from 'sharp'
 
-import { Users } from './collections/Users'
-import { Media } from './collections/Media'
+import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
+import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
+import { slateEditor } from '@payloadcms/richtext-slate' // editor-import
+import { buildConfig } from 'payload/config'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import Users from './collections/Users'
 
 export default buildConfig({
   admin: {
     user: Users.slug,
+    bundler: webpackBundler(), // bundler-config
   },
-  collections: [Users, Media],
-  editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  editor: slateEditor({}), // editor-config
+  collections: [Users],
   typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+    outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
+  graphQL: {
+    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
+  },
+  plugins: [payloadCloud()],
+  // database-adapter-config-start
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URI,
   }),
-  sharp,
-  plugins: [],
+  // database-adapter-config-end
 })

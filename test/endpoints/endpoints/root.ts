@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import type { Config } from 'payload/config'
 
 import { applicationEndpoint, rootEndpoint } from '../shared.js'
 

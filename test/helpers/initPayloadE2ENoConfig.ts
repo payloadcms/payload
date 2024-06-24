@@ -2,8 +2,9 @@ import { createServer } from 'http'
 import nextImport from 'next'
 import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath, parse } from 'url'
+import { wait } from 'payload/utilities'
+import { parse } from 'url'
+import { fileURLToPath } from 'url'
 
 import type { GeneratedTypes } from './sdk/types.js'
 

@@ -18,8 +18,7 @@ import type {
   GraphQLSchema,
   GraphQLUnionType,
   InlineFragmentNode,
-  OperationDefinitionNode,
-} from 'graphql'
+  OperationDefinitionNode} from 'graphql';
 
 import {
   GraphQLError,

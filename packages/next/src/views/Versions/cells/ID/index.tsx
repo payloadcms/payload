@@ -1,5 +1,5 @@
 'use client'
-import { useTableCell } from '@payloadcms/ui'
+import { useTableCell } from '@payloadcms/ui/elements/Table'
 import React, { Fragment } from 'react'
 
 export const IDCell: React.FC = () => {

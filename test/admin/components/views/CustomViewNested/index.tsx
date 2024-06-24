@@ -1,8 +1,8 @@
-import type { AdminViewProps } from 'payload'
-
-import { Button } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
 import LinkImport from 'next/link.js'
 import React from 'react'
+
+import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
 import { customNestedViewTitle, customViewPath } from '../../../shared.js'
 

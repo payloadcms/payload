@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose'
-import type { Connect } from 'payload'
+import type { Connect } from 'payload/database'
 
 import mongoose from 'mongoose'
 

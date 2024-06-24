@@ -1,4 +1,9 @@
-import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID } from 'payload'
+import type {
+  CollectionAfterDeleteHook,
+  CollectionConfig,
+  FileData,
+  TypeWithID,
+} from 'payload/types'
 
 import type { TypeWithPrefix } from '../types.js'
 

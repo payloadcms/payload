@@ -1,4 +1,3 @@
-'use client'
 import type { Column } from '../Table/index.js'
 
 import fieldTypes from './field-types.js'

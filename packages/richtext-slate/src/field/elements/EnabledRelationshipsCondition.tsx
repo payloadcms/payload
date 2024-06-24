@@ -1,8 +1,11 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientUser, VisibleEntities } from 'payload'
+import type { ClientUser } from 'payload/auth'
+import type { ClientCollectionConfig, VisibleEntities } from 'payload/types'
 
-import { useAuth, useConfig, useEntityVisibility } from '@payloadcms/ui'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import * as React from 'react'
 
 type Options = {

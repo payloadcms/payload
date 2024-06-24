@@ -1,22 +1,24 @@
 'use client'
-import type { ClientValidate, JSONField as JSONFieldType } from 'payload'
+import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'json-field'
 
+import type { JSONField as JSONFieldType } from 'payload/types'
+
 import type { FormFieldBase } from '../shared/index.js'
 
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
 
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']
@@ -62,14 +64,12 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
-    useField<string>({
-      path: pathFromContext ?? pathFromProps ?? name,
-      validate: memoizedValidate,
-    })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const { initialValue, path, setValue, showError, value } = useField<string>({
+    path: pathFromContext || pathFromProps || name,
+    validate: memoizedValidate,
+  })
 
   const handleMount = useCallback(
     (editor, monaco) => {
@@ -92,7 +92,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (disabled) return
+      if (readOnly) return
       setStringValue(val)
 
       try {
@@ -103,16 +103,14 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         setJsonError(e)
       }
     },
-    [disabled, setValue, setStringValue],
+    [readOnly, setValue, setStringValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) return
-
+    if (hasLoadedValue) return
     setStringValue(
       value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
     )
-
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
 
@@ -123,7 +121,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -132,22 +130,21 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <div>
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={disabled}
+          readOnly={readOnly}
           value={stringValue}
         />
         {AfterInput}

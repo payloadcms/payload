@@ -1,6 +1,7 @@
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload/types'
 
 const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
+  'account',
   'createFirstUser',
   'forgot',
   'login',
@@ -8,7 +9,6 @@ const authRouteKeys: (keyof SanitizedConfig['admin']['routes'])[] = [
   'forgot',
   'inactivity',
   'unauthorized',
-  'reset',
 ]
 
 export const isAdminRoute = (route: string, adminRoute: string) => {

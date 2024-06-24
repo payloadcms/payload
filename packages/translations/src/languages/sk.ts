@@ -111,7 +111,6 @@ export const skTranslations: DefaultTranslationsObject = {
     unauthorized: 'Neautorizováno, pro zadání tohoto požadavku musíte být přihlášeni.',
     unknown: 'Došlo k neznámej chybe.',
     unspecific: 'Došlo k chybe.',
-    userEmailAlreadyRegistered: 'Používateľ s daným e-mailom je už zaregistrovaný.',
     userLocked:
       'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
     valueMustBeUnique: 'Hodnota musí byť jedinečná',
@@ -274,7 +273,6 @@ export const skTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Zostať na tejto stránke',
     submissionSuccessful: 'Odoslanie úspešné.',
     submit: 'Odoslať',
-    submitting: 'Odosielanie...',
     success: 'Úspech',
     successfullyCreated: '{{label}} úspešne vytvorené.',
     successfullyDuplicated: '{{label}} úspešne duplikované.',

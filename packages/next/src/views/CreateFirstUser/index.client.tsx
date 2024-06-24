@@ -1,19 +1,17 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormState } from 'payload/types'
 
-import {
-  ConfirmPasswordField,
-  EmailField,
-  Form,
-  type FormProps,
-  FormSubmit,
-  PasswordField,
-  RenderFields,
-  useComponentMap,
-  useConfig,
-  useTranslation,
-} from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
+import { Email } from '@payloadcms/ui/fields/Email'
+import { Password } from '@payloadcms/ui/fields/Password'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React from 'react'
 
 export const CreateFirstUserClient: React.FC<{
@@ -56,14 +54,14 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <EmailField autoComplete="email" label={t('general:email')} name="email" required />
-      <PasswordField
+      <Email autoComplete="email" label={t('general:email')} name="email" required />
+      <Password
         autoComplete="off"
         label={t('authentication:newPassword')}
         name="password"
         required
       />
-      <ConfirmPasswordField />
+      <ConfirmPassword />
       <RenderFields
         fieldMap={fieldMap}
         operation="create"

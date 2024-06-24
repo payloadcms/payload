@@ -6,7 +6,7 @@ type CustomSelectProps = {
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   draggableProps?: any
-  droppableRef?: React.RefObject<HTMLDivElement | null>
+  droppableRef?: React.RefObject<HTMLDivElement>
   onSave?: DocumentDrawerProps['onSave']
   setDrawerIsOpen?: (isOpen: boolean) => void
 }
@@ -33,11 +33,11 @@ declare module 'react-select/dist/declarations/src' {
   }
 }
 
-export type Option<TValue = unknown> = {
+export type Option = {
   [key: string]: unknown
   //* The ID is used to identify the option in the UI. If it doesn't exist and value cannot be transformed into a string, sorting won't work */
   id?: string
-  value: TValue
+  value: unknown
 }
 
 export type OptionGroup = {
@@ -45,7 +45,7 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type ReactSelectAdapterProps = {
+export type Props = {
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   className?: string
@@ -77,7 +77,7 @@ export type ReactSelectAdapterProps = {
   isSortable?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
-  onChange?: (value: Option | Option[]) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+  onChange?: (value: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
   onInputChange?: (val: string) => void
   onMenuClose?: () => void
   onMenuOpen?: () => void

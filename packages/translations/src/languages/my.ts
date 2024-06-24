@@ -110,7 +110,6 @@ export const myTranslations: DefaultTranslationsObject = {
     unauthorized: 'အခွင့်မရှိပါ။ ဤတောင်းဆိုချက်ကို လုပ်ဆောင်နိုင်ရန် သင်သည် လော့ဂ်အင်ဝင်ရပါမည်။',
     unknown: 'ဘာမှန်းမသိသော error တက်သွားပါသည်။',
     unspecific: 'Error တက်နေပါသည်။',
-    userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     userLocked:
       'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
     valueMustBeUnique: 'value သည် အဓိပ္ပာယ်ရှိရပါမည်။',
@@ -275,7 +274,6 @@ export const myTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
-    submitting: 'Menghantar...',
     success: 'အောင်မြင်မှု',
     successfullyCreated: '{{label}} အောင်မြင်စွာဖန်တီးခဲ့သည်။',
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',

@@ -1,14 +1,14 @@
 'use client'
-import type { ClientValidate, Description, Validate } from 'payload'
+import type { ClientValidate, Description, Validate } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -32,7 +32,7 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     CustomLabel,
     autoComplete,
     className,
-    disabled: disabledFromProps,
+    disabled,
     errorProps,
     label,
     labelProps,
@@ -52,22 +52,14 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
+  const { formProcessing, path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const disabled = disabledFromProps || formInitializing || formProcessing
-
   return (
     <div
-      className={[
-        fieldBaseClass,
-        'password',
-        className,
-        showError && 'error',
-        disabled && 'read-only',
-      ]
+      className={[fieldBaseClass, 'password', className, showError && 'error']
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -75,24 +67,22 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <input
-          autoComplete={autoComplete}
-          disabled={disabled}
-          id={`field-${path.replace(/\./g, '__')}`}
-          name={path}
-          onChange={setValue}
-          type="password"
-          value={(value as string) || ''}
-        />
-      </div>
+      <input
+        autoComplete={autoComplete}
+        disabled={formProcessing || disabled}
+        id={`field-${path.replace(/\./g, '__')}`}
+        name={path}
+        onChange={setValue}
+        type="password"
+        value={(value as string) || ''}
+      />
     </div>
   )
 }

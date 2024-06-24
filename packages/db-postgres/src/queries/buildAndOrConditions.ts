@@ -1,14 +1,15 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, Where } from 'payload'
+import type { Field, Where } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types.js'
-import type { BuildQueryJoinAliases } from './buildQuery.js'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.js'
 
 import { parseParams } from './parseParams.js'
 
 export async function buildAndOrConditions({
   adapter,
   fields,
+  joinAliases,
   joins,
   locale,
   selectFields,
@@ -19,7 +20,8 @@ export async function buildAndOrConditions({
   collectionSlug?: string
   fields: Field[]
   globalSlug?: string
-  joins: BuildQueryJoinAliases
+  joinAliases: BuildQueryJoinAliases
+  joins: BuildQueryJoins
   locale?: string
   selectFields: Record<string, GenericColumn>
   tableName: string
@@ -36,6 +38,7 @@ export async function buildAndOrConditions({
       const result = await parseParams({
         adapter,
         fields,
+        joinAliases,
         joins,
         locale,
         selectFields,

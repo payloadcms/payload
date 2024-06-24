@@ -1,0 +1,123 @@
+@use './queries.scss' as *;
+@use './colors.scss' as *;
+@use './type.scss' as *;
+@import './theme.scss';
+
+:root {
+  --base: 24px;
+  --font-body: system-ui;
+  --font-mono: 'Roboto Mono', monospace;
+
+  --gutter-h: 180px;
+  --block-padding: 120px;
+
+  @include large-break {
+    --gutter-h: 144px;
+    --block-padding: 96px;
+  }
+
+  @include mid-break {
+    --gutter-h: 24px;
+    --block-padding: 60px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  @extend %body;
+  background: var(--theme-bg);
+  -webkit-font-smoothing: antialiased;
+  opacity: 0;
+
+  &[data-theme='dark'],
+  &[data-theme='light'] {
+    opacity: initial;
+  }
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  margin: 0;
+  color: var(--theme-text);
+}
+
+::selection {
+  background: var(--theme-success-500);
+  color: var(--color-base-800);
+}
+
+::-moz-selection {
+  background: var(--theme-success-500);
+  color: var(--color-base-800);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1 {
+  @extend %h1;
+}
+
+h2 {
+  @extend %h2;
+}
+
+h3 {
+  @extend %h3;
+}
+
+h4 {
+  @extend %h4;
+}
+
+h5 {
+  @extend %h5;
+}
+
+h6 {
+  @extend %h6;
+}
+
+p {
+  margin: var(--base) 0;
+
+  @include mid-break {
+    margin: calc(var(--base) * 0.75) 0;
+  }
+}
+
+ul,
+ol {
+  padding-left: var(--base);
+  margin: 0 0 var(--base);
+}
+
+a {
+  color: currentColor;
+
+  &:focus {
+    opacity: 0.8;
+    outline: none;
+  }
+
+  &:active {
+    opacity: 0.7;
+    outline: none;
+  }
+}
+
+svg {
+  vertical-align: middle;
+}

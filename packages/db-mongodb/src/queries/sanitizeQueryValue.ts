@@ -1,7 +1,7 @@
-import type { Field, TabAsField } from 'payload'
+import type { Field, TabAsField } from 'payload/types'
 
 import mongoose from 'mongoose'
-import { createArrayFromCommaDelineated } from 'payload'
+import { createArrayFromCommaDelineated } from 'payload/utilities'
 
 type SanitizeQueryValueArgs = {
   field: Field | TabAsField

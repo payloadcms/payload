@@ -2,6 +2,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
+import type { GraphQLInfo } from 'payload/config'
 import type {
   ArrayField,
   BlockField,
@@ -11,7 +12,6 @@ import type {
   DateField,
   EmailField,
   Field,
-  GraphQLInfo,
   GroupField,
   JSONField,
   NumberField,
@@ -27,7 +27,7 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from 'payload'
+} from 'payload/types'
 
 import {
   GraphQLBoolean,
@@ -41,8 +41,8 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { MissingEditorProp, createDataloaderCacheKey, toWords } from 'payload'
-import { tabHasName } from 'payload/shared'
+import { tabHasName } from 'payload/types'
+import { createDataloaderCacheKey, toWords } from 'payload/utilities'
 
 import type { Context } from '../resolvers/types.js'
 
@@ -80,7 +80,7 @@ type Args = {
   parentName: string
 }
 
-export function buildObjectType({
+function buildObjectType({
   name,
   baseFields = {},
   config,
@@ -476,10 +476,6 @@ export function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
-          if (!field?.editor) {
-            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-          }
-
           if (typeof field?.editor === 'function') {
             throw new Error('Attempted to access unsanitized rich text editor.')
           }
@@ -491,13 +487,13 @@ export function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.graphQLPopulationPromises) {
+          if (editor?.populationPromises) {
             const fieldPromises = []
             const populationPromises = []
             const populateDepth =
               field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
 
-            editor?.graphQLPopulationPromises({
+            editor?.populationPromises({
               context,
               depth: populateDepth,
               draft: args.draft,
@@ -697,3 +693,5 @@ export function buildObjectType({
 
   return newlyCreatedBlockType
 }
+
+export default buildObjectType

@@ -1,4 +1,4 @@
-import type { CustomComponent } from 'payload'
+import type { CustomComponent } from 'payload/config'
 
 import React from 'react'
 

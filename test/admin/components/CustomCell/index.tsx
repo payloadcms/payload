@@ -1,7 +1,7 @@
 'use client'
-import type { CellComponentProps } from 'payload'
+import type { CellComponentProps } from 'payload/types'
 
-import { useTableCell } from '@payloadcms/ui'
+import { useTableCell } from '@payloadcms/ui/elements/Table'
 import React from 'react'
 
 export const CustomCell: React.FC<CellComponentProps> = (props) => {

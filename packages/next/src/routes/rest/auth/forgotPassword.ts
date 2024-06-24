@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { forgotPasswordOperation } from 'payload'
+import { forgotPasswordOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 

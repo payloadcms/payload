@@ -1,7 +1,3 @@
-import { fileURLToPath } from 'node:url'
-import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 import { resendAdapter } from '@payloadcms/email-resend'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -34,8 +30,5 @@ export default buildConfigWithDefaults({
     })
 
     payload.logger.info({ msg: 'Email sent', email })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

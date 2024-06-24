@@ -64,8 +64,9 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
       })
     }
 
-    await email.sendEmail({
-      from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    email.sendEmail({
+      from: `"${email.defaultFromName}" <${email.defaultFromName}>`,
       html,
       subject,
       to: user.email,

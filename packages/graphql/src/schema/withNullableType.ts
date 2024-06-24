@@ -1,5 +1,5 @@
 import type { GraphQLType } from 'graphql'
-import type { FieldAffectingData } from 'payload'
+import type { FieldAffectingData } from 'payload/types'
 
 import { GraphQLNonNull } from 'graphql'
 

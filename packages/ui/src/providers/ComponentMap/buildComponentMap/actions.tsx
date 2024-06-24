@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import React from 'react'
 

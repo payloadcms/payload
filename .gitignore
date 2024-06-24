@@ -12,11 +12,6 @@ test-results
 .localstack
 .turbo
 
-meta_client.json
-meta_server.json
-meta_index.json
-meta_shared.json
-
 .turbo
 
 # Ignore test directory media folder/files

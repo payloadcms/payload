@@ -2,7 +2,7 @@ import type { QueryPromise, SQL } from 'drizzle-orm'
 
 import type { ChainedMethods } from '../find/chainMethods.js'
 import type { DrizzleDB, PostgresAdapter } from '../types.js'
-import type { BuildQueryJoinAliases } from './buildQuery.js'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.js'
 
 import { chainMethods } from '../find/chainMethods.js'
 import { type GenericColumn } from '../types.js'
@@ -11,7 +11,8 @@ type Args = {
   adapter: PostgresAdapter
   chainedMethods?: ChainedMethods
   db: DrizzleDB
-  joins: BuildQueryJoinAliases
+  joinAliases: BuildQueryJoinAliases
+  joins: BuildQueryJoins
   selectFields: Record<string, GenericColumn>
   tableName: string
   where: SQL
@@ -24,21 +25,31 @@ export const selectDistinct = ({
   adapter,
   chainedMethods = [],
   db,
+  joinAliases,
   joins,
   selectFields,
   tableName,
   where,
 }: Args): QueryPromise<Record<string, GenericColumn> & { id: number | string }[]> => {
-  if (Object.keys(joins).length > 0) {
+  if (Object.keys(joins).length > 0 || joinAliases.length > 0) {
     if (where) {
       chainedMethods.push({ args: [where], method: 'where' })
     }
 
-    joins.forEach(({ condition, table }) => {
+    joinAliases.forEach(({ condition, table }) => {
       chainedMethods.push({
         args: [table, condition],
         method: 'leftJoin',
       })
+    })
+
+    Object.entries(joins).forEach(([joinTable, condition]) => {
+      if (joinTable) {
+        chainedMethods.push({
+          args: [adapter.tables[joinTable], condition],
+          method: 'leftJoin',
+        })
+      }
     })
 
     return chainMethods({

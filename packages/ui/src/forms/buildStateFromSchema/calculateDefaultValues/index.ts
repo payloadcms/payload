@@ -1,4 +1,4 @@
-import type { Data, Field as FieldSchema, User } from 'payload'
+import type { Data, Field as FieldSchema, PayloadRequestWithData } from 'payload/types'
 
 import { iterateFields } from './iterateFields.js'
 
@@ -6,25 +6,17 @@ type Args = {
   data: Data
   fields: FieldSchema[]
   id?: number | string
-  locale: string | undefined
+  req: PayloadRequestWithData
   siblingData: Data
-  user: User
 }
 
-export const calculateDefaultValues = async ({
-  id,
-  data,
-  fields,
-  locale,
-  user,
-}: Args): Promise<Data> => {
+export const calculateDefaultValues = async ({ id, data, fields, req }: Args): Promise<Data> => {
   await iterateFields({
     id,
     data,
     fields,
-    locale,
+    req,
     siblingData: data,
-    user,
   })
 
   return data

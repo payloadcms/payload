@@ -1,4 +1,4 @@
-import type { ArrayField, Field } from 'payload'
+import type { ArrayField, Field } from 'payload/types'
 
 export const createBreadcrumbsField = (
   relationTo: string,

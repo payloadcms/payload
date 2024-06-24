@@ -1,4 +1,4 @@
-import { initOperation } from 'payload'
+import { initOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 

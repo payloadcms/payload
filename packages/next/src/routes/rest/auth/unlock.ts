@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { unlockOperation } from 'payload'
+import { unlockOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 

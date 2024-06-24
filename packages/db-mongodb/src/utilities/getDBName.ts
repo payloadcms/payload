@@ -1,4 +1,4 @@
-import type { DBIdentifierName } from 'payload'
+import type { DBIdentifierName } from 'payload/database'
 
 type Args = {
   config: {

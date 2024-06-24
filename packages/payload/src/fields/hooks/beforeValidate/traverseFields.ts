@@ -18,9 +18,7 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  path: (number | string)[]
   req: PayloadRequestWithData
-  schemaPath: string[]
   siblingData: Record<string, unknown>
   /**
    * The original siblingData (not modified by any hooks)
@@ -38,9 +36,7 @@ export const traverseFields = async <T>({
   global,
   operation,
   overrideAccess,
-  path,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
@@ -57,8 +53,6 @@ export const traverseFields = async <T>({
         global,
         operation,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
         req,
         siblingData,
         siblingDoc,

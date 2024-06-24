@@ -24,9 +24,8 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: (number | string)[]
+  path: string
   req: PayloadRequestWithData
-  schemaPath: string[]
   siblingData: Record<string, unknown>
   /**
    * The original siblingData (not modified by any hooks)
@@ -45,7 +44,7 @@ type Args = {
  * - Execute field hooks
  * - Validate data
  * - Transform data for storage
- * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
+ * - Unflatten locales
  */
 export const traverseFields = async ({
   id,
@@ -62,7 +61,6 @@ export const traverseFields = async ({
   operation,
   path,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -85,8 +83,7 @@ export const traverseFields = async ({
         global,
         mergeLocaleActions,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        path,
         req,
         siblingData,
         siblingDoc,

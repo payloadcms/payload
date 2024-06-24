@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { ValidationError } from 'payload'
+import { ValidationError } from 'payload/errors'
 
 import type { Form } from './payload-types.js'
 

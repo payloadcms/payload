@@ -7,7 +7,7 @@ type useThrottledEffect = (
   deps: React.DependencyList,
 ) => void
 
-export const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
+const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
   const lastRan = useRef(Date.now())
 
   useEffect(() => {
@@ -26,3 +26,5 @@ export const useThrottledEffect: useThrottledEffect = (callback, delay, deps = [
     }
   }, [delay, ...deps])
 }
+
+export default useThrottledEffect

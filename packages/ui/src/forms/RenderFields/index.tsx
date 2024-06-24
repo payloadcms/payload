@@ -22,9 +22,8 @@ export const RenderFields: React.FC<Props> = (props) => {
     {
       rootMargin: '1000px',
     },
-    Boolean(forceRender),
+    forceRender,
   )
-
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
   const shouldRender = forceRender || isIntersecting || isAboveViewport
@@ -68,9 +67,6 @@ export const RenderFields: React.FC<Props> = (props) => {
               isHidden,
             } = f
 
-            const forceRenderChildren =
-              (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
-
             const name = 'name' in f ? f.name : undefined
 
             return (
@@ -78,7 +74,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 CustomField={CustomField}
                 custom={custom}
                 disabled={disabled}
-                fieldComponentProps={{ ...fieldComponentProps, forceRender: forceRenderChildren }}
+                fieldComponentProps={fieldComponentProps}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 isHidden={isHidden}
                 key={fieldIndex}

@@ -1,4 +1,5 @@
-import type { DeleteOne, PayloadRequestWithData } from 'payload'
+import type { DeleteOne } from 'payload/database'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -21,7 +22,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   let docToDelete: Record<string, unknown>
 
-  const { joins, selectFields, where } = await buildQuery({
+  const { joinAliases, joins, selectFields, where } = await buildQuery({
     adapter: this,
     fields: collection.fields,
     locale: req.locale,
@@ -33,6 +34,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
     db,
+    joinAliases,
     joins,
     selectFields,
     tableName,
@@ -57,7 +59,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
   }
 
   const result = transform({
-    adapter: this,
     config: this.payload.config,
     data: docToDelete,
     fields: collection.fields,

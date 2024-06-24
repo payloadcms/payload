@@ -1,21 +1,15 @@
 import type { CollectionConfig } from 'payload/types'
 
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  HorizontalRuleFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import { BlocksFeature } from '@payloadcms/richtext-lexical'
-
 import { admins } from '../../access/admins'
-import { usersOrPublished } from '../../access/usersOrPublished'
-import { Banner } from '../../blocks/Banner'
-import { Code } from '../../blocks/Code'
+import { adminsOrPublished } from '../../access/adminsOrPublished'
+import { Archive } from '../../blocks/ArchiveBlock'
+import { CallToAction } from '../../blocks/CallToAction'
+import { Content } from '../../blocks/Content'
 import { MediaBlock } from '../../blocks/MediaBlock'
+import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
-import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
+import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidatePost } from './hooks/revalidatePost'
 
@@ -24,89 +18,32 @@ export const Posts: CollectionConfig = {
   access: {
     create: admins,
     delete: admins,
-    read: usersOrPublished,
+    read: adminsOrPublished,
     update: admins,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    livePreview: {
-      url: ({ data }) => {
-        const path = generatePreviewPath({
-          path: `/posts/${typeof data?.slug === 'string' ? data.slug : ''}`,
-        })
-        return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
-      },
+    preview: (doc) => {
+      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
+        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/posts/${doc?.slug}`,
+      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
-    preview: (doc) =>
-      generatePreviewPath({ path: `/posts/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
     useAsTitle: 'title',
   },
   fields: [
     {
-      type: 'tabs',
-      tabs: [
-        {
-          fields: [
-            {
-              name: 'content',
-              type: 'richText',
-              editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                    BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
-                    FixedToolbarFeature(),
-                    InlineToolbarFeature(),
-                    HorizontalRuleFeature(),
-                  ]
-                },
-              }),
-              label: false,
-              required: true,
-            },
-          ],
-          label: 'Content',
-        },
-        {
-          fields: [
-            {
-              name: 'relatedPosts',
-              type: 'relationship',
-              admin: {
-                position: 'sidebar',
-              },
-              filterOptions: ({ id }) => {
-                return {
-                  id: {
-                    not_in: [id],
-                  },
-                }
-              },
-              hasMany: true,
-              relationTo: 'posts',
-            },
-            {
-              name: 'categories',
-              type: 'relationship',
-              admin: {
-                position: 'sidebar',
-              },
-              hasMany: true,
-              relationTo: 'categories',
-            },
-          ],
-          label: 'Meta',
-        },
-      ],
-    },
-    {
       name: 'title',
       type: 'text',
+      required: true,
+    },
+    {
+      name: 'categories',
+      type: 'relationship',
       admin: {
         position: 'sidebar',
       },
-      required: true,
+      hasMany: true,
+      relationTo: 'categories',
     },
     {
       name: 'publishedAt',
@@ -161,16 +98,60 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          fields: [hero],
+          label: 'Hero',
+        },
+        {
+          fields: [
+            {
+              name: 'layout',
+              type: 'blocks',
+              blocks: [CallToAction, Content, MediaBlock, Archive],
+              required: true,
+            },
+            {
+              name: 'enablePremiumContent',
+              type: 'checkbox',
+              label: 'Enable Premium Content',
+            },
+            {
+              name: 'premiumContent',
+              type: 'blocks',
+              access: {
+                read: ({ req }) => req.user,
+              },
+              blocks: [CallToAction, Content, MediaBlock, Archive],
+            },
+          ],
+          label: 'Content',
+        },
+      ],
+    },
+    {
+      name: 'relatedPosts',
+      type: 'relationship',
+      filterOptions: ({ id }) => {
+        return {
+          id: {
+            not_in: [id],
+          },
+        }
+      },
+      hasMany: true,
+      relationTo: 'posts',
+    },
     slugField(),
   ],
   hooks: {
     afterChange: [revalidatePost],
-    afterRead: [populateAuthors],
+    afterRead: [populateArchiveBlock, populateAuthors],
+    beforeChange: [populatePublishedAt],
   },
   versions: {
-    drafts: {
-      autosave: true,
-    },
-    maxPerDoc: 50,
+    drafts: true,
   },
 }

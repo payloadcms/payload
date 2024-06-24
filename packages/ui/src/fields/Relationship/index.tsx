@@ -1,7 +1,8 @@
 'use client'
-import type { PaginatedDocs, Where } from 'payload'
+import type { PaginatedDocs } from 'payload/database'
+import type { Where } from 'payload/types'
 
-import { wordBoundariesRegex } from 'payload/shared'
+import { wordBoundariesRegex } from 'payload/utilities'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
@@ -9,7 +10,11 @@ import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js
 import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { useFormProcessing } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
@@ -17,9 +22,6 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { AddNewRelation } from './AddNew/index.js'
 import { createRelationMap } from './createRelationMap.js'
@@ -70,6 +72,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
+  const formProcessing = useFormProcessing()
   const hasMultipleRelations = Array.isArray(relationTo)
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
@@ -90,22 +93,14 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     [validate, required],
   )
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const {
-    filterOptions,
-    formInitializing,
-    formProcessing,
-    initialValue,
-    path,
-    setValue,
-    showError,
-    value,
-  } = useField<Value | Value[]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const { filterOptions, initialValue, path, setValue, showError, value } = useField<
+    Value | Value[]
+  >({
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
-
-  const readOnly = readOnlyFromProps || readOnlyFromContext || formInitializing
 
   const valueRef = useRef(value)
   valueRef.current = value
@@ -159,12 +154,13 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
 
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-            let fieldToSort = collection?.defaultSort || 'id'
-            if (typeof sortOptions === 'string') {
-              fieldToSort = sortOptions
-            } else if (sortOptions?.[relation]) {
-              fieldToSort = sortOptions[relation]
+            let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
+            if (!searchArg) {
+              if (typeof sortOptions === 'string') {
+                fieldToSearch = sortOptions
+              } else if (sortOptions?.[relation]) {
+                fieldToSearch = sortOptions[relation]
+              }
             }
 
             const query: {
@@ -176,7 +172,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
-              sort: fieldToSort,
+              sort: fieldToSearch,
               where: {
                 and: [
                   {
@@ -200,15 +196,11 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               query.where.and.push(relationFilterOption)
             }
 
-            const response = await fetch(`${serverURL}${api}/${relation}`, {
-              body: qs.stringify(query),
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-HTTP-Method-Override': 'GET',
               },
-              method: 'POST',
             })
 
             if (response.ok) {
@@ -329,15 +321,11 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}`, {
-            body: qs.stringify(query),
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-HTTP-Method-Override': 'GET',
             },
-            method: 'POST',
           })
 
           const collection = collections.find((coll) => coll.slug === relation)
@@ -483,125 +471,116 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
-        {!errorLoading && (
-          <div className={`${baseClass}__wrap`}>
-            <ReactSelect
-              backspaceRemovesValue={!drawerIsOpen}
-              components={{
-                MultiValueLabel,
-                SingleValue,
-              }}
-              customProps={{
-                disableKeyDown: drawerIsOpen,
-                disableMouseDown: drawerIsOpen,
-                onSave,
-                setDrawerIsOpen,
-              }}
-              disabled={readOnly || formProcessing || drawerIsOpen}
-              filterOption={enableWordBoundarySearch ? filterOption : undefined}
-              getOptionValue={(option) => {
-                if (!option) return undefined
-                return hasMany && Array.isArray(relationTo)
-                  ? `${option.relationTo}_${option.value}`
-                  : option.value
-              }}
-              isLoading={isLoading}
-              isMulti={hasMany}
-              isSortable={isSortable}
-              onChange={
-                !readOnly
-                  ? (selected) => {
-                      if (selected === null) {
-                        setValue(hasMany ? [] : null)
-                      } else if (hasMany && Array.isArray(selected)) {
-                        setValue(
-                          selected
-                            ? selected.map((option) => {
-                                if (hasMultipleRelations) {
-                                  return {
-                                    relationTo: option.relationTo,
-                                    value: option.value,
-                                  }
+      {!errorLoading && (
+        <div className={`${baseClass}__wrap`}>
+          <ReactSelect
+            backspaceRemovesValue={!drawerIsOpen}
+            components={{
+              MultiValueLabel,
+              SingleValue,
+            }}
+            customProps={{
+              disableKeyDown: drawerIsOpen,
+              disableMouseDown: drawerIsOpen,
+              onSave,
+              setDrawerIsOpen,
+            }}
+            disabled={readOnly || formProcessing || drawerIsOpen}
+            filterOption={enableWordBoundarySearch ? filterOption : undefined}
+            isLoading={isLoading}
+            isMulti={hasMany}
+            isSortable={isSortable}
+            onChange={
+              !readOnly
+                ? (selected) => {
+                    if (selected === null) {
+                      setValue(hasMany ? [] : null)
+                    } else if (hasMany) {
+                      setValue(
+                        selected
+                          ? selected.map((option) => {
+                              if (hasMultipleRelations) {
+                                return {
+                                  relationTo: option.relationTo,
+                                  value: option.value,
                                 }
+                              }
 
-                                return option.value
-                              })
-                            : null,
-                        )
-                      } else if (hasMultipleRelations && !Array.isArray(selected)) {
-                        setValue({
-                          relationTo: selected.relationTo,
-                          value: selected.value,
-                        })
-                      } else if (!Array.isArray(selected)) {
-                        setValue(selected.value)
-                      }
+                              return option.value
+                            })
+                          : null,
+                      )
+                    } else if (hasMultipleRelations) {
+                      setValue({
+                        relationTo: selected.relationTo,
+                        value: selected.value,
+                      })
+                    } else {
+                      setValue(selected.value)
                     }
-                  : undefined
-              }
-              onInputChange={(newSearch) => handleInputChange(newSearch, value)}
-              onMenuClose={() => {
-                menuIsOpen.current = false
-              }}
-              onMenuOpen={() => {
-                menuIsOpen.current = true
+                  }
+                : undefined
+            }
+            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            onMenuClose={() => {
+              menuIsOpen.current = false
+            }}
+            onMenuOpen={() => {
+              menuIsOpen.current = true
 
-                if (!hasLoadedFirstPageRef.current) {
-                  setIsLoading(true)
-                  void getResults({
-                    lastLoadedPage: {},
-                    onSuccess: () => {
-                      hasLoadedFirstPageRef.current = true
-                      setIsLoading(false)
-                    },
-                    value: initialValue,
-                  })
-                }
-              }}
-              onMenuScrollToBottom={() => {
+              if (!hasLoadedFirstPageRef.current) {
+                setIsLoading(true)
                 void getResults({
-                  lastFullyLoadedRelation,
-                  lastLoadedPage,
-                  search,
-                  sort: false,
+                  lastLoadedPage: {},
+                  onSuccess: () => {
+                    hasLoadedFirstPageRef.current = true
+                    setIsLoading(false)
+                  },
                   value: initialValue,
                 })
+              }
+            }}
+            onMenuScrollToBottom={() => {
+              void getResults({
+                lastFullyLoadedRelation,
+                lastLoadedPage,
+                search,
+                sort: false,
+                value: initialValue,
+              })
+            }}
+            options={options}
+            showError={showError}
+            value={valueToRender ?? null}
+          />
+          {!readOnly && allowCreate && (
+            <AddNewRelation
+              {...{
+                dispatchOptions,
+                hasMany,
+                options,
+                path,
+                relationTo,
+                setValue,
+                value,
               }}
-              options={options}
-              showError={showError}
-              value={valueToRender ?? null}
             />
-            {!readOnly && allowCreate && (
-              <AddNewRelation
-                {...{
-                  dispatchOptions,
-                  hasMany,
-                  options,
-                  path,
-                  relationTo,
-                  setValue,
-                  value,
-                }}
-              />
-            )}
-          </div>
-        )}
-        {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
-      </div>
+          )}
+        </div>
+      )}
+      {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

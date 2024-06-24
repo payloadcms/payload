@@ -12,9 +12,6 @@
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.525.0",
-    "@lexical/headless": "0.16.0",
-    "@lexical/markdown": "0.16.0",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
@@ -43,29 +40,17 @@
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@sentry/react": "^7.77.0",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
-    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
-    "dotenv": "16.4.5",
+    "dotenv": "8.6.0",
     "eslint-plugin-payload": "workspace:*",
     "eslint-plugin-playwright": "1.5.3",
     "execa": "5.1.1",
     "http-status": "1.6.2",
-    "jwt-decode": "4.0.0",
-    "lexical": "0.15.0",
     "payload": "workspace:*",
-    "server-only": "^0.0.1",
-    "slate": "0.91.4",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
     "typescript": "5.4.5",
     "uploadthing": "^6.10.1"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

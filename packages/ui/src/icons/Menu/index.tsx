@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const MenuIcon: React.FC = () => (
+export const Menu: React.FC = () => (
   <svg
     className="icon icon--menu"
     fill="none"

@@ -1,5 +1,6 @@
 'use client'
-import type { ArrayField as ArrayFieldType } from 'payload'
+import type { FieldPermissions } from 'payload/auth'
+import type { ArrayField as ArrayFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -12,6 +13,9 @@ import { Button } from '../../elements/Button/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -22,9 +26,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -40,6 +41,7 @@ export type ArrayFieldProps = FormFieldBase & {
   maxRows?: ArrayFieldType['maxRows']
   minRows?: ArrayFieldType['minRows']
   name?: string
+  permissions: FieldPermissions
   width?: string
 }
 
@@ -62,17 +64,14 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     maxRows,
     minRows: minRowsProp,
     path: pathFromProps,
+    permissions,
     readOnly: readOnlyFromProps,
     required,
     validate,
   } = props
 
-  const {
-    indexPath,
-    path: pathFromContext,
-    permissions,
-    readOnly: readOnlyFromContext,
-  } = useFieldProps()
+  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -113,10 +112,10 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
     errorPaths,
-    formInitializing,
-    formProcessing,
     path,
     rows = [],
     schemaPath,
@@ -125,11 +124,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
     async (rowIndex: number) => {
@@ -190,7 +187,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = disabled && rows.length === 0
+  const showRequired = readOnly && rows.length === 0
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
 
   return (
@@ -205,7 +202,11 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />}
+      {showError && (
+        <div className={`${baseClass}__error-wrap`}>
+          <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        </div>
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
@@ -260,7 +261,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               errorPath.startsWith(`${path}.${i}.`),
             ).length
             return (
-              <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
+              <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -277,7 +278,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                     moveRow={moveRow}
                     path={path}
                     permissions={permissions}
-                    readOnly={disabled}
+                    readOnly={readOnly}
                     removeRow={removeRow}
                     row={row}
                     rowCount={rows.length}
@@ -302,7 +303,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                     count: minRows,
                     label:
                       getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
-                      t(minRows > 1 ? 'general:rows' : 'general:row'),
+                      t(minRows > 1 ? 'general:row' : 'general:rows'),
                   })}
                 </Banner>
               )}
@@ -310,7 +311,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!disabled && !hasMaxRows && (
+      {!readOnly && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}

@@ -6,17 +6,16 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequestWithData } from 'payload'
+import type { FormState, PayloadRequestWithData } from 'payload/types'
 
-import {
-  EmailField,
-  Form,
-  FormSubmit,
-  PasswordField,
-  useConfig,
-  useTranslation,
-} from '@payloadcms/ui'
-import { email, password } from 'payload/shared'
+import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
+import { Email } from '@payloadcms/ui/fields/Email'
+import { Password } from '@payloadcms/ui/fields/Password'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { email, password } from 'payload/fields/validations'
 
 import './index.scss'
 
@@ -61,8 +60,9 @@ export const LoginForm: React.FC<{
       redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : admin}
       waitForAutocomplete
     >
+      <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>
-        <EmailField
+        <Email
           autoComplete="email"
           label={t('general:email')}
           name="email"
@@ -79,7 +79,7 @@ export const LoginForm: React.FC<{
             })
           }
         />
-        <PasswordField
+        <Password
           autoComplete="off"
           label={t('general:password')}
           name="password"

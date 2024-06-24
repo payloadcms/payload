@@ -1,10 +1,11 @@
 import type { GeneratedTypes } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Permissions } from '../types.js'
+import type { Permissions, User } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { parseCookies } from '../cookies.js'
 import { executeAuthStrategies } from '../executeAuthStrategies.js'
 import { getAccessResults } from '../getAccessResults.js'
 
@@ -14,6 +15,7 @@ export type AuthArgs = {
 }
 
 export type AuthResult = {
+  cookies: Map<string, string>
   permissions: Permissions
   user: GeneratedTypes['user'] | null
 }
@@ -23,10 +25,13 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const req = args.req as PayloadRequestWithData
   const { payload } = req
 
+  const cookies = parseCookies(headers)
+
   try {
     const shouldCommit = await initTransaction(req)
 
     const user = await executeAuthStrategies({
+      cookies,
       headers,
       payload,
     })
@@ -40,6 +45,7 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
     if (shouldCommit) await commitTransaction(req)
 
     return {
+      cookies,
       permissions,
       user,
     }

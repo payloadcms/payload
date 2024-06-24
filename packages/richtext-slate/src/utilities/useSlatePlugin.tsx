@@ -1,6 +1,7 @@
 import type { Editor } from 'slate'
 
-import { useAddClientFunction, useFieldProps } from '@payloadcms/ui'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useAddClientFunction } from '@payloadcms/ui/providers/ClientFunction'
 
 type Plugin = (editor: Editor) => Editor
 

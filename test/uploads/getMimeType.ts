@@ -21,9 +21,6 @@ export const getMimeType = (
     case 'svg':
       type = 'image/svg+xml'
       break
-    case 'webp':
-      type = 'image/webp'
-      break
     default:
       type = 'image/png'
   }

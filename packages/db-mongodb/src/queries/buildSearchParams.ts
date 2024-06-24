@@ -1,9 +1,13 @@
-import type { Field, Operator, PathToQuery, Payload } from 'payload'
+import type { Payload } from 'payload'
+import type { PathToQuery } from 'payload/database'
+import type { Field } from 'payload/types'
+import type { Operator } from 'payload/types'
 
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
-import { getLocalizedPaths } from 'payload'
-import { validOperators } from 'payload/shared'
+import { getLocalizedPaths } from 'payload/database'
+import { fieldAffectsData } from 'payload/types'
+import { validOperators } from 'payload/types'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -189,19 +193,17 @@ export async function buildSearchParam({
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
-        let multiIDCondition = '$or'
-        if (operatorKey === '$ne') multiIDCondition = '$and'
 
         const result = {
           value: {
-            [multiIDCondition]: [{ [path]: { [operatorKey]: formattedValue } }],
+            $or: [{ [path]: { [operatorKey]: formattedValue } }],
           },
         }
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value[multiIDCondition].push({
-              [path]: { [operatorKey]: ObjectId(formattedValue) },
+            result.value.$or.push({
+              [path]: { [operatorKey]: new ObjectId(formattedValue) },
             })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
@@ -216,13 +218,11 @@ export async function buildSearchParam({
             )
 
             if (hasNumberIDRelation)
-              result.value[multiIDCondition].push({
-                [path]: { [operatorKey]: parseFloat(formattedValue) },
-              })
+              result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } })
           }
         }
 
-        if (result.value[multiIDCondition].length > 1) {
+        if (result.value.$or.length > 1) {
           return result
         }
       }

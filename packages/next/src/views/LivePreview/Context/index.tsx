@@ -1,8 +1,9 @@
 'use client'
-import type { ClientFieldConfig, LivePreviewConfig } from 'payload'
+import type { LivePreviewConfig } from 'payload/config'
+import type { ClientFieldConfig, Field } from 'payload/types'
 
 import { DndContext } from '@dnd-kit/core'
-import { fieldSchemaToJSON } from 'payload/shared'
+import { fieldSchemaToJSON } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { usePopupWindow } from '../usePopupWindow.js'

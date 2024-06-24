@@ -1,8 +1,9 @@
-import type { Config, Field, GroupField, TabsField, TextField } from 'payload'
+import type { Config } from 'payload/config'
+import type { Field, GroupField, TabsField, TextField } from 'payload/types'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-import { withMergedProps } from '@payloadcms/ui/shared'
-import { deepMerge } from 'payload/shared'
+import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
+import { deepMerge } from 'payload/utilities'
 
 import type {
   GenerateDescription,

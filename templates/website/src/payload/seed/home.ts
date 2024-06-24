@@ -1,4 +1,4 @@
-import type { Page } from '../../payload-types'
+import type { Page } from '../payload-types'
 
 export const home: Partial<Page> = {
   slug: 'home',
@@ -8,116 +8,75 @@ export const home: Partial<Page> = {
     links: [
       {
         link: {
-          type: 'custom',
-          appearance: 'default',
+          type: 'reference',
+          appearance: 'primary',
           label: 'All posts',
-          url: '/posts',
+          reference: {
+            relationTo: 'pages',
+            value: '{{POSTS_PAGE_ID}}',
+          },
+          url: '',
         },
       },
       {
         link: {
-          type: 'custom',
-          appearance: 'outline',
-          label: 'Contact',
-          url: '/contact',
+          type: 'reference',
+          appearance: 'secondary',
+          label: 'All projects',
+          reference: {
+            relationTo: 'pages',
+            value: '{{PROJECTS_PAGE_ID}}',
+          },
+          url: '',
         },
       },
     ],
     media: '{{IMAGE_1}}',
-    richText: {
-      root: {
-        type: 'root',
+    richText: [
+      {
+        type: 'h1',
         children: [
           {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Payload Website Template',
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'link',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Visit the admin dashboard',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                fields: {
-                  linkType: 'custom',
-                  newTab: false,
-                  url: '/admin',
-                },
-                format: '',
-                indent: 0,
-                version: 2,
-              },
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: " to begin managing this site's content. The code for this template is completely open-source and can be found ",
-                version: 1,
-              },
-              {
-                type: 'autolink',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'https://github.com/payloadcms/payload/tree/main/templates/website',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                fields: {
-                  linkType: 'custom',
-                  url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
-                },
-                format: '',
-                indent: 0,
-                version: 2,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            textFormat: 0,
-            version: 1,
+            text: 'Payload Website Template',
           },
         ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        version: 1,
       },
-    },
+      {
+        type: 'large-body',
+        children: [
+          {
+            text: 'Welcome to your website! ',
+          },
+          {
+            type: 'link',
+            children: [
+              {
+                text: 'Visit the admin dashboard',
+              },
+            ],
+            linkType: 'custom',
+            url: '/admin',
+          },
+          {
+            text: " to begin managing this site's content. The code for this template is completely open-source and can be found ",
+          },
+          {
+            type: 'link',
+            children: [
+              {
+                text: 'here',
+              },
+            ],
+            linkType: 'custom',
+            newTab: true,
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+          },
+          {
+            text: '.',
+          },
+        ],
+      },
+    ],
   },
   layout: [
     {
@@ -125,36 +84,23 @@ export const home: Partial<Page> = {
       blockType: 'content',
       columns: [
         {
-          richText: {
-            root: {
-              type: 'root',
+          richText: [
+            {
+              type: 'h2',
               children: [
                 {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Core features',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  tag: 'h2',
-                  version: 1,
+                  text: 'Core features',
                 },
               ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              version: 1,
             },
-          },
+            {
+              children: [
+                {
+                  text: '',
+                },
+              ],
+            },
+          ],
           size: 'full',
         },
         {
@@ -164,87 +110,36 @@ export const home: Partial<Page> = {
             reference: null,
             url: '',
           },
-          richText: {
-            root: {
-              type: 'root',
+          richText: [
+            {
+              type: 'h3',
               children: [
                 {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Admin Dashboard',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  tag: 'h3',
-                  version: 1,
-                },
-                {
-                  type: 'paragraph',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: "Manage this site's pages and posts from the ",
-                      version: 1,
-                    },
-                    {
-                      type: 'link',
-                      children: [
-                        {
-                          type: 'text',
-                          detail: 0,
-                          format: 0,
-                          mode: 'normal',
-                          style: '',
-                          text: 'admin dashboard',
-                          version: 1,
-                        },
-                      ],
-                      direction: 'ltr',
-                      fields: {
-                        linkType: 'custom',
-                        newTab: false,
-                        url: '/admin',
-                      },
-                      format: '',
-                      indent: 0,
-                      version: 2,
-                    },
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: '.',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  version: 1,
+                  text: 'Admin Dashboard',
                 },
               ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              version: 1,
             },
-          },
+            {
+              children: [
+                {
+                  text: "Manage this site's pages, posts, projects and more from the ",
+                },
+                {
+                  type: 'link',
+                  children: [
+                    {
+                      text: 'admin dashboard',
+                    },
+                  ],
+                  linkType: 'custom',
+                  url: '/admin',
+                },
+                {
+                  text: '.',
+                },
+              ],
+            },
+          ],
           size: 'oneThird',
         },
         {
@@ -254,55 +149,76 @@ export const home: Partial<Page> = {
             reference: null,
             url: '',
           },
-          richText: {
-            root: {
-              type: 'root',
+          richText: [
+            {
+              type: 'h3',
               children: [
                 {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Preview',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  tag: 'h3',
-                  version: 1,
-                },
-                {
-                  type: 'paragraph',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Using versions, drafts, and preview, editors can review and share their changes before publishing them.',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  version: 1,
+                  text: 'Authentication',
                 },
               ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              version: 1,
             },
+            {
+              children: [
+                {
+                  text: 'Complete user ',
+                },
+                {
+                  type: 'link',
+                  children: [
+                    {
+                      text: 'login',
+                    },
+                  ],
+                  linkType: 'custom',
+                  url: '/login',
+                },
+                {
+                  text: ' and ',
+                },
+                {
+                  type: 'link',
+                  children: [
+                    {
+                      text: 'create account',
+                    },
+                  ],
+                  linkType: 'custom',
+                  url: '/create-account',
+                },
+                {
+                  text: ' flows with email verification and password reset.',
+                },
+              ],
+            },
+          ],
+          size: 'oneThird',
+        },
+
+        {
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
           },
+          richText: [
+            {
+              type: 'h3',
+              children: [
+                {
+                  text: 'Preview',
+                },
+              ],
+            },
+            {
+              children: [
+                {
+                  text: 'Using versions, drafts, and preview, editors can review and share their changes before publishing them.',
+                },
+              ],
+            },
+          ],
           size: 'oneThird',
         },
         {
@@ -312,55 +228,36 @@ export const home: Partial<Page> = {
             reference: null,
             url: '',
           },
-          richText: {
-            root: {
-              type: 'root',
+          richText: [
+            {
+              type: 'h3',
               children: [
                 {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Page Builder',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  tag: 'h3',
-                  version: 1,
-                },
-                {
-                  type: 'paragraph',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Custom page builder allows you to create unique page, post, and project layouts for any type of content.',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  version: 1,
+                  text: 'Comments',
                 },
               ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              version: 1,
             },
-          },
+            {
+              children: [
+                {
+                  text: 'Users can comment on posts and editors can moderate comments directly from the ',
+                },
+                {
+                  type: 'link',
+                  children: [
+                    {
+                      text: 'admin dashboard',
+                    },
+                  ],
+                  linkType: 'custom',
+                  url: '/admin/collections/comments',
+                },
+                {
+                  text: '.',
+                },
+              ],
+            },
+          ],
           size: 'oneThird',
         },
         {
@@ -370,87 +267,36 @@ export const home: Partial<Page> = {
             reference: null,
             url: '',
           },
-          richText: {
-            root: {
-              type: 'root',
+          richText: [
+            {
+              type: 'h3',
               children: [
                 {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'SEO',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  tag: 'h3',
-                  version: 1,
-                },
-                {
-                  type: 'paragraph',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Editors have complete control over SEO data and site content directly from the ',
-                      version: 1,
-                    },
-                    {
-                      type: 'link',
-                      children: [
-                        {
-                          type: 'text',
-                          detail: 0,
-                          format: 0,
-                          mode: 'normal',
-                          style: '',
-                          text: 'admin dashboard',
-                          version: 1,
-                        },
-                      ],
-                      direction: 'ltr',
-                      fields: {
-                        linkType: 'custom',
-                        newTab: false,
-                        url: '/admin',
-                      },
-                      format: '',
-                      indent: 0,
-                      version: 2,
-                    },
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: '.',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  version: 1,
+                  text: 'User Accounts',
                 },
               ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              version: 1,
             },
-          },
+            {
+              children: [
+                {
+                  text: 'Users can ',
+                },
+                {
+                  type: 'link',
+                  children: [
+                    {
+                      text: 'manage their account',
+                    },
+                  ],
+                  linkType: 'custom',
+                  url: '/account',
+                },
+                {
+                  text: ', view their comment history, and more without leaving the site.',
+                },
+              ],
+            },
+          ],
           size: 'oneThird',
         },
         {
@@ -460,55 +306,114 @@ export const home: Partial<Page> = {
             reference: null,
             url: '',
           },
-          richText: {
-            root: {
-              type: 'root',
+          richText: [
+            {
+              type: 'h3',
               children: [
                 {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Dark Mode',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  tag: 'h3',
-                  version: 1,
-                },
-                {
-                  type: 'paragraph',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Users will experience this site in their preferred color scheme and each block can be inverted.',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  version: 1,
+                  text: 'Premium Content',
                 },
               ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              version: 1,
             },
+            {
+              children: [
+                {
+                  text: 'Easily restrict access to premium content to only authenticated members of your site.',
+                },
+              ],
+            },
+          ],
+          size: 'oneThird',
+        },
+        {
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
           },
+          richText: [
+            {
+              type: 'h3',
+              children: [
+                {
+                  text: 'Page Builder',
+                },
+              ],
+            },
+            {
+              children: [
+                {
+                  text: 'Custom page builder allows you to create unique page, post, and project layouts for any type of content.',
+                },
+              ],
+            },
+          ],
+          size: 'oneThird',
+        },
+        {
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
+          richText: [
+            {
+              type: 'h3',
+              children: [
+                {
+                  text: 'SEO',
+                },
+              ],
+            },
+            {
+              children: [
+                {
+                  text: 'Editors have complete control over SEO data and site content directly from the ',
+                },
+                {
+                  type: 'link',
+                  children: [
+                    {
+                      text: 'admin dashboard',
+                    },
+                  ],
+                  linkType: 'custom',
+                  url: '/admin',
+                },
+                {
+                  text: '.',
+                },
+              ],
+            },
+          ],
+          size: 'oneThird',
+        },
+        {
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
+          richText: [
+            {
+              type: 'h3',
+              children: [
+                {
+                  text: 'Dark Mode',
+                },
+              ],
+            },
+            {
+              children: [
+                {
+                  text: 'Users will experience this site in their preferred color scheme and each block can be inverted.',
+                },
+              ],
+            },
+          ],
           size: 'oneThird',
         },
       ],
@@ -523,57 +428,51 @@ export const home: Partial<Page> = {
       blockName: 'Archive Block',
       blockType: 'archive',
       categories: [],
-      introContent: {
-        root: {
-          type: 'root',
+      introContent: [
+        {
+          type: 'h4',
           children: [
             {
-              type: 'heading',
-              children: [
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'Recent posts',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              tag: 'h3',
-              version: 1,
-            },
-            {
-              type: 'paragraph',
-              children: [
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'The posts below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or posts can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              textFormat: 0,
-              version: 1,
+              text: 'Recent posts',
             },
           ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          version: 1,
         },
-      },
+        {
+          type: 'p',
+          children: [
+            {
+              text: 'The posts below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or posts can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
+            },
+          ],
+        },
+      ],
       populateBy: 'collection',
       relationTo: 'posts',
+    },
+    {
+      blockName: 'Archive Block',
+      blockType: 'archive',
+      categories: [],
+      introContent: [
+        {
+          type: 'h4',
+          children: [
+            {
+              text: 'Recent projects',
+            },
+          ],
+        },
+        {
+          type: 'p',
+          children: [
+            {
+              text: 'The projects below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or projects can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
+            },
+          ],
+        },
+      ],
+      populateBy: 'collection',
+      relationTo: 'projects',
     },
     {
       blockName: 'CTA',
@@ -581,94 +480,59 @@ export const home: Partial<Page> = {
       links: [
         {
           link: {
-            type: 'custom',
-            appearance: 'default',
+            type: 'reference',
+            appearance: 'primary',
             label: 'All posts',
-            url: '/posts',
+            reference: {
+              relationTo: 'pages',
+              value: '{{POSTS_PAGE_ID}}',
+            },
+            url: '',
+          },
+        },
+        {
+          link: {
+            type: 'reference',
+            appearance: 'secondary',
+            label: 'All projects',
+            reference: {
+              relationTo: 'pages',
+              value: '{{PROJECTS_PAGE_ID}}',
+            },
+            url: '',
           },
         },
       ],
-      richText: {
-        root: {
-          type: 'root',
+      richText: [
+        {
+          type: 'h4',
           children: [
             {
-              type: 'heading',
-              children: [
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'This is a call to action',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              tag: 'h3',
-              version: 1,
-            },
-            {
-              type: 'paragraph',
-              children: [
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'This is a custom layout building block ',
-                  version: 1,
-                },
-                {
-                  type: 'link',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'configured in the admin dashboard',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  fields: {
-                    linkType: 'custom',
-                    newTab: false,
-                    url: '/admin',
-                  },
-                  format: '',
-                  indent: 0,
-                  version: 2,
-                },
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: '.',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              textFormat: 0,
-              version: 1,
+              text: 'This is a call to action',
             },
           ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          version: 1,
         },
-      },
+        {
+          children: [
+            {
+              text: 'This is a custom layout building block ',
+            },
+            {
+              type: 'link',
+              children: [
+                {
+                  text: 'configured in the admin dashboard',
+                },
+              ],
+              linkType: 'custom',
+              url: '/admin',
+            },
+            {
+              text: '.',
+            },
+          ],
+        },
+      ],
     },
   ],
   meta: {

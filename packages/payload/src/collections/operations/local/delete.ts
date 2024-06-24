@@ -1,10 +1,7 @@
-import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequestWithData,
-  RequestContext,
-  Where,
-} from '../../../types/index.js'
+import type { CollectionSlug, Payload } from '../../../index.js'
+import type { GeneratedTypes } from '../../../index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { Document, Where } from '../../../types/index.js'
 import type { BulkOperationResult, DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'

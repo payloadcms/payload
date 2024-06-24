@@ -1,6 +1,8 @@
-import type { Collection, PayloadRequestWithData, Where } from 'payload'
+import type { PayloadRequestWithData, Where } from 'payload/types'
+import type { Collection } from 'payload/types'
 
-import { countOperation, isolateObjectProperty } from 'payload'
+import { countOperation } from 'payload/operations'
+import { isolateObjectProperty } from 'payload/utilities'
 
 import type { Context } from '../types.js'
 

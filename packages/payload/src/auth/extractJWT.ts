@@ -2,7 +2,9 @@ import type { AuthStrategyFunctionArgs } from './index.js'
 
 import { parseCookies } from '../utilities/parseCookies.js'
 
-export const extractJWT = (args: AuthStrategyFunctionArgs): null | string => {
+export const extractJWT = (
+  args: Pick<AuthStrategyFunctionArgs, 'cookies' | 'headers' | 'payload'>,
+): null | string => {
   const { headers, payload } = args
 
   const jwtFromHeader = headers.get('Authorization')

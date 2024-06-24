@@ -1,4 +1,6 @@
 import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
+import type { Payload } from 'payload'
+import type { SanitizedConfig } from 'payload/config'
 import type {
   ArrayField,
   BlockField,
@@ -11,19 +13,17 @@ import type {
   GroupField,
   JSONField,
   NumberField,
-  Payload,
   PointField,
   RadioField,
   RelationshipField,
   RichTextField,
   RowField,
-  SanitizedConfig,
   SelectField,
   TabsField,
   TextField,
   TextareaField,
   UploadField,
-} from 'payload'
+} from 'payload/types'
 
 import type { BuildQueryArgs } from './queries/buildQuery.js'
 

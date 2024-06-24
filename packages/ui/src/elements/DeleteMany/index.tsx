@@ -1,11 +1,11 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig } from 'payload/types'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -13,6 +13,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
@@ -26,6 +27,8 @@ export type Props = {
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { collection: { slug, labels: { plural } } = {} } = props
 
   const { permissions } = useAuth()
@@ -64,7 +67,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
           const json = await res.json()
           toggleModal(modalSlug)
           if (res.status < 400) {
-            toast.success(json.message || t('general:deletedSuccessfully'))
+            toast.success(json.message || t('general:deletedSuccessfully'), { autoClose: 3000 })
             toggleAll()
             router.replace(
               stringifyParams({
@@ -121,7 +124,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
         {t('general:delete')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
+        <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('general:confirmDeletion')}</h1>
           <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
           <Button
@@ -135,7 +138,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
           <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
             {deleting ? t('general:deleting') : t('general:confirm')}
           </Button>
-        </div>
+        </MinimalTemplate>
       </Modal>
     </React.Fragment>
   )

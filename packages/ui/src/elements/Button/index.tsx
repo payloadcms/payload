@@ -3,22 +3,22 @@ import React, { Fragment, forwardRef, isValidElement } from 'react'
 
 import type { Props } from './types.js'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { EditIcon } from '../../icons/Edit/index.js'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { Edit } from '../../icons/Edit/index.js'
 import { LinkIcon } from '../../icons/Link/index.js'
-import { PlusIcon } from '../../icons/Plus/index.js'
-import { SwapIcon } from '../../icons/Swap/index.js'
-import { XIcon } from '../../icons/X/index.js'
+import { Plus } from '../../icons/Plus/index.js'
+import { Swap } from '../../icons/Swap/index.js'
+import { X } from '../../icons/X/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 
 const icons = {
-  chevron: ChevronIcon,
-  edit: EditIcon,
+  chevron: Chevron,
+  edit: Edit,
   link: LinkIcon,
-  plus: PlusIcon,
-  swap: SwapIcon,
-  x: XIcon,
+  plus: Plus,
+  swap: Swap,
+  x: X,
 }
 
 const baseClass = 'btn'
@@ -124,7 +124,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
     case 'anchor':
       return (
-        <a {...buttonProps} href={url} ref={ref as React.Ref<HTMLAnchorElement>}>
+        <a {...buttonProps} href={url} ref={ref as React.LegacyRef<HTMLAnchorElement>}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

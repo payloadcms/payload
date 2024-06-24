@@ -54,7 +54,6 @@ export function generateLexicalRichText() {
               direction: 'ltr',
               format: '',
               indent: 0,
-              id: '665d10938106ab380c7f3730',
               type: 'link',
               version: 2,
               fields: {
@@ -87,7 +86,6 @@ export function generateLexicalRichText() {
               direction: 'ltr',
               format: '',
               indent: 0,
-              id: '665d10938106ab380c7f3730',
               type: 'link',
               version: 2,
               fields: {
@@ -232,7 +230,6 @@ export function generateLexicalRichText() {
           format: '',
           type: 'upload',
           version: 2,
-          id: '665d10938106ab380c7f372f',
           relationTo: 'uploads',
           value: '{{UPLOAD_DOC_ID}}',
           fields: {

@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { ValidationError } from 'payload'
+import { ValidationError } from 'payload/errors'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 

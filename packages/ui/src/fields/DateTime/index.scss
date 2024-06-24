@@ -1,5 +1,11 @@
 @import '../../scss/styles.scss';
 
+.date-time-field {
+  &__error-wrap {
+    position: relative;
+  }
+}
+
 html[data-theme='light'] {
   .date-time-field {
     &--has-error {

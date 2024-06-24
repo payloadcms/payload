@@ -1,24 +1,22 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { CreateMigration, MigrationTemplateArgs } from 'payload'
+import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration } from 'payload'
 import { fileURLToPath } from 'url'
 
-const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
+const migrationTemplate = (upSQL?: string, downSQL?: string) => `import {
   MigrateUpArgs,
   MigrateDownArgs,
-} from '@payloadcms/db-mongodb'
-${imports}
+} from "@payloadcms/db-mongodb";
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}
-}
+};
 
 export async function down({ payload }: MigrateDownArgs): Promise<void> {
 ${downSQL ?? `  // Migration code`}
-}
+};
 `
 
 export const createMigration: CreateMigration = async function createMigration({
@@ -33,14 +31,36 @@ export const createMigration: CreateMigration = async function createMigration({
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
-  const predefinedMigration = await getPredefinedMigration({
-    dirname,
-    file,
-    migrationName,
-    payload,
-  })
 
-  const migrationFileContent = migrationTemplate(predefinedMigration)
+  let migrationFileContent: string | undefined
+
+  // Check for predefined migration.
+  // Either passed in via --file or prefixed with @payloadcms/db-mongodb/
+  if (file || migrationName?.startsWith('@payloadcms/db-mongodb/')) {
+    if (!file) file = migrationName
+
+    const predefinedMigrationName = file.replace('@payloadcms/db-mongodb/', '')
+    migrationName = predefinedMigrationName
+    const cleanPath = path.join(dirname, `../predefinedMigrations/${predefinedMigrationName}.js`)
+
+    // Check if predefined migration exists
+    if (fs.existsSync(cleanPath)) {
+      let migration = await eval(
+        `${typeof require === 'function' ? 'require' : 'import'}(${cleanPath})`,
+      )
+      if ('default' in migration) migration = migration.default
+      const { down, up } = migration
+
+      migrationFileContent = migrationTemplate(up, down)
+    } else {
+      payload.logger.error({
+        msg: `Canned migration ${predefinedMigrationName} not found.`,
+      })
+      process.exit(1)
+    }
+  } else {
+    migrationFileContent = migrationTemplate()
+  }
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')

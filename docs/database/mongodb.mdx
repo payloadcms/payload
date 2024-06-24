@@ -3,7 +3,7 @@ title: MongoDB
 label: MongoDB
 order: 40
 desc: Payload has supported MongoDB natively since we started. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
-keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, nextjs
+keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
 ---
 
 To use Payload with MongoDB, install the package `@payloadcms/db-mongodb`. It will come with everything you need to
@@ -28,7 +28,7 @@ export default buildConfig({
 })
 ```
 
-## Options
+### Options
 
 | Option               | Description                                                                                                                                                                                                                                                                                   |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
@@ -38,7 +38,7 @@ export default buildConfig({
 | `migrationDir`       | Customize the directory that migrations are stored.                                                                                                                                                                                                                                           |
 | `transactionOptions` | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions.                                                                                                                 |     |
 
-## Access to Mongoose models
+### Access to Mongoose models
 
 After Payload is initialized, this adapter exposes all of your Mongoose models and they are available for you to work
 with directly.

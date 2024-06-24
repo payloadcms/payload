@@ -1,5 +1,5 @@
-import type { LivePreviewConfig } from 'payload'
-import type { fieldSchemaToJSON } from 'payload/shared'
+import type { LivePreviewConfig } from 'payload/config'
+import type { fieldSchemaToJSON } from 'payload/utilities'
 import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'
@@ -13,7 +13,7 @@ export interface LivePreviewContextType {
   breakpoints: LivePreviewConfig['breakpoints']
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
   iframeHasLoaded: boolean
-  iframeRef: React.RefObject<HTMLIFrameElement | null>
+  iframeRef: React.RefObject<HTMLIFrameElement>
   isPopupOpen: boolean
   measuredDeviceSize: {
     height: number

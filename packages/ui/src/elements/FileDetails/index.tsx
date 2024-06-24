@@ -1,5 +1,4 @@
-'use client'
-import { isImage } from 'payload/shared'
+import { isImage } from 'payload/utilities'
 import React from 'react'
 
 import { UploadActions } from '../../elements/Upload/index.js'
@@ -10,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'file-details'
 
-import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
+import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload/types'
 
 export type FileDetailsProps = {
   canEdit?: boolean

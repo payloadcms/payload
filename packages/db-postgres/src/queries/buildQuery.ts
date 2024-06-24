@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { Field, Where } from 'payload'
+import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
 
@@ -26,7 +26,8 @@ type BuildQueryArgs = {
 }
 
 type Result = {
-  joins: BuildQueryJoinAliases
+  joinAliases: BuildQueryJoinAliases
+  joins: BuildQueryJoins
   orderBy: {
     column: GenericColumn
     order: typeof asc | typeof desc
@@ -45,7 +46,8 @@ const buildQuery = async function buildQuery({
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
   }
-  const joins: BuildQueryJoinAliases = []
+  const joins: BuildQueryJoins = {}
+  const joinAliases: BuildQueryJoinAliases = []
 
   const orderBy: Result['orderBy'] = {
     column: null,
@@ -68,6 +70,7 @@ const buildQuery = async function buildQuery({
         adapter,
         collectionPath: sortPath,
         fields,
+        joinAliases,
         joins,
         locale,
         pathSegments: sortPath.replace(/__/g, '.').split('.'),
@@ -102,6 +105,7 @@ const buildQuery = async function buildQuery({
     where = await parseParams({
       adapter,
       fields,
+      joinAliases,
       joins,
       locale,
       selectFields,
@@ -111,6 +115,7 @@ const buildQuery = async function buildQuery({
   }
 
   return {
+    joinAliases,
     joins,
     orderBy,
     selectFields,

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload'
+import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -13,10 +13,10 @@ import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { FileDetails } from '../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
+import { FieldDescription } from '../../forms/FieldDescription/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -133,59 +133,56 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
+        <FieldError CustomError={CustomError} {...(errorProps || {})} />
         <FieldLabel
           CustomLabel={CustomLabel}
           label={label}
           required={required}
           {...(labelProps || {})}
         />
-        <div className={`${fieldBaseClass}__wrap`}>
-          <FieldError CustomError={CustomError} {...(errorProps || {})} />
-
-          {collection?.upload && (
-            <React.Fragment>
-              {fileDoc && !missingFile && (
-                <FileDetails
-                  collectionSlug={relationTo}
-                  doc={fileDoc}
-                  handleRemove={
-                    readOnly
-                      ? undefined
-                      : () => {
-                          onChange(null)
-                        }
-                  }
-                  uploadConfig={collection.upload}
-                />
-              )}
-              {(!fileDoc || missingFile) && (
-                <div className={`${baseClass}__wrap`}>
-                  <div className={`${baseClass}__buttons`}>
-                    <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                        {t('fields:uploadNewLabel', {
-                          label: getTranslation(collection.labels.singular, i18n),
-                        })}
-                      </Button>
-                    </DocumentDrawerToggler>
-                    <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                        {t('fields:chooseFromExisting')}
-                      </Button>
-                    </ListDrawerToggler>
-                  </div>
+        {collection?.upload && (
+          <React.Fragment>
+            {fileDoc && !missingFile && (
+              <FileDetails
+                collectionSlug={relationTo}
+                doc={fileDoc}
+                handleRemove={
+                  readOnly
+                    ? undefined
+                    : () => {
+                        onChange(null)
+                      }
+                }
+                uploadConfig={collection.upload}
+              />
+            )}
+            {(!fileDoc || missingFile) && (
+              <div className={`${baseClass}__wrap`}>
+                <div className={`${baseClass}__buttons`}>
+                  <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                    <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                      {t('fields:uploadNewLabel', {
+                        label: getTranslation(collection.labels.singular, i18n),
+                      })}
+                    </Button>
+                  </DocumentDrawerToggler>
+                  <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                    <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                      {t('fields:chooseFromExisting')}
+                    </Button>
+                  </ListDrawerToggler>
                 </div>
-              )}
-              {CustomDescription !== undefined ? (
-                CustomDescription
-              ) : (
-                <FieldDescription {...(descriptionProps || {})} />
-              )}
-            </React.Fragment>
-          )}
-          {!readOnly && <DocumentDrawer onSave={onSave} />}
-          {!readOnly && <ListDrawer onSelect={onSelect} />}
-        </div>
+              </div>
+            )}
+            {CustomDescription !== undefined ? (
+              CustomDescription
+            ) : (
+              <FieldDescription {...(descriptionProps || {})} />
+            )}
+          </React.Fragment>
+        )}
+        {!readOnly && <DocumentDrawer onSave={onSave} />}
+        {!readOnly && <ListDrawer onSelect={onSelect} />}
       </div>
     )
   }

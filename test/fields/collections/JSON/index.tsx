@@ -1,6 +1,13 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload/types'
 
 import { jsonFieldsSlug } from '../../slugs.js'
+
+type JSONField = {
+  createdAt: string
+  id: string
+  json?: any
+  updatedAt: string
+}
 
 const JSON: CollectionConfig = {
   slug: jsonFieldsSlug,
@@ -26,16 +33,6 @@ const JSON: CollectionConfig = {
         },
         uri: 'a://b/foo.json',
       },
-    },
-    {
-      name: 'group',
-      type: 'group',
-      fields: [
-        {
-          name: 'jsonWithinGroup',
-          type: 'json',
-        },
-      ],
     },
   ],
   versions: {

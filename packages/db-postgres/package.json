@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.0.0-beta.53",
+  "version": "3.0.0-beta.32",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -14,18 +14,13 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
     },
     "./types": {
       "import": "./src/types.ts",
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
-    },
-    "./migration-utils": {
-      "import": "./src/exports/migration-utils.ts",
-      "types": "./src/exports/migration-utils.ts",
-      "default": "./src/exports/migration-utils.ts"
+      "require": "./src/types.ts",
+      "types": "./src/types.ts"
     }
   },
   "main": "./src/index.ts",
@@ -35,13 +30,11 @@
     "mock.js"
   ],
   "scripts": {
-    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
-    "build:esbuild": "echo skipping esbuild",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "@libsql/client": "^0.5.2",
@@ -51,14 +44,12 @@
     "pg": "8.11.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
-    "uuid": "10.0.0"
+    "uuid": "9.0.0"
   },
   "devDependencies": {
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "^0.21.4",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -68,18 +59,13 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
       },
       "./types": {
         "import": "./dist/types.js",
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
-      },
-      "./migration-utils": {
-        "import": "./dist/exports/migration-utils.js",
-        "types": "./dist/exports/migration-utils.d.ts",
-        "default": "./dist/exports/migration-utils.js"
+        "require": "./dist/types.js",
+        "types": "./dist/types.d.ts"
       }
     },
     "main": "./dist/index.js",

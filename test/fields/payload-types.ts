@@ -46,7 +46,6 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'select-fields': SelectField;
-    'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
     uploads: Upload;
@@ -101,7 +100,6 @@ export interface LexicalField {
     };
     [k: string]: unknown;
   };
-  lexicalWithBlocks_markdown?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -207,7 +205,7 @@ export interface LexicalMigrateField {
 export interface LexicalLocalizedField {
   id: string;
   title: string;
-  lexicalBlocksSubLocalized?: {
+  lexicalSimple?: {
     root: {
       type: string;
       children: {
@@ -223,6 +221,21 @@ export interface LexicalLocalizedField {
     [k: string]: unknown;
   } | null;
   lexicalBlocksLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lexicalBlocksSubLocalized?: {
     root: {
       type: string;
       children: {
@@ -672,8 +685,6 @@ export interface TextField {
   text: string;
   localizedText?: string | null;
   i18nText?: string | null;
-  defaultString?: string | null;
-  defaultEmptyString?: string | null;
   defaultFunction?: string | null;
   defaultAsync?: string | null;
   overrideLength?: string | null;
@@ -826,9 +837,6 @@ export interface GroupField {
         id?: string | null;
       }[]
     | null;
-  localizedGroup?: {
-    text?: string | null;
-  };
   potentiallyEmptyGroup?: {
     text?: string | null;
   };
@@ -843,7 +851,7 @@ export interface GroupField {
       nestedField?: string | null;
     };
   };
-  groups?: {
+  groups: {
     groupInRow?: {
       field?: string | null;
       secondField?: string | null;
@@ -917,17 +925,6 @@ export interface JsonField {
     | number
     | boolean
     | null;
-  group?: {
-    jsonWithinGroup?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1126,24 +1123,6 @@ export interface SelectField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tabs-fields-2".
- */
-export interface TabsFields2 {
-  id: string;
-  tabsInArray?:
-    | {
-        text?: string | null;
-        tab2?: {
-          text2?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields".
  */
 export interface TabsField {
@@ -1228,16 +1207,16 @@ export interface TabsField {
         }[]
       | null;
   };
-  namedTabWithDefaultValue?: {
+  namedTabWithDefaultValue: {
     defaultValue?: string | null;
   };
-  localizedTab?: {
+  localizedTab: {
     text?: string | null;
   };
-  accessControlTab?: {
+  accessControlTab: {
     text?: string | null;
   };
-  hooksTab?: {
+  hooksTab: {
     beforeValidate?: boolean | null;
     beforeChange?: boolean | null;
     afterChange?: boolean | null;
@@ -1245,7 +1224,7 @@ export interface TabsField {
   };
   textarea?: string | null;
   anotherText: string;
-  nestedTab?: {
+  nestedTab: {
     text?: string | null;
   };
   updatedAt: string;
@@ -1283,8 +1262,6 @@ export interface Upload {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1303,8 +1280,6 @@ export interface Uploads2 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1337,8 +1312,6 @@ export interface Uploads3 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1390,7 +1363,7 @@ export interface PayloadMigration {
  */
 export interface TabsWithRichText {
   id: string;
-  tab1?: {
+  tab1: {
     rt1?: {
       root: {
         type: string;
@@ -1407,7 +1380,7 @@ export interface TabsWithRichText {
       [k: string]: unknown;
     } | null;
   };
-  tab2?: {
+  tab2: {
     rt2?: {
       root: {
         type: string;
@@ -1440,6 +1413,6 @@ export interface LexicalBlocksRadioButtonsBlock {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
