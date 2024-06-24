@@ -23,8 +23,8 @@ export const AfterOperationCollection: CollectionConfig = {
         }
 
         if (operation === 'find') {
-          // only modify the first doc for `find` operations
-          // this is, so we can test against the other operations
+          // Only modify the first doc for `find` operations.
+          // This is so that we can test against the other operations
           return {
             ...result,
             docs: result.docs?.map((doc, index) =>
