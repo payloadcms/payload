@@ -8,11 +8,6 @@ keywords: Postgres, documentation, typescript, Content Management System, cms, h
 
 To use Payload with Postgres, install the package `@payloadcms/db-postgres`. It leverages Drizzle ORM and `node-postgres` to interact with a Postgres database that you provide.
 
-<Banner>
-  The Postgres database adapter is currently in beta. If you would like to help us test this
-  package, we'd love to hear if you find any bugs or issues!
-</Banner>
-
 It automatically manages changes to your database for you in development mode, and exposes a full suite of migration controls for you to leverage in order to keep other database environments in sync with your schema. DDL transformations are automatically generated.
 
 To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload config as follows:
@@ -81,17 +76,6 @@ Alternatively, you can disable `push` and rely solely on migrations to keep your
 
 ## Migration workflows
 
-Migrations are extremely powerful thanks to the seamless way that Payload and Drizzle work together. Let's take the following scenario:
+In Postgres, migrations are a fundamental aspect of working with Payload and you should become familiar with how they work.
 
-1. You are building your Payload config locally, with a local database used for testing.
-1. You have left the default setting of `push` enabled, so every time you change your Payload config (add or remove fields, collections, etc.), Drizzle will automatically push changes to your local DB.
-1. Once you're done with your changes, or have completed a feature, you can run `npm run payload migrate:create`.
-1. Payload and Drizzle will look for any existing migrations, and automatically generate all SQL changes necessary to convert your schema from its prior state into the state of your current Payload config, and store the resulting DDL in a newly created migration.
-1. Once you're ready to go to production, you will be able to run `npm run payload migrate` against your production database, which will apply any new migrations that have not yet run.
-1. Now your production database is in sync with your Payload config!
-
-<Banner type="warning">
-  Warning: do not mix "push" and migrations with your local development database. If you use "push"
-  locally, and then try to migrate, Payload will throw a warning, telling you that these two methods
-  are not meant to be used interchangeably.
-</Banner>
+For more information about migrations, [click here](/docs/beta/database/migrations#when-to-run-migrations).
