@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 
 export * as PopupList from './PopupButtonList/index.js'
 
-import * as facelessUIImport from '@faceless-ui/window-info'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
@@ -51,8 +51,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
     size = 'medium',
     verticalAlign: verticalAlignFromProps = 'top',
   } = props
-  const { useWindowInfo } = facelessUIImport
-
   const { height: windowHeight, width: windowWidth } = useWindowInfo()
   const [intersectionRef, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,

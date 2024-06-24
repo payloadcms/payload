@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.0.0-beta.32",
+  "version": "3.0.0-beta.53",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -11,19 +11,22 @@
   "exports": {
     ".": {
       "import": "./src/exports/index.ts",
-      "require": "./src/exports/index.ts"
+      "types": "./src/exports/index.ts",
+      "default": "./src/exports/index.ts"
     },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts"
+    "./all": {
+      "import": "./src/exports/all.ts",
+      "types": "./src/exports/all.ts",
+      "default": "./src/exports/all.ts"
     },
     "./languages/*": {
       "import": "./src/languages/*.ts",
-      "require": "./src/languages/*.ts"
+      "types": "./src/languages/*.ts",
+      "default": "./src/languages/*.ts"
     }
   },
   "main": "./src/exports/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/exports/index.ts",
   "files": [
     "dist"
   ],
@@ -32,14 +35,17 @@
     "build:types": "tsc --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "tsx scripts/translateNewKeys/index.ts"
+    "translateNewKeys": "tsx scripts/translateNewKeys/run.ts"
+  },
+  "dependencies": {
+    "date-fns": "3.3.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@swc/core": "^1.4.13",
-    "@types/react": "18.2.74",
-    "date-fns": "3.3.1",
-    "dotenv": "8.6.0",
+    "@swc/core": "^1.6.1",
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "dotenv": "16.4.5",
     "prettier": "^3.0.3",
     "typescript": "5.4.5"
   },
@@ -47,21 +53,25 @@
     "exports": {
       ".": {
         "import": "./dist/exports/index.js",
-        "require": "./dist/exports/index.js",
-        "types": "./dist/exports/*.d.ts"
+        "types": "./dist/exports/index.d.ts",
+        "default": "./dist/exports/index.js"
       },
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+      "./all": {
+        "import": "./dist/exports/all.js",
+        "types": "./dist/exports/all.d.ts",
+        "default": "./dist/exports/all.js"
       },
       "./languages/*": {
         "import": "./dist/languages/*.js",
-        "require": "./dist/languages/*.js",
-        "types": "./dist/languages/*.d.ts"
+        "types": "./dist/languages/*.d.ts",
+        "default": "./dist/languages/*.js"
       }
     },
     "main": "./dist/exports/index.js",
     "types": "./dist/exports/index.d.ts"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-beta.2",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
   }
 }

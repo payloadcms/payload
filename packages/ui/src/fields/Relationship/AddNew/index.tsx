@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
@@ -13,7 +13,7 @@ import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
 import { Popup } from '../../../elements/Popup/index.js'
 import { Tooltip } from '../../../elements/Tooltip/index.js'
-import { Plus } from '../../../icons/Plus/index.js'
+import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.scss'
@@ -52,7 +52,7 @@ export const AddNewRelation: React.FC<Props> = ({
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)
           ? {
-              relationTo: collectionConfig.slug,
+              relationTo: collectionConfig?.slug,
               value: doc.id,
             }
           : doc.id
@@ -95,11 +95,11 @@ export const AddNewRelation: React.FC<Props> = ({
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
-        setShow(permissions.collections[relatedCollections[0].slug].create.permission)
+        setShow(permissions.collections[relatedCollections[0]?.slug]?.create?.permission)
       } else {
         setShow(
           relatedCollections.some(
-            (collection) => permissions.collections[collection.slug].create.permission,
+            (collection) => permissions.collections[collection?.slug]?.create?.permission,
           ),
         )
       }
@@ -109,7 +109,7 @@ export const AddNewRelation: React.FC<Props> = ({
   useEffect(() => {
     if (relatedToMany && selectedCollection) {
       setCollectionConfig(
-        relatedCollections.find((collection) => collection.slug === selectedCollection),
+        relatedCollections.find((collection) => collection?.slug === selectedCollection),
       )
     }
   }, [selectedCollection, relatedToMany, relatedCollections])
@@ -145,7 +145,7 @@ export const AddNewRelation: React.FC<Props> = ({
                   label: getTranslation(relatedCollections[0].labels.singular, i18n),
                 })}
               </Tooltip>
-              <Plus />
+              <PlusIcon />
             </DocumentDrawerToggler>
             <DocumentDrawer onSave={onSave} />
           </Fragment>
@@ -159,7 +159,7 @@ export const AddNewRelation: React.FC<Props> = ({
                   className={`${baseClass}__add-button`}
                   tooltip={popupOpen ? undefined : t('fields:addNew')}
                 >
-                  <Plus />
+                  <PlusIcon />
                 </Button>
               }
               buttonType="custom"
@@ -168,17 +168,17 @@ export const AddNewRelation: React.FC<Props> = ({
               render={({ close: closePopup }) => (
                 <PopupList.ButtonGroup>
                   {relatedCollections.map((relatedCollection) => {
-                    if (permissions.collections[relatedCollection.slug].create.permission) {
+                    if (permissions.collections[relatedCollection?.slug].create.permission) {
                       return (
                         <PopupList.Button
-                          className={`${baseClass}__relation-button--${relatedCollection.slug}`}
-                          key={relatedCollection.slug}
+                          className={`${baseClass}__relation-button--${relatedCollection?.slug}`}
+                          key={relatedCollection?.slug}
                           onClick={() => {
                             closePopup()
-                            setSelectedCollection(relatedCollection.slug)
+                            setSelectedCollection(relatedCollection?.slug)
                           }}
                         >
-                          {getTranslation(relatedCollection.labels.singular, i18n)}
+                          {getTranslation(relatedCollection?.labels?.singular, i18n)}
                         </PopupList.Button>
                       )
                     }
@@ -190,7 +190,7 @@ export const AddNewRelation: React.FC<Props> = ({
               size="medium"
             />
             {collectionConfig &&
-              permissions.collections[collectionConfig.slug].create.permission && (
+              permissions.collections[collectionConfig?.slug]?.create?.permission && (
                 <DocumentDrawer onSave={onSave} />
               )}
           </Fragment>

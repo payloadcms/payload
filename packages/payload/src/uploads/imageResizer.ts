@@ -1,15 +1,20 @@
-import type { OutputInfo } from 'sharp'
+import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
-import fileType from 'file-type'
-const { fromBuffer } = fileType
-
+import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
 import sanitize from 'sanitize-filename'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SharpDependency } from '../config/types.js'
-import type { PayloadRequestWithData, UploadEdits } from '../types/index.js'
-import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.js'
+import type { PayloadRequestWithData } from '../types/index.js'
+import type {
+  FileSize,
+  FileSizes,
+  FileToSave,
+  ImageSize,
+  ProbedImageSize,
+  UploadEdits,
+} from './types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
 import fileExists from './fileExists.js'
@@ -19,18 +24,16 @@ type ResizeArgs = {
   dimensions: ProbedImageSize
   file: PayloadRequestWithData['file']
   mimeType: string
-  req: PayloadRequestWithData & {
-    query?: {
-      uploadEdits?: UploadEdits
-    }
-  }
+  req: PayloadRequestWithData
   savedFilename: string
-  sharp: SharpDependency
+  sharp?: SharpDependency
   staticPath: string
+  uploadEdits?: UploadEdits
 }
 
 /** Result from resizing and transforming the requested image sizes */
 type ImageSizesResult = {
+  focalPoint?: UploadEdits['focalPoint']
   sizeData: FileSizes
   sizesToSave: FileToSave[]
 }
@@ -71,6 +74,16 @@ const createImageName = (
   extension: string,
 ) => `${outputImageName}-${width}x${height}.${extension}`
 
+type CreateResultArgs = {
+  filename?: FileSize['filename']
+  filesize?: FileSize['filesize']
+  height?: FileSize['height']
+  mimeType?: FileSize['mimeType']
+  name: string
+  sizesToSave?: FileToSave[]
+  width?: FileSize['width']
+}
+
 /**
  * Create the result object for the image resize operation based on the
  * provided parameters. If the name is not provided, an empty result object
@@ -85,26 +98,28 @@ const createImageName = (
  * @param sizesToSave - the sizes to save
  * @returns the result object
  */
-const createResult = (
-  name: string,
-  filename: FileSize['filename'] = null,
-  width: FileSize['width'] = null,
-  height: FileSize['height'] = null,
-  filesize: FileSize['filesize'] = null,
-  mimeType: FileSize['mimeType'] = null,
-  sizesToSave: FileToSave[] = [],
-): ImageSizesResult => ({
-  sizeData: {
-    [name]: {
-      filename,
-      filesize,
-      height,
-      mimeType,
-      width,
+const createResult = ({
+  name,
+  filename = null,
+  filesize = null,
+  height = null,
+  mimeType = null,
+  sizesToSave = [],
+  width = null,
+}: CreateResultArgs): ImageSizesResult => {
+  return {
+    sizeData: {
+      [name]: {
+        filename,
+        filesize,
+        height,
+        mimeType,
+        width,
+      },
     },
-  },
-  sizesToSave,
-})
+    sizesToSave,
+  }
+}
 
 /**
  * Check if the image needs to be resized according to the requested dimensions
@@ -202,13 +217,13 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
  *
  * The image will be resized according to the provided
  * resize config. If no image sizes are requested, the resolved data will be empty.
- * For every image that dos not need to be resized, an result object with `null`
+ * For every image that does not need to be resized, a result object with `null`
  * parameters will be returned.
  *
  * @param resizeConfig - the resize config
  * @returns the result of the resize operation(s)
  */
-export default async function resizeAndTransformImageSizes({
+export async function resizeAndTransformImageSizes({
   config,
   dimensions,
   file,
@@ -217,12 +232,35 @@ export default async function resizeAndTransformImageSizes({
   savedFilename,
   sharp,
   staticPath,
+  uploadEdits,
 }: ResizeArgs): Promise<ImageSizesResult> {
-  const { imageSizes } = config.upload
-  // Noting to resize here so return as early as possible
-  if (!imageSizes) return { sizeData: {}, sizesToSave: [] }
+  const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
-  const sharpBase = sharp(file.tempFilePath || file.data).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  // Focal point adjustments
+  const incomingFocalPoint = uploadEdits.focalPoint
+    ? {
+        x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
+        y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
+      }
+    : undefined
+
+  const defaultResult: ImageSizesResult = {
+    ...(focalPointEnabled && incomingFocalPoint && { focalPoint: incomingFocalPoint }),
+    sizeData: {},
+    sizesToSave: [],
+  }
+
+  if (!imageSizes || !sharp) {
+    return defaultResult
+  }
+
+  // Determine if the file is animated
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const sharpOptions: SharpOptions = {}
+
+  if (fileIsAnimatedType) sharpOptions.animated = true
+
+  const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
@@ -232,54 +270,63 @@ export default async function resizeAndTransformImageSizes({
       // skipped COMPLETELY and thus will not be included in the resulting images.
       // All further format/trim options will thus be skipped as well.
       if (preventResize(imageResizeConfig, dimensions)) {
-        return createResult(imageResizeConfig.name)
+        return createResult({ name: imageResizeConfig.name })
       }
 
       const imageToResize = sharpBase.clone()
       let resized = imageToResize
 
-      if (
-        req.query?.uploadEdits?.focalPoint &&
-        applyPayloadAdjustments(imageResizeConfig, dimensions)
-      ) {
-        const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
-        const resizeAspectRatio = resizeWidth / resizeHeight
+      const metadata = await sharpBase.metadata()
+
+      if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
+        let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
+
         const originalAspectRatio = dimensions.width / dimensions.height
-        const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+
+        // Calculate resizeWidth based on original aspect ratio if it's undefined
+        if (resizeHeight && !resizeWidth) {
+          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
+        }
+
+        // Calculate resizeHeight based on original aspect ratio if it's undefined
+        if (resizeWidth && !resizeHeight) {
+          resizeHeight = Math.round(resizeWidth / originalAspectRatio)
+        }
 
         // Scale the image up or down to fit the resize dimensions
         const scaledImage = imageToResize.resize({
-          height: prioritizeHeight ? resizeHeight : null,
-          width: prioritizeHeight ? null : resizeWidth,
+          height: resizeHeight,
+          width: resizeWidth,
         })
-        const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
-        // Focal point adjustments
-        const focalPoint = {
-          x: isNumber(req.query.uploadEdits.focalPoint?.x)
-            ? req.query.uploadEdits.focalPoint.x
-            : 50,
-          y: isNumber(req.query.uploadEdits.focalPoint?.y)
-            ? req.query.uploadEdits.focalPoint.y
-            : 50,
-        }
+        const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
         const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
         const maxOffsetX = scaledImageInfo.width - safeResizeWidth
         const leftFocalEdge = Math.round(
-          scaledImageInfo.width * (focalPoint.x / 100) - safeResizeWidth / 2,
+          scaledImageInfo.width * (incomingFocalPoint.x / 100) - safeResizeWidth / 2,
         )
         const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
 
-        const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
-        const maxOffsetY = scaledImageInfo.height - safeResizeHeight
+        const isAnimated = fileIsAnimatedType && metadata.pages
+
+        let safeResizeHeight = resizeHeight ?? scaledImageInfo.height
+
+        if (isAnimated && resizeHeight === undefined) {
+          safeResizeHeight = scaledImageInfo.height / metadata.pages
+        }
+
+        const maxOffsetY = isAnimated
+          ? safeResizeHeight - (resizeHeight ?? safeResizeHeight)
+          : scaledImageInfo.height - safeResizeHeight
+
         const topFocalEdge = Math.round(
-          scaledImageInfo.height * (focalPoint.y / 100) - safeResizeHeight / 2,
+          scaledImageInfo.height * (incomingFocalPoint.y / 100) - safeResizeHeight / 2,
         )
         const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
 
         // extract the focal area from the scaled image
-        resized = scaledImage.extract({
+        resized = (fileIsAnimatedType ? imageToResize : scaledImage).extract({
           height: safeResizeHeight,
           left: safeOffsetX,
           top: safeOffsetY,
@@ -306,9 +353,11 @@ export default async function resizeAndTransformImageSizes({
 
       const sanitizedImage = getSanitizedImageData(savedFilename)
 
-      req.payloadUploadSizes[imageResizeConfig.name] = bufferData
+      if (req.payloadUploadSizes) {
+        req.payloadUploadSizes[imageResizeConfig.name] = bufferData
+      }
 
-      const mimeInfo = await fromBuffer(bufferData)
+      const mimeInfo = await fileTypeFromBuffer(bufferData)
 
       const imageNameWithDimensions = createImageName(
         sanitizedImage.name,
@@ -327,15 +376,15 @@ export default async function resizeAndTransformImageSizes({
       }
 
       const { height, size, width } = bufferInfo
-      return createResult(
-        imageResizeConfig.name,
-        imageNameWithDimensions,
+      return createResult({
+        name: imageResizeConfig.name,
+        filename: imageNameWithDimensions,
+        filesize: size,
+        height: fileIsAnimatedType && metadata.pages ? height / metadata.pages : height,
+        mimeType: mimeInfo?.mime || mimeType,
+        sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,
-        height,
-        size,
-        mimeInfo?.mime || mimeType,
-        [{ buffer: bufferData, path: imagePath }],
-      )
+      })
     }),
   )
 
@@ -345,6 +394,6 @@ export default async function resizeAndTransformImageSizes({
       acc.sizesToSave.push(...result.sizesToSave)
       return acc
     },
-    { sizeData: {}, sizesToSave: [] },
+    { ...defaultResult },
   )
 }

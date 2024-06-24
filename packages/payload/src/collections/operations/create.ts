@@ -119,6 +119,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
       collection,
       config,
       data,
+      operation: 'create',
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
@@ -163,14 +164,6 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    // if (!collectionConfig.upload.disableLocalStorage) {
-    //   await uploadFiles(payload, filesToUpload, req.t)
-    // }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
@@ -200,7 +193,10 @@ export const createOperation = async <TSlug extends CollectionSlug>(
       global: null,
       operation: 'create',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////
@@ -265,8 +261,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     if (collectionConfig.auth && collectionConfig.auth.verify) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      sendVerificationEmail({
+      await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
         disableEmail: disableVerificationEmail,

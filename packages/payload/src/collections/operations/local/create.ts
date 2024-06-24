@@ -1,5 +1,4 @@
-import type { CollectionSlug, GeneratedTypes } from '../../../index.js'
-import type { Payload } from '../../../index.js'
+import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
 import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type { DataFromCollectionSlug, RequiredDataFromCollectionSlug } from '../../config/types.js'

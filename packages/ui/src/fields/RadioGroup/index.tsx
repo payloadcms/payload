@@ -1,15 +1,15 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { Option } from 'payload/types'
+import type { Option } from 'payload'
 
-import { optionIsObject } from 'payload/types'
+import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 import './index.scss'
@@ -18,9 +18,9 @@ const baseClass = 'radio-group'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type RadioFieldProps = FormFieldBase & {
   layout?: 'horizontal' | 'vertical'
@@ -68,17 +68,20 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const {
+    formInitializing,
+    formProcessing,
     path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const value = valueFromContext || valueFromProps
 
@@ -90,7 +93,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        readOnly && `${baseClass}--read-only`,
+        disabled && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -99,57 +102,58 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      </div>
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
-        {options.map((option) => {
-          let optionValue = ''
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
 
-          if (optionIsObject(option)) {
-            optionValue = option.value
-          } else {
-            optionValue = option
-          }
+        <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
+          {options.map((option) => {
+            let optionValue = ''
 
-          const isSelected = String(optionValue) === String(value)
+            if (optionIsObject(option)) {
+              optionValue = option.value
+            } else {
+              optionValue = option
+            }
 
-          const id = `field-${path}-${optionValue}${uuid ? `-${uuid}` : ''}`
+            const isSelected = String(optionValue) === String(value)
 
-          return (
-            <li key={`${path} - ${optionValue}`}>
-              <Radio
-                id={id}
-                isSelected={isSelected}
-                onChange={() => {
-                  if (typeof onChangeFromProps === 'function') {
-                    onChangeFromProps(optionValue)
-                  }
+            const id = `field-${path}-${optionValue}${uuid ? `-${uuid}` : ''}`
 
-                  if (!readOnly) {
-                    setValue(optionValue)
-                  }
-                }}
-                option={optionIsObject(option) ? option : { label: option, value: option }}
-                path={path}
-                readOnly={readOnly}
-                uuid={uuid}
-              />
-            </li>
-          )
-        })}
-      </ul>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+            return (
+              <li key={`${path} - ${optionValue}`}>
+                <Radio
+                  id={id}
+                  isSelected={isSelected}
+                  onChange={() => {
+                    if (typeof onChangeFromProps === 'function') {
+                      onChangeFromProps(optionValue)
+                    }
+
+                    if (!disabled) {
+                      setValue(optionValue)
+                    }
+                  }}
+                  option={optionIsObject(option) ? option : { label: option, value: option }}
+                  path={path}
+                  readOnly={disabled}
+                  uuid={uuid}
+                />
+              </li>
+            )
+          })}
+        </ul>
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
+      </div>
     </div>
   )
 }

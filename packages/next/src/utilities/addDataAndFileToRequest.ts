@@ -1,6 +1,6 @@
-import type { PayloadRequest, PayloadRequestData } from 'payload/types'
+import type { PayloadRequest, PayloadRequestData } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 
 import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 

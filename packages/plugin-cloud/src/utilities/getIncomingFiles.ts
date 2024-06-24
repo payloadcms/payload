@@ -1,4 +1,4 @@
-import type { FileData, PayloadRequestWithData } from 'payload/types'
+import type { FileData, PayloadRequestWithData } from 'payload'
 
 import type { File } from '../types.js'
 

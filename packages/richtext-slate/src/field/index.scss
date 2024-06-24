@@ -3,6 +3,7 @@
 .rich-text {
   margin-bottom: base(2);
   display: flex;
+  flex-direction: column;
   isolation: isolate;
 
   &__toolbar {

@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
 import GlobalLivePreviewButton from '../components/GlobalLivePreviewButton/index.js'
 import link from '../fields/link.js'

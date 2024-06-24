@@ -1,5 +1,5 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 

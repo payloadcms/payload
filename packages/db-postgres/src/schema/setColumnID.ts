@@ -1,8 +1,8 @@
 import type { PgColumnBuilder } from 'drizzle-orm/pg-core'
 
 import { numeric, serial, uuid, varchar } from 'drizzle-orm/pg-core'
-import { type Field, fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { type Field, flattenTopLevelFields } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { IDType, PostgresAdapter } from '../types.js'
 

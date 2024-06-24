@@ -1,9 +1,11 @@
-import type { CollectionSlug } from 'payload'
-import type { DataFromCollectionSlug, PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  PayloadRequestWithData,
+} from 'payload'
 
-import { deleteByIDOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { deleteByIDOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

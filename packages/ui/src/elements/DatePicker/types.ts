@@ -1,4 +1,4 @@
-import type { DayPickerProps, SharedProps, TimePickerProps } from 'payload/types'
+import type { DayPickerProps, SharedProps, TimePickerProps } from 'payload'
 
 export type Props = SharedProps &
   DayPickerProps &

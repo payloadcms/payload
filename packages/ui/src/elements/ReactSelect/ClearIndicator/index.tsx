@@ -1,10 +1,11 @@
+'use client'
 import type { ClearIndicatorProps } from 'react-select'
 
 import React from 'react'
 
 import type { Option as OptionType } from '../types.js'
 
-import { X } from '../../../icons/X/index.js'
+import { XIcon } from '../../../icons/X/index.js'
 import './index.scss'
 
 const baseClass = 'clear-indicator'
@@ -18,7 +19,8 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
   return (
     <div
       className={baseClass}
-      ref={ref}
+      // TODO Fix this - Broke with React 19 types
+      ref={typeof ref === 'string' ? null : ref}
       {...restInnerProps}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
@@ -29,7 +31,7 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
       role="button"
       tabIndex={0}
     >
-      <X className={`${baseClass}__icon`} />
+      <XIcon className={`${baseClass}__icon`} />
     </div>
   )
 }

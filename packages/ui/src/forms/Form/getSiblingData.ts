@@ -1,14 +1,15 @@
-import type { Data, FormState } from 'payload/types'
-
-import flatleyImport from 'flatley'
-const { unflatten } = flatleyImport
+import type { Data, FormState } from 'payload'
 
 import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
+import { unflatten } from '../../utilities/unflatten.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
+  if (!fields) return null
+
   if (path.indexOf('.') === -1) {
     return reduceFieldsToValues(fields, true)
   }
+
   const siblingFields = {}
 
   // Determine if the last segment of the path is an array-based row
@@ -36,5 +37,5 @@ export const getSiblingData = (fields: FormState, path: string): Data => {
     }
   })
 
-  return unflatten(siblingFields, { safe: true })
+  return unflatten(siblingFields)
 }

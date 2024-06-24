@@ -3,7 +3,7 @@ title: Collection Hooks
 label: Collections
 order: 20
 desc: You can add hooks to any Collection, several hook types are available including beforeChange, afterRead, afterDelete and more.
-keywords: hooks, collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: hooks, collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Collections feature the ability to define the following hooks:
@@ -75,7 +75,7 @@ import { CollectionBeforeOperationHook } from 'payload/types'
 const beforeOperationHook: CollectionBeforeOperationHook = async ({
   args, // original arguments passed into the operation
   operation, // name of the operation
-  req, // full express request
+  req, // full Request object
 }) => {
   return args // return modified operation arguments as necessary
 }
@@ -96,7 +96,7 @@ import { CollectionBeforeValidateHook } from 'payload/types'
 
 const beforeValidateHook: CollectionBeforeValidateHook = async ({
   data, // incoming data to update or create with
-  req, // full express request
+  req, // full Request object
   operation, // name of the operation ie. 'create', 'update'
   originalDoc, // original document
 }) => {
@@ -113,7 +113,7 @@ import { CollectionBeforeChangeHook } from 'payload/types'
 
 const beforeChangeHook: CollectionBeforeChangeHook = async ({
   data, // incoming data to update or create with
-  req, // full express request
+  req, // full Request object
   operation, // name of the operation ie. 'create', 'update'
   originalDoc, // original document
 }) => {
@@ -130,7 +130,7 @@ import { CollectionAfterChangeHook } from 'payload/types'
 
 const afterChangeHook: CollectionAfterChangeHook = async ({
   doc, // full document data
-  req, // full express request
+  req, // full Request object
   previousDoc, // document data before updating the collection
   operation, // name of the operation ie. 'create', 'update'
 }) => {
@@ -147,7 +147,7 @@ import { CollectionBeforeReadHook } from 'payload/types'
 
 const beforeReadHook: CollectionBeforeReadHook = async ({
   doc, // full document data
-  req, // full express request
+  req, // full Request object
   query, // JSON formatted query
 }) => {
   return doc
@@ -163,7 +163,7 @@ import { CollectionAfterReadHook } from 'payload/types'
 
 const afterReadHook: CollectionAfterReadHook = async ({
   doc, // full document data
-  req, // full express request
+  req, // full Request object
   query, // JSON formatted query
   findMany, // boolean to denote if this hook is running against finding one, or finding many
 }) => {
@@ -179,7 +179,7 @@ Runs before the `delete` operation. Returned values are discarded.
 import { CollectionBeforeDeleteHook } from 'payload/types';
 
 const beforeDeleteHook: CollectionBeforeDeleteHook = async ({
-  req, // full express request
+  req, // full Request object
   id, // id of document to delete
 }) => {...}
 ```
@@ -192,7 +192,7 @@ Runs immediately after the `delete` operation removes records from the database.
 import { CollectionAfterDeleteHook } from 'payload/types';
 
 const afterDeleteHook: CollectionAfterDeleteHook = async ({
-  req, // full express request
+  req, // full Request object
   id, // id of document to delete
   doc, // deleted document
 }) => {...}
@@ -210,7 +210,7 @@ import { CollectionAfterOperationHook } from 'payload/types'
 const afterOperationHook: CollectionAfterOperationHook = async ({
   args, // arguments passed into the operation
   operation, // name of the operation
-  req, // full express request
+  req, // full Request object
   result, // the result of the operation, before modifications
 }) => {
   return result // return modified result as necessary
@@ -225,7 +225,7 @@ For auth-enabled Collections, this hook runs during `login` operations where a u
 import { CollectionBeforeLoginHook } from 'payload/types'
 
 const beforeLoginHook: CollectionBeforeLoginHook = async ({
-  req, // full express request
+  req, // full Request object
   user, // user being logged in
 }) => {
   return user
@@ -240,7 +240,7 @@ For auth-enabled Collections, this hook runs after successful `login` operations
 import { CollectionAfterLoginHook } from 'payload/types';
 
 const afterLoginHook: CollectionAfterLoginHook = async ({
-  req, // full express request
+  req, // full Request object
   user, // user that was logged in
   token, // user token
 }) => {...}
@@ -254,7 +254,7 @@ For auth-enabled Collections, this hook runs after `logout` operations.
 import { CollectionAfterLogoutHook } from 'payload/types';
 
 const afterLogoutHook: CollectionAfterLogoutHook = async ({
-  req, // full express request
+  req, // full Request object
 }) => {...}
 ```
 
@@ -266,8 +266,8 @@ For auth-enabled Collections, this hook runs after `refresh` operations.
 import { CollectionAfterRefreshHook } from 'payload/types';
 
 const afterRefreshHook: CollectionAfterRefreshHook = async ({
-  req, // full express request
-  res, // full express response
+  req, // full Request object
+  res, // full Response object
   token, // newly refreshed user token
 }) => {...}
 ```
@@ -280,7 +280,7 @@ For auth-enabled Collections, this hook runs after `me` operations.
 import { CollectionAfterMeHook } from 'payload/types';
 
 const afterMeHook: CollectionAfterMeHook = async ({
-  req, // full express request
+  req, // full Request object
   response, // response to return
 }) => {...}
 ```

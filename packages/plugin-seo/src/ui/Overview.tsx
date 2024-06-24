@@ -1,9 +1,8 @@
 'use client'
 
-import type { FormField } from 'payload/types'
+import type { FormField } from 'payload'
 
-import { useAllFormFields, useForm } from '@payloadcms/ui/forms/Form'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useAllFormFields, useForm, useTranslation } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'

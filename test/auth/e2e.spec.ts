@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -119,22 +119,18 @@ describe('auth', () => {
       await page.locator('#change-password').click()
       await page.locator('#field-password').fill('password')
       await page.locator('#field-confirm-password').fill('password')
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-email')).toHaveValue(emailBeforeSave)
     })
 
     test('should have up-to-date user in `useAuth` hook', async () => {
       await page.goto(url.account)
-
+      await page.waitForURL(url.account)
       await expect(page.locator('#users-api-result')).toHaveText('Hello, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Hello, world!')
-
       const field = page.locator('#field-custom')
       await field.fill('Goodbye, world!')
       await saveDocAndAssert(page)
-
       await expect(page.locator('#users-api-result')).toHaveText('Goodbye, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
     })

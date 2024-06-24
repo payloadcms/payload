@@ -1,11 +1,11 @@
 import type {
+  DefaultTranslationKeys,
   DefaultTranslationsObject,
   I18n,
   InitI18n,
   InitTFunction,
   Language,
 } from '../types.js'
-import type { DefaultTranslationKeys } from '../types.js'
 
 import { importDateFNSLocale } from '../importDateFNSLocale.js'
 import { deepMerge } from './deepMerge.js'

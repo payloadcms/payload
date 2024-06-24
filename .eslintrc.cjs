@@ -32,6 +32,12 @@ module.exports = {
       },
     },
     {
+      files: ['templates/vercel-postgres/**'],
+      rules: {
+        'no-restricted-exports': 'off',
+      },
+    },
+    {
       files: ['package.json', 'tsconfig.json'],
       rules: {
         'perfectionist/sort-array-includes': 'off',

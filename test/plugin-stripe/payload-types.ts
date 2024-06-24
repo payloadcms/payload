@@ -8,132 +8,139 @@
 
 export interface Config {
   collections: {
-    users: User;
-    products: Product;
-    customers: Customer;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
-  locale: 'en' | 'es' | 'de';
+    users: User
+    products: Product
+    customers: Customer
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: 'en' | 'es' | 'de'
   user:
     | (User & {
-        collection: 'users';
+        collection: 'users'
       })
     | (Customer & {
-        collection: 'customers';
-      });
+        collection: 'customers'
+      })
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
-  name?: string | null;
+  id: string
+  name?: string | null
   price?: {
-    stripePriceID?: string | null;
-    stripeJSON?: string | null;
-  };
-  stripeID?: string | null;
-  skipSync?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+    stripePriceID?: string | null
+    stripeJSON?: string | null
+  }
+  stripeID?: string | null
+  skipSync?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customers".
  */
 export interface Customer {
-  id: string;
-  name?: string | null;
+  id: string
+  name?: string | null
   subscriptions?:
     | {
-        stripeSubscriptionID?: string | null;
-        stripeProductID?: string | null;
-        product?: (string | null) | Product;
+        stripeSubscriptionID?: string | null
+        stripeProductID?: string | null
+        product?: (string | null) | Product
         status?:
-          | ('active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'trialing' | 'unpaid')
-          | null;
-        id?: string | null;
+          | (
+              | 'active'
+              | 'canceled'
+              | 'incomplete'
+              | 'incomplete_expired'
+              | 'past_due'
+              | 'trialing'
+              | 'unpaid'
+            )
+          | null
+        id?: string | null
       }[]
-    | null;
-  stripeID?: string | null;
-  skipSync?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+    | null
+  stripeID?: string | null
+  skipSync?: boolean | null
+  updatedAt: string
+  createdAt: string
+  enableAPIKey?: boolean | null
+  apiKey?: string | null
+  apiKeyIndex?: string | null
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user:
     | {
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'users'
+        value: string | User
       }
     | {
-        relationTo: 'customers';
-        value: string | Customer;
-      };
-  key?: string | null;
+        relationTo: 'customers'
+        value: string | Customer
+      }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

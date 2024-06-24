@@ -1,12 +1,14 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, TypeWithID } from 'payload/types'
+import type { Field, SanitizedConfig, TypeWithID } from 'payload'
+
+import type { PostgresAdapter } from '../../types.js'
 
 import { createBlocksMap } from '../../utilities/createBlocksMap.js'
 import { createPathMap } from '../../utilities/createRelationshipMap.js'
 import { traverseFields } from './traverseFields.js'
 
 type TransformArgs = {
+  adapter: PostgresAdapter
   config: SanitizedConfig
   data: Record<string, unknown>
   fallbackLocale?: false | string
@@ -17,6 +19,7 @@ type TransformArgs = {
 // This is the entry point to transform Drizzle output data
 // into the shape Payload expects based on field schema
 export const transform = <T extends Record<string, unknown> | TypeWithID>({
+  adapter,
   config,
   data,
   fields,
@@ -44,6 +47,7 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
   const deletions = []
 
   const result = traverseFields<T>({
+    adapter,
     blocks,
     config,
     dataRef: {

@@ -1,23 +1,22 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
-import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
-import { Upload } from '@payloadcms/ui/elements/Upload'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
-import { OperationProvider } from '@payloadcms/ui/providers/Operation'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { useRouter } from 'next/navigation.js'
-import { useSearchParams } from 'next/navigation.js'
+import {
+  DocumentControls,
+  DocumentFields,
+  Form,
+  type FormProps,
+  OperationProvider,
+  Upload,
+  useAuth,
+  useComponentMap,
+  useConfig,
+  useDocumentEvents,
+  useDocumentInfo,
+  useEditDepth,
+  useFormQueryParams,
+} from '@payloadcms/ui'
+import { getFormState } from '@payloadcms/ui/shared'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
@@ -44,14 +43,15 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    getDocPermissions,
     getDocPreferences,
     getVersions,
     globalSlug,
+    hasPublishPermission,
     hasSavePermission,
     initialData: data,
     initialState,
     isEditing,
+    isInitializing,
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
@@ -63,8 +63,6 @@ export const DefaultEditView: React.FC = () => {
   const params = useSearchParams()
   const depth = useEditDepth()
   const { reportUpdate } = useDocumentEvents()
-
-  const { i18n } = useTranslation()
 
   const {
     admin: { user: userSlug },
@@ -115,7 +113,6 @@ export const DefaultEditView: React.FC = () => {
       }
 
       void getVersions()
-      void getDocPermissions()
 
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
@@ -147,7 +144,6 @@ export const DefaultEditView: React.FC = () => {
       depth,
       collectionSlug,
       getVersions,
-      getDocPermissions,
       isEditing,
       refreshCookieAsync,
       adminRoute,
@@ -185,23 +181,13 @@ export const DefaultEditView: React.FC = () => {
           action={action}
           className={`${baseClass}__form`}
           disableValidationOnSubmit
-          disabled={!hasSavePermission}
-          initialState={initialState}
+          disabled={isInitializing || !hasSavePermission}
+          initialState={!isInitializing && initialState}
+          isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          <FormLoadingOverlayToggle
-            action={operation}
-            // formIsLoading={isLoading}
-            // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
-            name={`collection-edit--${
-              typeof collectionConfig?.labels?.singular === 'string'
-                ? collectionConfig.labels.singular
-                : i18n.t('general:document')
-            }`}
-            type="withoutNav"
-          />
           {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetDocumentStepNav
@@ -221,9 +207,10 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
-            isEditing={Boolean(id)}
+            isEditing={isEditing}
             permissions={docPermissions}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />

@@ -1,0 +1,105 @@
+.links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  margin: 0 var(--gutter);
+  border-block: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 1px;
+  pointer-events: all;
+
+  @media screen and (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+    border-bottom: none;
+  }
+
+  @media screen and (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+
+  a {
+    position: relative;
+    display: flex;
+    width: 100%;
+    padding: 24px;
+    padding-right: 48px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.75);
+
+    @media screen and (max-width: 1200px) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h6 {
+      margin: 0;
+      color: #fff;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      letter-spacing: -0.02em;
+
+      @media screen and (max-width: 1200px) {
+        font-size: 16px;
+      }
+    }
+
+    span {
+      line-height: 1.5;
+    }
+
+    &::before {
+      display: block;
+      position: absolute;
+      content: url('/arrow.svg');
+      width: 12px;
+      height: 12px;
+      top: 24px;
+      right: 24px;
+      opacity: 0.25;
+      transition-property: top, right, opacity;
+      transition-duration: 0.3s;
+    }
+
+    &::after {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      content: ('');
+      display: block;
+      width: 0;
+      height: 2px;
+      background-color: #fff;
+      transition: width 0.3s;
+    }
+
+    &:hover {
+      &::before {
+        top: 20px;
+        right: 20px;
+        opacity: 1;
+      }
+
+      &::after {
+        width: 100%;
+      }
+
+      .scanlines {
+        opacity: 0.1;
+      }
+    }
+  }
+}
+
+.scanlines {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: url('/scanline-light.png');
+  opacity: 0;
+  transition: opacity 0.3s;
+}

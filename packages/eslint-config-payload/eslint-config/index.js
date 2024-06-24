@@ -10,18 +10,32 @@ const baseRules = {
   'no-use-before-define': 'off',
   'object-shorthand': 'warn',
   'no-useless-escape': 'warn',
+  'import/no-duplicates': 'warn',
   'perfectionist/sort-objects': [
     'error',
     {
       type: 'natural',
       order: 'asc',
       'partition-by-comment': true,
+      'partition-by-new-line': true,
       groups: ['top', 'unknown'],
       'custom-groups': {
         top: ['_id', 'id', 'name', 'slug', 'type'],
       },
     },
   ],
+  /*'perfectionist/sort-object-types': [
+    'error',
+    {
+      'partition-by-new-line': true,
+    },
+  ],
+  'perfectionist/sort-interfaces': [
+    'error',
+    {
+      'partition-by-new-line': true,
+    },
+  ],*/
   'payload/no-jsx-import-statements': 'error',
 }
 
@@ -110,7 +124,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: [], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
+  plugins: ['import'], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
   overrides: [
     {
       files: ['**/*.ts'],

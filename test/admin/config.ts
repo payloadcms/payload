@@ -1,5 +1,9 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -42,6 +46,7 @@ import {
   customParamViewPath,
   customViewPath,
 } from './shared.js'
+
 export default buildConfigWithDefaults({
   admin: {
     components: {
@@ -83,6 +88,12 @@ export default buildConfigWithDefaults({
     },
     routes: customAdminRoutes,
     meta: {
+      titleSuffix: '- Custom CMS',
+      description: 'This is a custom meta description',
+      openGraph: {
+        title: 'This is a custom OG title',
+        description: 'This is a custom OG description',
+      },
       icons: [
         {
           type: 'image/png',
@@ -106,6 +117,7 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,
     CollectionGroup2A,
@@ -156,5 +168,8 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)
     }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

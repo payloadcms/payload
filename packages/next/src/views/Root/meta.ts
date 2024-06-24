@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountMetadata } from '../Account/index.js'
@@ -35,12 +35,6 @@ type Args = {
 
 export const generatePageMetadata = async ({ config: configPromise, params }: Args) => {
   const config = await configPromise
-
-  let route = config.routes.admin
-
-  if (Array.isArray(params.segments)) {
-    route = route + '/' + params.segments.join('/')
-  }
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -101,7 +95,6 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
           config,
           globalConfig,
           i18n,
-          isEditing: false,
           params,
         })
       }
@@ -118,16 +111,19 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:version
         // --> /collections/:collectionSlug/:id/api
-        const isEditing = ['api', 'create', 'preview', 'versions'].includes(segmentTwo)
-        meta = await generateDocumentMetadata({ collectionConfig, config, i18n, isEditing, params })
+        meta = await generateDocumentMetadata({ collectionConfig, config, i18n, params })
       } else if (isGlobal) {
         // Custom Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/versions/:version
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/api
-        const isEditing = ['api', 'create', 'preview', 'versions'].includes(segmentTwo)
-        meta = await generateDocumentMetadata({ config, globalConfig, i18n, isEditing, params })
+        meta = await generateDocumentMetadata({
+          config,
+          globalConfig,
+          i18n,
+          params,
+        })
       }
       break
     }

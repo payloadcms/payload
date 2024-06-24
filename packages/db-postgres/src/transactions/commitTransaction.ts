@@ -1,4 +1,4 @@
-import type { CommitTransaction } from 'payload/database'
+import type { CommitTransaction } from 'payload'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
   // if the session was deleted it has already been aborted

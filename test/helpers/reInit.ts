@@ -1,4 +1,4 @@
-import type { Endpoint, PayloadHandler } from 'payload/config'
+import type { Endpoint, PayloadHandler } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
@@ -17,7 +17,8 @@ const handler: PayloadHandler = async (req) => {
       collectionSlugs: payload.config.collections.map(({ slug }) => slug),
       seedFunction: payload.config.onInit,
       snapshotKey: String(data.snapshotKey),
-      uploadsDir: String(data.uploadsDir),
+      // uploadsDir can be string or stringlist
+      uploadsDir: data.uploadsDir as string | string[],
     })
 
     return Response.json(

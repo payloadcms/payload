@@ -55,6 +55,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       collection: collectionConfig.slug,
       limit: 1,
       locale,
+      pagination: false,
       req,
       where: { id: { equals: id } },
     })

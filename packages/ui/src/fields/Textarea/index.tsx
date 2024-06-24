@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -66,12 +66,13 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   return (
     <TextareaInput
@@ -90,7 +91,7 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={readOnly}
+      readOnly={disabled}
       required={required}
       rows={rows}
       rtl={isRTL}

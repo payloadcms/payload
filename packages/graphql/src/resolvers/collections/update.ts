@@ -1,9 +1,11 @@
-import type { CollectionSlug } from 'payload'
-import type { DataFromCollectionSlug, PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  PayloadRequestWithData,
+} from 'payload'
 
-import { updateByIDOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { isolateObjectProperty, updateByIDOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -49,7 +51,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
       id: args.id,
       autosave: args.autosave,
       collection,
-      data: args.data as any,
+      data: args.data,
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),

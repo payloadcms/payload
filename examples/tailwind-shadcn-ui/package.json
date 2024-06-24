@@ -1,20 +1,17 @@
 {
   "name": "tailwind-shadcn",
-  "description": "A blank template to get started with Payload 3.0",
   "version": "1.0.0",
+  "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "generate:types": "payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "generate:types": "payload generate:types"
-  },
-  "engines": {
-    "node": ">=18.19.0"
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "beta",
@@ -24,7 +21,7 @@
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
     "lucide-react": "^0.376.0",
-    "next": "14.3.0-canary.7",
+    "next": "14.3.0-canary.68",
     "payload": "beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -42,5 +39,8 @@
     "tailwindcss": "^3.4.3",
     "tsx": "^4.7.1",
     "typescript": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18.19.0"
   }
 }

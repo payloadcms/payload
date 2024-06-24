@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { groupFieldsSlug } from '../../slugs.js'
 
@@ -75,6 +75,17 @@ const GroupFields: CollectionConfig = {
           fields: [{ name: 'text', type: 'text' }],
         },
       ],
+    },
+    {
+      name: 'localizedGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      localized: true,
     },
     {
       name: 'potentiallyEmptyGroup',
