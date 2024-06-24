@@ -85,7 +85,7 @@
     "is-buffer": "^2.0.5",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
-    "qs": "6.11.2",
+    "qs": "6.12.1",
     "react-animate-height": "2.1.2",
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",

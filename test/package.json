@@ -57,6 +57,7 @@
     "jwt-decode": "4.0.0",
     "lexical": "0.15.0",
     "payload": "workspace:*",
+    "qs": "6.12.1",
     "server-only": "^0.0.1",
     "slate": "0.91.4",
     "tempy": "^1.0.1",
