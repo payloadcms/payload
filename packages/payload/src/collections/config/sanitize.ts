@@ -1,7 +1,6 @@
 import merge from 'deepmerge'
 
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import baseAccountLockFields from '../../auth/baseFields/accountLock.js'
@@ -169,11 +168,6 @@ export const sanitizeCollection = async (
     richTextSanitizationPromises,
     validRelationships,
   })
-
-  sanitized.fields.push({
-    name: 'id',
-    type: config.db.defaultIDType,
-  } as Field)
 
   return sanitized as SanitizedCollectionConfig
 }
