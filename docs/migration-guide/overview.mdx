@@ -5,7 +5,15 @@
 
 ## Overview
 
-Payload 3.0 is a major release with breaking changes. This guide will highlight the changes and help you migrate your existing Payload 2.0 application to 3.0.
+Payload 3.0 is a major release with breaking changes. This migration guide will cover:
+
+1. What has changed?
+2. How to migrate from 2.0 to 3.0 (two options)
+  2.a. Moving your existing app to a new 3.0 template
+  2.b. Updating your existing app
+3. Breaking Changes
+
+// TODO: add links to beta docs once they are live
 
 ## What has changed?
 
@@ -27,15 +35,22 @@ Key changes:
 - **Email Adapters**: Email functionality has been abstracted out into email adapters
 - **Custom Endpoints**: Root endpoints no longer exist on the config. If you want to create a “root” endpoint, you can add them to the api folder within your Payload application
 - **Uploads**: `staticDir` must now be an absolute path and `staticURL` has been removed
-- **Description and Label handling**: Globals config: `admin.description` no longer accepts a custom component. You will have to move it to `admin.components.elements.Description`. Collections config: `admin.description` no longer accepts a custom component. You will have to move it to `admin.components.edit.Description`. All Fields: `field.admin.description` no longer accepts a custom component. You will have to move it to `field.admin.components.Description`. Collapsible Field: `field.label` no longer accepts a custom component. You will have to move it to `field.admin.components.RowLabel`. Array Field: `field.admin.components.RowLabel` no longer accepts strings or records. If you are using our exported field components in your own app, their `labelProps` property has been stripped down and no longer contains the `label` and `required` prop. Those can now only be configured at the top-level
 - **Custom Components**: Components containing both server and client code must now be split into separate files
 - **Deploying to Vercel and Netlify**: Vercel Blob Storage and Netlify Blobs are now officially supported (so no S3 needed for files)
 
+These are not all breaking changes and will not all be applicable to you, however you should still briefly review them to ensure you are aware of the changes and how they may affect your app.
+
 ## Migrating from 2.0 to 3.0
 
-To migrate your existing app, you can either move your existing configuration to a fresh 3.0 template, or update your existing app by making the necessary changes to match the new 3.0 structure.
+To migrate your existing app, you can either:
 
-### Move your existing app to a new 3.0 template
+1. Move your existing Payload configuration to a fresh 3.0 template (which includes all of the Next.js files that you'll need)
+
+**OR**
+
+2. Update your existing app by making the necessary changes to match the new 3.0 structure
+
+### 1 - Move your existing app to a new 3.0 template
 
 1. Create a new Payload 3.0 app using the blank template:
 
@@ -43,9 +58,9 @@ To migrate your existing app, you can either move your existing configuration to
 npx create-payload-app@beta -t blank
 ```
 
-2. Copy your existing `payload.config` to the new app, review the Payload Config breaking changes outlined [below](#payload-config) and update as necessary.
+2. Copy your existing `payload.config` and all dependent files to the new app, review the Payload Config breaking changes outlined [below](#payload-config) and update as necessary.
 
-3. Copy your existing collections, review the collection changes outlined [here](#collections) and update.
+3. Review the collection changes outlined [here](#collections) and update.
 
 4. If you were using any custom components, endpoints, hooks, or plugins, make sure to update them to the new structure. See all the breaking changes outlined [below](#custom-components).
 
@@ -55,22 +70,26 @@ npx create-payload-app@beta -t blank
 
 If you are facing errors at this stage, review the remaining breaking changes outlined below or reach out to the Payload team for support.
 
-### Update your existing app to 3.0
+### 2 - Update your existing app to 3.0
 
-1. Update your existing app to the latest version:
+1. Update your existing app to the latest version and add additional dependencies:
 
 ```bash
-pnpm i payloadcms@beta
+// Update Payload to 3.0
+pnpm i payload@beta
+
+// Add the new dependencies
+pnpm i @payloadcms/next @payloadcms/ui @payloadcms/plugin-cloud
 ```
 
-2. Add the (app) folder and required files:
+2. Add the (payload) folder and required files:
    As Payload 3.0 is now fully Next.js native, you will need to add the required files for the admin UI and route handlers.
 
    We have consolidated all admin views into a single `page.tsx` and consolidated the API endpoints into single `route.ts` files for simplicity and performance.
    The benefit of this structure is that you only need to compile the admin UI / REST API / GraphQL API a single time then it will be served from the server.
    This means that the admin UI will be faster and more responsive, and the server will be more efficient.
 
-   The (app) folder should include the following folders and files:
+   Your Next.js `/app` folder should include the following:
    - `(payload)`
     - `admin/[[...segments]]`
       - `page.tsx`
@@ -84,62 +103,141 @@ pnpm i payloadcms@beta
       - `route.ts`
     - `custom.scss`
     - `layout.tsx`
-    - `my-route`
-      - `route.ts`
 
-   We recommend you copy the entire (app) folder from the blank 3.0 template, or you can create them manually.
+   We recommend you copy the entire (payload) folder from the blank 3.0 template, or you can create them manually.
    You can find the template on [GitHub](https://github.com/payloadcms/payload/tree/beta/templates/blank-3.0) or use the following command to create a new app and copy from there:
 
    ```bash
     npx create-payload-app@beta -t blank
     ```
 
-  3. Update the following root files: `next.config.js`, `server.ts`, `tsconfig.json` and `payload.config.ts`
+  3. Remove the `server.ts` file:
 
-  - **next.config.js**: You can copy your existing `next.config.js` file to the new app, but you then need to import and wrap the export in the `withPayload` function.
-  This function is now required for Payload to operate, and ensures compatibility with other packages that Payload uses such as `drizzle-kit`, `sharp`, `pino`, and `mongodb`.
+  The purpose of the `server.ts` file in 2.0 was to boot up an Express app, which was then used to serve the admin panel and API routes. However, since we are no longer relying on Express for this, and instead using Next.js, the entire file can be removed.
+
+  If you were passing any custom code in the `server.ts` file, you should migrate this to the `init` function in your `payload.config.ts` file.
+
+  NOTE: You can still use Express with Next.js by creating a custom server file in the root of your app, i.e. `server.js` and using it as a custom server with Next.js' Custom Server functionality. Learn more about this from the [Next.js documentation](https://nextjs.org/docs/pages/building-your-application/configuring/custom-server).
+
+  4. Update the following files: `next.config.js`,`tsconfig.json`, `package.json` and `payload.config.ts`
+
+  - **next.config.js**:
+
+  To start, copy your existing `next.config.js` file to the new app, then you'll need to update the file to an ESM file.
+  You can do this by either:
+    - Renaming the file from `next.config.js` to `next.config.mjs`
+    **or**
+    - Adding the `type: module` property to your `package.json` file
+
+  After you have updated the file to an ESM file, you then need to import and wrap the export in the `withPayload` function. This function is now required for Payload to run and ensures compatibility with other packages that Payload uses such as `drizzle-kit`, `sharp`, `pino`, and `mongodb`.
 
   ```tsx
-  import { withPayload } from '@payloadcms/next/withPayload' // Import the withPayload function
+  import { withPayload } from '@payloadcms/next/withPayload' // Import the withPayload function from the @payloadcms/next package
 
     /** @type {import('next').NextConfig} */
     const nextConfig = {
       // Your existing Next.js config here
     }
 
-  export default withPayload(nextConfig) // Wrap the module.exports in the withPayload function
+  export default withPayload(nextConfig) // Wrap in the withPayload function
   ```
 
-  - **server.ts**: This file is no longer needed in 3.0, instead the `init` function has been moved to the `payload.config.ts` file.
-  You should remove the `server.ts` file, and make sure to migrate any custom server code to the `init` function in the `payload.config.ts` file.
+  - **tsconfig.json**: Add a TypeScript alias to point to your Payload config, this is required for Payload to work correctly. By default, the `page.tsx` files and `route.ts` files within the `(app)` folder use this alias.
 
-  - **tsconfig.json**: Add a TypeScript alias to point to your Payload config, this is required for the Payload UI to work correctly. By default, the `page.tsx` files and `route.ts` files within the `(app)` folder use this alias.
+  Next, you should update the `moduleResolution` from `node` to `bundler`. This mode supports package.json "imports" and "exports", but unlike the Node.js resolution modes, `bundler` does not require file extensions on relative import paths. Read more about this in the [TypeScript documentation](https://www.typescriptlang.org/tsconfig/#moduleResolution).
+
 
   ```tsx
   {
     "compilerOptions": {
       "baseUrl": ".",
       "paths": {
-        "@payloadcms/config": ["./payload.config.ts"]
+        "@payloadcms/config": ["./payload.config.ts"] // alias to your Payload config
       }
+      "moduleResolution": "bundler", // Use 'bundler' for Next.js
     }
   }
   ```
 
-  - **payload.config.ts**: There are a few different changes to the `payload.config.ts` file in 3.0, copy your existing file to the new app and review the changes outlined [below](#payload-config) to update as necessary.
+  - **package.json**: Update existing `scripts` to include the new `dev`, `build` and `start` commands:
+    ```json
+    {
+      "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+      },
+    }
+    ```
 
-  ```tsx
-  import { buildConfig } from 'payload/config'
-  import { secret } from './secret'
+  - **payload.config.ts**: There are a few different changes to the `payload.config.ts` file in 3.0, copy your existing file to the new app and review the breaking changes outlined [below](#payload-config) then update as necessary.
+
+  ```ts
+  import { buildConfig } from 'payload/config' // Import from payload/config instead of payload
 
   export default payload.init(() => {
+    // There are several new and depreceated properties in the Payload config:
+
     return buildConfig({
-      // Your Payload config here
+      // These are a handful of the changes
+      admin: {
+        // Any bundler related options should be removed
+        bundler: 'webpack' // ❌ Old
+
+        // These properties have been depreceated
+        css: 'custom.scss', // ❌ Old
+        scss: 'custom.scss', // ❌ Old
+
+        // The favicon property has been replaced by icons
+        favicon: 'path-to-favicon.svg', // ❌ Old
+        icons: [{ path: 'path-to-favicon.svg', sizes: '32x32' }] // ✅ New
+
+        // indexHTML has bene deprecated
+        indexHTML: 'path-to-index.html' // ❌ Old
+
+        // The livePreview.url function has changed
+        livePreview: {
+          // ✅ New args
+          url: ({ collectionConfig, globalConfig }) => {
+            return `http://localhost:3000/${collectionConfig.slug}/[id]`
+          }
+          // ❌ Old args
+          url: ({ documentInfo }) => {
+            return `http://localhost:3000/${documentInfo.slug}/[id]`
+          }
+        }
+
+        // The meta.ogImage property has been replaced by openGraph.images
+        meta: {
+          ogImage: '' // ❌ Old
+          openGraph: {
+            images: [] // ✅ New
+          }
+        }
+      }
+
+      // Email functionality has been abstracted out into email adapters
+      email: nodemailerAdapter() // ✅ New
+
+      // The logoutRoute and inactivityRoute properties have been combined into a single routes property
+      logoutRoute: '/custom-logout', // ❌ Old
+      inactivityRoute: '/custom-inactivity', // ❌ Old
+      routes: {
+        logout: '/custom-logout', // ✅ New
+        inactivity: '/custom-inactivity' // ✅ New
+      }
+
+      // Rate limiting has been removed
+      rateLimit: 100 // ❌ Old
+
+      // Your secret key should be passed directly to the config
+      secret: process.env.PAYLOAD_SECRET || 'your-secret-key',
+
+      // Sharp is now an optional dependency
+      sharp, // only needed if you are using image resizing or cropping
     })
   })
   ```
-
-  4. Environment variables: Update the variables in your `.env` to use the `NEXT_PUBLIC` prefix instead of `PAYLOAD_PUBLIC`.
 
   5. Collections: Migrate and update your existing collections, review the collection breaking changes outlined [here](#collections).
 
@@ -163,281 +261,309 @@ All breaking changes are divided into the following categories:
 - [Uploads](#uploads)
 - [Plugins](#plugins)
 
+NOTE: Not all of these changes will be applicable to you, and you may not need to make all of these changes.
+
+We recommend that you get the proper files in place, and then look at your config and dependencies for TypeScript errors, and tackle them by resolving one by one.
+
 ## Environment variables
 
-- Environment variables prefixed with `PAYLOAD_PUBLIC` will no longer be available on the client. In order to access them on the client, those will now have to be prefixed with `NEXT_PUBLIC` instead.
+:warning: Environment variables prefixed with `PAYLOAD_PUBLIC` will no longer be available on the client. In order to access them on the client, those will now have to be prefixed with `NEXT_PUBLIC` instead.
 
 ## Payload Config
 
-1. Delete the `admin.bundler` property from your Payload config:
+Depreceated properties:
+- `admin.bundler`
+- `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite`
+- `admin.css` and `admin.scss`
+- `admin.indexHTML`
+- `rateLimit`
+- `admin.favicon` replaced by `admin.icons`
+- `admin.logoutRoute` and `admin.inactivityRoute` replaced by `admin.routes`
+- `admin.meta.ogImage` replaced by `admin.meta.openGraph.images`
 
-Payload no longer bundles the admin panel. Instead, we rely directly on Next.js for bundling.
+Other changes:
+- The secret key should be passed directly to the `payload.config`
+- Email now uses email adapters
+- `livePreview.url` args have changed
+- `views.Edit` / `views.Edit.Default` / `views.Edit.Default.Component` have a new type
+- `buildConfig` should be imported directly from `payload` instead of `payload/config`
+- `sharp` is now an optional dependency
+- You can use new option `admin.custom` for server only files
 
-2. This also means that the `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite` packages have been deprecated:
+:rotating_light: The `admin.bundler` property has been depreceated and should be deleted from your Payload config:
 
-You can completely uninstall those from your project by removing them from your `package.json` file and re-running your package manager’s installation process, i.e. `pnpm i`.
+  Payload no longer uses an additional bundler, we rely directly on Next.js for bundling.
 
-3. Add the `secret` property to your Payload config. This used to be set in the `payload.init()` function of your `server.ts` file. Move it to `payload.config.ts` instead:
+:rotating_light: The `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite` packages have been deprecated:
 
-```tsx
-// payload.config.ts
+  You can uninstall them from your project by:
+    1. Removing them from your `package.json` file
+    2. Then re-running `pnpm i / npm i / yarn i`
 
-buildConfig({
-  // ...
-  secret: process.env.PAYLOAD_SECRET
-})
-```
+:rotating_light: The `admin.css` and `admin.scss` properties no longer exist:
 
-4. The `admin.css` and `admin.scss` properties in the Payload config have been removed:
+  Instead for any global styles you can use `(payload)/custom.scss` to import or add your own styles.
 
-Instead for any global styles you can:
+  Plugins that need to inject global styles should do so via the provider config at `admin.components.providers`.
 
-- use `(payload)/custom.scss` to import or add your own styles, eg. for tailwind
-- plugins that need to inject global styles should do so via the provider config at `admin.components.providers` :
+  Here is a basic example of a provider:
 
-```tsx
-// payload.config.js
+  ```tsx
+  import React from 'react'
+  import './globals.css'
 
-admin: {
-  components: {
-    providers: [
-      MyProvider
-    ]
+  const MyProvider: React.FC<{children?: any}>= ({ children }) = {
+    return (
+      <React.fragment>
+        {children}
+      </React.fragment>
+    )
   }
-},
 
-// MyProvider.tsx
+  export default Provider
+  ```
 
-import React from 'react'
-import './globals.css'
+  Then in your `payload.config.ts`, you would add this provider to the `admin.components.providers` array:
 
-const MyProvider: React.FC<{children?: any}= ({ children }) = {
-  return (
-    <React.fragment>
-      {children}
-    </React.fragment>
-  )
-}
-
-export default Provider
-```
-
-5. The `admin.indexHTML` property has been removed
-
-You can now add your own custom HTML directly into the `pages/_document.tsx` file.
-
-6. `buildConfig` should be imported directly from `payload` instead of `payload/config`
-
-7. `sharp` is now an optional dependency
-
-Sharp should only be defined if you have configured image resizing or cropping
-
-8. Use the `custom` property for ***server only*** files.
-
-The `admin.custom` property is still functional will be available in both server and client bundles.
-
-```tsx
-// payload.config.ts
-
-buildConfig({
-  // Server Only
-  custom: {
-    someProperty: 'value'
-  },
+  ```ts
   admin: {
-    custom: {
-      name: 'Customer portal' // Available in server and client
+    components: {
+      providers: [
+        MyProvider
+      ]
     }
   },
-})
-```
-
-9. The `admin.favicon` property is now `admin.icons` and the types have changed
-
-Reference: https://github.com/payloadcms/payload/pull/6347
+  ```
 
 
-```tsx
-// payload.config.ts
+:rotating_light: The `admin.indexHTML` property has been removed.
 
-// ❌ Before
+  You can now add your own custom HTML directly into the `pages/_document.tsx` file.
 
-{
-  // ...
-  admin: {
-    favicon: 'path-to-favicon.svg'
-  }
-}
+:rotating_light: Remove any Rate Limiting configuration
 
-// ✅ After
+  Rate limiting has been removed from Payload. If you were using it, you will need to implement your own rate limiting middleware by using a custom server (Express or similar)
 
-{
-  // ...
-  admin: {
-    icons: [{
-      path: 'path-to-favicon.svg',
-      sizes: '32x32'
-    }]
-  }
-}
-```
+:rotating_light: The `admin.favicon` property has been replaced by `admin.icons` and the types have changed
 
-See also: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons
-
-10. The `admin.meta.ogImage` property has been replaced by `admin.meta.openGraph.images`
-
-Reference: https://github.com/payloadcms/payload/pull/6227
-
-```tsx
-// payload.config.ts
-
-// ❌ Before
-{
-  admin: {
-    meta: {
-      ogImage: ''
+  ❌ Old
+  ```ts
+  {
+    // ...
+    admin: {
+      favicon: 'path-to-favicon.svg'
     }
   }
-}
-```
+  ```
 
-```tsx
-// ✅ After
+  ✅ New
+  ```ts
+  {
+    // ...
+    admin: {
+      icons: [{
+        path: 'path-to-favicon.svg',
+        sizes: '32x32'
+      }]
+    }
+  }
+  ```
 
-{
-  admin: {
-    meta: {
-      openGraph: {
-        images: []
+  This change was made to allow compatibility with Next.js, learn more about how icons are generated [here](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons)
+
+:rotating_light: The `admin.logoutRoute` and `admin.inactivityRoute` properties have been combined into a single `admin.routes` property:
+
+  To migrate, simply move those two keys as follows:
+
+  ❌ Old
+  ```ts
+  {
+    // ...
+    admin: {
+      logoutRoute: '/custom-logout',
+      inactivityRoute: '/custom-inactivity'
+    }
+  }
+  ```
+
+  ✅ New
+  ```ts
+  {
+    // ...
+    admin: {
+      routes: {
+        logout: '/custom-logout',
+        inactivity: '/custom-inactivity'
       }
     }
   }
-}
-```
+  ```
 
-See also : https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
+:rotating_light: The `admin.meta.ogImage` property has been replaced by `admin.meta.openGraph.images`
 
-11. The `admin.logoutRoute` and `admin.inactivityRoute` properties have been consolidated into a single `admin.routes` property
-
-Reference: https://github.com/payloadcms/payload/pull/6354
-
-To migrate, simply move those two keys as follows:
-
-```tsx
-// payload.config.ts
-
-// ❌ Before
-
-{
-  // ...
-  admin: {
-    logoutRoute: '/custom-logout',
-    inactivityRoute: '/custom-inactivity'
-  }
-}
-
-// ✅ After
-
-{
-  // ...
-  admin: {
-    routes: {
-      logout: '/custom-logout',
-      inactivity: '/custom-inactivity'
+  ```ts
+  {
+    admin: {
+      meta: {
+        ogImage: ''
+      }
     }
   }
-}
-```
+  ```
 
-12. The args of the `livePreview.url` function have changed.
+  ✅ New
+  ```ts
+  {
+    admin: {
+      meta: {
+        openGraph: {
+          images: []
+        }
+      }
+    }
+  }
+  ```
 
-It no longer receives `documentInfo` as an arg, and instead, now has `collectionConfig` and `globalConfig`.
+Next.js reference: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
+
+:rotating_light: Your secret key should now be passed directly to the `payload.config.ts` file.
+
+  This used to be passed to the `payload.init()` function of your `server.ts` file. It now should be set in your `payload.config.ts` instead:
+
+  ```ts
+  buildConfig({
+    // Rest of your config
+    secret: process.env.PAYLOAD_SECRET
+  })
+  ```
 
 
-13. The `views.Edit` or `views.Edit.Default` or `views.Edit.Default.Component` properties are no longer of type `AdminViewComponent` like the other views.
+:rotating_light: Email functionality has been abstracted out into email adapters.
 
-Instead, their new type is `React.FC<EditViewProps>` where you now only receive the config slug. This is because of how custom edit views need to be rendered server-side, then returned by a client-component (i.e. the document drawer). There’s an example of this adapter pattern in the first sections of this page.
-
-
-14. The  `href` and `isActive` functions in the view tab config no longer sends the `match` or `location` arguments.
-
-This is is a property specific to React Router, not Next.js. If you need to do fancy matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions.
-
-15. Remove any Rate Limiting configuration
-
-Rate limiting has been removed from Payload. If you were using it, you will need to implement your own rate limiting middleware by using a custom server (Express or similar)
-
-16. Email functionality has been abstracted out into email adapters.
-
-- All existing nodemailer functionality was abstracted into the `@payloadcms/email-nodemailer` package
+- All existing nodemailer functionality was abstracted into the `@payloadcms/email-nodemailer` package
 - No longer configured with ethereal.email by default.
-- Ability to pass email into the `init` function has been removed.
-- Warning will be given on startup if email not configured. Any `sendEmail` call will simply log the To address and subject.
+- Ability to pass email into the `init` function has been removed.
+- Warning will be given on startup if email not configured. Any `sendEmail` call will simply log the `To address` and `subject`.
 - A Resend adapter is now also available via the `@payloadcms/email-resend` package.
 
-### If you used the default email configuration in 2.0 (nodemailer):
+  ❌ Old
+  ```ts
+  export default buildConfig({
+    email: {
+      transport: someNodemailerTransport
+      fromName: 'hello',
+      fromAddress: 'hello@example.com',
+    },
+  })
+  ```
 
-```tsx
-// ❌ Before
+  ✅ New
+  ```ts
+  import { nodemailerAdapter } from '@payloadcms/email-nodemailer' // Import the nodemailer adapter
 
-// via payload.init
-payload.init({
-  email: {
-    transport: someNodemailerTransport
-    fromName: 'hello',
-    fromAddress: 'hello@example.com',
-  },
-})
-// or via email in payload.config.ts
-export default buildConfig({
-  email: {
-    transport: someNodemailerTransport
-    fromName: 'hello',
-    fromAddress: 'hello@example.com',
-  },
-})
+  export default buildConfig({
+    email: nodemailerAdapter() // Pass the email adapter
+  })
 
-// ✅ After
-
-// Using new nodemailer adapter package
-
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-
-export default buildConfig({
-  email: nodemailerAdapter() // This will be the old ethereal.email functionality
-})
-
-// or pass in transport
-
-export default buildConfig({
-  email: nodemailerAdapter({
-    defaultFromAddress: 'info@payloadcms.com',
-    defaultFromName: 'Payload',
-    transport: await nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+  export default buildConfig({
+    email: nodemailerAdapter({
+    // pass in transport options if needed
+      defaultFromAddress: 'info@payloadcms.com',
+      defaultFromName: 'Payload',
+      transport: await nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: 587,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      })
     })
   })
-})
-```
+  ```
 
+:warning: The args of the `livePreview.url` function have changed.
+
+  It no longer receives `documentInfo` as an arg, and instead it has `collectionConfig` and `globalConfig`.
+
+:warning: The `views.Edit` / `views.Edit.Default` / `views.Edit.Default.Component` properties are no longer of type `AdminViewComponent` like the other views.
+
+  Instead, their new type is `React.FC<EditViewProps>` where you now only receive the config slug. This is because of how custom edit views need to be rendered server-side, then returned by a client-component (i.e. the document drawer).
+
+:warning: The  `href` and `isActive` functions in the view tab config no longer sends the `match` or `location` arguments.
+
+  This is is a property specific to React Router, not Next.js. If you need to do fancy matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions.
+
+:warning: `buildConfig` should be imported directly from `payload` instead of `payload/config`
+
+:warning: `sharp` is now an optional dependency
+
+  Sharp is no longer required and should only be defined if you have configured image resizing or cropping
+
+:warning: Use the `custom` property for ***server only*** files.
+
+  The `admin.custom` property is still functional will be available in both server and client bundles.
+
+  ```ts
+  buildConfig({
+    custom: {
+      someProperty: 'value' // Available in server only
+    },
+    admin: {
+      custom: {
+        name: 'Customer portal' // Available in server and client
+      }
+    },
+  })
+  ```
 
 ## Collections
 
-1. The `collection.admin.hooks` property has been removed.
+:rotating_light: The `collection.admin.hooks` property has been removed.
 
-Instead, use the new `beforeDuplicate` field-level hook which take the usual field hook arguments.
+  Instead, use the new `beforeDuplicate` field-level hook which takes the usual field hook arguments.
 
-```tsx
-// TODO: add snippet here of old vs new
-```
+  ❌ Old
+  ```tsx
+  {
+    admin: {
+      hooks: {
+        beforeDuplicate: async ({ data }) => {
+          return {
+            ...data,
+            title: `${data.title} - Copy`
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  ✅ New
+  ```tsx
+  {
+    admin: {...},
+    fields: [
+      {
+        name: 'title',
+        type: 'text',
+        admin: {
+          hooks: {
+            beforeDuplicate: async ({ data }) => {
+              return {
+                ...data,
+                title: `${data.title} - Copy`
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+  ```
 
 
-2. The `admin.components.views[].Tab.pillLabel` has been replaced with `admin.components.views[].Tab.Pill`
+:rotating_light: The `admin.components.views[].Tab.pillLabel` has been replaced with `admin.components.views[].Tab.Pill`
 
 ```tsx
 // Collection.ts
