@@ -46,7 +46,7 @@ const dirname = path.dirname(filename)
 // If you don't need to load your .env file, 
 // then you can skip this part!
 dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
+  path: path.resolve(dirname, '../.env'),
 })
 
 const seed = async () => {
