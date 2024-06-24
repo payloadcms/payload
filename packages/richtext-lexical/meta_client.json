@@ -1,0 +1,3995 @@
+{
+  "inputs": {
+    "src/field/lexical/theme/EditorTheme.tsx": { "bytes": 4478, "imports": [], "format": "esm" },
+    "src/field/lexical/config/client/default.ts": {
+      "bytes": 266,
+      "imports": [
+        {
+          "path": "src/field/lexical/theme/EditorTheme.tsx",
+          "kind": "import-statement",
+          "original": "../../theme/EditorTheme.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/config/client/loader.ts": { "bytes": 2805, "imports": [], "format": "esm" },
+    "src/field/lexical/config/client/sanitize.ts": {
+      "bytes": 6251,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/nodes/index.ts": { "bytes": 492, "imports": [], "format": "esm" },
+    "src/cell/index.tsx": {
+      "bytes": 6508,
+      "imports": [
+        { "path": "@lexical/headless", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/default.ts",
+          "kind": "import-statement",
+          "original": "../field/lexical/config/client/default.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/loader.ts",
+          "kind": "import-statement",
+          "original": "../field/lexical/config/client/loader.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/sanitize.ts",
+          "kind": "import-statement",
+          "original": "../field/lexical/config/client/sanitize.js"
+        },
+        {
+          "path": "src/field/lexical/nodes/index.ts",
+          "kind": "import-statement",
+          "original": "../field/lexical/nodes/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/AlignCenter/index.tsx": {
+      "bytes": 479,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/AlignJustify/index.tsx": {
+      "bytes": 484,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/AlignLeft/index.tsx": {
+      "bytes": 481,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/AlignRight/index.tsx": {
+      "bytes": 482,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/useLexicalFeature.tsx": {
+      "bytes": 867,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/createClientComponent.tsx": {
+      "bytes": 542,
+      "imports": [
+        {
+          "path": "src/useLexicalFeature.tsx",
+          "kind": "import-statement",
+          "original": "../../useLexicalFeature.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/align/toolbarAlignGroup.ts": {
+      "bytes": 358,
+      "imports": [
+        {
+          "path": "src/field/lexical/ui/icons/AlignLeft/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/AlignLeft/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/align/feature.client.tsx": {
+      "bytes": 4547,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/AlignCenter/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/AlignCenter/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/AlignJustify/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/AlignJustify/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/AlignLeft/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/AlignLeft/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/AlignRight/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/AlignRight/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/align/toolbarAlignGroup.ts",
+          "kind": "import-statement",
+          "original": "./toolbarAlignGroup.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Blockquote/index.tsx": {
+      "bytes": 848,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/shared/slashMenu/basicGroup.ts": {
+      "bytes": 361,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Text/index.tsx": {
+      "bytes": 657,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/shared/toolbar/textDropdownGroup.ts": {
+      "bytes": 355,
+      "imports": [
+        {
+          "path": "src/field/lexical/ui/icons/Text/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Text/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blockquote/markdownTransformer.ts": {
+      "bytes": 1105,
+      "imports": [
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blockquote/feature.client.tsx": {
+      "bytes": 2586,
+      "imports": [
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Blockquote/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/Blockquote/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/slashMenu/basicGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenu/basicGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/textDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/blockquote/markdownTransformer.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformer.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Block/index.tsx": {
+      "bytes": 502,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/config/client/EditorConfigProvider.tsx": {
+      "bytes": 4828,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/component/removeEmptyArrayValues.ts": {
+      "bytes": 598,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/blocks/component/FormSavePlugin.tsx": {
+      "bytes": 1026,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/blocks/component/removeEmptyArrayValues.ts",
+          "kind": "import-statement",
+          "original": "./removeEmptyArrayValues.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/component/BlockContent.tsx": {
+      "bytes": 8908,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "deep-equal", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/blocks/component/FormSavePlugin.tsx",
+          "kind": "import-statement",
+          "original": "./FormSavePlugin.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/component/index.tsx": {
+      "bytes": 5639,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "../nodes/BlocksNode.js", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "uuid", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/features/blocks/component/BlockContent.tsx",
+          "kind": "import-statement",
+          "original": "./BlockContent.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/nodes/BlocksNode.tsx": {
+      "bytes": 3130,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalDecoratorBlockNode.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/blocks/component/index.tsx",
+          "kind": "dynamic-import",
+          "original": "../component/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/plugin/commands.ts": {
+      "bytes": 254,
+      "imports": [{ "path": "lexical", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/features/blocks/drawer/index.tsx": {
+      "bytes": 3033,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/features/blocks/nodes/BlocksNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/BlocksNode.js"
+        },
+        {
+          "path": "src/field/features/blocks/plugin/commands.ts",
+          "kind": "import-statement",
+          "original": "../plugin/commands.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/plugin/index.tsx": {
+      "bytes": 2417,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/blocks/drawer/index.tsx",
+          "kind": "import-statement",
+          "original": "../drawer/index.js"
+        },
+        {
+          "path": "src/field/features/blocks/nodes/BlocksNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/BlocksNode.js"
+        },
+        {
+          "path": "src/field/features/blocks/plugin/commands.ts",
+          "kind": "import-statement",
+          "original": "./commands.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/blocks/feature.client.tsx": {
+      "bytes": 3148,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Block/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/Block/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/blocks/nodes/BlocksNode.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/BlocksNode.js"
+        },
+        {
+          "path": "src/field/features/blocks/plugin/commands.ts",
+          "kind": "import-statement",
+          "original": "./plugin/commands.js"
+        },
+        {
+          "path": "src/field/features/blocks/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/canUseDOM.ts": { "bytes": 170, "imports": [], "format": "esm" },
+    "src/field/lexical/utils/environment.ts": {
+      "bytes": 1339,
+      "imports": [
+        {
+          "path": "src/field/lexical/utils/canUseDOM.ts",
+          "kind": "import-statement",
+          "original": "./canUseDOM.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/debug/testRecorder/plugin/index.tsx": {
+      "bytes": 13300,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/utils/environment.ts",
+          "kind": "import-statement",
+          "original": "../../../../lexical/utils/environment.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/debug/testRecorder/feature.client.tsx": {
+      "bytes": 627,
+      "imports": [
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/debug/testRecorder/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/debug/treeView/plugin/index.tsx": {
+      "bytes": 767,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalTreeView.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/debug/treeView/feature.client.tsx": {
+      "bytes": 607,
+      "imports": [
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/debug/treeView/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Bold/index.tsx": {
+      "bytes": 777,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/shared/toolbarFormatGroup.ts": {
+      "bytes": 252,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/format/bold/markdownTransformers.ts": {
+      "bytes": 587,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/format/bold/feature.client.tsx": {
+      "bytes": 1660,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Bold/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Bold/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        },
+        {
+          "path": "src/field/features/format/bold/markdownTransformers.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformers.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Code/index.tsx": {
+      "bytes": 411,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/inlineCode/markdownTransformers.ts": {
+      "bytes": 173,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/format/inlineCode/feature.client.tsx": {
+      "bytes": 1418,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Code/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Code/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        },
+        {
+          "path": "src/field/features/format/inlineCode/markdownTransformers.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformers.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Italic/index.tsx": {
+      "bytes": 739,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/italic/markdownTransformers.ts": {
+      "bytes": 313,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/format/italic/feature.client.tsx": {
+      "bytes": 1450,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Italic/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Italic/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        },
+        {
+          "path": "src/field/features/format/italic/markdownTransformers.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformers.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Strikethrough/index.tsx": {
+      "bytes": 979,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/strikethrough/markdownTransformers.ts": {
+      "bytes": 185,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/format/strikethrough/feature.client.tsx": {
+      "bytes": 1403,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Strikethrough/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Strikethrough/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        },
+        {
+          "path": "src/field/features/format/strikethrough/markdownTransformers.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformers.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Subscript/index.tsx": {
+      "bytes": 886,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/subscript/feature.client.tsx": {
+      "bytes": 1337,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Subscript/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Subscript/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Superscript/index.tsx": {
+      "bytes": 864,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/superscript/feature.client.tsx": {
+      "bytes": 1355,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Superscript/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Superscript/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Underline/index.tsx": {
+      "bytes": 650,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/format/underline/feature.client.tsx": {
+      "bytes": 1337,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Underline/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Underline/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbarFormatGroup.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/H1/index.tsx": {
+      "bytes": 501,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/H2/index.tsx": {
+      "bytes": 798,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/H3/index.tsx": {
+      "bytes": 980,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/H4/index.tsx": {
+      "bytes": 546,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/H5/index.tsx": {
+      "bytes": 837,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/H6/index.tsx": {
+      "bytes": 960,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/markdown/createBlockNode.ts": {
+      "bytes": 421,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/heading/markdownTransformer.ts": {
+      "bytes": 1212,
+      "imports": [
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/utils/markdown/createBlockNode.ts",
+          "kind": "import-statement",
+          "original": "../../lexical/utils/markdown/createBlockNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/heading/feature.client.tsx": {
+      "bytes": 4279,
+      "imports": [
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/H1/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/H1/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/H2/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/H2/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/H3/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/H3/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/H4/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/H4/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/H5/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/H5/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/H6/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/H6/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/slashMenu/basicGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenu/basicGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/textDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/heading/markdownTransformer.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformer.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/HorizontalRule/index.tsx": {
+      "bytes": 346,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Add/index.tsx": {
+      "bytes": 273,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/shared/toolbar/addDropdownGroup.ts": {
+      "bytes": 350,
+      "imports": [
+        {
+          "path": "src/field/lexical/ui/icons/Add/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Add/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/horizontalRule/component/index.tsx": {
+      "bytes": 2584,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/useLexicalNodeSelection.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/horizontalRule/nodes/HorizontalRuleNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/HorizontalRuleNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/horizontalRule/nodes/HorizontalRuleNode.tsx": {
+      "bytes": 3721,
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/horizontalRule/component/index.tsx",
+          "kind": "dynamic-import",
+          "original": "../component/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/horizontalRule/markdownTransformer.ts": {
+      "bytes": 595,
+      "imports": [
+        {
+          "path": "src/field/features/horizontalRule/nodes/HorizontalRuleNode.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/HorizontalRuleNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/horizontalRule/plugin/index.tsx": {
+      "bytes": 1232,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/horizontalRule/nodes/HorizontalRuleNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/HorizontalRuleNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/horizontalRule/feature.client.tsx": {
+      "bytes": 2635,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/HorizontalRule/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/HorizontalRule/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/slashMenu/basicGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenu/basicGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/addDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/addDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/horizontalRule/markdownTransformer.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformer.js"
+        },
+        {
+          "path": "src/field/features/horizontalRule/nodes/HorizontalRuleNode.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/HorizontalRuleNode.js"
+        },
+        {
+          "path": "src/field/features/horizontalRule/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/IndentDecrease/index.tsx": {
+      "bytes": 564,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/IndentIncrease/index.tsx": {
+      "bytes": 561,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/indent/toolbarIndentGroup.ts": {
+      "bytes": 249,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/indent/feature.client.tsx": {
+      "bytes": 2191,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/IndentDecrease/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/IndentDecrease/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/icons/IndentIncrease/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/IndentIncrease/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/indent/toolbarIndentGroup.ts",
+          "kind": "import-statement",
+          "original": "./toolbarIndentGroup.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Link/index.tsx": {
+      "bytes": 582,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/getSelectedNode.ts": {
+      "bytes": 602,
+      "imports": [{ "path": "@lexical/selection", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/features/shared/toolbar/featureButtonsGroup.ts": {
+      "bytes": 262,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/link/nodes/LinkNode.ts": {
+      "bytes": 10690,
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/markdownTransformer.ts": {
+      "bytes": 1806,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/link/nodes/LinkNode.ts",
+          "kind": "import-statement",
+          "original": "./nodes/LinkNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/nodes/AutoLinkNode.ts": {
+      "bytes": 2091,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/link/nodes/LinkNode.ts",
+          "kind": "import-statement",
+          "original": "./LinkNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/invariant.ts": { "bytes": 638, "imports": [], "format": "esm" },
+    "src/field/features/link/plugins/autoLink/index.tsx": {
+      "bytes": 13444,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/utils/invariant.ts",
+          "kind": "import-statement",
+          "original": "../../../../lexical/utils/invariant.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/AutoLinkNode.ts",
+          "kind": "import-statement",
+          "original": "../../nodes/AutoLinkNode.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/LinkNode.ts",
+          "kind": "import-statement",
+          "original": "../../nodes/LinkNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/plugins/clickableLink/index.tsx": {
+      "bytes": 385,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalClickableLinkPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/commands.ts": {
+      "bytes": 271,
+      "imports": [{ "path": "lexical", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/setFloatingElemPositionForLinkEditor.ts": {
+      "bytes": 1230,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/link/drawer/index.tsx": {
+      "bytes": 2972,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "uuid", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        { "path": "./types.js", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/index.tsx": {
+      "bytes": 11840,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/utils/getSelectedNode.ts",
+          "kind": "import-statement",
+          "original": "../../../../../lexical/utils/getSelectedNode.js"
+        },
+        {
+          "path": "src/field/lexical/utils/setFloatingElemPositionForLinkEditor.ts",
+          "kind": "import-statement",
+          "original": "../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js"
+        },
+        {
+          "path": "src/field/features/link/drawer/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../drawer/index.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/AutoLinkNode.ts",
+          "kind": "import-statement",
+          "original": "../../../nodes/AutoLinkNode.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/LinkNode.ts",
+          "kind": "import-statement",
+          "original": "../../../nodes/LinkNode.js"
+        },
+        {
+          "path": "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/commands.ts",
+          "kind": "import-statement",
+          "original": "./commands.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/plugins/floatingLinkEditor/index.tsx": {
+      "bytes": 481,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/index.tsx",
+          "kind": "import-statement",
+          "original": "./LinkEditor/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/url.ts": { "bytes": 2050, "imports": [], "format": "esm" },
+    "src/field/features/link/plugins/link/index.tsx": {
+      "bytes": 2611,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/utils/url.ts",
+          "kind": "import-statement",
+          "original": "../../../../lexical/utils/url.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/LinkNode.ts",
+          "kind": "import-statement",
+          "original": "../../nodes/LinkNode.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/link/feature.client.tsx": {
+      "bytes": 3937,
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Link/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/Link/index.js"
+        },
+        {
+          "path": "src/field/lexical/utils/getSelectedNode.ts",
+          "kind": "import-statement",
+          "original": "../../lexical/utils/getSelectedNode.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/featureButtonsGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/featureButtonsGroup.js"
+        },
+        {
+          "path": "src/field/features/link/markdownTransformer.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformer.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/AutoLinkNode.ts",
+          "kind": "import-statement",
+          "original": "./nodes/AutoLinkNode.js"
+        },
+        {
+          "path": "src/field/features/link/nodes/LinkNode.ts",
+          "kind": "import-statement",
+          "original": "./nodes/LinkNode.js"
+        },
+        {
+          "path": "src/field/features/link/plugins/autoLink/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/autoLink/index.js"
+        },
+        {
+          "path": "src/field/features/link/plugins/clickableLink/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/clickableLink/index.js"
+        },
+        {
+          "path": "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/commands.ts",
+          "kind": "import-statement",
+          "original": "./plugins/floatingLinkEditor/LinkEditor/commands.js"
+        },
+        {
+          "path": "src/field/features/link/plugins/floatingLinkEditor/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/floatingLinkEditor/index.js"
+        },
+        {
+          "path": "src/field/features/link/plugins/link/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/link/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Checklist/index.tsx": {
+      "bytes": 432,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/plugin/index.tsx": {
+      "bytes": 255,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalListPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/shared/slashMenuListGroup.ts": {
+      "bytes": 359,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/lists/shared/markdown.ts": {
+      "bytes": 2683,
+      "imports": [{ "path": "@lexical/list", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/features/lists/checklist/markdownTransformers.ts": {
+      "bytes": 503,
+      "imports": [
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/lists/shared/markdown.ts",
+          "kind": "import-statement",
+          "original": "../shared/markdown.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/checklist/plugin/index.tsx": {
+      "bytes": 278,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalCheckListPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/checklist/feature.client.tsx": {
+      "bytes": 3538,
+      "imports": [
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Checklist/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/Checklist/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../../shared/toolbar/textDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/lists/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "../plugin/index.js"
+        },
+        {
+          "path": "src/field/features/lists/shared/slashMenuListGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenuListGroup.js"
+        },
+        {
+          "path": "src/field/features/lists/checklist/markdownTransformers.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformers.js"
+        },
+        {
+          "path": "src/field/features/lists/checklist/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/OrderedList/index.tsx": {
+      "bytes": 1099,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/orderedList/markdownTransformer.ts": {
+      "bytes": 488,
+      "imports": [
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/lists/shared/markdown.ts",
+          "kind": "import-statement",
+          "original": "../shared/markdown.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/orderedList/feature.client.tsx": {
+      "bytes": 3223,
+      "imports": [
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/OrderedList/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/OrderedList/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../../shared/toolbar/textDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/lists/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "../plugin/index.js"
+        },
+        {
+          "path": "src/field/features/lists/shared/slashMenuListGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenuListGroup.js"
+        },
+        {
+          "path": "src/field/features/lists/orderedList/markdownTransformer.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformer.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/UnorderedList/index.tsx": {
+      "bytes": 769,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/unorderedList/markdownTransformer.ts": {
+      "bytes": 488,
+      "imports": [
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/lists/shared/markdown.ts",
+          "kind": "import-statement",
+          "original": "../shared/markdown.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/lists/unorderedList/feature.client.tsx": {
+      "bytes": 3106,
+      "imports": [
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/UnorderedList/index.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/ui/icons/UnorderedList/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../../shared/toolbar/textDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/lists/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "../plugin/index.js"
+        },
+        {
+          "path": "src/field/features/lists/shared/slashMenuListGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenuListGroup.js"
+        },
+        {
+          "path": "src/field/features/lists/unorderedList/markdownTransformer.ts",
+          "kind": "import-statement",
+          "original": "./markdownTransformer.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/migrations/lexicalPluginToLexical/converter/index.ts": {
+      "bytes": 2843,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/Component.tsx": {
+      "bytes": 364,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/index.tsx": {
+      "bytes": 2286,
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/Component.tsx",
+          "kind": "dynamic-import",
+          "original": "./Component.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/migrations/lexicalPluginToLexical/feature.client.tsx": {
+      "bytes": 1442,
+      "imports": [
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/migrations/lexicalPluginToLexical/converter/index.ts",
+          "kind": "import-statement",
+          "original": "./converter/index.js"
+        },
+        {
+          "path": "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/index.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/unknownConvertedNode/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/nodeFormat.ts": { "bytes": 3639, "imports": [], "format": "esm" },
+    "src/field/features/migrations/slateToLexical/converter/index.ts": {
+      "bytes": 3609,
+      "imports": [
+        {
+          "path": "src/field/lexical/utils/nodeFormat.ts",
+          "kind": "import-statement",
+          "original": "../../../../lexical/utils/nodeFormat.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/Component.tsx": {
+      "bytes": 347,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/index.tsx": {
+      "bytes": 2286,
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/Component.tsx",
+          "kind": "dynamic-import",
+          "original": "./Component.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/migrations/slateToLexical/feature.client.tsx": {
+      "bytes": 1367,
+      "imports": [
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/migrations/slateToLexical/converter/index.ts",
+          "kind": "import-statement",
+          "original": "./converter/index.js"
+        },
+        {
+          "path": "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/index.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/unknownConvertedNode/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/paragraph/feature.client.tsx": {
+      "bytes": 2404,
+      "imports": [
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Text/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/Text/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/slashMenu/basicGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenu/basicGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/textDropdownGroup.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Relationship/index.tsx": {
+      "bytes": 802,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/relationship/drawer/commands.ts": {
+      "bytes": 260,
+      "imports": [{ "path": "lexical", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/features/relationship/nodes/components/RelationshipComponent.tsx": {
+      "bytes": 5968,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/useLexicalNodeSelection.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/features/relationship/drawer/commands.ts",
+          "kind": "import-statement",
+          "original": "../../drawer/commands.js"
+        },
+        {
+          "path": "src/field/features/relationship/nodes/RelationshipNode.tsx",
+          "kind": "import-statement",
+          "original": "../RelationshipNode.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/relationship/nodes/RelationshipNode.tsx": {
+      "bytes": 4161,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalDecoratorBlockNode.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/relationship/nodes/components/RelationshipComponent.tsx",
+          "kind": "dynamic-import",
+          "original": "./components/RelationshipComponent.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/relationship/utils/EnabledRelationshipsCondition.tsx": {
+      "bytes": 1406,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/relationship/drawer/index.tsx": {
+      "bytes": 3050,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/relationship/nodes/RelationshipNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/RelationshipNode.js"
+        },
+        {
+          "path": "src/field/features/relationship/plugins/index.tsx",
+          "kind": "import-statement",
+          "original": "../plugins/index.js"
+        },
+        {
+          "path": "src/field/features/relationship/utils/EnabledRelationshipsCondition.tsx",
+          "kind": "import-statement",
+          "original": "../utils/EnabledRelationshipsCondition.js"
+        },
+        {
+          "path": "src/field/features/relationship/drawer/commands.ts",
+          "kind": "import-statement",
+          "original": "./commands.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/relationship/plugins/index.tsx": {
+      "bytes": 2858,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/relationship/drawer/index.tsx",
+          "kind": "import-statement",
+          "original": "../drawer/index.js"
+        },
+        {
+          "path": "src/field/features/relationship/nodes/RelationshipNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/RelationshipNode.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/relationship/feature.client.tsx": {
+      "bytes": 2767,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Relationship/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/Relationship/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/slashMenu/basicGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenu/basicGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/addDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/addDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/relationship/drawer/commands.ts",
+          "kind": "import-statement",
+          "original": "./drawer/commands.js"
+        },
+        {
+          "path": "src/field/features/relationship/nodes/RelationshipNode.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/RelationshipNode.js"
+        },
+        {
+          "path": "src/field/features/relationship/plugins/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/shared/ToolbarButton/index.tsx": {
+      "bytes": 3288,
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/shared/ToolbarDropdown/DropDown.tsx": {
+      "bytes": 7894,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/shared/ToolbarDropdown/index.tsx": {
+      "bytes": 4691,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarDropdown/DropDown.tsx",
+          "kind": "import-statement",
+          "original": "./DropDown.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/fixed/Toolbar/index.tsx": {
+      "bytes": 8819,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../../shared/ToolbarButton/index.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarDropdown/index.tsx",
+          "kind": "import-statement",
+          "original": "../../shared/ToolbarDropdown/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/fixed/feature.client.tsx": {
+      "bytes": 725,
+      "imports": [
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/toolbars/fixed/Toolbar/index.tsx",
+          "kind": "import-statement",
+          "original": "./Toolbar/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/getDOMRangeRect.ts": { "bytes": 461, "imports": [], "format": "esm" },
+    "src/field/lexical/utils/setFloatingElemPosition.ts": {
+      "bytes": 3481,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/inline/Toolbar/index.tsx": {
+      "bytes": 11682,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/utils/getDOMRangeRect.ts",
+          "kind": "import-statement",
+          "original": "../../../../lexical/utils/getDOMRangeRect.js"
+        },
+        {
+          "path": "src/field/lexical/utils/setFloatingElemPosition.ts",
+          "kind": "import-statement",
+          "original": "../../../../lexical/utils/setFloatingElemPosition.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../../shared/ToolbarButton/index.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarDropdown/index.tsx",
+          "kind": "import-statement",
+          "original": "../../shared/ToolbarDropdown/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/toolbars/inline/feature.client.tsx": {
+      "bytes": 646,
+      "imports": [
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/toolbars/inline/Toolbar/index.tsx",
+          "kind": "import-statement",
+          "original": "./Toolbar/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/icons/Upload/index.tsx": {
+      "bytes": 1108,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/upload/drawer/commands.ts": {
+      "bytes": 261,
+      "imports": [{ "path": "lexical", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/features/upload/component/ExtraFieldsDrawer/index.tsx": {
+      "bytes": 4314,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "uuid", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/upload/component/index.tsx": {
+      "bytes": 8084,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/useLexicalNodeSelection.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/features/relationship/utils/EnabledRelationshipsCondition.tsx",
+          "kind": "import-statement",
+          "original": "../../relationship/utils/EnabledRelationshipsCondition.js"
+        },
+        {
+          "path": "src/field/features/upload/drawer/commands.ts",
+          "kind": "import-statement",
+          "original": "../drawer/commands.js"
+        },
+        {
+          "path": "src/field/features/upload/nodes/UploadNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/UploadNode.js"
+        },
+        {
+          "path": "src/field/features/upload/component/ExtraFieldsDrawer/index.tsx",
+          "kind": "import-statement",
+          "original": "./ExtraFieldsDrawer/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/upload/nodes/UploadNode.tsx": {
+      "bytes": 4611,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalDecoratorBlockNode.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/upload/component/index.tsx",
+          "kind": "dynamic-import",
+          "original": "../component/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/upload/drawer/index.tsx": {
+      "bytes": 2570,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/relationship/utils/EnabledRelationshipsCondition.tsx",
+          "kind": "import-statement",
+          "original": "../../relationship/utils/EnabledRelationshipsCondition.js"
+        },
+        {
+          "path": "src/field/features/upload/nodes/UploadNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/UploadNode.js"
+        },
+        {
+          "path": "src/field/features/upload/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "../plugin/index.js"
+        },
+        {
+          "path": "src/field/features/upload/drawer/commands.ts",
+          "kind": "import-statement",
+          "original": "./commands.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/upload/plugin/index.tsx": {
+      "bytes": 2981,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/features/upload/drawer/index.tsx",
+          "kind": "import-statement",
+          "original": "../drawer/index.js"
+        },
+        {
+          "path": "src/field/features/upload/nodes/UploadNode.tsx",
+          "kind": "import-statement",
+          "original": "../nodes/UploadNode.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/features/upload/feature.client.tsx": {
+      "bytes": 2588,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/ui/icons/Upload/index.tsx",
+          "kind": "import-statement",
+          "original": "../../lexical/ui/icons/Upload/index.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/shared/slashMenu/basicGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/slashMenu/basicGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/addDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../shared/toolbar/addDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/upload/drawer/commands.ts",
+          "kind": "import-statement",
+          "original": "./drawer/commands.js"
+        },
+        {
+          "path": "src/field/features/upload/nodes/UploadNode.tsx",
+          "kind": "import-statement",
+          "original": "./nodes/UploadNode.js"
+        },
+        {
+          "path": "src/field/features/upload/plugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/EditorPlugin.tsx": {
+      "bytes": 503,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/MarkdownShortcut/index.tsx": {
+      "bytes": 466,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalMarkdownShortcutPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../config/client/EditorConfigProvider.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu.tsx": {
+      "bytes": 17364,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.tsx": {
+      "bytes": 8215,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu.tsx",
+          "kind": "import-statement",
+          "original": "./LexicalMenu.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu.tsx",
+          "kind": "import-statement",
+          "original": "./LexicalMenu.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/SlashMenu/useMenuTriggerMatch.ts": {
+      "bytes": 1891,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./LexicalTypeaheadMenuPlugin/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/SlashMenu/index.tsx": {
+      "bytes": 7083,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./LexicalTypeaheadMenuPlugin/index.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/useMenuTriggerMatch.ts",
+          "kind": "import-statement",
+          "original": "./useMenuTriggerMatch.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/guard.ts": { "bytes": 98, "imports": [], "format": "esm" },
+    "src/field/lexical/utils/point.ts": { "bytes": 930, "imports": [], "format": "esm" },
+    "src/field/lexical/plugins/handles/utils/calculateDistanceFromScrollerElem.ts": {
+      "bytes": 1098,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/rect.ts": {
+      "bytes": 5142,
+      "imports": [
+        {
+          "path": "src/field/lexical/utils/point.ts",
+          "kind": "import-statement",
+          "original": "./point.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/DraggableBlockPlugin/getBoundingRectWithoutTransform.ts": {
+      "bytes": 568,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/utils/getCollapsedMargins.ts": {
+      "bytes": 782,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/utils/getTopLevelNodeKeys.ts": {
+      "bytes": 229,
+      "imports": [{ "path": "lexical", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/utils/getNodeCloseToPoint.ts": {
+      "bytes": 6826,
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/utils/point.ts",
+          "kind": "import-statement",
+          "original": "../../../utils/point.js"
+        },
+        {
+          "path": "src/field/lexical/utils/rect.ts",
+          "kind": "import-statement",
+          "original": "../../../utils/rect.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/DraggableBlockPlugin/getBoundingRectWithoutTransform.ts",
+          "kind": "import-statement",
+          "original": "../DraggableBlockPlugin/getBoundingRectWithoutTransform.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getCollapsedMargins.ts",
+          "kind": "import-statement",
+          "original": "../utils/getCollapsedMargins.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getTopLevelNodeKeys.ts",
+          "kind": "import-statement",
+          "original": "../utils/getTopLevelNodeKeys.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/utils/isOnHandleElement.ts": {
+      "bytes": 158,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/utils/doesLineHeightAffectElement.ts": {
+      "bytes": 1252,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/utils/setHandlePosition.ts": {
+      "bytes": 1495,
+      "imports": [
+        {
+          "path": "src/field/lexical/plugins/handles/utils/doesLineHeightAffectElement.ts",
+          "kind": "import-statement",
+          "original": "./doesLineHeightAffectElement.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/AddBlockHandlePlugin/index.tsx": {
+      "bytes": 6248,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/utils/guard.ts",
+          "kind": "import-statement",
+          "original": "../../../utils/guard.js"
+        },
+        {
+          "path": "src/field/lexical/utils/point.ts",
+          "kind": "import-statement",
+          "original": "../../../utils/point.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.tsx",
+          "kind": "import-statement",
+          "original": "../../SlashMenu/LexicalTypeaheadMenuPlugin/index.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/calculateDistanceFromScrollerElem.ts",
+          "kind": "import-statement",
+          "original": "../utils/calculateDistanceFromScrollerElem.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getNodeCloseToPoint.ts",
+          "kind": "import-statement",
+          "original": "../utils/getNodeCloseToPoint.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getTopLevelNodeKeys.ts",
+          "kind": "import-statement",
+          "original": "../utils/getTopLevelNodeKeys.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/isOnHandleElement.ts",
+          "kind": "import-statement",
+          "original": "../utils/isOnHandleElement.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/setHandlePosition.ts",
+          "kind": "import-statement",
+          "original": "../utils/setHandlePosition.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/DraggableBlockPlugin/highlightElemOriginalPosition.ts": {
+      "bytes": 1383,
+      "imports": [
+        {
+          "path": "src/field/lexical/plugins/handles/DraggableBlockPlugin/getBoundingRectWithoutTransform.ts",
+          "kind": "import-statement",
+          "original": "./getBoundingRectWithoutTransform.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/DraggableBlockPlugin/setTargetLine.ts": {
+      "bytes": 5379,
+      "imports": [
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getCollapsedMargins.ts",
+          "kind": "import-statement",
+          "original": "../utils/getCollapsedMargins.js"
+        },
+        {
+          "path": "./getBoundingRectWithoutTransform.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/DraggableBlockPlugin/highlightElemOriginalPosition.ts",
+          "kind": "import-statement",
+          "original": "./highlightElemOriginalPosition.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/plugins/handles/DraggableBlockPlugin/index.tsx": {
+      "bytes": 14080,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../../config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/utils/guard.ts",
+          "kind": "import-statement",
+          "original": "../../../utils/guard.js"
+        },
+        {
+          "path": "src/field/lexical/utils/point.ts",
+          "kind": "import-statement",
+          "original": "../../../utils/point.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/calculateDistanceFromScrollerElem.ts",
+          "kind": "import-statement",
+          "original": "../utils/calculateDistanceFromScrollerElem.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getNodeCloseToPoint.ts",
+          "kind": "import-statement",
+          "original": "../utils/getNodeCloseToPoint.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/getTopLevelNodeKeys.ts",
+          "kind": "import-statement",
+          "original": "../utils/getTopLevelNodeKeys.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/isOnHandleElement.ts",
+          "kind": "import-statement",
+          "original": "../utils/isOnHandleElement.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/utils/setHandlePosition.ts",
+          "kind": "import-statement",
+          "original": "../utils/setHandlePosition.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/DraggableBlockPlugin/getBoundingRectWithoutTransform.ts",
+          "kind": "import-statement",
+          "original": "./getBoundingRectWithoutTransform.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/DraggableBlockPlugin/setTargetLine.ts",
+          "kind": "import-statement",
+          "original": "./setTargetLine.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/ui/ContentEditable.tsx": {
+      "bytes": 314,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalContentEditable.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/LexicalEditor.tsx": {
+      "bytes": 7241,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalErrorBoundary.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalHistoryPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalOnChangePlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalRichTextPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalTabIndentationPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/EditorPlugin.tsx",
+          "kind": "import-statement",
+          "original": "./EditorPlugin.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "./config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/MarkdownShortcut/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/MarkdownShortcut/index.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/SlashMenu/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/SlashMenu/index.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/AddBlockHandlePlugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/handles/AddBlockHandlePlugin/index.js"
+        },
+        {
+          "path": "src/field/lexical/plugins/handles/DraggableBlockPlugin/index.tsx",
+          "kind": "import-statement",
+          "original": "./plugins/handles/DraggableBlockPlugin/index.js"
+        },
+        {
+          "path": "src/field/lexical/ui/ContentEditable.tsx",
+          "kind": "import-statement",
+          "original": "./ui/ContentEditable.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/LexicalProvider.tsx": {
+      "bytes": 3863,
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposer.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/LexicalEditor.tsx",
+          "kind": "import-statement",
+          "original": "./LexicalEditor.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "./config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/nodes/index.ts",
+          "kind": "import-statement",
+          "original": "./nodes/index.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/Field.tsx": {
+      "bytes": 4265,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-error-boundary", "kind": "import-statement", "external": true },
+        { "path": "./bundled.css", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/LexicalProvider.tsx",
+          "kind": "import-statement",
+          "original": "./lexical/LexicalProvider.js"
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/index.tsx": {
+      "bytes": 5073,
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/field/lexical/config/client/default.ts",
+          "kind": "import-statement",
+          "original": "./lexical/config/client/default.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/loader.ts",
+          "kind": "import-statement",
+          "original": "./lexical/config/client/loader.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/sanitize.ts",
+          "kind": "import-statement",
+          "original": "./lexical/config/client/sanitize.js"
+        },
+        { "path": "src/field/Field.tsx", "kind": "dynamic-import", "original": "./Field.js" },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/field/lexical/utils/cloneDeep.ts": { "bytes": 1547, "imports": [], "format": "esm" },
+    "src/field/lexical/utils/joinClasses.ts": { "bytes": 133, "imports": [], "format": "esm" },
+    "src/field/lexical/utils/swipe.ts": { "bytes": 3092, "imports": [], "format": "esm" },
+    "src/exports/client/index.ts": {
+      "bytes": 5044,
+      "imports": [
+        {
+          "path": "src/cell/index.tsx",
+          "kind": "import-statement",
+          "original": "../../cell/index.js"
+        },
+        {
+          "path": "src/field/features/align/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/align/feature.client.js"
+        },
+        {
+          "path": "src/field/features/blockquote/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/blockquote/feature.client.js"
+        },
+        {
+          "path": "src/field/features/blocks/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/blocks/feature.client.js"
+        },
+        {
+          "path": "src/field/features/createClientComponent.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/createClientComponent.js"
+        },
+        {
+          "path": "src/field/features/debug/testRecorder/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/debug/testRecorder/feature.client.js"
+        },
+        {
+          "path": "src/field/features/debug/treeView/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/debug/treeView/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/bold/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/bold/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/inlineCode/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/inlineCode/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/italic/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/italic/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/shared/toolbarFormatGroup.ts",
+          "kind": "import-statement",
+          "original": "../../field/features/format/shared/toolbarFormatGroup.js"
+        },
+        {
+          "path": "src/field/features/format/strikethrough/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/strikethrough/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/subscript/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/subscript/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/superscript/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/superscript/feature.client.js"
+        },
+        {
+          "path": "src/field/features/format/underline/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/format/underline/feature.client.js"
+        },
+        {
+          "path": "src/field/features/heading/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/heading/feature.client.js"
+        },
+        {
+          "path": "src/field/features/horizontalRule/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/horizontalRule/feature.client.js"
+        },
+        {
+          "path": "src/field/features/indent/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/indent/feature.client.js"
+        },
+        {
+          "path": "src/field/features/link/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/link/feature.client.js"
+        },
+        {
+          "path": "src/field/features/lists/checklist/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/lists/checklist/feature.client.js"
+        },
+        {
+          "path": "src/field/features/lists/orderedList/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/lists/orderedList/feature.client.js"
+        },
+        {
+          "path": "src/field/features/lists/unorderedList/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/lists/unorderedList/feature.client.js"
+        },
+        {
+          "path": "src/field/features/migrations/lexicalPluginToLexical/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/migrations/lexicalPluginToLexical/feature.client.js"
+        },
+        {
+          "path": "src/field/features/migrations/slateToLexical/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/migrations/slateToLexical/feature.client.js"
+        },
+        {
+          "path": "src/field/features/paragraph/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/paragraph/feature.client.js"
+        },
+        {
+          "path": "src/field/features/relationship/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/relationship/feature.client.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/addDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../../field/features/shared/toolbar/addDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/featureButtonsGroup.ts",
+          "kind": "import-statement",
+          "original": "../../field/features/shared/toolbar/featureButtonsGroup.js"
+        },
+        {
+          "path": "src/field/features/shared/toolbar/textDropdownGroup.ts",
+          "kind": "import-statement",
+          "original": "../../field/features/shared/toolbar/textDropdownGroup.js"
+        },
+        {
+          "path": "src/field/features/toolbars/fixed/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/toolbars/fixed/feature.client.js"
+        },
+        {
+          "path": "src/field/features/toolbars/inline/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/toolbars/inline/feature.client.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarButton/index.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/toolbars/shared/ToolbarButton/index.js"
+        },
+        {
+          "path": "src/field/features/toolbars/shared/ToolbarDropdown/index.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/toolbars/shared/ToolbarDropdown/index.js"
+        },
+        {
+          "path": "src/field/features/upload/feature.client.tsx",
+          "kind": "import-statement",
+          "original": "../../field/features/upload/feature.client.js"
+        },
+        {
+          "path": "src/field/index.tsx",
+          "kind": "import-statement",
+          "original": "../../field/index.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/EditorConfigProvider.tsx",
+          "kind": "import-statement",
+          "original": "../../field/lexical/config/client/EditorConfigProvider.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/default.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/config/client/default.js"
+        },
+        {
+          "path": "src/field/lexical/config/client/sanitize.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/config/client/sanitize.js"
+        },
+        {
+          "path": "src/field/lexical/utils/canUseDOM.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/canUseDOM.js"
+        },
+        {
+          "path": "src/field/lexical/utils/cloneDeep.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/cloneDeep.js"
+        },
+        {
+          "path": "src/field/lexical/utils/getDOMRangeRect.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/getDOMRangeRect.js"
+        },
+        {
+          "path": "src/field/lexical/utils/getSelectedNode.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/getSelectedNode.js"
+        },
+        {
+          "path": "src/field/lexical/utils/guard.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/guard.js"
+        },
+        {
+          "path": "src/field/lexical/utils/invariant.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/invariant.js"
+        },
+        {
+          "path": "src/field/lexical/utils/joinClasses.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/joinClasses.js"
+        },
+        {
+          "path": "src/field/lexical/utils/markdown/createBlockNode.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/markdown/createBlockNode.js"
+        },
+        {
+          "path": "src/field/lexical/utils/point.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/point.js"
+        },
+        {
+          "path": "src/field/lexical/utils/rect.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/rect.js"
+        },
+        {
+          "path": "src/field/lexical/utils/setFloatingElemPosition.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/setFloatingElemPosition.js"
+        },
+        {
+          "path": "src/field/lexical/utils/setFloatingElemPositionForLinkEditor.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/setFloatingElemPositionForLinkEditor.js"
+        },
+        {
+          "path": "src/field/lexical/utils/swipe.ts",
+          "kind": "import-statement",
+          "original": "../../field/lexical/utils/swipe.js"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "dist/exports/client/index.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 420924
+    },
+    "dist/exports/client/index.js": {
+      "imports": [
+        { "path": "dist/exports/client/chunk-3PZ2ZFQG.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-FSTRW2TI.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-M6MN4CA5.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-35NZOHAF.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-Y5455JF3.js", "kind": "import-statement" },
+        { "path": "@lexical/headless", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalDecoratorBlockNode.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/component-RAVN56DE.js", "kind": "dynamic-import" },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalTreeView.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalClickableLinkPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "uuid", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalListPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalCheckListPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@lexical/list", "kind": "import-statement", "external": true },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/Component-SZVAYRJX.js", "kind": "dynamic-import" },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/Component-6AVANNNR.js", "kind": "dynamic-import" },
+        { "path": "@lexical/selection", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/Field-U5PHZTST.js", "kind": "dynamic-import" }
+      ],
+      "exports": [
+        "AlignFeatureClientComponent",
+        "BlockquoteFeatureClientComponent",
+        "BlocksFeatureClientComponent",
+        "BoldFeatureClientComponent",
+        "CAN_USE_DOM",
+        "ChecklistFeatureClientComponent",
+        "EditorConfigProvider",
+        "FixedToolbarFeatureClientComponent",
+        "HeadingFeatureClientComponent",
+        "HorizontalRuleFeatureClientComponent",
+        "IndentFeatureClientComponent",
+        "InlineCodeFeatureClientComponent",
+        "InlineToolbarFeatureClientComponent",
+        "ItalicFeatureClientComponent",
+        "LexicalPluginToLexicalFeatureClientComponent",
+        "LinkFeatureClientComponent",
+        "OrderedListFeatureClientComponent",
+        "ParagraphFeatureClientComponent",
+        "Point",
+        "Rect",
+        "RelationshipFeatureClientComponent",
+        "RichTextCell",
+        "RichTextField",
+        "SlateToLexicalFeatureClientComponent",
+        "StrikethroughFeatureClientComponent",
+        "SubscriptFeatureClientComponent",
+        "SuperscriptFeatureClientComponent",
+        "TestRecorderFeatureClientComponent",
+        "ToolbarButton",
+        "ToolbarDropdown",
+        "TreeViewFeatureClientComponent",
+        "UnderlineFeatureClientComponent",
+        "UnorderedListFeatureClientComponent",
+        "UploadFeatureClientComponent",
+        "addSwipeDownListener",
+        "addSwipeLeftListener",
+        "addSwipeRightListener",
+        "addSwipeUpListener",
+        "cloneDeep",
+        "createBlockNode",
+        "createClientComponent",
+        "defaultEditorLexicalConfig",
+        "getDOMRangeRect",
+        "getSelectedNode",
+        "invariant",
+        "isHTMLElement",
+        "isPoint",
+        "joinClasses",
+        "sanitizeClientEditorConfig",
+        "sanitizeClientFeatures",
+        "setFloatingElemPosition",
+        "setFloatingElemPositionForLinkEditor",
+        "toolbarAddDropdownGroupWithItems",
+        "toolbarFeatureButtonsGroupWithItems",
+        "toolbarFormatGroupWithItems",
+        "toolbarTextDropdownGroupWithItems",
+        "useEditorConfigContext"
+      ],
+      "entryPoint": "src/exports/client/index.ts",
+      "inputs": {
+        "src/cell/index.tsx": { "bytesInOutput": 1725 },
+        "src/field/lexical/theme/EditorTheme.tsx": { "bytesInOutput": 3841 },
+        "src/field/lexical/config/client/default.ts": { "bytesInOutput": 38 },
+        "src/field/lexical/config/client/loader.ts": { "bytesInOutput": 1076 },
+        "src/field/lexical/config/client/sanitize.ts": { "bytesInOutput": 2214 },
+        "src/exports/client/index.ts": { "bytesInOutput": 0 },
+        "src/field/features/align/feature.client.tsx": { "bytesInOutput": 1659 },
+        "src/field/lexical/ui/icons/AlignCenter/index.tsx": { "bytesInOutput": 437 },
+        "src/field/lexical/ui/icons/AlignJustify/index.tsx": { "bytesInOutput": 441 },
+        "src/field/lexical/ui/icons/AlignLeft/index.tsx": { "bytesInOutput": 441 },
+        "src/field/lexical/ui/icons/AlignRight/index.tsx": { "bytesInOutput": 441 },
+        "src/useLexicalFeature.tsx": { "bytesInOutput": 206 },
+        "src/field/features/createClientComponent.tsx": { "bytesInOutput": 41 },
+        "src/field/features/align/toolbarAlignGroup.ts": { "bytesInOutput": 77 },
+        "src/field/features/blockquote/feature.client.tsx": { "bytesInOutput": 873 },
+        "src/field/lexical/ui/icons/Blockquote/index.tsx": { "bytesInOutput": 778 },
+        "src/field/features/shared/slashMenu/basicGroup.ts": { "bytesInOutput": 108 },
+        "src/field/lexical/ui/icons/Text/index.tsx": { "bytesInOutput": 593 },
+        "src/field/features/shared/toolbar/textDropdownGroup.ts": { "bytesInOutput": 75 },
+        "src/field/features/blockquote/markdownTransformer.ts": { "bytesInOutput": 504 },
+        "src/field/features/blocks/feature.client.tsx": { "bytesInOutput": 860 },
+        "src/field/lexical/ui/icons/Block/index.tsx": { "bytesInOutput": 466 },
+        "src/field/features/blocks/nodes/BlocksNode.tsx": { "bytesInOutput": 1218 },
+        "src/field/features/blocks/plugin/commands.ts": { "bytesInOutput": 74 },
+        "src/field/features/blocks/plugin/index.tsx": { "bytesInOutput": 767 },
+        "src/field/features/blocks/drawer/index.tsx": { "bytesInOutput": 1180 },
+        "src/field/features/debug/testRecorder/plugin/index.tsx": { "bytesInOutput": 5852 },
+        "src/field/lexical/utils/canUseDOM.ts": { "bytesInOutput": 94 },
+        "src/field/lexical/utils/environment.ts": { "bytesInOutput": 586 },
+        "src/field/features/debug/testRecorder/feature.client.tsx": { "bytesInOutput": 124 },
+        "src/field/features/debug/treeView/plugin/index.tsx": { "bytesInOutput": 548 },
+        "src/field/features/debug/treeView/feature.client.tsx": { "bytesInOutput": 124 },
+        "src/field/features/format/bold/feature.client.tsx": { "bytesInOutput": 458 },
+        "src/field/lexical/ui/icons/Bold/index.tsx": { "bytesInOutput": 713 },
+        "src/field/features/format/shared/toolbarFormatGroup.ts": { "bytesInOutput": 58 },
+        "src/field/features/format/bold/markdownTransformers.ts": { "bytesInOutput": 246 },
+        "src/field/features/format/inlineCode/feature.client.tsx": { "bytesInOutput": 393 },
+        "src/field/lexical/ui/icons/Code/index.tsx": { "bytesInOutput": 376 },
+        "src/field/features/format/inlineCode/markdownTransformers.ts": { "bytesInOutput": 52 },
+        "src/field/features/format/italic/feature.client.tsx": { "bytesInOutput": 396 },
+        "src/field/lexical/ui/icons/Italic/index.tsx": { "bytesInOutput": 673 },
+        "src/field/features/format/italic/markdownTransformers.ts": { "bytesInOutput": 117 },
+        "src/field/features/format/strikethrough/feature.client.tsx": { "bytesInOutput": 414 },
+        "src/field/lexical/ui/icons/Strikethrough/index.tsx": { "bytesInOutput": 919 },
+        "src/field/features/format/strikethrough/markdownTransformers.ts": { "bytesInOutput": 62 },
+        "src/field/features/format/subscript/feature.client.tsx": { "bytesInOutput": 376 },
+        "src/field/lexical/ui/icons/Subscript/index.tsx": { "bytesInOutput": 817 },
+        "src/field/features/format/superscript/feature.client.tsx": { "bytesInOutput": 382 },
+        "src/field/lexical/ui/icons/Superscript/index.tsx": { "bytesInOutput": 793 },
+        "src/field/features/format/underline/feature.client.tsx": { "bytesInOutput": 376 },
+        "src/field/lexical/ui/icons/Underline/index.tsx": { "bytesInOutput": 594 },
+        "src/field/features/heading/feature.client.tsx": { "bytesInOutput": 1145 },
+        "src/field/lexical/ui/icons/H1/index.tsx": { "bytesInOutput": 439 },
+        "src/field/lexical/ui/icons/H2/index.tsx": { "bytesInOutput": 736 },
+        "src/field/lexical/ui/icons/H3/index.tsx": { "bytesInOutput": 918 },
+        "src/field/lexical/ui/icons/H4/index.tsx": { "bytesInOutput": 484 },
+        "src/field/lexical/ui/icons/H5/index.tsx": { "bytesInOutput": 775 },
+        "src/field/lexical/ui/icons/H6/index.tsx": { "bytesInOutput": 898 },
+        "src/field/features/heading/markdownTransformer.ts": { "bytesInOutput": 401 },
+        "src/field/lexical/utils/markdown/createBlockNode.ts": { "bytesInOutput": 79 },
+        "src/field/features/horizontalRule/feature.client.tsx": { "bytesInOutput": 706 },
+        "src/field/lexical/ui/icons/HorizontalRule/index.tsx": { "bytesInOutput": 288 },
+        "src/field/lexical/ui/icons/Add/index.tsx": { "bytesInOutput": 272 },
+        "src/field/features/shared/toolbar/addDropdownGroup.ts": { "bytesInOutput": 75 },
+        "src/field/features/horizontalRule/markdownTransformer.ts": { "bytesInOutput": 131 },
+        "src/field/features/horizontalRule/plugin/index.tsx": { "bytesInOutput": 439 },
+        "src/field/features/indent/feature.client.tsx": { "bytesInOutput": 782 },
+        "src/field/lexical/ui/icons/IndentDecrease/index.tsx": { "bytesInOutput": 519 },
+        "src/field/lexical/ui/icons/IndentIncrease/index.tsx": { "bytesInOutput": 516 },
+        "src/field/features/indent/toolbarIndentGroup.ts": { "bytesInOutput": 59 },
+        "src/field/features/link/feature.client.tsx": { "bytesInOutput": 991 },
+        "src/field/lexical/ui/icons/Link/index.tsx": { "bytesInOutput": 510 },
+        "src/field/lexical/utils/getSelectedNode.ts": { "bytesInOutput": 185 },
+        "src/field/features/shared/toolbar/featureButtonsGroup.ts": { "bytesInOutput": 61 },
+        "src/field/features/link/markdownTransformer.ts": { "bytesInOutput": 576 },
+        "src/field/features/link/nodes/LinkNode.ts": { "bytesInOutput": 4331 },
+        "src/field/features/link/nodes/AutoLinkNode.ts": { "bytesInOutput": 815 },
+        "src/field/features/link/plugins/autoLink/index.tsx": { "bytesInOutput": 4051 },
+        "src/field/lexical/utils/invariant.ts": { "bytesInOutput": 163 },
+        "src/field/features/link/plugins/clickableLink/index.tsx": { "bytesInOutput": 146 },
+        "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/commands.ts": {
+          "bytesInOutput": 85
+        },
+        "src/field/features/link/plugins/floatingLinkEditor/index.tsx": { "bytesInOutput": 164 },
+        "src/field/features/link/plugins/floatingLinkEditor/LinkEditor/index.tsx": {
+          "bytesInOutput": 3905
+        },
+        "src/field/lexical/utils/setFloatingElemPositionForLinkEditor.ts": { "bytesInOutput": 420 },
+        "src/field/features/link/drawer/index.tsx": { "bytesInOutput": 1346 },
+        "src/field/features/link/plugins/link/index.tsx": { "bytesInOutput": 859 },
+        "src/field/lexical/utils/url.ts": { "bytesInOutput": 298 },
+        "src/field/features/lists/checklist/feature.client.tsx": { "bytesInOutput": 1169 },
+        "src/field/lexical/ui/icons/Checklist/index.tsx": { "bytesInOutput": 392 },
+        "src/field/features/lists/plugin/index.tsx": { "bytesInOutput": 128 },
+        "src/field/features/lists/shared/slashMenuListGroup.ts": { "bytesInOutput": 108 },
+        "src/field/features/lists/checklist/markdownTransformers.ts": { "bytesInOutput": 222 },
+        "src/field/features/lists/shared/markdown.ts": { "bytesInOutput": 875 },
+        "src/field/features/lists/checklist/plugin/index.tsx": { "bytesInOutput": 138 },
+        "src/field/features/lists/orderedList/feature.client.tsx": { "bytesInOutput": 1061 },
+        "src/field/lexical/ui/icons/OrderedList/index.tsx": { "bytesInOutput": 1025 },
+        "src/field/features/lists/orderedList/markdownTransformer.ts": { "bytesInOutput": 205 },
+        "src/field/features/lists/unorderedList/feature.client.tsx": { "bytesInOutput": 1003 },
+        "src/field/lexical/ui/icons/UnorderedList/index.tsx": { "bytesInOutput": 725 },
+        "src/field/features/lists/unorderedList/markdownTransformer.ts": { "bytesInOutput": 203 },
+        "src/field/features/migrations/lexicalPluginToLexical/converter/index.ts": {
+          "bytesInOutput": 1001
+        },
+        "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/index.tsx": {
+          "bytesInOutput": 846
+        },
+        "src/field/features/migrations/lexicalPluginToLexical/feature.client.tsx": {
+          "bytesInOutput": 270
+        },
+        "src/field/lexical/utils/nodeFormat.ts": { "bytesInOutput": 1463 },
+        "src/field/features/migrations/slateToLexical/converter/index.ts": {
+          "bytesInOutput": 1286
+        },
+        "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/index.tsx": {
+          "bytesInOutput": 846
+        },
+        "src/field/features/migrations/slateToLexical/feature.client.tsx": { "bytesInOutput": 252 },
+        "src/field/features/paragraph/feature.client.tsx": { "bytesInOutput": 803 },
+        "src/field/features/relationship/feature.client.tsx": { "bytesInOutput": 674 },
+        "src/field/lexical/ui/icons/Relationship/index.tsx": { "bytesInOutput": 707 },
+        "src/field/features/relationship/plugins/index.tsx": { "bytesInOutput": 1073 },
+        "src/field/features/relationship/drawer/index.tsx": { "bytesInOutput": 1013 },
+        "src/field/features/toolbars/fixed/Toolbar/index.tsx": { "bytesInOutput": 3292 },
+        "src/field/features/toolbars/shared/ToolbarButton/index.tsx": { "bytesInOutput": 1084 },
+        "src/field/features/toolbars/shared/ToolbarDropdown/index.tsx": { "bytesInOutput": 1756 },
+        "src/field/features/toolbars/shared/ToolbarDropdown/DropDown.tsx": {
+          "bytesInOutput": 2771
+        },
+        "src/field/features/toolbars/fixed/feature.client.tsx": { "bytesInOutput": 132 },
+        "src/field/features/toolbars/inline/Toolbar/index.tsx": { "bytesInOutput": 4571 },
+        "src/field/lexical/utils/getDOMRangeRect.ts": { "bytesInOutput": 194 },
+        "src/field/lexical/utils/setFloatingElemPosition.ts": { "bytesInOutput": 849 },
+        "src/field/features/toolbars/inline/feature.client.tsx": { "bytesInOutput": 136 },
+        "src/field/features/upload/feature.client.tsx": { "bytesInOutput": 674 },
+        "src/field/lexical/ui/icons/Upload/index.tsx": { "bytesInOutput": 987 },
+        "src/field/features/upload/plugin/index.tsx": { "bytesInOutput": 1019 },
+        "src/field/features/upload/drawer/index.tsx": { "bytesInOutput": 937 },
+        "src/field/index.tsx": { "bytesInOutput": 1264 },
+        "src/field/lexical/utils/cloneDeep.ts": { "bytesInOutput": 668 },
+        "src/field/lexical/utils/joinClasses.ts": { "bytesInOutput": 53 },
+        "src/field/lexical/utils/swipe.ts": { "bytesInOutput": 1039 }
+      },
+      "bytes": 105328
+    },
+    "dist/exports/client/component-RAVN56DE.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 25494
+    },
+    "dist/exports/client/component-RAVN56DE.js": {
+      "imports": [
+        { "path": "dist/exports/client/chunk-Y5455JF3.js", "kind": "import-statement" },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "uuid", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "deep-equal", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "exports": ["BlockComponent"],
+      "entryPoint": "src/field/features/blocks/component/index.tsx",
+      "inputs": {
+        "src/field/features/blocks/component/index.tsx": { "bytesInOutput": 2242 },
+        "src/field/features/blocks/component/BlockContent.tsx": { "bytesInOutput": 2348 },
+        "src/field/features/blocks/component/FormSavePlugin.tsx": { "bytesInOutput": 289 },
+        "src/field/features/blocks/component/removeEmptyArrayValues.ts": { "bytesInOutput": 118 }
+      },
+      "bytes": 5127
+    },
+    "dist/exports/client/component-FFLILIUZ.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 4685
+    },
+    "dist/exports/client/component-FFLILIUZ.js": {
+      "imports": [
+        { "path": "dist/exports/client/chunk-3PZ2ZFQG.js", "kind": "import-statement" },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/useLexicalNodeSelection.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "exports": ["HorizontalRuleComponent"],
+      "entryPoint": "src/field/features/horizontalRule/component/index.tsx",
+      "inputs": {
+        "src/field/features/horizontalRule/component/index.tsx": { "bytesInOutput": 931 }
+      },
+      "bytes": 1069
+    },
+    "dist/exports/client/chunk-3PZ2ZFQG.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 5368
+    },
+    "dist/exports/client/chunk-3PZ2ZFQG.js": {
+      "imports": [
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/component-FFLILIUZ.js", "kind": "dynamic-import" }
+      ],
+      "exports": ["a", "b", "c", "d"],
+      "inputs": {
+        "src/field/features/horizontalRule/nodes/HorizontalRuleNode.tsx": { "bytesInOutput": 927 }
+      },
+      "bytes": 1007
+    },
+    "dist/exports/client/Component-SZVAYRJX.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 800
+    },
+    "dist/exports/client/Component-SZVAYRJX.js": {
+      "imports": [{ "path": "react/jsx-runtime", "kind": "import-statement", "external": true }],
+      "exports": ["UnknownConvertedNodeComponent"],
+      "entryPoint": "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/Component.tsx",
+      "inputs": {
+        "src/field/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/Component.tsx": {
+          "bytesInOutput": 189
+        }
+      },
+      "bytes": 280
+    },
+    "dist/exports/client/Component-6AVANNNR.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 775
+    },
+    "dist/exports/client/Component-6AVANNNR.js": {
+      "imports": [{ "path": "react/jsx-runtime", "kind": "import-statement", "external": true }],
+      "exports": ["UnknownConvertedNodeComponent"],
+      "entryPoint": "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/Component.tsx",
+      "inputs": {
+        "src/field/features/migrations/slateToLexical/nodes/unknownConvertedNode/Component.tsx": {
+          "bytesInOutput": 172
+        }
+      },
+      "bytes": 263
+    },
+    "dist/exports/client/RelationshipComponent-FGUPLCD2.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 10822
+    },
+    "dist/exports/client/RelationshipComponent-FGUPLCD2.js": {
+      "imports": [
+        { "path": "dist/exports/client/chunk-FSTRW2TI.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-Y5455JF3.js", "kind": "import-statement" },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/useLexicalNodeSelection.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "exports": ["RelationshipComponent"],
+      "entryPoint": "src/field/features/relationship/nodes/components/RelationshipComponent.tsx",
+      "inputs": {
+        "src/field/features/relationship/nodes/components/RelationshipComponent.tsx": {
+          "bytesInOutput": 2444
+        }
+      },
+      "bytes": 2640
+    },
+    "dist/exports/client/chunk-FSTRW2TI.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 7061
+    },
+    "dist/exports/client/chunk-FSTRW2TI.js": {
+      "imports": [
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalDecoratorBlockNode.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "dist/exports/client/RelationshipComponent-FGUPLCD2.js",
+          "kind": "dynamic-import"
+        }
+      ],
+      "exports": ["a", "b", "c", "d"],
+      "inputs": {
+        "src/field/features/relationship/drawer/commands.ts": { "bytesInOutput": 91 },
+        "src/field/features/relationship/nodes/RelationshipNode.tsx": { "bytesInOutput": 1779 }
+      },
+      "bytes": 1950
+    },
+    "dist/exports/client/component-Z34HXRX3.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 21384
+    },
+    "dist/exports/client/component-Z34HXRX3.js": {
+      "imports": [
+        { "path": "dist/exports/client/chunk-M6MN4CA5.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-Y5455JF3.js", "kind": "import-statement" },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/useLexicalNodeSelection.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/ui/shared", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "uuid", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "exports": ["UploadComponent"],
+      "entryPoint": "src/field/features/upload/component/index.tsx",
+      "inputs": {
+        "src/field/features/upload/component/index.tsx": { "bytesInOutput": 3155 },
+        "src/field/features/upload/component/ExtraFieldsDrawer/index.tsx": { "bytesInOutput": 1750 }
+      },
+      "bytes": 5090
+    },
+    "dist/exports/client/chunk-M6MN4CA5.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 10356
+    },
+    "dist/exports/client/chunk-M6MN4CA5.js": {
+      "imports": [
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalDecoratorBlockNode.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "bson-objectid", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "dist/exports/client/component-Z34HXRX3.js", "kind": "dynamic-import" }
+      ],
+      "exports": ["a", "b", "c", "d", "e"],
+      "inputs": {
+        "src/field/features/relationship/utils/EnabledRelationshipsCondition.tsx": {
+          "bytesInOutput": 515
+        },
+        "src/field/features/upload/drawer/commands.ts": { "bytesInOutput": 85 },
+        "src/field/features/upload/nodes/UploadNode.tsx": { "bytesInOutput": 1978 }
+      },
+      "bytes": 2665
+    },
+    "dist/exports/client/Field-U5PHZTST.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 142105
+    },
+    "dist/exports/client/Field-U5PHZTST.js": {
+      "imports": [
+        { "path": "dist/exports/client/chunk-35NZOHAF.js", "kind": "import-statement" },
+        { "path": "dist/exports/client/chunk-Y5455JF3.js", "kind": "import-statement" },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-error-boundary", "kind": "import-statement", "external": true },
+        { "path": "./bundled.css", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposer.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalErrorBoundary.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalHistoryPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalOnChangePlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalRichTextPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "@lexical/react/LexicalTabIndentationPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalMarkdownShortcutPlugin.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@payloadcms/ui/client", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/utils", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "@lexical/rich-text", "kind": "import-statement", "external": true },
+        { "path": "lexical", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react-dom", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        {
+          "path": "@lexical/react/LexicalContentEditable.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "exports": ["RichText"],
+      "entryPoint": "src/field/Field.tsx",
+      "inputs": {
+        "src/field/Field.tsx": { "bytesInOutput": 1608 },
+        "src/field/lexical/LexicalProvider.tsx": { "bytesInOutput": 1685 },
+        "src/field/lexical/LexicalEditor.tsx": { "bytesInOutput": 2872 },
+        "src/field/lexical/EditorPlugin.tsx": { "bytesInOutput": 225 },
+        "src/field/lexical/plugins/MarkdownShortcut/index.tsx": { "bytesInOutput": 229 },
+        "src/field/lexical/plugins/SlashMenu/index.tsx": { "bytesInOutput": 2390 },
+        "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.tsx": {
+          "bytesInOutput": 2400
+        },
+        "src/field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu.tsx": {
+          "bytesInOutput": 5430
+        },
+        "src/field/lexical/plugins/SlashMenu/useMenuTriggerMatch.ts": { "bytesInOutput": 340 },
+        "src/field/lexical/plugins/handles/AddBlockHandlePlugin/index.tsx": {
+          "bytesInOutput": 1815
+        },
+        "src/field/lexical/plugins/handles/utils/calculateDistanceFromScrollerElem.ts": {
+          "bytesInOutput": 234
+        },
+        "src/field/lexical/plugins/handles/utils/getNodeCloseToPoint.ts": { "bytesInOutput": 2000 },
+        "src/field/lexical/plugins/handles/DraggableBlockPlugin/getBoundingRectWithoutTransform.ts": {
+          "bytesInOutput": 193
+        },
+        "src/field/lexical/plugins/handles/utils/getCollapsedMargins.ts": { "bytesInOutput": 299 },
+        "src/field/lexical/plugins/handles/utils/getTopLevelNodeKeys.ts": { "bytesInOutput": 109 },
+        "src/field/lexical/plugins/handles/utils/isOnHandleElement.ts": { "bytesInOutput": 44 },
+        "src/field/lexical/plugins/handles/utils/doesLineHeightAffectElement.ts": {
+          "bytesInOutput": 318
+        },
+        "src/field/lexical/plugins/handles/utils/setHandlePosition.ts": { "bytesInOutput": 429 },
+        "src/field/lexical/plugins/handles/DraggableBlockPlugin/index.tsx": {
+          "bytesInOutput": 4351
+        },
+        "src/field/lexical/plugins/handles/DraggableBlockPlugin/highlightElemOriginalPosition.ts": {
+          "bytesInOutput": 460
+        },
+        "src/field/lexical/plugins/handles/DraggableBlockPlugin/setTargetLine.ts": {
+          "bytesInOutput": 1095
+        },
+        "src/field/lexical/ui/ContentEditable.tsx": { "bytesInOutput": 197 }
+      },
+      "bytes": 28914
+    },
+    "dist/exports/client/chunk-35NZOHAF.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 11569
+    },
+    "dist/exports/client/chunk-35NZOHAF.js": {
+      "imports": [],
+      "exports": ["a", "b", "c", "d", "e"],
+      "inputs": {
+        "src/field/lexical/utils/guard.ts": { "bytesInOutput": 46 },
+        "src/field/lexical/utils/point.ts": { "bytesInOutput": 489 },
+        "src/field/lexical/utils/rect.ts": { "bytesInOutput": 2049 },
+        "src/field/lexical/nodes/index.ts": { "bytesInOutput": 81 }
+      },
+      "bytes": 2747
+    },
+    "dist/exports/client/chunk-Y5455JF3.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 7127
+    },
+    "dist/exports/client/chunk-Y5455JF3.js": {
+      "imports": [
+        {
+          "path": "@lexical/react/LexicalComposerContext.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react/jsx-runtime", "kind": "import-statement", "external": true }
+      ],
+      "exports": ["a", "b"],
+      "inputs": {
+        "src/field/lexical/config/client/EditorConfigProvider.tsx": { "bytesInOutput": 1212 }
+      },
+      "bytes": 1278
+    }
+  }
+}

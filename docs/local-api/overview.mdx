@@ -6,32 +6,35 @@ desc: The Payload Local API allows you to interact with your database and execut
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL
-within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and
-can interact directly with your database.
+The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and can interact directly with your database.
 
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  The Local API is incredibly powerful when used with server-side rendering app frameworks like
-  NextJS. With other headless CMS, you need to request your data from third-party servers which can
-  add significant loading time to your server-rendered pages. With Payload, you don't have to leave
-  your server to gather the data you need. It can be incredibly fast and is definitely a game
-  changer.
+  The Local API is incredibly powerful when used in React Server Components and other similar server-side contexts. With other headless CMS, you need to request your data from third-party servers via an HTTP layer, which can add significant loading time to your server-rendered pages. With Payload, you don't have to leave your server to gather the data you need. It can be incredibly fast and is definitely a game changer.
 </Banner>
 
 Here are some common examples of how you can use the Local API:
 
+- Fetching Payload data within React Server Components
 - Seeding data via Node seed scripts that you write and maintain
+<<<<<<< HEAD
+- Opening custom Next.js route handlers which feature additional functionality but still rely on Payload
+- Within Payload access control and hook functions
+=======
 - Opening custom routes which feature additional functionality but still rely on Payload
 - Within access control and hook functions
+>>>>>>> e782d9942928c97c3ff567fc311c7d889f8b06d3
 
-## Accessing payload
+## Accessing Payload
 
 You can gain access to the currently running `payload` object via two ways:
 
-#### Importing it
+#### Accessing from args or `req`
 
+<<<<<<< HEAD
+In most places within Payload itself, you can access `payload` directly from the arguments of hooks, access control, validation functions, and similar. This is the simplest way to access Payload in most cases. Most config functions take the `req` (Request) object, which has Payload bound to it (`req.payload`).
+=======
 You can import or require `payload` into your own files after it's been initialized, but you need to make sure that
 your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been
 initialized yet. That might be obvious. To us, it's usually not.
@@ -53,6 +56,7 @@ const afterChangeHook: CollectionAfterChangeHook = async () => {
 
 Payload is available anywhere you have access to the `req` - including within your access control and hook
 functions.
+>>>>>>> e782d9942928c97c3ff567fc311c7d889f8b06d3
 
 Example:
 
@@ -64,22 +68,58 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) 
 }
 ```
 
+#### Importing it
+
+If you want to import Payload in places where you don't have the option to access it from function arguments or `req`, you can import it and initialize it.
+
+There are two places to import Payload:
+
+**Option 1 - using HMR, within Next.js**
+
+```ts
+import { getPayloadHMR } from '@payloadcms/next/utilities'
+import config from '@payload-config'
+
+const payload = await getPayloadHMR({ config })
+```
+
+You should import Payload using the first option (`getPayloadHMR`) if you are using Payload inside of Next.js (like route handlers, server components, and similar.) 
+
+This way, in Next.js development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload config, your usage of Payload will always be in sync with your changes. In production, `getPayloadHMR` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
+
+If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
+
+**Option 2 - outside of Next.js**
+
+If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality.
+
+```ts
+import { getPayload } from 'payload'
+import { importConfig } from 'payload/node'
+
+const config = await importConfig('./payload.config.ts')
+const payload = await getPayload({ config })
+```
+
+Both options function in exactly the same way outside of one having HMR support and the other not. However, when you import your Payload config, you need to make sure that you can import it safely. 
+
+For more information about using Payload outside of Next.js, [click here](/docs/beta/local-api/outside-nextjs).
+
 ## Local options available
 
-You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are
-executed in.
+You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are executed in.
 
-| Local Option       | Description                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `collection`       | Required for Collection operations. Specifies the Collection slug to operate against.                                                                                                                                                                                                                                                                                 |
-| `data`             | The data to use within the operation. Required for `create`, `update`.                                                                                                                                                                                                                                                                                                |
-| `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.                                                                                                                                                                                                                                                             |
-| `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents.                                                                                                                                                                                                                                                                                        |
-| `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                                                                                                                                                                                                                                                                      |
-| `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations.                                                                                                                                                                                                                                                                        |
-| `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.                                                                                                                                                                                                                                                                 |
-| `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.                                                                                                                                                                                                                                                  |
-| `pagination`       | Set to false to return all documents and avoid querying for document counts.                                                                                                                                                                                                                                                                                          |
+| Local Option       | Description  |
+| ------------------ | ------------ |
+| `collection`       | Required for Collection operations. Specifies the Collection slug to operate against. |
+| `data`             | The data to use within the operation. Required for `create`, `update`. |
+| `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields. |
+| `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents. |
+| `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
+| `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations. |
+| `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks. |
+| `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
+| `pagination`       | Set to false to return all documents and avoid querying for document counts. |
 | `context`          | [Context](/docs/hooks/context), which will then be passed to `context` and `req.context`, which can be read by hooks. Useful if you want to pass additional information to the hooks which shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook to determine if it should run or not. |
 
 _There are more options available on an operation by operation basis outlined below._
@@ -424,6 +464,8 @@ const result = await payload.updateGlobal({
 })
 ```
 
+<<<<<<< HEAD
+=======
 ## Next.js Conflict with Local API
 
 There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes within a
@@ -527,6 +569,7 @@ const doAction = async (): Promise<void> => {
 doAction()
 ```
 
+>>>>>>> e782d9942928c97c3ff567fc311c7d889f8b06d3
 ## TypeScript
 
 Local API calls will automatically infer your [generated types](/docs/typescript/generating-types).

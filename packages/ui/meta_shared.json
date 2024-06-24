@@ -1,0 +1,226 @@
+{
+  "inputs": {
+    "src/elements/WithServerSideProps/index.tsx": {
+      "bytes": 643,
+      "imports": [
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/elements/RenderCustomComponent/index.tsx": {
+      "bytes": 1159,
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        {
+          "path": "src/elements/WithServerSideProps/index.tsx",
+          "kind": "import-statement",
+          "original": "../WithServerSideProps/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/graphics/Icon/index.tsx": {
+      "bytes": 571,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/graphics/Logo/index.tsx": {
+      "bytes": 3439,
+      "imports": [{ "path": "react", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/utilities/api.ts": {
+      "bytes": 1939,
+      "imports": [{ "path": "qs", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/utilities/findLocaleFromCode.ts": { "bytes": 433, "imports": [], "format": "esm" },
+    "src/utilities/formatDate.ts": {
+      "bytes": 677,
+      "imports": [{ "path": "date-fns", "kind": "import-statement", "external": true }],
+      "format": "esm"
+    },
+    "src/utilities/formatDocTitle.ts": {
+      "bytes": 1481,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        {
+          "path": "src/utilities/formatDate.ts",
+          "kind": "import-statement",
+          "original": "../utilities/formatDate.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/getFormState.ts": { "bytes": 967, "imports": [], "format": "esm" },
+    "src/utilities/groupNavItems.ts": {
+      "bytes": 1933,
+      "imports": [
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+      ],
+      "format": "esm"
+    },
+    "src/utilities/hasSavePermission.ts": { "bytes": 764, "imports": [], "format": "esm" },
+    "src/utilities/isEditing.ts": { "bytes": 205, "imports": [], "format": "esm" },
+    "../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js": {
+      "bytes": 698,
+      "imports": [],
+      "format": "cjs"
+    },
+    "../../node_modules/.pnpm/flatley@5.2.0/node_modules/flatley/index.js": {
+      "bytes": 3557,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js",
+          "kind": "import-statement",
+          "original": "is-buffer"
+        }
+      ],
+      "format": "cjs"
+    },
+    "src/utilities/reduceFieldsToValues.ts": {
+      "bytes": 975,
+      "imports": [
+        {
+          "path": "../../node_modules/.pnpm/flatley@5.2.0/node_modules/flatley/index.js",
+          "kind": "import-statement",
+          "original": "flatley"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/exports/shared/index.ts": {
+      "bytes": 989,
+      "imports": [
+        {
+          "path": "src/elements/RenderCustomComponent/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/RenderCustomComponent/index.js"
+        },
+        {
+          "path": "src/elements/WithServerSideProps/index.tsx",
+          "kind": "import-statement",
+          "original": "../../elements/WithServerSideProps/index.js"
+        },
+        {
+          "path": "src/graphics/Icon/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Icon/index.js"
+        },
+        {
+          "path": "src/graphics/Logo/index.tsx",
+          "kind": "import-statement",
+          "original": "../../graphics/Logo/index.js"
+        },
+        {
+          "path": "src/utilities/api.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/api.js"
+        },
+        {
+          "path": "src/utilities/findLocaleFromCode.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/findLocaleFromCode.js"
+        },
+        {
+          "path": "src/utilities/formatDate.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/formatDate.js"
+        },
+        {
+          "path": "src/utilities/formatDocTitle.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/formatDocTitle.js"
+        },
+        {
+          "path": "src/utilities/getFormState.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/getFormState.js"
+        },
+        {
+          "path": "src/utilities/groupNavItems.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/groupNavItems.js"
+        },
+        {
+          "path": "src/utilities/hasSavePermission.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/hasSavePermission.js"
+        },
+        {
+          "path": "src/utilities/isEditing.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/isEditing.js"
+        },
+        {
+          "path": "src/utilities/reduceFieldsToValues.ts",
+          "kind": "import-statement",
+          "original": "../../utilities/reduceFieldsToValues.js"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "dist/exports/shared/index.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 30976
+    },
+    "dist/exports/shared/index.js": {
+      "imports": [
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "payload/shared", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "react", "kind": "import-statement", "external": true },
+        { "path": "qs", "kind": "import-statement", "external": true },
+        { "path": "date-fns", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true },
+        { "path": "@payloadcms/translations", "kind": "import-statement", "external": true }
+      ],
+      "exports": [
+        "EntityType",
+        "PayloadIcon",
+        "PayloadLogo",
+        "RenderCustomComponent",
+        "WithServerSideProps",
+        "findLocaleFromCode",
+        "formatDate",
+        "formatDocTitle",
+        "getFormState",
+        "groupNavItems",
+        "hasSavePermission",
+        "isEditing",
+        "reduceFieldsToValues",
+        "requests"
+      ],
+      "entryPoint": "src/exports/shared/index.ts",
+      "inputs": {
+        "../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js": {
+          "bytesInOutput": 294
+        },
+        "../../node_modules/.pnpm/flatley@5.2.0/node_modules/flatley/index.js": {
+          "bytesInOutput": 1376
+        },
+        "src/elements/RenderCustomComponent/index.tsx": { "bytesInOutput": 239 },
+        "src/elements/WithServerSideProps/index.tsx": { "bytesInOutput": 232 },
+        "src/exports/shared/index.ts": { "bytesInOutput": 0 },
+        "src/graphics/Icon/index.tsx": { "bytesInOutput": 421 },
+        "src/graphics/Logo/index.tsx": { "bytesInOutput": 3490 },
+        "src/utilities/api.ts": { "bytesInOutput": 748 },
+        "src/utilities/findLocaleFromCode.ts": { "bytesInOutput": 83 },
+        "src/utilities/formatDate.ts": { "bytesInOutput": 150 },
+        "src/utilities/formatDocTitle.ts": { "bytesInOutput": 449 },
+        "src/utilities/getFormState.ts": { "bytesInOutput": 341 },
+        "src/utilities/groupNavItems.ts": { "bytesInOutput": 593 },
+        "src/utilities/hasSavePermission.ts": { "bytesInOutput": 172 },
+        "src/utilities/isEditing.ts": { "bytesInOutput": 59 },
+        "src/utilities/reduceFieldsToValues.ts": { "bytesInOutput": 182 }
+      },
+      "bytes": 9865
+    }
+  }
+}
