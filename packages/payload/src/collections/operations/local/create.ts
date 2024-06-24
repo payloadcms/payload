@@ -1,4 +1,4 @@
-import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type { DataFromCollectionSlug, RequiredDataFromCollectionSlug } from '../../config/types.js'
@@ -18,10 +18,10 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   file?: File
   filePath?: string
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req?: PayloadRequestWithData

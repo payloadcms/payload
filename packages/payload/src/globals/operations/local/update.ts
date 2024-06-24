@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes, GlobalSlug, Payload, RequestContext } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData } from '../../../types/index.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -13,8 +13,8 @@ export type Options<TSlug extends GlobalSlug> = {
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
-  locale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean

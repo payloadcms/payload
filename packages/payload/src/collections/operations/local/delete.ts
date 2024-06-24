@@ -1,4 +1,4 @@
-import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
@@ -19,8 +19,8 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   depth?: number
-  fallbackLocale?: GeneratedTypes['locale']
-  locale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean

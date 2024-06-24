@@ -1441,5 +1441,46 @@ export interface LexicalBlocksRadioButtonsBlock {
 
 declare module 'payload' {
   // @ts-ignore 
-  export interface GeneratedTypes extends Config {}
+  export interface GeneratedTypes {
+  
+    collections: {
+      'lexical-fields': LexicalField;
+      'lexical-migrate-fields': LexicalMigrateField;
+      'lexical-localized-fields': LexicalLocalizedField;
+      users: User;
+      'array-fields': ArrayField;
+      'block-fields': BlockField;
+      'checkbox-fields': CheckboxField;
+      'code-fields': CodeField;
+      'collapsible-fields': CollapsibleField;
+      'conditional-logic': ConditionalLogic;
+      'date-fields': DateField;
+      'radio-fields': RadioField;
+      'group-fields': GroupField;
+      'row-fields': RowField;
+      'indexed-fields': IndexedField;
+      'json-fields': JsonField;
+      'number-fields': NumberField;
+      'point-fields': PointField;
+      'relationship-fields': RelationshipField;
+      'rich-text-fields': RichTextField;
+      'select-fields': SelectField;
+      'tabs-fields-2': TabsFields2;
+      'tabs-fields': TabsField;
+      'text-fields': TextField;
+      uploads: Upload;
+      uploads2: Uploads2;
+      uploads3: Uploads3;
+      'ui-fields': UiField;
+      'payload-preferences': PayloadPreference;
+      'payload-migrations': PayloadMigration;
+    };
+    globals: {
+      tabsWithRichText: TabsWithRichText;
+    };
+    locale: 'en' | 'es';
+    user: User & {
+      collection: 'users';
+    };
+    }
 }

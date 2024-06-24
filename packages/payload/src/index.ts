@@ -66,21 +66,45 @@ import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 
 export interface GeneratedTypes {
-  collections: {
+  collectionsUntyped: {
     [slug: string]: TypeWithID & Record<string, unknown>
   }
-  globals: {
+  globalsUntyped: {
     [slug: string]: Record<string, unknown>
   }
-  locale: null | string
-  user: User
+  localeUntyped: null | string
+  userUntyped: User
 }
 
+// Helper type to resolve the correct type using conditional types
+type ResolveCollectionType<T> = 'collections' extends keyof T
+  ? T['collections']
+  : // @ts-expect-error
+    T['collectionsUntyped']
+// @ts-expect-error
+type ResolveGlobalType<T> = 'globals' extends keyof T ? T['globals'] : T['globalsUntyped']
+
+// Applying helper types to GeneratedTypes
+export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+
+// Extract string keys from the type
 type StringKeyOf<T> = Extract<keyof T, string>
 
-export type CollectionSlug = StringKeyOf<GeneratedTypes['collections']>
+// Define the types for slugs using the appropriate collections and globals
+export type CollectionSlug = StringKeyOf<TypedCollection>
+export type GlobalSlug = StringKeyOf<TypedGlobal>
 
-export type GlobalSlug = StringKeyOf<GeneratedTypes['globals']>
+// now for locale and user
+
+// @ts-expect-error
+type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
+// @ts-expect-error
+type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
+
+export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+export type TypedUser = ResolveUserType<GeneratedTypes>
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
@@ -30,10 +30,10 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   file?: File
   filePath?: string
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req?: PayloadRequestWithData

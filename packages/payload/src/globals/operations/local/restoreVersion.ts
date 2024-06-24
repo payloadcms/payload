@@ -1,4 +1,4 @@
-import type { GeneratedTypes, GlobalSlug, Payload, RequestContext } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData } from '../../../types/index.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -9,9 +9,9 @@ import { restoreVersionOperation } from '../restoreVersion.js'
 export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   id: string
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean

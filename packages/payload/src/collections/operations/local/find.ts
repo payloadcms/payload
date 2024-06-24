@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
@@ -22,9 +22,9 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   limit?: number
-  locale?: 'all' | GeneratedTypes['locale']
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
