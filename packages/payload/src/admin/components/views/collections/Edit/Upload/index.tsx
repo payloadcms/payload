@@ -12,7 +12,6 @@ import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
 import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
-import { useFormSubmitted } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
@@ -50,7 +49,6 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const submitted = useFormSubmitted()
   const { collection, internalState, onChange, updatedAt } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
@@ -123,8 +121,6 @@ export const Upload: React.FC<Props> = (props) => {
 
   const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
 
-  const lastSubmittedTime = submitted ? new Date().toISOString() : null
-
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
@@ -136,7 +132,7 @@ export const Upload: React.FC<Props> = (props) => {
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
-          imageCacheTag={lastSubmittedTime}
+          imageCacheTag={doc.updatedAt}
         />
       )}
 
@@ -190,7 +186,7 @@ export const Upload: React.FC<Props> = (props) => {
             doc={doc || undefined}
             fileName={value?.name || doc?.filename}
             fileSrc={fileSrc || doc?.url}
-            imageCacheTag={lastSubmittedTime}
+            imageCacheTag={doc.updatedAt}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
           />
@@ -203,7 +199,7 @@ export const Upload: React.FC<Props> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
-          <PreviewSizes collection={collection} doc={doc} />
+          <PreviewSizes collection={collection} doc={doc} imageCacheTag={doc.updatedAt} />
         </Drawer>
       )}
     </div>
