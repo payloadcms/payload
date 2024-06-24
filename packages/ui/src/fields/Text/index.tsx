@@ -17,7 +17,7 @@ import './index.scss'
 
 export { TextFieldProps, TextInput, TextInputProps }
 
-const TextField: React.FC<TextFieldProps> = (props) => {
+const _TextField: React.FC<TextFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -153,4 +153,4 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   )
 }
 
-export const Text = withCondition(TextField)
+export const TextField = withCondition(_TextField)

@@ -22,7 +22,7 @@ const baseClass = 'checkbox'
 
 export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 
-const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
+const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     name,
@@ -124,4 +124,4 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
   )
 }
 
-export const Checkbox = withCondition(CheckboxField)
+export const CheckboxField = withCondition(_CheckboxField)

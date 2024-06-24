@@ -72,7 +72,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           foundVersions[version] = _pkg
         }
       }
-      if (Object.keys(foundVersions).length !== 1) {
+      if (Object.keys(foundVersions).length > 1) {
         const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
           .map(([version, pkg]) => `${pkg}@${version}`)
           .join(', ')

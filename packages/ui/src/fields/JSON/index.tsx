@@ -26,7 +26,7 @@ export type JSONFieldProps = FormFieldBase & {
   width?: string
 }
 
-const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
+const _JSONField: React.FC<JSONFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -161,4 +161,4 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 }
 
-export const JSONField = withCondition(JSONFieldComponent)
+export const JSONField = withCondition(_JSONField)
