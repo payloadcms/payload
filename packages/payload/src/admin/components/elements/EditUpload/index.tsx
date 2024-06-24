@@ -1,5 +1,5 @@
 import { useModal } from '@faceless-ui/modal'
-import React, { forwardRef, useEffect, useRef, useState } from 'react'
+import React, { forwardRef, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
