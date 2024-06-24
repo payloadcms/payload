@@ -684,7 +684,7 @@ importers:
         version: link:../translations
       '@swc-node/core':
         specifier: 1.13.1
-        version: 1.13.1(@swc/core@1.6.5)(@swc/types@0.1.6)
+        version: 1.13.1(@swc/core@1.6.5)(@swc/types@0.1.9)
       '@swc-node/sourcemap-support':
         specifier: 0.5.0
         version: 0.5.0
@@ -1195,9 +1195,9 @@ importers:
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
-      deep-equal:
-        specifier: 2.2.3
-        version: 2.2.3
+      dequal:
+        specifier: 2.0.3
+        version: 2.0.3
       json-schema:
         specifier: ^0.4.0
         version: 0.4.0
@@ -6778,7 +6778,7 @@ packages:
       '@smithy/types': 2.12.0
       tslib: 2.6.2
 
-  /@swc-node/core@1.13.1(@swc/core@1.6.5)(@swc/types@0.1.6):
+  /@swc-node/core@1.13.1(@swc/core@1.6.5)(@swc/types@0.1.9):
     resolution: {integrity: sha512-emB5l2nZsXjUEAuusqjYvWnQMLWZp6K039Mv8aq5SX1rsNM/N7DNhw1i4/DX7AyzNZ0tT+ASWyTvqEURldp5HA==}
     engines: {node: '>= 10'}
     peerDependencies:
@@ -6786,7 +6786,7 @@ packages:
       '@swc/types': '>= 0.1'
     dependencies:
       '@swc/core': 1.6.5
-      '@swc/types': 0.1.6
+      '@swc/types': 0.1.9
     dev: false
 
   /@swc-node/sourcemap-support@0.5.0:
@@ -6942,12 +6942,6 @@ packages:
       '@swc/counter': 0.1.3
       jsonc-parser: 3.2.1
     dev: true
-
-  /@swc/types@0.1.6:
-    resolution: {integrity: sha512-/JLo/l2JsT/LRd80C3HfbmVpxOAJ11FO2RCEslFrgzLltoP9j8XIbsyDcfCt2WWyX+CM96rBoNM+IToAkFOugg==}
-    dependencies:
-      '@swc/counter': 0.1.3
-    dev: false
 
   /@swc/types@0.1.9:
     resolution: {integrity: sha512-qKnCno++jzcJ4lM4NTfYifm1EFSCeIfKiAHAfkENZAV5Kl9PjJIyd2yeeVv6c/2CckuLyv2NmRC5pv6pm2WQBg==}
@@ -9704,6 +9698,7 @@ packages:
       which-boxed-primitive: 1.0.2
       which-collection: 1.0.2
       which-typed-array: 1.1.15
+    dev: true
 
   /deep-extend@0.6.0:
     resolution: {integrity: sha512-LOHxIOaPYdHlJRtCQfDIVZtfw/ufM8+rVj649RIHzcm/vGwQRXFt6OPqIFWsm2XEMrNIEtWR64sY1LEKD2vAOA==}
