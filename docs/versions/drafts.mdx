@@ -87,7 +87,7 @@ You can use the `read` [Access Control](/docs/access-control/collections#read) m
 Here is an example that utilizes the `_status` field to require a user to be logged in to retrieve drafts:
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -129,7 +129,7 @@ export const Pages: CollectionConfig = {
 Here is an example for how to write an access control function that grants access to both documents where `_status` is equal to "published" and where `_status` does not exist:
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
