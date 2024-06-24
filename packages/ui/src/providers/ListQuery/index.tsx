@@ -1,9 +1,8 @@
 'use client'
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
+import type { PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
-import { isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/shared'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 

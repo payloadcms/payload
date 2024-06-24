@@ -1,4 +1,4 @@
-import type { Field, Payload, PayloadRequestWithData } from 'payload/types'
+import type { Field, Payload, PayloadRequestWithData } from 'payload'
 
 import { sql } from 'drizzle-orm'
 
@@ -88,7 +88,7 @@ export const migrateRelationships = async ({
       globalSlug,
       isVersions,
       payload,
-      req: req as PayloadRequestWithData,
+      req: req as unknown as PayloadRequestWithData,
       tableName,
     })
   }

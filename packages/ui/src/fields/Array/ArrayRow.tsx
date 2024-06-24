@@ -1,6 +1,5 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, Row } from 'payload/types'
+import type { ArrayField, FieldPermissions, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

@@ -1,6 +1,6 @@
-import type { Payload, PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
-import { Forbidden } from 'payload/errors'
+import { Forbidden } from 'payload'
 
 import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js'
 

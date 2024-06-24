@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, Payload, PayloadRequestWithData } from 'payload'
 
 import type { DrizzleTransaction, PostgresAdapter } from '../../../types.js'
 import type { DocsToResave } from '../types.js'

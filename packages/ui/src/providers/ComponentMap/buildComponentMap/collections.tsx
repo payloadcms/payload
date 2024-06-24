@@ -4,16 +4,18 @@ import type {
   EditViewProps,
   SanitizedCollectionConfig,
   SanitizedConfig,
-} from 'payload/types'
+} from 'payload'
 
-import { isReactComponentOrFunction } from 'payload/utilities'
+import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { CollectionComponentMap } from './types.js'
 
-import { ViewDescription } from '../../../elements/ViewDescription/index.js'
+// Need to import from client barrel file
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { ViewDescription } from '../../../exports/client/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 

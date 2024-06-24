@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { AuthenticationError } from 'payload/errors'
+import { AuthenticationError } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { NestedAfterReadHook } from './payload-types.js'

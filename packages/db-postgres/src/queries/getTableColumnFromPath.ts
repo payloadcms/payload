@@ -1,13 +1,12 @@
 /* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload/types'
+import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
-import { APIError } from 'payload/errors'
-import { fieldAffectsData, tabHasName } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { APIError, flattenTopLevelFields } from 'payload'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'
 

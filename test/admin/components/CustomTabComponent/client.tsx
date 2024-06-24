@@ -1,6 +1,6 @@
 'use client'
 
-import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useConfig } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { useParams } from 'next/navigation.js'
 import React from 'react'

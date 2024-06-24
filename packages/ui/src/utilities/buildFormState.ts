@@ -1,17 +1,19 @@
-import type { BuildFormStateArgs } from '@payloadcms/ui/forms/buildStateFromSchema'
 import type {
   DocumentPreferences,
   Field,
   FormState,
   PayloadRequestWithData,
   TypeWithID,
-} from 'payload/types'
+} from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
-
+import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import {} from '../exports/client/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { reduceFieldsToValues } from '../exports/shared/index.js'
+import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
 let cached = global._payload_fieldSchemaMap

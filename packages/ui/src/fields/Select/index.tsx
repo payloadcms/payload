@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, Option, OptionObject } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload'
 
 import React, { useCallback, useState } from 'react'
 
@@ -63,7 +63,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     width,
   } = props
 
-  const [options] = useState(formatOptions(optionsFromProps))
+  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {

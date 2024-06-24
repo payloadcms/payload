@@ -1,7 +1,7 @@
 import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getUniqueListBy } from 'payload/utilities'
+import { getUniqueListBy } from 'payload/shared'
 import React from 'react'
 
 import type { Props } from '../types.js'

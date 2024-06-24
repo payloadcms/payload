@@ -1,4 +1,4 @@
-import type { UIField } from 'payload/types'
+import type { UIField } from 'payload'
 
 import React from 'react'
 

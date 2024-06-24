@@ -1,5 +1,5 @@
 'use client'
-import type { Where } from 'payload/types'
+import type { Where } from 'payload'
 
 import queryString from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'

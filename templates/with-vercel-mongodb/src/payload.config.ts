@@ -2,7 +2,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Users } from './collections/Users'

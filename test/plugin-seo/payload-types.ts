@@ -46,11 +46,9 @@ export interface Page {
   title: string;
   excerpt?: string | null;
   slug: string;
-  meta: {
-    title: string;
+  meta?: {
+    title?: string | null;
     description?: string | null;
-    image?: string | Media | null;
-    ogTitle?: string | null;
   };
   updatedAt: string;
   createdAt: string;

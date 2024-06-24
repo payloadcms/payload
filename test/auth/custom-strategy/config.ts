@@ -4,7 +4,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-import type { AuthStrategyFunction } from 'payload/auth'
+import type { AuthStrategyFunction } from 'payload'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 import { usersSlug } from './shared.js'

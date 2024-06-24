@@ -8,329 +8,328 @@
 
 export interface Config {
   collections: {
-    'error-fields': ErrorField;
-    uploads: Upload;
-    'validate-drafts-on': ValidateDraftsOn;
-    'validate-drafts-off': ValidateDraftsOff;
-    'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
-    users: User;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
-  locale: null;
+    'error-fields': ErrorField
+    uploads: Upload
+    'validate-drafts-on': ValidateDraftsOn
+    'validate-drafts-off': ValidateDraftsOff
+    'validate-drafts-on-autosave': ValidateDraftsOnAutosave
+    users: User
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: null
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "error-fields".
  */
 export interface ErrorField {
-  id: string;
+  id: string
   parentArray?:
     | {
         childArray: {
-          childArrayText: string;
-          id?: string | null;
-        }[];
-        id?: string | null;
+          childArrayText: string
+          id?: string | null
+        }[]
+        id?: string | null
       }[]
-    | null;
+    | null
   home: {
-    tabText: string;
-    text: string;
+    tabText: string
+    text: string
     array?:
       | {
-          requiredArrayText: string;
-          arrayText?: string | null;
+          requiredArrayText: string
+          arrayText?: string | null
           group: {
-            text: string;
-            number: number;
-            date: string;
-            checkbox: boolean;
-          };
-          code: string;
+            text: string
+            number: number
+            date: string
+            checkbox: boolean
+          }
+          code: string
           json:
             | {
-                [k: string]: unknown;
+                [k: string]: unknown
               }
             | unknown[]
             | string
             | number
             | boolean
-            | null;
-          email: string;
+            | null
+          email: string
           /**
            * @minItems 2
            * @maxItems 2
            */
-          point: [number, number];
-          radio: 'mint' | 'dark_gray';
-          relationship: string | User;
+          point: [number, number]
+          radio: 'mint' | 'dark_gray'
+          relationship: string | User
           richtext: {
             root: {
-              type: string;
+              type: string
               children: {
-                type: string;
-                version: number;
-                [k: string]: unknown;
-              }[];
-              direction: ('ltr' | 'rtl') | null;
-              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-              indent: number;
-              version: number;
-            };
-            [k: string]: unknown;
-          };
-          select: 'mint' | 'dark_gray';
-          upload: string | Upload;
-          text: string;
-          textarea: string;
-          id?: string | null;
+                type: string
+                version: number
+                [k: string]: unknown
+              }[]
+              direction: ('ltr' | 'rtl') | null
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+              indent: number
+              version: number
+            }
+            [k: string]: unknown
+          }
+          select: 'mint' | 'dark_gray'
+          upload: string | Upload
+          text: string
+          textarea: string
+          id?: string | null
         }[]
-      | null;
-  };
-  tabText: string;
-  text: string;
+      | null
+  }
+  tabText: string
+  text: string
   array?:
     | {
-        requiredArrayText: string;
-        arrayText?: string | null;
+        requiredArrayText: string
+        arrayText?: string | null
         group: {
-          text: string;
-          number: number;
-          date: string;
-          checkbox: boolean;
-        };
-        code: string;
+          text: string
+          number: number
+          date: string
+          checkbox: boolean
+        }
+        code: string
         json:
           | {
-              [k: string]: unknown;
+              [k: string]: unknown
             }
           | unknown[]
           | string
           | number
           | boolean
-          | null;
-        email: string;
+          | null
+        email: string
         /**
          * @minItems 2
          * @maxItems 2
          */
-        point: [number, number];
-        radio: 'mint' | 'dark_gray';
-        relationship: string | User;
+        point: [number, number]
+        radio: 'mint' | 'dark_gray'
+        relationship: string | User
         richtext: {
           root: {
-            type: string;
+            type: string
             children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        select: 'mint' | 'dark_gray';
-        upload: string | Upload;
-        text: string;
-        textarea: string;
-        id?: string | null;
+              type: string
+              version: number
+              [k: string]: unknown
+            }[]
+            direction: ('ltr' | 'rtl') | null
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+            indent: number
+            version: number
+          }
+          [k: string]: unknown
+        }
+        select: 'mint' | 'dark_gray'
+        upload: string | Upload
+        text: string
+        textarea: string
+        id?: string | null
       }[]
-    | null;
+    | null
   layout?:
     | {
-        tabText: string;
-        text: string;
+        tabText: string
+        text: string
         array?:
           | {
-              requiredArrayText: string;
-              arrayText?: string | null;
+              requiredArrayText: string
+              arrayText?: string | null
               group: {
-                text: string;
-                number: number;
-                date: string;
-                checkbox: boolean;
-              };
-              code: string;
+                text: string
+                number: number
+                date: string
+                checkbox: boolean
+              }
+              code: string
               json:
                 | {
-                    [k: string]: unknown;
+                    [k: string]: unknown
                   }
                 | unknown[]
                 | string
                 | number
                 | boolean
-                | null;
-              email: string;
+                | null
+              email: string
               /**
                * @minItems 2
                * @maxItems 2
                */
-              point: [number, number];
-              radio: 'mint' | 'dark_gray';
-              relationship: string | User;
+              point: [number, number]
+              radio: 'mint' | 'dark_gray'
+              relationship: string | User
               richtext: {
                 root: {
-                  type: string;
+                  type: string
                   children: {
-                    type: string;
-                    version: number;
-                    [k: string]: unknown;
-                  }[];
-                  direction: ('ltr' | 'rtl') | null;
-                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                  indent: number;
-                  version: number;
-                };
-                [k: string]: unknown;
-              };
-              select: 'mint' | 'dark_gray';
-              upload: string | Upload;
-              text: string;
-              textarea: string;
-              id?: string | null;
+                    type: string
+                    version: number
+                    [k: string]: unknown
+                  }[]
+                  direction: ('ltr' | 'rtl') | null
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+                  indent: number
+                  version: number
+                }
+                [k: string]: unknown
+              }
+              select: 'mint' | 'dark_gray'
+              upload: string | Upload
+              text: string
+              textarea: string
+              id?: string | null
             }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block1';
+          | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block1'
       }[]
-    | null;
+    | null
   group: {
-    text: string;
-  };
-  updatedAt: string;
-  createdAt: string;
+    text: string
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
-  text?: string | null;
-  media?: string | Upload | null;
+  id: string
+  text?: string | null
+  media?: string | Upload | null
   richText?: {
     root: {
-      type: string;
+      type: string
       children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "validate-drafts-on".
  */
 export interface ValidateDraftsOn {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  id: string
+  title: string
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "validate-drafts-off".
  */
 export interface ValidateDraftsOff {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  id: string
+  title: string
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "validate-drafts-on-autosave".
  */
 export interface ValidateDraftsOnAutosave {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  id: string
+  title: string
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

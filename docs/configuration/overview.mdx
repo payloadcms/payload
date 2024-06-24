@@ -3,7 +3,7 @@ title: The Payload Config
 label: Overview
 order: 10
 desc: The Payload config is central to everything that Payload does, from adding custom React components, to modifying collections, controlling localization and much more.
-keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Payload is a _config-based_, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more.
@@ -44,6 +44,7 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 | `secret` \*            | A secure, unguessable string that Payload will use for any encryption workflows - for example, password salt / hashing. Required. |
 | `sharp`                | If you would like Payload to offer cropping, focal point selection, and automatic media resizing, install and pass the Sharp module to the config here. |
 | `typescript`           | Configure TypeScript settings here. [More](#typescript) |
+
 
 _\* An asterisk denotes that a property is required._
 
@@ -131,7 +132,7 @@ project-name
   <br />
   If you use an environment variable to configure any properties that are required for the Admin
   panel to function (ex. serverURL or any routes), you need to make sure that your Admin panel code
-  can access it. [Click here](/docs/admin/webpack#admin-environment-vars) for more info.
+  can access it. [Click here](/docs/admin/environment-vars) for more info.
 </Banner>
 
 ## Customizing & Automating Config Location Detection

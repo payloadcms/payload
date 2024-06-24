@@ -1,11 +1,11 @@
 'use client'
-import type { OptionObject, SanitizedCollectionConfig } from 'payload/types'
+import type { OptionObject, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
-import { sortableFieldTypes } from 'payload/fields/index'
-import { fieldAffectsData } from 'payload/types'
+import { sortableFieldTypes } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 import queryString from 'qs'
 import React, { useEffect, useState } from 'react'
 
