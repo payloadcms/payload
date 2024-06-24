@@ -3,7 +3,6 @@ import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
-import qs from 'qs'
 
 const defaultOpenGraph = {
   description:
