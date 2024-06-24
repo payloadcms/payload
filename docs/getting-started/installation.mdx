@@ -77,13 +77,13 @@ Once you have the required Payload files in place in your `/app` folder, you sho
      -- ...etc // whatever else you have
 ```
 
-You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, (`app`), or similar.
+You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [Check out the Admin documentation](/docs/beta/admin/overview) for more information.
 
-#### 3 - Add the Payload plugin to your Next.js config
+#### 3 - add the Payload plugin to your Next.js config
 
 Payload has a plugin that it uses to ensure Next.js compatibility with some of the packages Payload relies on, like `mongodb` or `drizzle-kit`.
 
-You need to import the `withPayload` plugin in your `next.config` file and wrap your config with it.
+You need to import the `withPayload` plugin in your `next.config.js` file and wrap your config with it.
 
 Here's an example of what your Next.js config should look like after you've imported the Payload plugin:
 
