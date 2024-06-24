@@ -77,20 +77,6 @@ export const EditUpload: React.FC<{
 
   const [imageLoaded, setImageLoaded] = useState<boolean>(false)
 
-  useEffect(() => {
-    if (imageLoaded) {
-      setCrop({
-        height: 100,
-        heightPixels: Number(heightRef.current?.value ?? 0),
-        unit: '%',
-        width: 100,
-        widthPixels: Number(widthRef.current?.value ?? 0),
-        x: 0,
-        y: 0,
-      })
-    }
-  }, [fileSrc, imageLoaded, uploadEdits?.crop])
-
   const onImageLoad = (e) => {
     setOriginalHeight(e.currentTarget.naturalHeight)
     setOriginalWidth(e.currentTarget.naturalWidth)
@@ -177,6 +163,7 @@ export const EditUpload: React.FC<{
             aria-label={t('general:applyChanges')}
             buttonStyle="primary"
             className={`${baseClass}__save`}
+            disabled={!imageLoaded}
             onClick={() => saveEdits()}
           >
             {t('general:applyChanges')}
