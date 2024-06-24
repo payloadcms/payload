@@ -16,7 +16,7 @@ export const stripeREST = async (args: {
 
   const { pluginConfig, req } = args
 
-  await addDataAndFileToRequest({ request: req })
+  await addDataAndFileToRequest({ req })
 
   const requestWithData = req as PayloadRequestWithData
 

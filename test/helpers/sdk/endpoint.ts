@@ -4,7 +4,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
 
 export const handler: PayloadHandler = async (incomingRequest) => {
-  const reqWithData = await addDataAndFileToRequest({ request: incomingRequest })
+  const reqWithData = await addDataAndFileToRequest({ req: incomingRequest })
 
   const { data, payload, user } = reqWithData
   const operation = data?.operation ? String(data.operation) : undefined

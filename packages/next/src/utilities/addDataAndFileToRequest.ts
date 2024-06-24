@@ -7,13 +7,13 @@ import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
 
 type ReturnType = PayloadRequest & PayloadRequestData
-type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<ReturnType>
+type AddDataAndFileToRequest = (args: { req: PayloadRequest }) => Promise<void>
 
 /**
  * Mutates the Request to contain 'data' and 'file' if present
  */
 export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
-  request: incomingRequest,
+  req: incomingRequest,
 }) => {
   const config = incomingRequest.payload.config
 
@@ -54,9 +54,5 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
         mutableRequest.data = JSON.parse(fields._payload)
       }
     }
-
-    return mutableRequest
   }
-
-  return incomingRequest
 }

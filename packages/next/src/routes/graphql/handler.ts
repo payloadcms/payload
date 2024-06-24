@@ -88,8 +88,8 @@ export const POST =
       request,
     })
 
-    const reqWithData = await addDataAndFileToRequest({ request: basePayloadRequest })
-    const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+    const reqWithData = await addDataAndFileToRequest({ req: basePayloadRequest })
+    const payloadRequest = addLocalesToRequestFromData({ req: reqWithData })
 
     const { schema, validationRules } = await getGraphql(config)
 
