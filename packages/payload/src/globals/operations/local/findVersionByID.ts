@@ -1,30 +1,31 @@
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
+import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
-export type Options<T extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
   disableErrors?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   id: string
-  locale?: 'all' | GeneratedTypes['locale']
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
-  slug: T
+  slug: TSlug
   user?: Document
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['globals']>(
+export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
+  options: Options<TSlug>,
+): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {
   const {
     id,
     slug: globalSlug,

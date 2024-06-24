@@ -1,4 +1,4 @@
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequestWithData } from '../../../types/index.js'
 import type { Result } from '../resetPassword.js'
 
@@ -6,7 +6,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { resetPasswordOperation } from '../resetPassword.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
   context?: RequestContext
   data: {
@@ -17,7 +17,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequestWithData
 }
 
-async function localResetPassword<T extends keyof GeneratedTypes['collections']>(
+async function localResetPassword<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {

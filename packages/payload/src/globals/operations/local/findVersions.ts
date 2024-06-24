@@ -1,32 +1,33 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData, Where } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
+import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<T extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   limit?: number
-  locale?: 'all' | GeneratedTypes['locale']
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
-  slug: T
+  slug: TSlug
   sort?: string
   user?: Document
   where?: Where
 }
 
-export default async function findVersionsLocal<T extends keyof GeneratedTypes['globals']>(
+export default async function findVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
+  options: Options<TSlug>,
+): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> {
   const {
     slug: globalSlug,
     depth,

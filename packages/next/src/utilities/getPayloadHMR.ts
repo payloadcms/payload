@@ -77,7 +77,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   }
 
   if (!cached.promise) {
-    cached.promise = new BasePayload<GeneratedTypes>().init(options)
+    cached.promise = new BasePayload().init(options)
   }
 
   try {

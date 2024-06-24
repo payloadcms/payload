@@ -1,5 +1,4 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequestWithData, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
@@ -262,23 +261,25 @@ export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+export type FindGlobal = <T extends Record<string, unknown> = any>(
+  args: FindGlobalArgs,
+) => Promise<T>
 
-export type CreateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
   req: PayloadRequestWithData
   slug: string
 }
-export type CreateGlobal = <T extends GlobalsTypeWithID = any>(
+export type CreateGlobal = <T extends Record<string, unknown> = any>(
   args: CreateGlobalArgs<T>,
 ) => Promise<T>
 
-export type UpdateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
   req: PayloadRequestWithData
   slug: string
 }
-export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(
+export type UpdateGlobal = <T extends Record<string, unknown> = any>(
   args: UpdateGlobalArgs<T>,
 ) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>

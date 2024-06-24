@@ -1,9 +1,9 @@
 import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { GeneratedTypes } from '../../index.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { PayloadRequestWithData, Where } from '../../types/index.js'
-import type { BeforeOperationHook, Collection } from '../config/types.js'
+import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -27,12 +27,12 @@ export type Arguments = {
   where: Where
 }
 
-export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
+export const deleteOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<{
-  docs: GeneratedTypes['collections'][TSlug][]
+  docs: DataFromCollectionSlug<TSlug>[]
   errors: {
-    id: GeneratedTypes['collections'][TSlug]['id']
+    id: DataFromCollectionSlug<TSlug>['id']
     message: string
   }[]
 }> => {
@@ -102,7 +102,7 @@ export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collec
     // Retrieve documents
     // /////////////////////////////////////
 
-    const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({
+    const { docs } = await payload.db.find<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
       locale,
       req,
@@ -255,7 +255,7 @@ export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collec
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'delete',

@@ -7,7 +7,7 @@ import type { SanitizedConfig } from 'payload'
 import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import AfterOperation from './collections/AfterOperation/index.js'
+import { AfterOperationCollection } from './collections/AfterOperation/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
@@ -19,7 +19,7 @@ import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   collections: [
-    AfterOperation,
+    AfterOperationCollection,
     ContextHooks,
     TransformHooks,
     Hooks,

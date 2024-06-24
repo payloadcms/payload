@@ -1,7 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import type { FindOneArgs } from '../../database/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Collection, TypeWithID } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -25,9 +26,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const findByIDOperation = async <T extends TypeWithID>(
+export const findByIDOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
-): Promise<T> => {
+): Promise<DataFromCollectionSlug<TSlug>> => {
   let args = incomingArgs
 
   try {
@@ -89,7 +90,7 @@ export const findByIDOperation = async <T extends TypeWithID>(
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    let result: T = await req.payload.db.findOne(findOneArgs)
+    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {
@@ -171,12 +172,12 @@ export const findByIDOperation = async <T extends TypeWithID>(
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<T>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'findByID',
-      result: result as any,
-    }) // TODO: fix this typing
+      result,
+    })
 
     // /////////////////////////////////////
     // Return results

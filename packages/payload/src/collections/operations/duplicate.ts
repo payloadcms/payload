@@ -3,9 +3,9 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Collection } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -32,9 +32,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
+export const duplicateOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
-): Promise<GeneratedTypes['collections'][TSlug]> => {
+): Promise<DataFromCollectionSlug<TSlug>> => {
   let args = incomingArgs
   const operation = 'create'
 
@@ -141,7 +141,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    let data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+    let data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -194,7 +194,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+    result = await beforeChange<DataFromCollectionSlug<TSlug>>({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -280,7 +280,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // afterChange - Fields
     // /////////////////////////////////////
 
-    result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+    result = await afterChange<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig,
       context: req.context,
       data: versionDoc,
@@ -313,7 +313,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation,

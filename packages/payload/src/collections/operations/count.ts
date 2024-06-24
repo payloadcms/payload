@@ -1,4 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
@@ -18,7 +19,7 @@ export type Arguments = {
   where?: Where
 }
 
-export const countOperation = async <T extends TypeWithID & Record<string, unknown>>(
+export const countOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<{ totalDocs: number }> => {
   let args = incomingArgs
@@ -90,7 +91,7 @@ export const countOperation = async <T extends TypeWithID & Record<string, unkno
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<T>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'count',
