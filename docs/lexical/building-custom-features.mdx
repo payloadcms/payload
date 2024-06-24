@@ -164,6 +164,7 @@ import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 // If you want your node to save data, feel free to extend it
 export type SerializedMyNode = SerializedLexicalNode
 
+// Lazy-import the React component to your node here
 const MyNodeComponent = React.lazy(() =>
   import('../component/index.js').then((module) => ({
     default: module.MyNodeComponent,
@@ -273,3 +274,202 @@ export function $isMyNode(
 ```
 
 Please do not add any 'use client' directives to your nodes, as the node class can be used on the server.
+
+### Plugins
+
+One small part of a feature are plugins. The name stems from the lexical playground plugins and is just a small part of a lexical feature.
+Plugins are simply react components which are added to the editor, within all the lexical context providers. They can be used to add any functionality
+to the editor, by utilizing the lexical API.
+
+Most commonly, they are used to register [lexical listeners](https://lexical.dev/docs/concepts/listeners), [node transforms](https://lexical.dev/docs/concepts/transforms) or [commands](https://lexical.dev/docs/concepts/commands).
+For example, you could add a drawer to your plugin and register a command which opens it. That command can then be called from anywhere within lexical, e.g. from within your custom lexical node.
+
+To add a plugin, simply add it to the `plugins` array in your client feature:
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client';
+import { MyPlugin } from './plugin';
+
+export const MyClientFeature = createClientFeature({
+  plugins: [MyPlugin]
+})
+```
+
+Example plugin.tsx:
+
+```ts
+'use client'
+import type {
+  LexicalCommand,
+} from 'lexical'
+
+import {
+  createCommand,
+  $getSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR
+} from 'lexical'
+
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $insertNodeToNearestRoot } from '@lexical/utils'
+import { useEffect } from 'react'
+
+import type { PluginComponent } from '@payloadcms/richtext-lexical' // type imports can be imported from @payloadcms/richtext-lexical - even on the client
+
+import {
+  $createMyNode,
+} from '../nodes/MyNode'
+import './index.scss'
+
+export const INSERT_MYNODE_COMMAND: LexicalCommand<void> = createCommand(
+  'INSERT_MYNODE_COMMAND',
+)
+
+/**
+ * Plugin which registers a lexical command to insert a new MyNode into the editor
+ */
+export const MyNodePlugin: PluginComponent= () => {
+  // The useLexicalComposerContext hook can be used to access the lexical editor instance
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    return editor.registerCommand(
+      INSERT_MYNODE_COMMAND,
+      (type) => {
+        const selection = $getSelection()
+
+        if (!$isRangeSelection(selection)) {
+          return false
+        }
+
+        const focusNode = selection.focus.getNode()
+
+        if (focusNode !== null) {
+          const newMyNode = $createMyNode()
+          $insertNodeToNearestRoot(newMyNode)
+        }
+
+        return true
+      },
+      COMMAND_PRIORITY_EDITOR,
+    )
+  }, [editor])
+
+  return null
+}
+```
+
+In this example, we register a lexical command which simply inserts a new MyNode into the editor. This command can be called from anywhere within lexical, e.g. from within a custom node.
+
+### Toolbar items
+
+Custom nodes and features on its own are pointless, if they can not be added to the editor. You will need to hook in one of our interfaces which allow the user to interact with the editor:
+
+- Fixed toolbar which stays fixed at the top of the editor
+- Inline, floating toolbar which appears when selecting text
+- Slash menu which appears when typing `/` in the editor
+- Markdown transformers which are triggered when a certain text pattern is typed in the editor
+- Or any other interfaces which can be added via your own plugins. Our toolbars are a prime example of this - they are just plugins.
+
+In order to add a toolbar item to either the floating or the inline toolbar, you can add a ToolbarGroup with a ToolbarItem to the `toolbarFixed` or `toolbarInline` props of your client feature:
+
+```ts
+'use client'
+
+import { createClientFeature, toolbarAddDropdownGroupWithItems } from '@payloadcms/richtext-lexical/client';
+import { IconComponent } from './icon';
+import { $isHorizontalRuleNode } from './nodes/MyNode';
+import { INSERT_MYNODE_COMMAND } from './plugin';
+import { $isNodeSelection } from 'lexical'
+
+export const MyClientFeature = createClientFeature({
+   toolbarFixed: {
+    groups: [
+      toolbarAddDropdownGroupWithItems([
+        {
+          ChildComponent: IconComponent,
+          isActive: ({ selection }) => {
+            if (!$isNodeSelection(selection) || !selection.getNodes().length) {
+              return false
+            }
+
+            const firstNode = selection.getNodes()[0]
+            return $isHorizontalRuleNode(firstNode)
+          },
+          key: 'myNode',
+          label: ({ i18n }) => {
+            return i18n.t('lexical:myFeature:label')
+          },
+          onSelect: ({ editor }) => {
+            editor.dispatchCommand(INSERT_MYNODE_COMMAND, undefined)
+          },
+        },
+      ]),
+    ],
+  },
+})
+```
+
+You will have to provide a toolbar group first, and then the items for that toolbar group.
+We already export all the default toolbar groups (like `toolbarAddDropdownGroupWithItems`, so you can use them as a base for your own toolbar items.
+
+If a toolbar with the same key is declared twice, all its items will be merged together into one group.
+
+The toolbar items provides various props you can use to customize its behavior:
+
+| Option               | Description                                                                                                                              |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| **`ChildComponent`** | A react component which is rendered within your toolbar item. Usually, you want this to be an item.                                      |
+| **`label`**          | The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. |
+| **`key`**            | Each toolbar item needs to have a unique key.                                                                                            |
+| **`onSelect`**       | A function which is called when the toolbar item is clicked.                                                                             |
+| **`isActive`**       | This is optional and controls if the toolbar item is clickable or not.                                                                   |
+
+The API for adding an item to the floating inline toolbar (`toolbarInline`) is identical. If you wanted to add an item to both the fixed and inline toolbar, you can extract it into its own variable
+(typed as `ToolbarGroup[]`) and add it to both the `toolbarFixed` and `toolbarInline` props.
+
+### Slash Menu items
+
+The API for adding items to the slash menu will be similar. There are slash menu groups, and each slash menu groups has items. Here is an example:
+
+```ts
+'use client'
+
+import { createClientFeature, slashMenuBasicGroupWithItems } from '@payloadcms/richtext-lexical/client';
+import { INSERT_MYNODE_COMMAND } from './plugin';
+import { IconComponent } from './icon';
+
+export const MyClientFeature = createClientFeature({
+  slashMenu: {
+    groups: [
+      slashMenuBasicGroupWithItems([
+        {
+          Icon: IconComponent,
+          key: 'myNode',
+          keywords: ['myNode', 'myFeature', 'someOtherKeyword'],
+          label: ({ i18n }) => {
+            return i18n.t('lexical:myFeature:label')
+          },
+          onSelect: ({ editor }) => {
+            editor.dispatchCommand(INSERT_MYNODE_COMMAND, undefined)
+          },
+        },
+      ]),
+    ],
+  },
+})
+```
+
+| Option         | Description                                                                                                                                                                                                                                                                                    |
+|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Icon`**     | The icon which is rendered in your slash menu item.                                                                                                                                                                                                                                            |
+| **`label`**    | The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function.                                                                                                                                                                                     |
+| **`key`**      | Each slash menu item needs to have a unique key. The key will be matched when typing.                                                                                                                                                                                                          |
+| **`onSelect`** | A function which is called when the slash menu item is selected.                                                                                                                                                                                                                               |
+| **`keywords`** | Keywords are used in order to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. Additionally to the keywords, the label and key will be used to match the correct slash menu item. |
+
+## More information
+
+Take a look at the [features we've already built](https://github.com/payloadcms/payload/tree/beta/packages/richtext-lexical/src/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of payload or not!
