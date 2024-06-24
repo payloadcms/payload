@@ -31,7 +31,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const CodeField: React.FC<CodeFieldProps> = (props) => {
+const _CodeField: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -111,4 +111,4 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
   )
 }
 
-export const Code = withCondition(CodeField)
+export const CodeField = withCondition(_CodeField)

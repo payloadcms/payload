@@ -30,7 +30,7 @@ export type CollapsibleFieldProps = FormFieldBase & {
   width?: string
 }
 
-const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
+const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -164,4 +164,4 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   )
 }
 
-export const Collapsible = withCondition(CollapsibleField)
+export const CollapsibleField = withCondition(_CollapsibleField)

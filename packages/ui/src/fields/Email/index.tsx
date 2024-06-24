@@ -24,7 +24,7 @@ export type EmailFieldProps = FormFieldBase & {
   width?: string
 }
 
-const EmailField: React.FC<EmailFieldProps> = (props) => {
+const _EmailField: React.FC<EmailFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -107,4 +107,4 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
   )
 }
 
-export const Email = withCondition(EmailField)
+export const EmailField = withCondition(_EmailField)

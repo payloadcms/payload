@@ -29,7 +29,7 @@ export type DateFieldProps = FormFieldBase & {
   width?: string
 }
 
-const DateTimeField: React.FC<DateFieldProps> = (props) => {
+const _DateTimeField: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -117,4 +117,4 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
   )
 }
 
-export const DateTime = withCondition(DateTimeField)
+export const DateTimeField = withCondition(_DateTimeField)
