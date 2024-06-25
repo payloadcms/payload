@@ -72,7 +72,7 @@
     "graphql-playground-html": "1.6.30",
     "http-status": "1.6.2",
     "path-to-regexp": "^6.2.1",
-    "qs": "6.11.2",
+    "qs": "6.12.1",
     "react-diff-viewer-continued": "3.2.6",
     "sass": "1.77.4",
     "sonner": "^1.5.0",

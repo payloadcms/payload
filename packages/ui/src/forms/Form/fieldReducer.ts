@@ -1,7 +1,7 @@
 import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import equal from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { deepCopyObject } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
@@ -29,7 +29,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           const oldField = state[path]
           const newField = field
 
-          if (!equal(oldField, newField)) {
+          if (!dequal(oldField, newField)) {
             newState[path] = newField
           } else if (oldField) {
             newState[path] = oldField
