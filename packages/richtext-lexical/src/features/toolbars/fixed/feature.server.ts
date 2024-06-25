@@ -1,7 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { FixedToolbarFeatureClientComponent } from '../../../exports/client/index.js'
+import { FixedToolbarFeatureClient } from '../../../exports/client/index.js'
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 
 export type FixedToolbarFeatureProps = {
   /**
@@ -20,29 +19,26 @@ export type FixedToolbarFeatureProps = {
   disableIfParentHasFixedToolbar?: boolean
 }
 
-export const FixedToolbarFeature: FeatureProviderProviderServer<
+export const FixedToolbarFeature = createServerFeature<
   FixedToolbarFeatureProps,
   FixedToolbarFeatureProps,
   FixedToolbarFeatureProps
-> = (props) => {
-  return {
-    feature: () => {
-      const sanitizedProps: FixedToolbarFeatureProps = {
-        applyToFocusedEditor:
-          props?.applyToFocusedEditor === undefined ? false : props.applyToFocusedEditor,
-        disableIfParentHasFixedToolbar:
-          props?.disableIfParentHasFixedToolbar === undefined
-            ? false
-            : props.disableIfParentHasFixedToolbar,
-      }
+>({
+  feature: ({ props }) => {
+    const sanitizedProps: FixedToolbarFeatureProps = {
+      applyToFocusedEditor:
+        props?.applyToFocusedEditor === undefined ? false : props.applyToFocusedEditor,
+      disableIfParentHasFixedToolbar:
+        props?.disableIfParentHasFixedToolbar === undefined
+          ? false
+          : props.disableIfParentHasFixedToolbar,
+    }
 
-      return {
-        ClientFeature: FixedToolbarFeatureClientComponent,
-        clientFeatureProps: sanitizedProps,
-        sanitizedServerFeatureProps: sanitizedProps,
-      }
-    },
-    key: 'toolbarFixed',
-    serverFeatureProps: props,
-  }
-}
+    return {
+      ClientFeature: FixedToolbarFeatureClient,
+      clientFeatureProps: sanitizedProps,
+      sanitizedServerFeatureProps: sanitizedProps,
+    }
+  },
+  key: 'toolbarFixed',
+})

@@ -14,7 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { PluginComponentWithAnchor } from '../../../types.js'
+import type { PluginComponentWithAnchor } from '../../../typesClient.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'

@@ -3,7 +3,7 @@ import { $isListNode, INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '
 import { $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
-import type { ClientFeature } from '../../types.js'
+import type { ClientFeature } from '../../typesClient.js'
 
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'

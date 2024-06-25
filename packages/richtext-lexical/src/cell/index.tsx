@@ -7,7 +7,7 @@ import { useClientFunctions, useTableCell } from '@payloadcms/ui'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
-import type { FeatureProviderClient } from '../features/types.js'
+import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 

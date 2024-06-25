@@ -14,7 +14,7 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { PluginComponent } from '../../types.js'
+import type { PluginComponent } from '../../typesClient.js'
 import type { RelationshipFeatureProps } from '../feature.server.js'
 import type { RelationshipData } from '../nodes/RelationshipNode.js'
 
