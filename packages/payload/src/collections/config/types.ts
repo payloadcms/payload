@@ -6,6 +6,7 @@ import type {
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomUpload,
 } from '../../admin/types.js'
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
@@ -254,6 +255,11 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Upload" section
+       * + upload must be enabled
+       */
+      Upload?: CustomUpload
     }
     views?: {
       /**

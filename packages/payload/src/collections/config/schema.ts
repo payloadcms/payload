@@ -8,11 +8,6 @@ import {
 } from '../../config/shared/componentSchema.js'
 import { openGraphSchema } from '../../config/shared/openGraphSchema.js'
 
-const strategyBaseSchema = joi.object().keys({
-  logout: joi.boolean(),
-  refresh: joi.boolean(),
-})
-
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
   access: joi.object({
@@ -36,6 +31,7 @@ const collectionSchema = joi.object().keys({
         PublishButton: componentSchema,
         SaveButton: componentSchema,
         SaveDraftButton: componentSchema,
+        Upload: componentSchema,
       }),
       views: joi.object({
         Edit: joi.alternatives().try(
