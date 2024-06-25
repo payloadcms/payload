@@ -290,6 +290,9 @@ const res = await fetch(`http://localhost:3000/api/[collection-slug]/unlock`, {
   headers: {
     'Content-Type': 'application/json',
   },
+  body: JSON.stringify({
+    email: 'dev@payloadcms.com',
+  }),
 })
 ```
 
@@ -297,7 +300,7 @@ const res = await fetch(`http://localhost:3000/api/[collection-slug]/unlock`, {
 
 ```
 mutation {
-  unlock[collection-singular-label]
+  unlock[collection-singular-label](email: "dev@payloadcms.com")
 }
 ```
 
@@ -306,6 +309,9 @@ mutation {
 ```ts
 const result = await payload.unlock({
   collection: '[collection-slug]',
+  data: {
+    email: 'dev@payloadcms.com',
+  },
 })
 ```
 
