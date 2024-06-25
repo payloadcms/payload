@@ -811,11 +811,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
-export {
-  type BlockFields,
-  BlockNode,
-  type SerializedBlockNode,
-} from './features/blocks/nodes/BlocksNode.js'
+export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
 
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
@@ -850,11 +846,7 @@ export { LinkFeature, type LinkFeatureServerProps } from './features/link/featur
 
 export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
 export { LinkNode } from './features/link/nodes/LinkNode.js'
-export type {
-  LinkFields,
-  SerializedAutoLinkNode,
-  SerializedLinkNode,
-} from './features/link/nodes/types.js'
+export type { LinkFields } from './features/link/nodes/types.js'
 export { ChecklistFeature } from './features/lists/checklist/feature.server.js'
 export { OrderedListFeature } from './features/lists/orderedList/feature.server.js'
 export { UnorderedListFeature } from './features/lists/unorderedList/feature.server.js'
@@ -889,7 +881,6 @@ export {
 export {
   type RelationshipData,
   RelationshipNode,
-  type SerializedRelationshipNode,
 } from './features/relationship/nodes/RelationshipNode.js'
 
 export { FixedToolbarFeature } from './features/toolbars/fixed/feature.server.js'
@@ -936,11 +927,7 @@ export type {
 export { UploadFeature } from './features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './features/upload/feature.server.js'
-export {
-  type SerializedUploadNode,
-  type UploadData,
-  UploadNode,
-} from './features/upload/nodes/UploadNode.js'
+export { type UploadData, UploadNode } from './features/upload/nodes/UploadNode.js'
 
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 export {
@@ -990,3 +977,5 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 
 export { createServerFeature } from './utilities/createServerFeature.js'
+
+export * from './nodeTypes.js'

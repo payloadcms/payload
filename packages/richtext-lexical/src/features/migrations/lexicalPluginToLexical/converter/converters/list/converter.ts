@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { SerializedListNode } from '@lexical/list'
-
+import type { SerializedListNode } from '../../../../../lists/plugin/index.js'
 import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'

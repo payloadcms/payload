@@ -1,9 +1,8 @@
-import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
-
 import { ListItemNode, ListNode } from '@lexical/list'
 import { v4 as uuidv4 } from 'uuid'
 
 import type { HTMLConverter } from '../converters/html/converter/types.js'
+import type { SerializedListItemNode, SerializedListNode } from './plugin/index.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 
