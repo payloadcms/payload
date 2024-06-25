@@ -5,13 +5,7 @@ import { CustomUploadRSC } from './components/CustomUpload/index.js'
 
 export const CustomUploadFieldCollection: CollectionConfig = {
   slug: customUploadFieldSlug,
-  upload: {
-    handlers: [
-      (req, res) => {
-        res.headers.set('Cache-control', 'public max-age=86400')
-      },
-    ],
-  },
+  upload: true,
   admin: {
     components: {
       edit: {
