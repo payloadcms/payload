@@ -58,9 +58,7 @@ const resultClient = await esbuild
       '@dnd-kit/core',
       '@payloadcms/graphql',
       '@payloadcms/translations',
-      'deep-equal',
       'dequal',
-      'react-toastify',
 
       //'side-channel',
       '@payloadcms/ui',
