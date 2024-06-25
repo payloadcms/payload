@@ -124,8 +124,12 @@ export type UploadConfig = {
    */
   handlers?: ((
     req: PayloadRequestWithData,
-    args: { doc: TypeWithID; params: { collection: string; filename: string } },
-  ) => Promise<Response> | Response | null)[]
+    res: Response,
+    args: {
+      doc: TypeWithID
+      params: { collection: string; filename: string }
+    },
+  ) => Promise<Response> | Promise<void> | Response | void)[]
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
