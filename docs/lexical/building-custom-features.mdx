@@ -15,7 +15,7 @@ By convention, these are named feature.server.ts for server-side functionality a
 
 ## Server Feature
 
-In order to get started with a new feature, you should start with the server feature which is the entry-point of your feature.
+To start building new features, you should start with the server feature, which is the entry-point.
 
 **Example myFeature/feature.server.ts:**
 
@@ -52,20 +52,16 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical';
 By default, this server feature does nothing - you haven't added any functionality yet. Depending on what you want your
 feature to do, the ServerFeature type exposes various properties you can set to inject custom functionality into the lexical editor.
 
-Here is an example:
+### i18n
+
+Each feature can register their own translations, which are automatically scoped to the feature key:
 
 ```ts
-import { createServerFeature, createNode } from '@payloadcms/richtext-lexical';
-import { MyClientFeature } from './feature.client.ts';
-import { MyMarkdownTransformer } from './feature.client.ts';
+import { createServerFeature } from '@payloadcms/richtext-lexical';
+
 
 export const MyFeature = createServerFeature({
   feature: {
-    // This allows you to connect the Client Feature. More on that below
-    ClientFeature: MyClientFeature,
-    // This allows you to add i18n translations scoped to your feature.
-    // This specific translation will be available under "lexical:myFeature:label" - myFeature
-    // being your feature key.
     i18n: {
       en: {
         label: 'My Feature',
@@ -74,9 +70,75 @@ export const MyFeature = createServerFeature({
         label: 'Mein Feature',
       },
     },
-    // Markdown Transformers in the server feature are used when converting the
-    // editor from or to markdown
+  },
+  key: 'myFeature',
+})
+```
+
+This allows you to add i18n translations scoped to your feature. This specific example translation will be available under `lexical:myFeature:label` - `myFeature` being your feature key.
+
+### Markdown Transformers
+
+The Server Feature, just like the Client Feature, allows you to add markdown transformers. Markdown transformers on the server are used when [converting the editor from or to markdown](/docs/lexical/converters#markdown-lexical).
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical';
+import type { ElementTransformer } from '@lexical/markdown'
+import {
+  $createMyNode,
+  $isMyNode,
+  MyNode
+} from './nodes/MyNode'
+
+const MyMarkdownTransformer: ElementTransformer = {
+  type: 'element',
+  dependencies: [MyNode],
+  export: (node, exportChildren) => {
+    if (!$isMyNode(node)) {
+      return null
+    }
+    return '+++'
+  },
+  // match ---
+  regExp: /^+++\s*$/,
+  replace: (parentNode) => {
+    const node = $createMyNode()
+    if (node) {
+      parentNode.replace(node)
+    }
+  },
+}
+
+
+export const MyFeature = createServerFeature({
+  feature: {
     markdownTransformers: [MyMarkdownTransformer],
+  },
+  key: 'myFeature',
+})
+```
+
+In this example, the node will be outputted as `+++` in Markdown, and the markdown `+++` will be converted to a `MyNode` node in the editor.
+
+### Nodes
+
+While nodes added to the server feature do not control how the node is rendered in the editor, they control other aspects of the node:
+- HTML conversion
+- Node Hooks
+- Sub fields
+- Behavior in a headless editor
+
+The `createNode` helper function is used to create nodes with proper typing. It is recommended to use this function to create nodes.
+
+```ts
+import { createServerFeature, createNode } from '@payloadcms/richtext-lexical';
+import {
+  MyNode
+} from './nodes/MyNode'
+
+export const MyFeature = createServerFeature({
+  feature: {
+
     nodes: [
       // Use the createNode helper function to more easily create nodes with proper typing
       createNode({
@@ -98,6 +160,18 @@ export const MyFeature = createServerFeature({
   key: 'myFeature',
 })
 ```
+
+While nodes in the client feature are added by themselves to the nodes array, nodes in the server feature can be added together with the following sibling options:
+
+| Option                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`getSubFields`**              | If a node includes sub-fields (e.g. block and link nodes), passing the subFields schema here will make payload automatically populate & run hooks for them.                                                                                                                                                                                                                                                                                                   |
+| **`getSubFieldsData`**          | If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.                                                                                                                                                                                                                                                                                                                            |
+| **`graphQLPopulationPromises`** | Allows you to run population logic when a node's data was requested from GraphQL. While `getSubFields` and `getSubFieldsData` automatically handle populating sub-fields (since they run hooks on them), those are only populated in the Rest API. This is because the Rest API hooks do not have access to the 'depth' property provided by GraphQL. In order for them to be populated correctly in GraphQL, the population logic needs to be provided here. |
+| **`node`**                      | The actual lexical node needs to be provided here. This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).                                                                                                                                                                                                                                                                                                        |
+| **`validations`**               | This allows you to provide node validations, which are run when your document is being validated, alongside other payload fields. You can use it to throw a validation error for a specific node in case its data is incorrect.                                                                                                                                                                                                                               |
+| **`converters`**                | Allows you to define how a node can be serialized into different formats. Currently, only supports HTML. Markdown converters are defined in `markdownTransformers` and not here.                                                                                                                                                                                                                                                                              |
+| **`hooks`**                     | Just like payload fields, you can provide hooks which are run for this specific node. These are called Node Hooks.                                                                                                                                                                                                                                                                                                                                            |
 
 ### Feature load order
 
@@ -210,6 +284,8 @@ export const MyClientFeature = createClientFeature({
   nodes: [MyNode]
 })
 ```
+
+This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).
 
 **myFeature/nodes/MyNode.tsx:**
 
@@ -347,7 +423,7 @@ Please do not add any 'use client' directives to your nodes, as the node class c
 ### Plugins
 
 One small part of a feature are plugins. The name stems from the lexical playground plugins and is just a small part of a lexical feature.
-Plugins are simply react components which are added to the editor, within all the lexical context providers. They can be used to add any functionality
+Plugins are simply React components which are added to the editor, within all the lexical context providers. They can be used to add any functionality
 to the editor, by utilizing the lexical API.
 
 Most commonly, they are used to register [lexical listeners](https://lexical.dev/docs/concepts/listeners), [node transforms](https://lexical.dev/docs/concepts/transforms) or [commands](https://lexical.dev/docs/concepts/commands).
@@ -430,19 +506,81 @@ export const MyNodePlugin: PluginComponent= () => {
 }
 ```
 
-In this example, we register a lexical command which simply inserts a new MyNode into the editor. This command can be called from anywhere within lexical, e.g. from within a custom node.
+In this example, we register a lexical command, which simply inserts a new MyNode into the editor. This command can be called from anywhere within lexical, e.g. from within a custom node.
+
+### Toolbar groups
+
+Toolbar groups are visual containers which hold toolbar items. There are different toolbar group types which determine *how* a toolbar item is displayed: `dropdown` and `buttons`.
+
+All the default toolbar groups are exported from `@payloadcms/richtext-lexical/client`. You can use them to add your own toolbar items to the editor:
+- Dropdown: `toolbarAddDropdownGroupWithItems`
+- Dropdown: `toolbarTextDropdownGroupWithItems`
+- Buttons: `toolbarFormatGroupWithItems`
+- Buttons: `toolbarFeatureButtonsGroupWithItems`
+
+Within dropdown groups, items are positioned vertically when the dropdown is opened and include the icon & label. Within button groups, items are positioned horizontally and only include the icon. If a toolbar group with the same key is declared twice, all its items will be merged into one group.
+
+#### Custom buttons toolbar group
+
+| Option      | Description                                                                                                                                            |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`items`** | All toolbar items part of this toolbar group need to be added here.                                                                                    |
+| **`key`**   | Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.                                        |
+| **`order`** | Determines where the toolbar group will be.                                                                                                            |
+| **`type`**  | Controls the toolbar group type. Set to `buttons` to create a buttons toolbar group, which displays toolbar items horizontally using only their icons. |
+
+Example:
+```ts
+import type { ToolbarGroup, ToolbarGroupItem } from '@payloadcms/richtext-lexical'
+
+export const toolbarFormatGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGroup => {
+  return {
+    type: 'buttons',
+    items,
+    key: 'myButtonsToolbar',
+    order: 10,
+  }
+}
+```
+
+#### Custom dropdown toolbar group
+
+| Option               | Description                                                                                                                                                                          |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`items`**          | All toolbar items part of this toolbar group need to be added here.                                                                                                                  |
+| **`key`**            | Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.                                                                      |
+| **`order`**          | Determines where the toolbar group will be.                                                                                                                                          |
+| **`type`**           | Controls the toolbar group type. Set to `dropdown` to create a buttons toolbar group, which displays toolbar items vertically using their icons and labels, if the dropdown is open. |
+| **`ChildComponent`** | The dropdown toolbar ChildComponent allows you to pass in a React Component which will be displayed within the dropdown button.                                                      |
+
+Example:
+```ts
+import type { ToolbarGroup, ToolbarGroupItem } from '@payloadcms/richtext-lexical'
+
+import { MyIcon } from './icons/MyIcon'
+
+export const toolbarAddDropdownGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGroup => {
+  return {
+    type: 'dropdown',
+    ChildComponent: MyIcon,
+    items,
+    key: 'myDropdownToolbar',
+    order: 10,
+  }
+}
+```
 
 ### Toolbar items
 
-Custom nodes and features on its own are pointless, if they can not be added to the editor. You will need to hook in one of our interfaces which allow the user to interact with the editor:
+Custom nodes and features on its own are pointless, if they can't be added to the editor. You will need to hook in one of our interfaces which allow the user to interact with the editor:
 
 - Fixed toolbar which stays fixed at the top of the editor
 - Inline, floating toolbar which appears when selecting text
 - Slash menu which appears when typing `/` in the editor
-- Markdown transformers which are triggered when a certain text pattern is typed in the editor
+- Markdown transformers, which are triggered when a certain text pattern is typed in the editor
 - Or any other interfaces which can be added via your own plugins. Our toolbars are a prime example of this - they are just plugins.
 
-In order to add a toolbar item to either the floating or the inline toolbar, you can add a ToolbarGroup with a ToolbarItem to the `toolbarFixed` or `toolbarInline` props of your client feature:
+To add a toolbar item to either the floating or the inline toolbar, you can add a ToolbarGroup with a ToolbarItem to the `toolbarFixed` or `toolbarInline` props of your client feature:
 
 ```ts
 'use client'
@@ -481,10 +619,7 @@ export const MyClientFeature = createClientFeature({
 })
 ```
 
-You will have to provide a toolbar group first, and then the items for that toolbar group.
-We already export all the default toolbar groups (like `toolbarAddDropdownGroupWithItems`, so you can use them as a base for your own toolbar items.
-
-If a toolbar with the same key is declared twice, all its items will be merged together into one group.
+You will have to provide a toolbar group first, and then the items for that toolbar group (more on that above).
 
 A `ToolbarItem` various props you can use to customize its behavior:
 
@@ -492,7 +627,7 @@ A `ToolbarItem` various props you can use to customize its behavior:
 |----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`ChildComponent`** | A React component which is rendered within your toolbar item's default button component. Usually, you want this to be an icon.                                                             |
 | **`Component`**      | A React component which is rendered in place of the toolbar item's default button component, thus completely replacing it. The `ChildComponent` and `onSelect` properties will be ignored. |
-| **`label`**          | The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function.                                                   |
+| **`label`**          | The label will be displayed in your toolbar item, if it's within a dropdown group. To make use of i18n, this can be a function.                                                            |
 | **`key`**            | Each toolbar item needs to have a unique key.                                                                                                                                              |
 | **`onSelect`**       | A function which is called when the toolbar item is clicked.                                                                                                                               |
 | **`isEnabled`**      | This is optional and controls if the toolbar item is clickable or not. If `false` is returned here, it will be grayed out and unclickable.                                                 |
@@ -500,6 +635,34 @@ A `ToolbarItem` various props you can use to customize its behavior:
 
 The API for adding an item to the floating inline toolbar (`toolbarInline`) is identical. If you wanted to add an item to both the fixed and inline toolbar, you can extract it into its own variable
 (typed as `ToolbarGroup[]`) and add it to both the `toolbarFixed` and `toolbarInline` props.
+
+### Slash Menu groups
+
+We're exporting `slashMenuBasicGroupWithItems` from `@payloadcms/richtext-lexical/client` which you can use to add items to the slash menu labelled "Basic". If you want to create your own slash menu group, here is an example:
+
+```ts
+import type {
+  SlashMenuGroup,
+  SlashMenuItem,
+} from '@payloadcms/richtext-lexical'
+
+export function mwnSlashMenuGroupWithItems(items: SlashMenuItem[]): SlashMenuGroup {
+  return {
+    items,
+    key: 'myGroup',
+    label: 'My Group' // <= This can be a function to make use of i18n
+  }
+}
+```
+
+By creating a helper function like this, you can easily re-use it and add items to it. All Slash Menu groups with the same keys will have their items merged together.
+
+| Option      | Description                                                                                                                           |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| **`items`** | An array of `SlashMenuItem`'s which will be displayed in the slash menu.                                                              |
+| **`label`** | The label will be displayed before your Slash Menu group. In order to make use of i18n, this can be a function.                       |
+| **`key`**   | Used for class names and, if label is not provided, for display. Slash menus with the same key will have their items merged together. |
+
 
 ### Slash Menu items
 
@@ -533,17 +696,58 @@ export const MyClientFeature = createClientFeature({
 })
 ```
 
-| Option         | Description                                                                                                                                                                                                                                                                                    |
-|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`Icon`**     | The icon which is rendered in your slash menu item.                                                                                                                                                                                                                                            |
-| **`label`**    | The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function.                                                                                                                                                                                     |
-| **`key`**      | Each slash menu item needs to have a unique key. The key will be matched when typing, displayed if no `label` property is set, and used for classNames.                                                                                                                                        |
-| **`onSelect`** | A function which is called when the slash menu item is selected.                                                                                                                                                                                                                               |
-| **`keywords`** | Keywords are used in order to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. Additionally to the keywords, the label and key will be used to match the correct slash menu item. |
+| Option         | Description                                                                                                                                                                                                                                                                       |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Icon`**     | The icon which is rendered in your slash menu item.                                                                                                                                                                                                                               |
+| **`label`**    | The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function.                                                                                                                                                                        |
+| **`key`**      | Each slash menu item needs to have a unique key. The key will be matched when typing, displayed if no `label` property is set, and used for classNames.                                                                                                                           |
+| **`onSelect`** | A function which is called when the slash menu item is selected.                                                                                                                                                                                                                  |
+| **`keywords`** | Keywords are used to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. In addition to the keywords, the label and key will be used to find the right slash menu item. |
+
+
+### Markdown Transformers
+
+The Client Feature, just like the Server Feature, allows you to add markdown transformers. Markdown transformers on the client are used to create new nodes when a certain markdown pattern is typed in the editor.
+
+```ts
+import { createClientFeature } from '@payloadcms/richtext-lexical/client';
+import type { ElementTransformer } from '@lexical/markdown'
+import {
+  $createMyNode,
+  $isMyNode,
+  MyNode
+} from './nodes/MyNode'
+
+const MyMarkdownTransformer: ElementTransformer = {
+  type: 'element',
+  dependencies: [MyNode],
+  export: (node, exportChildren) => {
+    if (!$isMyNode(node)) {
+      return null
+    }
+    return '+++'
+  },
+  // match ---
+  regExp: /^+++\s*$/,
+  replace: (parentNode) => {
+    const node = $createMyNode()
+    if (node) {
+      parentNode.replace(node)
+    }
+  },
+}
+
+
+export const MyFeature = createClientFeature({
+  markdownTransformers: [MyMarkdownTransformer],
+})
+```
+
+In this example, a new `MyNode` will be inserted into the editor when `+++ ` is typed.
 
 ## Props
 
-In order to accept props in your feature, you should first type them as a generic.
+To accept props in your feature, type them as a generic.
 
 Server Feature:
 
@@ -578,9 +782,9 @@ createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
 })
 ```
 
-Keep in mind that any sanitized props then have to returned in the `sanitizedServerFeatureProps` property.
+Keep in mind that any sanitized props then have to be returned in the `sanitizedServerFeatureProps` property.
 
-In the client feature, it works in a similar way:
+In the client feature, it works similarly:
 
 ```ts
 createClientFeature<UnSanitizedClientProps, SanitizedClientProps>(
@@ -617,4 +821,4 @@ The reason the client feature does not have the same props available as the serv
 
 ## More information
 
-Take a look at the [features we've already built](https://github.com/payloadcms/payload/tree/beta/packages/richtext-lexical/src/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of payload or not!
+Have a look at the [features we've already built](https://github.com/payloadcms/payload/tree/beta/packages/richtext-lexical/src/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of payload or not!
