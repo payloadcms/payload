@@ -27,9 +27,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const restoreVersionOperation = async <T extends TypeWithID = any>(
+export const restoreVersionOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
-): Promise<T> => {
+): Promise<TData> => {
   const {
     id,
     collection: { config: collectionConfig },

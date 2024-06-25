@@ -24,9 +24,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const findVersionByIDOperation = async <T extends TypeWithID = any>(
+export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
-): Promise<TypeWithVersion<T>> => {
+): Promise<TypeWithVersion<TData>> => {
   const {
     id,
     collection: { config: collectionConfig },
@@ -65,7 +65,7 @@ export const findVersionByIDOperation = async <T extends TypeWithID = any>(
     // Find by ID
     // /////////////////////////////////////
 
-    const versionsQuery = await payload.db.findVersions<T>({
+    const versionsQuery = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: 1,
       locale,

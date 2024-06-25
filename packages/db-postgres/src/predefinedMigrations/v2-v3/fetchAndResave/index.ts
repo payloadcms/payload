@@ -210,7 +210,6 @@ export const fetchAndResave = async ({
 
           try {
             await upsertRow({
-              id: doc.id,
               adapter,
               data: doc,
               db,

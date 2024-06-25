@@ -13,7 +13,6 @@ import {
 } from '@payloadcms/ui'
 import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
-import QueryString from 'qs'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -90,13 +89,17 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
-    const apiQueryParams = QueryString.stringify(
-      {
-        draft: collectionConfig.versions?.drafts ? 'true' : undefined,
-        locale: locale?.code,
-      },
-      { addQueryPrefix: true },
-    )
+
+    const params = new URLSearchParams()
+    if (collectionConfig.versions?.drafts) {
+      params.append('draft', 'true')
+    }
+    if (locale?.code) {
+      params.append('locale', locale.code)
+    }
+
+    const apiQueryParams = `?${params.toString()}`
+
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
     const editConfig = collectionConfig?.admin?.components?.views?.Edit
@@ -127,13 +130,18 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
-    const apiQueryParams = QueryString.stringify(
-      {
-        draft: globalConfig.versions?.drafts ? 'true' : undefined,
-        locale: locale?.code,
-      },
-      { addQueryPrefix: true },
-    )
+    const params = new URLSearchParams({
+      locale: locale?.code,
+    })
+    if (globalConfig.versions?.drafts) {
+      params.append('draft', 'true')
+    }
+    if (locale?.code) {
+      params.append('locale', locale.code)
+    }
+
+    const apiQueryParams = `?${params.toString()}`
+
     apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
     const editConfig = globalConfig?.admin?.components?.views?.Edit

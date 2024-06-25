@@ -32,7 +32,7 @@ npm install @payloadcms/richtext-lexical
 Once you have it installed, you can pass it to your top-level Payload config as follows:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({
@@ -47,7 +47,7 @@ export default buildConfig({
 You can also override Lexical settings on a field-by-field basis as follows:
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const Pages: CollectionConfig = {
@@ -168,12 +168,4 @@ Notice how even the toolbars are features? That's how extensible our lexical edi
 
 ## Creating your own, custom Feature
 
-Creating your own custom feature requires deep knowledge of the Lexical editor. We recommend you take a look at the [Lexical documentation](https://lexical.dev/docs/intro) first - especially the "concepts" section.
-
-Next, take a look at the [features we've already built](https://github.com/payloadcms/payload/tree/main/packages/richtext-lexical/src/field/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of payload or not!
-
-## Coming Soon
-
-Lots more documentation will be coming soon, which will show in detail how to create your own custom features within Lexical.
-
-For now, take a look at the TypeScript interfaces and let us know if you need a hand. Much more will be coming from the Payload team on this topic soon.
+You can find more information about creating your own feature in our [building custom feature docs](lexical/building-custom-features).

@@ -12,7 +12,7 @@ Payload is based around a small and intuitive set of concepts. Before starting t
 
 <Banner type="info">The Payload config is where you configure everything that Payload does.</Banner>
 
-By default, the Payload config lives in the root folder of your code and is named `payload.config.js` (`payload.config.ts` if you're using TypeScript), but you can customize its name and where you store it. You can write full functions and even full React components right into your config.
+By default, the Payload config lives in the root folder of your code and is named `payload.config.ts`, but you can customize its name and where you store it. You can write full functions and even full React components right into your config.
 
 ## Collections
 
@@ -62,6 +62,83 @@ There are many more potential reasons to use Hooks. For more, visit the [Hooks d
 Access Control is extremely powerful but easy and intuitive to manage. You can easily define your own full-blown RBAC (role-based access control) or any other access control pattern that your scenario requires. No conventions or structure is forced on you whatsoever.
 
 For more, visit the [Access Control documentation](/docs/access-control/overview).
+
+## Retrieving Payload data
+
+Everything Payload does (create, read, update, delete, login, logout, etc) is exposed to you via three APIs:
+
+**1 - Payload's Local API**
+
+By far one of the most powerful aspects of Payload is the fact that it gives you direct-to-database access to your data. It's _extremely_ fast and does not incur any typical REST API / GraphQL / HTTP overhead - you query your database directly in Node.js / TypeScript.
+
+Everything is strongly typed and it's extremely nice to use. It works anywhere on the server, including custom Next.js route handlers, Payload hooks, Payload access control, and React Server Components.
+
+Here's a quick example of a React Server Component fetching page data with Payload's Local API:
+
+```tsx
+import React from 'react'
+import config from '@payload-config'
+import { getPayloadHMR } from '@payloadcms/next'
+
+const MyServerComponent: React.FC = () => {
+  // If you're working in Next.js, and you want HMR,
+  // you should get Payload via the `getPayloadHMR` function.
+  const payload = await getPayloadHMR({ config })
+
+  // If you are writing a standalone script and do not need HMR,
+  // you can get Payload via import { getPayload } from 'payload' instead.
+
+  // The `findResult` here will be fully typed as `PaginatedDocs<Page>`,
+  // where you will have the `docs` that are returned as well as
+  // information about how many items are returned / are available in total / etc
+  const findResult = await payload.find({ collection: 'pages' })
+
+  return (
+    <ul>
+      {findResult.docs.map((page) => {
+        // Render whatever here!
+        // The `page` is fully typed as your Pages collection!
+      })}
+    </ul>
+  )
+}
+```
+
+For more docs about the Payload Local API, [click here](/docs/beta/local-api/overview).
+
+**2 - The REST API**
+
+By default, the Payload REST API will be mounted automatically for you at the `/api` path of your app.
+
+For example, if you have a collection with the `slug` as `pages`, you'd fetch pages via `http://localhost:3000/api/pages`.
+
+Here's an example:
+
+```ts
+const pages = await fetch('http://localhost:3000/api/pages', {
+  // Include cookies, like the Payload auth token
+  credentials: 'include',
+}).then((res) => res.json())
+```
+
+For a full list of REST API endpoints, including examples, [click here](/docs/beta/rest-api/overview).
+
+**3 - GraphQL**
+
+Payload automatically exposes GraphQL queries and mutations for everything it does.
+
+By default, you'll find the GraphQL route handler in your `/app/(payload)/api/graphql` folder, which makes the GraphQL endpoint available by default at `http://localhost:3000/api/graphql`.
+
+You'll also find a full GraphQL Playground which can be accessible via `http://localhost:3000/api/graphql-playground`.
+
+You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few packages:
+
+- [`graphql-request`](https://www.npmjs.com/package/graphql-request) - a very lightweight GraphQL client
+- [`@apollo/client`](https://www.apollographql.com/docs/react/api/core/ApolloClient/) - an industry-standard GraphQL client with lots of nice features
+
+If you don't use GraphQL, you can delete those files! But if you do, you'll find that GraphQL is a first-class API in Payload. Either way, the overhead of GraphQL is completely constrained to these endpoints, and will not slow down / affect Payload outside of those endpoints themselves.
+
+For more docs on GraphQL, [click here](/docs/beta/graphql/overview). 
 
 ## Depth
 
@@ -184,3 +261,49 @@ In this case, the field would not be populated, as the current depth (2) has exc
   When access control on collections prevents relationship fields from populating, the API response
   will contain the relationship id instead of the full document.
 </Banner>
+
+## Package organization
+
+Payload is abstracted into a set of dedicated packages, and it's a good idea to familiarize yourself with what each one is responsible for.
+
+<Banner type="success">
+  <strong>Note:</strong>
+  <br/>
+  Version numbers of all official Payload packages are kept in sync - and you should always make sure that you use matching versions for all official Payload packages. 
+</Banner>
+
+`payload`
+
+The `payload` package is where core business logic for Payload lives. You can think of Payload as an ORM with superpowers - it contains the logic for all Payload "operations" like `find`, `create`, `update`, and `delete`. It executes access control, hooks, validation, and more.
+
+Payload itself is extremely compact, and can be used in any Node environment. As long as you have `payload` installed and you have access to your Payload config, you can query and mutate your database directly without going through an unnecessary HTTP layer.
+
+Payload also contains all TypeScript definitions, which can be imported from `payload` directly.
+
+Here's how to import some common Payload types:
+
+```ts
+import { CollectionConfig, Field, GlobalConfig, Config } from 'payload'
+```
+
+`@payloadcms/next`
+
+Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the admin panel and the entire HTTP layer (REST, GraphQL) that Payload exposes. 
+
+`@payloadcms/graphql`
+
+All of Payload's GraphQL functionality is abstracted into a separate package. Payload, its Admin UI, and REST API have absolutely no overlap with GraphQL, and you will incur no performance overhead from GraphQL if you are not using it. However, it's installed within in the `@payloadcms/next` package so you don't have to install it manually. You do, however, need to have GraphQL installed separately in your `package.json` if you are using GraphQL.
+
+`@payloadcms/ui`
+
+This is the UI library that Payload's admin panel uses. All components are exported from this package and can be re-used as you build extensions to the Payload admin UI, or want to use Payload components in your own React apps. Some exports are server components and some are client components.
+
+`@payloadcms/db-postgres`, `@payloadcms/db-mongodb`
+
+You can choose which database adapter you'd like to use for your project, and no matter which you choose, the entire data layer for Payload is contained within these packages. You can only use one at a time for any given project.
+
+`@payloadcms/richtext-lexical`, `@payloadcms/richtext-slate`
+
+Payload's Rich Text functionality is abstracted into separate packages and if you want to enable Rich Text in your project, you'll need to install one of these packages. We recommend Lexical for all new projects, and this is where Payload will focus its efforts on from this point, but Slate is still supported if you have already built with it.
+
+Rich Text is entirely optional and you may not need it for your project.

@@ -1,10 +1,8 @@
-import type { GeneratedTypes } from '../../index.js'
+import type { TypedCollection } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
-async function findOne(
-  args: PreferenceRequest,
-): Promise<GeneratedTypes['collections']['_preference']> {
+async function findOne(args: PreferenceRequest): Promise<TypedCollection['_preference']> {
   const {
     key,
     req: { payload },

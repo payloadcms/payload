@@ -1,27 +1,29 @@
-import type { I18n, I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { LexicalEditor } from 'lexical'
 import type { MutableRefObject } from 'react'
 import type React from 'react'
 
 export type SlashMenuItem = {
-  // Icon for display
+  /** The icon which is rendered in your slash menu item. */
   Icon: React.FC
-
-  // Used for class names and, if label is not provided, for display.
+  /** Each slash menu item needs to have a unique key. The key will be matched when typing, displayed if no `label` property is set, and used for classNames. */
   key: string
-  // TBD
-  keyboardShortcut?: string
-  // For extra searching.
+  /**
+   * Keywords are used in order to match the item for different texts typed after the '/'.
+   * E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc.
+   * Additionally to the keywords, the label and key will be used to match the correct slash menu item.
+   */
   keywords?: Array<string>
+  /** The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function. */
   label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
-  // What happens when you select this item?
+  /** A function which is called when the slash menu item is selected. */
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
 }
 
 export type SlashMenuGroup = {
   items: Array<SlashMenuItem>
-  key: string
   // Used for class names and, if label is not provided, for display.
+  key: string
   label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
 }
 

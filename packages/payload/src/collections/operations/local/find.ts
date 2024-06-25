@@ -1,13 +1,14 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -16,9 +17,9 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   limit?: number
-  locale?: 'all' | GeneratedTypes['locale']
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
@@ -29,10 +30,10 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   where?: Where
 }
 
-export default async function findLocal<T extends keyof GeneratedTypes['collections']>(
+export async function findLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> {
+  options: Options<TSlug>,
+): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> {
   const {
     collection: collectionSlug,
     currentDepth,
@@ -56,7 +57,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     )
   }
 
-  return findOperation<GeneratedTypes['collections'][T]>({
+  return findOperation<TSlug>({
     collection,
     currentDepth,
     depth,

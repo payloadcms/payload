@@ -30,7 +30,7 @@ functionalities to be easily reusable across your projects.
 Example field configuration:
 
 ```ts
-import { Field } from 'payload/types';
+import type { Field } from 'payload';
 
 const ExampleField: Field = {
   name: 'name',
@@ -107,7 +107,7 @@ Runs before the `update` operation. This hook allows you to pre-process or forma
 validation.
 
 ```ts
-import { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 const usernameField: Field = {
   name: 'username',
@@ -134,7 +134,7 @@ you can be confident that the field data that will be saved to the document is v
 validations.
 
 ```ts
-import { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 const emailField: Field = {
   name: 'email',
@@ -162,7 +162,7 @@ The `afterChange` hook is executed after a field's value has been changed and sa
 for post-processing or triggering side effects based on the new value of the field.
 
 ```ts
-import { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 const membershipStatusField: Field = {
   name: 'membershipStatus',
@@ -199,7 +199,7 @@ The `afterRead` hook is invoked after a field value is read from the database. T
 transforming the field data for output.
 
 ```ts
-import { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 const dateField: Field = {
   name: 'createdAt',
@@ -230,7 +230,7 @@ By Default, unique and required text fields Payload will append "- Copy" to the 
 Here is an example of a number field with a hook that increments the number to avoid unique constraint errors when duplicating a document:
 
 ```ts
-import { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 const numberField: Field = {
   name: 'number',
@@ -249,7 +249,7 @@ const numberField: Field = {
 Payload exports a type for field hooks which can be accessed and used as follows:
 
 ```ts
-import type { FieldHook } from 'payload/types'
+import type { FieldHook } from 'payload'
 
 // Field hook type is a generic that takes three arguments:
 // 1: The document type

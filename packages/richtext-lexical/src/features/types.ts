@@ -92,11 +92,11 @@ export type FeatureProviderServer<
   ServerFeatureProps = UnSanitizedServerFeatureProps,
   ClientFeatureProps = undefined,
 > = {
-  /** Keys of dependencies needed for this feature. These dependencies do not have to be loaded first */
+  /** Keys of dependencies needed for this feature. These dependencies do not have to be loaded first, but they have to exist, otherwise an error will be thrown. */
   dependencies?: string[]
-  /** Keys of priority dependencies needed for this feature. These dependencies have to be loaded first and are available in the `feature` property*/
+  /**  Keys of priority dependencies needed for this feature. These dependencies have to be loaded first AND have to exist, otherwise an error will be thrown. They will be available in the `feature` property. */
   dependenciesPriority?: string[]
-  /** Keys of soft-dependencies needed for this feature. The FeatureProviders dependencies are optional, but are considered as last-priority in the loading process */
+  /** Keys of soft-dependencies needed for this feature. These are optional. Payload will attempt to load them before this feature, but doesn't throw an error if that's not possible. */
   dependenciesSoft?: string[]
 
   /**

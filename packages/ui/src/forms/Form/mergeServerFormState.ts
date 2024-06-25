@@ -1,6 +1,6 @@
 import type { FormState } from 'payload'
 
-import deepEquals from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
@@ -44,7 +44,7 @@ export const mergeServerFormState = (
        * Handle filterOptions
        */
       if (incomingState[path]?.filterOptions || newFieldState.filterOptions) {
-        if (!deepEquals(incomingState[path]?.filterOptions, newFieldState.filterOptions)) {
+        if (!dequal(incomingState[path]?.filterOptions, newFieldState.filterOptions)) {
           changed = true
           newFieldState.filterOptions = incomingState[path].filterOptions
         }

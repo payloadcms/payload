@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypeWithID, UpdateGlobalArgs } from 'payload'
+import type { PayloadRequest, UpdateGlobalArgs } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -6,7 +6,7 @@ import type { PostgresAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
 
-export async function updateGlobal<T extends TypeWithID>(
+export async function updateGlobal<T extends Record<string, unknown>>(
   this: PostgresAdapter,
   { slug, data, req = {} as PayloadRequest }: UpdateGlobalArgs,
 ): Promise<T> {

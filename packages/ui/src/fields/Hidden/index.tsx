@@ -19,7 +19,7 @@ export type HiddenInputFieldProps = FormFieldBase & {
  * This is mainly used to save a value on the form that is not visible to the user.
  * For example, this sets the `ìd` property of a block in the Blocks field.
  */
-const HiddenInputField: React.FC<HiddenInputFieldProps> = (props) => {
+const _HiddenField: React.FC<HiddenInputFieldProps> = (props) => {
   const {
     name,
     disableModifyingForm = true,
@@ -51,4 +51,4 @@ const HiddenInputField: React.FC<HiddenInputFieldProps> = (props) => {
   )
 }
 
-export const HiddenInput = withCondition(HiddenInputField)
+export const HiddenField = withCondition(_HiddenField)
