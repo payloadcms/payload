@@ -20,8 +20,9 @@ export type ToolbarGroup =
     }
 
 export type ToolbarGroupItem = {
+  /** A React component which is rendered within your toolbar item's default button component. Usually, you want this to be an icon. */
   ChildComponent?: React.FC
-  /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
+  /** A React component which is rendered in place of the toolbar item's default button component, thus completely replacing it. The `ChildComponent` and `onSelect` properties will be ignored. */
   Component?: React.FC<{
     active?: boolean
     anchorElem: HTMLElement
@@ -29,6 +30,7 @@ export type ToolbarGroupItem = {
     enabled?: boolean
     item: ToolbarGroupItem
   }>
+  /** This is optional and controls if the toolbar item is highlighted or not. */
   isActive?: ({
     editor,
     editorConfigContext,
@@ -38,6 +40,7 @@ export type ToolbarGroupItem = {
     editorConfigContext: EditorConfigContextType
     selection: BaseSelection
   }) => boolean
+  /** This is optional and controls if the toolbar item is clickable or not. If `false` is returned here, it will be grayed out and unclickable. */
   isEnabled?: ({
     editor,
     editorConfigContext,
@@ -47,9 +50,11 @@ export type ToolbarGroupItem = {
     editorConfigContext: EditorConfigContextType
     selection: BaseSelection
   }) => boolean
+  /** Each toolbar item needs to have a unique key. */
   key: string
-  /** The label is displayed as text if the item is part of a dropdown group */
+  /** The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. */
   label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  /** Each toolbar item needs to have a unique key. */
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }

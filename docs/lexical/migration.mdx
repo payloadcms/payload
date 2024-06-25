@@ -17,7 +17,7 @@ One way to handle this is to just give your lexical editor the ability to read t
 Simply add the `SlateToLexicalFeature` to your editor:
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { SlateToLexicalFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
@@ -49,7 +49,7 @@ The easy way to solve this: Just save the document! This overrides the slate dat
 The method described above does not solve the issue for all documents, though. If you want to convert all your documents to lexical, you can use a migration script. Here's a simple example:
 
 ```ts
-import type { Payload } from 'payload'
+import type { Payload, YourDocumentType } from 'payload'
 import type { YourDocumentType } from 'payload/generated-types'
 
 import {
@@ -146,7 +146,7 @@ When using a migration script, you can add your custom converters to the `conver
 When using the `SlateToLexicalFeature`, you can add your custom converters to the `converters` property of the `SlateToLexicalFeature` props:
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import {
   SlateToLexicalFeature,
