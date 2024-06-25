@@ -2,7 +2,7 @@ import type { Field, PayloadRequestWithData, RequestContext } from 'payload'
 
 import { afterReadTraverseFields } from 'payload'
 
-import type { PopulationPromise } from '../features/types.js'
+import type { PopulationPromise } from '../features/typesServer.js'
 
 type NestedRichTextFieldsArgs = {
   context: RequestContext

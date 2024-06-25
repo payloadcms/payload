@@ -32,12 +32,12 @@ export { RelationshipFeatureClient } from '../../features/relationship/feature.c
 export { toolbarAddDropdownGroupWithItems } from '../../features/shared/toolbar/addDropdownGroup.js'
 export { toolbarFeatureButtonsGroupWithItems } from '../../features/shared/toolbar/featureButtonsGroup.js'
 export { toolbarTextDropdownGroupWithItems } from '../../features/shared/toolbar/textDropdownGroup.js'
-export { FixedToolbarFeatureClientComponent } from '../../features/toolbars/fixed/feature.client.js'
-export { InlineToolbarFeatureClientComponent } from '../../features/toolbars/inline/feature.client.js'
+export { FixedToolbarFeatureClient } from '../../features/toolbars/fixed/feature.client.js'
+export { InlineToolbarFeatureClient } from '../../features/toolbars/inline/feature.client.js'
 export { ToolbarButton } from '../../features/toolbars/shared/ToolbarButton/index.js'
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
-export { UploadFeatureClientComponent } from '../../features/upload/feature.client.js'
+export { UploadFeatureClient } from '../../features/upload/feature.client.js'
 
 export { RichTextField } from '../../field/index.js'
 export {

@@ -26,7 +26,7 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
-import type { ClientComponentProps } from '../../types.js'
+import type { ClientComponentProps } from '../../typesClient.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadData } from '../nodes/UploadNode.js'
 

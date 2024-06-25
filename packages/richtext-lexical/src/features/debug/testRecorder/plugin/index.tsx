@@ -6,7 +6,7 @@ import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
 import * as React from 'react'
 import { type JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import type { PluginComponent } from '../../../types.js'
+import type { PluginComponent } from '../../../typesClient.js'
 
 import { IS_APPLE } from '../../../../lexical/utils/environment.js'
 import './index.scss'

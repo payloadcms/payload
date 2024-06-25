@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { SanitizedPlugin } from '../features/types.js'
+import type { SanitizedPlugin } from '../features/typesClient.js'
 
 export const EditorPlugin: React.FC<{
   anchorElem?: HTMLDivElement
