@@ -89,7 +89,7 @@ import { CallToAction } from '../blocks/CallToAction'
 
 {
   editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [
+    features: ({ defaultFeatures, rootFeatures }) => [
       ...defaultFeatures,
       LinkFeature({
         // Example showing how to customize the built-in fields
@@ -134,6 +134,15 @@ import { CallToAction } from '../blocks/CallToAction'
 }
 ```
 
+`features` can be both an array of features, or a function returning an array of features. The function provides the following props:
+
+
+| Prop                  | Description                                                                                                                                                                                                                                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`defaultFeatures`** | This opinionated array contains all "recommended" default features. You can see which features are included in the default features in the table below.                                                                                               |
+| **`rootFeatures`**    | This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts). If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty. |
+
+
 ## Features overview
 
 Here's an overview of all the included features:
@@ -169,3 +178,77 @@ Notice how even the toolbars are features? That's how extensible our lexical edi
 ## Creating your own, custom Feature
 
 You can find more information about creating your own feature in our [building custom feature docs](lexical/building-custom-features).
+
+## TypeScript
+
+Every single piece of saved data is 100% fully-typed within lexical. It provides a type for every single node, which can be imported from `@payloadcms/richtext-lexical` - each type is prefixed with `Serialized`, e.g. `SerializedUploadNode`.
+
+In order to fully type the entire editor JSON, you can use our `TypedEditorState` helper type, which accepts a union of all possible node types as a generic. The reason we do not provide a type which already contains all possible node types is because the possible node types depend on which features you have enabled in your editor. Here is an example:
+
+```ts
+import type {
+  SerializedAutoLinkNode,
+  SerializedBlockNode,
+  SerializedHorizontalRuleNode,
+  SerializedLinkNode,
+  SerializedListItemNode,
+  SerializedListNode,
+  SerializedParagraphNode,
+  SerializedQuoteNode,
+  SerializedRelationshipNode,
+  SerializedTextNode,
+  SerializedUploadNode,
+  TypedEditorState,
+} from '@payloadcms/richtext-lexical'
+
+const editorState: TypedEditorState<
+  | SerializedAutoLinkNode
+  | SerializedBlockNode
+  | SerializedHorizontalRuleNode
+  | SerializedLinkNode
+  | SerializedListItemNode
+  | SerializedListNode
+  | SerializedParagraphNode
+  | SerializedQuoteNode
+  | SerializedRelationshipNode
+  | SerializedTextNode
+  | SerializedUploadNode
+> = {
+  root: {
+    type: 'root',
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Some text. Every property here is fully-typed',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        textFormat: 0,
+        version: 1,
+      },
+    ],
+  },
+}
+```
+
+This is a type-safe representation of the editor state. Looking at the auto-suggestions of `type` it will show you all the possible node types you can use.
+
+Make sure to only use types exported from `@payloadcms/richtext-lexical`, not from the lexical core packages. We only have control over types we export and can guarantee that those are correct, even though lexical core may export types with identical names.
+
+### Automatic type generation
+
+Lexical does not generate the accurate type definitions for your richText fields for you yet - this will be improved in the future. Currently, it only outputs the rough shape of the editor JSON which you can enhance using type assertions.

@@ -1,5 +1,4 @@
-import type { SerializedListItemNode } from '@lexical/list'
-
+import type { SerializedListItemNode } from '../../../../../lists/plugin/index.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'

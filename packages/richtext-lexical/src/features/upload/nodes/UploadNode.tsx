@@ -8,6 +8,7 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
+import type { CollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -25,7 +26,7 @@ export type UploadData = {
     [key: string]: unknown
   }
   id: string
-  relationTo: string
+  relationTo: CollectionSlug
   value: number | string
 }
 
@@ -66,7 +67,10 @@ function $convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput |
   return null
 }
 
-export type SerializedUploadNode = Spread<UploadData, SerializedDecoratorBlockNode>
+export type SerializedUploadNode = Spread<UploadData, SerializedDecoratorBlockNode> & {
+  children?: never // required so that our typed editor state doesn't automatically add children
+  type: 'upload'
+}
 
 export class UploadNode extends DecoratorBlockNode {
   __data: UploadData
@@ -148,7 +152,7 @@ export class UploadNode extends DecoratorBlockNode {
     return {
       ...super.exportJSON(),
       ...this.getData(),
-      type: this.getType(),
+      type: 'upload',
       version: 3,
     }
   }

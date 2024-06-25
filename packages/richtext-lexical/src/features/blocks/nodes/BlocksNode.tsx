@@ -30,7 +30,9 @@ const BlockComponent = React.lazy(() =>
 
 export type SerializedBlockNode = Spread<
   {
+    children?: never // required so that our typed editor state doesn't automatically add children
     fields: BlockFields
+    type: 'block'
   },
   SerializedDecoratorBlockNode
 >
@@ -102,7 +104,7 @@ export class BlockNode extends DecoratorBlockNode {
   exportJSON(): SerializedBlockNode {
     return {
       ...super.exportJSON(),
-      type: this.getType(),
+      type: 'block',
       fields: this.getFields(),
       version: 2,
     }
