@@ -1,6 +1,8 @@
 /* eslint-disable perfectionist/sort-exports */
 'use client'
 
+export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/basicGroup.js'
+
 export { RichTextCell } from '../../cell/index.js'
 export { AlignFeatureClient } from '../../features/align/feature.client.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/feature.client.js'
@@ -11,7 +13,6 @@ export { TreeViewFeatureClient } from '../../features/debug/treeView/feature.cli
 export { BoldFeatureClient } from '../../features/format/bold/feature.client.js'
 export { InlineCodeFeatureClient } from '../../features/format/inlineCode/feature.client.js'
 export { ItalicFeatureClient } from '../../features/format/italic/feature.client.js'
-export { toolbarFormatGroupWithItems } from '../../features/format/shared/toolbarFormatGroup.js'
 export { StrikethroughFeatureClient } from '../../features/format/strikethrough/feature.client.js'
 export { SubscriptFeatureClient } from '../../features/format/subscript/feature.client.js'
 export { SuperscriptFeatureClient } from '../../features/format/superscript/feature.client.js'
@@ -29,6 +30,7 @@ export { ParagraphFeatureClient } from '../../features/paragraph/feature.client.
 
 export { RelationshipFeatureClient } from '../../features/relationship/feature.client.js'
 
+export { toolbarFormatGroupWithItems } from '../../features/format/shared/toolbarFormatGroup.js'
 export { toolbarAddDropdownGroupWithItems } from '../../features/shared/toolbar/addDropdownGroup.js'
 export { toolbarFeatureButtonsGroupWithItems } from '../../features/shared/toolbar/featureButtonsGroup.js'
 export { toolbarTextDropdownGroupWithItems } from '../../features/shared/toolbar/textDropdownGroup.js'
