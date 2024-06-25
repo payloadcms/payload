@@ -6,7 +6,7 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequestWithData } from 'payload'
+import type { FormState, PayloadRequest } from 'payload'
 
 import {
   EmailField,
@@ -73,7 +73,7 @@ export const LoginForm: React.FC<{
               type: 'email',
               data: {},
               preferences: { fields: {} },
-              req: { t } as PayloadRequestWithData,
+              req: { t } as PayloadRequest,
               required: true,
               siblingData: {},
             })
@@ -95,7 +95,7 @@ export const LoginForm: React.FC<{
                   config,
                 },
                 t,
-              } as PayloadRequestWithData,
+              } as PayloadRequest,
               required: true,
               siblingData: {},
             })

@@ -1,5 +1,5 @@
 import type { Access, AccessResult } from '../config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { Forbidden } from '../errors/index.js'
 
@@ -8,7 +8,7 @@ type OperationArgs = {
   disableErrors?: boolean
   id?: number | string
   isReadingStaticFile?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 const executeAccess = async (
   { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,

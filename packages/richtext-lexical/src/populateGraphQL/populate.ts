@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { createDataloaderCacheKey } from 'payload'
 
@@ -9,7 +9,7 @@ type Arguments = {
   draft: boolean
   key: number | string
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 

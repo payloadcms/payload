@@ -1,4 +1,4 @@
-import type { Collection, GeneratedTypes, PayloadRequestWithData } from 'payload'
+import type { Collection, GeneratedTypes, PayloadRequest } from 'payload'
 
 import { duplicateOperation, isolateObjectProperty } from 'payload'
 
@@ -13,7 +13,7 @@ export type Resolver<T> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<T>
 

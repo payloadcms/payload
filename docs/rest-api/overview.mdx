@@ -656,7 +656,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
   path: '/:id/tracking',
   method: 'post',
   handler: (req) => {
-    await addDataAndFileToRequest({ req })
+    await addDataAndFileToRequest(req)
     await req.payload.update({
       collection: 'tracking',
       data: {
@@ -682,7 +682,7 @@ import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
   path: '/:id/tracking',
   method: 'post',
   handler: (req) => {
-    await addLocalesToRequestFromData({ req })
+    await addLocalesToRequestFromData(req)
     // you now can access req.locale & req.fallbackLocale
     return Response.json({ message: 'success' })
   }

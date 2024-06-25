@@ -1,12 +1,12 @@
 import type { User } from '../auth/types.js'
 import type { Payload, RequestContext } from '../index.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 
 function getRequestContext(
-  req: PayloadRequestWithData = { context: null } as PayloadRequestWithData,
+  req: PayloadRequest = { context: null } as PayloadRequest,
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
@@ -21,7 +21,7 @@ function getRequestContext(
   }
 }
 
-const attachFakeURLProperties = (req: PayloadRequestWithData) => {
+const attachFakeURLProperties = (req: PayloadRequest) => {
   /**
    * *NOTE*
    * If no URL is provided, the local API was called directly outside
@@ -59,13 +59,13 @@ type CreateLocalReq = (
     context?: RequestContext
     fallbackLocale?: string
     locale?: string
-    req?: PayloadRequestWithData
+    req?: PayloadRequest
     user?: User
   },
   payload: Payload,
-) => Promise<PayloadRequestWithData>
+) => Promise<PayloadRequest>
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequestWithData, user },
+  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
 ) => {
   if (payload.config?.localization) {

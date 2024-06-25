@@ -223,7 +223,7 @@ export const GET =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2, slug3, slug4] = slug
-    let req: PayloadRequest | (PayloadRequest & PayloadRequestData)
+    let req: PayloadRequest
     let res: Response
     let collection: Collection
 
@@ -259,8 +259,8 @@ export const GET =
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          await addDataAndFileToRequest({ req })
-          addLocalesToRequestFromData({ req })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
@@ -330,8 +330,8 @@ export const GET =
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          await addDataAndFileToRequest({ req })
-          addLocalesToRequestFromData({ req })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 2:
@@ -370,8 +370,8 @@ export const GET =
           }
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.GET) {
-        await addDataAndFileToRequest({ req })
-        addLocalesToRequestFromData({ req })
+        await addDataAndFileToRequest(req)
+        addLocalesToRequestFromData(req)
         res = await endpoints.root.GET[slug1]({ req })
       }
 
@@ -443,8 +443,8 @@ export const POST =
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          await addDataAndFileToRequest({ req })
-          addLocalesToRequestFromData({ req })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
@@ -506,8 +506,8 @@ export const POST =
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          await addDataAndFileToRequest({ req })
-          addLocalesToRequestFromData({ req })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
           switch (slug.length) {
             case 2:
               // /globals/:slug
@@ -539,8 +539,8 @@ export const POST =
           }
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
-        await addDataAndFileToRequest({ req })
-        addLocalesToRequestFromData({ req })
+        await addDataAndFileToRequest(req)
+        addLocalesToRequestFromData(req)
         res = await endpoints.root.POST[slug1]({ req })
       }
 
@@ -605,8 +605,8 @@ export const DELETE =
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          await addDataAndFileToRequest({ req })
-          addLocalesToRequestFromData({ req })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
@@ -687,8 +687,8 @@ export const PATCH =
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          await addDataAndFileToRequest({ req })
-          addLocalesToRequestFromData({ req })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:

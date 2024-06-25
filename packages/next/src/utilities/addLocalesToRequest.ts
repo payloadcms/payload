@@ -1,12 +1,9 @@
-import type { PayloadRequest, PayloadRequestData, SanitizedConfig } from 'payload'
+import type { PayloadRequest, SanitizedConfig } from 'payload'
 
 /**
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams
  */
-type Args = {
-  req: PayloadRequest & PayloadRequestData
-}
-export function addLocalesToRequestFromData({ req }: Args): void {
+export function addLocalesToRequestFromData(req: PayloadRequest): void {
   const {
     data,
     payload: { config },

@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, PayloadRequestWithData } from 'payload'
+import type { Field, PayloadRequest } from 'payload'
 
 import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types.js'
 
@@ -14,7 +14,7 @@ type BaseArgs = {
    */
   ignoreResult?: boolean
   path?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   tableName: string
 }
 

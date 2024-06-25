@@ -1,4 +1,4 @@
-import type { Field, Payload, PayloadRequestWithData } from 'payload'
+import type { Field, Payload, PayloadRequest } from 'payload'
 
 import type { DrizzleTransaction, PostgresAdapter } from '../../../types.js'
 import type { DocsToResave } from '../types.js'
@@ -16,7 +16,7 @@ type Args = {
   globalSlug?: string
   isVersions: boolean
   payload: Payload
-  req: PayloadRequestWithData
+  req: PayloadRequest
   tableName: string
 }
 

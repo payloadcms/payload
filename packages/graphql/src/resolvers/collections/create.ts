@@ -1,4 +1,4 @@
-import type { Collection, GeneratedTypes, PayloadRequestWithData } from 'payload'
+import type { Collection, GeneratedTypes, PayloadRequest } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
 import { createOperation, isolateObjectProperty } from 'payload'
@@ -16,7 +16,7 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 

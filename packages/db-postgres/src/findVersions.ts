@@ -1,4 +1,4 @@
-import type { FindVersions, PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
+import type { FindVersions, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -15,7 +15,7 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     page,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     skip,
     sort: sortArg,
     where,

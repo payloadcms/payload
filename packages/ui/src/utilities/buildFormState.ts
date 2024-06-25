@@ -1,10 +1,4 @@
-import type {
-  DocumentPreferences,
-  Field,
-  FormState,
-  PayloadRequestWithData,
-  TypeWithID,
-} from 'payload'
+import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
@@ -23,7 +17,7 @@ if (!cached) {
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap => {
+export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
@@ -36,11 +30,7 @@ export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap =
   return cached
 }
 
-export const buildFormState = async ({
-  req,
-}: {
-  req: PayloadRequestWithData
-}): Promise<FormState> => {
+export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
   const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 

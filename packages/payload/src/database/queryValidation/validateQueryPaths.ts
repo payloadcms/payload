@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { Field, FieldAffectingData } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 /* eslint-disable no-await-in-loop */
-import type { Operator, PayloadRequestWithData, Where, WhereField } from '../../types/index.js'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
@@ -16,7 +16,7 @@ type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
   policies?: EntityPolicies
-  req: PayloadRequestWithData
+  req: PayloadRequest
   versionFields?: Field[]
   where: Where
 } & (
@@ -63,9 +63,9 @@ export async function validateQueryPaths({
     const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
-    whereFields.map(async (constraint) => {
-      Object.keys(constraint).map(async (path) => {
-        Object.entries(constraint[path]).map(async ([operator, val]) => {
+    void whereFields.map((constraint) => {
+      void Object.keys(constraint).map((path) => {
+        void Object.entries(constraint[path]).map(([operator, val]) => {
           if (validOperators.includes(operator as Operator)) {
             promises.push(
               validateSearchParam({
