@@ -11,7 +11,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
     new: true,
   }

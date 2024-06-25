@@ -17,7 +17,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const [doc] = await VersionModel.create(
     [
