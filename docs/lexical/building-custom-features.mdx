@@ -99,6 +99,75 @@ export const MyFeature = createServerFeature({
 })
 ```
 
+### Feature load order
+
+Server features can also accept a function as the `feature` property (useful for sanitizing props, as mentioned below). This function will be called when the feature is loaded during the payload sanitization process:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical';
+
+createServerFeature({
+  //...
+  feature: async ({ config, isRoot, props, resolvedFeatures, unSanitizedEditorConfig, featureProviderMap }) => {
+
+    return {
+      //Actual server feature here...
+    }
+  }
+})
+```
+
+"Loading" here means the process of calling this `feature` function. By default, features are called in the order in which they are added to the editor.
+However, sometimes you might want to load a feature after another feature has been loaded, or require a different feature to be loaded, throwing an error if this is not the case.
+
+Within lexical, one example where this is done are our list features. Both `UnorderedListFeature` and `OrderedListFeature` register the same `ListItem` node. Within `UnorderedListFeature` we register it normally, but within `OrderedListFeature` we want to only register the `ListItem` node if the `UnorderedListFeature` is not present - otherwise, we would have two features registering the same node.
+
+Here is how we do it:
+
+```ts
+import { createServerFeature, createNode } from '@payloadcms/richtext-lexical';
+
+export const OrderedListFeature = createServerFeature({
+  feature: ({ featureProviderMap }) => {
+    return {
+      // ...
+      nodes: featureProviderMap.has('unorderedList')
+        ? []
+        : [
+            createNode({
+              // ...
+            }),
+          ],
+    }
+  },
+  key: 'orderedList',
+})
+```
+
+`featureProviderMap` will always be available and contain all the features, even yet-to-be-loaded ones, so we can check if a feature is loaded by checking if its `key` present in the map.
+
+If you wanted to make sure a feature is loaded before another feature, you can use the `dependenciesPriority` property:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical';
+
+export const MyFeature = createServerFeature({
+  feature: ({ featureProviderMap }) => {
+    return {
+      // ...
+    }
+  },
+  key: 'myFeature',
+  dependenciesPriority: ['otherFeature'],
+})
+```
+
+| Option                     | Description                                                                                                                                                                                               |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`dependenciesSoft`**     | Keys of soft-dependencies needed for this feature. These are optional. Payload will attempt to load them before this feature, but doesn't throw an error if that's not possible.                          |
+| **`dependencies`**         | Keys of dependencies needed for this feature. These dependencies do not have to be loaded first, but they have to exist, otherwise an error will be thrown.                                               |
+| **`dependenciesPriority`** | Keys of priority dependencies needed for this feature. These dependencies have to be loaded first AND have to exist, otherwise an error will be thrown. They will be available in the `feature` property. |
+
 ## Client Feature
 
 Most of the functionality which the user actually sees and interacts with, like toolbar items and React components for nodes, resides on the client-side.
@@ -121,7 +190,7 @@ export const MyClientFeature = createClientFeature({
 })
 ```
 
-Explore the APIs available through ClientFeature to add the specific functionality you need. Remember, do not import directly from `'@payloadcms/richtext-lexical'` when working on the client-side, as it will cause errors with webpack or turbopack. Instead, use `'@payloadcms/richtext-lexical/client'` for all client-side imports.
+Explore the APIs available through ClientFeature to add the specific functionality you need. Remember, do not import directly from `'@payloadcms/richtext-lexical'` when working on the client-side, as it will cause errors with webpack or turbopack. Instead, use `'@payloadcms/richtext-lexical/client'` for all client-side imports. Type-imports are excluded from this rule and can always be imported.
 
 ### Nodes
 
@@ -417,22 +486,24 @@ We already export all the default toolbar groups (like `toolbarAddDropdownGroupW
 
 If a toolbar with the same key is declared twice, all its items will be merged together into one group.
 
-The toolbar items provides various props you can use to customize its behavior:
+A `ToolbarItem` various props you can use to customize its behavior:
 
-| Option               | Description                                                                                                                              |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| **`ChildComponent`** | A react component which is rendered within your toolbar item. Usually, you want this to be an item.                                      |
-| **`label`**          | The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. |
-| **`key`**            | Each toolbar item needs to have a unique key.                                                                                            |
-| **`onSelect`**       | A function which is called when the toolbar item is clicked.                                                                             |
-| **`isActive`**       | This is optional and controls if the toolbar item is clickable or not.                                                                   |
+| Option               | Description                                                                                                                                                                                |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`ChildComponent`** | A React component which is rendered within your toolbar item's default button component. Usually, you want this to be an icon.                                                             |
+| **`Component`**      | A React component which is rendered in place of the toolbar item's default button component, thus completely replacing it. The `ChildComponent` and `onSelect` properties will be ignored. |
+| **`label`**          | The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function.                                                   |
+| **`key`**            | Each toolbar item needs to have a unique key.                                                                                                                                              |
+| **`onSelect`**       | A function which is called when the toolbar item is clicked.                                                                                                                               |
+| **`isEnabled`**      | This is optional and controls if the toolbar item is clickable or not. If `false` is returned here, it will be grayed out and unclickable.                                                 |
+| **`isActive`**       | This is optional and controls if the toolbar item is highlighted or not                                                                                                                    |
 
 The API for adding an item to the floating inline toolbar (`toolbarInline`) is identical. If you wanted to add an item to both the fixed and inline toolbar, you can extract it into its own variable
 (typed as `ToolbarGroup[]`) and add it to both the `toolbarFixed` and `toolbarInline` props.
 
 ### Slash Menu items
 
-The API for adding items to the slash menu will be similar. There are slash menu groups, and each slash menu groups has items. Here is an example:
+The API for adding items to the slash menu is similar. There are slash menu groups, and each slash menu groups has items. Here is an example:
 
 ```ts
 'use client'
@@ -466,9 +537,83 @@ export const MyClientFeature = createClientFeature({
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Icon`**     | The icon which is rendered in your slash menu item.                                                                                                                                                                                                                                            |
 | **`label`**    | The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function.                                                                                                                                                                                     |
-| **`key`**      | Each slash menu item needs to have a unique key. The key will be matched when typing.                                                                                                                                                                                                          |
+| **`key`**      | Each slash menu item needs to have a unique key. The key will be matched when typing, displayed if no `label` property is set, and used for classNames.                                                                                                                                        |
 | **`onSelect`** | A function which is called when the slash menu item is selected.                                                                                                                                                                                                                               |
 | **`keywords`** | Keywords are used in order to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. Additionally to the keywords, the label and key will be used to match the correct slash menu item. |
+
+## Props
+
+In order to accept props in your feature, you should first type them as a generic.
+
+Server Feature:
+
+```ts
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+  //...
+})
+```
+
+Client Feature:
+
+```ts
+createClientFeature<UnSanitizedClientProps, SanitizedClientProps>({
+  //...
+})
+```
+
+The unSanitized props are what the user will pass to the feature when they call its provider function and add it to their editor config. You then have an option to sanitize those props.
+To sanitize those in the server feature, you can pass a function to `feature` instead of an object:
+
+```ts
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+  //...
+  feature: async ({ config, isRoot, props, resolvedFeatures, unSanitizedEditorConfig, featureProviderMap }) => {
+    const sanitizedProps = doSomethingWithProps(props)
+
+    return {
+      sanitizedServerFeatureProps: sanitizedProps,
+      //Actual server feature here...
+    }
+  }
+})
+```
+
+Keep in mind that any sanitized props then have to returned in the `sanitizedServerFeatureProps` property.
+
+In the client feature, it works in a similar way:
+
+```ts
+createClientFeature<UnSanitizedClientProps, SanitizedClientProps>(
+  ({ clientFunctions, featureProviderMap, props, resolvedFeatures, unSanitizedEditorConfig }) => {
+    const sanitizedProps = doSomethingWithProps(props)
+    return {
+      sanitizedClientFeatureProps:  sanitizedProps,
+      //Actual client feature here...
+    }
+  },
+)
+```
+
+### Bringing props from the server to the client
+
+By default, the client feature will never receive any props from the server feature. In order to pass props from the server to the client, you can need to return those props in the server feature:
+
+```ts
+type UnSanitizedClientProps = {
+  test: string
+}
+
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+  //...
+  feature: {
+    clientFeatureProps: {
+      test: 'myValue'
+    }
+  }
+})
+```
+
+The reason the client feature does not have the same props available as the server by default is because all client props need to be serializable. You can totally accept things like functions or Maps as props in your server feature, but you will not be able to send those to the client. In the end, those props are sent from the server to the client over the network, so they need to be serializable.
 
 ## More information
 
