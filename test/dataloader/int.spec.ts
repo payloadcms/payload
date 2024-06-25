@@ -62,8 +62,6 @@ describe('dataloader', () => {
           })
           .then((res) => res.json())
 
-        console.log(JSON.stringify(data, null, 2)) // Log the actual response
-
         const normalizedResponse = JSON.parse(JSON.stringify(data))
 
         expect(normalizedResponse).toStrictEqual({
