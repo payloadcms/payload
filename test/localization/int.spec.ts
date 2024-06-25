@@ -13,7 +13,7 @@ import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
 import configPromise from './config'
-import { defaultLocale, localizedSortSlug } from './shared'
+import { defaultLocale, hungarianLocale, localizedSortSlug } from './shared'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -290,6 +290,69 @@ describe('Localization', () => {
         })
 
         expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
+      })
+    })
+
+    describe('Localized sorting', () => {
+      let localizedAccentPostOne: LocalizedPost
+      let localizedAccentPostTwo: LocalizedPost
+      beforeEach(async () => {
+        // @ts-expect-error Force typing
+        localizedAccentPostOne = await payload.create({
+          collection,
+          data: {
+            title: 'non accent post',
+            description: 'something',
+          },
+          locale: englishLocale,
+        })
+
+        // @ts-expect-error Force typing
+        localizedAccentPostTwo = await payload.create({
+          collection,
+          data: {
+            title: 'accent post',
+            description: 'veterinarian',
+          },
+          locale: englishLocale,
+        })
+
+        await payload.update({
+          id: localizedAccentPostOne.id,
+          collection,
+          data: {
+            title: 'non accent post',
+            description: 'valami',
+          },
+          locale: hungarianLocale,
+        })
+
+        await payload.update({
+          id: localizedAccentPostTwo.id,
+          collection,
+          data: {
+            title: 'accent post',
+            description: 'állatorvos',
+          },
+          locale: hungarianLocale,
+        })
+      })
+
+      it('should sort alphabetically even with accented letters', async () => {
+        const sortByDescriptionQuery = await payload.find({
+          collection,
+          sort: 'description',
+          where: {
+            title: {
+              like: 'accent',
+            },
+          },
+          locale: hungarianLocale,
+        })
+
+        console.log(sortByDescriptionQuery.docs)
+
+        expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
       })
     })
   })
