@@ -302,7 +302,7 @@ describe('Localization', () => {
           collection,
           data: {
             title: 'non accent post',
-            description: 'something',
+            localizedDescription: 'something',
           },
           locale: englishLocale,
         })
@@ -312,7 +312,7 @@ describe('Localization', () => {
           collection,
           data: {
             title: 'accent post',
-            description: 'veterinarian',
+            localizedDescription: 'veterinarian',
           },
           locale: englishLocale,
         })
@@ -322,7 +322,7 @@ describe('Localization', () => {
           collection,
           data: {
             title: 'non accent post',
-            description: 'valami',
+            localizedDescription: 'valami',
           },
           locale: hungarianLocale,
         })
@@ -332,7 +332,7 @@ describe('Localization', () => {
           collection,
           data: {
             title: 'accent post',
-            description: 'állatorvos',
+            localizedDescription: 'állatorvos',
           },
           locale: hungarianLocale,
         })

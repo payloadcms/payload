@@ -65,6 +65,10 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
           localized: true,
           type: 'text',
         },
