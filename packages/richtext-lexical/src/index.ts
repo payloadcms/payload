@@ -17,7 +17,7 @@ import {
   withNullableJSONSchemaType,
 } from 'payload'
 
-import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/types.js'
+import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type {
   AdapterProps,
@@ -898,6 +898,20 @@ export { InlineToolbarFeature } from './features/toolbars/inline/feature.server.
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
 export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 export type {
+  ClientComponentProps,
+  ClientFeature,
+  ClientFeatureProviderMap,
+  FeatureProviderClient,
+  FeatureProviderProviderClient,
+  PluginComponent,
+  PluginComponentWithAnchor,
+  ResolvedClientFeature,
+  ResolvedClientFeatureMap,
+  SanitizedClientFeatures,
+  SanitizedPlugin,
+} from './features/typesClient.js'
+
+export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
   AfterReadNodeHook,
@@ -907,28 +921,17 @@ export type {
   BeforeChangeNodeHookArgs,
   BeforeValidateNodeHook,
   BeforeValidateNodeHookArgs,
-  ClientComponentProps,
-  ClientFeature,
-  ClientFeatureProviderMap,
-  FeatureProviderClient,
-  FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
   NodeValidation,
   NodeWithHooks,
-  PluginComponent,
-  PluginComponentWithAnchor,
   PopulationPromise,
-  ResolvedClientFeature,
-  ResolvedClientFeatureMap,
   ResolvedServerFeature,
   ResolvedServerFeatureMap,
-  SanitizedClientFeatures,
-  SanitizedPlugin,
   SanitizedServerFeatures,
   ServerFeature,
   ServerFeatureProviderMap,
-} from './features/types.js'
+} from './features/typesServer.js'
 
 export { UploadFeature } from './features/upload/feature.server.js'
 

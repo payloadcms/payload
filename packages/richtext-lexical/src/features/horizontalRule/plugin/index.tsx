@@ -5,7 +5,7 @@ import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import { useEffect } from 'react'
 
-import type { PluginComponent } from '../../types.js'
+import type { PluginComponent } from '../../typesClient.js'
 
 import {
   $createHorizontalRuleNode,

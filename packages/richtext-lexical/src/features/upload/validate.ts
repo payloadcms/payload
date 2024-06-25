@@ -1,7 +1,7 @@
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { isValidID } from 'payload'
 
-import type { NodeValidation } from '../types.js'
+import type { NodeValidation } from '../typesServer.js'
 import type { UploadFeatureProps } from './feature.server.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
 

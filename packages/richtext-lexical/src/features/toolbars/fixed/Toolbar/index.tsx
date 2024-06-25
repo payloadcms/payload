@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 
 import type { EditorConfigContextType } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
-import type { PluginComponentWithAnchor } from '../../../types.js'
+import type { PluginComponentWithAnchor } from '../../../typesClient.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../types.js'
 import type { FixedToolbarFeatureProps } from '../feature.server.js'
 

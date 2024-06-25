@@ -7,7 +7,7 @@ import type {
   FeatureProviderClient,
   FeatureProviderProviderClient,
   ResolvedClientFeatureMap,
-} from '../features/types.js'
+} from '../features/typesClient.js'
 import type { ClientEditorConfig } from '../lexical/config/types.js'
 
 import { createClientComponent } from '../features/createClientComponent.js'

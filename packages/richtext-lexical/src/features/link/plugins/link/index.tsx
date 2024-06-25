@@ -10,7 +10,7 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
-import type { PluginComponent } from '../../../types.js'
+import type { PluginComponent } from '../../../typesClient.js'
 import type { ClientProps } from '../../feature.client.js'
 import type { LinkFields } from '../../nodes/types.js'
 import type { LinkPayload } from '../floatingLinkEditor/types.js'

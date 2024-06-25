@@ -5,7 +5,7 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { FeatureProviderClient } from '../features/types.js'
+import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 

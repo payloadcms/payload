@@ -1,6 +1,6 @@
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 
-import type { NodeValidation } from '../types.js'
+import type { NodeValidation } from '../typesServer.js'
 import type { BlocksFeatureProps } from './feature.server.js'
 import type { BlockFields, SerializedBlockNode } from './nodes/BlocksNode.js'
 
