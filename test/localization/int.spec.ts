@@ -350,8 +350,6 @@ describe('Localization', () => {
           locale: hungarianLocale,
         })
 
-        console.log(sortByDescriptionQuery.docs)
-
         expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
       })
     })

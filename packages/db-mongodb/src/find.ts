@@ -55,7 +55,7 @@ export const find: Find = async function find(
     useEstimatedCount,
   }
 
-  if (locale) {
+  if (locale && locale !== 'all' && locale !== '*') {
     paginationOptions.collation = { locale, strength: 1 }
   }
 

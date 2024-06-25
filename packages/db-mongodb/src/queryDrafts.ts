@@ -58,7 +58,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     useEstimatedCount,
   }
 
-  if (locale) {
+  if (locale && locale !== 'all' && locale !== '*') {
     paginationOptions.collation = { locale, strength: 1 }
   }
 

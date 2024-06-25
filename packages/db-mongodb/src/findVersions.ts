@@ -70,7 +70,7 @@ export const findVersions: FindVersions = async function findVersions(
     useEstimatedCount,
   }
 
-  if (locale) {
+  if (locale && locale !== 'all' && locale !== '*') {
     paginationOptions.collation = { locale, strength: 1 }
   }
 

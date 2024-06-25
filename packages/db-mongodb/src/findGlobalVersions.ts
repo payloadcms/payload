@@ -74,7 +74,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     useEstimatedCount,
   }
 
-  if (locale) {
+  if (locale && locale !== 'all' && locale !== '*') {
     paginationOptions.collation = { locale, strength: 1 }
   }
 
