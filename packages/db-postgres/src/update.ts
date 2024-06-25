@@ -12,7 +12,7 @@ export const updateOne: UpdateOne = async function updateOne(
   this: PostgresAdapter,
   { id, collection: collectionSlug, data, draft, locale, req, where: whereArg },
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   const whereToUse = whereArg || { id: { equals: id } }

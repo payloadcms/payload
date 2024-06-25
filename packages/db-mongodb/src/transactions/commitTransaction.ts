@@ -1,6 +1,8 @@
 import type { CommitTransaction } from 'payload/database'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
+  if (id instanceof Promise) return
+
   if (!this.sessions[id]?.inTransaction()) {
     return
   }
