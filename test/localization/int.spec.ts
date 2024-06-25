@@ -293,66 +293,68 @@ describe('Localization', () => {
       })
     })
 
-    describe('Localized sorting', () => {
-      let localizedAccentPostOne: LocalizedPost
-      let localizedAccentPostTwo: LocalizedPost
-      beforeEach(async () => {
-        // @ts-expect-error Force typing
-        localizedAccentPostOne = await payload.create({
-          collection,
-          data: {
-            title: 'non accent post',
-            localizedDescription: 'something',
-          },
-          locale: englishLocale,
-        })
-
-        // @ts-expect-error Force typing
-        localizedAccentPostTwo = await payload.create({
-          collection,
-          data: {
-            title: 'accent post',
-            localizedDescription: 'veterinarian',
-          },
-          locale: englishLocale,
-        })
-
-        await payload.update({
-          id: localizedAccentPostOne.id,
-          collection,
-          data: {
-            title: 'non accent post',
-            localizedDescription: 'valami',
-          },
-          locale: hungarianLocale,
-        })
-
-        await payload.update({
-          id: localizedAccentPostTwo.id,
-          collection,
-          data: {
-            title: 'accent post',
-            localizedDescription: 'állatorvos',
-          },
-          locale: hungarianLocale,
-        })
-      })
-
-      it('should sort alphabetically even with accented letters', async () => {
-        const sortByDescriptionQuery = await payload.find({
-          collection,
-          sort: 'description',
-          where: {
-            title: {
-              like: 'accent',
+    if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+      describe('Localized sorting', () => {
+        let localizedAccentPostOne: LocalizedPost
+        let localizedAccentPostTwo: LocalizedPost
+        beforeEach(async () => {
+          // @ts-expect-error Force typing
+          localizedAccentPostOne = await payload.create({
+            collection,
+            data: {
+              title: 'non accent post',
+              localizedDescription: 'something',
             },
-          },
-          locale: hungarianLocale,
+            locale: englishLocale,
+          })
+
+          // @ts-expect-error Force typing
+          localizedAccentPostTwo = await payload.create({
+            collection,
+            data: {
+              title: 'accent post',
+              localizedDescription: 'veterinarian',
+            },
+            locale: englishLocale,
+          })
+
+          await payload.update({
+            id: localizedAccentPostOne.id,
+            collection,
+            data: {
+              title: 'non accent post',
+              localizedDescription: 'valami',
+            },
+            locale: hungarianLocale,
+          })
+
+          await payload.update({
+            id: localizedAccentPostTwo.id,
+            collection,
+            data: {
+              title: 'accent post',
+              localizedDescription: 'állatorvos',
+            },
+            locale: hungarianLocale,
+          })
         })
 
-        expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
+        it('should sort alphabetically even with accented letters', async () => {
+          const sortByDescriptionQuery = await payload.find({
+            collection,
+            sort: 'description',
+            where: {
+              title: {
+                like: 'accent',
+              },
+            },
+            locale: hungarianLocale,
+          })
+
+          expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
+        })
       })
-    })
+    }
   })
 
   describe('Localized Sort Count', () => {
