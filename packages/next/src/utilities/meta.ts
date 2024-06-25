@@ -3,6 +3,7 @@ import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
+import qs from 'qs'
 
 const defaultOpenGraph = {
   description:
@@ -49,12 +50,6 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
 
   const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
 
-  const params = new URLSearchParams()
-  params.append('description', openGraphFromProps?.description || defaultOpenGraph.description)
-  params.append('title', ogTitle)
-
-  const queryString = `?${params.toString()}`
-
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
     ...(defaultOGImageType === 'dynamic'
@@ -63,7 +58,15 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
             {
               alt: ogTitle,
               height: 630,
-              url: `/api/og${queryString}`,
+              url: `/api/og${qs.stringify(
+                {
+                  description: openGraphFromProps?.description || defaultOpenGraph.description,
+                  title: ogTitle,
+                },
+                {
+                  addQueryPrefix: true,
+                },
+              )}`,
               width: 1200,
             },
           ],
