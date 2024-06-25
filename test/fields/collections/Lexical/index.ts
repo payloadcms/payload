@@ -1,13 +1,4 @@
-import type {
-  SerializedBlockNode,
-  SerializedLinkNode,
-  SerializedParagraphNode,
-  SerializedRelationshipNode,
-  SerializedTextNode,
-  SerializedUploadNode,
-  ServerEditorConfig,
-  TypedEditorState,
-} from '@payloadcms/richtext-lexical'
+import type { ServerEditorConfig } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from 'lexical'
 import type { CollectionConfig } from 'payload'
 
@@ -39,44 +30,6 @@ import {
   TextBlock,
   UploadAndRichTextBlock,
 } from './blocks.js'
-
-const a: TypedEditorState<
-  | SerializedBlockNode
-  | SerializedLinkNode
-  | SerializedParagraphNode
-  | SerializedRelationshipNode
-  | SerializedTextNode
-  | SerializedUploadNode
-> = {
-  root: {
-    type: 'root',
-    format: '',
-    indent: 0,
-    version: 1,
-    children: [
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'Upload Node:',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        textFormat: 5,
-        type: 'paragraph',
-        version: 1,
-      },
-    ],
-    direction: 'ltr',
-  },
-}
 
 const editorConfig: ServerEditorConfig = {
   features: [
