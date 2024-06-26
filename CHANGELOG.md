@@ -1,3 +1,10 @@
+## [2.22.2](https://github.com/payloadcms/payload/compare/v2.22.1...v2.22.2) (2024-06-26)
+
+
+### Bug Fixes
+
+* return exp and strategy from auth ([#6943](https://github.com/payloadcms/payload/issues/6943)) ([ea18735](https://github.com/payloadcms/payload/commit/ea18735d3b2d2a96989009130e3724aab487e520))
+
 ## [2.22.1](https://github.com/payloadcms/payload/compare/v2.22.0...v2.22.1) (2024-06-25)
 
 
