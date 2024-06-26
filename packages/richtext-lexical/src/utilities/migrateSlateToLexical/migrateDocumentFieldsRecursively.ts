@@ -17,7 +17,7 @@ type NestedRichTextFieldsArgs = {
   found: number
 }
 
-export const migrateDocumentFields = ({
+export const migrateDocumentFieldsRecursively = ({
   data,
   fields,
   found,
@@ -25,13 +25,13 @@ export const migrateDocumentFields = ({
   for (const field of fields) {
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
-        migrateDocumentFields({
+        migrateDocumentFieldsRecursively({
           data: data[field.name],
           fields: field.fields,
           found,
         })
       } else {
-        migrateDocumentFields({
+        migrateDocumentFieldsRecursively({
           data,
           found,
 
@@ -40,7 +40,7 @@ export const migrateDocumentFields = ({
       }
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
-        migrateDocumentFields({
+        migrateDocumentFieldsRecursively({
           data,
           found,
 
@@ -52,7 +52,7 @@ export const migrateDocumentFields = ({
         data[field.name].forEach((row, i) => {
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
-            migrateDocumentFields({
+            migrateDocumentFieldsRecursively({
               data: data[field.name][i],
               found,
 
@@ -64,7 +64,7 @@ export const migrateDocumentFields = ({
 
       if (field.type === 'array') {
         data[field.name].forEach((_, i) => {
-          migrateDocumentFields({
+          migrateDocumentFieldsRecursively({
             data: data[field.name][i],
             found,
 
