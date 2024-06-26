@@ -8,7 +8,13 @@ import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { idToString } from '../helpers/idToString'
-import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config'
+import configPromise, {
+  errorOnHookSlug,
+  pointSlug,
+  relationSlug,
+  relationWithAccessControlSlug,
+  slug,
+} from './config'
 
 const title = 'title'
 
@@ -872,6 +878,52 @@ describe('collections-graphql', () => {
         const { docs } = response.Posts
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
+      })
+
+      // fix: https://github.com/payloadcms/payload/issues/6518
+      it('should query a document with a filtered relationship', async () => {
+        const relWithAccessControl1 = await payload.create({
+          collection: relationWithAccessControlSlug,
+          data: {
+            name: 'rel1',
+            visible: false,
+          },
+        })
+        const relWithAccessControl2 = await payload.create({
+          collection: relationWithAccessControlSlug,
+          data: {
+            name: 'rel2',
+            visible: true,
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationHasManyFieldWithAccessControl: [
+              relWithAccessControl1.id,
+              relWithAccessControl2.id,
+            ],
+            title: 'with a filtered relationship',
+          },
+        })
+
+        // language=graphql
+        const query = `query {
+          Posts(where: {title: {equals: "with a filtered relationship"}}) {
+            docs {
+              relationHasManyFieldWithAccessControl {
+                name
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+        expect(response).toStrictEqual({
+          Posts: {
+            docs: [{ relationHasManyFieldWithAccessControl: [{ name: 'rel2' }] }],
+          },
+        })
       })
 
       it('should query relationships with locale', async () => {
