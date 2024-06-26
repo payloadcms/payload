@@ -12,7 +12,7 @@ import type {
 } from 'payload'
 
 import { notFound } from 'next/navigation.js'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
@@ -162,7 +162,9 @@ export const DocumentInfoProvider: React.FC<
 
     if (globalSlug) {
       versionFetchURL = `${baseURL}/globals/${globalSlug}/versions`
-      publishedFetchURL = `${baseURL}/globals/${globalSlug}?${qs.stringify(publishedVersionParams)}`
+      publishedFetchURL = `${baseURL}/globals/${globalSlug}?${stringify(publishedVersionParams, {
+        nestingSyntax: 'index',
+      })}`
     }
 
     if (collectionSlug) {
@@ -174,7 +176,9 @@ export const DocumentInfoProvider: React.FC<
         },
       })
 
-      publishedFetchURL = `${baseURL}/${collectionSlug}?${qs.stringify(publishedVersionParams)}`
+      publishedFetchURL = `${baseURL}/${collectionSlug}?${stringify(publishedVersionParams, {
+        nestingSyntax: 'index',
+      })}`
 
       if (!id) {
         shouldFetch = false
@@ -204,12 +208,17 @@ export const DocumentInfoProvider: React.FC<
       }
 
       if (shouldFetchVersions) {
-        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
+        versionJSON = await fetch(
+          `${versionFetchURL}?${stringify(versionParams, {
+            nestingSyntax: 'index',
+          })}`,
+          {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        }).then((res) => res.json())
+        ).then((res) => res.json())
 
         if (publishedJSON?.updatedAt) {
           const newerVersionParams = {
@@ -229,7 +238,9 @@ export const DocumentInfoProvider: React.FC<
 
           // Get any newer versions available
           const newerVersionRes = await fetch(
-            `${versionFetchURL}?${qs.stringify(newerVersionParams)}`,
+            `${versionFetchURL}?${stringify(newerVersionParams, {
+              nestingSyntax: 'index',
+            })}`,
             {
               credentials: 'include',
               headers: {
@@ -266,16 +277,23 @@ export const DocumentInfoProvider: React.FC<
             : null
 
         if (docAccessURL) {
-          const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
+          const res = await fetch(
+            `${serverURL}${api}${docAccessURL}?${stringify(params, {
+              nestingSyntax: 'index',
+            })}`,
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
             },
-          })
+          )
 
           const json: DocumentPermissions = await res.json()
           const publishedAccessJSON = await fetch(
-            `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
+            `${serverURL}${api}${docAccessURL}?${stringify(params, {
+              nestingSyntax: 'index',
+            })}`,
             {
               body: JSON.stringify({
                 data: {

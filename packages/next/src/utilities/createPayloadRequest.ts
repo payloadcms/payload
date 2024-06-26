@@ -2,7 +2,7 @@ import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } 
 
 import { initI18n } from '@payloadcms/translations'
 import { executeAuthStrategies, getDataLoader, parseCookies } from 'payload'
-import qs from 'qs'
+import { parse } from 'picoquery'
 import { URL } from 'url'
 
 import { sanitizeLocales } from './addLocalesToRequest.js'
@@ -61,10 +61,8 @@ export const createPayloadRequest = async ({
   const queryToParse = overrideHttpMethod === 'GET' ? await request.text() : urlProperties.search
 
   const query = queryToParse
-    ? qs.parse(queryToParse, {
-        arrayLimit: 1000,
-        depth: 10,
-        ignoreQueryPrefix: true,
+    ? parse(queryToParse, {
+        nestingSyntax: 'index',
       })
     : {}
 

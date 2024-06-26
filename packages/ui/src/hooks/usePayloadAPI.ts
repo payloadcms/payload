@@ -1,5 +1,5 @@
 'use client'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import { useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../providers/Locale/index.js'
@@ -35,15 +35,15 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const { code: locale } = useLocale()
   const hasInitialized = useRef(false)
 
-  const search = qs.stringify(
+  const search = `?${stringify(
     {
       locale,
       ...(typeof params === 'object' ? params : {}),
     },
     {
-      addQueryPrefix: true,
+      nestingSyntax: 'index',
     },
-  )
+  )}`
 
   // If `initialData`, no need to make a request
   useEffect(() => {

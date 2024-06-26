@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { usePathname, useRouter } from 'next/navigation.js'
 import { sortableFieldTypes } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { useEffect, useState } from 'react'
 
 export type SortComplexProps = {
@@ -57,13 +57,13 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
       if (handleChange) handleChange(newSortValue)
 
       if (searchParams.sort !== newSortValue && modifySearchQuery) {
-        const search = qs.stringify(
+        const search = `?${stringify(
           {
             ...searchParams,
             sort: newSortValue,
           },
-          { addQueryPrefix: true },
-        )
+          { nestingSyntax: 'index' },
+        )}`
 
         router.replace(`${pathname}${search}`)
       }

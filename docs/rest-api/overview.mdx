@@ -634,6 +634,8 @@ Here is an example of how to use the method override to perform a GET request:
 #### Using Method Override (POST)
 
 ```ts
+import { stringify } from 'picoquery'
+
 const res = await fetch(`${api}/${collectionSlug}`, {
   method: 'POST',
   credentials: 'include',
@@ -642,10 +644,10 @@ const res = await fetch(`${api}/${collectionSlug}`, {
     'Content-Type': 'application/x-www-form-urlencoded',
     'X-HTTP-Method-Override': 'GET',
   },
-  body: qs.stringify({
+  body: stringify({
     depth: 1,
     locale: 'en',
-  }),
+  }, { nestingSyntax: 'index' }),
 })
 ```
 

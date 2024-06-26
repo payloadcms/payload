@@ -28,7 +28,7 @@ export interface Config {
 export interface Post {
   id: string;
   text?: string | null;
-  richText?: {
+  richText: {
     root: {
       type: string;
       children: {
@@ -42,7 +42,7 @@ export interface Post {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
+  };
   richText2?: {
     root: {
       type: string;

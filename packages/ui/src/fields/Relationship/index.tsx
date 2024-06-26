@@ -2,7 +2,7 @@
 import type { PaginatedDocs, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
@@ -201,7 +201,9 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
             }
 
             const response = await fetch(`${serverURL}${api}/${relation}`, {
-              body: qs.stringify(query),
+              body: stringify(query, {
+                nestingSyntax: 'index',
+              }),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
@@ -330,7 +332,9 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
 
         if (!errorLoading) {
           const response = await fetch(`${serverURL}${api}/${relation}`, {
-            body: qs.stringify(query),
+            body: stringify(query, {
+              nestingSyntax: 'index',
+            }),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,

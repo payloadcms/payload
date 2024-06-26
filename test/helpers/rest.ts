@@ -3,7 +3,7 @@ import type { Where } from 'payload'
 import type { Config } from 'payload'
 import type { PaginatedDocs } from 'payload'
 
-import qs from 'qs'
+import { parse, stringify } from 'picoquery'
 
 import { devUser } from '../credentials.js'
 
@@ -175,14 +175,14 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`
     }
 
-    const formattedQs = qs.stringify(
+    const formattedQs = `?${stringify(
       {
         ...(where ? { where } : {}),
       },
       {
-        addQueryPrefix: true,
+        nestingSyntax: 'index',
       },
-    )
+    )}`
 
     const slug = args?.slug || this.defaultSlug
     const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options)
@@ -238,7 +238,7 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`
     }
 
-    const whereQuery = qs.stringify(
+    const whereQuery = stringify(
       {
         ...(args?.query ? { where: args.query } : {}),
         limit: args?.limit,
@@ -246,12 +246,12 @@ export class RESTClient {
         sort: args?.sort,
       },
       {
-        addQueryPrefix: true,
+        nestingSyntax: 'index',
       },
     )
 
     const slug = args?.slug || this.defaultSlug
-    const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options)
+    const response = await fetch(`${this.serverURL}/api/${slug}?${whereQuery}`, options)
     const { status } = response
     const result = await response.json()
     if (result.errors) throw new Error(result.errors[0].message)
@@ -268,9 +268,11 @@ export class RESTClient {
     }
 
     const slug = args?.slug || this.defaultSlug
-    const formattedOpts = qs.stringify(args?.options || {}, { addQueryPrefix: true })
+    const formattedOpts = stringify(args?.options || {}, {
+      nestingSyntax: 'index',
+    })
     const response = await fetch(
-      `${this.serverURL}/api/${slug}/${args.id}${formattedOpts}`,
+      `${this.serverURL}/api/${slug}/${args.id}?${formattedOpts}`,
       options,
     )
     const { status } = response
@@ -350,9 +352,11 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`
     }
 
-    const formattedQs = qs.stringify(query)
+    const formattedQs = stringify(query, {
+      nestingSyntax: 'index',
+    })
     const slug = args.slug || this.defaultSlug
-    const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options)
+    const response = await fetch(`${this.serverURL}/api/${slug}/${id}?${formattedQs}`, options)
     const { status } = response
     const json = await response.json()
     return { doc: json.doc, errors: json.errors, status }
@@ -389,17 +393,17 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`
     }
 
-    const formattedQs = qs.stringify(
+    const formattedQs = stringify(
       {
         ...(where ? { where } : {}),
       },
       {
-        addQueryPrefix: true,
+        nestingSyntax: 'index',
       },
     )
 
     const slug = args?.slug || this.defaultSlug
-    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options)
+    const response = await fetch(`${this.serverURL}/api/${slug}?${formattedQs}`, options)
     const { status } = response
     const json = await response.json()
     return { docs: json.docs, errors: json.errors, status }

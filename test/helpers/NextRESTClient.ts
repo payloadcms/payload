@@ -1,5 +1,4 @@
 import type { SanitizedConfig, Where } from 'payload'
-import type { ParsedQs } from 'qs'
 
 import {
   REST_DELETE as createDELETE,
@@ -8,7 +7,7 @@ import {
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
 } from '@payloadcms/next/routes'
-import qs from 'qs'
+import { parse, stringify } from 'picoquery'
 
 import { devUser } from '../credentials.js'
 
@@ -30,16 +29,16 @@ type FileArg = {
   file?: Omit<File, 'webkitRelativePath'>
 }
 
-function generateQueryString(query: RequestOptions['query'], params: ParsedQs): string {
-  return qs.stringify(
+function generateQueryString(query: RequestOptions['query'], params: object): string {
+  return `?${stringify(
     {
       ...(params || {}),
       ...(query || {}),
     },
     {
-      addQueryPrefix: true,
+      nestingSyntax: 'index',
     },
-  )
+  )}`
 }
 
 export class NextRESTClient {
@@ -90,7 +89,7 @@ export class NextRESTClient {
   }
 
   private generateRequestParts(path: ValidPath): {
-    params?: ParsedQs
+    params?: object
     slug: string[]
     url: string
   } {
@@ -100,7 +99,11 @@ export class NextRESTClient {
     return {
       url,
       slug: slugs.split('/'),
-      params: params ? qs.parse(params) : undefined,
+      params: params
+        ? parse(params, {
+            nestingSyntax: 'index',
+          })
+        : undefined,
     }
   }
 

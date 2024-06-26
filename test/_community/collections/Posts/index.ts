@@ -17,6 +17,7 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
+      required: true,
     },
     {
       name: 'richText2',

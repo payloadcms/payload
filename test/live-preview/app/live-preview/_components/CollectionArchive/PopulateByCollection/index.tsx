@@ -1,6 +1,6 @@
 'use client'
 
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Post } from '../../../../../payload-types.js'
@@ -86,7 +86,7 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
       }
     }, 500)
 
-    const searchQuery = qs.stringify(
+    const searchQuery = stringify(
       {
         depth: 1,
         limit,
@@ -107,7 +107,9 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
             : {}),
         },
       },
-      { encode: false },
+      {
+        nestingSyntax: 'index',
+      },
     )
 
     const makeRequest = async () => {

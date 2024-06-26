@@ -9,7 +9,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
@@ -74,7 +74,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
         })
       }
 
-      const search = qs.stringify(query)
+      const search = stringify(query, {
+        nestingSyntax: 'index',
+      })
 
       const response = await fetch(`${baseURL}?${search}`, {
         credentials: 'include',

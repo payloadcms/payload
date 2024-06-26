@@ -1,7 +1,7 @@
 'use client'
 import type { PaginatedDocs, Where } from 'payload'
 
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'
@@ -90,7 +90,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
         try {
           const response = await fetch(
-            `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            `${serverURL}${api}/${relationSlug}?${stringify(query, { nestingSyntax: 'index' })}`,
             {
               credentials: 'include',
               headers: {

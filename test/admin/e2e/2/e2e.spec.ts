@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
 
@@ -376,14 +376,14 @@ describe('admin2', () => {
           },
         }
 
-        const whereQuery = qs.stringify(
+        const whereQuery = `?${stringify(
           {
             ...{ where: whereQueryJSON },
           },
           {
-            addQueryPrefix: false,
+            nestingSyntax: 'index',
           },
-        )
+        )}`
 
         // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [7,-7] point, as it's not within the polygon
         await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}?limit=10&page=1&${whereQuery}`)

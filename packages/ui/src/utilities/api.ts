@@ -1,4 +1,4 @@
-import qs from 'qs'
+import { stringify } from 'picoquery'
 
 type GetOptions = RequestInit & {
   params?: Record<string, unknown>
@@ -23,7 +23,7 @@ export const requests = {
   get: (url: string, options: GetOptions = { headers: {} }): Promise<Response> => {
     let query = ''
     if (options.params) {
-      query = qs.stringify(options.params, { addQueryPrefix: true })
+      query = `?${stringify(options.params, { nestingSyntax: 'index' })}`
     }
     return fetch(`${url}${query}`, {
       credentials: 'include',

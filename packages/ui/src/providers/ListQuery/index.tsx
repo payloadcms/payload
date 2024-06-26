@@ -3,7 +3,7 @@ import type { PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { createContext, useContext } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
@@ -94,7 +94,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         where: 'where' in query ? query.where : currentQuery?.where,
       }
 
-      router.replace(`${qs.stringify(params, { addQueryPrefix: true })}`)
+      router.replace(
+        `?${stringify(params, {
+          nestingSyntax: 'index',
+        })}`,
+      )
     },
     [preferenceKey, modifySearchParams, router, setPreference, currentQuery],
   )
@@ -159,7 +163,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
           shouldUpdateQueryString = true
         }
         if (shouldUpdateQueryString) {
-          router.replace(`?${qs.stringify(currentQuery)}`)
+          router.replace(
+            `?${stringify(currentQuery, {
+              nestingSyntax: 'index',
+            })}`,
+          )
         }
       }
 

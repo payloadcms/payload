@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -41,7 +41,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = qs.stringify(formQueryParams)
+  const formattedQueryParams = stringify(formQueryParams, {
+    nestingSyntax: 'index',
+  })
 
   const { componentMap } = useComponentMap()
 

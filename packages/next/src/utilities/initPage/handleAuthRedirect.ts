@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation.js'
-import qs from 'qs'
+import { parse, stringify } from 'picoquery'
 
 import { isAdminAuthRoute, isAdminRoute } from './shared.js'
 
@@ -26,7 +26,7 @@ export const handleAuthRedirect = ({
 
     const redirectRoute = encodeURIComponent(
       route + Object.keys(searchParams ?? {}).length
-        ? `${qs.stringify(searchParams, { addQueryPrefix: true })}`
+        ? `?${stringify(searchParams, { nestingSyntax: 'index' })}`
         : undefined,
     )
 
@@ -39,14 +39,16 @@ export const handleAuthRedirect = ({
       ? adminLoginRoute
       : customLoginRoute || loginRouteFromConfig
 
-    const parsedLoginRouteSearchParams = qs.parse(loginRoute.split('?')[1] ?? '')
+    const parsedLoginRouteSearchParams = parse(loginRoute.split('?')[1] ?? '', {
+      nestingSyntax: 'index',
+    })
 
-    const searchParamsWithRedirect = `${qs.stringify(
+    const searchParamsWithRedirect = `?${stringify(
       {
         ...parsedLoginRouteSearchParams,
         ...(redirectRoute ? { redirect: redirectRoute } : {}),
       },
-      { addQueryPrefix: true },
+      { nestingSyntax: 'index' },
     )}`
 
     redirect(`${loginRoute.split('?')[0]}${searchParamsWithRedirect}`)

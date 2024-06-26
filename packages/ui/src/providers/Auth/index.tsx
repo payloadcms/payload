@@ -3,7 +3,7 @@ import type { ClientUser, MeOperationResult, Permissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -181,11 +181,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const request = await requests.get(`${serverURL}${api}/access?${qs.stringify(params)}`, {
-        headers: {
-          'Accept-Language': i18n.language,
+      const request = await requests.get(
+        `${serverURL}${api}/access?${stringify(params, {
+          nestingSyntax: 'index',
+        })}`,
+        {
+          headers: {
+            'Accept-Language': i18n.language,
+          },
         },
-      })
+      )
 
       if (request.status === 200) {
         const json: Permissions = await request.json()

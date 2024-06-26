@@ -1,7 +1,6 @@
 'use client'
 import type { TypeWithID } from 'payload'
 
-import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'

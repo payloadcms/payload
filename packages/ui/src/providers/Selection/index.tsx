@@ -1,7 +1,7 @@
 'use client'
 import type { Where } from 'payload'
 
-import qs from 'qs'
+import { stringify } from 'picoquery'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../Locale/index.js'
@@ -109,13 +109,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           and: [{ ...additionalParams }, where],
         }
       }
-      return qs.stringify(
+      return `?${stringify(
         {
           locale,
           where,
         },
-        { addQueryPrefix: true },
-      )
+        { nestingSyntax: 'index' },
+      )}`
     },
     [selectAll, selected, locale, searchParams],
   )

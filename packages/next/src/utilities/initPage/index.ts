@@ -5,7 +5,7 @@ import { initI18n } from '@payloadcms/translations'
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
 import { createLocalReq, isEntityHidden, parseCookies } from 'payload'
-import qs from 'qs'
+import { parse, stringify } from 'picoquery'
 
 import type { Args } from './types.js'
 
@@ -31,7 +31,7 @@ export const initPage = async ({
     routes: { admin: adminRoute },
   } = payload.config
 
-  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+  const queryString = `${stringify(searchParams ?? {}, { nestingSyntax: 'index' })}`
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
@@ -61,11 +61,10 @@ export const initPage = async ({
       req: {
         host: headers.get('host'),
         i18n,
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
+        query: parse(queryString, {
+          nestingSyntax: 'index',
         }),
-        url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
+        url: `${payload.config.serverURL}${route}${searchParams ? `?${queryString}` : ''}`,
       } as PayloadRequestWithData,
     },
     payload,

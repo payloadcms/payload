@@ -1,14 +1,14 @@
 'use client'
 import { useSearchParams as useNextSearchParams } from 'next/navigation.js'
-import qs from 'qs'
+import { parse, stringify } from 'picoquery'
 import React, { createContext, useContext } from 'react'
 
 export type SearchParamsContext = {
-  searchParams: qs.ParsedQs
+  searchParams: any
   stringifyParams: ({ params, replace }: { params: State; replace?: boolean }) => string
 }
 
-export type State = qs.ParsedQs
+export type State = any
 
 const initialContext: SearchParamsContext = {
   searchParams: {},
@@ -18,9 +18,8 @@ const initialContext: SearchParamsContext = {
 const Context = createContext(initialContext)
 
 function createParams(search: string) {
-  return qs.parse(search, {
-    depth: 10,
-    ignoreQueryPrefix: true,
+  return parse(search, {
+    nestingSyntax: 'index',
   })
 }
 
@@ -34,13 +33,13 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
 
   const stringifyParams = React.useCallback(
     ({ params, replace = false }: { params: State; replace?: boolean }) => {
-      return qs.stringify(
+      return `?${stringify(
         {
           ...(replace ? {} : searchParams),
           ...params,
         },
-        { addQueryPrefix: true },
-      )
+        { nestingSyntax: 'index' },
+      )}`
     },
     [searchParams],
   )

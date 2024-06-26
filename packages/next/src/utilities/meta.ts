@@ -3,7 +3,7 @@ import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
-import qs from 'qs'
+import { stringify } from 'picoquery'
 
 const defaultOpenGraph = {
   description:
@@ -58,13 +58,13 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
             {
               alt: ogTitle,
               height: 630,
-              url: `/api/og${qs.stringify(
+              url: `/api/og?${stringify(
                 {
                   description: openGraphFromProps?.description || defaultOpenGraph.description,
                   title: ogTitle,
                 },
                 {
-                  addQueryPrefix: true,
+                  nestingSyntax: 'index',
                 },
               )}`,
               width: 1200,
