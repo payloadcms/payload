@@ -102,6 +102,10 @@ export const mapCollections = (args: {
       <WithServerSideProps Component={PublishButtonComponent} />
     ) : undefined
 
+    const UploadComponent = collectionConfig?.admin?.components?.edit?.Upload
+
+    const Upload = UploadComponent ? <WithServerSideProps Component={UploadComponent} /> : undefined
+
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
     const BeforeList =
@@ -171,6 +175,7 @@ export const mapCollections = (args: {
       PublishButton,
       SaveButton,
       SaveDraftButton,
+      Upload,
       actionsMap: mapActions({
         WithServerSideProps,
         collectionConfig,

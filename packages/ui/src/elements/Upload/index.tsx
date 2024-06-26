@@ -55,12 +55,11 @@ export type UploadProps = {
   collectionSlug: string
   initialState?: FormState
   onChange?: (file?: File) => void
-  updatedAt?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
+  const { collectionSlug, initialState, onChange, uploadConfig } = props
 
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
@@ -75,29 +74,52 @@ export const Upload: React.FC<UploadProps> = (props) => {
   })
   const [_crop, setCrop] = useState({ x: 0, y: 0 })
 
+  const handleFileChange = React.useCallback(
+    (newFile: File) => {
+      if (newFile instanceof File) {
+        const fileReader = new FileReader()
+        fileReader.onload = (e) => {
+          const imgSrc = e.target?.result
+
+          if (typeof imgSrc === 'string') {
+            setFileSrc(imgSrc)
+          }
+        }
+        fileReader.readAsDataURL(newFile)
+      }
+
+      setValue(newFile)
+
+      if (typeof onChange === 'function') {
+        onChange(newFile)
+      }
+    },
+    [onChange, setValue],
+  )
+
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value
     if (value) {
       const fileValue = value
       // Creating a new File object with updated properties
       const newFile = new File([fileValue], updatedFileName, { type: fileValue.type })
-      setValue(newFile) // Updating the state with the new File object
+      handleFileChange(newFile)
     }
   }
 
   const handleFileSelection = React.useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
-      setValue(fileToUpload)
+      handleFileChange(fileToUpload)
     },
-    [setValue],
+    [handleFileChange],
   )
 
   const handleFileRemoval = useCallback(() => {
     setReplacingFile(true)
-    setValue(null)
+    handleFileChange(null)
     setFileSrc('')
-  }, [setValue])
+  }, [handleFileChange])
 
   const onEditsSave = React.useCallback(
     ({ crop, focalPosition }) => {
@@ -127,24 +149,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setDoc(reduceFieldsToValues(initialState || {}, true))
     setReplacingFile(false)
   }, [initialState])
-
-  useEffect(() => {
-    if (value instanceof File) {
-      const fileReader = new FileReader()
-      fileReader.onload = (e) => {
-        const imgSrc = e.target?.result
-
-        if (typeof imgSrc === 'string') {
-          setFileSrc(imgSrc)
-        }
-      }
-      fileReader.readAsDataURL(value)
-    }
-
-    if (typeof onChange === 'function') {
-      onChange(value)
-    }
-  }, [value, onChange, updatedAt])
 
   const canRemoveUpload =
     docPermissions?.update?.permission &&
@@ -184,7 +188,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
             />
           )}
 
-          {value && (
+          {value && fileSrc && (
             <React.Fragment>
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
