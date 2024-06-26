@@ -33,33 +33,60 @@ const validate = (value) => {
   return true
 }
 
-export const UploadActions = ({ canEdit, showSizePreviews }) => {
+type UploadActionsArgs = {
+  customActions?: React.ReactNode[]
+  enableAdjustments: boolean
+  enablePreviewSizes: boolean
+  mimeType: string
+}
+
+export const UploadActions = ({
+  customActions,
+  enableAdjustments,
+  enablePreviewSizes,
+  mimeType,
+}: UploadActionsArgs) => {
   const { t } = useTranslation()
+
+  const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
+
+  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) return null
+
   return (
-    <div className={`${baseClass}__file-mutation`}>
-      {showSizePreviews && (
-        <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
-          {t('upload:previewSizes')}
-        </DrawerToggler>
+    <div className={`${baseClass}__upload-actions`}>
+      {fileTypeIsAdjustable && (
+        <React.Fragment>
+          {enablePreviewSizes && (
+            <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+              {t('upload:previewSizes')}
+            </DrawerToggler>
+          )}
+          {enableAdjustments && (
+            <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+              {t('upload:editImage')}
+            </DrawerToggler>
+          )}
+        </React.Fragment>
       )}
-      {canEdit && (
-        <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
-          {t('upload:editImage')}
-        </DrawerToggler>
-      )}
+
+      {customActions &&
+        customActions.map((CustomAction, i) => {
+          return <React.Fragment key={i}>{CustomAction}</React.Fragment>
+        })}
     </div>
   )
 }
 
 export type UploadProps = {
   collectionSlug: string
+  customActions?: React.ReactNode[]
   initialState?: FormState
   onChange?: (file?: File) => void
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, initialState, onChange, uploadConfig } = props
+  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
@@ -169,9 +196,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
       <FieldError message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails
-          canEdit={showCrop || showFocalPoint}
           collectionSlug={collectionSlug}
           doc={doc}
+          enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
           imageCacheTag={doc.updatedAt}
@@ -203,13 +230,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
                   type="text"
                   value={value.name}
                 />
-
-                {isImage(value.type) && value.type !== 'image/svg+xml' && (
-                  <UploadActions
-                    canEdit={showCrop || showFocalPoint}
-                    showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
-                  />
-                )}
+                <UploadActions
+                  customActions={customActions}
+                  enableAdjustments={showCrop || showFocalPoint}
+                  enablePreviewSizes={hasImageSizes && doc.filename && !replacingFile}
+                  mimeType={value.type}
+                />
               </div>
               <Button
                 buttonStyle="icon-label"
