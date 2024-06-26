@@ -1,4 +1,4 @@
-import type { CollectionConfig, Payload, TypeWithID } from 'payload'
+import type { CollectionConfig, Field, GlobalConfig, Payload } from 'payload'
 
 import { migrateDocumentFields } from './recurse.js'
 
@@ -15,15 +15,60 @@ import { migrateDocumentFields } from './recurse.js'
 export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
   const collections = payload.config.collections
 
+  const allLocales = payload.config.localization ? payload.config.localization.localeCodes : [null]
+
   const totalCollections = collections.length
-  let curCollection = 0
-  for (const collection of collections) {
-    curCollection++
-    await migrateCollection({
-      collection,
-      cur: curCollection,
-      max: totalCollections,
-      payload,
+  for (const locale of allLocales) {
+    let curCollection = 0
+    for (const collection of collections) {
+      curCollection++
+      await migrateCollection({
+        collection,
+        cur: curCollection,
+        locale,
+        max: totalCollections,
+        payload,
+      })
+    }
+    for (const global of payload.config.globals) {
+      await migrateGlobal({
+        global,
+        locale,
+        payload,
+      })
+    }
+  }
+}
+
+async function migrateGlobal({
+  global,
+  locale,
+  payload,
+}: {
+  global: GlobalConfig
+  locale: null | string
+  payload: Payload
+}) {
+  console.log(`SlateToLexical: ${locale}: Migrating global:`, global.slug)
+
+  const document = await payload.findGlobal({
+    slug: global.slug,
+    depth: 0,
+    locale: locale || undefined,
+    overrideAccess: true,
+  })
+
+  const found = migrateDocument({
+    document,
+    fields: global.fields,
+  })
+
+  if (found) {
+    await payload.updateGlobal({
+      slug: global.slug,
+      data: document,
+      depth: 0,
+      locale: locale || undefined,
     })
   }
 }
@@ -31,20 +76,27 @@ export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
 async function migrateCollection({
   collection,
   cur,
+  locale,
   max,
   payload,
 }: {
   collection: CollectionConfig
   cur: number
+  locale: null | string
   max: number
   payload: Payload
 }) {
-  console.log('SlateToLexical: Migrating collection:', collection.slug, '(' + cur + '/' + max + ')')
+  console.log(
+    `SlateToLexical: ${locale}: Migrating collection:`,
+    collection.slug,
+    '(' + cur + '/' + max + ')',
+  )
 
   const documentCount = (
     await payload.count({
       collection: collection.slug,
       depth: 0,
+      locale: locale || undefined,
     })
   ).totalDocs
 
@@ -55,6 +107,7 @@ async function migrateCollection({
     const documents = await payload.find({
       collection: collection.slug,
       depth: 0,
+      locale: locale || undefined,
       overrideAccess: true,
       page,
       pagination: true,
@@ -63,7 +116,7 @@ async function migrateCollection({
     for (const document of documents.docs) {
       migrated++
       console.log(
-        'SlateToLexical: Migrating collection:',
+        `SlateToLexical: ${locale}: Migrating collection:`,
         collection.slug,
         '(' +
           cur +
@@ -78,8 +131,8 @@ async function migrateCollection({
           ')',
       )
       const found = migrateDocument({
-        collection,
         document,
+        fields: collection.fields,
       })
 
       if (found) {
@@ -87,6 +140,8 @@ async function migrateCollection({
           id: document.id,
           collection: collection.slug,
           data: document,
+          depth: 0,
+          locale: locale || undefined,
         })
       }
     }
@@ -95,15 +150,15 @@ async function migrateCollection({
 }
 
 function migrateDocument({
-  collection,
   document,
+  fields,
 }: {
-  collection: CollectionConfig
-  document: TypeWithID & Record<string, unknown>
+  document: Record<string, unknown>
+  fields: Field[]
 }): boolean {
   return !!migrateDocumentFields({
     data: document,
-    fields: collection.fields,
+    fields,
     found: 0,
   })
 }
