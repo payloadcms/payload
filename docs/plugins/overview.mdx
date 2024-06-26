@@ -61,7 +61,7 @@ Some plugins have become so widely used that they are adopted as an [Official Pl
 
 ## Installing Plugins
 
-The base [Payload Config](../configuration/overview) allows for a `plugins` property which takes an `array` of Plugin Configs.
+The base [Payload Config](../configuration/overview) allows for a `plugins` property which takes an `array` of [Plugin Configs](./build-your-own).
 
 ```ts
 import { buildConfig } from 'payload/config'
@@ -91,10 +91,10 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and had default options merged in. After all plugins are executed, the full config with all plugins will be sanitized.
+  Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and has had default options merged in. After all plugins are executed, the full config with all plugins will be sanitized.
 </Banner>
 
-Here is an example what the `addLastModified` plugin from above might look like. It adds a `lastModifiedBy` field to all Payload collections. For full details, [how to build your own plugin](./build-your-own).
+Here is an example what the `addLastModified` plugin from above might look like. It adds a `lastModifiedBy` field to all Payload collections. For full details, see [how to build your own plugin](./build-your-own).
 
 ```ts
 import { Config, Plugin } from 'payload/config'
