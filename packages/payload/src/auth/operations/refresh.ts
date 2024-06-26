@@ -14,6 +14,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 export type Result = {
   exp: number
   refreshedToken: string
+  strategy?: string
   user: Document
 }
 
@@ -88,6 +89,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     let result: Result = {
       exp,
       refreshedToken,
+      strategy: args.req.user._strategy,
       user,
     }
 
