@@ -1,4 +1,4 @@
-import type { PopulationPromise } from '../types.js'
+import type { PopulationPromise } from '../typesServer.js'
 import type { RelationshipFeatureProps } from './feature.server.js'
 import type { SerializedRelationshipNode } from './nodes/RelationshipNode.js'
 

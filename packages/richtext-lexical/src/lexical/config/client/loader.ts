@@ -4,7 +4,7 @@ import type {
   ClientFeatureProviderMap,
   FeatureProviderClient,
   ResolvedClientFeatureMap,
-} from '../../../features/types.js'
+} from '../../../features/typesClient.js'
 import type { ClientEditorConfig } from '../types.js'
 
 /**

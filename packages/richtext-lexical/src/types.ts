@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import type { FeatureProviderServer } from './features/types.js'
+import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
 export type LexicalFieldAdminProps = {
@@ -39,7 +39,7 @@ export type LexicalEditorProps = {
         defaultFeatures: FeatureProviderServer<any, any, any>[]
         /**
          * This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts).
-         * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty
+         * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty.
          *
          * @Example
          *

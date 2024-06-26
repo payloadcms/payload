@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { PluginComponentWithAnchor } from '../../../types.js'
+import type { PluginComponentWithAnchor } from '../../../typesClient.js'
 import type { ClientProps } from '../../feature.client.js'
 
 import { LinkEditor } from './LinkEditor/index.js'

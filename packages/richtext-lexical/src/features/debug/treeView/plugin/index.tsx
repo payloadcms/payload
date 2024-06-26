@@ -3,7 +3,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { TreeView } from '@lexical/react/LexicalTreeView.js'
 import * as React from 'react'
 
-import type { PluginComponent } from '../../../types.js'
+import type { PluginComponent } from '../../../typesClient.js'
 
 import './index.scss'
 

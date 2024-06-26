@@ -2,12 +2,14 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import type {
   FeatureProviderClient,
-  FeatureProviderServer,
   ResolvedClientFeatureMap,
-  ResolvedServerFeatureMap,
   SanitizedClientFeatures,
+} from '../../features/typesClient.js'
+import type {
+  FeatureProviderServer,
+  ResolvedServerFeatureMap,
   SanitizedServerFeatures,
-} from '../../features/types.js'
+} from '../../features/typesServer.js'
 import type { LexicalFieldAdminProps } from '../../types.js'
 
 export type ServerEditorConfig = {

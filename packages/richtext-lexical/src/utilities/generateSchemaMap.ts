@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload'
 
-import type { ResolvedServerFeatureMap } from '../features/types.js'
+import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>

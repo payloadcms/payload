@@ -6,7 +6,7 @@ import type {
   ResolvedServerFeatureMap,
   ServerFeature,
   ServerFeatureProviderMap,
-} from '../features/types.js'
+} from '../features/typesServer.js'
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 
 export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProps> = Pick<

@@ -26,7 +26,7 @@ export const ChecklistFeature = createServerFeature({
               }),
               createNode({
                 converters: {
-                  html: ListItemHTMLConverter,
+                  html: ListItemHTMLConverter as any,
                 },
                 node: ListItemNode,
               }),

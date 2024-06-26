@@ -129,7 +129,7 @@ export class LinkNode extends ElementNode {
   exportJSON(): SerializedLinkNode {
     const returnObject: SerializedLinkNode = {
       ...super.exportJSON(),
-      type: this.getType(),
+      type: 'link',
       fields: this.getFields(),
       version: 3,
     }

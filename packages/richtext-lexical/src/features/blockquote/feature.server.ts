@@ -1,3 +1,6 @@
+import type { SerializedQuoteNode as _SerializedQuoteNode } from '@lexical/rich-text'
+import type { Spread } from 'lexical'
+
 import { QuoteNode } from '@lexical/rich-text'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
@@ -7,6 +10,13 @@ import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js
 import { createNode } from '../typeUtilities.js'
 import { i18n } from './i18n.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
+
+export type SerializedQuoteNode = Spread<
+  {
+    type: 'quote'
+  },
+  _SerializedQuoteNode
+>
 
 export const BlockquoteFeature = createServerFeature({
   feature: {

@@ -111,6 +111,7 @@ export type ConfigComponentMapBase = {
   PublishButton: React.ReactNode
   SaveButton: React.ReactNode
   SaveDraftButton: React.ReactNode
+  Upload: React.ReactNode
   actionsMap: ActionMap
   fieldMap: FieldMap
   isPreviewEnabled: boolean

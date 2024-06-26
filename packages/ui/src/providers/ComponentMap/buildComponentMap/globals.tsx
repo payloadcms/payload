@@ -112,6 +112,7 @@ export const mapGlobals = ({
       PublishButton: PublishButtonComponent,
       SaveButton: SaveButtonComponent,
       SaveDraftButton: SaveDraftButtonComponent,
+      Upload: null,
       actionsMap: mapActions({
         WithServerSideProps,
         globalConfig,

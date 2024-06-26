@@ -9,7 +9,7 @@ export type HTMLConverterFeatureProps = {
 }
 
 // This is just used to save the props on the richText field
-export const HTMLConverterFeature = createServerFeature({
+export const HTMLConverterFeature = createServerFeature<HTMLConverterFeatureProps>({
   feature: {},
   key: 'htmlConverter',
 })

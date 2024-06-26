@@ -12,7 +12,7 @@ import {
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { ClientComponentProps } from '../../types.js'
+import type { ClientComponentProps } from '../../typesClient.js'
 import type { BlocksFeatureClientProps } from '../feature.client.js'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'

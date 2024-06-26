@@ -1,5 +1,4 @@
-import type { SerializedQuoteNode } from '@lexical/rich-text'
-
+import type { SerializedQuoteNode } from '../../../../../blockquote/feature.server.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
