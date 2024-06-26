@@ -124,7 +124,6 @@ export type UploadConfig = {
    */
   handlers?: ((
     req: PayloadRequestWithData,
-    res: Response,
     args: {
       doc: TypeWithID
       params: { collection: string; filename: string }
@@ -137,6 +136,11 @@ export type UploadConfig = {
    * @default undefined
    */
   mimeTypes?: string[]
+  /**
+   * Ability to modify the response headers fetching a file.
+   * @default undefined
+   */
+  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize

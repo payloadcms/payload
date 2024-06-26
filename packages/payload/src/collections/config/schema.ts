@@ -184,6 +184,7 @@ const collectionSchema = joi.object().keys({
           .unknown(),
       ),
       mimeTypes: joi.array().items(joi.string()),
+      modifyResponseHeaders: joi.func(),
       resizeOptions: joi
         .object()
         .keys({

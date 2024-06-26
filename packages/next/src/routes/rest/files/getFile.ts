@@ -35,11 +35,10 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
 
     if (accessResult instanceof Response) return accessResult
 
-    const res: Response = new Response()
     if (collection.config.upload.handlers?.length) {
       let customResponse = null
       for (const handler of collection.config.upload.handlers) {
-        customResponse = await handler(req, res, {
+        customResponse = await handler(req, {
           doc: accessResult,
           params: {
             collection: collection.config.slug,
@@ -57,12 +56,16 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
     const data = streamFile(filePath)
     const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
 
-    res.headers.set('Content-Type', fileTypeResult.mime)
-    res.headers.set('Content-Length', stats.size + '')
+    let headers = new Headers()
+    headers.set('Content-Type', fileTypeResult.mime)
+    headers.set('Content-Length', stats.size + '')
+    headers = collection.config.upload?.modifyResponseHeaders
+      ? collection.config.upload.modifyResponseHeaders({ headers })
+      : headers
 
     return new Response(data, {
       headers: headersWithCors({
-        headers: res.headers,
+        headers,
         req,
       }),
       status: httpStatus.OK,
