@@ -52,12 +52,12 @@ The following options are available:
 | Path                  | Description                                                                                                                                                                                                         |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
-| **`BeforeNavLinks`**  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
-| **`AfterNavLinks`**   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
-| **`BeforeDashboard`** | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
-| **`AfterDashboard`**  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents.                                                                                                        |
-| **`BeforeLogin`**     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
-| **`AfterLogin`**      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
+| **`beforeNavLinks`**  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
+| **`afterNavLinks`**   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
+| **`beforeDashboard`** | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
+| **`afterDashboard`**  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents.                                                                                                        |
+| **`beforeLogin`**     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
+| **`afterLogin`**      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
 | **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
 | **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
 | **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
@@ -140,10 +140,10 @@ The following options are available:
 
 | Path                       | Description                                                                                                            |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **`BeforeList`**           | Array of components to inject _before_ the built-in List view                                                          |
-| **`BeforeListTable`**      | Array of components to inject _before_ the built-in List view's table                                                  |
-| **`AfterList`**            | Array of components to inject _after_ the built-in List view                                                           |
-| **`AfterListTable`**       | Array of components to inject _after_ the built-in List view's table                                                   |
+| **`beforeList`**           | An array of components to inject _before_ the built-in List View                                                          |
+| **`beforeListTable`**      | An array of components to inject _before_ the built-in List View's table                                                  |
+| **`afterList`**            | An array of components to inject _after_ the built-in List View                                                           |
+| **`afterListTable`**       | An array of components to inject _after_ the built-in List View's table                                                   |
 | **`edit.SaveButton`**      | Replace the default `Save` button with a Custom Component. Drafts must be disabled                                     |
 | **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a Custom Component. Drafts must be enabled and autosave must be disabled. |
 | **`edit.PublishButton`**   | Replace the default `Publish` button with a Custom Component. Drafts must be enabled.                                  |

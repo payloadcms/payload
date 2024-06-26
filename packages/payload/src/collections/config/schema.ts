@@ -21,10 +21,10 @@ const collectionSchema = joi.object().keys({
   }),
   admin: joi.object({
     components: joi.object({
-      AfterList: joi.array().items(componentSchema),
-      AfterListTable: joi.array().items(componentSchema),
-      BeforeList: joi.array().items(componentSchema),
-      BeforeListTable: joi.array().items(componentSchema),
+      afterList: joi.array().items(componentSchema),
+      afterListTable: joi.array().items(componentSchema),
+      beforeList: joi.array().items(componentSchema),
+      beforeListTable: joi.array().items(componentSchema),
       edit: joi.object({
         Description: componentSchema,
         PreviewButton: componentSchema,
