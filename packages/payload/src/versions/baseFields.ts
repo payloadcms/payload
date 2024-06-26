@@ -22,6 +22,7 @@ const baseVersionFields: Field[] = [
       disableBulkEdit: true,
     },
     defaultValue: 'draft',
+    index: true,
     label: ({ t }) => t('version:status'),
     options: statuses,
   },
