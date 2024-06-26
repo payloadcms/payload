@@ -32,6 +32,8 @@ async function installDeps(args: {
     installCmd = 'yarn'
   } else if (packageManager === 'pnpm') {
     installCmd = 'pnpm install'
+  } else if (packageManager === 'bun') {
+    installCmd = 'bun install'
   }
 
   try {

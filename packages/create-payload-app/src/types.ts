@@ -9,6 +9,7 @@ export interface Args extends arg.Spec {
   '--no-deps': BooleanConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
+  '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
@@ -45,7 +46,7 @@ interface Template {
   type: ProjectTemplate['type']
 }
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn'
+export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
 export type DbType = 'mongodb' | 'postgres'
 
