@@ -10,6 +10,7 @@ import getExtractJWT from '../getExtractJWT'
 export type Result = {
   collection?: string
   exp?: number
+  strategy?: string
   token?: string
   user?: User
 }
@@ -48,6 +49,7 @@ async function me({ collection, req }: Arguments): Promise<Result> {
 
     response = {
       collection: req.user.collection,
+      strategy: req.user._strategy,
       user,
     }
 
