@@ -221,7 +221,7 @@ Custom Components also receive various other props that are specific to the cont
   See [Root Components](#custom-root-components), [Collection Components](#custom-collection-components), [Global Components](#custom-global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
 </Banner>
 
-#### Client Components
+### Client Components
 
 When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object. To do this, simply add the `use client` directive at the top of your file. Payload will automatically detect and remove all default [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component.
 
@@ -245,7 +245,50 @@ export const MyClientComponent: React.FC = () => {
   Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). If you are rendering your Client Component _from within_ a Server Component, ensure that its props are serializable.
 </Banner>
 
-#### Using Hooks
+### Accessing the Payload Config
+
+From any Server Component, the [Payload Config](../configuration/overview) can be retrieved using the `payload` prop:
+
+```tsx
+import React from 'react'
+
+export default async function MyServerComponent({
+  payload: {
+    config // highlight-line
+  }
+}) {
+  return (
+    <Link href={config.serverURL}>
+      Go Home
+    </Link>
+  )
+}
+```
+
+But the Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions, React components, etc. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
+
+For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
+
+```tsx
+import React from 'react'
+import { useConfig } from '@payloadcms/ui'
+
+export const MyClientComponent: React.FC = () => {
+  const { serverURL } = useConfig() // highlight-line
+
+  return (
+    <Link href={serverURL}>
+      Go Home
+    </Link>
+  )
+}
+```
+
+<Banner type="success">
+  See [Using Hooks](#using-hooks) for more details.
+</Banner>
+
+### Using Hooks
 
 To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts:
 
@@ -255,7 +298,7 @@ import React from 'react'
 import { useDocumentInfo } from '@payloadcms/ui'
 
 export const MyClientComponent: React.FC = () => {
-  const { slug } = useDocumentInfo()
+  const { slug } = useDocumentInfo() // highlight-line
 
   return (
     <p>{`Entity slug: ${slug}`}</p>
@@ -267,7 +310,7 @@ export const MyClientComponent: React.FC = () => {
   See the [Hooks](./hooks) documentation for a full list of available hooks.
 </Banner>
 
-#### Getting the Current Language
+### Getting the Current Language
 
 All Custom Components can support multiple languages to be consistent with Payload's [Internationalization](../configuration/i18n). To do this, first add your translation resources to the [I18n Config](../configuration/i18n).
 
@@ -309,7 +352,7 @@ export const MyClientComponent: React.FC = () => {
   See the [Hooks](./hooks) documentation for a full list of available hooks.
 </Banner>
 
-#### Getting the Current Locale
+### Getting the Current Locale
 
 All [Custom Views](./views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). They automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
 
@@ -353,7 +396,7 @@ const Greeting: React.FC = () => {
   See the [Hooks](./hooks) documentation for a full list of available hooks.
 </Banner>
 
-#### Styling Custom Components
+### Styling Custom Components
 
 Payload has a robust [CSS Library](./customizing-css) that you can style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Component matches the existing design system, and so that it automatically adapts to any theme changes.
 

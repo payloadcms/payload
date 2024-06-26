@@ -130,7 +130,7 @@ You can use whatever Collection you'd like to access the Admin Panel as long as 
 
 To do this, specify `admin: { user: 'admins' }` in your config. This will provide access to the Admin Panel to only `admins`. Any users authenticated as `customers` will be prevented from accessing the Admin Panel.  See [Access Control](/docs/access-control/overview) for full details.
 
-#### Role-based access control
+### Role-based Access Control
 
 It is also possible to allow multiple user types into the Admin Panel with limited permissions. For example, you may wish to have two roles within the `admins` Collection:
 
@@ -143,7 +143,7 @@ To do this, add a `roles` or similar field to your auth-enabled Collection, then
 
 You have full control over the routes that Payload binds itself to. This includes both [Root-level Routes](#root-level-routes) such as the [REST API](../rest-api/overview), and [Admin-level Routes](#admin-level-routes) such as the user's account page. You can customize these routes to meet the needs of your application simply by specifying the desired paths in your config.
 
-#### Root-level Routes
+### Root-level Routes
 
 Root-level routes are those that are not behind the `/admin` path, such as the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), or the root path of the Admin Panel itself.
 
@@ -179,7 +179,7 @@ You can configure custom paths for the following root-level routes through the `
    You can easily add _new_ routes to the Admin Panel through the `endpoints` property of the Payload Config. See [Custom Endpoints](../rest-api/overview#custom-endpoints) for more information.
 </Banner>
 
-#### Admin-level Routes
+### Admin-level Routes
 
 Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
 
