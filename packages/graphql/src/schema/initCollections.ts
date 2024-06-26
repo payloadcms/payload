@@ -379,6 +379,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             exp: {
               type: GraphQLInt,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             token: {
               type: GraphQLString,
             },
@@ -403,6 +406,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
               type: GraphQLInt,
             },
             refreshedToken: {
+              type: GraphQLString,
+            },
+            strategy: {
               type: GraphQLString,
             },
             user: {

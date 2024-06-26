@@ -7,6 +7,7 @@ import type { ClientUser, User } from '../types.js'
 export type MeOperationResult = {
   collection?: string
   exp?: number
+  strategy?: string
   token?: string
   user?: ClientUser
 }
@@ -49,6 +50,7 @@ export const meOperation = async ({
 
     result = {
       collection: req.user.collection,
+      strategy: req.user._strategy,
       user,
     }
 
