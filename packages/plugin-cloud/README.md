@@ -22,7 +22,7 @@ Add the plugin to your Payload config
 
 ```ts
 import { payloadCloud } from '@payloadcms/plugin-cloud'
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   plugins: [payloadCloud()],

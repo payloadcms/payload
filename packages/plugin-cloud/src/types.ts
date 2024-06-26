@@ -1,5 +1,10 @@
-import type { Config } from 'payload/config'
-import type { CollectionConfig, FileData, PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type {
+  CollectionConfig,
+  Config,
+  FileData,
+  PayloadRequestWithData,
+  TypeWithID,
+} from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -36,7 +41,7 @@ export type GenerateURL = (args: {
 export type StaticHandler = (
   req: PayloadRequestWithData,
   args: { params: { collection: string; filename: string } },
-) => Promise<Response> | Response
+) => Promise<Response> | Promise<void> | Response | void
 
 export interface PayloadCloudEmailOptions {
   apiKey: string

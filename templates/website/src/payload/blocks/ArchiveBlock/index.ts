@@ -85,29 +85,6 @@ export const Archive: Block = {
       label: 'Selection',
       relationTo: ['posts'],
     },
-    {
-      name: 'populatedDocs',
-      type: 'relationship',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-        description: 'This field is auto-populated after-read',
-        disabled: true,
-      },
-      hasMany: true,
-      label: 'Populated Docs',
-      relationTo: ['posts'],
-    },
-    {
-      name: 'populatedDocsTotal',
-      type: 'number',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-        description: 'This field is auto-populated after-read',
-        disabled: true,
-        step: 1,
-      },
-      label: 'Populated Docs Total',
-    },
   ],
   labels: {
     plural: 'Archives',

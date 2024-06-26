@@ -115,6 +115,21 @@ describe('Block fields', () => {
     await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
   })
 
+  test('should duplicate block', async () => {
+    await page.goto(url.create)
+    const firstRow = page.locator('#field-blocks #blocks-row-0')
+    const rowActions = firstRow.locator('.collapsible__actions')
+    await expect(rowActions).toBeVisible()
+
+    await rowActions.locator('.array-actions__button').click()
+    const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
+    await expect(duplicateButton).toBeVisible()
+    await duplicateButton.click()
+
+    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
+    expect(await blocks.count()).toEqual(4)
+  })
+
   test('should use i18n block labels', async () => {
     await page.goto(url.create)
     await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en')
@@ -182,7 +197,7 @@ describe('Block fields', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -208,7 +223,7 @@ describe('Block fields', () => {
     await expect(firstRow).toHaveValue('first row')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: blocksWithMinRows',
     )
   })

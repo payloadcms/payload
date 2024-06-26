@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload/types'
+import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -13,10 +13,10 @@ import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { FileDetails } from '../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -25,6 +25,7 @@ const baseClass = 'upload'
 export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
   api?: string
   collection?: ClientCollectionConfig
+  customUploadActions?: React.ReactNode[]
   filterOptions?: FilterOptionsResult
   onChange?: (e) => void
   relationTo?: UploadField['relationTo']
@@ -41,6 +42,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     api = '/api',
     className,
     collection,
+    customUploadActions,
     descriptionProps,
     errorProps,
     filterOptions,
@@ -147,6 +149,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
               {fileDoc && !missingFile && (
                 <FileDetails
                   collectionSlug={relationTo}
+                  customUploadActions={customUploadActions}
                   doc={fileDoc}
                   handleRemove={
                     readOnly

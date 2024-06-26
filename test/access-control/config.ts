@@ -1,8 +1,13 @@
-import type { FieldAccess } from 'payload/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { FieldAccess } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { TestButton } from './TestButton.js'
+import { Disabled } from './collections/Disabled/index.js'
 import {
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
@@ -529,6 +534,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    Disabled,
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -598,5 +604,8 @@ export default buildConfigWithDefaults({
         name: 'dev@payloadcms.com',
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

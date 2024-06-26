@@ -1,7 +1,7 @@
 import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 import type { UTApi } from 'uploadthing/server'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 
 import { getKeyFromFilename } from './utilities.js'
 

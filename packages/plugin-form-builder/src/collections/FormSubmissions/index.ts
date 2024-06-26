@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field } from 'payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 
@@ -95,7 +95,7 @@ export const generateSubmissionCollection = (
     fields:
       formConfig?.formSubmissionOverrides?.fields &&
       typeof formConfig?.formSubmissionOverrides?.fields === 'function'
-        ? formConfig?.formSubmissionOverrides?.fields({ defaultFields })
+        ? formConfig.formSubmissionOverrides.fields({ defaultFields })
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),

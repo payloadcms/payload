@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import type { GraphQLInfo } from 'payload/config'
-import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
+import type { GraphQLInfo } from 'payload'
+import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
 
 import {
   GraphQLBoolean,
@@ -9,9 +9,8 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields, formatNames, toWords } from 'payload/utilities'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
@@ -37,8 +36,8 @@ import restoreVersionResolver from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
-import buildObjectType from './buildObjectType.js'
-import buildPaginatedListType from './buildPaginatedListType.js'
+import { buildObjectType } from './buildObjectType.js'
+import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
 
@@ -380,6 +379,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             exp: {
               type: GraphQLInt,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             token: {
               type: GraphQLString,
             },
@@ -404,6 +406,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
               type: GraphQLInt,
             },
             refreshedToken: {
+              type: GraphQLString,
+            },
+            strategy: {
               type: GraphQLString,
             },
             user: {

@@ -1,7 +1,6 @@
-import type { Document, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
+import type { Document, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload'
 
-import { findVersionByIDOperationGlobal } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { findVersionByIDOperationGlobal, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

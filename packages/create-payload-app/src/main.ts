@@ -95,7 +95,7 @@ export class Main {
           message: chalk.bold(`Upgrade Payload in this project?`),
         })
 
-        if (!p.isCancel(shouldUpdate) || shouldUpdate) {
+        if (!p.isCancel(shouldUpdate) && shouldUpdate) {
           const { message, success: updateSuccess } = await updatePayloadInProject(nextAppDetails)
           if (updateSuccess) {
             info(message)
@@ -156,7 +156,7 @@ export class Main {
         }
 
         await configurePayloadConfig({
-          dbDetails,
+          dbType: dbDetails?.type,
           projectDirOrConfigPath: {
             payloadConfigPath: result.payloadConfigPath,
           },

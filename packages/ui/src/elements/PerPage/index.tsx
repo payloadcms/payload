@@ -1,10 +1,9 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { collectionDefaults } from 'payload/config'
-import { isNumber } from 'payload/utilities'
+import { collectionDefaults, isNumber } from 'payload/shared'
 import React from 'react'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.scss'
@@ -38,7 +37,7 @@ export const PerPage: React.FC<PerPageProps> = ({
           <div className={`${baseClass}__base-button`}>
             <span>{t('general:perPage', { limit: limitToUse })}</span>
             &nbsp;
-            <Chevron className={`${baseClass}__icon`} />
+            <ChevronIcon className={`${baseClass}__icon`} />
           </div>
         }
         horizontalAlign="right"
@@ -60,7 +59,7 @@ export const PerPage: React.FC<PerPageProps> = ({
               >
                 {limitNumber === limitToUse && (
                   <div className={`${baseClass}__chevron`}>
-                    <Chevron direction="right" />
+                    <ChevronIcon direction="right" />
                   </div>
                 )}
                 &nbsp;

@@ -5,7 +5,7 @@
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "rootDir": "./src" /* Specify the root folder within your source files. */
   },
   "exclude": [
     "dist",

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 

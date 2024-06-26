@@ -1,4 +1,4 @@
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 
 export const subscriptionCreatedOrUpdated = async (args) => {
   const {

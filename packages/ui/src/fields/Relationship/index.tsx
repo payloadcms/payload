@@ -1,8 +1,7 @@
 'use client'
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
+import type { PaginatedDocs, Where } from 'payload'
 
-import { wordBoundariesRegex } from 'payload/utilities'
+import { wordBoundariesRegex } from 'payload/shared'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
@@ -10,9 +9,6 @@ import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js
 import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -21,6 +17,9 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { AddNewRelation } from './AddNew/index.js'
 import { createRelationMap } from './createRelationMap.js'
@@ -36,7 +35,7 @@ const baseClass = 'relationship'
 
 export { RelationshipFieldProps }
 
-const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
+const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -102,7 +101,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -201,11 +200,15 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
               query.where.and.push(relationFilterOption)
             }
 
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            const response = await fetch(`${serverURL}${api}/${relation}`, {
+              body: qs.stringify(query),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-HTTP-Method-Override': 'GET',
               },
+              method: 'POST',
             })
 
             if (response.ok) {
@@ -326,11 +329,15 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+          const response = await fetch(`${serverURL}${api}/${relation}`, {
+            body: qs.stringify(query),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-HTTP-Method-Override': 'GET',
             },
+            method: 'POST',
           })
 
           const collection = collections.find((coll) => coll.slug === relation)
@@ -515,7 +522,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                   ? (selected) => {
                       if (selected === null) {
                         setValue(hasMany ? [] : null)
-                      } else if (hasMany) {
+                      } else if (hasMany && Array.isArray(selected)) {
                         setValue(
                           selected
                             ? selected.map((option) => {
@@ -530,12 +537,12 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                               })
                             : null,
                         )
-                      } else if (hasMultipleRelations) {
+                      } else if (hasMultipleRelations && !Array.isArray(selected)) {
                         setValue({
                           relationTo: selected.relationTo,
                           value: selected.value,
                         })
-                      } else {
+                      } else if (!Array.isArray(selected)) {
                         setValue(selected.value)
                       }
                     }
@@ -599,4 +606,4 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   )
 }
 
-export const Relationship = withCondition(RelationshipField)
+export const RelationshipField = withCondition(_RelationshipField)

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
@@ -13,7 +13,7 @@ import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
 import { Popup } from '../../../elements/Popup/index.js'
 import { Tooltip } from '../../../elements/Tooltip/index.js'
-import { Plus } from '../../../icons/Plus/index.js'
+import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.scss'
@@ -145,7 +145,7 @@ export const AddNewRelation: React.FC<Props> = ({
                   label: getTranslation(relatedCollections[0].labels.singular, i18n),
                 })}
               </Tooltip>
-              <Plus />
+              <PlusIcon />
             </DocumentDrawerToggler>
             <DocumentDrawer onSave={onSave} />
           </Fragment>
@@ -159,7 +159,7 @@ export const AddNewRelation: React.FC<Props> = ({
                   className={`${baseClass}__add-button`}
                   tooltip={popupOpen ? undefined : t('fields:addNew')}
                 >
-                  <Plus />
+                  <PlusIcon />
                 </Button>
               }
               buttonType="custom"

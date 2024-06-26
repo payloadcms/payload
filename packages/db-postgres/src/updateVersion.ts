@@ -1,7 +1,12 @@
-import type { TypeWithVersion, UpdateVersionArgs } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+import type {
+  PayloadRequestWithData,
+  SanitizedCollectionConfig,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateVersionArgs,
+} from 'payload'
 
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'

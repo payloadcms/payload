@@ -6,7 +6,6 @@ import type {
 } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { Metadata as NextMetadata } from 'next'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { JSX } from 'react'
@@ -26,7 +25,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { GeneratedTypes, Payload } from '../index.js'
+import type { Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -120,7 +119,7 @@ export type MetaConfig = {
    *
    * For example browser tabs, phone home screens, and search engine results.
    */
-  icons?: IconConfig
+  icons?: IconConfig[]
   /**
    * Overrides the auto-generated <meta name="keywords"> of admin pages
    * @example `"CMS, Payload, Custom"`
@@ -333,7 +332,7 @@ export type ServerProps = {
   payload: Payload
   permissions?: Permissions
   searchParams?: { [key: string]: string | string[] | undefined }
-  user?: GeneratedTypes['user']
+  user?: TypedUser
 }
 
 export const serverProps: (keyof ServerProps)[] = [
@@ -564,6 +563,8 @@ export type Config = {
       login?: string
       /** The route for the logout page. */
       logout?: string
+      /** The route for the reset password page. */
+      reset?: string
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
@@ -615,7 +616,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapterProvider<any, any, any>
+  editor?: RichTextAdapterProvider<any, any, any>
   /**
    * Email Adapter
    *
@@ -719,6 +720,12 @@ export type Config = {
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
+    /**
+     * Automatically generate types during development
+     * @default true
+     */
+    autoGenerate?: boolean
+
     /** Disable declare block in generated types file */
     declare?:
       | {
@@ -732,6 +739,7 @@ export type Config = {
           ignoreTSError?: boolean
         }
       | false
+
     /** Filename to write the generated types to */
     outputFile?: string
   }
@@ -747,7 +755,7 @@ export type SanitizedConfig = Omit<
 > & {
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any, any>
+  editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>

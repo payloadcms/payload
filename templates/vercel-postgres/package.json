@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
     "ci": "payload migrate && pnpm build",
+    "dev": "next dev",
+    "generate:types": "payload generate:types",
+    "lint": "next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "generate:types": "payload generate:types"
+    "start": "next start"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "beta",
@@ -34,5 +34,8 @@
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
   }
 }

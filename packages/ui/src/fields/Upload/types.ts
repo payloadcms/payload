@@ -1,4 +1,4 @@
-import type { UploadField } from 'payload/types'
+import type { UploadField } from 'payload'
 
 import type { FormFieldBase } from '../shared/index.js'
 

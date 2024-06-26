@@ -1,5 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
@@ -30,6 +30,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   createNotUpdateCollectionSlug,
+  disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
   noAdminAccessEmail,
@@ -67,6 +68,7 @@ describe('access control', () => {
   let restrictedVersionsUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
   let userRestrictedGlobalURL: AdminUrlUtil
+  let disabledFields: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
   let logoutURL: string
@@ -83,6 +85,7 @@ describe('access control', () => {
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
+    disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -250,7 +253,7 @@ describe('access control', () => {
       await expect(page.locator('#field-name')).toHaveValue('name')
       await expect(page.locator('#action-save')).toBeVisible()
       await page.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(page.locator('#action-save')).toBeHidden()
       await expect(page.locator('#field-name')).toBeDisabled()
     })
@@ -277,7 +280,7 @@ describe('access control', () => {
       await documentDrawer.locator('#field-name').fill('name')
       await expect(documentDrawer.locator('#field-name')).toHaveValue('name')
       await documentDrawer.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(documentDrawer.locator('#action-save')).toBeHidden()
       await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     })
@@ -301,7 +304,7 @@ describe('access control', () => {
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill('anonymous@email.com')
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(page.locator('#field-name')).toBeDisabled()
         await expect(page.locator('#action-save')).toBeHidden()
 
@@ -309,7 +312,7 @@ describe('access control', () => {
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill(devUser.email)
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(page.locator('#field-name')).toBeEnabled()
         await expect(page.locator('#action-save')).toBeVisible()
       })
@@ -332,7 +335,7 @@ describe('access control', () => {
         await expect(documentDrawer).toBeVisible()
         await documentDrawer.locator('#field-name').fill('anonymous@email.com')
         await documentDrawer.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(documentDrawer.locator('#field-name')).toBeDisabled()
         await documentDrawer.locator('button.doc-drawer__header-close').click()
         await expect(documentDrawer).toBeHidden()
@@ -341,7 +344,7 @@ describe('access control', () => {
         await expect(documentDrawer2).toBeVisible()
         await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
         await documentDrawer2.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText('successfully')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
       })
     })
@@ -355,7 +358,7 @@ describe('access control', () => {
         await expect(page.locator('#field-name')).toBeEnabled()
         await page.locator('#field-name').fill('anonymous@email.com')
         await page.locator('#action-save').click()
-        await expect(page.locator('.Toastify')).toContainText(
+        await expect(page.locator('.payload-toast-container')).toContainText(
           'You are not allowed to perform this action',
         )
 
@@ -519,6 +522,34 @@ describe('access control', () => {
       await page.waitForURL(adminURL)
 
       await expect(page.locator('.next-error-h1')).toBeVisible()
+    })
+  })
+
+  describe('read-only from access control', () => {
+    test('should be read-only when update returns false', async () => {
+      await page.goto(disabledFields.create)
+
+      // group field
+      await page.locator('#field-group__text').fill('group')
+
+      // named tab
+      await page.locator('#field-namedTab__text').fill('named tab')
+
+      // unnamed tab
+      await page.locator('.tabs-field__tab-button').nth(1).click()
+      await page.locator('#field-unnamedTab').fill('unnamed tab')
+
+      // array field
+      await page.locator('#field-array button').click()
+      await page.locator('#field-array__0__text').fill('array row 0')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-group__text')).toBeDisabled()
+      await expect(page.locator('#field-namedTab__text')).toBeDisabled()
+      await page.locator('.tabs-field__tab-button').nth(1).click()
+      await expect(page.locator('#field-unnamedTab')).toBeDisabled()
+      await expect(page.locator('#field-array__0__text')).toBeDisabled()
     })
   })
 })

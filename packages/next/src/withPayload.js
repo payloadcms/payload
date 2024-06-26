@@ -10,8 +10,14 @@ export const withPayload = (nextConfig = {}) => {
     )
   }
 
-  return {
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const toReturn = {
     ...nextConfig,
+    env: {
+      ...(nextConfig?.env || {}),
+    },
     experimental: {
       ...(nextConfig?.experimental || {}),
       outputFileTracingExcludes: {
@@ -21,6 +27,13 @@ export const withPayload = (nextConfig = {}) => {
           'drizzle-kit/payload',
           'libsql',
         ],
+      },
+      turbo: {
+        ...(nextConfig?.experimental?.turbo || {}),
+        resolveAlias: {
+          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
+          'payload-mock-package': 'payload-mock-package',
+        },
       },
     },
     headers: async () => {
@@ -98,6 +111,12 @@ export const withPayload = (nextConfig = {}) => {
       }
     },
   }
+
+  if (nextConfig.basePath) {
+    toReturn.env.NEXT_BASE_PATH = nextConfig.basePath
+  }
+
+  return toReturn
 }
 
 export default withPayload

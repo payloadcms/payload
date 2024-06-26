@@ -20,6 +20,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -41,16 +42,28 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   overrideAccess?: boolean
+  /**
+   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+   */
+  path: (number | string)[]
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: TData
-  /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
+  /** The sibling data of the document before changes being applied, only in `beforeChange`, `beforeValidate`, `beforeDuplicate` and `afterChange` field hooks. */
   previousSiblingDoc?: TData
-  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange` and `beforeValidate` hooks. */
+  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequestWithData
+  /**
+   * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
+   */
+  schemaPath: string[]
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<TSiblingData>
+  /**
+   * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
+   */
+  siblingDocWithLocales?: Record<string, unknown>
   /** The value of the field. */
   value?: TValue
 }
@@ -98,7 +111,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * The collection `slug` to filter against, limited to this field's `relationTo` property.
    */
-  relationTo: string
+  relationTo: CollectionSlug
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */
@@ -487,7 +500,7 @@ export type UploadField = FieldBase & {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-  relationTo: string
+  relationTo: CollectionSlug
   type: 'upload'
 }
 
@@ -592,20 +605,20 @@ type RelationshipAdmin = Admin & {
 }
 export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
-    sortOptions?: { [collectionSlug: string]: string }
+    sortOptions?: { [collectionSlug: CollectionSlug]: string }
   }
-  relationTo: string[]
+  relationTo: CollectionSlug[]
 }
 export type SingleRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
     sortOptions?: string
   }
-  relationTo: string
+  relationTo: CollectionSlug
 }
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
 export type ValueWithRelation = {
-  relationTo: string
+  relationTo: CollectionSlug
   value: number | string
 }
 

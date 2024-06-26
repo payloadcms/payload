@@ -1,7 +1,15 @@
 'use client'
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type { Data, FormState, TypeWithTimestamps } from 'payload/types'
-import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
+import type {
+  Data,
+  DocumentPermissions,
+  DocumentPreferences,
+  FormState,
+  PaginatedDocs,
+  TypeWithID,
+  TypeWithTimestamps,
+  TypeWithVersion,
+  Where,
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
 import qs from 'qs'
@@ -354,12 +362,14 @@ export const DocumentInfoProvider: React.FC<
 
       const docPreferences = await getDocPreferences()
 
+      const newData = collectionSlug ? json.doc : json.result
+
       const newState = await getFormState({
         apiRoute: api,
         body: {
           id,
           collectionSlug,
-          data: json.doc,
+          data: newData,
           docPreferences,
           globalSlug,
           locale,
@@ -368,8 +378,6 @@ export const DocumentInfoProvider: React.FC<
         },
         serverURL,
       })
-
-      const newData = json.doc
 
       setInitialState(newState)
       setData(newData)

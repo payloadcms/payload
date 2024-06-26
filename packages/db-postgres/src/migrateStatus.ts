@@ -1,5 +1,5 @@
 import { Table } from 'console-table-printer'
-import { getMigrations, readMigrationFiles } from 'payload/database'
+import { getMigrations, readMigrationFiles } from 'payload'
 
 import type { PostgresAdapter } from './types.js'
 

@@ -2,8 +2,7 @@ import jwt from 'jsonwebtoken'
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Document } from '../../types/index.js'
+import type { Document, PayloadRequestWithData } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { Forbidden } from '../../errors/index.js'
@@ -15,6 +14,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 export type Result = {
   exp: number
   refreshedToken: string
+  strategy?: string
   user: Document
 }
 
@@ -89,6 +89,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     let result: Result = {
       exp,
       refreshedToken,
+      strategy: args.req.user._strategy,
       user,
     }
 

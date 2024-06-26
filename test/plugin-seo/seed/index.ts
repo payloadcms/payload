@@ -1,9 +1,8 @@
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequestWithData } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 
 import { mediaSlug } from '../shared.js'
 const filename = fileURLToPath(import.meta.url)

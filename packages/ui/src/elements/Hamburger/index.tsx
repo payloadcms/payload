@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -38,7 +38,7 @@ export const Hamburger: React.FC<{
                 </React.Fragment>
               )}
               {closeIcon === 'collapse' && (
-                <Chevron className={`${baseClass}__collapse-chevron`} direction="left" />
+                <ChevronIcon className={`${baseClass}__collapse-chevron`} direction="left" />
               )}
             </div>
           )}

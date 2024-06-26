@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const Calendar: React.FC = () => (
+export const CalendarIcon: React.FC = () => (
   <svg className="icon icon--calendar" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <rect className="stroke" height="14" width="16" x="4.5" y="6.11401" />
     <line className="stroke" x1="8.625" x2="8.625" y1="8.02026" y2="3.70776" />

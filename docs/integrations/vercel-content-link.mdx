@@ -3,7 +3,7 @@ title: Vercel Content Link
 label: Vercel Content Link
 order: 10
 desc: Payload + Vercel Content Link allows yours editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it.
-keywords: vercel, vercel content link, visual editing, content source maps, Content Management System, cms, headless, javascript, node, react, express
+keywords: vercel, vercel content link, content link, visual editing, content source maps, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 [Vercel Content Link](https://vercel.com/docs/workflow-collaboration/edit-mode#content-link) will allow your editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it. This requires no changes to your front-end code and very few changes to your Payload config.
@@ -16,13 +16,13 @@ keywords: vercel, vercel content link, visual editing, content source maps, Cont
   team](https://payloadcms.com/for-enterprise) for help with your integration.
 </Banner>
 
-### How it works
+## How it works
 
 To power Vercel Content Link, Payload embeds Content Source Maps into its API responses. Content Source Maps are invisible, encoded JSON values that include a link back to the field in the CMS that generated the content. When rendered on the page, Vercel detects and decodes these values to display the Content Link interface.
 
 For full details on how the encoding and decoding algorithm works, check out [`@vercel/stega`](https://www.npmjs.com/package/@vercel/stega).
 
-### Getting Started
+## Getting Started
 
 Setting up Payload with Vercel Content Link is easy. First, install the `@payloadcms/plugin-csm` plugin into your project. This plugin requires an API key to install, [contact our sales team](https://payloadcms.com/for-enterprise) if you don't already have one.
 
@@ -74,15 +74,15 @@ if (isDraftMode || process.env.VERCEL_ENV === 'preview') {
 
 And that's it! You are now ready to enter Edit Mode and begin visually editing your content.
 
-##### Edit Mode
+#### Edit Mode
 
 To see Content Link on your site, you first need to visit any preview deployment on Vercel and login using the Vercel Toolbar. When Content Source Maps are detected on the page, a pencil icon will appear in the toolbar. Clicking this icon will enable Edit Mode, highlighting all editable fields on the page in blue.
 
 ![Versions](/images/docs/vercel-toolbar.jpg)
 
-### Troubleshooting
+## Troubleshooting
 
-##### Dates
+### Date Fields
 
 The plugin does not encode `date` fields by default, but for some cases like text that uses negative CSS letter-spacing, it may be necessary to split the encoded data out from the rendered text. This way you can safely use the cleaned data as expected.
 
@@ -91,13 +91,13 @@ import { vercelStegaSplit } from '@vercel/stega'
 const { cleaned, encoded } = vercelStegaSplit(text)
 ```
 
-##### Blocks
+### Blocks and array fields
 
-All `blocks` fields by definition do not have plain text strings to encode. For this reason, blocks are given an additional `encodedSourceMap` key, which you can use to enable Content Link on entire sections of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
+All `blocks` and `array` fields by definition do not have plain text strings to encode. For this reason, they are given an additional `_encodedSourceMap` property, which you can use to enable Content Link on entire _sections_ of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
 
 ```ts
 <div data-vercel-edit-target>
-  <span style={{ display: "none" }}>{encodedSourceMap}</span>
+  <span style={{ display: "none" }}>{_encodedSourceMap}</span>
   {children}
 </div>
 ```

@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload'
 
 import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types.js'
 

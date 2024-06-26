@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { APIError, ValidationError } from 'payload/errors'
+import { APIError, ValidationError } from 'payload'
 
 export const handleError = ({
   collection,

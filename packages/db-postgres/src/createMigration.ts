@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
+import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'
 import { createRequire } from 'module'
 import path from 'path'
-import { getPredefinedMigration } from 'payload/database'
+import { getPredefinedMigration } from 'payload'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
@@ -121,10 +121,10 @@ export const createMigration: CreateMigration = async function createMigration(
         process.exit(0)
       }
     }
-
-    // write schema
-    fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
   }
+
+  // write schema
+  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
 
   // write migration
   fs.writeFileSync(

@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -18,7 +18,7 @@ import './index.scss'
 
 export { TextAreaInputProps, TextareaFieldProps, TextareaInput }
 
-const TextareaField: React.FC<TextareaFieldProps> = (props) => {
+const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -68,7 +68,7 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -103,4 +103,4 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
   )
 }
 
-export const Textarea = withCondition(TextareaField)
+export const TextareaField = withCondition(_TextareaField)

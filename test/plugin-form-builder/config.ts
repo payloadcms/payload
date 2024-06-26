@@ -1,4 +1,8 @@
-import type { Block } from 'payload/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { Block } from 'payload'
 
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
 import { slateEditor } from '@payloadcms/richtext-slate'
@@ -97,4 +101,7 @@ export default buildConfigWithDefaults({
       redirectRelationships: ['pages'],
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

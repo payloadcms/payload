@@ -1,6 +1,6 @@
-import type { DBIdentifierName } from 'payload/database'
+import type { DBIdentifierName } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types.js'

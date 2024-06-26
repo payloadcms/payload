@@ -4,6 +4,7 @@ export type LabelProps = {
   htmlFor?: string
   label?: Record<string, string> | string
   required?: boolean
+  schemaPath?: string
   unstyled?: boolean
 }
 

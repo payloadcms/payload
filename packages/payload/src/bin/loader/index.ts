@@ -114,11 +114,12 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
 
   if (resolvedModule) {
     const resolvedIsTS = TS_EXTENSIONS.includes(resolvedModule.extension)
+    const resolvedPath = await resolveOriginalPath(resolvedModule.resolvedFileName)
 
     return {
       format: resolvedIsTS ? 'ts' : undefined,
       shortCircuit: true,
-      url: pathToFileURL(await resolveOriginalPath(resolvedModule.resolvedFileName)).href, // The typescript module resolver does not resolve to the original path, but to the symlinked path, if present. This can cause issues
+      url: pathToFileURL(resolvedPath ?? resolvedModule.resolvedFileName).href, // The typescript module resolver does not resolve to the original path, but to the symlinked path, if present. This can cause issues
     }
   }
 

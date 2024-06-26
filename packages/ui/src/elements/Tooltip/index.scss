@@ -52,7 +52,6 @@
     }
   }
 
-
   &--position-top {
     top: calc(var(--base) * -0.6 - 13px);
     transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
@@ -62,7 +61,6 @@
       border-top: var(--caret-size) solid var(--theme-elevation-800);
     }
   }
-
 
   &--position-bottom {
     bottom: calc(var(--base) * -0.6 - 13px);

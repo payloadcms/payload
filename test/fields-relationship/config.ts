@@ -1,7 +1,10 @@
-import type { CollectionConfig } from 'payload/types'
-import type { FilterOptionsProps } from 'payload/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { CollectionConfig, FilterOptionsProps } from 'payload'
 
-import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
+import { withMergedProps } from '@payloadcms/ui/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -526,5 +529,8 @@ export default buildConfigWithDefaults({
         },
       })
     }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

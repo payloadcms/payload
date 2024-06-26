@@ -1,8 +1,6 @@
-import type { Collection } from 'payload/types'
+import type { Collection } from 'payload'
 
-import { generatePayloadCookie } from 'payload/auth'
-import { resetPasswordOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { generatePayloadCookie, isolateObjectProperty, resetPasswordOperation } from 'payload'
 
 import type { Context } from '../types.js'
 

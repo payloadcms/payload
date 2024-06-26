@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -39,4 +43,7 @@ export default buildConfigWithDefaults({
       parentFieldSlug: 'owner',
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

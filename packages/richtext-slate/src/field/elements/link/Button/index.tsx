@@ -1,15 +1,9 @@
 'use client'
 
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
-import * as facelessUIImport from '@faceless-ui/modal'
-import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { useConfig, useDrawerSlug, useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
+import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
@@ -61,8 +55,6 @@ const insertLink = (editor, fields) => {
 }
 
 export const LinkButton: React.FC = () => {
-  const { useModal } = facelessUIImport
-
   const { fieldProps } = useElementButton()
   const [initialState, setInitialState] = useState<FormState>({})
 
