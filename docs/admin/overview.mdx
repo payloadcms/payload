@@ -53,7 +53,7 @@ app/
 
 As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes, etc.
 
-The `admin` directory contains all the _pages_ related to the interface itself, and the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's requirements.
 
 Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
@@ -128,7 +128,7 @@ You can use whatever Collection you'd like to access the Admin Panel as long as 
 - `admins` - meant to have a higher level of permissions to manage your data and access the Admin Panel
 - `customers` - meant for end users of your app that should not be allowed to log into the Admin Panel
 
-To do this, specify `admin: { user: 'admins' }` in your config. This will provide access to the Admin Panel to only `admins`. Any users authenticated as `customers` will be prevented from accessing the Admin Panel.  See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
+To do this, specify `admin: { user: 'admins' }` in your config. This will provide access to the Admin Panel to only `admins`. Any users authenticated as `customers` will be prevented from accessing the Admin Panel.  See [Access Control](/docs/access-control/overview) for full details.
 
 #### Role-based access control
 
@@ -141,11 +141,11 @@ To do this, add a `roles` or similar field to your auth-enabled Collection, then
 
 ## Customizing Routes
 
-You have full control over the routes that Payload binds itself to. This includes both root-level routes such as the REST API, and admin-level routes such as the user's account page. You can customize these routes to meet the needs of your application simply by specifying the desired paths in your config.
+You have full control over the routes that Payload binds itself to. This includes both [Root-level Routes](#root-level-routes) such as the [REST API](../rest-api/overview), and [Admin-level Routes](#admin-level-routes) such as the user's account page. You can customize these routes to meet the needs of your application simply by specifying the desired paths in your config.
 
 #### Root-level Routes
 
-Root-level routes are those that are not behind the `/admin` path, such as the REST API and GraphQL APIs, or the root path of the Admin Panel itself.
+Root-level routes are those that are not behind the `/admin` path, such as the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), or the root path of the Admin Panel itself.
 
 Here is an example of how you might modify root-level routes:
 
