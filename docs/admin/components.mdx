@@ -245,6 +245,53 @@ export const MyClientComponent: React.FC = () => {
   Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). If you are rendering your Client Component _from within_ a Server Component, ensure that its props are serializable.
 </Banner>
 
+### Accessing the Payload Config
+
+#### Server Components
+
+From any Server Component, the [Payload Config](../configuration/overview) can be retrieved from the `payload` prop:
+
+```tsx
+import React from 'react'
+
+export default async function MyServerComponent({
+  payload: {
+    config // highlight-line
+  }
+}) {
+  return (
+    <Link href={config.serverURL}>
+      Go Home
+    </Link>
+  )
+}
+```
+
+#### Client Components
+
+The Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions, React components, etc. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
+
+For this reason, Payload creates a Client Config and passed it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
+
+```tsx
+import React from 'react'
+import { useConfig } from '@payloadcms/ui'
+
+export const MyClientComponent: React.FC = () => {
+  const { serverURL } = useConfig() // highlight-line
+
+  return (
+    <Link href={serverURL}>
+      Go Home
+    </Link>
+  )
+}
+```
+
+<Banner type="success">
+  See [Using Hooks](#using-hooks) for more details.
+</Banner>
+
 ### Using Hooks
 
 To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts:
