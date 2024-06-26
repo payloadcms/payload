@@ -1,18 +1,14 @@
 import type { CollectionConfig, Field, GlobalConfig, Payload } from 'payload'
 
-import { migrateDocumentFieldsRecursively } from './migrateDocumentFieldsRecursively.js'
+import { upgradeDocumentFieldsRecursively } from './upgradeDocumentFieldsRecursively.js'
 
 /**
- * This goes through every single collection and field in the payload config, and migrates its data from Slate to Lexical. This does not support sub-fields within slate.
- *
- * It will only translate fields fulfilling all these requirements:
- * - field schema uses lexical editor
- * - lexical editor has SlateToLexicalFeature added
- * - saved field data is in Slate format
+ * This goes through every single document in your payload app and re-saves it, if it has a lexical editor.
+ * This way, the data is automatically converted to the new format, and that automatic conversion gets applied to every single document in your app.
  *
  * @param payload
  */
-export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
+export async function upgradeLexicalData({ payload }: { payload: Payload }) {
   const collections = payload.config.collections
 
   const allLocales = payload.config.localization ? payload.config.localization.localeCodes : [null]
@@ -22,7 +18,7 @@ export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
     let curCollection = 0
     for (const collection of collections) {
       curCollection++
-      await migrateCollection({
+      await upgradeCollection({
         collection,
         cur: curCollection,
         locale,
@@ -31,7 +27,7 @@ export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
       })
     }
     for (const global of payload.config.globals) {
-      await migrateGlobal({
+      await upgradeGlobal({
         global,
         locale,
         payload,
@@ -40,7 +36,7 @@ export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
   }
 }
 
-async function migrateGlobal({
+async function upgradeGlobal({
   global,
   locale,
   payload,
@@ -49,7 +45,7 @@ async function migrateGlobal({
   locale: null | string
   payload: Payload
 }) {
-  console.log(`SlateToLexical: ${locale}: Migrating global:`, global.slug)
+  console.log(`Lexical Upgrader: ${locale}: Upgrading global:`, global.slug)
 
   const document = await payload.findGlobal({
     slug: global.slug,
@@ -58,7 +54,7 @@ async function migrateGlobal({
     overrideAccess: true,
   })
 
-  const found = migrateDocument({
+  const found = upgradeDocument({
     document,
     fields: global.fields,
   })
@@ -73,7 +69,7 @@ async function migrateGlobal({
   }
 }
 
-async function migrateCollection({
+async function upgradeCollection({
   collection,
   cur,
   locale,
@@ -87,7 +83,7 @@ async function migrateCollection({
   payload: Payload
 }) {
   console.log(
-    `SlateToLexical: ${locale}: Migrating collection:`,
+    `Lexical Upgrade: ${locale}: Upgrading collection:`,
     collection.slug,
     '(' + cur + '/' + max + ')',
   )
@@ -101,9 +97,9 @@ async function migrateCollection({
   ).totalDocs
 
   let page = 1
-  let migrated = 0
+  let upgraded = 0
 
-  while (migrated < documentCount) {
+  while (upgraded < documentCount) {
     const documents = await payload.find({
       collection: collection.slug,
       depth: 0,
@@ -114,23 +110,23 @@ async function migrateCollection({
     })
 
     for (const document of documents.docs) {
-      migrated++
+      upgraded++
       console.log(
-        `SlateToLexical: ${locale}: Migrating collection:`,
+        `Lexical Upgrade: ${locale}: Upgrading collection:`,
         collection.slug,
         '(' +
           cur +
           '/' +
           max +
-          ') - Migrating Document: ' +
+          ') - Upgrading Document: ' +
           document.id +
           ' (' +
-          migrated +
+          upgraded +
           '/' +
           documentCount +
           ')',
       )
-      const found = migrateDocument({
+      const found = upgradeDocument({
         document,
         fields: collection.fields,
       })
@@ -149,14 +145,14 @@ async function migrateCollection({
   }
 }
 
-function migrateDocument({
+function upgradeDocument({
   document,
   fields,
 }: {
   document: Record<string, unknown>
   fields: Field[]
 }): boolean {
-  return !!migrateDocumentFieldsRecursively({
+  return !!upgradeDocumentFieldsRecursively({
     data: document,
     fields,
     found: 0,
