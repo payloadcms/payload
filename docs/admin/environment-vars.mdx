@@ -33,15 +33,15 @@ This key will automatically be made available to the client-side Payload bundle 
 'use client'
 import React from 'react'
 
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY // highlight-line
 
 const MyClientComponent = () => {
   // do something with the key
 
   return (
-    <p>
+    <div>
       My Client Component
-    </p>
+    </div>
   )
 }
 ```
@@ -64,15 +64,15 @@ This key will be available to your Server Components as follows:
 ```tsx
 import React from 'react'
 
-const stripeSecret = process.env.STRIPE_SECRET
+const stripeSecret = process.env.STRIPE_SECRET // highlight-line
 
 const MyServerComponent = async () => {
   // do something with the secret
 
   return (
-    <p>
+    <div>
       My Server Component
-    </p>
+    </div>
   )
 }
 ```

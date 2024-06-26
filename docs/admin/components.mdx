@@ -12,7 +12,7 @@ All Custom Components in Payload are [React Server Components](https://react.dev
 
 <Banner type="success">
   <strong>Note:</strong>
-  Client Components continue to be fully supported. To use Client Components in your app, simply import them into a Server Component and render them. Ensure your Client Component includes the `use client` directive and that any [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) are sanitized. [More details](#client-components).
+  Client Components continue to be fully supported. To use Client Components in your app, simply include the `use client` directive. Payload will automatically detect and remove all default [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component. [More details](#client-components).
 </Banner>
 
 To swap in your own Custom Component, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
@@ -26,9 +26,9 @@ There are four main types of Custom Components in Payload:
 
 ## Custom Root Components
 
-Root Components are those that effect the [Admin Panel](./overview) generally. You can override Root Components through the `admin.components` property of the [Payload Config](../getting-started/overview).
+Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo. You can override Root Components through the `admin.components` property of the [Payload Config](../getting-started/overview).
 
-Here is an example showing what it might look like to swap out Root Components for your own Custom Components. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
+Here is an example showing what it might look like to swap out Root Components for your own. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -71,7 +71,7 @@ The following options are available:
 
 ### Custom Providers
 
-You can add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) to any Payload app through Custom Providers. As you add more and more Custom Components to your [Admin Panel](./overview), this is a great may to share state across all of them.
+You can add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) to any Payload app through Custom Providers. As you add more and more Custom Components to your [Admin Panel](./overview), this is a great way to share state across all of them.
 
 To do this, add `admin.components.providers` to your config:
 
@@ -115,9 +115,9 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 
 ## Custom Collection Components
 
-Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview). You can override Collection Components through the `admin.components` property on any [Collection Config](../configuration/collections).
+Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview), such as the save button. You can override Collection Components through the `admin.components` property on any [Collection Config](../configuration/collections).
 
-Here is an example showing what it might look like to swap out Collection Components for your own Custom Components. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
+Here is an example showing what it might look like to swap out Collection Components for your own. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -152,9 +152,9 @@ The following options are available:
 
 ## Custom Global Components
 
-Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview). You can override Global Components through the `admin.components` property on any [Global Config](../configuration/globals).
+Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview), such as the save button. You can override Global Components through the `admin.components` property on any [Global Config](../configuration/globals).
 
-Here is an example showing what it might look like to swap out Global Components for your own Custom Components. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
+Here is an example showing what it might look like to swap out Global Components for your own. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload/types'
@@ -187,7 +187,7 @@ The following options are available:
 
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly in the front-end.
 
-To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class, the [`i18n`](../configuration/i18n) object, etc. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself like you would from an external application.
+To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class and the [`i18n`](../configuration/i18n) object. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself like you would from an external application.
 
 Here is an example:
 
@@ -223,7 +223,7 @@ Custom Components also receive various other props that are specific to the cont
 
 #### Client Components
 
-When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object. To do this, simply define your component in a new file with the `use client` directive at the top:
+When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object. To do this, simply add the `use client` directive at the top of your file. Payload will automatically detect and remove all default [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component.
 
 ```tsx
 'use client' // highlight-line
@@ -240,29 +240,14 @@ export const MyClientComponent: React.FC = () => {
 }
 ```
 
-Then simply import and render your Client Component within your Server Component:
-
-```tsx
-import React from 'react'
-import { MyClientComponent } from './MyClientComponent'
-
-export default function MyServerComponent() {
-  return (
-    <div>
-      <MyClientComponent />
-    </div>
-  )
-}
-```
-
 <Banner type="warning">
   <strong>Reminder:</strong>
-  Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). Before rendering your Client Component from a Server Component, ensure that any props passed to it are appropriately sanitized.
+  Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). If you are rendering your Client Component _from within_ a Server Component, ensure that its props are serializable.
 </Banner>
 
 #### Using Hooks
 
-To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) on the client. For example, you might want to interact with one of Payload's many React Contexts:
+To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts:
 
 ```tsx
 'use client'
@@ -326,7 +311,7 @@ export const MyClientComponent: React.FC = () => {
 
 #### Getting the Current Locale
 
-All [Custom Views](./views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). All Custom Views automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
+All [Custom Views](./views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). They automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
 
 ```tsx
 import React from 'react'
