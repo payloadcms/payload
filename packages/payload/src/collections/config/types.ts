@@ -225,10 +225,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: CustomComponent[]
-    AfterListTable?: CustomComponent[]
-    BeforeList?: CustomComponent[]
-    BeforeListTable?: CustomComponent[]
+    afterList?: CustomComponent[]
+    afterListTable?: CustomComponent[]
+    beforeList?: CustomComponent[]
+    beforeListTable?: CustomComponent[]
     /**
      * Components within the edit view
      */
