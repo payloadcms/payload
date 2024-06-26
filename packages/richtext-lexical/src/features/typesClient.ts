@@ -154,9 +154,9 @@ export type ResolvedClientFeature<ClientFeatureProps> = ClientFeature<ClientFeat
   order: number
 }
 
-export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown>>
+export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<any>>
 
-export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown, unknown>>
+export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, any>>
 
 /**
  * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality

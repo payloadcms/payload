@@ -83,7 +83,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     }
 
-    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
+    let features: FeatureProviderServer<any, any, any>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -977,5 +977,6 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 
 export { createServerFeature } from './utilities/createServerFeature.js'
+export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
 
 export * from './nodeTypes.js'

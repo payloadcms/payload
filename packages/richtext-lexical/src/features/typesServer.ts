@@ -356,12 +356,12 @@ export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = ServerFeatu
     order: number
   }
 
-export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<unknown, unknown>>
+export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<any, any>>
 
-export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown, unknown>>
+export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, any, any>>
 
 export type SanitizedServerFeatures = Required<
-  Pick<ResolvedServerFeature<unknown, unknown>, 'i18n' | 'markdownTransformers' | 'nodes'>
+  Pick<ResolvedServerFeature<any, any>, 'i18n' | 'markdownTransformers' | 'nodes'>
 > & {
   /**  The node types mapped to their converters */
   converters: {
