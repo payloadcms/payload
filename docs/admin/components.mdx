@@ -249,7 +249,7 @@ export const MyClientComponent: React.FC = () => {
 
 #### Server Components
 
-From any Server Component, the [Payload Config](../configuration/overview) can be retrieved from the `payload` prop:
+From any Server Component, the [Payload Config](../configuration/overview) can be retrieved using the `payload` prop:
 
 ```tsx
 import React from 'react'
@@ -271,7 +271,7 @@ export default async function MyServerComponent({
 
 The Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions, React components, etc. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
 
-For this reason, Payload creates a Client Config and passed it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
+For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
 
 ```tsx
 import React from 'react'
