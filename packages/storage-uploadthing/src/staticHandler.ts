@@ -9,7 +9,7 @@ type Args = {
 }
 
 export const getHandler = ({ utApi }: Args): StaticHandler => {
-  return async (req, { doc, params: { collection, filename } }) => {
+  return async (req, res, { doc, params: { collection, filename } }) => {
     try {
       const collectionConfig = req.payload.collections[collection]?.config
       let retrievedDoc = doc

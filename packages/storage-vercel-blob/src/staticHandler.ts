@@ -14,7 +14,7 @@ export const getStaticHandler = (
   { baseUrl, token }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
-  return async (req, { params: { filename } }) => {
+  return async (req, res, { params: { filename } }) => {
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
 

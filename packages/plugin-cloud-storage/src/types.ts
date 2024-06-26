@@ -42,6 +42,7 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequestWithData,
+  res: Response,
   args: { doc?: TypeWithID; params: { collection: string; filename: string } },
 ) => Promise<Response> | Response
 
