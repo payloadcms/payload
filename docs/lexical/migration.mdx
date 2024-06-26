@@ -10,6 +10,21 @@ keywords: lexical, rich text, editor, headless cms, migrate, migration
 
 While both Slate and Lexical save the editor state in JSON, the structure of the JSON is different.
 
+### Migration via Migration Script (Recommended)
+
+Just import the `migrateSlateToLexical` function we provide, pass it the `payload` object and run it. Depending on the amount of collections, this might take a while.
+
+IMPORTANT: This will overwrite all slate data. We recommend doing the following first:
+1. Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
+2. Make every richText field a lexical editor. This script will only convert lexical richText fields with old Slate data
+3. Add the SlateToLexicalFeature (as seen below) first, and test it out by loading up the admin panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The SlateToLexicalFeature is where the converters are stored. Only fields with this feature added will be migrated.
+
+```ts
+import { migrateSlateToLexical } from '@payloadcms/richtext-lexical'
+
+await migrateSlateToLexical({ payload })
+```
+
 ### Migration via SlateToLexicalFeature
 
 One way to handle this is to just give your lexical editor the ability to read the slate JSON.
@@ -42,7 +57,7 @@ This is by far the easiest way to migrate from Slate to Lexical, although it doe
 - There is a performance hit when initializing the lexical editor
 - The editor will still output the Slate data in the output JSON, as the on-the-fly converter only runs for the admin panel
 
-The easy way to solve this: Just save the document! This overrides the slate data with the lexical data, and the next time the document is loaded, the lexical data will be used. This solves both the performance and the output issue for that specific document.
+The easy way to solve this: Edit the richText field and save the document! This overrides the slate data with the lexical data, and the next time the document is loaded, the lexical data will be used. This solves both the performance and the output issue for that specific document. This, however, is a slow and gradual migration process, thus you will have to support both API formats. Especially for a large number of documents, we recommend running the migration script, as explained above.
 
 ### Migration via migration script
 
