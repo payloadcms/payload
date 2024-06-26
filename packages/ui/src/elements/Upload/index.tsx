@@ -50,7 +50,7 @@ export const UploadActions = ({
 
   const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
 
-  if (!fileTypeIsAdjustable && customActions.length === 0) return null
+  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) return null
 
   return (
     <div className={`${baseClass}__upload-actions`}>
@@ -69,9 +69,10 @@ export const UploadActions = ({
         </React.Fragment>
       )}
 
-      {customActions.map((CustomAction, i) => {
-        return <React.Fragment key={i}>{CustomAction}</React.Fragment>
-      })}
+      {customActions &&
+        customActions.map((CustomAction, i) => {
+          return <React.Fragment key={i}>{CustomAction}</React.Fragment>
+        })}
     </div>
   )
 }
