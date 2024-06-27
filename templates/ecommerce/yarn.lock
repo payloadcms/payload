@@ -1594,6 +1594,14 @@
     amazon-cognito-identity-js "^6.1.2"
     nodemailer "6.9.8"
 
+"@payloadcms/plugin-form-builder@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-form-builder/-/plugin-form-builder-1.2.1.tgz#9e8561f911e0cd60ca6116ac0bee47d0d9a5d4c2"
+  integrity sha512-HsJKKY8a7N8F21fIkVsUbJSmpO3iym9rDprnk4PxA5RGuwvFvWbeG4cNrybvQGnXKp1rdbzmN9XA/ig/EU6cVw==
+  dependencies:
+    deepmerge "^4.2.2"
+    escape-html "^1.0.3"
+
 "@payloadcms/plugin-nested-docs@^1.0.8":
   version "1.0.12"
   resolved "https://registry.yarnpkg.com/@payloadcms/plugin-nested-docs/-/plugin-nested-docs-1.0.12.tgz#57723fdd1eec3c26a69f0662ee9b05d2ca0269c7"
@@ -3783,7 +3791,7 @@ deep-is@^0.1.3:
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.4.tgz#a6f2dce612fadd2ef1f519b73551f17e85199831"
   integrity sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==
 
-deepmerge@4.3.1, deepmerge@^4.0.0:
+deepmerge@4.3.1, deepmerge@^4.0.0, deepmerge@^4.2.2:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.3.1.tgz#44b5f2147cd3b00d4b56137685966f26fd25dd4a"
   integrity sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==
