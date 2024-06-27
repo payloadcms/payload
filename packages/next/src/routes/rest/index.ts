@@ -123,7 +123,7 @@ const endpoints = {
   },
 }
 
-const handleCustomEndpoints = ({
+const handleCustomEndpoints = async ({
   endpoints,
   entitySlug,
   payloadRequest,
@@ -131,7 +131,7 @@ const handleCustomEndpoints = ({
   endpoints: Endpoint[] | GlobalConfig['endpoints']
   entitySlug?: string
   payloadRequest: PayloadRequest
-}): Promise<Response> | Response => {
+}): Promise<Response> => {
   if (endpoints && endpoints.length > 0) {
     let handlerParams = {}
     const { pathname } = payloadRequest
@@ -171,7 +171,7 @@ const handleCustomEndpoints = ({
         ...payloadRequest.routeParams,
         ...handlerParams,
       }
-      const res = customEndpoint.handler(payloadRequest)
+      const res = await customEndpoint.handler(payloadRequest)
 
       if (res instanceof Response) {
         if (payloadRequest.responseHeaders) {
