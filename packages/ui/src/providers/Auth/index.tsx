@@ -3,7 +3,7 @@ import type { ClientUser, MeOperationResult, Permissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
