@@ -15,6 +15,7 @@ export type AuthArgs = {
 
 export type AuthResult = {
   permissions: Permissions
+  responseHeaders?: Headers
   user: TypedUser | null
 }
 
@@ -26,12 +27,13 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await executeAuthStrategies({
+    const { responseHeaders, user } = await executeAuthStrategies({
       headers,
       payload,
     })
 
     req.user = user
+    req.responseHeaders = responseHeaders
 
     const permissions = await getAccessResults({
       req,
@@ -41,6 +43,7 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
 
     return {
       permissions,
+      responseHeaders,
       user,
     }
   } catch (error: unknown) {

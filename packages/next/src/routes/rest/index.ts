@@ -21,6 +21,7 @@ import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { init } from './auth/init.js'
@@ -383,7 +384,14 @@ export const GET =
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
-      if (customEndpointResponse) return customEndpointResponse
+
+      if (customEndpointResponse) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, customEndpointResponse.headers)
+        }
+
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,
@@ -552,7 +560,14 @@ export const POST =
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
-      if (customEndpointResponse) return customEndpointResponse
+
+      if (customEndpointResponse) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, customEndpointResponse.headers)
+        }
+
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,
@@ -633,7 +648,14 @@ export const DELETE =
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
-      if (customEndpointResponse) return customEndpointResponse
+
+      if (customEndpointResponse) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, customEndpointResponse.headers)
+        }
+
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,

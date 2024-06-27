@@ -29,11 +29,13 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     if (user && (!collection.config.auth.verify || user._verified)) {
       user.collection = collection.config.slug
       user._strategy = 'local-jwt'
-      return user as User
+      return {
+        user: user as User,
+      }
     } else {
-      return null
+      return { user: null }
     }
   } catch (error) {
-    return null
+    return { user: null }
   }
 }
