@@ -64,12 +64,14 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
     result.collection = req.user.collection
     result.strategy = req.user._strategy
 
-    if (!result.user && currentToken) {
+    if (!result.user) {
       result.user = user
 
-      const decoded = jwt.decode(currentToken) as jwt.JwtPayload
-      if (decoded) result.exp = decoded.exp
-      result.token = currentToken
+      if (currentToken) {
+        const decoded = jwt.decode(currentToken) as jwt.JwtPayload
+        if (decoded) result.exp = decoded.exp
+        if (!collection.config.auth.removeTokenFromResponses) result.token = currentToken
+      }
     }
   }
 
