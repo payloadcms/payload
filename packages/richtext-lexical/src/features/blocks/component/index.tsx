@@ -72,7 +72,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         apiRoute: config.routes.api,
         body: {
           id,
-          data: JSON.parse(JSON.stringify(formData)),
+          data: formData,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
