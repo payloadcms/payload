@@ -62,9 +62,6 @@ importers:
       '@types/prompts':
         specifier: ^2.4.5
         version: 2.4.9
-      '@types/qs':
-        specifier: 6.9.14
-        version: 6.9.14
       '@types/react':
         specifier: npm:types-react@19.0.0-beta.2
         version: /types-react@19.0.0-beta.2
@@ -595,8 +592,8 @@ importers:
         specifier: ^6.2.1
         version: 6.2.2
       qs-esm:
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 7.0.1
+        version: 7.0.1
       react-diff-viewer-continued:
         specifier: 3.2.6
         version: 3.2.6(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
@@ -1444,8 +1441,8 @@ importers:
         specifier: 4.5.1
         version: 4.5.1
       qs-esm:
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 7.0.1
+        version: 7.0.1
       react:
         specifier: ^19.0.0-rc-f994737d14-20240522
         version: 19.0.0-rc-f994737d14-20240522
@@ -1501,9 +1498,6 @@ importers:
       '@types/body-scroll-lock':
         specifier: ^3.1.0
         version: 3.1.2
-      '@types/qs':
-        specifier: 6.9.7
-        version: 6.9.7
       '@types/react':
         specifier: npm:types-react@19.0.0-beta.2
         version: /types-react@19.0.0-beta.2
@@ -1688,8 +1682,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/payload
       qs-esm:
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 7.0.1
+        version: 7.0.1
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -7279,10 +7273,6 @@ packages:
 
   /@types/qs@6.9.14:
     resolution: {integrity: sha512-5khscbd3SwWMhFqylJBLQ0zIu7c1K6Vz0uBIt915BI3zV0q1nfjRQD3RqSBcPaO6PHEF4ov/t9y89fSiyThlPA==}
-    dev: true
-
-  /@types/qs@6.9.7:
-    resolution: {integrity: sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==}
     dev: true
 
   /@types/range-parser@1.2.7:
@@ -15307,8 +15297,8 @@ packages:
   /pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
-  /qs-esm@7.0.0:
-    resolution: {integrity: sha512-E4bfQORiFLobm3EoPS9ZyK68rg1AA3BVtAYKJQgt3Q6ne3WJbplqjpoyirNtF1/RkdOa/GyzYiAD5zIN3KRuyw==}
+  /qs-esm@7.0.1:
+    resolution: {integrity: sha512-ezmEzDkJmkKoFJFuIxoDZ38zknoRzVJqSgXfkBmrrOXjl+sxyivgER7/GGgEainpG2fOnsbxXKNtwSkq5KXIxA==}
     engines: {node: '>=18'}
 
   /qs@6.11.0:
