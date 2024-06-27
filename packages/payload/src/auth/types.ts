@@ -101,9 +101,15 @@ export type AuthStrategyFunctionArgs = {
   isGraphQL?: boolean
   payload: Payload
 }
+
+export type AuthStrategyResult = {
+  responseHeaders?: Headers
+  user: User | null
+}
+
 export type AuthStrategyFunction = (
   args: AuthStrategyFunctionArgs,
-) => Promise<User | null> | User | null
+) => AuthStrategyResult | Promise<AuthStrategyResult>
 export type AuthStrategy = {
   authenticate: AuthStrategyFunction
   name: string
