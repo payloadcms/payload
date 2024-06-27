@@ -32,17 +32,19 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
     token,
   })
 
-  const cookie = generatePayloadCookie({
-    collectionConfig: collection.config,
-    payload: req.payload,
-    token: result.refreshedToken,
-  })
+  if (result.setCookie) {
+    const cookie = generatePayloadCookie({
+      collectionConfig: collection.config,
+      payload: req.payload,
+      token: result.refreshedToken,
+    })
 
-  if (collection.config.auth.removeTokenFromResponses) {
-    delete result.refreshedToken
+    if (collection.config.auth.removeTokenFromResponses) {
+      delete result.refreshedToken
+    }
+
+    headers.set('Set-Cookie', cookie)
   }
-
-  headers.set('Set-Cookie', cookie)
 
   return Response.json(
     {

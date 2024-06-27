@@ -18,11 +18,9 @@ export type Arguments = {
   req: PayloadRequestWithData
 }
 
-export const meOperation = async ({
-  collection,
-  currentToken,
-  req,
-}: Arguments): Promise<MeOperationResult> => {
+export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
+  const { collection, currentToken, req } = args
+
   let result: MeOperationResult = {
     user: null,
   }
@@ -48,16 +46,32 @@ export const meOperation = async ({
 
     delete user.collection
 
-    result = {
-      collection: req.user.collection,
-      strategy: req.user._strategy,
-      user,
+    // /////////////////////////////////////
+    // me hook - Collection
+    // /////////////////////////////////////
+
+    for (const meHook of collection.config.hooks.me) {
+      const hookResult = await meHook({ args, user })
+
+      if (hookResult) {
+        result.user = hookResult.user
+        result.exp = hookResult.exp
+
+        break
+      }
     }
 
-    if (currentToken) {
-      const decoded = jwt.decode(currentToken) as jwt.JwtPayload
-      if (decoded) result.exp = decoded.exp
-      result.token = currentToken
+    result.collection = req.user.collection
+    result.strategy = req.user._strategy
+
+    if (!result.user) {
+      result.user = user
+
+      if (currentToken) {
+        const decoded = jwt.decode(currentToken) as jwt.JwtPayload
+        if (decoded) result.exp = decoded.exp
+        if (!collection.config.auth.removeTokenFromResponses) result.token = currentToken
+      }
     }
   }
 

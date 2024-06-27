@@ -674,6 +674,8 @@ export type {
   Collection,
   CollectionConfig,
   DataFromCollectionSlug,
+  MeHook as CollectionMeHook,
+  RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
   SanitizedCollectionConfig,

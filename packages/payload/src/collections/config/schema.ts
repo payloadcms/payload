@@ -141,6 +141,8 @@ const collectionSchema = joi.object().keys({
     beforeOperation: joi.array().items(joi.func()),
     beforeRead: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
+    me: joi.array().items(joi.func()),
+    refresh: joi.array().items(joi.func()),
   }),
   labels: joi.object({
     plural: joi
