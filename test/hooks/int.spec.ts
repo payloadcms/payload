@@ -353,6 +353,38 @@ describe('Hooks', () => {
         }),
       ).rejects.toThrow(AuthenticationError)
     })
+
+    it('should respect refresh hooks', async () => {
+      const email = 'dontrefresh@payloadcms.com'
+
+      await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email,
+          password: devUser.password,
+          roles: ['admin'],
+        },
+      })
+
+      const { token } = await payload.login({
+        collection: hooksUsersSlug,
+        data: {
+          email,
+          password: devUser.password,
+        },
+      })
+
+      const response = await restClient.POST(`/${hooksUsersSlug}/refresh-token`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.exp).toStrictEqual(1)
+      expect(data.refreshedToken).toStrictEqual('fake')
+    })
   })
 
   describe('hook parameter data', () => {

@@ -4,6 +4,7 @@ import { AuthenticationError } from 'payload'
 
 import { devUser, regularUser } from '../../../credentials.js'
 import { afterLoginHook } from './afterLoginHook.js'
+import { refreshHook } from './refreshHook.js'
 
 const beforeLoginHook: BeforeLoginHook = ({ req, user }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined
@@ -45,6 +46,7 @@ const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    refresh: [refreshHook],
     afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
   },

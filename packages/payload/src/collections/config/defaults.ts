@@ -39,6 +39,7 @@ export const defaults = {
     beforeOperation: [],
     beforeRead: [],
     beforeValidate: [],
+    refresh: [],
   },
   timestamps: true,
   upload: false,

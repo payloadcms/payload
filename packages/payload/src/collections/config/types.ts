@@ -8,6 +8,10 @@ import type {
   CustomSaveDraftButton,
   CustomUpload,
 } from '../../admin/types.js'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh.js'
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
@@ -204,6 +208,11 @@ export type AfterMeHook<T extends TypeWithID = any> = (args: {
   response: unknown
 }) => any
 
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -398,6 +407,12 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration
