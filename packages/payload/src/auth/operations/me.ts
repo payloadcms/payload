@@ -68,11 +68,14 @@ async function me(args: Arguments): Promise<Result> {
 
     const token = extractJWT(req)
 
-    if (!response.user && token) {
+    if (!response.user) {
       response.user = user
-      const decoded = jwt.decode(token) as jwt.JwtPayload
-      if (decoded) response.exp = decoded.exp
-      if (!collection.config.auth.removeTokenFromResponses) response.token = token
+
+      if (token) {
+        const decoded = jwt.decode(token) as jwt.JwtPayload
+        if (decoded) response.exp = decoded.exp
+        if (!collection.config.auth.removeTokenFromResponses) response.token = token
+      }
     }
   }
 
