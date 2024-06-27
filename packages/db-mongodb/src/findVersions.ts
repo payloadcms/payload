@@ -27,7 +27,7 @@ export const findVersions: FindVersions = async function findVersions(
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     limit,
     skip,
   }

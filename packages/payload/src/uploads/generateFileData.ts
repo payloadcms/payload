@@ -121,7 +121,7 @@ export const generateFileData = async <T>({
   let newData = data
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -139,9 +139,9 @@ export const generateFileData = async <T>({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimated) sharpOptions.animated = true
+    if (fileIsAnimatedType) sharpOptions.animated = true
 
-    if (sharp && (fileIsAnimated || fileHasAdjustments)) {
+    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -225,7 +225,7 @@ export const generateFileData = async <T>({
       }
       fileData.width = info.width
       fileData.height = info.height
-      if (fileIsAnimated) {
+      if (fileIsAnimatedType) {
         const metadata = await sharpFile.metadata()
         fileData.height = metadata.pages ? info.height / metadata.pages : info.height
       }

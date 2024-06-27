@@ -393,11 +393,25 @@ describe('fields', () => {
       const input = '{"foo": "bar"}'
 
       await page.goto(url.create)
-      const json = page.locator('.json-field .inputarea')
+      const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+      await jsonFieldInputArea.fill(input)
+
+      await saveDocAndAssert(page, '.form-submit button')
+      const jsonField = page.locator('.json-field').first()
+      await expect(jsonField).toContainText('"foo": "bar"')
+    })
+
+    test('should not unflatten json field containing keys with dots', async () => {
+      const input = '{"foo.with.periods": "bar"}'
+
+      await page.goto(url.create)
+      const json = page.locator('.group-field .json-field .inputarea')
       await json.fill(input)
 
       await saveDocAndAssert(page, '.form-submit button')
-      await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
+      await expect(page.locator('.group-field .json-field')).toContainText(
+        '"foo.with.periods": "bar"',
+      )
     })
   })
 
@@ -1973,6 +1987,69 @@ describe('fields', () => {
 
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
+
+    // TODO: properly handle polymorphic relationship handling with the postgres adapter
+    test('should allow filtering by relationship field / is_in', async () => {
+      const textDoc = await createTextFieldDoc()
+      await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
+
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+      await dropdownOperatorOptions.locator('text=is in').click()
+
+      const valueField = page.locator('.condition__value')
+      await valueField.click()
+      const dropdownValueOptions = valueField.locator('.rs__option')
+      await dropdownValueOptions.locator('text=some text').click()
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
+
+    test('should allow filtering by relationship field / not_in', async () => {
+      const textDoc = await createTextFieldDoc()
+      await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
+
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+      await dropdownOperatorOptions.locator('text=is not in').click()
+
+      const valueField = page.locator('.condition__value')
+      await valueField.click()
+      const dropdownValueOptions = valueField.locator('.rs__option')
+      await dropdownValueOptions.locator('text=some text').click()
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(0)
+    })
   })
 
   describe('upload', () => {
@@ -2003,7 +2080,7 @@ describe('fields', () => {
       await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.jpg',
+        /\/uploads\/payload-1\.jpg(\?.*)?$/,
       )
     })
 

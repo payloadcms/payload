@@ -5,38 +5,14 @@ import { mediaSlug } from '../Media'
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
-  hooks: {
-    beforeValidate: [
-      async ({ data, req }) => {
-        const postsQuery1 = await req.payload.find({
-          collection: 'posts',
-          where: {
-            text: {
-              equals: 'hello',
-            },
-          },
-        })
-
-        console.log({ postsQuery1 })
-
-        const postsQuery2 = await req.payload.find({
-          collection: 'posts',
-          where: {
-            text: {
-              equals: 'goodbye',
-            },
-          },
-        })
-
-        console.log({ postsQuery2 })
-
-        return data
-      },
-    ],
-  },
+  defaultSort: 'title',
   fields: [
     {
       name: 'text',
+      type: 'text',
+    },
+    {
+      name: 'title',
       type: 'text',
     },
     {

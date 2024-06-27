@@ -42,6 +42,7 @@ const start = async (): Promise<void> => {
 
   const nextApp = next({
     dev: process.env.NODE_ENV !== 'production',
+    port: Number(PORT),
   })
 
   const nextHandler = nextApp.getRequestHandler()

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": {
     "type": "git",

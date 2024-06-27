@@ -168,7 +168,8 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       global: globalConfig,
       operation: 'update',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////

@@ -1,7 +1,6 @@
-import { unflatten } from 'flatley'
-
 import type { Data, Fields } from './types'
 
+import { unflatten } from '../../../utilities/unflatten'
 import reduceFieldsToValues from './reduceFieldsToValues'
 
 const getSiblingData = (fields: Fields, path: string): Data => {
@@ -35,7 +34,7 @@ const getSiblingData = (fields: Fields, path: string): Data => {
     }
   })
 
-  return unflatten(siblingFields, { safe: true })
+  return unflatten(siblingFields)
 }
 
 export default getSiblingData

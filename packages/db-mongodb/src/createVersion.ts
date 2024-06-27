@@ -19,7 +19,7 @@ export const createVersion: CreateVersion = async function createVersion(
   },
 ) {
   const VersionModel = this.versions[collectionSlug]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const [doc] = await VersionModel.create(
     [

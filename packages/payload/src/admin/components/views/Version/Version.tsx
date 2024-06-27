@@ -138,7 +138,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
 
     setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
-    setLatestPublishedVersion(formattedPublished?.id)
+    setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
   }, [draft, published])
 
   useEffect(() => {
