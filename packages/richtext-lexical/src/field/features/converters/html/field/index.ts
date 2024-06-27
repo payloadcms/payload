@@ -26,7 +26,7 @@ export const consolidateHTMLConverters = ({
   const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
   const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature?.props
 
-  const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
+  const defaultConvertersWithConvertersFromFeatures = [...defaultHTMLConverters]
 
   for (const converter of editorConfig.features.converters.html) {
     defaultConvertersWithConvertersFromFeatures.push(converter)
