@@ -171,7 +171,15 @@ const handleCustomEndpoints = ({
         ...payloadRequest.routeParams,
         ...handlerParams,
       }
-      return customEndpoint.handler(payloadRequest)
+      const res = customEndpoint.handler(payloadRequest)
+
+      if (res instanceof Response) {
+        if (payloadRequest.responseHeaders) {
+          mergeHeaders(payloadRequest.responseHeaders, res.headers)
+        }
+
+        return res
+      }
     }
   }
 
@@ -377,7 +385,13 @@ export const GET =
         res = await endpoints.root.GET[slug1]({ req: payloadRequest })
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
@@ -385,13 +399,7 @@ export const GET =
         payloadRequest: req,
       })
 
-      if (customEndpointResponse) {
-        if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, customEndpointResponse.headers)
-        }
-
-        return customEndpointResponse
-      }
+      if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
         slug,
@@ -553,7 +561,13 @@ export const POST =
         res = await endpoints.root.POST[slug1]({ req: payloadRequest })
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
@@ -561,13 +575,7 @@ export const POST =
         payloadRequest: req,
       })
 
-      if (customEndpointResponse) {
-        if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, customEndpointResponse.headers)
-        }
-
-        return customEndpointResponse
-      }
+      if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
         slug,
@@ -641,7 +649,13 @@ export const DELETE =
         }
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
@@ -649,13 +663,7 @@ export const DELETE =
         payloadRequest: req,
       })
 
-      if (customEndpointResponse) {
-        if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, customEndpointResponse.headers)
-        }
-
-        return customEndpointResponse
-      }
+      if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
         slug,
@@ -730,13 +738,20 @@ export const PATCH =
         }
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
+
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
