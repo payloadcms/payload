@@ -27,6 +27,7 @@ Additionally, `auth`-enabled collections feature the following hooks:
 - [afterMe](#afterme)
 - [afterForgotPassword](#afterforgotpassword)
 - [refresh](#refresh)
+- [me](#me)
 
 ## Config
 
@@ -61,6 +62,7 @@ export const ExampleHooks: CollectionConfig = {
     afterMe: [(args) => {...}],
     afterForgotPassword: [(args) => {...}],
     refresh: [(args) => {...}],
+    me: [(args) => {...}],
   },
 }
 ```
@@ -314,6 +316,19 @@ const myRefreshHook: CollectionRefreshHook = async ({
 }) => {...}
 ```
 
+### me
+
+For auth-enabled Collections, this hook allows you to optionally replace the default behavior of the `me` operation with your own. If you optionally return a value from your hook, the operation will not perform its own logic and continue.
+
+```ts
+import type { CollectionMeHook } from 'payload'
+
+const meHook: CollectionMeHook = async ({
+  args, // arguments passed into the `me` operation
+  user, // the user as queried from the database 
+}) => {...}
+```
+
 ## TypeScript
 
 Payload exports a type for each Collection hook which can be accessed as follows:
@@ -335,5 +350,6 @@ import type {
   CollectionAfterMeHook,
   CollectionAfterForgotPasswordHook,
   CollectionRefreshHook,
+  CollectionMeHook,
 } from 'payload'
 ```

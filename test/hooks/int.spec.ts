@@ -326,6 +326,32 @@ describe('Hooks', () => {
   })
 
   describe('auth collection hooks', () => {
+    let hookUser
+    let hookUserToken
+
+    beforeAll(async () => {
+      const email = 'dontrefresh@payloadcms.com'
+
+      hookUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email,
+          password: devUser.password,
+          roles: ['admin'],
+        },
+      })
+
+      const { token } = await payload.login({
+        collection: hooksUsersSlug,
+        data: {
+          email: hookUser.email,
+          password: devUser.password,
+        },
+      })
+
+      hookUserToken = token
+    })
+
     it('should call afterLogin hook', async () => {
       const { user } = await payload.login({
         collection: hooksUsersSlug,
@@ -355,28 +381,9 @@ describe('Hooks', () => {
     })
 
     it('should respect refresh hooks', async () => {
-      const email = 'dontrefresh@payloadcms.com'
-
-      await payload.create({
-        collection: hooksUsersSlug,
-        data: {
-          email,
-          password: devUser.password,
-          roles: ['admin'],
-        },
-      })
-
-      const { token } = await payload.login({
-        collection: hooksUsersSlug,
-        data: {
-          email,
-          password: devUser.password,
-        },
-      })
-
       const response = await restClient.POST(`/${hooksUsersSlug}/refresh-token`, {
         headers: {
-          Authorization: `JWT ${token}`,
+          Authorization: `JWT ${hookUserToken}`,
         },
       })
 
@@ -384,6 +391,18 @@ describe('Hooks', () => {
 
       expect(data.exp).toStrictEqual(1)
       expect(data.refreshedToken).toStrictEqual('fake')
+    })
+
+    it('should respect me hooks', async () => {
+      const response = await restClient.GET(`/${hooksUsersSlug}/me`, {
+        headers: {
+          Authorization: `JWT ${hookUserToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.exp).toStrictEqual(10000)
     })
   })
 
