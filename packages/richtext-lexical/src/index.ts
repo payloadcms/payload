@@ -981,3 +981,5 @@ export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.j
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
 
 export * from './nodeTypes.js'
+
+export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
