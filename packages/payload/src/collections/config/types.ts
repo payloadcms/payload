@@ -8,8 +8,8 @@ import type {
   CustomSaveDraftButton,
   CustomUpload,
 } from '../../admin/types.js'
+import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
-  Arguments as MeArguments,
   Arguments as RefreshArguments,
   Result as RefreshResult,
 } from '../../auth/operations/refresh.js'
