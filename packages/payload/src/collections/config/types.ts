@@ -11,11 +11,11 @@ import type {
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
+import type { Arguments as MeArguments } from '../../auth/operations/me'
 import type {
-  Arguments as MeArguments,
   Arguments as RefreshArguments,
   Result as RefreshResult,
-} from '../../auth/operations/refresh.js'
+} from '../../auth/operations/refresh'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
