@@ -123,3 +123,5 @@ export {
   $isBlockNode,
   BlockNode,
 } from '../../features/blocks/nodes/BlocksNode.js'
+
+export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'

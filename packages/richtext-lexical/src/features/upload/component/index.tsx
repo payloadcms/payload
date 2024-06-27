@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Data } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
@@ -12,6 +12,7 @@ import {
   useConfig,
   useDocumentDrawer,
   useDrawerSlug,
+  useModal,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
@@ -28,13 +29,13 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from 'rea
 
 import type { ClientComponentProps } from '../../typesClient.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
-import type { UploadData } from '../nodes/UploadNode.js'
+import type { UploadData, UploadNode } from '../nodes/UploadNode.js'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
+import { FieldsDrawer } from '../../../utilities/fieldsDrawer/Drawer.js'
 import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import { $isUploadNode } from '../nodes/UploadNode.js'
-import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'lexical-upload'
@@ -60,6 +61,7 @@ const Component: React.FC<ElementProps> = (props) => {
     serverURL,
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
+  const { closeModal } = useModal()
 
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
@@ -68,7 +70,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection, setRelatedCollection] = useState<ClientCollectionConfig>(() =>
+  const [relatedCollection] = useState<ClientCollectionConfig>(() =>
     collections.find((coll) => coll.slug === relationTo),
   )
 
@@ -94,7 +96,7 @@ const Component: React.FC<ElementProps> = (props) => {
   }, [editor, nodeKey])
 
   const updateUpload = useCallback(
-    (json) => {
+    (data: Data) => {
       setParams({
         ...initialParams,
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
@@ -107,9 +109,8 @@ const Component: React.FC<ElementProps> = (props) => {
   )
 
   const $onDelete = useCallback(
-    (payload: KeyboardEvent) => {
+    (event: KeyboardEvent) => {
       if (isSelected && $isNodeSelection($getSelection())) {
-        const event: KeyboardEvent = payload
         event.preventDefault()
         const node = $getNodeByKey(nodeKey)
         if ($isUploadNode(node)) {
@@ -122,8 +123,7 @@ const Component: React.FC<ElementProps> = (props) => {
     [isSelected, nodeKey],
   )
   const onClick = useCallback(
-    (payload: MouseEvent) => {
-      const event = payload
+    (event: MouseEvent) => {
       // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
       if (event.target === uploadRef.current || uploadRef.current?.contains(event.target as Node)) {
         if (event.shiftKey) {
@@ -155,6 +155,25 @@ const Component: React.FC<ElementProps> = (props) => {
     editorConfig?.resolvedFeatureMap?.get('upload')
       ?.sanitizedClientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
+
+  const onExtraFieldsDrawerSubmit = useCallback(
+    (_, data) => {
+      // Update lexical node (with key nodeKey) with new data
+      editor.update(() => {
+        const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
+        if (uploadNode) {
+          const newData: UploadData = {
+            ...uploadNode.getData(),
+            fields: data,
+          }
+          uploadNode.setData(newData)
+        }
+      })
+
+      closeModal(drawerSlug)
+    },
+    [closeModal, editor, drawerSlug, nodeKey],
+  )
 
   return (
     <div
@@ -239,10 +258,15 @@ const Component: React.FC<ElementProps> = (props) => {
       </div>
       {value && <DocumentDrawer onSave={updateUpload} />}
       {hasExtraFields ? (
-        <ExtraFieldsUploadDrawer
+        <FieldsDrawer
+          data={fields}
           drawerSlug={drawerSlug}
-          relatedCollection={relatedCollection}
-          {...props}
+          drawerTitle={t('general:editLabel', {
+            label: getTranslation(relatedCollection.labels.singular, i18n),
+          })}
+          featureKey="upload"
+          handleDrawerSubmit={onExtraFieldsDrawerSubmit}
+          schemaPathSuffix={relatedCollection.slug}
         />
       ) : null}
     </div>

@@ -1,8 +1,8 @@
+'use client'
 import type { FormProps } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 import {
-  Drawer,
   Form,
   FormSubmit,
   RenderFields,
@@ -15,13 +15,16 @@ import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
-import './index.scss'
-import { type Props } from './types.js'
+import type { FieldsDrawerProps } from './Drawer.js'
 
-const baseClass = 'lexical-link-edit-drawer'
+import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
 
-export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, stateData }) => {
+export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
+  data,
+  featureKey,
+  handleDrawerSubmit,
+  schemaPathSuffix,
+}) => {
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
@@ -31,8 +34,8 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const componentMapRenderedFieldsPath = `feature.link.fields.fields`
-  const schemaFieldsPath = `${schemaPath}.feature.link.fields`
+  const componentMapRenderedFieldsPath = `feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+  const schemaFieldsPath = `${schemaPath}.feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
   const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath) // Field Schema
 
@@ -42,7 +45,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
         apiRoute: config.routes.api,
         body: {
           id,
-          data: stateData,
+          data,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -52,10 +55,10 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
       setInitialState(state)
     }
 
-    if (stateData) {
+    if (data) {
       void awaitInitialState()
     }
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, stateData])
+  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -74,29 +77,29 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     [config.routes.api, config.serverURL, schemaFieldsPath, id],
   )
 
-  return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
-      {initialState !== false && (
-        <Form
-          beforeSubmit={[onChange]}
-          disableValidationOnSubmit
-          fields={Array.isArray(fieldMap) ? fieldMap : []}
-          initialState={initialState}
-          onChange={[onChange]}
-          onSubmit={handleModalSubmit}
-          uuid={uuid()}
-        >
-          <RenderFields
-            fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
-            forceRender
-            path="" // See Blocks feature path for details as for why this is empty
-            readOnly={false}
-            schemaPath={schemaFieldsPath}
-          />
+  if (initialState === false) {
+    return null
+  }
 
-          <FormSubmit>{t('general:submit')}</FormSubmit>
-        </Form>
-      )}
-    </Drawer>
+  return (
+    <Form
+      beforeSubmit={[onChange]}
+      disableValidationOnSubmit
+      fields={Array.isArray(fieldMap) ? fieldMap : []}
+      initialState={initialState}
+      onChange={[onChange]}
+      onSubmit={handleDrawerSubmit}
+      uuid={uuid()}
+    >
+      <RenderFields
+        fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+        forceRender
+        path="" // See Blocks feature path for details as for why this is empty
+        readOnly={false}
+        schemaPath={schemaFieldsPath}
+      />
+
+      <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+    </Form>
   )
 }
