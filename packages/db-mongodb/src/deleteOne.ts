@@ -12,7 +12,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   { collection, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const query = await Model.buildQuery({
     payload: this.payload,

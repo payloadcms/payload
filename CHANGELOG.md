@@ -1,3 +1,36 @@
+## [2.23.1](https://github.com/payloadcms/payload/compare/v2.23.0...v2.23.1) (2024-06-28)
+
+### Bug Fixes
+
+* remove unused refresh arg, this affected me/refresh hooks ([#6976](https://github.com/payloadcms/payload/issues/6976)) ([c82d2ca](https://github.com/payloadcms/payload/commit/77e8ce980ef0bcb0380b499dd1ccdfd36199b707))
+
+## [2.23.0](https://github.com/payloadcms/payload/compare/v2.22.2...v2.23.0) (2024-06-28)
+
+
+### Features
+
+* adds me and refresh hooks ([#6968](https://github.com/payloadcms/payload/issues/6968)) ([c82d2ca](https://github.com/payloadcms/payload/commit/c82d2caa29422083e97affc99a033296d78892d6))
+
+
+### Bug Fixes
+
+* **richtext-lexical:** html converters unnecessarily growing over time ([#6963](https://github.com/payloadcms/payload/issues/6963)) ([cf52d64](https://github.com/payloadcms/payload/commit/cf52d64d984d98ab782ca33f20b43c935ce60683))
+
+## [2.22.2](https://github.com/payloadcms/payload/compare/v2.22.1...v2.22.2) (2024-06-26)
+
+
+### Bug Fixes
+
+* return exp and strategy from auth ([#6943](https://github.com/payloadcms/payload/issues/6943)) ([ea18735](https://github.com/payloadcms/payload/commit/ea18735d3b2d2a96989009130e3724aab487e520))
+
+## [2.22.1](https://github.com/payloadcms/payload/compare/v2.22.0...v2.22.1) (2024-06-25)
+
+
+### Bug Fixes
+
+* graphql query concurrency issues ([#6857](https://github.com/payloadcms/payload/issues/6857)) ([bb911cc](https://github.com/payloadcms/payload/commit/bb911cc7eca1eeef15ade8eb043c0056c281e311))
+* sends cropped image pixel values to server instead of percent values ([#6852](https://github.com/payloadcms/payload/issues/6852)) ([8747743](https://github.com/payloadcms/payload/commit/874774375f8beada9bac0a8ef3e77f63adc30834))
+
 ## [2.22.0](https://github.com/payloadcms/payload/compare/v2.21.0...v2.22.0) (2024-06-20)
 
 

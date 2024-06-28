@@ -8,6 +8,8 @@ export type AuthContext<T = User> = {
   refreshCookieAsync: () => Promise<User>
   refreshPermissions: ({ locale }?: { locale?: string }) => Promise<void>
   setUser: (user: T) => void
+  strategy?: string
   token?: string
+  tokenExpiration?: number
   user?: T | null
 }

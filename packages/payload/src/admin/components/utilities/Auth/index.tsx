@@ -20,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
+  const [strategy, setStrategy] = useState<string>()
   const { pathname } = useLocation()
   const { push } = useHistory()
 
@@ -93,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
     setTokenExpiration(undefined)
+    setStrategy(undefined)
   }, [])
 
   const setTokenAndExpiration = useCallback(
@@ -101,6 +103,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token && json?.exp) {
         setTokenInMemory(token)
         setTokenExpiration(json.exp)
+        if (json.strategy) {
+          setStrategy(json.strategy)
+        }
       } else {
         revokeTokenAndExpire()
       }
@@ -324,7 +329,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshCookieAsync,
         refreshPermissions,
         setUser: setActiveUser,
+        strategy,
         token: tokenInMemory,
+        tokenExpiration,
         user,
       }}
     >
