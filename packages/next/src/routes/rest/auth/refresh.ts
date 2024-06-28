@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { extractJWT, generatePayloadCookie, refreshOperation } from 'payload'
+import { generatePayloadCookie, refreshOperation } from 'payload'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -7,29 +7,15 @@ import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
   const { t } = req
-  const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
 
   const headers = headersWithCors({
     headers: new Headers(),
     req,
   })
 
-  if (!token) {
-    return Response.json(
-      {
-        message: t('error:tokenNotProvided'),
-      },
-      {
-        headers,
-        status: httpStatus.UNAUTHORIZED,
-      },
-    )
-  }
-
   const result = await refreshOperation({
     collection,
     req,
-    token,
   })
 
   if (result.setCookie) {

@@ -416,9 +416,6 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
