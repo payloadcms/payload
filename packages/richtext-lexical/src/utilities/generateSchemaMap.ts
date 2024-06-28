@@ -24,7 +24,7 @@ export const getGenerateSchemaMap =
 
       if (schemas) {
         for (const [schemaKey, fields] of schemas.entries()) {
-          // generate schema map entried for sub-fields using traverseFields
+          // generate schema map entries for sub-fields using traverseFields
           traverseFields({
             config,
             fields,
