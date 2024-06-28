@@ -2,8 +2,10 @@ import type { LocalizedPost } from './payload-types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import { englishLocale } from '../globals/config'
 import { ArrayCollection } from './collections/Array'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
+import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
 import {
   blocksWithLocalizedSameName,
   defaultLocale,
@@ -45,6 +47,18 @@ export default buildConfigWithDefaults({
           name: 'relation',
           relationTo: localizedPostsSlug,
           type: 'relationship',
+        },
+        {
+          name: 'assignedLocales',
+          type: 'select',
+          hasMany: true,
+          options: [defaultLocale, spanishLocale, portugueseLocale, 'ar'],
+        },
+        {
+          type: 'select',
+          name: 'roles',
+          options: ['admin', 'editor'],
+          defaultValue: 'admin',
         },
       ],
       slug: 'users',
@@ -263,6 +277,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    RestrictedByLocaleCollection,
   ],
   globals: [
     {
@@ -285,28 +300,7 @@ export default buildConfigWithDefaults({
   localization: {
     defaultLocale,
     fallback: true,
-    locales: [
-      {
-        code: defaultLocale,
-        label: 'English',
-        rtl: false,
-      },
-      {
-        code: spanishLocale,
-        label: 'Spanish',
-        rtl: false,
-      },
-      {
-        code: portugueseLocale,
-        fallbackLocale: spanishLocale,
-        label: 'Portuguese',
-      },
-      {
-        code: 'ar',
-        label: 'Arabic',
-        rtl: true,
-      },
-    ],
+    locales: [defaultLocale, spanishLocale, portugueseLocale, 'ar'],
   },
   onInit: async (payload) => {
     const collection = localizedPostsSlug
@@ -331,6 +325,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
         relation: localizedPost.id,
+        assignedLocales: [englishLocale, spanishLocale],
       },
     })
 
