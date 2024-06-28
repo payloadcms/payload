@@ -12,17 +12,9 @@ type Args = {
   i18n: I18n<any, any>
   schemaMap: FieldSchemaMap
   schemaPath: string
-  validRelationships: string[]
 }
 
-export const traverseFields = ({
-  config,
-  fields,
-  i18n,
-  schemaMap,
-  schemaPath,
-  validRelationships,
-}: Args) => {
+export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: Args) => {
   fields.map((field) => {
     switch (field.type) {
       case 'group':
@@ -35,7 +27,6 @@ export const traverseFields = ({
           i18n,
           schemaMap,
           schemaPath: `${schemaPath}.${field.name}`,
-          validRelationships,
         })
         break
 
@@ -47,7 +38,6 @@ export const traverseFields = ({
           i18n,
           schemaMap,
           schemaPath,
-          validRelationships,
         })
         break
 
@@ -63,7 +53,6 @@ export const traverseFields = ({
             i18n,
             schemaMap,
             schemaPath: blockSchemaPath,
-            validRelationships,
           })
         })
         break
@@ -101,7 +90,6 @@ export const traverseFields = ({
             i18n,
             schemaMap,
             schemaPath: tabSchemaPath,
-            validRelationships,
           })
         })
         break
