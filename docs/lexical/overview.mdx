@@ -199,6 +199,7 @@ import type {
   SerializedTextNode,
   SerializedUploadNode,
   TypedEditorState,
+  SerializedHeadingNode,
 } from '@payloadcms/richtext-lexical'
 
 const editorState: TypedEditorState<
@@ -213,6 +214,7 @@ const editorState: TypedEditorState<
   | SerializedRelationshipNode
   | SerializedTextNode
   | SerializedUploadNode
+  | SerializedHeadingNode
 > = {
   root: {
     type: 'root',
@@ -244,6 +246,47 @@ const editorState: TypedEditorState<
   },
 }
 ```
+
+Alternatively, you can use the `DefaultTypedEditorState` type, which includes all types for all nodes included in the `defaultFeatures`:
+
+```ts
+import type {
+  DefaultTypedEditorState
+} from '@payloadcms/richtext-lexical'
+
+const editorState: DefaultTypedEditorState = {
+  root: {
+    type: 'root',
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Some text. Every property here is fully-typed',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        textFormat: 0,
+        version: 1,
+      },
+    ],
+  },
+}
+```
+
+Just like `TypedEditorState`, the `DefaultTypedEditorState` also accepts an optional node type union as a generic. Here, this would **add** the specified node types to the default ones. Example: `DefaultTypedEditorState<SerializedBlockNode | YourCustomSerializedNode>`.
 
 This is a type-safe representation of the editor state. Looking at the auto-suggestions of `type` it will show you all the possible node types you can use.
 

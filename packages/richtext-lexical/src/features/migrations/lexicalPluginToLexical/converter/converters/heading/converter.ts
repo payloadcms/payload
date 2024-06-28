@@ -1,5 +1,4 @@
-import type { SerializedHeadingNode } from '@lexical/rich-text'
-
+import type { SerializedHeadingNode } from '../../../../../heading/feature.server.js'
 import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
