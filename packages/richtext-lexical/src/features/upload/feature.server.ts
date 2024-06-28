@@ -82,23 +82,14 @@ export const UploadFeature = createServerFeature<
     return {
       ClientFeature: UploadFeatureClient,
       clientFeatureProps: clientProps,
-      generateSchemaMap: ({ config, i18n, props }) => {
+      generateSchemaMap: ({ props }) => {
         if (!props?.collections) return null
 
         const schemaMap = new Map<string, Field[]>()
-        const validRelationships = config.collections.map((c) => c.slug) || []
 
         for (const collection in props.collections) {
           if (props.collections[collection].fields?.length) {
             schemaMap.set(collection, props.collections[collection].fields)
-            traverseFields({
-              config,
-              fields: props.collections[collection].fields,
-              i18n,
-              schemaMap,
-              schemaPath: collection,
-              validRelationships,
-            })
           }
         }
 
