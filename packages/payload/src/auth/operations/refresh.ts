@@ -26,7 +26,6 @@ export type Arguments = {
   collection: Collection
   req: PayloadRequest
   res?: Response
-  token: string
 }
 
 async function refresh(incomingArgs: Arguments): Promise<Result> {
@@ -66,7 +65,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       },
     } = args
 
-    if (typeof args.token !== 'string' || !args.req.user) throw new Forbidden(args.req.t)
+    if (!args.req.user) throw new Forbidden(args.req.t)
 
     const parsedURL = url.parse(args.req.url)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
