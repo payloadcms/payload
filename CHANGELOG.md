@@ -1,3 +1,15 @@
+## [2.23.0](https://github.com/payloadcms/payload/compare/v2.22.2...v2.23.0) (2024-06-28)
+
+
+### Features
+
+* adds me and refresh hooks ([#6968](https://github.com/payloadcms/payload/issues/6968)) ([c82d2ca](https://github.com/payloadcms/payload/commit/c82d2caa29422083e97affc99a033296d78892d6))
+
+
+### Bug Fixes
+
+* **richtext-lexical:** html converters unnecessarily growing over time ([#6963](https://github.com/payloadcms/payload/issues/6963)) ([cf52d64](https://github.com/payloadcms/payload/commit/cf52d64d984d98ab782ca33f20b43c935ce60683))
+
 ## [2.22.2](https://github.com/payloadcms/payload/compare/v2.22.1...v2.22.2) (2024-06-26)
 
 
