@@ -15,7 +15,7 @@ type Args = {
 }
 
 export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: Args) => {
-  fields.map((field) => {
+  for (const field of fields) {
     switch (field.type) {
       case 'group':
       case 'array':
@@ -94,5 +94,5 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
         })
         break
     }
-  })
+  }
 }
