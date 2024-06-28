@@ -2,6 +2,9 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { GenerateDescription, GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+import type { Page } from 'plugin-seo/payload-types.js'
+
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
@@ -12,6 +15,18 @@ import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
+
+const generateTitle: GenerateTitle<Page> = ({ doc }) => {
+  return `Website.com — ${doc?.title}`
+}
+
+const generateDescription: GenerateDescription<Page> = ({ doc }) => {
+  return doc?.excerpt || 'generated description'
+}
+
+const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
+  return `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug || ''}`
+}
 
 export default buildConfigWithDefaults({
   collections: [Users, Pages, Media],
@@ -59,10 +74,9 @@ export default buildConfigWithDefaults({
           label: 'og:title',
         },
       ],
-      generateDescription: ({ doc }: any) => doc?.excerpt?.value || 'generated description',
-      generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
-      generateURL: ({ doc, locale }: any) =>
-        `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug?.value || ''}`,
+      generateDescription,
+      generateTitle,
+      generateURL,
       tabbedUI: true,
       uploadsCollection: 'media',
     }),
