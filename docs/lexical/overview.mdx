@@ -199,6 +199,7 @@ import type {
   SerializedTextNode,
   SerializedUploadNode,
   TypedEditorState,
+  SerializedHeadingNode,
 } from '@payloadcms/richtext-lexical'
 
 const editorState: TypedEditorState<
@@ -213,6 +214,7 @@ const editorState: TypedEditorState<
   | SerializedRelationshipNode
   | SerializedTextNode
   | SerializedUploadNode
+  | SerializedHeadingNode
 > = {
   root: {
     type: 'root',
@@ -244,6 +246,8 @@ const editorState: TypedEditorState<
   },
 }
 ```
+
+Alternatively, oyo
 
 This is a type-safe representation of the editor state. Looking at the auto-suggestions of `type` it will show you all the possible node types you can use.
 

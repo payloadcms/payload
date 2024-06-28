@@ -5,8 +5,11 @@ import type {
   Spread,
   TextModeType,
 } from 'lexical'
+
 export type { SerializedQuoteNode } from './features/blockquote/feature.server.js'
 export type { SerializedBlockNode } from './features/blocks/nodes/BlocksNode.js'
+export type { SerializedHeadingNode } from './features/heading/feature.server.js'
+
 export type { SerializedHorizontalRuleNode } from './features/horizontalRule/nodes/HorizontalRuleNode.js'
 
 export type { SerializedAutoLinkNode, SerializedLinkNode } from './features/link/nodes/types.js'
