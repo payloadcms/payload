@@ -1,6 +1,5 @@
 import type { Block, BlockField, Config, Field } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { baseBlockFields, fieldsToJSONSchema, formatLabels, sanitizeFields } from 'payload'
 
 import type { BlocksFeatureClientProps } from './feature.client.js'

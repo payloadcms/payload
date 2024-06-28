@@ -8,7 +8,6 @@ import type {
   TypeWithID,
 } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload'
 
 import type { UploadFeaturePropsClient } from './feature.client.js'

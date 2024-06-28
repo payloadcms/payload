@@ -1,6 +1,5 @@
 import type { CollectionSlug, Config, Field, FieldAffectingData, SanitizedConfig } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload'
 import { deepCopyObject } from 'payload/shared'
 
