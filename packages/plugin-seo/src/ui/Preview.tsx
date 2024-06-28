@@ -2,7 +2,13 @@
 
 import type { FormField, UIField } from 'payload'
 
-import { useAllFormFields, useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
+import {
+  useAllFormFields,
+  useDocumentInfo,
+  useForm,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
@@ -17,6 +23,7 @@ export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
+  const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
   const {
@@ -31,7 +38,7 @@ export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
       const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
         body: JSON.stringify({
           ...docInfo,
-          doc: { ...fields },
+          doc: { ...getData() },
           locale: typeof locale === 'object' ? locale?.code : locale,
         } satisfies Parameters<GenerateURL>[0]),
         credentials: 'include',
@@ -49,7 +56,7 @@ export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
     if (hasGenerateURLFn && !href) {
       void getHref()
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn])
+  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData])
 
   return (
     <div>

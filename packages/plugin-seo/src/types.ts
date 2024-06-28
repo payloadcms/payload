@@ -1,22 +1,22 @@
 import type { DocumentInfoContext } from '@payloadcms/ui'
 import type { Field, TextField, TextareaField, UploadField } from 'payload'
 
-export type GenerateTitle = <T = any>(
+export type GenerateTitle<T = any> = (
   args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
-export type GenerateDescription = <T = any>(
+export type GenerateDescription<T = any> = (
   args: DocumentInfoContext & {
     doc: T
     locale?: string
   },
 ) => Promise<string> | string
 
-export type GenerateImage = <T = any>(
+export type GenerateImage<T = any> = (
   args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
-export type GenerateURL = <T = any>(
+export type GenerateURL<T = any> = (
   args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
