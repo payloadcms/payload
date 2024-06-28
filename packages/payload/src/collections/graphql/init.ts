@@ -423,9 +423,6 @@ function initCollectionsGraphQL(payload: Payload): void {
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
