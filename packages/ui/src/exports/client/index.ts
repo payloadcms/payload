@@ -18,6 +18,8 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
+export { Translation } from '../../elements/Translation/index.js'
+export { default as DatePicker } from '../../elements/DatePicker/DatePicker.jsx'
 export { ViewDescription } from '../../elements/ViewDescription/index.js'
 export { AppHeader } from '../../elements/AppHeader/index.js'
 export { Button } from '../../elements/Button/index.js'
@@ -224,5 +226,4 @@ export { SearchParamsProvider, useSearchParams } from '../../providers/SearchPar
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 export { type Theme, ThemeProvider, defaultTheme, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
-export { Translation } from '../../elements/Translation/index.js'
 export { WindowInfoProvider, useWindowInfo } from '../../providers/WindowInfo/index.js'
