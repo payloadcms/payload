@@ -245,7 +245,7 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        if ('hasMany' in field && field.hasMany) {
+        if ('hasMany' in field && field.hasMany && field.dbJsonColumn) {
           targetTable[fieldName] = withDefault(jsonb(fieldName), field)
           break
         }
