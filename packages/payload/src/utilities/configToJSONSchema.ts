@@ -152,133 +152,163 @@ export function fieldsToJSONSchema(
         if (isRequired) requiredFieldNames.add(field.name)
 
         let fieldSchema: JSONSchema4
-        switch (field.type) {
-          case 'text':
-            if (field.hasMany === true) {
-              fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: { type: 'string' },
+
+        if ('typeGenSchema' in field && field.typeGenSchema) {
+          fieldSchema = field.typeGenSchema
+        } else {
+          switch (field.type) {
+            case 'text':
+              if (field.hasMany === true) {
+                fieldSchema = {
+                  type: withNullableJSONSchemaType('array', isRequired),
+                  items: { type: 'string' },
+                }
+              } else {
+                fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
               }
-            } else {
+              break
+            case 'textarea':
+            case 'code':
+            case 'email':
+            case 'date': {
               fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
+              break
             }
-            break
-          case 'textarea':
-          case 'code':
-          case 'email':
-          case 'date': {
-            fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
-            break
-          }
 
-          case 'number': {
-            if (field.hasMany === true) {
-              fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: { type: 'number' },
+            case 'number': {
+              if (field.hasMany === true) {
+                fieldSchema = {
+                  type: withNullableJSONSchemaType('array', isRequired),
+                  items: { type: 'number' },
+                }
+              } else {
+                fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
               }
-            } else {
-              fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
+              break
             }
-            break
-          }
 
-          case 'checkbox': {
-            fieldSchema = { type: withNullableJSONSchemaType('boolean', isRequired) }
-            break
-          }
+            case 'checkbox': {
+              fieldSchema = { type: withNullableJSONSchemaType('boolean', isRequired) }
+              break
+            }
 
-          case 'json': {
-            fieldSchema = {
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-            }
-            break
-          }
-
-          case 'richText': {
-            if (!field?.editor) {
-              throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-            }
-            if (typeof field.editor === 'function') {
-              throw new Error('Attempted to access unsanitized rich text editor.')
-            }
-            if (field.editor.outputSchema) {
-              fieldSchema = field.editor.outputSchema({
-                collectionIDFieldTypes,
-                config,
-                field,
-                interfaceNameDefinitions,
-                isRequired,
-              })
-            } else {
-              // Maintain backwards compatibility with existing rich text editors
+            case 'json': {
               fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  type: 'object',
-                },
+                type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
               }
+              break
             }
 
-            break
-          }
+            case 'richText': {
+              if (!field?.editor) {
+                throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+              }
+              if (typeof field.editor === 'function') {
+                throw new Error('Attempted to access unsanitized rich text editor.')
+              }
+              if (field.editor.outputSchema) {
+                fieldSchema = field.editor.outputSchema({
+                  collectionIDFieldTypes,
+                  config,
+                  field,
+                  interfaceNameDefinitions,
+                  isRequired,
+                })
+              } else {
+                // Maintain backwards compatibility with existing rich text editors
+                fieldSchema = {
+                  type: withNullableJSONSchemaType('array', isRequired),
+                  items: {
+                    type: 'object',
+                  },
+                }
+              }
 
-          case 'radio': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('string', isRequired),
-              enum: buildOptionEnums(field.options),
+              break
             }
 
-            break
-          }
-
-          case 'select': {
-            const optionEnums = buildOptionEnums(field.options)
-
-            if (field.hasMany) {
-              fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  type: 'string',
-                  enum: optionEnums,
-                },
-              }
-            } else {
+            case 'radio': {
               fieldSchema = {
                 type: withNullableJSONSchemaType('string', isRequired),
-                enum: optionEnums,
+                enum: buildOptionEnums(field.options),
               }
+
+              break
             }
 
-            break
-          }
+            case 'select': {
+              const optionEnums = buildOptionEnums(field.options)
 
-          case 'point': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('array', isRequired),
-              items: [
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'number',
-                },
-              ],
-              maxItems: 2,
-              minItems: 2,
-            }
-            break
-          }
-
-          case 'relationship': {
-            if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
                   type: withNullableJSONSchemaType('array', isRequired),
                   items: {
+                    type: 'string',
+                    enum: optionEnums,
+                  },
+                }
+              } else {
+                fieldSchema = {
+                  type: withNullableJSONSchemaType('string', isRequired),
+                  enum: optionEnums,
+                }
+              }
+
+              break
+            }
+
+            case 'point': {
+              fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: [
+                  {
+                    type: 'number',
+                  },
+                  {
+                    type: 'number',
+                  },
+                ],
+                maxItems: 2,
+                minItems: 2,
+              }
+              break
+            }
+
+            case 'relationship': {
+              if (Array.isArray(field.relationTo)) {
+                if (field.hasMany) {
+                  fieldSchema = {
+                    type: withNullableJSONSchemaType('array', isRequired),
+                    items: {
+                      oneOf: field.relationTo.map((relation) => {
+                        return {
+                          type: 'object',
+                          additionalProperties: false,
+                          properties: {
+                            relationTo: {
+                              const: relation,
+                            },
+                            value: {
+                              oneOf: [
+                                {
+                                  type: collectionIDFieldTypes[relation],
+                                },
+                                {
+                                  $ref: `#/definitions/${relation}`,
+                                },
+                              ],
+                            },
+                          },
+                          required: ['value', 'relationTo'],
+                        }
+                      }),
+                    },
+                  }
+                } else {
+                  fieldSchema = {
                     oneOf: field.relationTo.map((relation) => {
                       return {
-                        type: 'object',
+                        type: withNullableJSONSchemaType('object', isRequired),
                         additionalProperties: false,
                         properties: {
                           relationTo: {
@@ -298,125 +328,173 @@ export function fieldsToJSONSchema(
                         required: ['value', 'relationTo'],
                       }
                     }),
+                  }
+                }
+              } else if (field.hasMany) {
+                fieldSchema = {
+                  type: withNullableJSONSchemaType('array', isRequired),
+                  items: {
+                    oneOf: [
+                      {
+                        type: collectionIDFieldTypes[field.relationTo],
+                      },
+                      {
+                        $ref: `#/definitions/${field.relationTo}`,
+                      },
+                    ],
                   },
                 }
               } else {
                 fieldSchema = {
-                  oneOf: field.relationTo.map((relation) => {
-                    return {
-                      type: withNullableJSONSchemaType('object', isRequired),
-                      additionalProperties: false,
-                      properties: {
-                        relationTo: {
-                          const: relation,
-                        },
-                        value: {
-                          oneOf: [
-                            {
-                              type: collectionIDFieldTypes[relation],
-                            },
-                            {
-                              $ref: `#/definitions/${relation}`,
-                            },
-                          ],
-                        },
-                      },
-                      required: ['value', 'relationTo'],
-                    }
-                  }),
-                }
-              }
-            } else if (field.hasMany) {
-              fieldSchema = {
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
                   oneOf: [
                     {
-                      type: collectionIDFieldTypes[field.relationTo],
+                      type: withNullableJSONSchemaType(
+                        collectionIDFieldTypes[field.relationTo],
+                        isRequired,
+                      ),
                     },
                     {
                       $ref: `#/definitions/${field.relationTo}`,
                     },
                   ],
-                },
+                }
               }
-            } else {
+
+              break
+            }
+
+            case 'upload': {
               fieldSchema = {
                 oneOf: [
                   {
-                    type: withNullableJSONSchemaType(
-                      collectionIDFieldTypes[field.relationTo],
-                      isRequired,
-                    ),
+                    type: collectionIDFieldTypes[field.relationTo],
                   },
                   {
                     $ref: `#/definitions/${field.relationTo}`,
                   },
                 ],
               }
+              if (!isRequired) fieldSchema.oneOf.push({ type: 'null' })
+              break
             }
 
-            break
-          }
+            case 'blocks': {
+              fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: {
+                  oneOf: field.blocks.map((block) => {
+                    const blockFieldSchemas = fieldsToJSONSchema(
+                      collectionIDFieldTypes,
+                      block.fields,
+                      interfaceNameDefinitions,
+                      config,
+                    )
 
-          case 'upload': {
-            fieldSchema = {
-              oneOf: [
-                {
-                  type: collectionIDFieldTypes[field.relationTo],
+                    const blockSchema: JSONSchema4 = {
+                      type: 'object',
+                      additionalProperties: false,
+                      properties: {
+                        ...blockFieldSchemas.properties,
+                        blockType: {
+                          const: block.slug,
+                        },
+                      },
+                      required: ['blockType', ...blockFieldSchemas.required],
+                    }
+
+                    if (block.interfaceName) {
+                      interfaceNameDefinitions.set(block.interfaceName, blockSchema)
+
+                      return {
+                        $ref: `#/definitions/${block.interfaceName}`,
+                      }
+                    }
+
+                    return blockSchema
+                  }),
                 },
-                {
-                  $ref: `#/definitions/${field.relationTo}`,
-                },
-              ],
+              }
+              break
             }
-            if (!isRequired) fieldSchema.oneOf.push({ type: 'null' })
-            break
-          }
 
-          case 'blocks': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('array', isRequired),
-              items: {
-                oneOf: field.blocks.map((block) => {
-                  const blockFieldSchemas = fieldsToJSONSchema(
+            case 'array': {
+              fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
+                items: {
+                  type: 'object',
+                  additionalProperties: false,
+                  ...fieldsToJSONSchema(
                     collectionIDFieldTypes,
-                    block.fields,
+                    field.fields,
                     interfaceNameDefinitions,
                     config,
-                  )
+                  ),
+                },
+              }
 
-                  const blockSchema: JSONSchema4 = {
+              if (field.interfaceName) {
+                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+                fieldSchema = {
+                  $ref: `#/definitions/${field.interfaceName}`,
+                }
+              }
+              break
+            }
+
+            case 'row':
+            case 'collapsible': {
+              const childSchema = fieldsToJSONSchema(
+                collectionIDFieldTypes,
+                field.fields,
+                interfaceNameDefinitions,
+                config,
+              )
+              Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
+                fieldSchemas.set(propName, propSchema)
+              })
+              childSchema.required.forEach((propName) => {
+                requiredFieldNames.add(propName)
+              })
+              break
+            }
+
+            case 'tabs': {
+              field.tabs.forEach((tab) => {
+                const childSchema = fieldsToJSONSchema(
+                  collectionIDFieldTypes,
+                  tab.fields,
+                  interfaceNameDefinitions,
+                  config,
+                )
+                if (tabHasName(tab)) {
+                  // could have interface
+                  fieldSchemas.set(tab.name, {
                     type: 'object',
                     additionalProperties: false,
-                    properties: {
-                      ...blockFieldSchemas.properties,
-                      blockType: {
-                        const: block.slug,
-                      },
-                    },
-                    required: ['blockType', ...blockFieldSchemas.required],
+                    ...childSchema,
+                  })
+
+                  // If the named tab has any required fields then we mark this as required otherwise it should be optional
+                  const hasRequiredFields = tab.fields.some((subField) => fieldIsRequired(subField))
+
+                  if (hasRequiredFields) {
+                    requiredFieldNames.add(tab.name)
                   }
-
-                  if (block.interfaceName) {
-                    interfaceNameDefinitions.set(block.interfaceName, blockSchema)
-
-                    return {
-                      $ref: `#/definitions/${block.interfaceName}`,
-                    }
-                  }
-
-                  return blockSchema
-                }),
-              },
+                } else {
+                  Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
+                    fieldSchemas.set(propName, propSchema)
+                  })
+                  childSchema.required.forEach((propName) => {
+                    requiredFieldNames.add(propName)
+                  })
+                }
+              })
+              break
             }
-            break
-          }
 
-          case 'array': {
-            fieldSchema = {
-              type: withNullableJSONSchemaType('array', isRequired),
-              items: {
+            case 'group': {
+              fieldSchema = {
                 type: 'object',
                 additionalProperties: false,
                 ...fieldsToJSONSchema(
@@ -425,94 +503,21 @@ export function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                   config,
                 ),
-              },
-            }
-
-            if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
-
-              fieldSchema = {
-                $ref: `#/definitions/${field.interfaceName}`,
               }
-            }
-            break
-          }
 
-          case 'row':
-          case 'collapsible': {
-            const childSchema = fieldsToJSONSchema(
-              collectionIDFieldTypes,
-              field.fields,
-              interfaceNameDefinitions,
-              config,
-            )
-            Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-              fieldSchemas.set(propName, propSchema)
-            })
-            childSchema.required.forEach((propName) => {
-              requiredFieldNames.add(propName)
-            })
-            break
-          }
+              if (field.interfaceName) {
+                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-          case 'tabs': {
-            field.tabs.forEach((tab) => {
-              const childSchema = fieldsToJSONSchema(
-                collectionIDFieldTypes,
-                tab.fields,
-                interfaceNameDefinitions,
-                config,
-              )
-              if (tabHasName(tab)) {
-                // could have interface
-                fieldSchemas.set(tab.name, {
-                  type: 'object',
-                  additionalProperties: false,
-                  ...childSchema,
-                })
-
-                // If the named tab has any required fields then we mark this as required otherwise it should be optional
-                const hasRequiredFields = tab.fields.some((subField) => fieldIsRequired(subField))
-
-                if (hasRequiredFields) {
-                  requiredFieldNames.add(tab.name)
+                fieldSchema = {
+                  $ref: `#/definitions/${field.interfaceName}`,
                 }
-              } else {
-                Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-                  fieldSchemas.set(propName, propSchema)
-                })
-                childSchema.required.forEach((propName) => {
-                  requiredFieldNames.add(propName)
-                })
               }
-            })
-            break
-          }
-
-          case 'group': {
-            fieldSchema = {
-              type: 'object',
-              additionalProperties: false,
-              ...fieldsToJSONSchema(
-                collectionIDFieldTypes,
-                field.fields,
-                interfaceNameDefinitions,
-                config,
-              ),
+              break
             }
 
-            if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
-
-              fieldSchema = {
-                $ref: `#/definitions/${field.interfaceName}`,
-              }
+            default: {
+              break
             }
-            break
-          }
-
-          default: {
-            break
           }
         }
 
