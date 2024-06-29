@@ -54,7 +54,7 @@ export async function migrateRefresh(this: PostgresAdapter) {
         msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
       })
 
-      const tableExists = await migrationTableExists(this.drizzle)
+      const tableExists = await migrationTableExists(this)
       if (tableExists) {
         await payload.delete({
           collection: 'payload-migrations',
