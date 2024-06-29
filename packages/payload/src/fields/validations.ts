@@ -341,7 +341,12 @@ export const number: Validate<number | number[], unknown, unknown, NumberField> 
       return t('validation:lessThanMin', { label: t('general:value'), min, value })
     }
 
-    if (dbType && !Number.isInteger(numberValue)) return t('validation:integerOnly')
+    if (
+      typeof dbType === 'string' &&
+      ['bigint', 'integer'].includes(dbType) &&
+      !Number.isInteger(numberValue)
+    )
+      return t('validation:integerOnly')
   }
 
   return true

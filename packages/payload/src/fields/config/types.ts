@@ -256,9 +256,9 @@ export type NumberField = FieldBase & {
    */
   dbStore?: boolean
   /**
-   * Only numbers without decimals are accepted, changes SQL type. Used in the default `validation` function.
+   * Changes SQL column type. With `bigint` and `integer` used in the default `validation` function to accept only integers.
    */
-  dbType?: 'bigint' | 'integer'
+  dbType?: 'bigint' | 'integer' | 'numeric' | 'real'
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
   /** Minimum value accepted. Used in the default `validation` function. */

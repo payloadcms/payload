@@ -123,7 +123,7 @@ export const number = baseField.keys({
     placeholder: joi.string(),
     step: joi.number(),
   }),
-  dbType: joi.string().valid('integer', 'bigint'),
+  dbType: joi.string().valid('integer', 'bigint', 'real', 'numeric'),
   defaultValue: joi
     .alternatives()
     .try(

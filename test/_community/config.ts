@@ -22,9 +22,9 @@ export default buildConfigWithDefaults({
           defaultValue: 'some default',
         },
         {
-          name: 'int',
+          name: 'real',
           type: 'number',
-          dbType: 'bigint',
+          dbType: 'real',
         },
         {
           name: 'select',

@@ -32,6 +32,7 @@ import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
 import { createTableName } from './createTableName.js'
 import { idToUUID } from './idToUUID.js'
+import { numberColumnMap } from './numberColumnMap.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical.js'
 import { withDefault } from './withDefault.js'
@@ -215,11 +216,7 @@ export const traverseFields = ({
           }
         } else {
           targetTable[fieldName] = withDefault(
-            field.dbType
-              ? field.dbType === 'integer'
-                ? integer(columnName)
-                : bigint(columnName, { mode: 'number' })
-              : numeric(columnName),
+            numberColumnMap[field.dbType ?? 'numeric'](fieldName),
             field,
           )
         }
