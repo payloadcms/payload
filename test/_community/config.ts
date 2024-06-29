@@ -29,6 +29,16 @@ export default buildConfigWithDefaults({
           },
         },
         {
+          name: 'withDefintionsUsage',
+          type: 'text',
+          typescriptSchema: {
+            type: 'array',
+            items: {
+              $ref: `#/definitions/objectWithNumber`,
+            },
+          },
+        },
+        {
           name: 'json',
           type: 'json',
           required: true,
@@ -89,5 +99,18 @@ export default buildConfigWithDefaults({
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    definitions: {
+      objectWithNumber: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+            required: true,
+          },
+        },
+        required: true,
+        additionalProperties: false,
+      },
+    },
   },
 })

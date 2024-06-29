@@ -202,6 +202,7 @@ export default joi.object({
   typescript: joi.object({
     autoGenerate: joi.boolean(),
     declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
+    definitions: joi.object(),
     outputFile: joi.string(),
   }),
   upload: joi.object(),

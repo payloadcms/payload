@@ -608,7 +608,11 @@ export function configToJSONSchema(
 
   return {
     additionalProperties: false,
-    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    definitions: {
+      ...entityDefinitions,
+      ...Object.fromEntries(interfaceNameDefinitions),
+      ...config.typescript.definitions,
+    },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
     properties: {

@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
+import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { JSX } from 'react'
@@ -739,6 +740,9 @@ export type Config = {
           ignoreTSError?: boolean
         }
       | false
+
+    /** Reusable JSON Shema definitions for usage in `typescriptSchema` field property */
+    definitions?: Record<string, JSONSchema4>
 
     /** Filename to write the generated types to */
     outputFile?: string
