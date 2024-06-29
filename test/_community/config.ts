@@ -22,6 +22,12 @@ export default buildConfigWithDefaults({
           defaultValue: 'some default',
         },
         {
+          name: 'select',
+          type: 'select',
+          options: ['some', 'asd'],
+          defaultValue: 'some',
+        },
+        {
           name: 'blocks',
           type: 'blocks',
           dbJsonColumn: true,
