@@ -120,6 +120,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (fieldAffectsData(field)) {
+      if ('dbStore' in field && !field.dbStore) return result
+
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
       const localizedFieldData = {}
@@ -130,6 +132,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (fieldPrefix) {
         deletions.push(() => delete table[fieldName])
+      }
+
+      if ('dbJsonColumn' in field && field.dbJsonColumn) {
+        result[field.name] = table[`${fieldPrefix || ''}${field.name}`]
+        return result
       }
 
       if (field.type === 'array') {

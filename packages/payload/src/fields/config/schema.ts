@@ -42,6 +42,8 @@ export const baseField = joi
     }),
     admin: baseAdminFields.default(),
     custom: joi.object().pattern(joi.string(), joi.any()),
+    dbJsonColumn: joi.boolean(),
+    dbStore: joi.boolean(),
     hidden: joi.boolean().default(false),
     hooks: joi
       .object()
@@ -121,6 +123,7 @@ export const number = baseField.keys({
     placeholder: joi.string(),
     step: joi.number(),
   }),
+  dbInteger: joi.boolean(),
   defaultValue: joi
     .alternatives()
     .try(
