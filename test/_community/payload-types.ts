@@ -15,6 +15,7 @@ export interface Config {
   };
   globals: {
     menu: Menu;
+    'custom-ts': CustomT;
   };
   locale: null;
   user: User & {
@@ -120,6 +121,21 @@ export interface PayloadMigration {
 export interface Menu {
   id: string;
   globalText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ts".
+ */
+export interface CustomT {
+  id: string;
+  custom?: 'hello' | 'world';
+  json: {
+    id: string;
+    name: string;
+    age?: number;
+  }[];
   updatedAt?: string | null;
   createdAt?: string | null;
 }

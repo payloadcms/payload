@@ -18,6 +18,47 @@ export default buildConfigWithDefaults({
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,
+    {
+      slug: 'custom-ts',
+      fields: [
+        {
+          name: 'custom',
+          type: 'text',
+          typescriptSchema: {
+            enum: ['hello', 'world'],
+          },
+        },
+        {
+          name: 'json',
+          type: 'json',
+          required: true,
+          jsonSchema: {
+            uri: 'a://b/foo.json',
+            fileMatch: ['a://b/foo.json'],
+            schema: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                  age: {
+                    type: 'integer',
+                  },
+                  // Add other properties here
+                },
+                required: ['id', 'name'], // Specify which properties are required
+              },
+            },
+          },
+        },
+      ],
+    },
     // ...add more globals here
   ],
   onInit: async (payload) => {

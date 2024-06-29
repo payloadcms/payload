@@ -2,6 +2,7 @@ import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
 import { configToJSONSchema } from './configToJSONSchema.js'
+import { JSONSchema4 } from 'json-schema'
 
 describe('configToJSONSchema', () => {
   it('should handle optional arrays with required fields', async () => {
@@ -142,6 +143,61 @@ describe('configToJSONSchema', () => {
         },
       },
       required: ['id', 'namedTabWithRequired'],
+      title: 'Test',
+      type: 'object',
+    })
+  })
+
+  it('should handle custom typescript schema and JSON field schema', async () => {
+    const customSchema: JSONSchema4 = {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'number',
+        },
+        required: ['id'],
+      },
+    }
+
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          fields: [
+            {
+              type: 'text',
+              name: 'withCustom',
+              typescriptSchema: customSchema,
+            },
+            {
+              type: 'json',
+              name: 'jsonWithSchema',
+              jsonSchema: {
+                uri: 'a://b/foo.json',
+                fileMatch: ['a://b/foo.json'],
+                schema: customSchema,
+              },
+            },
+          ],
+          slug: 'test',
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect(schema?.definitions?.test).toStrictEqual({
+      additionalProperties: false,
+      properties: {
+        id: {
+          type: 'string',
+        },
+        withCustom: customSchema,
+        jsonWithSchema: customSchema,
+      },
+      required: ['id'],
       title: 'Test',
       type: 'object',
     })

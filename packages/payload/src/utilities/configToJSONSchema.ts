@@ -153,8 +153,8 @@ export function fieldsToJSONSchema(
 
         let fieldSchema: JSONSchema4
 
-        if ('typeGenSchema' in field && field.typeGenSchema) {
-          fieldSchema = field.typeGenSchema
+        if ('typescriptSchema' in field && field.typescriptSchema) {
+          fieldSchema = field.typescriptSchema
         } else {
           switch (field.type) {
             case 'text':
@@ -193,7 +193,7 @@ export function fieldsToJSONSchema(
             }
 
             case 'json': {
-              fieldSchema = {
+              fieldSchema = field.jsonSchema?.schema || {
                 type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
               }
               break

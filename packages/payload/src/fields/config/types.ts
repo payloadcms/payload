@@ -232,7 +232,8 @@ export interface FieldBase {
   name: string
   required?: boolean
   saveToJWT?: boolean | string
-  typeGenSchema?: JSONSchema4
+  /** Overrides Payload Typescript generation for the field  */
+  typescriptSchema?: JSONSchema4
   unique?: boolean
   validate?: Validate
 }
@@ -532,7 +533,11 @@ type JSONAdmin = Admin & {
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: JSONAdmin
-  jsonSchema?: Record<string, unknown>
+  jsonSchema?: {
+    fileMatch: string[]
+    schema: JSONSchema4
+    uri: string
+  }
   type: 'json'
 }
 
