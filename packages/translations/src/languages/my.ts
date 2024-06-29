@@ -340,6 +340,7 @@ export const myTranslations: DefaultTranslationsObject = {
     fieldHasNo: 'ဤအကွက်တွင် {{label}} မရှိပါ။',
     greaterThanMax:
       '{{value}} သည် {{max}} ထက် ပိုမိုကြီးသည်။ ဤသည်ဖြင့် {{label}} အများဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် ကြီးသည်။',
+    integerOnly: 'Veuillez entrer un nombre valide sans décimales.',
     invalidInput: 'ဤအကွက်တွင် မမှန်ကန်သော ထည့်သွင်းမှုတစ်ခုရှိသည်။',
     invalidSelection: 'ဤအကွက်တွင် မမှန်ကန်သော ရွေးချယ်မှုတစ်ခုရှိသည်။',
     invalidSelections: 'ဤအကွက်တွင် အောက်ပါ မမှန်ကန်သော ရွေးချယ်မှုများ ရှိသည်',

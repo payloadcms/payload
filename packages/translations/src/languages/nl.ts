@@ -338,6 +338,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     enterNumber: 'Voer een geldig nummer in.',
     fieldHasNo: 'Dit veld heeft geen {{label}}',
     greaterThanMax: '{{value}} is groter dan de maximaal toegestane {{label}} van {{max}}.',
+    integerOnly: 'Voer alstublieft een geldig nummer in zonder decimalen.',
     invalidInput: 'Dit veld heeft een ongeldige invoer.',
     invalidSelection: 'Dit veld heeft een ongeldige selectie.',
     invalidSelections: 'Dit veld heeft de volgende ongeldige selecties:',

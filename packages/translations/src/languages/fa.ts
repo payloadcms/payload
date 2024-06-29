@@ -335,6 +335,7 @@ export const faTranslations: DefaultTranslationsObject = {
     enterNumber: 'لطفاً یک شماره درست وارد کنید.',
     fieldHasNo: 'این کادر شامل هیچ {{label}} نمی‌شود',
     greaterThanMax: '{{value}} بیشتر از حداکثر مجاز برای {{label}} است که {{max}} است.',
+    integerOnly: 'لطفاً یک عدد صحیح و بدون اعشار وارد کنید.',
     invalidInput: 'این کادر دارای ورودی نامعتبر است.',
     invalidSelection: 'این کادر دارای یک انتخاب نامعتبر است.',
     invalidSelections: 'این کادر دارای انتخاب‌های نامعتبر زیر است:',

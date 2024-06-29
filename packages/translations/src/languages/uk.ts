@@ -336,6 +336,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     enterNumber: 'Будь ласка, введіть валідне число.',
     fieldHasNo: 'В цього полі немає {{label}}',
     greaterThanMax: '{{value}} більше, ніж припустиме максимальне значення {{label}} в {{max}}.',
+    integerOnly: 'Будь ласка, введіть дійсне число без десяткових дробів.',
     invalidInput: 'У цьому полі введено некоректне значення.',
     invalidSelection: 'Це поле має некоректний вибір.',
     invalidSelections: 'Це поле має наступні невірні варіанти вибору:',

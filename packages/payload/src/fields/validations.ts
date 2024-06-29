@@ -313,7 +313,7 @@ const validateArrayLength = (
 
 export const number: Validate<number | number[], unknown, unknown, NumberField> = (
   value,
-  { hasMany, max, maxRows, min, minRows, req: { t }, required },
+  { dbType, hasMany, max, maxRows, min, minRows, req: { t }, required },
 ) => {
   if (hasMany === true) {
     const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
@@ -340,6 +340,8 @@ export const number: Validate<number | number[], unknown, unknown, NumberField> 
     if (typeof min === 'number' && numberValue < min) {
       return t('validation:lessThanMin', { label: t('general:value'), min, value })
     }
+
+    if (dbType && !Number.isInteger(numberValue)) return t('validation:integerOnly')
   }
 
   return true

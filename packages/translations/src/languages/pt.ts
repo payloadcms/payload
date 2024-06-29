@@ -337,6 +337,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     enterNumber: 'Por favor, insira um número válido.',
     fieldHasNo: 'Esse campo não contém {{label}}',
     greaterThanMax: '{{value}} é maior que o máximo permitido de {{label}} que é {{max}}.',
+    integerOnly: 'Por favor, insira um número válido sem decimais.',
     invalidInput: 'Esse campo tem um conteúdo inválido.',
     invalidSelection: 'Esse campo tem uma seleção inválida.',
     invalidSelections: "'Esse campo tem as seguintes seleções inválidas:'",

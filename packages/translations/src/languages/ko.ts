@@ -334,6 +334,7 @@ export const koTranslations: DefaultTranslationsObject = {
     enterNumber: '유효한 숫자를 입력하세요.',
     fieldHasNo: '이 입력란에는 {{label}}이(가) 없습니다.',
     greaterThanMax: '{{value}}은(는) 최대 허용된 {{label}}인 {{max}}개보다 큽니다.',
+    integerOnly: '소수점이 없는 유효한 숫자를 입력해주세요.',
     invalidInput: '이 입력란에는 유효하지 않은 입력이 있습니다.',
     invalidSelection: '이 입력란에는 유효하지 않은 선택이 있습니다.',
     invalidSelections: '이 입력란에는 다음과 같은 유효하지 않은 선택 사항이 있습니다:',

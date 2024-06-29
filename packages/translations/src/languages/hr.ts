@@ -336,6 +336,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     enterNumber: 'Molim unesite valjani broj.',
     fieldHasNo: 'Ovo polje nema {{label}}',
     greaterThanMax: '{{value}} exceeds the maximum allowable {{label}} limit of {{max}}.',
+    integerOnly: 'Molimo unesite valjani broj bez decimala.',
     invalidInput: 'Ovo polje ima nevaljan unos.',
     invalidSelection: 'Ovo polje ima nevaljan odabir.',
     invalidSelections: 'Ovo polje ima sljedeće nevaljane odabire:',

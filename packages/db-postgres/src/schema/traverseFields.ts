@@ -8,6 +8,7 @@ import {
   PgNumericBuilder,
   PgUUIDBuilder,
   PgVarcharBuilder,
+  bigint,
   boolean,
   foreignKey,
   index,
@@ -214,7 +215,11 @@ export const traverseFields = ({
           }
         } else {
           targetTable[fieldName] = withDefault(
-            field.dbInteger ? integer(columnName) : numeric(columnName),
+            field.dbType
+              ? field.dbType === 'integer'
+                ? integer(columnName)
+                : bigint(columnName, { mode: 'number' })
+              : numeric(columnName),
             field,
           )
         }

@@ -22,6 +22,11 @@ export default buildConfigWithDefaults({
           defaultValue: 'some default',
         },
         {
+          name: 'int',
+          type: 'number',
+          dbType: 'bigint',
+        },
+        {
           name: 'select',
           type: 'select',
           options: ['some', 'asd'],

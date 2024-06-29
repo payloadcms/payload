@@ -20,7 +20,7 @@ export async function translateText(text: string, targetLang: string) {
           role: 'user',
         },
       ],
-      model: 'gpt-4',
+      model: 'gpt-3.5-turbo',
     }),
     headers: {
       Authorization: `Bearer ${process.env.OPENAI_KEY}`,

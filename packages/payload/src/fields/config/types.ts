@@ -251,15 +251,14 @@ export type NumberField = FieldBase & {
     step?: number
   }
   /**
-   * Use `integer` column type in the SQL.
-   * You must be sure that floating values won't be passed.
-   */
-  dbInteger?: boolean
-  /**
    * Disables creation of the field schema in the SQL
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
    */
   dbStore?: boolean
+  /**
+   * Only numbers without decimals are accepted, changes SQL type. Used in the default `validation` function.
+   */
+  dbType?: 'bigint' | 'integer'
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
   /** Minimum value accepted. Used in the default `validation` function. */

@@ -335,6 +335,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     enterNumber: '有効な数値を入力してください。',
     fieldHasNo: '{{label}} が必要です。',
     greaterThanMax: '{{value}}は許容最大{{label}}の{{max}}を超えています。',
+    integerOnly: '有効な小数点以下のない数値を入力してください。',
     invalidInput: '無効な入力値です。',
     invalidSelection: '無効な選択です。',
     invalidSelections: '次の無効な選択があります: ',

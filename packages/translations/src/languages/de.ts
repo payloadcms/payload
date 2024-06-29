@@ -340,6 +340,7 @@ export const deTranslations: DefaultTranslationsObject = {
     enterNumber: 'Bitte gib eine gültige Nummer an,',
     fieldHasNo: 'Dieses Feld hat kein {{label}}',
     greaterThanMax: '{{value}} ist größer als der maximal erlaubte {{label}} von {{max}}.',
+    integerOnly: 'Bitte geben Sie eine gültige Zahl ohne Dezimalstellen ein.',
     invalidInput: 'Dieses Feld hat einen inkorrekten Wert.',
     invalidSelection: 'Dieses Feld hat eine inkorrekte Auswahl.',
     invalidSelections: "'Dieses Feld enthält die folgenden inkorrekten Auswahlen:'",
