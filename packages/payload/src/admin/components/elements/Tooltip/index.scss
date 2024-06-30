@@ -82,18 +82,3 @@
     display: none;
   }
 }
-
-html[data-theme='light'] {
-  .tooltip {
-    background-color: var(--theme-elevation-100);
-    color: var(--theme-elevation-1000);
-
-    &--position-top:after {
-      border-top-color: var(--theme-elevation-100);
-    }
-
-    &--position-bottom:after {
-      border-bottom-color: var(--theme-elevation-100);
-    }
-  }
-}
