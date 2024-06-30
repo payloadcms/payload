@@ -150,7 +150,7 @@ const Relationship: React.FC<Props> = (props) => {
           await priorRelation
 
           if (relationFilterOption === false) {
-            setLastFullyLoadedRelation(relations.indexOf(relation))
+            setLastFullyLoadedRelation(hasMultipleRelations ? relations.indexOf(relation) : -1)
             return Promise.resolve()
           }
 
@@ -214,7 +214,7 @@ const Relationship: React.FC<Props> = (props) => {
               })
 
               if (!data.nextPage) {
-                setLastFullyLoadedRelation(relations.indexOf(relation))
+                setLastFullyLoadedRelation(hasMultipleRelations ? relations.indexOf(relation) : -1)
               }
 
               if (data.docs.length > 0) {
@@ -230,7 +230,7 @@ const Relationship: React.FC<Props> = (props) => {
                 })
               }
             } else if (response.status === 403) {
-              setLastFullyLoadedRelation(relations.indexOf(relation))
+              setLastFullyLoadedRelation(hasMultipleRelations ? relations.indexOf(relation) : -1)
               dispatchOptions({
                 type: 'ADD',
                 collection,
@@ -254,15 +254,16 @@ const Relationship: React.FC<Props> = (props) => {
       relationTo,
       hasMany,
       errorLoading,
+      filterOptionsResult,
       search,
       lastLoadedPage,
+      hasMultipleRelations,
       collections,
       locale,
-      filterOptionsResult,
       serverURL,
-      sortOptions,
       api,
       i18n,
+      sortOptions,
       config,
       t,
     ],
