@@ -72,6 +72,20 @@
     }
   }
 
+  &--error {
+    background-color: var(--theme-error-500);
+    top: 0;
+    bottom: auto;
+    left: auto;
+    right: calc(var(--base) * 0.5);
+    transform: translate3d(0%, calc(var(--caret-size) * -1), 0);
+    max-width: 75%;
+
+    &::after {
+      border-top-color: var(--theme-error-500);
+    }
+  }
+
   .tooltip-content {
     overflow: hidden;
     text-overflow: ellipsis;
