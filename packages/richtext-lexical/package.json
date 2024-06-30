@@ -73,12 +73,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.0-beta.0",
-    "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@lexical/headless": "0.16.0",
-    "@lexical/link": "0.16.0",
     "@lexical/list": "0.16.0",
-    "@lexical/mark": "0.16.0",
     "@lexical/markdown": "0.16.0",
     "@lexical/react": "0.16.0",
     "@lexical/rich-text": "0.16.0",
