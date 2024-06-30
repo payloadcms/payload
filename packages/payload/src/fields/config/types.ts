@@ -128,12 +128,13 @@ export type Labels = {
   singular: Record<string, string> | string
 }
 
-export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
+export type ValidateOptions<TData, TSiblingData, TFieldConfig, TValue> = {
   config: SanitizedConfig
   data: Partial<TData>
   id?: number | string
   operation?: Operation
   payload?: Payload
+  previousValue?: TValue
   req?: PayloadRequest
   siblingData: Partial<TSiblingData>
   t: TFunction
@@ -143,7 +144,7 @@ export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
 // TODO: Having TFieldConfig as any breaks all type checking / auto-completions for the base ValidateOptions properties.
 export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (
   value: TValue,
-  options: ValidateOptions<TData, TSiblingData, TFieldConfig>,
+  options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
 export type OptionObject = {
