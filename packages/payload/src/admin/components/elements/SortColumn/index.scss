@@ -37,6 +37,7 @@
     border: none;
     outline: none;
     cursor: pointer;
+    transition: all var(--all-trans-timing);
 
     &.sort-column--active {
       opacity: 1;

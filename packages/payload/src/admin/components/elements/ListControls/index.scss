@@ -30,6 +30,7 @@
 
     .pill {
       background-color: var(--theme-elevation-200);
+      transition: all var(--all-trans-timing);
 
       &:hover {
         background-color: var(--theme-elevation-150);
