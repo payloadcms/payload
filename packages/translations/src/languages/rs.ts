@@ -4,6 +4,7 @@ export const rsTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Налог',
     accountOfCurrentUser: 'Налог тренутног корисника',
+    accountVerified: 'Nalog je uspešno verifikovan.',
     alreadyActivated: 'Већ активирано',
     alreadyLoggedIn: 'Већ пријављен',
     apiKey: 'АПИ кључ',
@@ -64,6 +65,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Osvežavanje tokena je uspešno.',
     unableToVerify: 'Није могуће потврдити',
     username: 'Korisničko ime',
+    usernameNotValid: 'Korisničko ime koje ste uneli nije važeće.',
     verified: 'Потврђено',
     verifiedSuccessfully: 'Успешно потврђено',
     verify: 'Потврди',
@@ -116,6 +118,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Корисник са датом имејл адресом је већ регистрован.',
     userLocked: 'Овај корисник је закључан због превеликог броја неуспешних покушаја пријаве.',
     usernameAlreadyRegistered: 'Korisnik sa datim korisničkim imenom je već registrovan.',
+    usernameOrPasswordIncorrect: 'Korisničko ime ili lozinka koje ste uneli su netačni.',
     valueMustBeUnique: 'Вредност мора бити јединствена.',
     verificationTokenInvalid: 'Верификациони токен је невалидан.',
   },

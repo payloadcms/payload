@@ -4,6 +4,7 @@ export const bgTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Профил',
     accountOfCurrentUser: 'Профил на текущия потребител',
+    accountVerified: 'Профилът е верифициран успешно.',
     alreadyActivated: 'Вече активиран',
     alreadyLoggedIn: 'Вече влязъл',
     apiKey: 'API ключ',
@@ -64,6 +65,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Освежаването на токена беше успешно.',
     unableToVerify: 'Неуспешно потвърждение',
     username: 'Потребителско име',
+    usernameNotValid: 'Предоставеното потребителско име не е валидно.',
     verified: 'Потвърден',
     verifiedSuccessfully: 'Потвърден успешно',
     verify: 'Потвърди',
@@ -116,6 +118,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Потребител с дадения имейл вече е регистриран.',
     userLocked: 'Този потребител има прекалено много невалидни опити за влизане и е заключен.',
     usernameAlreadyRegistered: 'Потребител със зададеното потребителско име вече е регистриран.',
+    usernameOrPasswordIncorrect: 'Предоставеното потребителско име или парола са неправилни.',
     valueMustBeUnique: 'Стойността трябва да е уникална',
     verificationTokenInvalid: 'Ключът за верификация е невалиден.',
   },

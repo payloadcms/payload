@@ -4,6 +4,7 @@ export const deTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Aktuelles Benutzerkonto',
+    accountVerified: 'Konto erfolgreich verifiziert.',
     alreadyActivated: 'Bereits aktiviert',
     alreadyLoggedIn: 'Bereits angemeldet',
     apiKey: 'API-Key',
@@ -66,6 +67,7 @@ export const deTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Token-Aktualisierung erfolgreich.',
     unableToVerify: 'Konnte nicht verifiziert werden',
     username: 'Benutzername',
+    usernameNotValid: 'Der angegebene Benutzername ist nicht gültig.',
     verified: 'Verifiziert',
     verifiedSuccessfully: 'Erfolgreich verifiziert',
     verify: 'Verifizieren',
@@ -120,6 +122,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.',
     usernameAlreadyRegistered:
       'Ein Benutzer mit dem angegebenen Benutzernamen ist bereits registriert.',
+    usernameOrPasswordIncorrect: 'Der angegebene Benutzername oder das Passwort ist falsch.',
     valueMustBeUnique: 'Wert muss einzigartig sein',
     verificationTokenInvalid: 'Verifizierungs-Token ist nicht korrekt.',
   },

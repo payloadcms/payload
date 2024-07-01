@@ -4,6 +4,7 @@ export const skTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
     accountOfCurrentUser: 'Aktuálny používateľský účet',
+    accountVerified: 'Účet úspešne overený.',
     alreadyActivated: 'Už aktivované',
     alreadyLoggedIn: 'Už prihlásený',
     apiKey: 'API kľúč',
@@ -65,6 +66,7 @@ export const skTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Obnovenie tokenu bolo úspešné.',
     unableToVerify: 'Nemožno overiť',
     username: 'Používateľské meno',
+    usernameNotValid: 'Zadané užívateľské meno nie je platné.',
     verified: 'Overené',
     verifiedSuccessfully: 'Úspešne overené',
     verify: 'Overiť',
@@ -118,6 +120,7 @@ export const skTranslations: DefaultTranslationsObject = {
     userLocked:
       'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
     usernameAlreadyRegistered: 'Používateľ s daným používateľským menom je už zaregistrovaný.',
+    usernameOrPasswordIncorrect: 'Zadané meno alebo heslo je nesprávne.',
     valueMustBeUnique: 'Hodnota musí byť jedinečná',
     verificationTokenInvalid: 'Overovací token je neplatný.',
   },

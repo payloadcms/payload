@@ -4,6 +4,7 @@ export const frTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Compte',
     accountOfCurrentUser: 'Compte de l’utilisateur actuel',
+    accountVerified: 'Compte vérifié avec succès.',
     alreadyActivated: 'Déjà activé',
     alreadyLoggedIn: 'Déjà connecté',
     apiKey: 'Clé API',
@@ -66,6 +67,7 @@ export const frTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Actualisation du jeton réussie.',
     unableToVerify: 'Vérification échouée',
     username: "Nom d'utilisateur",
+    usernameNotValid: "Le nom d'utilisateur fourni n'est pas valide",
     verified: 'Vérifié',
     verifiedSuccessfully: 'Vérifié avec succès',
     verify: 'Vérifier',
@@ -122,6 +124,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Cet utilisateur est verrouillé en raison d’un trop grand nombre de tentatives de connexion infructueuses.',
     usernameAlreadyRegistered:
       "Un utilisateur avec le nom d'utilisateur donné est déjà enregistré.",
+    usernameOrPasswordIncorrect: "Le nom d'utilisateur ou le mot de passe fourni est incorrect.",
     valueMustBeUnique: 'La valeur doit être unique',
     verificationTokenInvalid: 'Le jeton de vérification n’est pas valide.',
   },

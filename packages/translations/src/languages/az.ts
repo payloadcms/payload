@@ -4,6 +4,7 @@ export const azTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesab',
     accountOfCurrentUser: 'Cari istifadəçinin hesabı',
+    accountVerified: 'Hesab uğurla doğrulandı.',
     alreadyActivated: 'Artıq Aktivləşdirilib',
     alreadyLoggedIn: 'Artıq daxil olunub',
     apiKey: 'API Açarı',
@@ -64,6 +65,7 @@ export const azTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Tokenin yenilənməsi uğurlu oldu.',
     unableToVerify: 'Doğrulamaq mümkün deyil',
     username: 'İstifadəçi adı',
+    usernameNotValid: 'Təqdim edilən istifadəçi adı düzgün deyil',
     verified: 'Doğrulanmış',
     verifiedSuccessfully: 'Uğurla doğrulandı',
     verify: 'Doğrula',
@@ -116,6 +118,7 @@ export const azTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Verilən e-poçt ünvanı ilə artıq istifadəçi qeydiyyatdan keçib.',
     userLocked: 'Bu istifadəçi çoxsaylı uğursuz giriş cəhdləri səbəbindən kilidlənib.',
     usernameAlreadyRegistered: 'Verilən istifadəçi adı ilə artıq qeydiyyatdan keçmişdir.',
+    usernameOrPasswordIncorrect: 'Təqdim edilən istifadəçi adı və ya şifrə yanlışdır.',
     valueMustBeUnique: 'Dəyər təkrar olmamalıdır',
     verificationTokenInvalid: 'Doğrulama tokenı yanlışdır.',
   },

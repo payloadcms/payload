@@ -120,7 +120,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     })
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
-      throw new AuthenticationError(req.t)
+      throw new AuthenticationError(req.t, loginWithUsername)
     }
 
     if (user && isLocked(user.lockUntil)) {

@@ -4,6 +4,7 @@ export const ukTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Обліковий запис',
     accountOfCurrentUser: 'Обліковий запис поточного користувача',
+    accountVerified: 'Рахунок успішно перевірено.',
     alreadyActivated: 'Вже активований',
     alreadyLoggedIn: 'Вже увійшли в систему',
     apiKey: 'API ключ',
@@ -65,6 +66,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Оновлення токену успішне.',
     unableToVerify: 'Неможливо підтвердити',
     username: "Ім'я користувача",
+    usernameNotValid: "Вказане ім'я користувача недійсне",
     verified: 'Підтверджено',
     verifiedSuccessfully: 'Успішно підтверджено',
     verify: 'Підтвердити',
@@ -117,6 +119,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Користувач із вказаною електронною поштою вже зареєстрований.',
     userLocked: 'Цей користувач заблокований через велику кількість невдалих спроб входу.',
     usernameAlreadyRegistered: 'Користувач з вказаним іменем користувача вже зареєстрований.',
+    usernameOrPasswordIncorrect: "Введене ім'я користувача або пароль неправильні.",
     valueMustBeUnique: 'Значення має бути унікальним.',
     verificationTokenInvalid: 'Токен верифікації недійсний.',
   },

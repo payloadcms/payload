@@ -4,6 +4,7 @@ export const roTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cont',
     accountOfCurrentUser: 'Contul utilizatorului curent',
+    accountVerified: 'Contul a fost verificat cu succes.',
     alreadyActivated: 'Deja activat',
     alreadyLoggedIn: 'Deja autorizat',
     apiKey: 'Cheia API',
@@ -66,6 +67,7 @@ export const roTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Reîmprospătarea tokenului a fost efectuată cu succes.',
     unableToVerify: 'Nu se poate verifica',
     username: 'Nume de utilizator',
+    usernameNotValid: 'Numele de utilizator furnizat nu este valid.',
     verified: 'Verificat',
     verifiedSuccessfully: 'Verificat cu succes',
     verify: 'Verifică',
@@ -120,6 +122,7 @@ export const roTranslations: DefaultTranslationsObject = {
       'Acest utilizator este blocat din cauza unui număr prea mare de încercări de autentificare eșuate.',
     usernameAlreadyRegistered:
       'Un utilizator cu numele de utilizator furnizat este deja înregistrat.',
+    usernameOrPasswordIncorrect: 'Numele de utilizator sau parola furnizate sunt incorecte.',
     valueMustBeUnique: 'Valoarea trebuie să fie unică',
     verificationTokenInvalid: 'Tokenul de verificare este invalid.',
   },

@@ -4,6 +4,7 @@ export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
     accountOfCurrentUser: 'Cuenta del usuario actual',
+    accountVerified: 'Cuenta verificada con éxito.',
     alreadyActivated: 'Ya Activado',
     alreadyLoggedIn: 'Sesión iniciada',
     apiKey: 'Clave API',
@@ -64,6 +65,7 @@ export const esTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Actualización de token exitosa.',
     unableToVerify: 'No se pudo Verificar',
     username: 'Nombre de usuario',
+    usernameNotValid: 'El nombre de usuario proporcionado no es válido.',
     verified: 'Verificado',
     verifiedSuccessfully: 'Verificación Correcta',
     verify: 'Verificar',
@@ -119,6 +121,8 @@ export const esTranslations: DefaultTranslationsObject = {
       'Este usuario ha sido bloqueado debido a que tiene muchos intentos fallidos para iniciar sesión.',
     usernameAlreadyRegistered:
       'Un usuario con el nombre de usuario proporcionado ya está registrado.',
+    usernameOrPasswordIncorrect:
+      'El nombre de usuario o la contraseña proporcionados son incorrectos.',
     valueMustBeUnique: 'El valor debe ser único',
     verificationTokenInvalid: 'Token de verificación inválido.',
   },

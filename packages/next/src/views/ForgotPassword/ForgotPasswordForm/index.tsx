@@ -28,7 +28,11 @@ export const ForgotPasswordForm: React.FC = () => {
         successToast(t('general:submissionSuccessful'))
       })
       .catch(() => {
-        errorToast(t('authentication:emailNotValid'))
+        errorToast(
+          loginWithUsername
+            ? t('authentication:usernameNotValid')
+            : t('authentication:emailNotValid'),
+        )
       })
   }
 

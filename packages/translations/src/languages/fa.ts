@@ -4,6 +4,7 @@ export const faTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'نمایه',
     accountOfCurrentUser: 'نمایه کاربر فعلی',
+    accountVerified: 'حساب با موفقیت تایید شد.',
     alreadyActivated: 'قبلاً فعال شده است',
     alreadyLoggedIn: 'قبلاً وارد شده‌اید',
     apiKey: 'کلید اِی‌پی‌آی',
@@ -64,6 +65,7 @@ export const faTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'تازه سازی توکن موفق بود.',
     unableToVerify: 'امکان تأیید نیست',
     username: 'نام کاربری',
+    usernameNotValid: 'نام کاربری ارائه شده معتبر نیست',
     verified: 'تأیید شده',
     verifiedSuccessfully: 'با موفقیت تأیید شد',
     verify: 'تأیید',
@@ -115,6 +117,7 @@ export const faTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'کاربری با ایمیل داده شده قبلاً ثبت نام کرده است.',
     userLocked: 'این کاربر به دلیل تلاش های زیاد برای ورود ناموفق قفل شده است.',
     usernameAlreadyRegistered: 'کاربری با نام کاربری داده شده قبلا ثبت نام کرده است.',
+    usernameOrPasswordIncorrect: 'نام کاربری یا گذرواژه ارائه شده صحیح نیست.',
     valueMustBeUnique: 'مقدار باید منحصر به فرد باشد',
     verificationTokenInvalid: 'ژتون تأیید نامعتبر است.',
   },

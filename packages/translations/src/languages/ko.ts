@@ -4,6 +4,7 @@ export const koTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '계정',
     accountOfCurrentUser: '현재 사용자의 계정',
+    accountVerified: '계정이 성공적으로 인증되었습니다.',
     alreadyActivated: '이미 활성화됨',
     alreadyLoggedIn: '이미 로그인됨',
     apiKey: 'API 키',
@@ -64,6 +65,7 @@ export const koTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: '토큰 새로 고침이 성공했습니다.',
     unableToVerify: '확인할 수 없음',
     username: '사용자 이름',
+    usernameNotValid: '제공된 사용자 이름이 유효하지 않습니다.',
     verified: '확인됨',
     verifiedSuccessfully: '성공적으로 확인됨',
     verify: '확인',
@@ -116,6 +118,7 @@ export const koTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: '주어진 이메일로 이미 등록된 사용자가 있습니다.',
     userLocked: '이 사용자는 로그인 실패 횟수가 너무 많아 잠겼습니다.',
     usernameAlreadyRegistered: '주어진 사용자 이름을 가진 사용자가 이미 등록되어 있습니다.',
+    usernameOrPasswordIncorrect: '제공된 사용자 이름 또는 비밀번호가 잘못되었습니다.',
     valueMustBeUnique: '값은 고유해야 합니다.',
     verificationTokenInvalid: '확인 토큰이 유효하지 않습니다.',
   },

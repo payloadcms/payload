@@ -4,6 +4,7 @@ export const plTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Konto bieżącego użytkownika',
+    accountVerified: 'Konto zweryfikowane pomyślnie.',
     alreadyActivated: 'Już aktywowano',
     alreadyLoggedIn: 'Już zalogowano',
     apiKey: 'Klucz API',
@@ -64,6 +65,7 @@ export const plTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Odświeżenie tokenu powiodło się.',
     unableToVerify: 'Nie można zweryfikować',
     username: 'Nazwa użytkownika',
+    usernameNotValid: 'Podana nazwa użytkownika nie jest prawidłowa.',
     verified: 'Zweryfikowano',
     verifiedSuccessfully: 'Pomyślnie zweryfikowany',
     verify: 'Zweryfikuj',
@@ -116,6 +118,7 @@ export const plTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Użytkownik o podanym adresie e-mail jest już zarejestrowany.',
     userLocked: 'Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.',
     usernameAlreadyRegistered: 'Użytkownik o podanej nazwie użytkownika jest już zarejestrowany.',
+    usernameOrPasswordIncorrect: 'Podana nazwa użytkownika lub hasło jest nieprawidłowe.',
     valueMustBeUnique: 'Wartość musi być unikalna',
     verificationTokenInvalid: 'Token weryfikacyjny jest nieprawidłowy.',
   },

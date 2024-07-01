@@ -4,6 +4,7 @@ export const nbTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Konto til nåværende bruker',
+    accountVerified: 'Konto bekreftet vellykket.',
     alreadyActivated: 'Allerede aktivert',
     alreadyLoggedIn: 'Allerede logget inn',
     apiKey: 'API-nøkkel',
@@ -64,6 +65,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Token-oppdatering vellykket.',
     unableToVerify: 'Kunne ikke bekrefte',
     username: 'Brukernavn',
+    usernameNotValid: 'Brukernavnet som er oppgitt er ikke gyldig.',
     verified: 'Bekreftet',
     verifiedSuccessfully: 'Bekreftet',
     verify: 'Bekreft',
@@ -116,6 +118,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'En bruker med den oppgitte e-posten er allerede registrert.',
     userLocked: 'Denne brukeren er låst på grunn av for mange mislykkede innloggingsforsøk.',
     usernameAlreadyRegistered: 'En bruker med det gitte brukernavnet er allerede registrert.',
+    usernameOrPasswordIncorrect: 'Brukernavnet eller passordet som ble oppgitt er feil.',
     valueMustBeUnique: 'Verdien må være unik',
     verificationTokenInvalid: 'Verifiseringskoden er ugyldig.',
   },

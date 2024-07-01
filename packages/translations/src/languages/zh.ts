@@ -4,6 +4,7 @@ export const zhTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '帐户',
     accountOfCurrentUser: '当前用户的帐户',
+    accountVerified: '帐户验证成功。',
     alreadyActivated: '已经激活了',
     alreadyLoggedIn: '已经登入了',
     apiKey: 'API密钥',
@@ -61,6 +62,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: '令牌刷新成功。',
     unableToVerify: '无法验证',
     username: '用户名',
+    usernameNotValid: '提供的用户名无效',
     verified: '已验证',
     verifiedSuccessfully: '成功验证',
     verify: '验证',
@@ -111,6 +113,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: '给定电子邮件的用户已经注册。',
     userLocked: '该用户由于有太多次失败的登录尝试而被锁定。',
     usernameAlreadyRegistered: '已有用户使用了该用户名进行注册。',
+    usernameOrPasswordIncorrect: '提供的用户名或密码不正确。',
     valueMustBeUnique: '值必须是唯一的',
     verificationTokenInvalid: '验证令牌无效。',
   },

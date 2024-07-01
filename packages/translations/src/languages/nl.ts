@@ -4,6 +4,7 @@ export const nlTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Account',
     accountOfCurrentUser: 'Account van huidige gebruiker',
+    accountVerified: 'Account succesvol geverifieerd.',
     alreadyActivated: 'Al geactiveerd',
     alreadyLoggedIn: 'Al ingelogd',
     apiKey: 'API-sleutel',
@@ -65,6 +66,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Token vernieuwing succesvol.',
     unableToVerify: 'Verificatie niet mogelijk',
     username: 'Gebruikersnaam',
+    usernameNotValid: 'De opgegeven gebruikersnaam is niet geldig',
     verified: 'Geverifieerd',
     verifiedSuccessfully: 'Succesvol geverifieerd',
     verify: 'Verifiëren',
@@ -117,6 +119,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Een gebruiker met het opgegeven e-mailadres is al geregistreerd.',
     userLocked: 'Deze gebruiker is vergrendeld wegens te veel mislukte inlogpogingen.',
     usernameAlreadyRegistered: 'Een gebruiker met de opgegeven gebruikersnaam is al geregistreerd.',
+    usernameOrPasswordIncorrect: 'De opgegeven gebruikersnaam of wachtwoord is onjuist.',
     valueMustBeUnique: 'De waarde moet uniek zijn',
     verificationTokenInvalid: 'Verificatietoken is ongeldig.',
   },

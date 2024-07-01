@@ -4,6 +4,7 @@ export const thTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'บัญชี',
     accountOfCurrentUser: 'บัญชีปัจจุบัน',
+    accountVerified: 'ยืนยันบัญชีสำเร็จแล้ว',
     alreadyActivated: 'เปิดใช้งานแล้ว',
     alreadyLoggedIn: 'ลงชื่อเข้าใช้แล้ว',
     apiKey: 'API Key',
@@ -63,6 +64,7 @@ export const thTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'การรีเฟรชโทเค็นสำเร็จ',
     unableToVerify: 'ไม่สามารถยืนยันบัญชีได้',
     username: 'ชื่อผู้ใช้',
+    usernameNotValid: 'ชื่อผู้ใช้ที่ให้มาไม่ถูกต้อง',
     verified: 'ยืนยันบััญชีแล้ว',
     verifiedSuccessfully: 'ยืนยันบัญชีสำเร็จ',
     verify: 'ยืนยันบัญชี',
@@ -114,6 +116,7 @@ export const thTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'ผู้ใช้ที่มีอีเมลดังกล่าวได้ลงทะเบียนแล้ว',
     userLocked: 'บัญชีนี้ถูกล็อกเนื่องจากมีการพยายามเข้าสู่ระบบมากเกินไป',
     usernameAlreadyRegistered: 'ผู้ใช้ที่มีชื่อผู้ใช้ที่ระบุไว้แล้วถูกลงทะเบียนเอาไว้แล้ว',
+    usernameOrPasswordIncorrect: 'ชื่อผู้ใช้หรือรหัสผ่านที่คุณให้มาไม่ถูกต้อง',
     valueMustBeUnique: 'ค่าต้องไม่ซ้ำกับเอกสารอื่น',
     verificationTokenInvalid: 'Token ยืนยันตัวตนไม่ถูกต้อง',
   },

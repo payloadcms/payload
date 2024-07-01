@@ -4,6 +4,7 @@ export const jaTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'アカウント',
     accountOfCurrentUser: '現在のユーザーアカウント',
+    accountVerified: 'アカウントが正常に確認されました。',
     alreadyActivated: 'すでに有効です',
     alreadyLoggedIn: 'すでにログインしています',
     apiKey: 'API Key',
@@ -65,6 +66,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'トークンの更新が成功しました。',
     unableToVerify: '検証ができません',
     username: 'ユーザー名',
+    usernameNotValid: '提供されたユーザーネームは無効です',
     verified: '検証済み',
     verifiedSuccessfully: '検証が成功しました',
     verify: '検証',
@@ -117,6 +119,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: '指定されたメールのユーザーはすでに登録されています。',
     userLocked: 'このユーザーは、ログイン試行回数が多すぎるため、ロックされています。',
     usernameAlreadyRegistered: '指定されたユーザーネームのユーザーはすでに登録されています。',
+    usernameOrPasswordIncorrect: '提供されたユーザー名またはパスワードが間違っています。',
     valueMustBeUnique: 'ユニークな値である必要があります。',
     verificationTokenInvalid: '認証トークンが無効です。',
   },

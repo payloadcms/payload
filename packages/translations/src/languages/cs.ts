@@ -4,6 +4,7 @@ export const csTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
     accountOfCurrentUser: 'Účet současného uživatele',
+    accountVerified: 'Účet byl úspěšně ověřen.',
     alreadyActivated: 'Již aktivováno',
     alreadyLoggedIn: 'Již přihlášen',
     apiKey: 'API klíč',
@@ -64,6 +65,7 @@ export const csTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Obnovení tokenu úspěšné.',
     unableToVerify: 'Nepodařilo se ověřit',
     username: 'Uživatelské jméno',
+    usernameNotValid: 'Poskytnuté uživatelské jméno není platné.',
     verified: 'Ověřeno',
     verifiedSuccessfully: 'Úspěšně ověřeno',
     verify: 'Ověřit',
@@ -116,6 +118,7 @@ export const csTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Uživatel s daným e-mailem je již zaregistrován.',
     userLocked: 'Tento uživatel je uzamčen kvůli příliš mnoha neúspěšným pokusům o přihlášení.',
     usernameAlreadyRegistered: 'Uživatel se zadaným uživatelským jménem je již zaregistrován.',
+    usernameOrPasswordIncorrect: 'Zadané uživatelské jméno nebo heslo je nesprávné.',
     valueMustBeUnique: 'Hodnota musí být jedinečná',
     verificationTokenInvalid: 'Ověřovací token je neplatný.',
   },

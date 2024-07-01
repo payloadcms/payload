@@ -4,6 +4,7 @@ export const viTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Tài khoản',
     accountOfCurrentUser: 'Tài khoản của người dùng hiện tại',
+    accountVerified: 'Tài khoản đã được xác minh thành công.',
     alreadyActivated: 'Đã được kích hoạt',
     alreadyLoggedIn: 'Đã đăng nhập',
     apiKey: 'API Key',
@@ -63,6 +64,7 @@ export const viTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Làm mới token thành công.',
     unableToVerify: 'Không thể xác thực',
     username: 'Tên đăng nhập',
+    usernameNotValid: 'Tên người dùng được cung cấp không hợp lệ',
     verified: 'Đã xác thực',
     verifiedSuccessfully: 'Đã xác thực thành công',
     verify: 'Tiến hành xác thực',
@@ -115,6 +117,7 @@ export const viTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Người dùng với email đã cho đã được đăng ký.',
     userLocked: 'Lỗi- Tài khoản đã bị khóa do đăng nhập thất bại nhiều lần.',
     usernameAlreadyRegistered: 'Một người dùng với tên đăng nhập đã cho đã được đăng ký.',
+    usernameOrPasswordIncorrect: 'Tên người dùng hoặc mật khẩu được cung cấp không chính xác.',
     valueMustBeUnique: 'Lỗi - Giá trị không được trùng lặp.',
     verificationTokenInvalid: 'Lỗi - Token dùng để xác thực không hợp lệ.',
   },

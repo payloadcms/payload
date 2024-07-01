@@ -4,6 +4,7 @@ export const trTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesap',
     accountOfCurrentUser: 'Şu anki kullanıcının hesabı',
+    accountVerified: 'Hesap başarıyla doğrulandı.',
     alreadyActivated: 'Hesap zaten etkinleştirildi',
     alreadyLoggedIn: 'Hesaba zaten giriş yapıldı',
     apiKey: 'API Anahtarı',
@@ -65,6 +66,7 @@ export const trTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Token yenileme başarılı.',
     unableToVerify: 'Doğrulama başarısız',
     username: 'Kullanıcı Adı',
+    usernameNotValid: 'Sağlanan kullanıcı adı geçerli değil.',
     verified: 'Doğrulandı',
     verifiedSuccessfully: 'Hesap başarıyla doğrulandı',
     verify: 'Doğrula',
@@ -118,6 +120,7 @@ export const trTranslations: DefaultTranslationsObject = {
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
     usernameAlreadyRegistered: 'Verilen kullanıcı adına sahip bir kullanıcı zaten kayıtlı.',
+    usernameOrPasswordIncorrect: 'Sağlanan kullanıcı adı veya şifre yanlış.',
     valueMustBeUnique: 'Değer benzersiz olmalıdır',
     verificationTokenInvalid: 'Doğrulama tokeni geçersiz.',
   },

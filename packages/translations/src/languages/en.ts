@@ -4,6 +4,7 @@ export const enTranslations = {
   authentication: {
     account: 'Account',
     accountOfCurrentUser: 'Account of current user',
+    accountVerified: 'Account verified successfully.',
     alreadyActivated: 'Already Activated',
     alreadyLoggedIn: 'Already logged in',
     apiKey: 'API Key',
@@ -27,6 +28,7 @@ export const enTranslations = {
       'Please enter your email below. You will receive an email message with instructions on how to reset your password.',
     forgotPasswordUsernameInstructions:
       'Please enter your username below. Instructions on how to reset your password will be sent to email address associated with your username.',
+    usernameNotValid: 'The username provided is not valid',
 
     forgotPasswordQuestion: 'Forgot password?',
     generate: 'Generate',
@@ -118,6 +120,7 @@ export const enTranslations = {
     userEmailAlreadyRegistered: 'A user with the given email is already registered.',
     userLocked: 'This user is locked due to having too many failed login attempts.',
     usernameAlreadyRegistered: 'A user with the given username is already registered.',
+    usernameOrPasswordIncorrect: 'The username or password provided is incorrect.',
     valueMustBeUnique: 'Value must be unique',
     verificationTokenInvalid: 'Verification token is invalid.',
   },

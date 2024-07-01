@@ -4,6 +4,7 @@ export const ruTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Аккаунт',
     accountOfCurrentUser: 'Аккаунт текущего пользователя',
+    accountVerified: 'Учетная запись успешно подтверждена.',
     alreadyActivated: 'Уже активирован',
     alreadyLoggedIn: 'Уже вошли в систему',
     apiKey: 'API ключ',
@@ -65,6 +66,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Обновление токена прошло успешно.',
     unableToVerify: 'Невозможно подтвердить',
     username: 'Имя пользователя',
+    usernameNotValid: 'Предоставленное имя пользователя недействительно.',
     verified: 'Подтверждено',
     verifiedSuccessfully: 'Успешно подтверждено',
     verify: 'Подтвердить',
@@ -118,6 +120,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     userLocked:
       'Этот пользователь заблокирован из-за слишком большого количества неудачных попыток входа.',
     usernameAlreadyRegistered: 'Пользователь с данным именем пользователя уже зарегистрирован.',
+    usernameOrPasswordIncorrect: 'Указанное имя пользователя или пароль неверны.',
     valueMustBeUnique: 'Значение должно быть уникальным',
     verificationTokenInvalid: 'Проверочный токен недействителен.',
   },

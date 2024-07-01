@@ -4,6 +4,7 @@ export const heTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'חשבון',
     accountOfCurrentUser: 'חשבון המשתמש הנוכחי',
+    accountVerified: 'החשבון אומת בהצלחה.',
     alreadyActivated: 'כבר הופעל',
     alreadyLoggedIn: 'כבר מחובר',
     apiKey: 'מפתח API',
@@ -63,6 +64,7 @@ export const heTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'רענון הטוקן הצליח.',
     unableToVerify: 'לא ניתן לאמת',
     username: 'שם משתמש',
+    usernameNotValid: 'שם המשתמש שסופק אינו חוקי',
     verified: 'אומת',
     verifiedSuccessfully: 'אומת בהצלחה',
     verify: 'אמת',
@@ -113,6 +115,7 @@ export const heTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'משתמש עם האימייל הנתון כבר רשום.',
     userLocked: 'המשתמש נעול עקב מספר נסיונות התחברות כושלים.',
     usernameAlreadyRegistered: 'משתמש עם שם המשתמש שניתן כבר רשום.',
+    usernameOrPasswordIncorrect: 'שם המשתמש או הסיסמה שסופקו אינם נכונים.',
     valueMustBeUnique: 'הערך חייב להיות ייחודי',
     verificationTokenInvalid: 'טוקן אימות אינו תקין.',
   },
