@@ -6,7 +6,7 @@ import {
   MetaTitleField,
   OverviewField,
   PreviewField,
-} from '@payloadcms/plugin-seo'
+} from '@payloadcms/plugin-seo/fields'
 
 import { pagesWithImportedFieldsSlug } from '../shared.js'
 
