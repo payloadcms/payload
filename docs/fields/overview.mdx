@@ -12,7 +12,9 @@ keywords: overview, fields, config, configuration, documentation, Content Manage
   complex.
 </Banner>
 
-Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
+Payload Fields define the shape of the data that will be stored in the [Database](../database/overview) as well as automatically construct the corresponding UI within the [Admin Panel](../admin/overview). Fields are defined as an array on [Collections](../configuration/collections) or [Globals](../configuration/globals) via the `fields` key.
+
+There are many [field types](#field-types) to choose from, each of which allow you to write [Custom Validation](#validation) functions, [Conditional Logic](../admin/fields#conditional-logic), [Field-level Access Control](#field-level-access-control), [Field-level Hooks](#field-level-hooks), and so much more. You can also customize the appearance and behavior of fields in the Admin Panel, more details [here](../admin/fields).
 
 The required `type` property on a field determines what values it can accept, how it is presented in the API, and how the field will be rendered in the admin interface.
 

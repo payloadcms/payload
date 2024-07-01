@@ -19,9 +19,7 @@ To swap in your own Custom Views, consult the list of available components. Dete
 
 ## Custom Root Views
 
-Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views. You can easily swap Root Views with your own or [create entirely new ones](#adding-new-root-views) through the `admin.components.views` property of your [Payload Config](../configuration/overview).
-
-Here is an example showing what it might look like to swap out Root Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views. To easily swap Root Views with your own or [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -37,6 +35,10 @@ const config = buildConfig({
   },
 })
 ```
+
+<i>
+  For details on how to build Custom Views, see [Building Custom Views](#building-custom-views).
+</i>
 
 The following options are available:
 
@@ -94,9 +96,7 @@ The above example shows how to add a new [Root View](#custom-root-views), but th
 
 ## Custom Collection Views
 
-Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views. You can easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Collection Config](../collections/overview).
-
-Here is an example showing what it might look like to swap out Collection Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views. To easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../collections/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -112,6 +112,10 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
   },
 }
 ```
+
+<strong>
+  For details on how to build Custom Views, see [Building Custom Views](#building-custom-views).
+</strong>
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -132,9 +136,7 @@ The following options are available:
 
 ## Custom Global Views
 
-Global Views are views that are scoped under the `/globals` route, such as the Document Edit View. You can easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Global Config](../globals/overview).
-
-Here is an example showing what it might look like to swap out Global Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+Global Views are views that are scoped under the `/globals` route, such as the Document Edit View. To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Global Config](../globals/overview):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload/types'
@@ -150,6 +152,10 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
   },
 })
 ```
+
+<i>
+  For details on how to build Custom Views, see [Building Custom Views](#building-custom-views).
+</i>
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -169,11 +175,11 @@ The following options are available:
 
 ## Custom Document Views
 
-Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View. You can easily swap out Document Views with your own or [create entirely new ones](#adding-new-document-views) through the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview).
+Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View.
 
 This approach allows you to replace specific nested views while keeping the overall structure of the Edit View intact, including the title, tabs, etc. If you need to replace the _entire_ Edit View, including the nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#custom-collection-views) or [Custom Global Views](#custom-global-views) for more information.
 
-Here's an example showing what it might look like to swap out Document Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+To easily swap out Document Views with your own or [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview).
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -193,6 +199,10 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
   },
 })
 ```
+
+<i>
+  For details on how to build Custom Views, see [Building Custom Views](#building-custom-views).
+</i>
 
 <Banner type="warning">
  <strong>Note:</strong>
@@ -249,7 +259,7 @@ export const MyCollection: SanitizedCollectionConfig = {
  This applies to _both_ Collections _and_ Globals.
 </Banner>
 
-### Building Custom Views
+## Building Custom Views
 
 Custom Views are just [Custom Components](./components) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
 
