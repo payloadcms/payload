@@ -135,8 +135,8 @@ export const POST =
       resHeaders.append(key, headers[key])
     }
 
-    if (basePayloadRequest.responseHeaders) {
-      mergeHeaders(basePayloadRequest.responseHeaders, resHeaders)
+    if (req.responseHeaders) {
+      mergeHeaders(req.responseHeaders, resHeaders)
     }
 
     return new Response(apiResponse.body, {
