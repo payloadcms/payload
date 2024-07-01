@@ -69,12 +69,30 @@ Payload generates your types based on a JSON schema. You can extend that JSON sc
 // payload.config.ts
 {
   // ...
-	typescript: {
-		schema: [({ jsonSchema }) => {
-      // ... do something with jsonSchema
-      return jsonSchema
-    }]
-	}
+  typescript: {
+    schema: [
+      ({ jsonSchema }) => {
+        // Modify the JSON schema here
+        jsonSchema.definitions.Test = {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            content: { type: 'string' },
+          },
+          required: ['title', 'content'],
+        }
+        return jsonSchema
+      },
+    ]
+  }
+}
+
+// This will generate the following type in your payload-types.ts:
+
+export interface Test {
+  title: string;
+  content: string;
+  [k: string]: unknown;
 }
 ```
 
