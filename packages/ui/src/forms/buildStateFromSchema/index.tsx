@@ -65,3 +65,5 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
 
   return {}
 }
+
+export { iterateFields }
