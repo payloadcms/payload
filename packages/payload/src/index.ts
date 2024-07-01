@@ -820,7 +820,6 @@ export type {
 export { getLocalI18n } from './translations/getLocalI18n.js'
 
 export { combineMerge } from './utilities/combineMerge.js'
-
 export {
   configToJSONSchema,
   entityToJSONSchema,
@@ -829,7 +828,10 @@ export {
 } from './utilities/configToJSONSchema.js'
 
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+
 export { createLocalReq } from './utilities/createLocalReq.js'
+export { deepCopyObject } from './utilities/deepCopyObject.js'
+export { deepMerge } from './utilities/deepMerge.js'
 
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 
