@@ -166,7 +166,7 @@ type CreateCacheKeyArgs = {
   locale: string
   overrideAccess: boolean
   showHiddenFields: boolean
-  transactionID: number | string
+  transactionID: Promise<number | string> | number | string
 }
 export const createDataloaderCacheKey = ({
   collectionSlug,

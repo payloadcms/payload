@@ -13,7 +13,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
 ) {
   const Model = this.globals
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
   }
 

@@ -28,7 +28,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     this.payload.globals.config.find(({ slug }) => slug === global),
   )
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     limit,
     skip,
   }
