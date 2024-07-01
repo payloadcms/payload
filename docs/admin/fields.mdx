@@ -6,9 +6,9 @@ desc:
 keywords:
 ---
 
-All [Payload Fields](../fields) support the ability to swap in your own [Custom Components](./components). This allows you to endlessly customize the appearance or behavior of fields either by replacing the entire field component, or the individual components with each field.
+All [Payload Fields](../fields/overview) support [Conditional Logic](#conditional-logic), [Custom Components](./components), and so much more. This allows for endless customization of the appearance and behavior fields within the [Admin Panel](./overview).
 
-For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you would simply replace the default [Text Field](../fields/text) input with some user-friendly UI that formats the data into a valid color value. Then, a [Custom Validation](../fields/overview#validation) function could ensure the value is acceptable.
+For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you would simply replace the default [Text Field](../fields/text) input with some user-friendly UI that formats the data into a valid color value. Then, write a [Custom Validation](../fields/overview#validation) function could ensure the value is acceptable.
 
 <Banner type="success">
   <strong>Tip:</strong>
@@ -16,15 +16,33 @@ For example, your app might need to render a specific interface that Payload doe
   and [Custom Components](./components), you can override the entirety of how a component functions within the [Admin Panel](./overview) to effectively create your own field type.
 </Banner>
 
+## Configuration
+
+You can customize fields through the `admin` property of any [Field Config](../fields/overview):
+
+| Option              | Description                                                                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `condition`         | Programmatically show / hide fields based on other fields. [More details](../admin/fields#conditional-logic).                                                                                               |
+| `components`        | All Field Components can be swapped out for [Custom Components](../admin/components) that you define. [More details](../admin/fields).                                                                             |
+| `description`       | Helper text to display alongside the field to provide more information for the editor user. [More details](../admin/fields#description).                                                                                                 |
+| `position`          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
+| `width`             | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| `style`             | Attach raw CSS style properties to the root DOM element of a field.                                                                                                                                                              |
+| `className`         | Attach a CSS class name to the root DOM element of a field.                                                                                                                                                                      |
+| `readOnly`          | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
+| `disabled`          | If a field is `disabled`, it is completely omitted from the Admin panel.                                                                                                                                                         |
+| `disableBulkEdit`   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents.                                                                                                 |
+| `disableListColumn` | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                             |
+| `disableListFilter` | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
+| `hidden`            | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.        |
+
+## Field Components
+
 Within the Admin Panel, fields are rendered in three distinct places:
 
 - [Field](#field-component) - The actual form field rendered in the Edit View.
 - [Cell](#cell-component) - The table cell component rendered in the List View.
 - [Filter](#filter-component) - The filter component rendered in the List View.
-
-To swap in your own Field Components, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then author your React component(s) accordingly.
-
-## Configuration
 
 You can easily swap Field Components with your own through the `admin.components` property of your [Field Config](../fields/overview):
 
