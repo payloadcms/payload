@@ -12,12 +12,16 @@ import type {
   SEOPluginConfig,
 } from './types.js'
 
-import { MetaDescription } from './fields/MetaDescription.js'
-import { MetaImage } from './fields/MetaImage.js'
-import { MetaTitle } from './fields/MetaTitle.js'
+import { MetaDescriptionComponent } from './fields/MetaDescription/MetaDescriptionComponent.js'
+import { MetaImageComponent } from './fields/MetaImage/MetaImageComponent.js'
+import { MetaTitleComponent } from './fields/MetaTitle/MetaTitleComponent.js'
 import { translations } from './translations/index.js'
 import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
+
+export { MetaDescription } from './fields/MetaDescription/index.js'
+export { MetaImage } from './fields/MetaImage/index.js'
+export { MetaTitle } from './fields/MetaTitle/index.js'
 
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
@@ -43,7 +47,7 @@ export const seoPlugin =
             admin: {
               components: {
                 Field: withMergedProps({
-                  Component: MetaTitle,
+                  Component: MetaTitleComponent,
                   sanitizeServerOnlyProps: true,
                   toMergeIntoProps: {
                     hasGenerateTitleFn: typeof pluginConfig?.generateTitle === 'function',
@@ -60,7 +64,7 @@ export const seoPlugin =
             admin: {
               components: {
                 Field: withMergedProps({
-                  Component: MetaDescription,
+                  Component: MetaDescriptionComponent,
                   sanitizeServerOnlyProps: true,
                   toMergeIntoProps: {
                     hasGenerateDescriptionFn:
@@ -81,7 +85,7 @@ export const seoPlugin =
                   admin: {
                     components: {
                       Field: withMergedProps({
-                        Component: MetaImage,
+                        Component: MetaImageComponent,
                         sanitizeServerOnlyProps: true,
                         toMergeIntoProps: {
                           hasGenerateImageFn: typeof pluginConfig?.generateImage === 'function',
