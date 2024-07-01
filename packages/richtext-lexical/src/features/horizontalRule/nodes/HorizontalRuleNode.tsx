@@ -6,6 +6,7 @@ import type {
   LexicalCommand,
   LexicalNode,
   SerializedLexicalNode,
+  Spread,
 } from 'lexical'
 
 import { addClassNamesToElement } from '@lexical/utils'
@@ -21,7 +22,13 @@ const HorizontalRuleComponent = React.lazy(() =>
 /**
  * Serialized representation of a horizontal rule node. Serialized = converted to JSON. This is what is stored in the database / in the lexical editor state.
  */
-export type SerializedHorizontalRuleNode = SerializedLexicalNode
+export type SerializedHorizontalRuleNode = Spread<
+  {
+    children?: never // required so that our typed editor state doesn't automatically add children
+    type: 'horizontalrule'
+  },
+  SerializedLexicalNode
+>
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createCommand(
   'INSERT_HORIZONTAL_RULE_COMMAND',

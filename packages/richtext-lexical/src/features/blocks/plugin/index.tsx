@@ -10,7 +10,7 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { PluginComponent } from '../../types.js'
+import type { PluginComponent } from '../../typesClient.js'
 import type { BlocksFeatureClientProps } from '../feature.client.js'
 import type { BlockFields } from '../nodes/BlocksNode.js'
 

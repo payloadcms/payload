@@ -48,12 +48,14 @@ export const APIKeyAuthentication =
           user.collection = collectionConfig.slug
           user._strategy = 'api-key'
 
-          return user as User
+          return {
+            user: user as User,
+          }
         }
       } catch (err) {
-        return null
+        return { user: null }
       }
     }
 
-    return null
+    return { user: null }
   }

@@ -25,6 +25,7 @@ const baseClass = 'upload'
 export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
   api?: string
   collection?: ClientCollectionConfig
+  customUploadActions?: React.ReactNode[]
   filterOptions?: FilterOptionsResult
   onChange?: (e) => void
   relationTo?: UploadField['relationTo']
@@ -41,6 +42,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     api = '/api',
     className,
     collection,
+    customUploadActions,
     descriptionProps,
     errorProps,
     filterOptions,
@@ -147,6 +149,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
               {fileDoc && !missingFile && (
                 <FileDetails
                   collectionSlug={relationTo}
+                  customUploadActions={customUploadActions}
                   doc={fileDoc}
                   handleRemove={
                     readOnly

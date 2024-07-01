@@ -17,7 +17,7 @@ import {
   withNullableJSONSchemaType,
 } from 'payload'
 
-import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/types.js'
+import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type {
   AdapterProps,
@@ -83,7 +83,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     }
 
-    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
+    let features: FeatureProviderServer<any, any, any>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -811,11 +811,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
-export {
-  type BlockFields,
-  BlockNode,
-  type SerializedBlockNode,
-} from './features/blocks/nodes/BlocksNode.js'
+export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
 
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
@@ -850,11 +846,7 @@ export { LinkFeature, type LinkFeatureServerProps } from './features/link/featur
 
 export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
 export { LinkNode } from './features/link/nodes/LinkNode.js'
-export type {
-  LinkFields,
-  SerializedAutoLinkNode,
-  SerializedLinkNode,
-} from './features/link/nodes/types.js'
+export type { LinkFields } from './features/link/nodes/types.js'
 export { ChecklistFeature } from './features/lists/checklist/feature.server.js'
 export { OrderedListFeature } from './features/lists/orderedList/feature.server.js'
 export { UnorderedListFeature } from './features/lists/unorderedList/feature.server.js'
@@ -889,7 +881,6 @@ export {
 export {
   type RelationshipData,
   RelationshipNode,
-  type SerializedRelationshipNode,
 } from './features/relationship/nodes/RelationshipNode.js'
 
 export { FixedToolbarFeature } from './features/toolbars/fixed/feature.server.js'
@@ -897,6 +888,20 @@ export { InlineToolbarFeature } from './features/toolbars/inline/feature.server.
 
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
 export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
+export type {
+  ClientComponentProps,
+  ClientFeature,
+  ClientFeatureProviderMap,
+  FeatureProviderClient,
+  FeatureProviderProviderClient,
+  PluginComponent,
+  PluginComponentWithAnchor,
+  ResolvedClientFeature,
+  ResolvedClientFeatureMap,
+  SanitizedClientFeatures,
+  SanitizedPlugin,
+} from './features/typesClient.js'
+
 export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
@@ -907,37 +912,22 @@ export type {
   BeforeChangeNodeHookArgs,
   BeforeValidateNodeHook,
   BeforeValidateNodeHookArgs,
-  ClientComponentProps,
-  ClientFeature,
-  ClientFeatureProviderMap,
-  FeatureProviderClient,
-  FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
   NodeValidation,
   NodeWithHooks,
-  PluginComponent,
-  PluginComponentWithAnchor,
   PopulationPromise,
-  ResolvedClientFeature,
-  ResolvedClientFeatureMap,
   ResolvedServerFeature,
   ResolvedServerFeatureMap,
-  SanitizedClientFeatures,
-  SanitizedPlugin,
   SanitizedServerFeatures,
   ServerFeature,
   ServerFeatureProviderMap,
-} from './features/types.js'
+} from './features/typesServer.js'
 
 export { UploadFeature } from './features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './features/upload/feature.server.js'
-export {
-  type SerializedUploadNode,
-  type UploadData,
-  UploadNode,
-} from './features/upload/nodes/UploadNode.js'
+export { type UploadData, UploadNode } from './features/upload/nodes/UploadNode.js'
 
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 export {
@@ -987,3 +977,9 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 
 export { createServerFeature } from './utilities/createServerFeature.js'
+export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
+export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
+
+export * from './nodeTypes.js'
+
+export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'

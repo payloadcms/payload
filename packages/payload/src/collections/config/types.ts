@@ -1,12 +1,18 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired } from 'ts-essentials'
+import type { DeepRequired, MarkOptional } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomUpload,
 } from '../../admin/types.js'
+import type { Arguments as MeArguments } from '../../auth/operations/me.js'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh.js'
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
@@ -22,7 +28,7 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { GeneratedTypes } from '../../index.js'
+import type { CollectionSlug, TypedCollection } from '../../index.js'
 import type { PayloadRequestWithData, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -30,6 +36,16 @@ import type {
   SanitizedCollectionVersions,
 } from '../../versions/types.js'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
+
+export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+export type RequiredDataFromCollection<TData extends Record<string, any>> = MarkOptional<
+  TData,
+  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+>
+
+export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'
@@ -141,9 +157,17 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequestWithData
 }) => any
 
-export type AfterOperationHook<T extends TypeWithID = any> = (
-  arg: AfterOperationArg<T>,
-) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>
+export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string> = (
+  arg: AfterOperationArg<TOperationGeneric>,
+) =>
+  | Awaited<
+      ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
+    >
+  | Promise<
+      Awaited<
+        ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
+      >
+    >
 
 export type AfterErrorHook = (
   err: Error,
@@ -185,6 +209,16 @@ export type AfterMeHook<T extends TypeWithID = any> = (args: {
   response: unknown
 }) => any
 
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
+export type MeHook<T extends TypeWithID = any> = (args: {
+  args: MeArguments
+  user: T
+}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
+
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -206,10 +240,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: CustomComponent[]
-    AfterListTable?: CustomComponent[]
-    BeforeList?: CustomComponent[]
-    BeforeListTable?: CustomComponent[]
+    afterList?: CustomComponent[]
+    afterListTable?: CustomComponent[]
+    beforeList?: CustomComponent[]
+    beforeListTable?: CustomComponent[]
     /**
      * Components within the edit view
      */
@@ -236,6 +270,11 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Upload" section
+       * + upload must be enabled
+       */
+      Upload?: CustomUpload
     }
     views?: {
       /**
@@ -302,7 +341,7 @@ export type CollectionAdminOptions = {
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig = {
+export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Access control
    */
@@ -365,7 +404,7 @@ export type CollectionConfig = {
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]
     afterMe?: AfterMeHook[]
-    afterOperation?: AfterOperationHook[]
+    afterOperation?: AfterOperationHook<TSlug>[]
     afterRead?: AfterReadHook[]
     afterRefresh?: AfterRefreshHook[]
     beforeChange?: BeforeChangeHook[]
@@ -374,6 +413,19 @@ export type CollectionConfig = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+    me?: MeHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration
@@ -439,10 +491,10 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
-  docs: GeneratedTypes['collections'][TSlug][]
+export type BulkOperationResult<TSlug extends CollectionSlug> = {
+  docs: DataFromCollectionSlug<TSlug>[]
   errors: {
-    id: GeneratedTypes['collections'][TSlug]['id']
+    id: DataFromCollectionSlug<TSlug>['id']
     message: string
   }[]
 }

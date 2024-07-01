@@ -5,14 +5,25 @@ import httpStatus from 'http-status'
 
 import { APIError } from './APIError.js'
 
-export class ValidationError extends APIError<{ field: string; message: string }[]> {
-  constructor(results: { field: string; message: string }[], t?: TFunction) {
+export class ValidationError extends APIError<{
+  collection?: string
+  errors: { field: string; message: string }[]
+  global?: string
+}> {
+  constructor(
+    results: { collection?: string; errors: { field: string; message: string }[]; global?: string },
+    t?: TFunction,
+  ) {
     const message = t
-      ? t('error:followingFieldsInvalid', { count: results.length })
-      : results.length === 1
+      ? t('error:followingFieldsInvalid', { count: results.errors.length })
+      : results.errors.length === 1
         ? en.translations.error.followingFieldsInvalid_one
         : en.translations.error.followingFieldsInvalid_other
 
-    super(`${message} ${results.map((f) => f.field).join(', ')}`, httpStatus.BAD_REQUEST, results)
+    super(
+      `${message} ${results.errors.map((f) => f.field).join(', ')}`,
+      httpStatus.BAD_REQUEST,
+      results,
+    )
   }
 }

@@ -14,13 +14,14 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 export type Result = {
   exp: number
   refreshedToken: string
+  setCookie?: boolean
+  strategy?: string
   user: Document
 }
 
 export type Arguments = {
   collection: Collection
   req: PayloadRequestWithData
-  token: string
 }
 
 export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
@@ -61,7 +62,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       },
     } = args
 
-    if (typeof args.token !== 'string' || !args.req.user) throw new Forbidden(args.req.t)
+    if (!args.req.user) throw new Forbidden(args.req.t)
 
     const parsedURL = url.parse(args.req.url)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
@@ -73,22 +74,41 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       req: args.req,
     })
 
-    const fieldsToSign = getFieldsToSign({
-      collectionConfig,
-      email: user?.email as string,
-      user: args?.req?.user,
-    })
+    let result: Result
 
-    const refreshedToken = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
-    })
+    // /////////////////////////////////////
+    // refresh hook - Collection
+    // /////////////////////////////////////
 
-    const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
+    for (const refreshHook of args.collection.config.hooks.refresh) {
+      const hookResult = await refreshHook({ args, user })
 
-    let result: Result = {
-      exp,
-      refreshedToken,
-      user,
+      if (hookResult) {
+        result = hookResult
+        break
+      }
+    }
+
+    if (!result) {
+      const fieldsToSign = getFieldsToSign({
+        collectionConfig,
+        email: user?.email as string,
+        user: args?.req?.user,
+      })
+
+      const refreshedToken = jwt.sign(fieldsToSign, secret, {
+        expiresIn: collectionConfig.auth.tokenExpiration,
+      })
+
+      const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
+
+      result = {
+        exp,
+        refreshedToken,
+        setCookie: true,
+        strategy: args.req.user._strategy,
+        user,
+      }
     }
 
     // /////////////////////////////////////
@@ -102,9 +122,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         (await hook({
           collection: args.collection?.config,
           context: args.req.context,
-          exp,
+          exp: result.exp,
           req: args.req,
-          token: refreshedToken,
+          token: result.refreshedToken,
         })) || result
     }, Promise.resolve())
 

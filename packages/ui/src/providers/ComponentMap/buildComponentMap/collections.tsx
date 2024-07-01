@@ -102,7 +102,11 @@ export const mapCollections = (args: {
       <WithServerSideProps Component={PublishButtonComponent} />
     ) : undefined
 
-    const beforeList = collectionConfig?.admin?.components?.BeforeList
+    const UploadComponent = collectionConfig?.admin?.components?.edit?.Upload
+
+    const Upload = UploadComponent ? <WithServerSideProps Component={UploadComponent} /> : undefined
+
+    const beforeList = collectionConfig?.admin?.components?.beforeList
 
     const BeforeList =
       (beforeList &&
@@ -110,7 +114,7 @@ export const mapCollections = (args: {
         beforeList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
-    const beforeListTable = collectionConfig?.admin?.components?.BeforeListTable
+    const beforeListTable = collectionConfig?.admin?.components?.beforeListTable
 
     const BeforeListTable =
       (beforeListTable &&
@@ -118,7 +122,7 @@ export const mapCollections = (args: {
         beforeListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
-    const afterList = collectionConfig?.admin?.components?.AfterList
+    const afterList = collectionConfig?.admin?.components?.afterList
 
     const AfterList =
       (afterList &&
@@ -126,7 +130,7 @@ export const mapCollections = (args: {
         afterList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
-    const afterListTable = collectionConfig?.admin?.components?.AfterListTable
+    const afterListTable = collectionConfig?.admin?.components?.afterListTable
 
     const AfterListTable =
       (afterListTable &&
@@ -171,6 +175,7 @@ export const mapCollections = (args: {
       PublishButton,
       SaveButton,
       SaveDraftButton,
+      Upload,
       actionsMap: mapActions({
         WithServerSideProps,
         collectionConfig,

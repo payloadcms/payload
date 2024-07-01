@@ -3,7 +3,7 @@ import type { RichTextAdapter } from 'payload'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import React from 'react'
 
-import type { ResolvedServerFeatureMap } from '../features/types.js'
+import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =

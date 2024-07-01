@@ -1,7 +1,5 @@
 import { ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProviderProviderServer } from '../../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { OrderedListFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
@@ -27,7 +25,7 @@ export const OrderedListFeature = createServerFeature({
             }),
             createNode({
               converters: {
-                html: ListItemHTMLConverter,
+                html: ListItemHTMLConverter as any,
               },
               node: ListItemNode,
             }),

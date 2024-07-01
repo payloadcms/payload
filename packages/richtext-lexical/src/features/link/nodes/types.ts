@@ -1,4 +1,4 @@
-import type { SerializedElementNode, Spread } from 'lexical'
+import type { SerializedElementNode, SerializedLexicalNode, Spread } from 'lexical'
 
 export type LinkFields = {
   // unknown, custom fields:
@@ -18,11 +18,14 @@ export type LinkFields = {
   url: string
 }
 
-export type SerializedLinkNode = Spread<
+export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = Spread<
   {
     fields: LinkFields
     id?: string // optional if AutoLinkNode
+    type: 'link'
   },
-  SerializedElementNode
+  SerializedElementNode<T>
 >
-export type SerializedAutoLinkNode = Omit<SerializedLinkNode, 'id'>
+export type SerializedAutoLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  type: 'autolink'
+} & Omit<SerializedLinkNode<T>, 'id' | 'type'>

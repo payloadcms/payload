@@ -36,7 +36,7 @@ export const Page: CollectionConfig = {
 }
 ```
 
-## Field types
+## Field Types
 
 - [Array](/docs/fields/array) - for repeating content, supports nested fields
 - [Blocks](/docs/fields/blocks) - block-based fields, allowing powerful layout creation
@@ -60,15 +60,15 @@ export const Page: CollectionConfig = {
 - [Upload](/docs/fields/upload) - allows local file and image upload
 - [UI](/docs/fields/ui) - inject your own custom components and do whatever you need
 
-## Field-level hooks
+## Field-level Hooks
 
 One of the most powerful parts about Payload is its ability for you to define field-level hooks that can control the logic of your fields to a fine-grained level. for more information about how to define field hooks, [click here](/docs/hooks/overview#field-hooks).
 
-## Field-level access control
+## Field-level Access Control
 
 In addition to being able to define access control on a document-level, you can define extremely granular permissions on a field by field level. For more information about field-level access control, [click here](/docs/access-control/overview#fields).
 
-## Field names
+## Field Names
 
 Some fields use their `name` property as a unique identifier to store and retrieve from the database. `__v`, `salt`, and `hash` are all reserved field names which are sanitized from Payload's config and cannot be used.
 
@@ -159,7 +159,7 @@ Example:
 }
 ```
 
-## Admin config
+## Admin Config
 
 In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
 
@@ -179,11 +179,11 @@ In addition to each field's base configuration, you can define specific traits a
 | `disableListFilter` | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
 | `hidden`            | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.        |
 
-## Custom components
+## Custom Components
 
-All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/components#fields).
+All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/fields).
 
-## Conditional logic
+## Conditional Logic
 
 You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
 
@@ -222,7 +222,7 @@ The `condition` function should return a boolean that will control if the field 
 }
 ```
 
-## Default values
+## Default Values
 
 Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
 

@@ -5,10 +5,10 @@ import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
 import {
   FieldLabel,
   TextInput,
-  useAllFormFields,
   useDocumentInfo,
   useField,
   useFieldProps,
+  useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
@@ -39,7 +39,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   } as Options)
 
   const locale = useLocale()
-  const [fields] = useAllFormFields()
+  const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
   const { errorMessage, setValue, showError, value } = field
@@ -50,7 +50,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
     const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
       body: JSON.stringify({
         ...docInfo,
-        doc: { ...fields },
+        doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
       } satisfies Parameters<GenerateTitle>[0]),
       credentials: 'include',
@@ -63,7 +63,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
     const { result: generatedTitle } = await genTitleResponse.json()
 
     setValue(generatedTitle || '')
-  }, [fields, setValue, hasGenerateTitleFn, locale, docInfo])
+  }, [hasGenerateTitleFn, docInfo, getData, locale, setValue])
 
   return (
     <div

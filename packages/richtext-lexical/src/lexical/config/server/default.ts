@@ -1,6 +1,6 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import type { FeatureProviderServer } from '../../../features/types.js'
+import type { FeatureProviderServer } from '../../../features/typesServer.js'
 import type { ServerEditorConfig } from '../types.js'
 
 import { AlignFeature } from '../../../features/align/feature.server.js'
@@ -30,7 +30,7 @@ export const defaultEditorLexicalConfig: LexicalEditorConfig = {
   theme: LexicalEditorTheme,
 }
 
-export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = [
+export const defaultEditorFeatures: FeatureProviderServer<any, any, any>[] = [
   BoldFeature(),
   ItalicFeature(),
   UnderlineFeature(),

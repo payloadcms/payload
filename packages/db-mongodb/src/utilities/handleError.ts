@@ -1,16 +1,30 @@
 import httpStatus from 'http-status'
 import { APIError, ValidationError } from 'payload'
 
-const handleError = (error, req) => {
+export const handleError = ({
+  collection,
+  error,
+  global,
+  req,
+}: {
+  collection?: string
+  error
+  global?: string
+  req
+}) => {
   // Handle uniqueness error from MongoDB
   if (error.code === 11000 && error.keyValue) {
     throw new ValidationError(
-      [
-        {
-          field: Object.keys(error.keyValue)[0],
-          message: req.t('error:valueMustBeUnique'),
-        },
-      ],
+      {
+        collection,
+        errors: [
+          {
+            field: Object.keys(error.keyValue)[0],
+            message: req.t('error:valueMustBeUnique'),
+          },
+        ],
+        global,
+      },
       req.t,
     )
   } else if (error.code === 11000) {
@@ -19,5 +33,3 @@ const handleError = (error, req) => {
     throw error
   }
 }
-
-export default handleError

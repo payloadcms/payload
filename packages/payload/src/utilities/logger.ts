@@ -7,7 +7,7 @@ const pinoPretty = (pinoPrettyImport.default ||
 
 export type PayloadLogger = pinoImport.default.Logger
 
-const prettyOptions = {
+const prettyOptions: pinoPrettyImport.PrettyOptions = {
   colorize: true,
   ignore: 'pid,hostname',
   translateTime: 'SYS:HH:MM:ss',

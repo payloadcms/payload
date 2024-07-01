@@ -1,12 +1,13 @@
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -15,19 +16,19 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
   id: number | string
-  locale?: 'all' | GeneratedTypes['locale']
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
   user?: Document
 }
 
-export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<GeneratedTypes['collections'][T]> {
+  options: Options<TSlug>,
+): Promise<DataFromCollectionSlug<TSlug>> {
   const {
     id,
     collection: collectionSlug,
@@ -47,7 +48,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     )
   }
 
-  return findByIDOperation<GeneratedTypes['collections'][T]>({
+  return findByIDOperation<TSlug>({
     id,
     collection,
     currentDepth,

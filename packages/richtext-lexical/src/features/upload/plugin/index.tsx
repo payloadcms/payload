@@ -14,7 +14,7 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { PluginComponentWithAnchor } from '../../types.js'
+import type { PluginComponentWithAnchor } from '../../typesClient.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadData } from '../nodes/UploadNode.js'
 

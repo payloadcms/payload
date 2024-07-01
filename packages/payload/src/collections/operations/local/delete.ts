@@ -1,62 +1,60 @@
-import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
   RequestContext,
   Where,
 } from '../../../types/index.js'
-import type { BulkOperationResult } from '../../config/types.js'
+import type { BulkOperationResult, DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
-export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type BaseOptions<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   depth?: number
-  fallbackLocale?: GeneratedTypes['locale']
-  locale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
   user?: Document
 }
 
-export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+export type ByIDOptions<TSlug extends CollectionSlug> = BaseOptions<TSlug> & {
   id: number | string
   where?: never
 }
 
-export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+export type ManyOptions<TSlug extends CollectionSlug> = BaseOptions<TSlug> & {
   id?: never
   where: Where
 }
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> =
-  | ByIDOptions<TSlug>
-  | ManyOptions<TSlug>
+export type Options<TSlug extends CollectionSlug> = ByIDOptions<TSlug> | ManyOptions<TSlug>
 
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: ByIDOptions<TSlug>,
-): Promise<GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+): Promise<DataFromCollectionSlug<TSlug>>
+async function deleteLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>>
+async function deleteLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
+): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>> {
   const {
     id,
     collection: collectionSlug,

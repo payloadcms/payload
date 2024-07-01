@@ -1,19 +1,20 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequestWithData } from '../../../types/index.js'
+import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
-export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug> = {
   context?: RequestContext
-  data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
+  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: GeneratedTypes['locale']
-  locale?: GeneratedTypes['locale']
+  fallbackLocale?: TypedLocale
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequestWithData
   showHiddenFields?: boolean
@@ -21,10 +22,10 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   user?: Document
 }
 
-export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
+export default async function updateLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<GeneratedTypes['globals'][TSlug]> {
+): Promise<DataFromGlobalSlug<TSlug>> {
   const { slug: globalSlug, data, depth, draft, overrideAccess = true, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)

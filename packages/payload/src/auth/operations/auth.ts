@@ -1,4 +1,4 @@
-import type { GeneratedTypes } from '../../index.js'
+import type { TypedUser } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
 import type { Permissions } from '../types.js'
 
@@ -15,7 +15,8 @@ export type AuthArgs = {
 
 export type AuthResult = {
   permissions: Permissions
-  user: GeneratedTypes['user'] | null
+  responseHeaders?: Headers
+  user: TypedUser | null
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
@@ -26,12 +27,13 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await executeAuthStrategies({
+    const { responseHeaders, user } = await executeAuthStrategies({
       headers,
       payload,
     })
 
     req.user = user
+    req.responseHeaders = responseHeaders
 
     const permissions = await getAccessResults({
       req,
@@ -41,6 +43,7 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
 
     return {
       permissions,
+      responseHeaders,
       user,
     }
   } catch (error: unknown) {

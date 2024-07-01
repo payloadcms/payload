@@ -17,7 +17,7 @@ import './index.scss'
 
 const baseClass = 'date-time-picker'
 
-const DateTime: React.FC<Props> = (props) => {
+const DatePicker: React.FC<Props> = (props) => {
   const {
     displayFormat: customDisplayFormat,
     maxDate,
@@ -119,4 +119,4 @@ const DateTime: React.FC<Props> = (props) => {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default DateTime
+export default DatePicker

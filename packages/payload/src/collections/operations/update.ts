@@ -3,10 +3,14 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData, Where } from '../../types/index.js'
-import type { BulkOperationResult, Collection } from '../config/types.js'
-import type { CreateUpdateType } from './create.js'
+import type {
+  BulkOperationResult,
+  Collection,
+  DataFromCollectionSlug,
+  RequiredDataFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -28,9 +32,9 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments<T extends CreateUpdateType> = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
-  data: DeepPartial<T>
+  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
@@ -41,8 +45,8 @@ export type Arguments<T extends CreateUpdateType> = {
   where: Where
 }
 
-export const updateOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+export const updateOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug>> => {
   let args = incomingArgs
 
@@ -126,7 +130,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
         where: versionsWhere,
       })
 
-      const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
+      const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         locale,
         pagination: false,
@@ -199,7 +203,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
         // beforeValidate - Fields
         // /////////////////////////////////////
 
-        data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+        data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
           id,
           collection: collectionConfig,
           context: req.context,
@@ -259,7 +263,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
         // beforeChange - Fields
         // /////////////////////////////////////
 
-        let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+        let result = await beforeChange<DataFromCollectionSlug<TSlug>>({
           id,
           collection: collectionConfig,
           context: req.context,
@@ -345,7 +349,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
         // afterChange - Fields
         // /////////////////////////////////////
 
-        result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+        result = await afterChange<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig,
           context: req.context,
           data,
@@ -405,7 +409,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'update',

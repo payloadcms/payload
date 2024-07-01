@@ -1,26 +1,28 @@
-import type { Collection, GeneratedTypes, PayloadRequestWithData } from 'payload'
-import type { MarkOptional } from 'ts-essentials'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  PayloadRequestWithData,
+  RequiredDataFromCollectionSlug,
+} from 'payload'
 
 import { createOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
-export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
+export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
-    data: MarkOptional<
-      GeneratedTypes['collections'][TSlug],
-      'createdAt' | 'id' | 'sizes' | 'updatedAt'
-    >
+    data: RequiredDataFromCollectionSlug<TSlug>
     draft: boolean
     locale?: string
   },
   context: {
     req: PayloadRequestWithData
   },
-) => Promise<GeneratedTypes['collections'][TSlug]>
+) => Promise<DataFromCollectionSlug<TSlug>>
 
-export default function createResolver<TSlug extends keyof GeneratedTypes['collections']>(
+export default function createResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

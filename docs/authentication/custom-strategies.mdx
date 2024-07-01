@@ -33,10 +33,12 @@ The `authenticate` function is passed the following arguments:
 
 ### Example Strategy
 
-At its core a strategy simply takes information from the incoming request and returns a user. This is exactly how Payloads built-in strategies function.
+At its core a strategy simply takes information from the incoming request and returns a user. This is exactly how Payload's built-in strategies function.
+
+Your `authenticate` method should return an object containing a Payload user document and any optional headers that you'd like Payload to set for you when we return a response.
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -59,7 +61,18 @@ export const Users: CollectionConfig = {
             },
           })
 
-          return usersQuery.docs[0] || null
+          return {
+            // Send the user back to authenticate,
+            // or send null if no user should be authenticated
+            user: usersQuery.docs[0] || null,
+
+            // Optionally, you can return headers
+            // that you'd like Payload to set here when
+            // it returns the response
+            responseHeaders: new Headers({
+              'some-header': 'my header value'
+            })
+          }
         }
       }
     ]

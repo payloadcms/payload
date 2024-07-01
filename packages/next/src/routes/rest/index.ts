@@ -21,6 +21,7 @@ import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { init } from './auth/init.js'
@@ -122,7 +123,7 @@ const endpoints = {
   },
 }
 
-const handleCustomEndpoints = ({
+const handleCustomEndpoints = async ({
   endpoints,
   entitySlug,
   payloadRequest,
@@ -130,7 +131,7 @@ const handleCustomEndpoints = ({
   endpoints: Endpoint[] | GlobalConfig['endpoints']
   entitySlug?: string
   payloadRequest: PayloadRequest
-}): Promise<Response> | Response => {
+}): Promise<Response> => {
   if (endpoints && endpoints.length > 0) {
     let handlerParams = {}
     const { pathname } = payloadRequest
@@ -170,7 +171,15 @@ const handleCustomEndpoints = ({
         ...payloadRequest.routeParams,
         ...handlerParams,
       }
-      return customEndpoint.handler(payloadRequest)
+      const res = await customEndpoint.handler(payloadRequest)
+
+      if (res instanceof Response) {
+        if (payloadRequest.responseHeaders) {
+          mergeHeaders(payloadRequest.responseHeaders, res.headers)
+        }
+
+        return res
+      }
     }
   }
 
@@ -376,13 +385,20 @@ export const GET =
         res = await endpoints.root.GET[slug1]({ req: payloadRequest })
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
+
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
@@ -545,13 +561,20 @@ export const POST =
         res = await endpoints.root.POST[slug1]({ req: payloadRequest })
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
+
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
@@ -626,13 +649,20 @@ export const DELETE =
         }
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
+
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
@@ -708,13 +738,20 @@ export const PATCH =
         }
       }
 
-      if (res instanceof Response) return res
+      if (res instanceof Response) {
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
+        }
+
+        return res
+      }
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
         payloadRequest: req,
       })
+
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse({
