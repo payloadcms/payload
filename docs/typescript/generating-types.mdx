@@ -103,11 +103,13 @@ This function takes the existing JSON schema as an argument and returns the modi
 For example, let's look at the following simple Payload config:
 
 ```ts
+import type { Config } from 'payload'
+
 const config: Config = {
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   admin: {
     user: 'users',
-  }
+  },
   collections: [
     {
       slug: 'users',
