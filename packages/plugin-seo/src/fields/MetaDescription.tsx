@@ -5,10 +5,10 @@ import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
 import {
   FieldLabel,
   TextareaInput,
-  useAllFormFields,
   useDocumentInfo,
   useField,
   useFieldProps,
+  useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
@@ -35,7 +35,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
-  const [fields] = useAllFormFields()
+  const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
   const field: FieldType<string> = useField({
@@ -50,7 +50,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({
         ...docInfo,
-        doc: { ...fields },
+        doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
       } satisfies Parameters<GenerateDescription>[0]),
       credentials: 'include',
@@ -63,7 +63,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
     const { result: generatedDescription } = await genDescriptionResponse.json()
 
     setValue(generatedDescription || '')
-  }, [fields, setValue, hasGenerateDescriptionFn, locale, docInfo])
+  }, [hasGenerateDescriptionFn, docInfo, getData, locale, setValue])
 
   return (
     <div

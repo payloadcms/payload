@@ -83,10 +83,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     const { email: unsanitizedEmail, password } = data
 
     if (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '') {
-      throw new ValidationError([{ field: 'email', message: req.i18n.t('validation:required') }])
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
+      })
     }
     if (typeof password !== 'string' || password.trim() === '') {
-      throw new ValidationError([{ field: 'password', message: req.i18n.t('validation:required') }])
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ field: 'password', message: req.i18n.t('validation:required') }],
+      })
     }
 
     const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null

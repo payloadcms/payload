@@ -69,7 +69,14 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   })
 
   if (errors.length > 0) {
-    throw new ValidationError(errors, req.t)
+    throw new ValidationError(
+      {
+        collection: collection?.slug,
+        errors,
+        global: global?.slug,
+      },
+      req.t,
+    )
   }
 
   await mergeLocaleActions.reduce(async (priorAction, action) => {

@@ -313,12 +313,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   } catch (error) {
     throw error.code === '23505'
       ? new ValidationError(
-          [
-            {
-              field: adapter.fieldConstraints[tableName][error.constraint],
-              message: req.t('error:valueMustBeUnique'),
-            },
-          ],
+          {
+            errors: [
+              {
+                field: adapter.fieldConstraints[tableName][error.constraint],
+                message: req.t('error:valueMustBeUnique'),
+              },
+            ],
+          },
           req.t,
         )
       : error

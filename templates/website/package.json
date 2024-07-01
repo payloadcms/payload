@@ -75,7 +75,7 @@
     "prettier": "^3.0.3",
     "tailwindcss": "^3.4.3",
     "ts-node": "10.9.1",
-    "typescript": "^5.4.2"
+    "typescript": "5.4.2"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

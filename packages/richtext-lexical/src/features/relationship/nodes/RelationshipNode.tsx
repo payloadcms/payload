@@ -10,6 +10,7 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
+import type { CollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -22,11 +23,14 @@ const RelationshipComponent = React.lazy(() =>
 )
 
 export type RelationshipData = {
-  relationTo: string
+  relationTo: CollectionSlug
   value: number | string
 }
 
-export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode>
+export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode> & {
+  children?: never // required so that our typed editor state doesn't automatically add children
+  type: 'relationship'
+}
 
 function $relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
@@ -129,7 +133,7 @@ export class RelationshipNode extends DecoratorBlockNode {
     return {
       ...super.exportJSON(),
       ...this.getData(),
-      type: this.getType(),
+      type: 'relationship',
       version: 2,
     }
   }

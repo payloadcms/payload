@@ -67,7 +67,10 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     if (!user) throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
 
     // TODO: replace this method
-    const { hash, salt } = await generatePasswordSaltHash({ password: data.password })
+    const { hash, salt } = await generatePasswordSaltHash({
+      collection: collectionConfig,
+      password: data.password,
+    })
 
     user.salt = salt
     user.hash = hash

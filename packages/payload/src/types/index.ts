@@ -31,6 +31,8 @@ export type CustomPayloadRequestProperties = {
   payloadUploadSizes?: Record<string, Buffer>
   /** Query params on the request */
   query: Record<string, unknown>
+  /** Any response headers that are required to be set when a response is sent */
+  responseHeaders?: Headers
   /** The route parameters
    * @example
    * /:collection/:id -> /posts/123

@@ -9,6 +9,7 @@ import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 
 const handleError = async (
   payload: Payload,
@@ -122,7 +123,7 @@ export const POST =
         return response
       },
       schema,
-      validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
+      validationRules: (_, args, defaultRules) => defaultRules.concat(validationRules(args)),
     })(originalRequest)
 
     const resHeaders = headersWithCors({
@@ -132,6 +133,10 @@ export const POST =
 
     for (const key in headers) {
       resHeaders.append(key, headers[key])
+    }
+
+    if (basePayloadRequest.responseHeaders) {
+      mergeHeaders(basePayloadRequest.responseHeaders, resHeaders)
     }
 
     return new Response(apiResponse.body, {

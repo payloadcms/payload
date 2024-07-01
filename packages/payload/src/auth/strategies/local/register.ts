@@ -34,12 +34,13 @@ export const registerLocalStrategy = async ({
   })
 
   if (existingUser.docs.length > 0) {
-    throw new ValidationError([
-      { field: 'email', message: req.t('error:userEmailAlreadyRegistered') },
-    ])
+    throw new ValidationError({
+      collection: collection.slug,
+      errors: [{ field: 'email', message: req.t('error:userEmailAlreadyRegistered') }],
+    })
   }
 
-  const { hash, salt } = await generatePasswordSaltHash({ password })
+  const { hash, salt } = await generatePasswordSaltHash({ collection, password })
 
   const sanitizedDoc = { ...doc }
   if (sanitizedDoc.password) delete sanitizedDoc.password

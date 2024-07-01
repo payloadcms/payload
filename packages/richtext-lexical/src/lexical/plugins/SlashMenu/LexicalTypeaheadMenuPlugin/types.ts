@@ -9,9 +9,9 @@ export type SlashMenuItem = {
   /** Each slash menu item needs to have a unique key. The key will be matched when typing, displayed if no `label` property is set, and used for classNames. */
   key: string
   /**
-   * Keywords are used in order to match the item for different texts typed after the '/'.
+   * Keywords are used to match the item for different texts typed after the '/'.
    * E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc.
-   * Additionally to the keywords, the label and key will be used to match the correct slash menu item.
+   * In addition to the keywords, the label and key will be used to find the right slash menu item.
    */
   keywords?: Array<string>
   /** The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function. */
@@ -21,9 +21,15 @@ export type SlashMenuItem = {
 }
 
 export type SlashMenuGroup = {
+  /**
+   * An array of `SlashMenuItem`'s which will be displayed in the slash menu.
+   */
   items: Array<SlashMenuItem>
-  // Used for class names and, if label is not provided, for display.
+  /**
+   * Used for class names and, if label is not provided, for display. Slash menus with the same key will have their items merged together.
+   */
   key: string
+  /** The label will be displayed before your Slash Menu group. In order to make use of i18n, this can be a function. */
   label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
 }
 

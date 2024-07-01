@@ -6,7 +6,13 @@ import type {
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomUpload,
 } from '../../admin/types.js'
+import type { Arguments as MeArguments } from '../../auth/operations/me.js'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh.js'
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
@@ -203,6 +209,16 @@ export type AfterMeHook<T extends TypeWithID = any> = (args: {
   response: unknown
 }) => any
 
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
+export type MeHook<T extends TypeWithID = any> = (args: {
+  args: MeArguments
+  user: T
+}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
+
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -224,10 +240,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: CustomComponent[]
-    AfterListTable?: CustomComponent[]
-    BeforeList?: CustomComponent[]
-    BeforeListTable?: CustomComponent[]
+    afterList?: CustomComponent[]
+    afterListTable?: CustomComponent[]
+    beforeList?: CustomComponent[]
+    beforeListTable?: CustomComponent[]
     /**
      * Components within the edit view
      */
@@ -254,6 +270,11 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Upload" section
+       * + upload must be enabled
+       */
+      Upload?: CustomUpload
     }
     views?: {
       /**
@@ -392,6 +413,19 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+    me?: MeHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration

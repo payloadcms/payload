@@ -6,17 +6,44 @@ import type { EditorConfigContextType } from '../../lexical/config/client/Editor
 
 export type ToolbarGroup =
   | {
-      ChildComponent?: React.FC
+      /**
+       * All toolbar items part of this toolbar group need to be added here.
+       */
       items: Array<ToolbarGroupItem>
+      /**
+       * Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.
+       */
       key: string
+      /**
+       * Determines where the toolbar group will be.
+       */
       order?: number
-      type: 'dropdown'
+      /**
+       * Controls the toolbar group type. Set to `buttons` to create a buttons toolbar group, which displays toolbar items horizontally using only their icons.
+       */
+      type: 'buttons'
     }
   | {
+      /**
+       * The dropdown toolbar ChildComponent allows you to pass in a React Component which will be displayed within the dropdown button.
+       */
+      ChildComponent?: React.FC
+      /**
+       * All toolbar items part of this toolbar group need to be added here.
+       */
       items: Array<ToolbarGroupItem>
+      /**
+       * Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.
+       */
       key: string
+      /**
+       * Determines where the toolbar group will be.
+       */
       order?: number
-      type: 'buttons'
+      /**
+       * Controls the toolbar group type. Set to `dropdown` to create a buttons toolbar group, which displays toolbar items vertically using their icons and labels, if the dropdown is open.
+       */
+      type: 'dropdown'
     }
 
 export type ToolbarGroupItem = {

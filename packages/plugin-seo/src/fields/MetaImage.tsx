@@ -5,10 +5,10 @@ import type { FieldType, Options, UploadInputProps } from '@payloadcms/ui'
 import {
   FieldLabel,
   UploadInput,
-  useAllFormFields,
   useConfig,
   useDocumentInfo,
   useField,
+  useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
@@ -32,7 +32,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
-  const [fields] = useAllFormFields()
+  const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
   const { errorMessage, setValue, showError, value } = field
@@ -43,7 +43,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
         ...docInfo,
-        doc: { ...fields },
+        doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
       } satisfies Parameters<GenerateImage>[0]),
       credentials: 'include',
@@ -56,7 +56,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
     const { result: generatedImage } = await genImageResponse.json()
 
     setValue(generatedImage || '')
-  }, [fields, setValue, hasGenerateImageFn, locale, docInfo])
+  }, [hasGenerateImageFn, docInfo, getData, locale, setValue])
 
   const hasImage = Boolean(value)
 

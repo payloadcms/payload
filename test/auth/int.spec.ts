@@ -134,6 +134,8 @@ describe('Auth', () => {
 
         const data = await response.json()
 
+        expect(data.strategy).toBeDefined()
+        expect(typeof data.exp).toBe('number')
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
       })

@@ -260,7 +260,10 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     const dataToUpdate: Record<string, unknown> = { ...result }
 
     if (shouldSavePassword && typeof password === 'string') {
-      const { hash, salt } = await generatePasswordSaltHash({ password })
+      const { hash, salt } = await generatePasswordSaltHash({
+        collection: collectionConfig,
+        password,
+      })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash
       delete dataToUpdate.password

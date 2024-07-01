@@ -13,8 +13,6 @@ export const buildFieldSchemaMap = (args: {
 
   const result: FieldSchemaMap = new Map()
 
-  const validRelationships = config.collections.map((c) => c.slug) || []
-
   config.collections.forEach((collection) => {
     traverseFields({
       config,
@@ -22,7 +20,6 @@ export const buildFieldSchemaMap = (args: {
       i18n,
       schemaMap: result,
       schemaPath: collection.slug,
-      validRelationships,
     })
   })
 
@@ -33,7 +30,6 @@ export const buildFieldSchemaMap = (args: {
       i18n,
       schemaMap: result,
       schemaPath: global.slug,
-      validRelationships,
     })
   })
 

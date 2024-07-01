@@ -73,7 +73,14 @@ export const RootPage = async ({
 
     const routeWithAdmin = `${adminRoute}${createFirstUserRoute}`
 
-    if (!dbHasUser && currentRoute !== routeWithAdmin) {
+    const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
+    const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
+
+    if (disableLocalStrategy && currentRoute === routeWithAdmin) {
+      redirect(adminRoute)
+    }
+
+    if (!dbHasUser && currentRoute !== routeWithAdmin && !disableLocalStrategy) {
       redirect(routeWithAdmin)
     }
 

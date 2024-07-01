@@ -46,34 +46,54 @@ const Pages: CollectionConfig = {
 
 The `lexicalHTML()` function creates a new field that automatically converts the referenced lexical richText field into HTML through an afterRead hook.
 
-### Generating HTML anywhere on the server:
+### Generating HTML anywhere on the server
 
-If you wish to convert JSON to HTML ad-hoc, use this code snippet:
+If you wish to convert JSON to HTML ad-hoc, use the `convertLexicalToHTML` function:
 
 ```ts
-import type { SerializedEditorState } from 'lexical'
-import {
-  type SanitizedEditorConfig,
-  convertLexicalToHTML,
-  consolidateHTMLConverters,
-} from '@payloadcms/richtext-lexical'
+import { consolidateHTMLConverters, convertLexicalToHTML } from '@payloadcms/richtext-lexical'
 
-async function lexicalToHTML(
-  editorData: SerializedEditorState,
-  editorConfig: SanitizedEditorConfig,
-) {
-  return await convertLexicalToHTML({
-    converters: consolidateHTMLConverters({ editorConfig }),
-    data: editorData,
-    payload, // if you have payload but no req available, pass it in here to enable server-only functionality (e.g. proper conversion of upload nodes)
-    req, // if you have req available, pass it in here to enable server-only functionality (e.g. proper conversion of upload nodes). No need to pass in payload if req is passed in.
-  })
-}
+
+await convertLexicalToHTML({
+  converters: consolidateHTMLConverters({ editorConfig }),
+  data: editorData,
+  payload, // if you have payload but no req available, pass it in here to enable server-only functionality (e.g. proper conversion of upload nodes)
+  req, // if you have req available, pass it in here to enable server-only functionality (e.g. proper conversion of upload nodes). No need to pass in payload if req is passed in.
+})
 ```
-
 This method employs `convertLexicalToHTML` from `@payloadcms/richtext-lexical`, which converts the serialized editor state into HTML.
 
 Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
+
+#### Example: Generating HTML within an afterRead hook
+
+```ts
+import type { FieldHook } from 'payload'
+
+import {
+  HTMLConverterFeature,
+  consolidateHTMLConverters,
+  convertLexicalToHTML,
+  defaultEditorConfig,
+  defaultEditorFeatures,
+  sanitizeServerEditorConfig,
+} from '@payloadcms/richtext-lexical'
+
+const hook: FieldHook = async ({ req, siblingData }) => {
+  const editorConfig = defaultEditorConfig
+
+  editorConfig.features = [...defaultEditorFeatures, HTMLConverterFeature({})]
+
+  const sanitizedEditorConfig = await sanitizeServerEditorConfig(editorConfig, req.payload.config)
+
+  const html = await convertLexicalToHTML({
+    converters: consolidateHTMLConverters({ editorConfig: sanitizedEditorConfig }),
+    data: siblingData.lexicalSimple,
+    req,
+  })
+  return html
+}
+```
 
 ### CSS
 
@@ -184,10 +204,11 @@ import { createHeadlessEditor } from '@lexical/headless' // <= make sure this pa
 import { getEnabledNodes, sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
 
 const yourEditorConfig // <= your editor config here
+const payloadConfig // <= your payload config here
 
 const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
-    editorConfig: sanitizeServerEditorConfig(yourEditorConfig),
+    editorConfig: sanitizeServerEditorConfig(yourEditorConfig, payloadConfig),
   }),
 })
 ```
@@ -316,7 +337,7 @@ Convert markdown content to the Lexical editor format with the following:
 import { $convertFromMarkdownString } from '@lexical/markdown'
 import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
 
-const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig) // <= your editor config here
+const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & payload config here
 const markdown = `# Hello World`
 
 headlessEditor.update(
@@ -344,7 +365,7 @@ import { $convertToMarkdownString } from '@lexical/markdown'
 import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from 'lexical'
 
-const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig) // <= your editor config here
+const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & payload config here
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
