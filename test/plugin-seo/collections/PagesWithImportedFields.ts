@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { MetaDescription, MetaImage, MetaTitle } from '@payloadcms/plugin-seo'
+import { MetaDescription, MetaImage, MetaTitle, Overview, Preview } from '@payloadcms/plugin-seo'
 
 import { pagesWithImportedFieldsSlug } from '../shared.js'
 
@@ -23,6 +23,11 @@ export const PagesWithImportedFields: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    Overview({
+      titlePath: 'metaAndSEO.title',
+      descriptionPath: 'metaAndSEO.innerMeta.description',
+      imagePath: 'metaAndSEO.innerMedia.image',
+    }),
     {
       type: 'tabs',
       tabs: [
@@ -54,6 +59,11 @@ export const PagesWithImportedFields: CollectionConfig = {
           fields: [
             MetaTitle({
               hasGenerateFn: true,
+            }),
+            Preview({
+              hasGenerateFn: true,
+              titlePath: 'metaAndSEO.title',
+              descriptionPath: 'metaAndSEO.innerMeta.description',
             }),
             {
               type: 'group',
