@@ -296,6 +296,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     contains: 'садржи',
     equals: 'једнако',
     exists: 'постоји',
+    intersects: 'preseca',
     isGreaterThan: 'је веће од',
     isGreaterThanOrEqualTo: 'је веће од или једнако',
     isIn: 'је у',
@@ -305,6 +306,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'није једнако',
     isNotIn: 'није у',
     near: 'близу',
+    within: 'unutar',
   },
   upload: {
     crop: 'Исеците слику',

@@ -246,6 +246,14 @@ describe('admin2', () => {
 
         await page.locator('.where-builder__add-first-filter').click()
 
+        const conditionField = page.locator('.condition__field')
+        await conditionField.click()
+        const dropdownFieldOption = conditionField.locator('.rs__option', {
+          hasText: exactText('ID'),
+        })
+        await dropdownFieldOption.click()
+        await expect(page.locator('.condition__field')).toContainText('ID')
+
         const operatorField = page.locator('.condition__operator')
         const valueField = page.locator('.condition__value input')
 
@@ -256,7 +264,9 @@ describe('admin2', () => {
 
         await valueField.fill(id)
 
-        await expect(page.locator(tableRowLocator)).toHaveCount(1)
+        const tableRows = page.locator(tableRowLocator)
+
+        await expect(tableRows).toHaveCount(1)
         const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText()
         expect(firstId).toEqual(`ID: ${id}`)
 
@@ -288,12 +298,15 @@ describe('admin2', () => {
         await filterField.click()
 
         // select new filter field of Number
-        const dropdownFieldOptions = filterField.locator('.rs__option')
-        await dropdownFieldOptions.locator('text=Number').click()
+        const dropdownFieldOption = filterField.locator('.rs__option', {
+          hasText: exactText('Status'),
+        })
+        await dropdownFieldOption.click()
+        await expect(filterField).toContainText('Status')
 
         // expect operator & value field to reset (be empty)
         await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
-        await expect(valueField).toHaveValue('')
+        await expect(page.locator('.condition__value input')).toHaveValue('')
       })
 
       test('should accept where query from valid URL where parameter', async () => {

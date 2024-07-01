@@ -301,6 +301,7 @@ export const deTranslations: DefaultTranslationsObject = {
     contains: 'enthält',
     equals: 'gleich',
     exists: 'existiert',
+    intersects: 'schneidet sich',
     isGreaterThan: 'ist größer als',
     isGreaterThanOrEqualTo: 'ist größer oder gleich',
     isIn: 'ist drin',
@@ -310,6 +311,7 @@ export const deTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'ist nicht gleich',
     isNotIn: 'ist nicht drin',
     near: 'in der Nähe',
+    within: 'innerhalb',
   },
   upload: {
     crop: 'Zuschneiden',

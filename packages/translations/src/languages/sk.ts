@@ -298,6 +298,7 @@ export const skTranslations: DefaultTranslationsObject = {
     contains: 'obsahuje',
     equals: 'rovná sa',
     exists: 'existuje',
+    intersects: 'pretína sa',
     isGreaterThan: 'je väčšie ako',
     isGreaterThanOrEqualTo: 'je väčšie alebo rovné',
     isIn: 'je v',
@@ -307,6 +308,7 @@ export const skTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nie je rovné',
     isNotIn: 'nie je v',
     near: 'blízko',
+    within: 'vnútri',
   },
   upload: {
     crop: 'Orezať',

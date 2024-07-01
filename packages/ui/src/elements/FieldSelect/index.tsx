@@ -19,7 +19,7 @@ export type FieldSelectProps = {
   setSelected: (fields: FieldWithPath[]) => void
 }
 
-const combineLabel = ({
+export const combineLabel = ({
   customLabel,
   field,
   prefix,

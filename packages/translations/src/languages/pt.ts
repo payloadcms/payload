@@ -298,6 +298,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     contains: 'contém',
     equals: 'igual',
     exists: 'existe',
+    intersects: 'intersecciona',
     isGreaterThan: 'é maior que',
     isGreaterThanOrEqualTo: 'é maior ou igual a',
     isIn: 'está em',
@@ -307,6 +308,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'não é igual a',
     isNotIn: 'não está em',
     near: 'perto',
+    within: 'dentro',
   },
   upload: {
     crop: 'Cultura',

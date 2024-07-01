@@ -299,6 +299,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     contains: 'bevat',
     equals: 'is gelijk aan',
     exists: 'bestaat',
+    intersects: 'kruist',
     isGreaterThan: 'is groter dan',
     isGreaterThanOrEqualTo: 'is groter dan of gelijk aan',
     isIn: 'is binnen',
@@ -308,6 +309,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'is niet gelijk aan',
     isNotIn: 'zit er niet in',
     near: 'nabij',
+    within: 'binnen',
   },
   upload: {
     crop: 'Bijsnijden',

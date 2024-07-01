@@ -297,6 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     contains: '含む',
     equals: '等しい',
     exists: '存在す',
+    intersects: '交差する',
     isGreaterThan: 'より大きい',
     isGreaterThanOrEqualTo: '以上',
     isIn: 'あります',
@@ -306,6 +307,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     isNotEqualTo: '等しくない',
     isNotIn: '入っていません',
     near: '近く',
+    within: '内で',
   },
   upload: {
     crop: 'クロップ',

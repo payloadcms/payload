@@ -297,6 +297,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     contains: 'contains',
     equals: 'lik',
     exists: 'eksisterer',
+    intersects: 'krysser',
     isGreaterThan: 'er større enn',
     isGreaterThanOrEqualTo: 'er større enn eller lik',
     isIn: 'er i',
@@ -306,6 +307,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'er ikke lik',
     isNotIn: 'er ikke med',
     near: 'nær',
+    within: 'innen',
   },
   upload: {
     crop: 'Beskjær',

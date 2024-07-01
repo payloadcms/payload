@@ -297,6 +297,7 @@ export const svTranslations: DefaultTranslationsObject = {
     contains: 'innehåller',
     equals: 'likar med',
     exists: 'finns',
+    intersects: 'korsar',
     isGreaterThan: 'är större än',
     isGreaterThanOrEqualTo: 'är större än eller lika med',
     isIn: 'är med',
@@ -306,6 +307,7 @@ export const svTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'är inte lika med',
     isNotIn: 'är inte med',
     near: 'nära',
+    within: 'inom',
   },
   upload: {
     crop: 'Skörd',
