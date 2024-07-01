@@ -74,26 +74,28 @@ export type User = {
  */
 export type ClientUser = Omit<User, 'collection'>
 
-type GenerateVerifyEmailHTML = (args: {
+type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequestWithData
   token: string
-  user: any
-}) => Promise<string> | string
-type GenerateVerifyEmailSubject = (args: {
-  req: PayloadRequestWithData
-  token: string
-  user: any
+  user: TUser
 }) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: {
-  req?: PayloadRequestWithData
-  token?: string
-  user?: unknown
+type GenerateVerifyEmailSubject<TUser = any> = (args: {
+  req: PayloadRequestWithData
+  token: string
+  user: TUser
 }) => Promise<string> | string
-type GenerateForgotPasswordEmailSubject = (args?: {
+
+type GenerateForgotPasswordEmailHTML<TUser = any> = (args?: {
   req?: PayloadRequestWithData
   token?: string
-  user?: any
+  user?: TUser
+}) => Promise<string> | string
+
+type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
+  req?: PayloadRequestWithData
+  token?: string
+  user?: TUser
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
