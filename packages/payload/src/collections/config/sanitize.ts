@@ -138,9 +138,7 @@ export const sanitizeCollection = async (
     if (!sanitized.auth.disableLocalStrategy) {
       const loginField = sanitized.auth.loginWithUsername ? 'username' : 'email'
 
-      if (loginField) {
-        authFields = authFields.concat(baseLoginField(loginField))
-      }
+      authFields = authFields.concat(baseLoginField(loginField))
 
       authFields = authFields.concat(baseAuthFields)
 
