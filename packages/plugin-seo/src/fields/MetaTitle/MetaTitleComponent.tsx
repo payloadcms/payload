@@ -29,13 +29,13 @@ type MetaTitleProps = FormFieldBase & {
 }
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
-  const { CustomLabel, hasGenerateTitleFn, label, labelProps, path, required } = props || {}
+  const { CustomLabel, hasGenerateTitleFn, label, labelProps, required } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const field: FieldType<string> = useField({
-    path,
+    path: pathFromContext,
   } as Options)
 
   const locale = useLocale()

@@ -15,13 +15,15 @@ import type {
 import { MetaDescriptionComponent } from './fields/MetaDescription/MetaDescriptionComponent.js'
 import { MetaImageComponent } from './fields/MetaImage/MetaImageComponent.js'
 import { MetaTitleComponent } from './fields/MetaTitle/MetaTitleComponent.js'
+import { OverviewComponent } from './fields/Overview/OverviewComponent.js'
+import { PreviewComponent } from './fields/Preview/PreviewComponent.js'
 import { translations } from './translations/index.js'
-import { Overview } from './ui/Overview.js'
-import { Preview } from './ui/Preview.js'
 
 export { MetaDescription } from './fields/MetaDescription/index.js'
 export { MetaImage } from './fields/MetaImage/index.js'
 export { MetaTitle } from './fields/MetaTitle/index.js'
+export { Overview } from './fields/Overview/index.js'
+export { Preview } from './fields/Preview/index.js'
 
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
@@ -36,7 +38,7 @@ export const seoPlugin =
             type: 'ui',
             admin: {
               components: {
-                Field: Overview,
+                Field: OverviewComponent,
               },
             },
             label: 'Overview',
@@ -109,7 +111,7 @@ export const seoPlugin =
             admin: {
               components: {
                 Field: withMergedProps({
-                  Component: Preview,
+                  Component: PreviewComponent,
                   sanitizeServerOnlyProps: true,
                   toMergeIntoProps: {
                     hasGenerateURLFn: typeof pluginConfig?.generateURL === 'function',

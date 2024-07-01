@@ -29,7 +29,7 @@ type MetaDescriptionProps = FormFieldBase & {
 }
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
-  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, path, required } = props
+  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, required } = props
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
@@ -39,7 +39,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const docInfo = useDocumentInfo()
 
   const field: FieldType<string> = useField({
-    path,
+    path: pathFromContext,
   } as Options)
 
   const { errorMessage, setValue, showError, value } = field

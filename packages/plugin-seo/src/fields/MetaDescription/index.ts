@@ -5,6 +5,9 @@ import { withMergedProps } from '@payloadcms/ui/shared'
 import { MetaDescriptionComponent } from './MetaDescriptionComponent.js'
 
 interface FieldFunctionProps {
+  /**
+   * Tell the component if the generate function is available as configured in the plugin config
+   */
   hasGenerateFn?: boolean
   overrides?: Partial<TextareaField>
 }

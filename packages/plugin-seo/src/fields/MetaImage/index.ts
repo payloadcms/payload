@@ -5,6 +5,9 @@ import { withMergedProps } from '@payloadcms/ui/shared'
 import { MetaImageComponent } from './MetaImageComponent.js'
 
 interface FieldFunctionProps {
+  /**
+   * Tell the component if the generate function is available as configured in the plugin config
+   */
   hasGenerateFn?: boolean
   overrides?: Partial<UploadField>
   relationTo: string
