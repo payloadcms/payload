@@ -197,6 +197,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
       {doc.filename && !replacingFile && (
         <FileDetails
           collectionSlug={collectionSlug}
+          customUploadActions={customActions}
           doc={doc}
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
