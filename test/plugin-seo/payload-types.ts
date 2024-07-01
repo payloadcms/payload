@@ -11,6 +11,7 @@ export interface Config {
     users: User;
     pages: Page;
     media: Media;
+    pagesWithImportedFields: PagesWithImportedField;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -89,6 +90,28 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pagesWithImportedFields".
+ */
+export interface PagesWithImportedField {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  slug: string;
+  metaAndSEO?: {
+    title?: string | null;
+    innerMeta?: {
+      description?: string | null;
+    };
+    innerMedia?: {
+      image?: string | Media | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
