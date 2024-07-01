@@ -6,18 +6,15 @@ desc:
 keywords:
 ---
 
-All [Payload Fields](../fields) support the ability to swap in your own [Custom Components](./components). This allows you to endlessly customize the appearance or behavior of fields. You can either replace entire fields, or swap out individual components that make up each field for endless customization.
+All [Payload Fields](../fields) support the ability to swap in your own [Custom Components](./components). This allows you to endlessly customize the appearance or behavior of fields either by replacing the entire field component, or the individual components with each field.
 
-For example, your app might need to render an interface that Payload does not inherently support, such as a color picker. To do this, you would simply replace the default [Text Field](../fields/text) input with some user-friendly UI that formats the data into a valid color value. Then, a [Custom Validation](../fields/overview#validation) function could ensure the value is acceptable.
+For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you would simply replace the default [Text Field](../fields/text) input with some user-friendly UI that formats the data into a valid color value. Then, a [Custom Validation](../fields/overview#validation) function could ensure the value is acceptable.
 
 <Banner type="success">
   <strong>Tip:</strong>
-  <br />
   Don't see a built-in field type that you need? Build it! Using a combination of [Field Validations](../fields/overview#validation)
   and [Custom Components](./components), you can override the entirety of how a component functions within the [Admin Panel](./overview) to effectively create your own field type.
 </Banner>
-
-To swap in your own Field Components, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then author your React component(s) accordingly.
 
 Within the Admin Panel, fields are rendered in three distinct places:
 
@@ -25,7 +22,11 @@ Within the Admin Panel, fields are rendered in three distinct places:
 - [Cell](#cell-component) - The table cell component rendered in the List View.
 - [Filter](#filter-component) - The filter component rendered in the List View.
 
-Here is an example showing what it might look like to swap out the Field Components for your own Custom Components. You can easily swap Field Components with your own through the `admin.components` property of your [Field Config](../fields/overview).
+To swap in your own Field Components, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then author your React component(s) accordingly.
+
+## Configuration
+
+You can easily swap Field Components with your own through the `admin.components` property of your [Field Config](../fields/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload/types'
@@ -222,4 +223,105 @@ const titleField: Field = {
 }
 
 export default titleField
+```
+
+## Description
+
+A description can be configured in three ways.
+
+- As a string
+- As a function which returns a string
+- As a React component
+
+Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
+
+- `path` - the path of the field
+- `value` - the current value of the field
+
+As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
+
+**Function Example:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description: ({ path, value }) =>
+          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
+      },
+    },
+  ]
+}
+```
+
+This example will display the number of characters allowed as the user types.
+
+**Component Example:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description:
+          ({ path, value }) => (
+            <div>
+              Character count:
+              {' '}
+              { value?.length || 0 }
+               (field: {path})
+            </div>
+          )
+      }
+    }
+  ]
+}
+```
+
+This component will count the number of characters entered, as well as display the path of the field.
+
+## Conditional Logic
+
+You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
+
+- `data` - the entire document's data that is currently being edited
+- `siblingData` - only the fields that are direct siblings to the field with the condition
+- `{ user }` - the final argument is an object containing the currently authenticated user
+
+The `condition` function should return a boolean that will control if the field should be displayed or not.
+
+**Example:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'enableGreeting',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
+      name: 'greeting',
+      type: 'text',
+      admin: {
+        // highlight-start
+        condition: (data, siblingData, { user }) => {
+          if (data.enableGreeting) {
+            return true
+          } else {
+            return false
+          }
+        },
+        // highlight-end
+      },
+    },
+  ]
+}
 ```

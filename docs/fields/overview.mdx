@@ -72,6 +72,36 @@ In addition to being able to define access control on a document-level, you can 
 
 Some fields use their `name` property as a unique identifier to store and retrieve from the database. `__v`, `salt`, and `hash` are all reserved field names which are sanitized from Payload's config and cannot be used.
 
+## Default Values
+
+Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
+
+Functions are called with an optional argument object containing:
+
+- `user` - the authenticated user object
+- `locale` - the currently selected locale string
+
+Here is an example of a defaultValue function that uses both:
+
+```ts
+const translation: {
+  en: 'Written by'
+  es: 'Escrito por'
+}
+
+const field = {
+  name: 'attribution',
+  type: 'text',
+  // highlight-start
+  defaultValue: ({ user, locale }) => `${translation[locale]} ${user.name}`,
+  // highlight-end
+}
+```
+
+<Banner type="success">
+  You can use async defaultValue functions to fill fields with data from API requests.
+</Banner>
+
 ## Validation
 
 Field validation is enforced automatically based on the field type and other properties such as `required` or `min` and `max` value constraints on certain field types. This default behavior can be replaced by providing your own validate function for any field. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
@@ -161,13 +191,13 @@ Example:
 
 ## Admin Config
 
-In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
+In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property of a Field Config:
 
 | Option              | Description                                                                                                                                                                                                                      |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `condition`         | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info.                                                                                                |
-| `components`        | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-components) for more info.                                                                             |
-| `description`       | Helper text to display with the field to provide more information for the editor user. [Click here](#description) for more info.                                                                                                 |
+| `condition`         | Programmatically show / hide fields based on what other fields are doing. [More details](../admin/fields/conditional-logic).                                                                                               |
+| `components`        | All Field Components can be completely and easily swapped out for [Custom Components](../admin/components) that you define. [More details](../admin/fields).                                                                             |
+| `description`       | Helper text to display with the field to provide more information for the editor user. [More details](../admin/fields#description).                                                                                                 |
 | `position`          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
 | `width`             | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
 | `style`             | Attach raw CSS style properties to the root DOM element of a field.                                                                                                                                                              |
@@ -178,141 +208,6 @@ In addition to each field's base configuration, you can define specific traits a
 | `disableListColumn` | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                             |
 | `disableListFilter` | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
 | `hidden`            | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.        |
-
-## Custom Components
-
-All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/fields).
-
-## Conditional Logic
-
-You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
-
-- `data` - the entire document's data that is currently being edited
-- `siblingData` - only the fields that are direct siblings to the field with the condition
-- `{ user }` - the final argument is an object containing the currently authenticated user
-
-The `condition` function should return a boolean that will control if the field should be displayed or not.
-
-**Example:**
-
-```ts
-{
-  fields: [
-    {
-      name: 'enableGreeting',
-      type: 'checkbox',
-      defaultValue: false,
-    },
-    {
-      name: 'greeting',
-      type: 'text',
-      admin: {
-        // highlight-start
-        condition: (data, siblingData, { user }) => {
-          if (data.enableGreeting) {
-            return true
-          } else {
-            return false
-          }
-        },
-        // highlight-end
-      },
-    },
-  ]
-}
-```
-
-## Default Values
-
-Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
-
-Functions are called with an optional argument object containing:
-
-- `user` - the authenticated user object
-- `locale` - the currently selected locale string
-
-Here is an example of a defaultValue function that uses both:
-
-```ts
-const translation: {
-  en: 'Written by'
-  es: 'Escrito por'
-}
-
-const field = {
-  name: 'attribution',
-  type: 'text',
-  // highlight-start
-  defaultValue: ({ user, locale }) => `${translation[locale]} ${user.name}`,
-  // highlight-end
-}
-```
-
-<Banner type="success">
-  You can use async defaultValue functions to fill fields with data from API requests.
-</Banner>
-
-## Description
-
-A description can be configured in three ways.
-
-- As a string
-- As a function which returns a string
-- As a React component
-
-Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
-
-- `path` - the path of the field
-- `value` - the current value of the field
-
-As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
-
-**Function Example:**
-
-```ts
-{
-  fields: [
-    {
-      name: 'message',
-      type: 'text',
-      maxLength: 20,
-      admin: {
-        description: ({ path, value }) =>
-          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
-      },
-    },
-  ]
-}
-```
-
-This example will display the number of characters allowed as the user types.
-
-**Component Example:**
-
-```ts
-{
-  fields: [
-    {
-      name: 'message',
-      type: 'text',
-      maxLength: 20,
-      admin: {
-        description:
-          ({ path, value }) => (
-            <div>
-              Character count:
-              {' '}
-              { value?.length || 0 }
-               (field: {path})
-            </div>
-          )
-      }
-    }
-  ]
-}
-```
-
-This component will count the number of characters entered, as well as display the path of the field.
 
 ## TypeScript
 

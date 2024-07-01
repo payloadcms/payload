@@ -8,14 +8,12 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for both easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly in the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
   <strong>Note:</strong>
   Client Components continue to be fully supported. To use Client Components in your app, simply include the `use client` directive. Payload will automatically detect and remove all default [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component. [More details](#client-components).
 </Banner>
-
-To swap in your own Custom Component, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
 
 There are four main types of Custom Components in Payload:
 
@@ -23,6 +21,8 @@ There are four main types of Custom Components in Payload:
 - [Collection Components](#custom-collection-components)
 - [Global Components](#custom-global-components)
 - [Field Components](./fields)
+
+To swap in your own Custom Component, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
 
 ## Custom Root Components
 
@@ -185,7 +185,7 @@ The following options are available:
 
 ## Building Custom Components
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly in the front-end.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api) directly on the front-end, among other things.
 
 To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class and the [`i18n`](../configuration/i18n) object. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself like you would from an external application.
 
