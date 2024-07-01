@@ -26,9 +26,7 @@ To swap in your own Custom Component, consult the list of available components. 
 
 ## Custom Root Components
 
-Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo. You can override Root Components through the `admin.components` property of the [Payload Config](../getting-started/overview).
-
-Here is an example showing what it might look like to swap out Root Components for your own. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
+Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo. To override Root Components, use the `admin.components` property of the [Payload Config](../getting-started/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -46,6 +44,10 @@ export default buildConfig({
   },
 })
 ```
+
+<strong>
+  For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
+</strong>
 
 The following options are available:
 
@@ -115,9 +117,7 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 
 ## Custom Collection Components
 
-Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview), such as the save button. You can override Collection Components through the `admin.components` property on any [Collection Config](../configuration/collections).
-
-Here is an example showing what it might look like to swap out Collection Components for your own. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
+Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview), such as the save button. To override Collection Components, use the `admin.components` property on any [Collection Config](../configuration/collections):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -136,6 +136,10 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
+<strong>
+  For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
+</strong>
+
 The following options are available:
 
 | Path                       | Description                                                                                                            |
@@ -152,9 +156,7 @@ The following options are available:
 
 ## Custom Global Components
 
-Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview), such as the save button. You can override Global Components through the `admin.components` property on any [Global Config](../configuration/globals).
-
-Here is an example showing what it might look like to swap out Global Components for your own. See [Building Custom Components](#building-custom-components) for exact details on how to build them:
+Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview), such as the save button. To override Global Components, use the `admin.components` property on any [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload/types'
@@ -172,6 +174,10 @@ export const MyGlobal: SanitizedGlobalConfig = {
   // ...
 }
 ```
+
+<strong>
+  For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
+</strong>
 
 The following options are available:
 
