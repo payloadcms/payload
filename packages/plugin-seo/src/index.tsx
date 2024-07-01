@@ -19,11 +19,11 @@ import { OverviewComponent } from './fields/Overview/OverviewComponent.js'
 import { PreviewComponent } from './fields/Preview/PreviewComponent.js'
 import { translations } from './translations/index.js'
 
-export { MetaDescription } from './fields/MetaDescription/index.js'
-export { MetaImage } from './fields/MetaImage/index.js'
-export { MetaTitle } from './fields/MetaTitle/index.js'
-export { Overview } from './fields/Overview/index.js'
-export { Preview } from './fields/Preview/index.js'
+export { MetaDescriptionField } from './fields/MetaDescription/index.js'
+export { MetaImageField } from './fields/MetaImage/index.js'
+export { MetaTitleField } from './fields/MetaTitle/index.js'
+export { OverviewField } from './fields/Overview/index.js'
+export { PreviewField } from './fields/Preview/index.js'
 
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>

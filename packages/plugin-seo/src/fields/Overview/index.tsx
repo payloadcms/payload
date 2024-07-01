@@ -28,7 +28,12 @@ interface FieldFunctionProps {
 
 type FieldFunction = ({ overrides }: FieldFunctionProps) => UIField
 
-export const Overview: FieldFunction = ({ descriptionPath, imagePath, overrides, titlePath }) => {
+export const OverviewField: FieldFunction = ({
+  descriptionPath,
+  imagePath,
+  overrides,
+  titlePath,
+}) => {
   return {
     name: 'overview',
     type: 'ui',

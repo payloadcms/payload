@@ -14,7 +14,7 @@ interface FieldFunctionProps {
 
 type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => TextField
 
-export const MetaTitle: FieldFunction = ({ hasGenerateFn = false, overrides }) => {
+export const MetaTitleField: FieldFunction = ({ hasGenerateFn = false, overrides }) => {
   return {
     name: 'title',
     type: 'text',

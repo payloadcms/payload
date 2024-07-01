@@ -1,6 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { MetaDescription, MetaImage, MetaTitle, Overview, Preview } from '@payloadcms/plugin-seo'
+import {
+  MetaDescriptionField,
+  MetaImageField,
+  MetaTitleField,
+  OverviewField,
+  PreviewField,
+} from '@payloadcms/plugin-seo'
 
 import { pagesWithImportedFieldsSlug } from '../shared.js'
 
@@ -23,7 +29,7 @@ export const PagesWithImportedFields: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    Overview({
+    OverviewField({
       titlePath: 'metaAndSEO.title',
       descriptionPath: 'metaAndSEO.innerMeta.description',
       imagePath: 'metaAndSEO.innerMedia.image',
@@ -57,10 +63,10 @@ export const PagesWithImportedFields: CollectionConfig = {
           label: 'Meta',
           name: 'metaAndSEO',
           fields: [
-            MetaTitle({
+            MetaTitleField({
               hasGenerateFn: true,
             }),
-            Preview({
+            PreviewField({
               hasGenerateFn: true,
               titlePath: 'metaAndSEO.title',
               descriptionPath: 'metaAndSEO.innerMeta.description',
@@ -69,7 +75,7 @@ export const PagesWithImportedFields: CollectionConfig = {
               type: 'group',
               name: 'innerMeta',
               fields: [
-                MetaDescription({
+                MetaDescriptionField({
                   hasGenerateFn: true,
                 }),
               ],
@@ -78,7 +84,7 @@ export const PagesWithImportedFields: CollectionConfig = {
               type: 'group',
               name: 'innerMedia',
               fields: [
-                MetaImage({
+                MetaImageField({
                   relationTo: 'media',
                   hasGenerateFn: true,
                 }),

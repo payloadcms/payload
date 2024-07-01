@@ -26,7 +26,7 @@ interface FieldFunctionProps {
 
 type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => UIField
 
-export const Preview: FieldFunction = ({
+export const PreviewField: FieldFunction = ({
   descriptionPath,
   hasGenerateFn = false,
   overrides,

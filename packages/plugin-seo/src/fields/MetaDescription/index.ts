@@ -14,7 +14,7 @@ interface FieldFunctionProps {
 
 type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => TextareaField
 
-export const MetaDescription: FieldFunction = ({ hasGenerateFn = false, overrides }) => {
+export const MetaDescriptionField: FieldFunction = ({ hasGenerateFn = false, overrides }) => {
   return {
     name: 'description',
     type: 'textarea',

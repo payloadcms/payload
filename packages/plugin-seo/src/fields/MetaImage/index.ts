@@ -15,7 +15,7 @@ interface FieldFunctionProps {
 
 type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => UploadField
 
-export const MetaImage: FieldFunction = ({ hasGenerateFn = false, overrides, relationTo }) => {
+export const MetaImageField: FieldFunction = ({ hasGenerateFn = false, overrides, relationTo }) => {
   return {
     name: 'image',
     type: 'upload',
