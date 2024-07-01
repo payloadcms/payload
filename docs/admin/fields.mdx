@@ -6,23 +6,53 @@ desc:
 keywords:
 ---
 
-All Payload fields support the ability to swap in your own React components. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
+All [Payload Fields](../fields) support the ability to swap in your own [Custom Components](./components). This allows you to endlessly customize the appearance or behavior of fields. You can either replace entire fields, or swap out individual components that make up each field for endless customization.
+
+For example, your app might need to render an interface that Payload does not inherently support, such as a color picker. To do this, you would simply replace the default [Text Field](../fields/text) input with some user-friendly UI that formats the data into a valid color value. Then, a [Custom Validation](../fields/overview#validation) function could ensure the value is acceptable.
 
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  Don't see a built-in field type that you need? Build it! Using a combination of custom validation
-  and custom components, you can override the entirety of how a component functions within the admin
-  panel and effectively create your own field type.
+  Don't see a built-in field type that you need? Build it! Using a combination of [Field Validations](../fields/overview#validation)
+  and [Custom Components](./components), you can override the entirety of how a component functions within the [Admin Panel](./overview) to effectively create your own field type.
 </Banner>
 
-**Fields support the following custom components:**
+To swap in your own Field Components, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then author your React component(s) accordingly.
+
+Within the Admin Panel, fields are rendered in three distinct places:
+
+- [Field](#field-component) - The actual form field rendered in the Edit View.
+- [Cell](#cell-component) - The table cell component rendered in the List View.
+- [Filter](#filter-component) - The filter component rendered in the List View.
+
+Here is an example showing what it might look like to swap out the Field Components for your own Custom Components. You can easily swap Field Components with your own through the `admin.components` property of your [Field Config](../fields/overview).
+
+```ts
+import type { CollectionConfig } from 'payload/types'
+
+export const CollectionConfig: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      // ...
+      admin: {
+        components: {
+          Field: MyCustomField, // highlight-line
+        },
+      },
+    }
+  ]
+}
+```
+
+The following options are available:
 
 | Component    | Description                                                                                                                 |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **`Filter`** | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field.    |
-| **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More details](#cell-component).|
-| **`Field`**  | Swap out the field itself within all `Edit` views. [More details](#field-component).                                                |
+| **`Field`**  | The form field rendered in the Edit View. [More details](#field-component).                                                |
+| **`Cell`**   | The table cell rendered in the List View. [More details](#cell-component).              |
+| **`Filter`** | The filter component rendered in the List View. [More details](#filter-component). |
 
 As an alternative to replacing the entire Field component, you may want to keep the majority of the default Field component and only swap components within. This allows you to replace the **`Label`** or **`Error`** within a field component or add additional components inside the field with **`beforeInput`** or **`afterInput`**. **`beforeInput`** and **`afterInput`** are allowed in any fields that don't contain other fields, except [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
 
