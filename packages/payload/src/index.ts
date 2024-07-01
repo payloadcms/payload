@@ -663,17 +663,24 @@ export type {
   AfterErrorHook as CollectionAfterErrorHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
+  AfterLogoutHook,
+  AfterMeHook,
   AfterOperationHook as CollectionAfterOperationHook,
   AfterReadHook as CollectionAfterReadHook,
+  AfterRefreshHook,
+  AuthCollection,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeLoginHook as CollectionBeforeLoginHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
+  BulkOperationResult,
   Collection,
+  CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
+  HookOperationType,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
@@ -813,7 +820,6 @@ export type {
 export { getLocalI18n } from './translations/getLocalI18n.js'
 
 export { combineMerge } from './utilities/combineMerge.js'
-
 export {
   configToJSONSchema,
   entityToJSONSchema,
@@ -822,7 +828,10 @@ export {
 } from './utilities/configToJSONSchema.js'
 
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+
 export { createLocalReq } from './utilities/createLocalReq.js'
+export { deepCopyObject } from './utilities/deepCopyObject.js'
+export { deepMerge } from './utilities/deepMerge.js'
 
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 
