@@ -55,7 +55,7 @@ export type CustomPayloadRequestProperties = {
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
 >
-export type PayloadRequestData = {
+type PayloadRequestData = {
   /**
    * Data from the request body
    *
