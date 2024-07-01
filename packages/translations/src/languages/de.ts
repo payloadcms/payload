@@ -26,6 +26,8 @@ export const deTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Bitte gib deine E-Mail-Adresse an. Du wirst eine E-Mail mit Instruktionen zum Zurücksetzen deines Passworts erhalten.',
     forgotPasswordQuestion: 'Passwort vergessen?',
+    forgotPasswordUsernameInstructions:
+      'Bitte geben Sie unten Ihren Benutzernamen ein. Anweisungen zum Zurücksetzen Ihres Passworts werden an die mit Ihrem Benutzernamen verknüpfte E-Mail-Adresse gesendet.',
     generate: 'Generieren',
     generateNewAPIKey: 'Neuen API-Key generieren',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +65,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Erfolgreich entsperrt',
     tokenRefreshSuccessful: 'Token-Aktualisierung erfolgreich.',
     unableToVerify: 'Konnte nicht verifiziert werden',
+    username: 'Benutzername',
     verified: 'Verifiziert',
     verifiedSuccessfully: 'Erfolgreich verifiziert',
     verify: 'Verifizieren',
@@ -115,6 +118,8 @@ export const deTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Ein Benutzer mit der angegebenen E-Mail ist bereits registriert.',
     userLocked:
       'Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.',
+    usernameAlreadyRegistered:
+      'Ein Benutzer mit dem angegebenen Benutzernamen ist bereits registriert.',
     valueMustBeUnique: 'Wert muss einzigartig sein',
     verificationTokenInvalid: 'Verifizierungs-Token ist nicht korrekt.',
   },

@@ -26,6 +26,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Molim unesite svoj email. Primit ćete poruku s uputama za ponovno postavljanje lozinke.',
     forgotPasswordQuestion: 'Zaboravljena lozinka?',
+    forgotPasswordUsernameInstructions:
+      'Molimo unesite vaše korisničko ime ispod. Upute o tome kako resetirati vašu lozinku bit će poslane na e-adresu povezanu s vašim korisničkim imenom.',
     generate: 'Generiraj',
     generateNewAPIKey: 'Generiraj novi API ključ',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +64,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Uspješno otključano',
     tokenRefreshSuccessful: 'Osvježavanje tokena uspješno.',
     unableToVerify: 'Nije moguće potvrditi',
+    username: 'Korisničko ime',
     verified: 'Potvrđeno',
     verifiedSuccessfully: 'Uspješno potvrđeno',
     verify: 'Potvrdi',
@@ -113,6 +116,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     unspecific: 'Došlo je do pogreške.',
     userEmailAlreadyRegistered: 'Korisnik s navedenom e-poštom je već registriran.',
     userLocked: 'Ovaj korisnik je zaključan zbog previše neuspješnih pokušaja prijave.',
+    usernameAlreadyRegistered: 'Korisnik s navedenim korisničkim imenom već je registriran.',
     valueMustBeUnique: 'Vrijednost mora biti jedinstvena.',
     verificationTokenInvalid: 'Verifikacijski token je nevaljan.',
   },

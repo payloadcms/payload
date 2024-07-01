@@ -26,6 +26,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Skriv inn e-postadressen din nedenfor, og vi vil sende deg en e-post med instruksjoner om hvordan du tilbakestiller passordet ditt.',
     forgotPasswordQuestion: 'Glemt passord?',
+    forgotPasswordUsernameInstructions:
+      'Vennligst skriv inn brukernavnet ditt nedenfor. Instruksjoner om hvordan du tilbakestiller passordet ditt vil bli sendt til e-postadressen som er knyttet til brukernavnet ditt.',
     generate: 'Generer',
     generateNewAPIKey: 'Generer ny API-nøkkel',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +63,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Låst opp',
     tokenRefreshSuccessful: 'Token-oppdatering vellykket.',
     unableToVerify: 'Kunne ikke bekrefte',
+    username: 'Brukernavn',
     verified: 'Bekreftet',
     verifiedSuccessfully: 'Bekreftet',
     verify: 'Bekreft',
@@ -112,6 +115,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     unspecific: 'En feil har oppstått.',
     userEmailAlreadyRegistered: 'En bruker med den oppgitte e-posten er allerede registrert.',
     userLocked: 'Denne brukeren er låst på grunn av for mange mislykkede innloggingsforsøk.',
+    usernameAlreadyRegistered: 'En bruker med det gitte brukernavnet er allerede registrert.',
     valueMustBeUnique: 'Verdien må være unik',
     verificationTokenInvalid: 'Verifiseringskoden er ugyldig.',
   },

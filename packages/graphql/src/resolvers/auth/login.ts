@@ -11,6 +11,7 @@ function loginResolver(collection: Collection): any {
       data: {
         email: args.email,
         password: args.password,
+        username: args.username,
       },
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),

@@ -15,7 +15,8 @@ export type Arguments = {
   collection: Collection
   data: {
     [key: string]: unknown
-    email: string
+    email?: string
+    username?: string
   }
   disableEmail?: boolean
   expiration?: number
@@ -25,8 +26,13 @@ export type Arguments = {
 export type Result = string
 
 export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<null | string> => {
-  if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
-    throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
+  const loginWithUsername = incomingArgs.collection?.config?.auth?.loginWithUsername
+
+  if (!incomingArgs.data.email && !incomingArgs.data.username) {
+    throw new APIError(
+      `Missing ${loginWithUsername ? 'username' : 'email'}.`,
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   let args = incomingArgs
@@ -68,21 +74,27 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     let token: string = crypto.randomBytes(20).toString('hex')
-
     type UserDoc = {
+      email?: string
       id: number | string
       resetPasswordExpiration?: string
       resetPasswordToken?: string
     }
 
-    if (!data.email) {
-      throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
+    if (!data.email && !data.username) {
+      throw new APIError(
+        `Missing ${loginWithUsername ? 'username' : 'email'}.`,
+        httpStatus.BAD_REQUEST,
+      )
     }
 
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
-      where: { email: { equals: data.email.toLowerCase() } },
+      where:
+        loginWithUsername && data?.username
+          ? { username: { equals: data.username } }
+          : { email: { equals: data.email.toLowerCase() } },
     })
 
     // We don't want to indicate specifically that an email was not found,
@@ -133,7 +145,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
         from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
         html,
         subject,
-        to: data.email,
+        to: loginWithUsername ? user.email : data.email,
       })
     }
 

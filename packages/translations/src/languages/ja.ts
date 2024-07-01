@@ -26,6 +26,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'アカウントのメールアドレスを以下に入力してください。パスワードの再設定方法が記載されたメールが届きます。',
     forgotPasswordQuestion: 'パスワードをお忘れですか？',
+    forgotPasswordUsernameInstructions:
+      '以下にユーザー名を入力してください。パスワードのリセット方法については、ユーザー名に関連付けられたメールアドレスに送信されます。',
     generate: '生成',
     generateNewAPIKey: '新しいAPI Keyを生成',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +64,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'ロックの解除に成功しました。',
     tokenRefreshSuccessful: 'トークンの更新が成功しました。',
     unableToVerify: '検証ができません',
+    username: 'ユーザー名',
     verified: '検証済み',
     verifiedSuccessfully: '検証が成功しました',
     verify: '検証',
@@ -113,6 +116,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     unspecific: 'エラーが発生しました。',
     userEmailAlreadyRegistered: '指定されたメールのユーザーはすでに登録されています。',
     userLocked: 'このユーザーは、ログイン試行回数が多すぎるため、ロックされています。',
+    usernameAlreadyRegistered: '指定されたユーザーネームのユーザーはすでに登録されています。',
     valueMustBeUnique: 'ユニークな値である必要があります。',
     verificationTokenInvalid: '認証トークンが無効です。',
   },

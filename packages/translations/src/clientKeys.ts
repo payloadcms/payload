@@ -26,6 +26,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:forceUnlock',
   'authentication:forgotPassword',
   'authentication:forgotPasswordEmailInstructions',
+  'authentication:forgotPasswordUsernameInstructions',
   'authentication:forgotPasswordQuestion',
   'authentication:generate',
   'authentication:generateNewAPIKey',
@@ -49,6 +50,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:stayLoggedIn',
   'authentication:successfullyRegisteredFirstUser',
   'authentication:successfullyUnlocked',
+  'authentication:username',
   'authentication:unableToVerify',
   'authentication:tokenRefreshSuccessful',
   'authentication:verified',
@@ -71,6 +73,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unknown',
   'error:unspecific',
   'error:userEmailAlreadyRegistered',
+  'error:usernameAlreadyRegistered',
   'error:tokenNotProvided',
   'error:unPublishingDocument',
 

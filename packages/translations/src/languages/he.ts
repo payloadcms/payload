@@ -25,6 +25,8 @@ export const heTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'אנא הזן את כתובת הדוא"ל שלך למטה. תקבל הודעה עם הוראות לאיפוס הסיסמה שלך.',
     forgotPasswordQuestion: 'שכחת סיסמה?',
+    forgotPasswordUsernameInstructions:
+      'אנא הזן את שם המשתמש שלך למטה. הוראות על איך לאפס את הסיסמה שלך ישלחו לכתובת הדוא"ל המשויכת לשם המשתמש שלך.',
     generate: 'יצירה',
     generateNewAPIKey: 'יצירת מפתח API חדש',
     generatingNewAPIKeyWillInvalidate:
@@ -60,6 +62,7 @@ export const heTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'נעילה בוטלה בהצלחה.',
     tokenRefreshSuccessful: 'רענון הטוקן הצליח.',
     unableToVerify: 'לא ניתן לאמת',
+    username: 'שם משתמש',
     verified: 'אומת',
     verifiedSuccessfully: 'אומת בהצלחה',
     verify: 'אמת',
@@ -109,6 +112,7 @@ export const heTranslations: DefaultTranslationsObject = {
     unspecific: 'אירעה שגיאה.',
     userEmailAlreadyRegistered: 'משתמש עם האימייל הנתון כבר רשום.',
     userLocked: 'המשתמש נעול עקב מספר נסיונות התחברות כושלים.',
+    usernameAlreadyRegistered: 'משתמש עם שם המשתמש שניתן כבר רשום.',
     valueMustBeUnique: 'הערך חייב להיות ייחודי',
     verificationTokenInvalid: 'טוקן אימות אינו תקין.',
   },

@@ -27,8 +27,9 @@ export type Result = {
 export type Arguments = {
   collection: Collection
   data: {
-    email: string
+    email?: string
     password: string
+    username?: string
   }
   depth?: number
   overrideAccess?: boolean
@@ -80,9 +81,21 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Login
     // /////////////////////////////////////
 
-    const { email: unsanitizedEmail, password } = data
+    let user
+    const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+    const { email: unsanitizedEmail, password, username } = data
 
-    if (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '') {
+    if (loginWithUsername && !username) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
+      })
+    }
+
+    if (
+      !loginWithUsername &&
+      (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '')
+    ) {
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
@@ -97,10 +110,13 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
 
-    let user = await payload.db.findOne<any>({
+    user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       req,
-      where: { email: { equals: email.toLowerCase() } },
+      where:
+        loginWithUsername && username
+          ? { username: { equals: username } }
+          : { email: { equals: unsanitizedEmail.toLowerCase() } },
     })
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {

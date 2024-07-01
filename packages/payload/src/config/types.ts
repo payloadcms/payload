@@ -455,7 +455,7 @@ export type Config = {
            * The email address of the user to login as
            *
            */
-          email: string
+          email?: string
           /** The password of the user to login as */
           password: string
           /**
@@ -464,6 +464,8 @@ export type Config = {
            * @default false
            */
           prefillOnly?: boolean
+          /** The username of the user to login as */
+          username?: string
         }
       | false
     /** Set account profile picture. Options: gravatar, default or a custom React component. */

@@ -26,6 +26,8 @@ export const itTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Inserisci la tua mail qui sotto. Riceverai un messaggio email con le istruzioni su come cambiare la tua password.',
     forgotPasswordQuestion: 'Password dimenticata?',
+    forgotPasswordUsernameInstructions:
+      "Inserisci il tuo nome utente qui sotto. Le istruzioni su come reimpostare la tua password verranno inviate all'indirizzo email associato al tuo nome utente.",
     generate: 'Genera',
     generateNewAPIKey: 'Genera una nuova Chiave API',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +63,7 @@ export const itTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Sbloccato con successo',
     tokenRefreshSuccessful: 'Aggiornamento del token riuscito.',
     unableToVerify: 'Impossibile verificare',
+    username: 'Nome utente',
     verified: 'Verificato',
     verifiedSuccessfully: 'Verificato con successo',
     verify: 'Verifica',
@@ -115,6 +118,7 @@ export const itTranslations: DefaultTranslationsObject = {
     unspecific: 'Si è verificato un errore.',
     userEmailAlreadyRegistered: "Un utente con l'email fornita è già registrato.",
     userLocked: 'Questo utente è bloccato a causa di troppi tentativi di accesso non riusciti.',
+    usernameAlreadyRegistered: 'Un utente con il nome utente fornito è già registrato.',
     valueMustBeUnique: 'Il valore deve essere univoco',
     verificationTokenInvalid: 'Il token di verifica non è valido.',
   },

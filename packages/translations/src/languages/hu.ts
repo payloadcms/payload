@@ -26,6 +26,8 @@ export const huTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Kérjük, adja meg e-mail címét alább. Kapni fog egy e-mail üzenetet a jelszó visszaállításához szükséges utasításokkal.',
     forgotPasswordQuestion: 'Elfelejtette jelszavát?',
+    forgotPasswordUsernameInstructions:
+      'Kérjük, adja meg felhasználónevét lentebb. A jelszó visszaállításáról szóló utasításokat a felhasználónevéhez tartozó e-mail címre küldjük.',
     generate: 'Generálás',
     generateNewAPIKey: 'Új API-kulcs generálása',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +65,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Sikeresen feloldva',
     tokenRefreshSuccessful: 'A token frissítése sikeres.',
     unableToVerify: 'Sikertelen megerősítés',
+    username: 'Felhasználónév',
     verified: 'Megerősítve',
     verifiedSuccessfully: 'Sikeresen megerősítve',
     verify: 'Megerősítés',
@@ -114,6 +117,7 @@ export const huTranslations: DefaultTranslationsObject = {
     unspecific: 'Hiba történt.',
     userEmailAlreadyRegistered: 'A megadott email címmel már regisztráltak egy felhasználót.',
     userLocked: 'Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van.',
+    usernameAlreadyRegistered: 'Egy felhasználó a megadott felhasználónévvel már regisztrált.',
     valueMustBeUnique: 'Az értéknek egyedinek kell lennie',
     verificationTokenInvalid: 'Az ellenőrző token érvénytelen.',
   },

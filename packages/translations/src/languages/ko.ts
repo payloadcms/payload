@@ -26,6 +26,8 @@ export const koTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       '아래에 이메일을 입력하세요. 비밀번호를 재설정하는 방법에 대한 안내가 포함된 이메일 메시지를 받게 될 것입니다.',
     forgotPasswordQuestion: '비밀번호를 잊으셨나요?',
+    forgotPasswordUsernameInstructions:
+      '아래에 사용자 이름을 입력해 주세요. 암호를 재설정하는 방법에 대한 지침은 사용자 이름과 관련된 이메일 주소로 발송됩니다.',
     generate: '생성',
     generateNewAPIKey: '새로운 API 키 생성',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +63,7 @@ export const koTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: '잠금 해제 성공',
     tokenRefreshSuccessful: '토큰 새로 고침이 성공했습니다.',
     unableToVerify: '확인할 수 없음',
+    username: '사용자 이름',
     verified: '확인됨',
     verifiedSuccessfully: '성공적으로 확인됨',
     verify: '확인',
@@ -112,6 +115,7 @@ export const koTranslations: DefaultTranslationsObject = {
     unspecific: '오류가 발생했습니다.',
     userEmailAlreadyRegistered: '주어진 이메일로 이미 등록된 사용자가 있습니다.',
     userLocked: '이 사용자는 로그인 실패 횟수가 너무 많아 잠겼습니다.',
+    usernameAlreadyRegistered: '주어진 사용자 이름을 가진 사용자가 이미 등록되어 있습니다.',
     valueMustBeUnique: '값은 고유해야 합니다.',
     verificationTokenInvalid: '확인 토큰이 유효하지 않습니다.',
   },

@@ -26,6 +26,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Vul hieronder uw e-mailadres in. U ontvangt een e-mailbericht met instructies om uw wachtwoord opnieuw in te stellen.',
     forgotPasswordQuestion: 'Wachtwoord vergeten?',
+    forgotPasswordUsernameInstructions:
+      'Voer hieronder uw gebruikersnaam in. Instructies over hoe u uw wachtwoord kunt resetten, worden naar het e-mailadres gestuurd dat aan uw gebruikersnaam is gekoppeld.',
     generate: 'Genereren',
     generateNewAPIKey: 'Genereer nieuwe API-sleutel',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +64,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Succesvol ontgrendeld',
     tokenRefreshSuccessful: 'Token vernieuwing succesvol.',
     unableToVerify: 'Verificatie niet mogelijk',
+    username: 'Gebruikersnaam',
     verified: 'Geverifieerd',
     verifiedSuccessfully: 'Succesvol geverifieerd',
     verify: 'Verifiëren',
@@ -113,6 +116,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     unspecific: 'Er is een fout opgetreden.',
     userEmailAlreadyRegistered: 'Een gebruiker met het opgegeven e-mailadres is al geregistreerd.',
     userLocked: 'Deze gebruiker is vergrendeld wegens te veel mislukte inlogpogingen.',
+    usernameAlreadyRegistered: 'Een gebruiker met de opgegeven gebruikersnaam is al geregistreerd.',
     valueMustBeUnique: 'De waarde moet uniek zijn',
     verificationTokenInvalid: 'Verificatietoken is ongeldig.',
   },

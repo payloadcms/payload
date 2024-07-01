@@ -11,6 +11,7 @@ export const forgotPassword: CollectionRouteHandler = async ({ collection, req }
     collection,
     data: {
       email: req.data.email as string,
+      username: req.data.username as string,
     },
     disableEmail: Boolean(req.data?.disableEmail),
     expiration: typeof req.data.expiration === 'number' ? req.data.expiration : undefined,

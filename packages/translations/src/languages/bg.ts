@@ -26,6 +26,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Моля, въведи имейла си по-долу. Ще получиш съобщение с насоки как да промениш паролата си.',
     forgotPasswordQuestion: 'Забравена парола?',
+    forgotPasswordUsernameInstructions:
+      'Моля, въведете вашето потребителско име по-долу. Инструкции как да възстановите паролата си ще бъдат изпратени на имейл адреса, асоцииран с вашето потребителско име.',
     generate: 'Генерирай',
     generateNewAPIKey: 'Генерирай нов API ключ',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +63,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Успешно отключен',
     tokenRefreshSuccessful: 'Освежаването на токена беше успешно.',
     unableToVerify: 'Неуспешно потвърждение',
+    username: 'Потребителско име',
     verified: 'Потвърден',
     verifiedSuccessfully: 'Потвърден успешно',
     verify: 'Потвърди',
@@ -112,6 +115,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     unspecific: 'Грешка.',
     userEmailAlreadyRegistered: 'Потребител с дадения имейл вече е регистриран.',
     userLocked: 'Този потребител има прекалено много невалидни опити за влизане и е заключен.',
+    usernameAlreadyRegistered: 'Потребител със зададеното потребителско име вече е регистриран.',
     valueMustBeUnique: 'Стойността трябва да е уникална',
     verificationTokenInvalid: 'Ключът за верификация е невалиден.',
   },

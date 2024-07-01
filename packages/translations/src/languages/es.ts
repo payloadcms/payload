@@ -26,6 +26,8 @@ export const esTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Por favor introduce tu correo electrónico. Recibirás un mensaje con las instrucciones para restablecer tu contraseña.',
     forgotPasswordQuestion: '¿Olvidaste tu contraseña?',
+    forgotPasswordUsernameInstructions:
+      'Por favor, ingrese su nombre de usuario a continuación. Se enviarán instrucciones sobre cómo restablecer su contraseña a la dirección de correo electrónico asociada con su nombre de usuario.',
     generate: 'Generar',
     generateNewAPIKey: 'Generar Nueva Clave de API',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +63,7 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Desbloqueado correctamente',
     tokenRefreshSuccessful: 'Actualización de token exitosa.',
     unableToVerify: 'No se pudo Verificar',
+    username: 'Nombre de usuario',
     verified: 'Verificado',
     verifiedSuccessfully: 'Verificación Correcta',
     verify: 'Verificar',
@@ -114,6 +117,8 @@ export const esTranslations: DefaultTranslationsObject = {
       'Ya hay un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
       'Este usuario ha sido bloqueado debido a que tiene muchos intentos fallidos para iniciar sesión.',
+    usernameAlreadyRegistered:
+      'Un usuario con el nombre de usuario proporcionado ya está registrado.',
     valueMustBeUnique: 'El valor debe ser único',
     verificationTokenInvalid: 'Token de verificación inválido.',
   },

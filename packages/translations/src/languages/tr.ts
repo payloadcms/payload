@@ -26,6 +26,8 @@ export const trTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Lütfen e-posta adresinizi aşağıdaki alana girin. Parolanızı nasıl sıfırlayacağınızı gösteren bir e-posta adresi alacaksınız.',
     forgotPasswordQuestion: 'Parolanızı mı unuttunuz?',
+    forgotPasswordUsernameInstructions:
+      'Lütfen kullanıcı adınızı aşağıya girin. Şifrenizi nasıl sıfırlayacağınıza dair talimatlar, kullanıcı adınızla ilişkilendirilmiş e-posta adresine gönderilecektir.',
     generate: 'Oluştur',
     generateNewAPIKey: 'Yeni bir API anahtarı oluştur',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +64,7 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Hesabın kilidi başarıyla açıldı',
     tokenRefreshSuccessful: 'Token yenileme başarılı.',
     unableToVerify: 'Doğrulama başarısız',
+    username: 'Kullanıcı Adı',
     verified: 'Doğrulandı',
     verifiedSuccessfully: 'Hesap başarıyla doğrulandı',
     verify: 'Doğrula',
@@ -114,6 +117,7 @@ export const trTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
+    usernameAlreadyRegistered: 'Verilen kullanıcı adına sahip bir kullanıcı zaten kayıtlı.',
     valueMustBeUnique: 'Değer benzersiz olmalıdır',
     verificationTokenInvalid: 'Doğrulama tokeni geçersiz.',
   },

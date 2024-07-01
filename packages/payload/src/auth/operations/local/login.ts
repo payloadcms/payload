@@ -15,8 +15,9 @@ export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: {
-    email: string
+    email?: string
     password: string
+    username?: string
   }
   depth?: number
   fallbackLocale?: string

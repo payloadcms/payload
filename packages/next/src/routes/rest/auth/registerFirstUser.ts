@@ -14,6 +14,7 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
       ...data,
       email: typeof data?.email === 'string' ? data.email : '',
       password: typeof data?.password === 'string' ? data.password : '',
+      username: typeof data?.username === 'string' ? data.username : '',
     },
     req,
   })

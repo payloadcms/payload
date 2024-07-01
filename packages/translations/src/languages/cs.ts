@@ -26,6 +26,8 @@ export const csTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Zadejte svůj email níže. Obdržíte email s instrukcemi, jak resetovat vaše heslo.',
     forgotPasswordQuestion: 'Zapomněli jste heslo?',
+    forgotPasswordUsernameInstructions:
+      'Zadejte níže své uživatelské jméno. Instrukce, jak obnovit vaše heslo, budou odeslány na e-mailovou adresu spojenou s vaším uživatelským jménem.',
     generate: 'Generovat',
     generateNewAPIKey: 'Generovat nový API klíč',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +63,7 @@ export const csTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Úspěšně odemčeno',
     tokenRefreshSuccessful: 'Obnovení tokenu úspěšné.',
     unableToVerify: 'Nepodařilo se ověřit',
+    username: 'Uživatelské jméno',
     verified: 'Ověřeno',
     verifiedSuccessfully: 'Úspěšně ověřeno',
     verify: 'Ověřit',
@@ -112,6 +115,7 @@ export const csTranslations: DefaultTranslationsObject = {
     unspecific: 'Došlo k chybě.',
     userEmailAlreadyRegistered: 'Uživatel s daným e-mailem je již zaregistrován.',
     userLocked: 'Tento uživatel je uzamčen kvůli příliš mnoha neúspěšným pokusům o přihlášení.',
+    usernameAlreadyRegistered: 'Uživatel se zadaným uživatelským jménem je již zaregistrován.',
     valueMustBeUnique: 'Hodnota musí být jedinečná',
     verificationTokenInvalid: 'Ověřovací token je neplatný.',
   },

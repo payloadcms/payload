@@ -15,6 +15,7 @@ export const login: CollectionRouteHandler = async ({ collection, req }) => {
     data: {
       email: typeof req.data?.email === 'string' ? req.data.email : '',
       password: typeof req.data?.password === 'string' ? req.data.password : '',
+      username: typeof req.data?.username === 'string' ? req.data.username : '',
     },
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,

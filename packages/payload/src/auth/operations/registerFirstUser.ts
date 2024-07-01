@@ -14,8 +14,9 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: RequiredDataFromCollectionSlug<TSlug> & {
-    email: string
+    email?: string
     password: string
+    username?: string
   }
   req: PayloadRequestWithData
 }
