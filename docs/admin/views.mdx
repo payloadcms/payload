@@ -98,7 +98,7 @@ The above example shows how to add a new [Root View](#custom-root-views), but th
 
 Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views.
 
-To easily swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Collection Config](../collections/overview):
+To easily swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../collections/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -138,7 +138,7 @@ The following options are available:
 
 Global Views are views that are scoped under the `/globals` route, such as the Document Edit View.
 
-To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Global Config](../globals/overview):
+To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Global Config](../globals/overview):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload'

@@ -47,9 +47,7 @@ export default buildConfig({
 })
 ```
 
-<strong>
-  For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
-</strong>
+_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
 
 The following options are available:
 
@@ -121,7 +119,7 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 
 Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview), such as the save button or the List View.
 
-To override Collection Components, use the `admin.components` property on any [Collection Config](../configuration/collections):
+To override Collection Components, use the `admin.components` property of your [Collection Config](../configuration/collections):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -140,9 +138,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-<strong>
-  For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
-</strong>
+_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
 
 The following options are available:
 
@@ -162,7 +158,7 @@ The following options are available:
 
 Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview), such as the save button or the Edit View.
 
-To override Global Components, use the `admin.components` property on any [Global Config](../configuration/globals):
+To override Global Components, use the `admin.components` property of your [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload'
@@ -181,9 +177,7 @@ export const MyGlobal: SanitizedGlobalConfig = {
 }
 ```
 
-<strong>
-  For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
-</strong>
+_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
 
 The following options are available:
 
@@ -259,7 +253,7 @@ export const MyClientComponent: React.FC = () => {
 
 ### Accessing the Payload Config
 
-From any Server Component, the [Payload Config](../configuration/overview) can be accessed directly off the `payload` prop:
+From any Server Component, the [Payload Config](../configuration/overview) can be accessed directly from the `payload` prop:
 
 ```tsx
 import React from 'react'

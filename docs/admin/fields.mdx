@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in their appearance and behavior without affecting the underlying data structure. Using [Conditional Logic](#conditional-logic), [Custom Field Components](#custom-field-components), [Custom Validations](../fields/overview#validation), and more, fields are designed to withstand heavy modification or even complete replacement.
+[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in appearance and behavior without affecting their underlying data structure. Using [Conditional Logic](#conditional-logic), [Custom Field Components](#custom-field-components), [Custom Validations](../fields/overview#validation), and more, fields are designed to withstand heavy modification or even complete replacement.
 
 For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
@@ -122,11 +122,13 @@ export const CollectionConfig: CollectionConfig = {
 }
 ```
 
+_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
+
 <Banner type="warning">
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#the-label-component), [`Error`](#the-error-component), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
-All Field Components are passed the following props by default:
+All Field Components receive the following default props:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -134,26 +136,31 @@ All Field Components are passed the following props by default:
 | **`BeforeInput`** | The rendered result of the `admin.components.beforeInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
 | **`CustomDescription`** | The rendered result of the `description` property. [More details](#the-description-component).                                                                                                      |
 | **`CustomError`** | The rendered result of the `admin.components.Error` property. [More details](#the-error-component).                                                                                                      |
-| **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).                                                                                                      |
-| **`className`**  | A string that can be used to add a CSS class to the root element of the field.                                                                                                                                                     |
-| **`custom`**     | The object that contains everything provided to `admin.custom`. |
+| **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).
+| **`path`***       | The static path of the field at render time.                                                                                                                                                                                                            |                                                                                                    |
+| **`disabled`**   | The `admin.disabled` property defined in the [Field Config](../fields/overview). |
+| **`required`**   | The `admin.required` property defined in the [Field Config](../fields/overview). |
+| **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
+| **`style`**      | The `admin.style` property defined in the [Field Config](../fields/overview).                                                                                                                                                      |
+| **`custom`**     | The `admin.custom` property defined in the [Field Config](../fields/overview).
 | **`descriptionProps`** | An object that contains the props for the `FieldDescription` component.                                                                                                                                                                   |
-| **`disabled`**   | A boolean value that represents if the field is disabled or not.                                                                                                                                                                   |
-| **`docPreferences`** | An object that contains the preferences for the document.                                                                                                                                                                         |
-| **`errorProps`** | An object that contains the props for the error component.                                                                                                                                                                         |
-| **`label`**      | The label value provided in the field, it can be used with i18n.                                                                                                                                                                   |
 | **`labelProps`** | An object that contains the props needed for the `FieldLabel` component.                                                                                                                                                                         |
+| **`errorProps`** | An object that contains the props for the `FieldError` component.                                                                                                                                                                         |
+| **`docPreferences`** | An object that contains the preferences for the document.                                                                                                                                                                         |
+| **`label`**      | The label value provided in the field, it can be used with i18n.                                                                                                                                                                   |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
 | **`localized`**  | A boolean value that represents if the field is localized or not. [More details](../fields/localized).                                                                                                                                                                   |
-| **`path`***       | The static path of the field at render time.                                                                                                                                                                                                            |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
-| **`required`**   | A boolean value that represents if the field is required or not.                                                                                                                                                                   |
 | **`rtl`**        | A boolean value that represents if the field should be rendered right-to-left or not. [More details](../configuration/i18n).                                                                                           |
-| **`style`**      | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                           |
-| **`user`**       | The currently authenticated user.                                                                                                                                                                                                  |
+| **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
 | **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
 
 _\* The **`path`** prop is static, defined at render time. To use the dynamic path of the field, subscribe to it using the `useFieldProps` hook. [More details](./hooks#usefieldprops)._
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  Custom Fields also receive various other props that are specific [Field Type](../fields/overview) that is being rendered. For example, [Text Field](../fields/text) receives the `hasMany` prop. For a full list of available props, consult the documentation related to the specific field you are working with.
+</Banner>
 
 #### Sending and receiving values from the form
 
@@ -183,105 +190,109 @@ export const CustomTextField: React.FC = () => {
 
 ### The Cell Component
 
-These are the props that will be passed to your custom Cell to use in your own components.
+The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
+
+To easily swap in your own Cell Component, use the `admin.components.Cell` property of your [Field Config](../fields/overview):
+
+```ts
+import type { Field } from 'payload'
+
+export const myField: Field = {
+  name: 'myField',
+  type: 'text',
+  admin: {
+    components: {
+      Cell: MyCustomCell, // highlight-line
+    },
+  },
+}
+```
+
+_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
+
+All Cell Components receive the following default props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`field`**      | An object that includes the field configuration.                  |
-| **`colIndex`**   | A unique number for the column in the list.                       |
-| **`collection`** | An object with the config of the Collection that the field is in. |
-| **`cellData`**   | The data for the field that the cell represents.                  |
-| **`rowData`**    | An object with all the field values for the row.                  |
-
-#### Example
-
-```tsx
-import React from 'react'
-import type { CellProps } from 'payload'
-import './index.scss'
-
-const baseClass = 'custom-cell'
-
-const CustomCell: React.FC<Props> = (props) => {
-  const { field, colIndex, collection, cellData, rowData } = props
-
-  return <span className={baseClass}>{cellData}</span>
-}
-```
+| **`name`** | The name of the field. |
+| **`cellData`** | The value of the field. |
+| **`rowData`** | The data of the entire row, including the cell. |
+| **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
+| **`fieldType`** | The `type` property defined in the [Field Config](../fields/overview). |
+| **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
+| **`isFieldAffectingData`** | A boolean value that represents if the field is affecting the data or not. |
+| **`label`** | The label value provided in the field, it can be used with i18n. |
+| **`labels`** | An object that contains the labels for the field. |
+| **`link`** | A boolean representing whether this cell should be wrapped in a link. |
+| **`onClick`** | A function that is called when the cell is clicked. |
+| **`customCellContext`** | An object that contains the context for the custom cell, such as `collectionSlug` or `uploadConfig`. |
+| **`dateDisplayFormat`** | If a [`date`](../fields/date) field, the `admin.dateDisplayFormat` property defined in the [Field Config](../fields/overview). |
+| **`options`** | If a [`select`](../fields/select) field, this is an array of options defined in the [Field Config](../fields/overview). [More details](../fields/select). |
+| **`relationTo`** | If a [`relationship`](../fields/relationship). or [`upload`](../fields/upload) field, this is the collection(s) the field is related to. |
+| **`richTextComponentMap`** | If a [`richText`](../fields/rich-text) field, this is an object that maps the rich text components. [More details](../fields/rich-text). |
+| **`blocks`** | If a [`blocks`](../fields/blocks) field, this is an array of labels and slugs representing the blocks defined in the [Field Config](../fields/overview). [More details](../fields/blocks). |
 
 ### The Label Component
 
-These are the props that will be passed to your custom Label.
+The Label Component is rendered where a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
+
+To easily swap in your own Label Component, use the `admin.components.Label` property of your [Field Config](../fields/overview):
+
+```ts
+import type { Field } from 'payload'
+
+export const myField: Field = {
+  name: 'myField',
+  type: 'text',
+  admin: {
+    components: {
+      Label: MyCustomLabel, // highlight-line
+    },
+  },
+}
+```
+
+_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
+
+All Label Components receive the following props:
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`htmlFor`**  | Property used to set `for` attribute for label.                  |
 | **`label`**    | Label value provided in field, it can be used with i18n.         |
-| **`required`** | A boolean value that represents if the field is required or not. |
-
-#### Example
-
-```tsx
-'use client'
-import React from 'react'
-import { useTranslation } from '@payloadcms/ui'
-import { getTranslation } from '@payloadcms/translations'
-
-type Props = {
-  htmlFor?: string
-  label?: Record<string, string> | false | string
-  required?: boolean
-}
-
-const CustomLabel: React.FC<Props> = (props) => {
-  const { htmlFor, label, required = false } = props
-
-  const { i18n } = useTranslation()
-
-  if (label) {
-    return (
-      <span>
-        {getTranslation(label, i18n)}
-        {required && <span className="required">*</span>}
-      </span>
-    )
-  }
-
-  return null
-}
-```
+| **`required`** | The `admin.required` property defined in the [Field Config](../fields/overview). |
+| **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
 
 ### The Error Component
 
-These are the props that will be passed to your custom Error.
+The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
 
-| Property        | Description                                                   |
-| --------------- | ------------------------------------------------------------- |
-| **`message`**   | The error message.                                            |
-| **`showError`** | A boolean value that represents if the error should be shown. |
+```ts
+import type { Field } from 'payload'
 
-#### Example
-
-```tsx
-import React from 'react'
-
-type Props = {
-  message: string
-  showError?: boolean
-}
-
-const CustomError: React.FC<Props> = (props) => {
-  const { message, showError } = props
-
-  if (showError) {
-    return <p style={{ color: 'red' }}>{message}</p>
-  } else return null
+export const myField: Field = {
+  name: 'myField',
+  type: 'text',
+  admin: {
+    components: {
+      Error: MyCustomError, // highlight-line
+    },
+  },
 }
 ```
 
+_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
+
+All Error Components receive the following props:
+
+| Property        | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| **`path`***       | The static path of the field at render time.                                                                                                                                                                                                            |
+
+_\* The **`path`** prop is static, defined at render time. To use the dynamic path of the field, subscribe to it using the `useFieldProps` hook. [More details](./hooks#usefieldprops)._
+
 ### The Description Property
 
-The `description` property is used to provide additional information to the editor about a field, such as special instructions. It's placement varies from field to field, but it is typically displayed beneath the field input in a subtle style.
+The `description` property is used to provide additional information to the editor about a field, such as special instructions. Its placement varies from field to field, but it is typically displayed beneath the field input with subtle style differences.
 
 A description can be configured in three ways:
 
@@ -289,7 +300,7 @@ A description can be configured in three ways:
   - As a function which returns a string. [More details](#description-function).
   - As a React component. [More details](#description-component).
 
-To easily add a Custom Description to a field, use the `admin.description` property on any [Field Config](../fields/overview):
+To easily add a Custom Description to a field, use the `admin.description` property of your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -357,9 +368,13 @@ You can also provide a React component to the `description` property. This can b
 }
 ```
 
-<Banner type="success">
-  For details on how to build a Custom Description, see [Building Custom Components](./components#building-custom-components).
-</Banner>
+_For details on how to build a Custom Description, see [Building Custom Components](./components#building-custom-components)._
+
+All Description Components receive the following props:
+
+| Property       | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| **`description`**    | The `description` property defined in the [Field Config](../fields/overview).         |
 
 ### afterInput and beforeInput
 
