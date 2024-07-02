@@ -28,6 +28,7 @@ import {
   TableCellNode,
   getTableObserverFromTableElement,
 } from '@lexical/table'
+import { useScrollInfo } from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getRoot,
@@ -156,6 +157,7 @@ function TableActionMenu({
   })
   const [canMergeCells, setCanMergeCells] = useState(false)
   const [canUnmergeCell, setCanUnmergeCell] = useState(false)
+  const { y } = useScrollInfo()
 
   useEffect(() => {
     return editor.registerMutationListener(TableCellNode, (nodeMutations) => {
@@ -214,7 +216,7 @@ function TableActionMenu({
       }
       dropDownElement.style.top = `${topPosition}px`
     }
-  }, [contextRef, dropDownRef, editor])
+  }, [contextRef, dropDownRef, editor, y])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
