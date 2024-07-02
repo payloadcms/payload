@@ -727,11 +727,5 @@ export function configToJSONSchema(
     }
   }
 
-  if (config?.typescript?.schema?.length) {
-    for (const schema of config.typescript.schema) {
-      jsonSchema = schema({ jsonSchema })
-    }
-  }
-
   return jsonSchema
 }
