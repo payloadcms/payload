@@ -339,6 +339,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     enterNumber: 'Пожалуйста, введите корректный номер.',
     fieldHasNo: 'У этого поля нет {{label}}',
     greaterThanMax: '{{value}} больше максимально допустимого значения {{label}} {{max}}.',
+    integerOnly: 'Пожалуйста, введите целое число без десятичных знаков.',
     invalidInput: 'Это поле имеет недопустимое значение.',
     invalidSelection: 'В этом поле выбран недопустимый вариант.',
     invalidSelections: "'Это поле содержит следующие неправильные варианты:'",

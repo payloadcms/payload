@@ -335,6 +335,7 @@ export const csTranslations: DefaultTranslationsObject = {
     enterNumber: 'Zadejte prosím platné číslo.',
     fieldHasNo: 'Toto pole nemá {{label}}',
     greaterThanMax: '{{value}} je vyšší než maximálně povolená {{label}} {{max}}.',
+    integerOnly: 'Zadejte platné číslo bez desetinných míst.',
     invalidInput: 'Toto pole má neplatný vstup.',
     invalidSelection: 'Toto pole má neplatný výběr.',
     invalidSelections: 'Toto pole má následující neplatné výběry:',

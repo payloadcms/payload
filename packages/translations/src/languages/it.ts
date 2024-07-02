@@ -338,6 +338,7 @@ export const itTranslations: DefaultTranslationsObject = {
     enterNumber: 'Si prega di inserire un numero valido.',
     fieldHasNo: 'Questo campo non ha {{label}}',
     greaterThanMax: '{{value}} è superiore al massimo consentito {{label}} di {{max}}.',
+    integerOnly: 'Per favore inserire un numero valido senza decimali.',
     invalidInput: 'Questo campo ha un input non valido.',
     invalidSelection: 'Questo campo ha una selezione non valida.',
     invalidSelections: "'In questo campo sono presenti le seguenti selezioni non valide:'",

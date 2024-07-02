@@ -326,6 +326,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     enterNumber: '請輸入一個有效的數字。',
     fieldHasNo: '這個字串沒有{{label}}',
     greaterThanMax: '{{value}}超過了允許的最大{{label}}，該最大值為{{max}}。',
+    integerOnly: '請輸入一個沒有小數的有效數字。',
     invalidInput: '這個字串有一個無效的輸入。',
     invalidSelection: '這個字串有一個無效的選擇。',
     invalidSelections: '這個字串有以下無效的選擇：',

@@ -340,6 +340,7 @@ export const roTranslations: DefaultTranslationsObject = {
     fieldHasNo: 'Acest câmp nu are un {{label}}',
     greaterThanMax:
       '{{value}} este mai mare decât valoarea maximă permisă pentru {{label}} de {{max}}.',
+    integerOnly: 'Vă rugăm să introduceți un număr valid fără zecimale.',
     invalidInput: 'Acest câmp are o intrare invalidă.',
     invalidSelection: 'Acest câmp are o selecție invalidă.',
     invalidSelections: 'Acest câmp are următoarele selecții invalide:',

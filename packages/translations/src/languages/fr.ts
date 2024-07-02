@@ -343,6 +343,7 @@ export const frTranslations: DefaultTranslationsObject = {
     enterNumber: 'S’il vous plait, veuillez entrer un nombre valide.',
     fieldHasNo: 'Ce champ n’a pas de {{label}}',
     greaterThanMax: '{{value}} est supérieur au max autorisé {{label}} de {{max}}.',
+    integerOnly: 'Veuillez entrer un numéro valide sans décimales.',
     invalidInput: 'Ce champ a une entrée invalide.',
     invalidSelection: 'Ce champ a une sélection invalide.',
     invalidSelections: 'Ce champ contient les sélections invalides suivantes :',

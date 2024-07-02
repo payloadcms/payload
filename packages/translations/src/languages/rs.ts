@@ -335,6 +335,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     enterNumber: 'Молимо Вас унесите валидан број.',
     fieldHasNo: 'Ово поље нема {{label}}',
     greaterThanMax: '{{value}} прекорачује максималан дозвољени {{label}} лимит од {{max}}.',
+    integerOnly: 'Molimo unesite ispravan broj bez decimala.',
     invalidInput: 'Ово поље садржи невалидан унос.',
     invalidSelection: 'Ово поље садржи невалидан одабир.',
     invalidSelections: 'Ово поље има следеће невалидне одабире:',

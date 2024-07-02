@@ -250,6 +250,15 @@ export type NumberField = FieldBase & {
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
+  /**
+   * Changes SQL column type. With `bigint` and `integer` used in the default `validation` function to accept only integers.
+   */
+  dbType?: 'bigint' | 'integer' | 'numeric' | 'real'
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
   /** Minimum value accepted. Used in the default `validation` function. */
@@ -258,19 +267,21 @@ export type NumberField = FieldBase & {
 } & (
     | {
         /** Makes this field an ordered array of numbers instead of just a single number. */
-        hasMany: true
-        /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
-        maxRows?: number
-        /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-        minRows?: number
-      }
-    | {
-        /** Makes this field an ordered array of numbers instead of just a single number. */
         hasMany?: false | undefined
         /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
         maxRows?: undefined
         /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
         minRows?: undefined
+      }
+    | {
+        /** Store the field in a single JSON column in the SQL */
+        dbJsonColumn?: boolean
+        /** Makes this field an ordered array of numbers instead of just a single number. */
+        hasMany: true
+        /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+        maxRows?: number
+        /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+        minRows?: number
       }
   )
 
@@ -286,18 +297,15 @@ export type TextField = FieldBase & {
     placeholder?: Record<string, string> | string
     rtl?: boolean
   }
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   maxLength?: number
   minLength?: number
   type: 'text'
 } & (
-    | {
-        /** Makes this field an ordered array of strings instead of just a single string. */
-        hasMany: true
-        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
-        maxRows?: number
-        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
-        minRows?: number
-      }
     | {
         /** Makes this field an ordered array of strings instead of just a single string. */
         hasMany?: false | undefined
@@ -305,6 +313,16 @@ export type TextField = FieldBase & {
         maxRows?: undefined
         /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
         minRows?: undefined
+      }
+    | {
+        /** Store the field in a single JSON column in the SQL */
+        dbJsonColumn?: boolean
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany: true
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: number
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: number
       }
   )
 
@@ -319,6 +337,11 @@ export type EmailField = FieldBase & {
     }
     placeholder?: Record<string, string> | string
   }
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   type: 'email'
 }
 
@@ -334,6 +357,11 @@ export type TextareaField = FieldBase & {
     rows?: number
     rtl?: boolean
   }
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   maxLength?: number
   minLength?: number
   type: 'textarea'
@@ -348,6 +376,11 @@ export type CheckboxField = FieldBase & {
       beforeInput?: CustomComponent[]
     }
   }
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   type: 'checkbox'
 }
 
@@ -362,6 +395,12 @@ export type DateField = FieldBase & {
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
   }
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
+
   type: 'date'
 }
 
@@ -369,6 +408,13 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   admin?: Admin & {
     hideGutter?: boolean
   }
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
@@ -453,6 +499,13 @@ export type TabsField = Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveTo
 }
 
 export type TabAsField = Tab & {
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   name?: string
   type: 'tab'
 }
@@ -493,6 +546,13 @@ export type UploadField = FieldBase & {
       Label?: CustomComponent<LabelProps>
     }
   }
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   filterOptions?: FilterOptions
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
@@ -543,12 +603,19 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
   /**
    * Customize the SQL table name
    */
   dbName?: DBIdentifierName
   /**
-   * Customize the DB enum name
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
+  /**
+   * Customize the DB enum naFme
    */
   enumName?: DBIdentifierName
   hasMany?: boolean
@@ -557,6 +624,11 @@ export type SelectField = FieldBase & {
 }
 
 type SharedRelationshipProperties = FieldBase & {
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   filterOptions?: FilterOptions
   hasMany?: boolean
   /**
@@ -568,6 +640,8 @@ type SharedRelationshipProperties = FieldBase & {
   type: 'relationship'
 } & (
     | {
+        /** Store the field in a single JSON column in the SQL */
+        dbJsonColumn?: boolean
         hasMany: true
         /**
          * @deprecated Use 'maxRows' instead
@@ -607,6 +681,8 @@ export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
   }
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
   relationTo: CollectionSlug[]
 }
 export type SingleRelationshipField = SharedRelationshipProperties & {
@@ -666,10 +742,17 @@ export type ArrayField = FieldBase & {
      */
     isSortable?: boolean
   }
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
   /**
    * Customize the SQL table name
    */
   dbName?: DBIdentifierName
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
@@ -696,6 +779,11 @@ export type RadioField = FieldBase & {
    * Customize the SQL table name
    */
   dbName?: DBIdentifierName
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   /**
    * Customize the DB enum name
    */
@@ -742,10 +830,18 @@ export type BlockField = FieldBase & {
     isSortable?: boolean
   }
   blocks: Block[]
+  /** Store the field in a single JSON column in the SQL */
+  dbJsonColumn?: boolean
+  /**
+   * Disables creation of the field schema in the SQL
+   * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)
+   */
+  dbStore?: boolean
   defaultValue?: unknown
   labels?: Labels
   maxRows?: number
   minRows?: number
+
   type: 'blocks'
 }
 

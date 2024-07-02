@@ -336,6 +336,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     enterNumber: 'Vennligst skriv inn et gyldig tall.',
     fieldHasNo: 'Dette feltet har ingen {{label}}',
     greaterThanMax: '{{value}} er større enn den tillatte maksimale {{label}} på {{max}}.',
+    integerOnly: 'Vennligst skriv inn et gyldig tall uten desimaler.',
     invalidInput: 'Dette feltet har en ugyldig inndata.',
     invalidSelection: 'Dette feltet har en ugyldig utvalg.',
     invalidSelections: 'Dette feltet har følgende ugyldige utvalg:',

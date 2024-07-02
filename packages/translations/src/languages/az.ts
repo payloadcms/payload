@@ -337,6 +337,7 @@ export const azTranslations: DefaultTranslationsObject = {
     enterNumber: 'Xahiş edirik doğru nömrəni daxil edin.',
     fieldHasNo: 'Bu sahədə heç bir {{label}} yoxdur',
     greaterThanMax: '{{value}} icazə verilən maksimal {{label}} olan {{max}}-dən böyükdür.',
+    integerOnly: 'Zəhmət olmasa, ondalıqlar olmadan etibarlı bir nömrə daxil edin.',
     invalidInput: 'Bu sahə yanlış daxil edilmişdir.',
     invalidSelection: 'Bu sahədə yanlış seçim edilmişdir.',
     invalidSelections: 'Bu sahədə aşağıdakı yanlış seçimlər edilmişdir:',

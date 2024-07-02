@@ -13,6 +13,57 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
     PostsCollection,
+    {
+      slug: 'tests',
+      fields: [
+        {
+          name: 'default',
+          type: 'text',
+          defaultValue: 'some default',
+        },
+        {
+          name: 'real',
+          type: 'number',
+          dbType: 'real',
+        },
+        {
+          name: 'virtualField',
+          type: 'text',
+          dbStore: false,
+          hooks: {
+            afterRead: [() => 'Virtual'],
+            beforeChange: [
+              (args) => {
+                delete args.siblingData['virtualField']
+              },
+            ],
+          },
+        },
+        {
+          name: 'select',
+          type: 'select',
+          options: ['some', 'asd'],
+          defaultValue: 'some',
+        },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          dbJsonColumn: true,
+          blocks: [{ slug: 'some', fields: [{ type: 'text', name: 'text' }] }],
+        },
+        {
+          name: 'arr',
+          type: 'array',
+          dbJsonColumn: true,
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
     // MediaCollection
   ],
   cors: ['http://localhost:3000', 'http://localhost:3001'],

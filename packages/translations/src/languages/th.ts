@@ -330,6 +330,7 @@ export const thTranslations: DefaultTranslationsObject = {
     enterNumber: 'กรุณาระบุตัวเลขที่ถูกต้อง',
     fieldHasNo: 'ช่องนี้ไม่มี {{label}}',
     greaterThanMax: '{{value}} มากกว่าค่าสูงสุดที่อนุญาตของ {{label}} ซึ่งคือ {{max}}.',
+    integerOnly: 'โปรดป้อนตัวเลขที่ถูกต้องโดยไม่มีทศนิยม',
     invalidInput: 'ข้อมูลไม่ถูกต้อง',
     invalidSelection: 'ค่าที่เลือกไม่ถูกต้อง',
     invalidSelections: 'ค่าที่เลือกไม่ถูกต้องดังนี้:',

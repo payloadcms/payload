@@ -336,6 +336,7 @@ export const enTranslations = {
     enterNumber: 'Please enter a valid number.',
     fieldHasNo: 'This field has no {{label}}',
     greaterThanMax: '{{value}} is greater than the max allowed {{label}} of {{max}}.',
+    integerOnly: 'Please enter a valid number without decimals.',
     invalidInput: 'This field has an invalid input.',
     invalidSelection: 'This field has an invalid selection.',
     invalidSelections: 'This field has the following invalid selections:',
