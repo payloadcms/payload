@@ -37,6 +37,7 @@ export { toolbarTextDropdownGroupWithItems } from '../../features/shared/toolbar
 export { FixedToolbarFeatureClient } from '../../features/toolbars/fixed/feature.client.js'
 export { InlineToolbarFeatureClient } from '../../features/toolbars/inline/feature.client.js'
 export { ToolbarButton } from '../../features/toolbars/shared/ToolbarButton/index.js'
+export { TableFeatureClient } from '../../features/experimental_table/feature.client.js'
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
 export { UploadFeatureClient } from '../../features/upload/feature.client.js'

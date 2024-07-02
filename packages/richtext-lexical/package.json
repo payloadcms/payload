@@ -83,6 +83,7 @@
     "@lexical/react": "0.16.1",
     "@lexical/rich-text": "0.16.1",
     "@lexical/selection": "0.16.1",
+    "@lexical/table": "0.16.1",
     "@lexical/utils": "0.16.1",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
