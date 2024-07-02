@@ -8,7 +8,11 @@ import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarAddDropdownGroupWithItems } from '../shared/toolbar/addDropdownGroup.js'
 import { TableActionMenuPlugin } from './plugins/TableActionMenuPlugin/index.js'
 import { TableCellResizerPlugin } from './plugins/TableCellResizerPlugin/index.js'
-import { OPEN_TABLE_DRAWER_COMMAND, TablePlugin } from './plugins/TablePlugin/index.js'
+import {
+  OPEN_TABLE_DRAWER_COMMAND,
+  TableContext,
+  TablePlugin,
+} from './plugins/TablePlugin/index.js'
 
 export const TableFeatureClient = createClientFeature({
   nodes: [TableNode, TableCellNode, TableRowNode],
@@ -26,6 +30,7 @@ export const TableFeatureClient = createClientFeature({
       position: 'floatingAnchorElem',
     },
   ],
+  providers: [TableContext],
   slashMenu: {
     groups: [
       slashMenuBasicGroupWithItems([
