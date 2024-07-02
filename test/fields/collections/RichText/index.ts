@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
@@ -7,8 +7,8 @@ import {
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
+  lexicalHTML,
 } from '@payloadcms/richtext-lexical'
-import { lexicalHTML } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { richTextFieldsSlug } from '../../slugs.js'

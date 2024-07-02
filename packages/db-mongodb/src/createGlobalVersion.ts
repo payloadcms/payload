@@ -1,5 +1,4 @@
-import type { CreateGlobalVersion } from 'payload/database'
-import type { Document , PayloadRequestWithData } from 'payload/types'
+import type { CreateGlobalVersion, Document, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -7,15 +6,7 @@ import { withSession } from './withSession.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
-  {
-    autosave,
-    createdAt,
-    globalSlug,
-    parent,
-    req = {} as PayloadRequestWithData,
-    updatedAt,
-    versionData,
-  },
+  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
 ) {
   const VersionModel = this.versions[globalSlug]
   const options = withSession(this, req.transactionID)

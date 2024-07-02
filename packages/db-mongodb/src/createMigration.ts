@@ -1,9 +1,9 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { CreateMigration, MigrationTemplateArgs } from 'payload/database'
+import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration } from 'payload/database'
+import { getPredefinedMigration } from 'payload'
 import { fileURLToPath } from 'url'
 
 const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {

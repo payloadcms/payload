@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -567,6 +567,58 @@ describe('fields - relationship', () => {
       await expect(
         page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value'),
       ).toHaveCount(15)
+    })
+  })
+
+  describe('field relationship with many items', () => {
+    beforeEach(async () => {
+      const relations: string[] = []
+      const batchSize = 10
+      const totalRelations = 300
+      const totalBatches = Math.ceil(totalRelations / batchSize)
+      for (let i = 0; i < totalBatches; i++) {
+        const batchPromises: Promise<RelationOne>[] = []
+        const start = i * batchSize
+        const end = Math.min(start + batchSize, totalRelations)
+
+        for (let j = start; j < end; j++) {
+          batchPromises.push(
+            payload.create({
+              collection: relationOneSlug,
+              data: {
+                name: 'relation',
+              },
+            }),
+          )
+        }
+
+        const batchRelations = await Promise.all(batchPromises)
+        relations.push(...batchRelations.map((doc) => doc.id))
+      }
+
+      await payload.update({
+        id: docWithExistingRelations.id,
+        collection: slug,
+        data: {
+          relationshipHasMany: relations,
+        },
+      })
+    })
+
+    test('should update with new relationship', async () => {
+      await page.goto(url.edit(docWithExistingRelations.id))
+
+      const field = page.locator('#field-relationshipHasMany')
+      const dropdownIndicator = field.locator('.dropdown-indicator')
+      await dropdownIndicator.click({ delay: 100 })
+
+      const options = page.locator('.rs__option')
+      await expect(options).toHaveCount(2)
+
+      await options.nth(0).click()
+      await expect(field).toContainText(relationOneDoc.id)
+
+      await saveDocAndAssert(page)
     })
   })
 })

@@ -8,326 +8,325 @@
 
 export interface Config {
   collections: {
-    users: User;
-    'non-admin-user': NonAdminUser;
-    posts: Post;
-    unrestricted: Unrestricted;
-    'fully-restricted': FullyRestricted;
-    'read-only-collection': ReadOnlyCollection;
-    'user-restricted-collection': UserRestrictedCollection;
-    'create-not-update-collection': CreateNotUpdateCollection;
-    'restricted-versions': RestrictedVersion;
-    'sibling-data': SiblingDatum;
-    'rely-on-request-headers': RelyOnRequestHeader;
-    'doc-level-access': DocLevelAccess;
-    'hidden-fields': HiddenField;
-    'hidden-access': HiddenAccess;
-    'hidden-access-count': HiddenAccessCount;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
+    users: User
+    'non-admin-user': NonAdminUser
+    posts: Post
+    unrestricted: Unrestricted
+    'fully-restricted': FullyRestricted
+    'read-only-collection': ReadOnlyCollection
+    'user-restricted-collection': UserRestrictedCollection
+    'create-not-update-collection': CreateNotUpdateCollection
+    'restricted-versions': RestrictedVersion
+    'sibling-data': SiblingDatum
+    'rely-on-request-headers': RelyOnRequestHeader
+    'doc-level-access': DocLevelAccess
+    'hidden-fields': HiddenField
+    'hidden-access': HiddenAccess
+    'hidden-access-count': HiddenAccessCount
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
   globals: {
-    settings: Setting;
-    test: Test;
-    'read-only-global': ReadOnlyGlobal;
-    'user-restricted-global': UserRestrictedGlobal;
-    'read-not-update-global': ReadNotUpdateGlobal;
-  };
-  locale: null;
+    settings: Setting
+    test: Test
+    'read-only-global': ReadOnlyGlobal
+    'user-restricted-global': UserRestrictedGlobal
+    'read-not-update-global': ReadNotUpdateGlobal
+  }
+  locale: null
   user:
     | (User & {
-        collection: 'users';
+        collection: 'users'
       })
     | (NonAdminUser & {
-        collection: 'non-admin-user';
-      });
+        collection: 'non-admin-user'
+      })
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  roles?: ('admin' | 'user')[] | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  roles?: ('admin' | 'user')[] | null
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "non-admin-user".
  */
 export interface NonAdminUser {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
-  restrictedField?: string | null;
+  id: string
+  restrictedField?: string | null
   group?: {
-    restrictedGroupText?: string | null;
-  };
-  restrictedRowText?: string | null;
-  restrictedCollapsibleText?: string | null;
-  updatedAt: string;
-  createdAt: string;
+    restrictedGroupText?: string | null
+  }
+  restrictedRowText?: string | null
+  restrictedCollapsibleText?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "unrestricted".
  */
 export interface Unrestricted {
-  id: string;
-  name?: string | null;
-  userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
-  createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  userRestrictedDocs?: (string | UserRestrictedCollection)[] | null
+  createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "user-restricted-collection".
  */
 export interface UserRestrictedCollection {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "create-not-update-collection".
  */
 export interface CreateNotUpdateCollection {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fully-restricted".
  */
 export interface FullyRestricted {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "read-only-collection".
  */
 export interface ReadOnlyCollection {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-versions".
  */
 export interface RestrictedVersion {
-  id: string;
-  name?: string | null;
-  hidden?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  hidden?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sibling-data".
  */
 export interface SiblingDatum {
-  id: string;
+  id: string
   array?:
     | {
-        allowPublicReadability?: boolean | null;
-        text?: string | null;
-        id?: string | null;
+        allowPublicReadability?: boolean | null
+        text?: string | null
+        id?: string | null
       }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rely-on-request-headers".
  */
 export interface RelyOnRequestHeader {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "doc-level-access".
  */
 export interface DocLevelAccess {
-  id: string;
-  approvedForRemoval?: boolean | null;
-  approvedTitle?: string | null;
-  lockTitle?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  approvedForRemoval?: boolean | null
+  approvedTitle?: string | null
+  lockTitle?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-fields".
  */
 export interface HiddenField {
-  id: string;
-  title?: string | null;
+  id: string
+  title?: string | null
   partiallyHiddenGroup?: {
-    name?: string | null;
-    value?: string | null;
-  };
+    name?: string | null
+    value?: string | null
+  }
   partiallyHiddenArray?:
     | {
-        name?: string | null;
-        value?: string | null;
-        id?: string | null;
+        name?: string | null
+        value?: string | null
+        id?: string | null
       }[]
-    | null;
-  hidden?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  hidden?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-access".
  */
 export interface HiddenAccess {
-  id: string;
-  title: string;
-  hidden?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  hidden?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-access-count".
  */
 export interface HiddenAccessCount {
-  id: string;
-  title: string;
-  hidden?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  hidden?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user:
     | {
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'users'
+        value: string | User
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
-      };
-  key?: string | null;
+        relationTo: 'non-admin-user'
+        value: string | NonAdminUser
+      }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings".
  */
 export interface Setting {
-  id: string;
-  test?: boolean | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  test?: boolean | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "test".
  */
 export interface Test {
-  id: string;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "read-only-global".
  */
 export interface ReadOnlyGlobal {
-  id: string;
-  name?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  name?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "user-restricted-global".
  */
 export interface UserRestrictedGlobal {
-  id: string;
-  name?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  name?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "read-not-update-global".
  */
 export interface ReadNotUpdateGlobal {
-  id: string;
-  name?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+  id: string
+  name?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

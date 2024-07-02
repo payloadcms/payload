@@ -1,8 +1,4 @@
-import type {
-  CollectionAfterChangeHook,
-  CollectionConfig,
-  PayloadRequestWithData,
-} from 'payload/types'
+import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -13,7 +9,7 @@ type ResaveArgs = {
   doc: Record<string, unknown>
   draft: boolean
   pluginConfig: NestedDocsPluginConfig
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {

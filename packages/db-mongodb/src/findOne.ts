@@ -1,6 +1,5 @@
 import type { MongooseQueryOptions } from 'mongoose'
-import type { FindOne } from 'payload/database'
-import type { Document , PayloadRequestWithData } from 'payload/types'
+import type { Document, FindOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -9,7 +8,7 @@ import { withSession } from './withSession.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequestWithData, where },
+  { collection, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
   const options: MongooseQueryOptions = {

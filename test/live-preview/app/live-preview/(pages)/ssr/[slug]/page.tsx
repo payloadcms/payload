@@ -1,4 +1,4 @@
-import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { Gutter } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 

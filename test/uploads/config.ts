@@ -1,5 +1,5 @@
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
+import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
@@ -498,6 +499,7 @@ export default buildConfigWithDefaults({
         drafts: true,
       },
     },
+    CustomUploadFieldCollection,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')

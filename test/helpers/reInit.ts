@@ -1,4 +1,4 @@
-import type { Endpoint, PayloadHandler } from 'payload/config'
+import type { Endpoint, PayloadHandler } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
@@ -8,8 +8,8 @@ import { seedDB } from './seed.js'
 
 const handler: PayloadHandler = async (req) => {
   process.env.SEED_IN_CONFIG_ONINIT = 'true'
-  const reqWithData = await addDataAndFileToRequest({ request: req })
-  const { data, payload } = reqWithData
+  await addDataAndFileToRequest(req)
+  const { data, payload } = req
 
   try {
     await seedDB({

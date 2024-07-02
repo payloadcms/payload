@@ -1,5 +1,5 @@
 'use client'
-import isDeepEqual from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -97,7 +97,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         // merge the value with any existing preference for the key
         newValue = { ...(currentPreference || {}), ...value }
 
-        if (isDeepEqual(newValue, currentPreference)) {
+        if (dequal(newValue, currentPreference)) {
           return
         }
 
@@ -115,7 +115,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
       const updatePreference = async () => {
         // compare the value stored in context before sending to eliminate duplicate requests
-        if (isDeepEqual(pendingUpdate.current[key], preferencesRef.current[key])) {
+        if (dequal(pendingUpdate.current[key], preferencesRef.current[key])) {
           return
         }
 

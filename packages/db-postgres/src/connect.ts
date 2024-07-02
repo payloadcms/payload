@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { Connect } from 'payload/database'
+import type { Connect, Payload } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'

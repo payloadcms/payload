@@ -114,7 +114,7 @@ export async function configurePayloadConfig(args: {
         startMatch: '// storage-adapter-placeholder',
       })
 
-      if (replacement?.importReplacement) {
+      if (replacement?.importReplacement !== undefined) {
         configLines = replaceInConfigLines({
           lines: configLines,
           replacement: [replacement.importReplacement],

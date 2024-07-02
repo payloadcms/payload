@@ -1,6 +1,11 @@
 'use client'
+import type { BlockField } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
+
+import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -9,32 +14,25 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'blocks-field'
-
-import type { FieldPermissions } from 'payload/auth'
-import type { BlockField } from 'payload/types'
-
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
-
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { withCondition } from '../../forms/withCondition/index.js'
 
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
@@ -44,7 +42,6 @@ export type BlocksFieldProps = FormFieldBase & {
   maxRows?: number
   minRows?: number
   name?: string
-  permissions: FieldPermissions
   slug?: string
   width?: string
 }
@@ -128,7 +125,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 

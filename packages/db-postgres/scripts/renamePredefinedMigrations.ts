@@ -13,6 +13,7 @@ const rename = () => {
       const newPath = path.join('./dist/predefinedMigrations', file)
       fs.renameSync(newPath, newPath.replace('.js', '.mjs'))
     })
+  console.log('done')
 }
 
 rename()

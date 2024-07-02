@@ -1,4 +1,4 @@
-import type { CommitTransaction } from 'payload/database'
+import type { CommitTransaction } from 'payload'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
   if (!this.sessions[id]?.inTransaction()) {

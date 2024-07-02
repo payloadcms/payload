@@ -1,7 +1,6 @@
-import type { Collection, PayloadRequestWithData , Where } from 'payload/types'
+import type { Collection, PayloadRequest, Where } from 'payload'
 
-import { countOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { countOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -13,7 +12,7 @@ export type Resolver = (
     where?: Where
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<{ totalDocs: number }>

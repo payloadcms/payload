@@ -12,148 +12,147 @@
  */
 export type SharedMetaArray =
   | {
-      title?: string | null;
-      description?: string | null;
-      id?: string | null;
+      title?: string | null
+      description?: string | null
+      id?: string | null
     }[]
-  | null;
+  | null
 
 export interface Config {
   collections: {
-    collection1: Collection1;
-    collection2: Collection2;
-    'no-graphql': NoGraphql;
-    users: User;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
-  locale: null;
+    collection1: Collection1
+    collection2: Collection2
+    'no-graphql': NoGraphql
+    users: User
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: null
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection1".
  */
 export interface Collection1 {
-  id: string;
-  testing: string;
-  title: string;
-  meta?: SharedMetaArray;
-  blocks: (SharedMetaBlock | AnotherSharedBlock)[];
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  testing: string
+  title: string
+  meta?: SharedMetaArray
+  blocks: (SharedMetaBlock | AnotherSharedBlock)[]
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "SharedMetaBlock".
  */
 export interface SharedMetaBlock {
-  b1title: string;
-  b1description?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block1';
+  b1title: string
+  b1description?: string | null
+  id?: string | null
+  blockName?: string | null
+  blockType: 'block1'
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "AnotherSharedBlock".
  */
 export interface AnotherSharedBlock {
-  b2title: string;
-  b2description?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block2';
+  b2title: string
+  b2description?: string | null
+  id?: string | null
+  blockName?: string | null
+  blockType: 'block2'
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection2".
  */
 export interface Collection2 {
-  id: string;
-  metaArray?: SharedMetaArray;
-  metaGroup?: SharedMeta;
+  id: string
+  metaArray?: SharedMetaArray
+  metaGroup?: SharedMeta
   nestedGroup?: {
-    meta?: SharedMeta;
-  };
-  updatedAt: string;
-  createdAt: string;
+    meta?: SharedMeta
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "SharedMeta".
  */
 export interface SharedMeta {
-  title?: string | null;
-  description?: string | null;
+  title?: string | null
+  description?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-graphql".
  */
 export interface NoGraphql {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

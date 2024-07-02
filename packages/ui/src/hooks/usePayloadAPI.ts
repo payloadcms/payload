@@ -1,5 +1,5 @@
 'use client'
-import queryString from 'qs'
+import qs from 'qs'
 import { useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../providers/Locale/index.js'
@@ -24,7 +24,7 @@ type Options = {
 
 type UsePayloadAPI = (url: string, options?: Options) => Result
 
-const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
+export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const { initialData, initialParams = {} } = options
 
   const { i18n } = useTranslation()
@@ -35,7 +35,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const { code: locale } = useLocale()
   const hasInitialized = useRef(false)
 
-  const search = queryString.stringify(
+  const search = qs.stringify(
     {
       locale,
       ...(typeof params === 'object' ? params : {}),
@@ -102,5 +102,3 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
 
   return [{ data, isError, isLoading }, { setParams }]
 }
-
-export default usePayloadAPI

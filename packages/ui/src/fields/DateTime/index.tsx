@@ -1,27 +1,25 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate, DateField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { DateField } from 'payload/types'
-
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
 export type DateFieldProps = FormFieldBase & {
   date?: DateField['admin']['date']
@@ -31,7 +29,7 @@ export type DateFieldProps = FormFieldBase & {
   width?: string
 }
 
-const DateTimeField: React.FC<DateFieldProps> = (props) => {
+const _DateTimeField: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -68,7 +66,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField<Date>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -119,4 +117,4 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
   )
 }
 
-export const DateTime = withCondition(DateTimeField)
+export const DateTimeField = withCondition(_DateTimeField)

@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -116,6 +117,7 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,
     CollectionGroup2A,

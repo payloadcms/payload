@@ -1,5 +1,4 @@
-import type { GeneratedTypes, Payload } from 'payload'
-import type { InitOptions, SanitizedConfig } from 'payload/config'
+import type { GeneratedTypes, InitOptions, Payload, SanitizedConfig } from 'payload'
 
 import { BasePayload } from 'payload'
 import WebSocket from 'ws'
@@ -78,7 +77,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   }
 
   if (!cached.promise) {
-    cached.promise = new BasePayload<GeneratedTypes>().init(options)
+    cached.promise = new BasePayload().init(options)
   }
 
   try {

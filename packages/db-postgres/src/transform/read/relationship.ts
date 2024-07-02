@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { RelationshipField, UploadField } from 'payload/types'
+import type { RelationshipField, UploadField } from 'payload'
 
 type Args = {
   field: RelationshipField | UploadField

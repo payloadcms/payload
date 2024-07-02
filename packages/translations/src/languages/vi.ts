@@ -4,6 +4,7 @@ export const viTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Tài khoản',
     accountOfCurrentUser: 'Tài khoản của người dùng hiện tại',
+    accountVerified: 'Tài khoản đã được xác minh thành công.',
     alreadyActivated: 'Đã được kích hoạt',
     alreadyLoggedIn: 'Đã đăng nhập',
     apiKey: 'API Key',
@@ -24,6 +25,8 @@ export const viTranslations: DefaultTranslationsObject = {
     forgotPassword: 'Quên mật khẩu',
     forgotPasswordEmailInstructions: 'Nhập email của bạn để nhận hướng dẫn tạo lại mật khẩu.',
     forgotPasswordQuestion: 'Quên mật khẩu?',
+    forgotPasswordUsernameInstructions:
+      'Vui lòng nhập tên người dùng của bạn bên dưới. Hướng dẫn về cách đặt lại mật khẩu của bạn sẽ được gửi đến địa chỉ email liên kết với tên người dùng của bạn.',
     generate: 'Tạo',
     generateNewAPIKey: 'Tạo API Key mới',
     generatingNewAPIKeyWillInvalidate:
@@ -60,6 +63,8 @@ export const viTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Mở khóa thành công',
     tokenRefreshSuccessful: 'Làm mới token thành công.',
     unableToVerify: 'Không thể xác thực',
+    username: 'Tên đăng nhập',
+    usernameNotValid: 'Tên người dùng được cung cấp không hợp lệ',
     verified: 'Đã xác thực',
     verifiedSuccessfully: 'Đã xác thực thành công',
     verify: 'Tiến hành xác thực',
@@ -111,6 +116,8 @@ export const viTranslations: DefaultTranslationsObject = {
     unspecific: 'Lỗi - Đã xảy ra (unspecific error).',
     userEmailAlreadyRegistered: 'Người dùng với email đã cho đã được đăng ký.',
     userLocked: 'Lỗi- Tài khoản đã bị khóa do đăng nhập thất bại nhiều lần.',
+    usernameAlreadyRegistered: 'Một người dùng với tên đăng nhập đã cho đã được đăng ký.',
+    usernameOrPasswordIncorrect: 'Tên người dùng hoặc mật khẩu được cung cấp không chính xác.',
     valueMustBeUnique: 'Lỗi - Giá trị không được trùng lặp.',
     verificationTokenInvalid: 'Lỗi - Token dùng để xác thực không hợp lệ.',
   },

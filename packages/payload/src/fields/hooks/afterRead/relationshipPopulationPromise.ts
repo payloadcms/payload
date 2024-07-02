@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { RelationshipField, UploadField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
@@ -16,7 +16,7 @@ type PopulateArgs = {
   key?: string
   locale: null | string
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
@@ -103,7 +103,7 @@ type PromiseArgs = {
   field: RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
 }

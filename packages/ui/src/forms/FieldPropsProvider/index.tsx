@@ -1,6 +1,5 @@
 'use client'
-import type { FieldTypes } from 'payload/config'
-import type { FieldPermissions } from 'payload/types'
+import type { FieldPermissions, FieldTypes } from 'payload'
 
 import React from 'react'
 
@@ -18,13 +17,13 @@ export type FieldPropsContextType = {
 }
 
 const FieldPropsContext = React.createContext<FieldPropsContextType>({
-  type: '' as keyof FieldTypes,
+  type: undefined as keyof FieldTypes,
   custom: {},
-  indexPath: '',
-  path: '',
+  indexPath: undefined,
+  path: undefined,
   permissions: {} as FieldPermissions,
   readOnly: false,
-  schemaPath: '',
+  schemaPath: undefined,
   siblingPermissions: {},
 })
 

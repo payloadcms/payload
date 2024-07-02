@@ -1,5 +1,5 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
-import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload/types'
+import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload'
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
@@ -9,6 +9,7 @@ import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { mergeHeaders } from '../../utilities/mergeHeaders.js'
 
 const handleError = async (
   payload: Payload,
@@ -83,24 +84,24 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
-    const basePayloadRequest = await createPayloadRequest({
+    const req = await createPayloadRequest({
       config,
       request,
     })
 
-    const reqWithData = await addDataAndFileToRequest({ request: basePayloadRequest })
-    const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+    await addDataAndFileToRequest(req)
+    addLocalesToRequestFromData(req)
 
     const { schema, validationRules } = await getGraphql(config)
 
-    const { payload } = payloadRequest
+    const { payload } = req
 
     const afterErrorHook =
       typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
 
     const headers = {}
     const apiResponse = await createHandler({
-      context: { headers, req: payloadRequest },
+      context: { headers, req },
       onOperation: async (request, args, result) => {
         const response =
           typeof payload.extensions === 'function'
@@ -122,16 +123,20 @@ export const POST =
         return response
       },
       schema,
-      validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
+      validationRules: (_, args, defaultRules) => defaultRules.concat(validationRules(args)),
     })(originalRequest)
 
     const resHeaders = headersWithCors({
       headers: new Headers(apiResponse.headers),
-      req: payloadRequest,
+      req,
     })
 
     for (const key in headers) {
       resHeaders.append(key, headers[key])
+    }
+
+    if (req.responseHeaders) {
+      mergeHeaders(req.responseHeaders, resHeaders)
     }
 
     return new Response(apiResponse.body, {

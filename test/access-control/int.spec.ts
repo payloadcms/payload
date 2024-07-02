@@ -1,6 +1,6 @@
-import type { Payload, PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequest } from 'payload'
 
-import { Forbidden } from 'payload/errors'
+import { Forbidden } from 'payload'
 
 import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js'
 
@@ -186,7 +186,7 @@ describe('Access Control', () => {
       it('access control ok when passing request headers', async () => {
         const req = {
           headers: requestHeaders,
-        } as PayloadRequestWithData
+        } as PayloadRequest
         const name = 'name'
         const overrideAccess = false
 

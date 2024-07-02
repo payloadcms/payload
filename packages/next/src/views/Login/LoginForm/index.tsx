@@ -6,15 +6,18 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequestWithData } from 'payload/types'
+import type { FormState, PayloadRequest } from 'payload'
 
-import { Email } from '@payloadcms/ui/fields/Email'
-import { Password } from '@payloadcms/ui/fields/Password'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { email, password } from 'payload/fields/validations'
+import {
+  EmailField,
+  Form,
+  FormSubmit,
+  PasswordField,
+  TextField,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
+import { email, password, text } from 'payload/shared'
 
 import './index.scss'
 
@@ -32,21 +35,33 @@ export const LoginForm: React.FC<{
     routes: { admin, api },
   } = config
 
+  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+
   const { t } = useTranslation()
 
   const prefillForm = autoLogin && autoLogin.prefillOnly
 
   const initialState: FormState = {
-    email: {
-      initialValue: prefillForm ? autoLogin.email : undefined,
-      valid: true,
-      value: prefillForm ? autoLogin.email : undefined,
-    },
     password: {
       initialValue: prefillForm ? autoLogin.password : undefined,
       valid: true,
       value: prefillForm ? autoLogin.password : undefined,
     },
+  }
+
+  if (loginWithUsername) {
+    initialState.username = {
+      initialValue: prefillForm ? autoLogin.username : undefined,
+      valid: true,
+      value: prefillForm ? autoLogin.username : undefined,
+    }
+  } else {
+    initialState.email = {
+      initialValue: prefillForm ? autoLogin.email : undefined,
+      valid: true,
+      value: prefillForm ? autoLogin.email : undefined,
+    }
   }
 
   return (
@@ -60,24 +75,48 @@ export const LoginForm: React.FC<{
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
-        <Email
-          autoComplete="email"
-          label={t('general:email')}
-          name="email"
-          required
-          validate={(value) =>
-            email(value, {
-              name: 'email',
-              type: 'email',
-              data: {},
-              preferences: { fields: {} },
-              req: { t } as PayloadRequestWithData,
-              required: true,
-              siblingData: {},
-            })
-          }
-        />
-        <Password
+        {loginWithUsername ? (
+          <TextField
+            label={t('authentication:username')}
+            name="username"
+            required
+            validate={(value) =>
+              text(value, {
+                name: 'username',
+                type: 'text',
+                data: {},
+                preferences: { fields: {} },
+                req: {
+                  payload: {
+                    config,
+                  },
+                  t,
+                } as PayloadRequest,
+                required: true,
+                siblingData: {},
+              })
+            }
+          />
+        ) : (
+          <EmailField
+            autoComplete="email"
+            label={t('general:email')}
+            name="email"
+            required
+            validate={(value) =>
+              email(value, {
+                name: 'email',
+                type: 'email',
+                data: {},
+                preferences: { fields: {} },
+                req: { t } as PayloadRequest,
+                required: true,
+                siblingData: {},
+              })
+            }
+          />
+        )}
+        <PasswordField
           autoComplete="off"
           label={t('general:password')}
           name="password"
@@ -93,7 +132,7 @@ export const LoginForm: React.FC<{
                   config,
                 },
                 t,
-              } as PayloadRequestWithData,
+              } as PayloadRequest,
               required: true,
               siblingData: {},
             })

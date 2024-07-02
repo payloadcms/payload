@@ -3,7 +3,7 @@ import { URL } from 'url'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { InitializedEmailAdapter } from '../email/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { User, VerifyConfig } from './types.js'
 
 type Args = {
@@ -11,7 +11,7 @@ type Args = {
   config: SanitizedConfig
   disableEmail: boolean
   email: InitializedEmailAdapter
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: string
   user: User
 }

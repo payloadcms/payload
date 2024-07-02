@@ -1,14 +1,18 @@
 'use client'
 
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
-import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
-import { Email } from '@payloadcms/ui/fields/Email'
-import { Password } from '@payloadcms/ui/fields/Password'
-import { useFormFields, useFormModified } from '@payloadcms/ui/forms/Form'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  Button,
+  CheckboxField,
+  ConfirmPasswordField,
+  EmailField,
+  PasswordField,
+  TextField,
+  useConfig,
+  useDocumentInfo,
+  useFormFields,
+  useFormModified,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -25,6 +29,7 @@ export const Auth: React.FC<Props> = (props) => {
     collectionSlug,
     disableLocalStrategy,
     email,
+    loginWithUsername,
     operation,
     readOnly,
     requirePassword,
@@ -93,24 +98,35 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <Email
-            autoComplete="email"
-            disabled={disabled}
-            label={t('general:email')}
-            name="email"
-            readOnly={readOnly}
-            required
-          />
+          {!loginWithUsername && (
+            <EmailField
+              autoComplete="email"
+              disabled={disabled}
+              label={t('general:email')}
+              name="email"
+              readOnly={readOnly}
+              required
+            />
+          )}
+          {loginWithUsername && (
+            <TextField
+              disabled={disabled}
+              label={t('authentication:username')}
+              name="username"
+              readOnly={readOnly}
+              required
+            />
+          )}
           {(changingPassword || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
-              <Password
+              <PasswordField
                 autoComplete="off"
                 disabled={disabled}
                 label={t('authentication:newPassword')}
                 name="password"
                 required
               />
-              <ConfirmPassword disabled={readOnly} />
+              <ConfirmPasswordField disabled={readOnly} />
             </div>
           )}
           <div className={`${baseClass}__controls`}>
@@ -150,7 +166,7 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          <Checkbox
+          <CheckboxField
             disabled={disabled}
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
@@ -160,7 +176,7 @@ export const Auth: React.FC<Props> = (props) => {
         </div>
       )}
       {verify && (
-        <Checkbox
+        <CheckboxField
           disabled={disabled}
           label={t('authentication:verified')}
           name="_verified"

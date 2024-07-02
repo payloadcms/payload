@@ -1,14 +1,14 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import queryString from 'qs'
+import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
 import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -41,7 +41,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = queryString.stringify(formQueryParams)
+  const formattedQueryParams = qs.stringify(formQueryParams)
 
   const { componentMap } = useComponentMap()
 
@@ -98,7 +98,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               onClick={() => toggleModal(drawerSlug)}
               type="button"
             >
-              <X />
+              <XIcon />
             </button>
           </div>
           <DocumentTitle />

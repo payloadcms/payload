@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, Payload, PayloadRequest } from 'payload'
 
 import type { DrizzleTransaction, PostgresAdapter } from '../../../types.js'
 import type { DocsToResave } from '../types.js'
@@ -17,7 +16,7 @@ type Args = {
   globalSlug?: string
   isVersions: boolean
   payload: Payload
-  req: PayloadRequestWithData
+  req: PayloadRequest
   tableName: string
 }
 
@@ -211,7 +210,6 @@ export const fetchAndResave = async ({
 
           try {
             await upsertRow({
-              id: doc.id,
               adapter,
               data: doc,
               db,

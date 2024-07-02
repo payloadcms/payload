@@ -1,5 +1,5 @@
 import { resendAdapter } from './index.js'
-import { Payload } from 'payload/types'
+import { Payload } from 'payload'
 import { jest } from '@jest/globals'
 
 describe('email-resend', () => {

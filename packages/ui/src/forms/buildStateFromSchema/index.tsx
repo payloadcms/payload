@@ -3,8 +3,8 @@ import type {
   DocumentPreferences,
   Field as FieldSchema,
   FormState,
-  PayloadRequestWithData,
-} from 'payload/types'
+  PayloadRequest,
+} from 'payload'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
@@ -15,7 +15,7 @@ type Args = {
   id?: number | string
   operation?: 'create' | 'update'
   preferences: DocumentPreferences
-  req: PayloadRequestWithData
+  req: PayloadRequest
   siblingData?: Data
 }
 
@@ -65,3 +65,5 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
 
   return {}
 }
+
+export { iterateFields }

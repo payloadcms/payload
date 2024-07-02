@@ -1,9 +1,8 @@
-import type { RequestContext } from 'payload'
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, PayloadRequest, RequestContext } from 'payload'
 
-import { afterReadTraverseFields } from 'payload/utilities'
+import { afterReadTraverseFields } from 'payload'
 
-import type { PopulationPromise } from '../field/features/types.js'
+import type { PopulationPromise } from '../features/typesServer.js'
 
 type NestedRichTextFieldsArgs = {
   context: RequestContext
@@ -24,7 +23,7 @@ type NestedRichTextFieldsArgs = {
   flattenLocales: boolean
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }

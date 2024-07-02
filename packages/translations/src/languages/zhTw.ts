@@ -4,6 +4,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '帳戶',
     accountOfCurrentUser: '目前使用者的帳戶',
+    accountVerified: '帳戶驗證成功。',
     alreadyActivated: '已經啟用了',
     alreadyLoggedIn: '已經登入了',
     apiKey: 'API金鑰',
@@ -25,6 +26,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       '請在下方輸入您的電子郵件。您將收到一封有關如何重設密碼的說明電子郵件。',
     forgotPasswordQuestion: '忘記密碼？',
+    forgotPasswordUsernameInstructions:
+      '請在下方輸入您的使用者名稱。關於如何重設密碼的指示將會發送到與您的使用者名稱相關的電子郵件地址。',
     generate: '生成',
     generateNewAPIKey: '生成新的API金鑰',
     generatingNewAPIKeyWillInvalidate: '生成新的API金鑰將使之前的金鑰<1>失效</1>。您確定要繼續嗎？',
@@ -58,6 +61,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: '已成功解鎖',
     tokenRefreshSuccessful: '令牌刷新成功。',
     unableToVerify: '無法驗證',
+    username: '使用者名稱',
+    usernameNotValid: '提供的使用者名稱無效',
     verified: '已驗證',
     verifiedSuccessfully: '成功驗證',
     verify: '驗證',
@@ -107,6 +112,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     unspecific: '發生了一個錯誤。',
     userEmailAlreadyRegistered: '給定電子郵件的用戶已經註冊。',
     userLocked: '該使用者由於有太多次失敗的登錄嘗試而被鎖定。',
+    usernameAlreadyRegistered: '已有使用者使用所提供的用戶名註冊。',
+    usernameOrPasswordIncorrect: '提供的使用者名稱或密碼不正確。',
     valueMustBeUnique: '數值必須是唯一的',
     verificationTokenInvalid: '驗證令牌無效。',
   },

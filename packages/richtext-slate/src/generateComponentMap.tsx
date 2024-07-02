@@ -1,4 +1,4 @@
-import type { Field, RichTextAdapter } from 'payload/types'
+import type { Field, RichTextAdapter } from 'payload'
 
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import React from 'react'

@@ -28,6 +28,7 @@ export default joi.object({
         email: joi.string(),
         password: joi.string(),
         prefillOnly: joi.boolean(),
+        username: joi.string(),
       }),
       joi.boolean(),
     ),
@@ -90,6 +91,7 @@ export default joi.object({
       inactivity: joi.string(),
       login: joi.string(),
       logout: joi.string(),
+      reset: joi.string(),
       unauthorized: joi.string(),
     }),
     user: joi.string(),
@@ -202,6 +204,7 @@ export default joi.object({
     autoGenerate: joi.boolean(),
     declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
     outputFile: joi.string(),
+    schema: joi.array().items(joi.func()),
   }),
   upload: joi.object(),
 })

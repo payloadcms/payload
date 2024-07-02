@@ -48,6 +48,8 @@ describe('AuthStrategies', () => {
 
       const data = await response.json()
 
+      // Expect that the auth strategy should be able to return headers
+      expect(response.headers.has('Smile-For-Me')).toBeTruthy()
       expect(response.status).toBe(200)
       expect(data.user.name).toBe(name)
     })

@@ -1,27 +1,25 @@
-import type { GeneratedTypes } from 'payload'
-import type { Collection , PayloadRequestWithData } from 'payload/types'
+import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { updateByIDOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { isolateObjectProperty, updateByIDOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
-export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
+export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     autosave: boolean
-    data: GeneratedTypes['collections'][TSlug]
+    data: DataFromCollectionSlug<TSlug>
     draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
-) => Promise<GeneratedTypes['collections'][TSlug]>
+) => Promise<DataFromCollectionSlug<TSlug>>
 
-export function updateResolver<TSlug extends keyof GeneratedTypes['collections']>(
+export function updateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

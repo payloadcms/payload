@@ -1,4 +1,4 @@
-import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload/types'
+import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload'
 
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 

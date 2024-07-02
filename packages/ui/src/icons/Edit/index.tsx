@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const Edit: React.FC<{ className?: string }> = ({ className }) => (
+export const EditIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={[className, 'icon icon--edit'].filter(Boolean).join(' ')}
     viewBox="0 0 25 25"

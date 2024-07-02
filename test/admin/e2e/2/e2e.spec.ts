@@ -1,12 +1,11 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { wait } from 'payload/utilities'
-import { mapAsync } from 'payload/utilities'
+import { mapAsync } from 'payload'
+import { wait } from 'payload/shared'
 import qs from 'qs'
 
-import type { Geo, Post } from '../../payload-types.js'
-import type { Config } from '../../payload-types.js'
+import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
   ensureAutoLoginAndCompilationIsDone,

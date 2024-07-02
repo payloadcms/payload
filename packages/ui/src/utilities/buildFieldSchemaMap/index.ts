@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import type { FieldSchemaMap } from './types.js'
 
@@ -13,8 +13,6 @@ export const buildFieldSchemaMap = (args: {
 
   const result: FieldSchemaMap = new Map()
 
-  const validRelationships = config.collections.map((c) => c.slug) || []
-
   config.collections.forEach((collection) => {
     traverseFields({
       config,
@@ -22,7 +20,6 @@ export const buildFieldSchemaMap = (args: {
       i18n,
       schemaMap: result,
       schemaPath: collection.slug,
-      validRelationships,
     })
   })
 
@@ -33,7 +30,6 @@ export const buildFieldSchemaMap = (args: {
       i18n,
       schemaMap: result,
       schemaPath: global.slug,
-      validRelationships,
     })
   })
 

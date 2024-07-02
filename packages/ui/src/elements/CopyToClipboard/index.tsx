@@ -1,7 +1,7 @@
 'use client'
 import React, { useRef, useState } from 'react'
 
-import { Copy } from '../../icons/Copy/index.js'
+import { CopyIcon } from '../../icons/Copy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
@@ -42,7 +42,7 @@ export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessag
         }}
         type="button"
       >
-        <Copy />
+        <CopyIcon />
         <Tooltip delay={copied ? 0 : undefined} show={hovered || copied}>
           {copied && (successMessage ?? t('general:copied'))}
           {!copied && (defaultMessage ?? t('general:copy'))}

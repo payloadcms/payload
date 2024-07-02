@@ -8,7 +8,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
@@ -151,7 +150,7 @@ export const Status: React.FC = () => {
                 {t('version:unpublish')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
-                <MinimalTemplate className={`${baseClass}__modal-template`}>
+                <div className={`${baseClass}__modal-template`}>
                   <h1>{t('version:confirmUnpublish')}</h1>
                   <p>{t('version:aboutToUnpublish')}</p>
                   <Button
@@ -164,7 +163,7 @@ export const Status: React.FC = () => {
                   <Button onClick={processing ? undefined : () => performAction('unpublish')}>
                     {t(processing ? 'version:unpublishing' : 'general:confirm')}
                   </Button>
-                </MinimalTemplate>
+                </div>
               </Modal>
             </React.Fragment>
           )}
@@ -180,7 +179,7 @@ export const Status: React.FC = () => {
                 {t('version:revertToPublished')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
-                <MinimalTemplate className={`${baseClass}__modal-template`}>
+                <div className={`${baseClass}__modal-template`}>
                   <h1>{t('version:confirmRevertToSaved')}</h1>
                   <p>{t('version:aboutToRevertToPublished')}</p>
                   <Button
@@ -196,7 +195,7 @@ export const Status: React.FC = () => {
                   >
                     {t(processing ? 'version:reverting' : 'general:confirm')}
                   </Button>
-                </MinimalTemplate>
+                </div>
               </Modal>
             </React.Fragment>
           )}

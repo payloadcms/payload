@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 

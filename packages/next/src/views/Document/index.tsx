@@ -1,20 +1,23 @@
-import type { EditViewComponent } from 'payload/config'
-import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
-import type { AdminViewProps } from 'payload/types'
+import type {
+  AdminViewComponent,
+  AdminViewProps,
+  EditViewComponent,
+  ServerSideEditViewProps,
+} from 'payload'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
-import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
-import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
-import { isEditing as getIsEditing } from '@payloadcms/ui/utilities/isEditing'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
+} from '@payloadcms/ui'
+import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
-import QueryString from 'qs'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -86,13 +89,17 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
-    const apiQueryParams = QueryString.stringify(
-      {
-        draft: collectionConfig.versions?.drafts ? 'true' : undefined,
-        locale: locale?.code,
-      },
-      { addQueryPrefix: true },
-    )
+
+    const params = new URLSearchParams()
+    if (collectionConfig.versions?.drafts) {
+      params.append('draft', 'true')
+    }
+    if (locale?.code) {
+      params.append('locale', locale.code)
+    }
+
+    const apiQueryParams = `?${params.toString()}`
+
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
     const editConfig = collectionConfig?.admin?.components?.views?.Edit
@@ -123,13 +130,18 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
-    const apiQueryParams = QueryString.stringify(
-      {
-        draft: globalConfig.versions?.drafts ? 'true' : undefined,
-        locale: locale?.code,
-      },
-      { addQueryPrefix: true },
-    )
+    const params = new URLSearchParams({
+      locale: locale?.code,
+    })
+    if (globalConfig.versions?.drafts) {
+      params.append('draft', 'true')
+    }
+    if (locale?.code) {
+      params.append('locale', locale.code)
+    }
+
+    const apiQueryParams = `?${params.toString()}`
+
     apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
     const editConfig = globalConfig?.admin?.components?.views?.Edit

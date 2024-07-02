@@ -4,6 +4,7 @@ export const arTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'الحساب',
     accountOfCurrentUser: 'حساب المستخدم الحالي',
+    accountVerified: 'تم التحقق من الحساب بنجاح.',
     alreadyActivated: 'تمّ التّفعيل بالفعل',
     alreadyLoggedIn: 'تمّ تسجيل الدّخول بالفعل',
     apiKey: 'مفتاح API',
@@ -26,6 +27,8 @@ export const arTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'يرجى إدخال البريد الالكتروني أدناه. ستتلقّى رسالة بريد إلكتروني تحتوي على إرشادات حول كيفيّة إعادة تعيين كلمة المرور الخاصّة بك.',
     forgotPasswordQuestion: 'هل نسيت كلمة المرور؟',
+    forgotPasswordUsernameInstructions:
+      'يرجى إدخال اسم المستخدم الخاص بك أدناه. سيتم إرسال تعليمات حول كيفية إعادة تعيين كلمة المرور الخاصة بك إلى عنوان البريد الإلكتروني المرتبط باسم المستخدم الخاص بك.',
     generate: 'توليد',
     generateNewAPIKey: 'توليد مفتاح API جديد',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const arTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'تمّ فتح القفل بنجاح',
     tokenRefreshSuccessful: 'تم تجديد الرمز بنجاح.',
     unableToVerify: 'غير قادر على التحقق من',
+    username: 'اسم المستخدم',
+    usernameNotValid: 'اسم المستخدم المقدم غير صالح',
     verified: 'تمّ التحقّق',
     verifiedSuccessfully: 'تمّ التحقّق بنجاح',
     verify: 'قم بالتّحقّق',
@@ -112,6 +117,8 @@ export const arTranslations: DefaultTranslationsObject = {
     unspecific: 'حدث خطأ.',
     userEmailAlreadyRegistered: 'يوجد مستخدم مسجل بالفعل بهذا البريد الإلكتروني.',
     userLocked: 'تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة.',
+    usernameAlreadyRegistered: 'المستخدم بالاسم المعطى مسجل بالفعل.',
+    usernameOrPasswordIncorrect: 'اسم المستخدم أو كلمة المرور التي تم تقديمها غير صحيحة.',
     valueMustBeUnique: 'على القيمة أن تكون فريدة',
     verificationTokenInvalid: 'رمز التحقّق غير صالح.',
   },

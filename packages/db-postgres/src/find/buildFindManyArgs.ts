@@ -1,5 +1,5 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 import type { PostgresAdapter } from '../types.js'
 

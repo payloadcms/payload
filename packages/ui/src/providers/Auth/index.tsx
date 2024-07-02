@@ -1,6 +1,5 @@
 'use client'
-import type { ClientUser, Permissions } from 'payload/auth'
-import type { MeOperationResult } from 'payload/types'
+import type { ClientUser, MeOperationResult, Permissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -24,7 +23,9 @@ export type AuthContext<T = ClientUser> = {
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
   setUser: (user: T) => void
+  strategy?: string
   token?: string
+  tokenExpiration?: number
   user?: T | null
 }
 
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<ClientUser | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
+  const [strategy, setStrategy] = useState<string>()
   const pathname = usePathname()
   const router = useRouter()
   // const { code } = useLocale()
@@ -77,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
     setTokenExpiration(undefined)
+    setStrategy(undefined)
   }, [])
 
   const setTokenAndExpiration = useCallback(
@@ -85,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token && json?.exp) {
         setTokenInMemory(token)
         setTokenExpiration(json.exp)
+        if (json.strategy) setStrategy(json.strategy)
       } else {
         revokeTokenAndExpire()
       }
@@ -220,6 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               body: JSON.stringify({
                 email: autoLogin.email,
                 password: autoLogin.password,
+                username: autoLogin.username,
               }),
               headers: {
                 'Accept-Language': i18n.language,
@@ -259,6 +264,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     searchParams,
     admin,
     revokeTokenAndExpire,
+    strategy,
+    tokenExpiration,
     loginRoute,
   ])
 

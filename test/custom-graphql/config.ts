@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { commitTransaction, initTransaction, killTransaction } from 'payload/database'
+import { commitTransaction, initTransaction, killTransaction } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
