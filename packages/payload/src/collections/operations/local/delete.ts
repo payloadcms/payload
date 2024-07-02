@@ -1,10 +1,5 @@
 import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequestWithData,
-  RequestContext,
-  Where,
-} from '../../../types/index.js'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
 import type { BulkOperationResult, DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -22,7 +17,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   fallbackLocale?: TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   user?: Document
 }

@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import {
   commitTransaction,
@@ -34,7 +34,7 @@ export async function migrateRefresh(this: PostgresAdapter) {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  const req = { payload } as PayloadRequestWithData
+  const req = { payload } as PayloadRequest
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()

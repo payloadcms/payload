@@ -3,7 +3,7 @@ import type {
   DocumentPreferences,
   Field as FieldSchema,
   FormState,
-  PayloadRequestWithData,
+  PayloadRequest,
 } from 'payload'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
@@ -15,7 +15,7 @@ type Args = {
   id?: number | string
   operation?: 'create' | 'update'
   preferences: DocumentPreferences
-  req: PayloadRequestWithData
+  req: PayloadRequest
   siblingData?: Data
 }
 

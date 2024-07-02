@@ -1,9 +1,4 @@
-import type {
-  Collection,
-  CollectionSlug,
-  DataFromCollectionSlug,
-  PayloadRequestWithData,
-} from 'payload'
+import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
 import { deleteByIDOperation, isolateObjectProperty } from 'payload'
 
@@ -18,7 +13,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<DataFromCollectionSlug<TSlug>>
 

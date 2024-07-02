@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
-import type { Document, PayloadRequestWithData } from '../../types/index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { Forbidden } from '../../errors/index.js'
@@ -21,7 +21,7 @@ export type Result = {
 
 export type Arguments = {
   collection: Collection
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {

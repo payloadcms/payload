@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
@@ -20,7 +20,7 @@ export type Arguments = {
   disableErrors?: boolean
   id: number | string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 

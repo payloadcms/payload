@@ -1,9 +1,4 @@
-import type {
-  DataFromGlobalSlug,
-  GlobalSlug,
-  PayloadRequestWithData,
-  SanitizedGlobalConfig,
-} from 'payload'
+import type { DataFromGlobalSlug, GlobalSlug, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import { isolateObjectProperty, updateOperationGlobal } from 'payload'
@@ -19,7 +14,7 @@ type Resolver<TSlug extends GlobalSlug> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<DataFromGlobalSlug<TSlug>>
 

@@ -1,5 +1,5 @@
 import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type { DataFromCollectionSlug, RequiredDataFromCollectionSlug } from '../../config/types.js'
 
@@ -24,7 +24,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   user?: Document
 }

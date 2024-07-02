@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData, TypeWithID, TypeWithVersion } from 'payload'
+import type { PayloadRequest, TypeWithID, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { type CreateGlobalVersionArgs, buildVersionGlobalFields } from 'payload'
@@ -10,12 +10,7 @@ import { upsertRow } from './upsertRow/index.js'
 
 export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
-  {
-    autosave,
-    globalSlug,
-    req = {} as PayloadRequestWithData,
-    versionData,
-  }: CreateGlobalVersionArgs,
+  { autosave, globalSlug, req = {} as PayloadRequest, versionData }: CreateGlobalVersionArgs,
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)

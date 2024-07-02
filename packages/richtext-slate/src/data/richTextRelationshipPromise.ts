@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData, RichTextAdapter, RichTextField } from 'payload'
+import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 
@@ -17,7 +17,7 @@ type RecurseRichTextArgs = {
   field: RichTextField<any[], AdapterArguments, AdapterArguments>
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 

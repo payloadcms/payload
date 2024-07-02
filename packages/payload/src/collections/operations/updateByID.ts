@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -41,7 +41,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   id: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 

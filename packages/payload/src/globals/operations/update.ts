@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GlobalSlug } from '../../index.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -22,7 +22,7 @@ type Args<TSlug extends GlobalSlug> = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
 }

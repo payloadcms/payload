@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { Operation, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
@@ -16,7 +16,7 @@ type Args<T> = {
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: Operation
-  req: PayloadRequestWithData
+  req: PayloadRequest
   skipValidation?: boolean
 }
 

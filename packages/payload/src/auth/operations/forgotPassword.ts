@@ -7,7 +7,7 @@ import type {
   Collection,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
@@ -22,7 +22,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export type Result = string
