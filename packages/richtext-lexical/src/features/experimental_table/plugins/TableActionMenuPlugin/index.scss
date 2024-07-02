@@ -31,7 +31,7 @@ html[data-theme='light'] {
   display: block;
   position: fixed;
   background: var(--color-base-0);
-  width: 200px;
+  min-width: 160px;
   color: var(--color-base-800);
   border-radius: 4px;
   min-height: 40px;
