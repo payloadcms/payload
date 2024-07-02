@@ -50,13 +50,13 @@ export const i18n: Partial<GenericLanguages> = {
     label: '[SURAT]\n\nKepala {{headingLevel}}',
   },
   nb: {
-    label: 'Overskrift {{overskriftsnivå}}',
+    label: 'Overskrift {{headingLevel}}',
   },
   nl: {
     label: 'Kop {{headingLevel}}',
   },
   pl: {
-    label: 'Nagłówek {{poziom nagłówka}}',
+    label: 'Nagłówek {{headingLevel}}',
   },
   pt: {
     label: 'Cabeçalho {{headingLevel}}',

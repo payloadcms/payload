@@ -4,7 +4,7 @@ import type {
   ClientFeatureProviderMap,
   FeatureProviderClient,
   ResolvedClientFeatureMap,
-} from '../../../features/types.js'
+} from '../../../features/typesClient.js'
 import type { ClientEditorConfig } from '../types.js'
 
 /**
@@ -39,7 +39,8 @@ export function loadClientFeatures({
 
   const featureProviderMap: ClientFeatureProviderMap = new Map(
     unSanitizedEditorConfig.features.map(
-      (f) => [f.clientFeatureProps.featureKey, f] as [string, FeatureProviderClient<unknown>],
+      (f) =>
+        [f.clientFeatureProps.featureKey, f] as [string, FeatureProviderClient<unknown, unknown>],
     ),
   )
 
@@ -65,12 +66,16 @@ export function loadClientFeatures({
       }
     })
 
-    const feature = featureProvider.feature({
-      clientFunctions: relevantClientFunctions,
-      featureProviderMap,
-      resolvedFeatures,
-      unSanitizedEditorConfig,
-    })
+    const feature =
+      typeof featureProvider.feature === 'function'
+        ? featureProvider.feature({
+            clientFunctions: relevantClientFunctions,
+            featureProviderMap,
+            resolvedFeatures,
+            unSanitizedEditorConfig,
+          })
+        : featureProvider.feature
+
     resolvedFeatures.set(featureProvider.clientFeatureProps.featureKey, {
       ...feature,
       key: featureProvider.clientFeatureProps.featureKey,

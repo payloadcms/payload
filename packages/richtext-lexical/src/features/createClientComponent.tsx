@@ -1,6 +1,7 @@
 'use client'
 
-import type { FeatureProviderProviderClient, ServerFeature } from './types.js'
+import type { FeatureProviderProviderClient } from './typesClient.js'
+import type { ServerFeature } from './typesServer.js'
 
 import { useLexicalFeature } from '../utilities/useLexicalFeature.js'
 
@@ -9,7 +10,7 @@ import { useLexicalFeature } from '../utilities/useLexicalFeature.js'
  */
 export const createClientComponent = <ClientFeatureProps,>(
   clientFeature: FeatureProviderProviderClient<ClientFeatureProps>,
-): ServerFeature<unknown, ClientFeatureProps>['ClientComponent'] => {
+): ServerFeature<unknown, ClientFeatureProps>['ClientFeature'] => {
   return (props) => {
     useLexicalFeature(props.featureKey, clientFeature(props))
     return null

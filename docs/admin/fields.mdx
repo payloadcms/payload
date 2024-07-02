@@ -21,17 +21,17 @@ All Payload fields support the ability to swap in your own React components. So,
 | Component    | Description                                                                                                                 |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | **`Filter`** | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field.    |
-| **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More](#cell-component) |
-| **`Field`**  | Swap out the field itself within all `Edit` views. [More](#field-component)                                                 |
+| **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More details](#cell-component).|
+| **`Field`**  | Swap out the field itself within all `Edit` views. [More details](#field-component).                                                |
 
 As an alternative to replacing the entire Field component, you may want to keep the majority of the default Field component and only swap components within. This allows you to replace the **`Label`** or **`Error`** within a field component or add additional components inside the field with **`beforeInput`** or **`afterInput`**. **`beforeInput`** and **`afterInput`** are allowed in any fields that don't contain other fields, except [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
 
 | Component         | Description                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`Label`**       | Override the default Label in the Field Component. [More](#label-component)                                     |
-| **`Error`**       | Override the default Label in the Field Component. [More](#error-component)                                     |
-| **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More](#afterinput-and-beforeinput) |
-| **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More](#afterinput-and-beforeinput)  |
+| **`Label`**       | Override the default Label in the Field Component. [More details](#label-component).                                    |
+| **`Error`**       | Override the default Label in the Field Component. [More details](#error-component).                                    |
+| **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More details](#afterinput-and-beforeinput).|
+| **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More details](#afterinput-and-beforeinput). |
 
 ## Cell Component
 
@@ -41,7 +41,7 @@ These are the props that will be passed to your custom Cell to use in your own c
 | ---------------- | ----------------------------------------------------------------- |
 | **`field`**      | An object that includes the field configuration.                  |
 | **`colIndex`**   | A unique number for the column in the list.                       |
-| **`collection`** | An object with the config of the collection that the field is in. |
+| **`collection`** | An object with the config of the Collection that the field is in. |
 | **`cellData`**   | The data for the field that the cell represents.                  |
 | **`rowData`**    | An object with all the field values for the row.                  |
 
@@ -49,7 +49,7 @@ These are the props that will be passed to your custom Cell to use in your own c
 
 ```tsx
 import React from 'react'
-import type { Props } from 'payload/components/views/Cell'
+import type { CellProps } from 'payload'
 import './index.scss'
 
 const baseClass = 'custom-cell'
@@ -70,11 +70,12 @@ When writing your own custom components you can make use of a number of hooks to
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```tsx
-import { useField } from 'payload/components/forms'
+'use client'
+import { useField } from '@payloadcms/ui'
 
 const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
   // highlight-start
-  const { value, setValue } = useField<string>({ path })
+  const { value, setValue } = useField({ path })
   // highlight-end
 
   return <input onChange={(e) => setValue(e.target.value)} value={value} />
@@ -99,10 +100,10 @@ These are the props that will be passed to your custom Label.
 #### Example
 
 ```tsx
+'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
-
-import { getTranslation } from 'payload/utilities/getTranslation'
+import { useTranslation } from '@payloadcms/ui'
+import { getTranslation } from '@payloadcms/translations'
 
 type Props = {
   htmlFor?: string
@@ -164,7 +165,7 @@ With these properties you can add multiple components before and after the input
 
 ```tsx
 import React from 'react'
-import { Field } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import './style.scss'
 

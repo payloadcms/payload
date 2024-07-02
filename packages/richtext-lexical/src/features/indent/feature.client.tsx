@@ -3,11 +3,10 @@
 import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../types.js'
 
 import { IndentDecreaseIcon } from '../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../lexical/ui/icons/IndentIncrease/index.js'
-import { createClientComponent } from '../createClientComponent.js'
+import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -54,19 +53,11 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const IndentFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
-      toolbarFixed: {
-        groups: toolbarGroups,
-      },
-      toolbarInline: {
-        groups: toolbarGroups,
-      },
-    }),
-  }
-}
-
-export const IndentFeatureClientComponent = createClientComponent(IndentFeatureClient)
+export const IndentFeatureClient = createClientFeature({
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

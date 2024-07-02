@@ -1,4 +1,4 @@
-import type { PayloadRequest, PayloadRequestData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
@@ -6,40 +6,32 @@ import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 
 import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
 
-type ReturnType = PayloadRequest & PayloadRequestData
-type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<ReturnType>
+type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
 /**
- * Mutates the Request to contain 'data' and 'file' if present
+ * Mutates the Request, appending 'data' and 'file' if found
  */
-export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
-  request: incomingRequest,
-}) => {
-  const config = incomingRequest.payload.config
+export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
+  const { body, headers, method, payload } = req
 
-  if (
-    incomingRequest.method &&
-    ['PATCH', 'POST', 'PUT'].includes(incomingRequest.method.toUpperCase()) &&
-    incomingRequest.body
-  ) {
-    const [contentType] = (incomingRequest.headers.get('Content-Type') || '').split(';')
-    const mutableRequest = incomingRequest as ReturnType
-    const bodyByteSize = parseInt(incomingRequest.headers.get('Content-Length') || '0', 10)
+  if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body) {
+    const [contentType] = (headers.get('Content-Type') || '').split(';')
+    const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
 
     if (contentType === 'application/json') {
       let data = {}
       try {
-        data = await mutableRequest.json()
+        data = await req.json()
       } catch (error) {
-        mutableRequest.payload.logger.error(error)
+        req.payload.logger.error(error)
       } finally {
-        mutableRequest.data = data
-        mutableRequest.json = () => Promise.resolve(data)
+        req.data = data
+        req.json = () => Promise.resolve(data)
       }
     } else if (bodyByteSize && contentType.includes('multipart/')) {
       const { error, fields, files } = await fetchAPIFileUpload({
-        options: config.upload as FetchAPIFileUploadOptions,
-        request: mutableRequest as Request,
+        options: payload.config.upload as FetchAPIFileUploadOptions,
+        request: req as Request,
       })
 
       if (error) {
@@ -47,16 +39,12 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
       }
 
       if (files?.file) {
-        mutableRequest.file = files.file
+        req.file = files.file
       }
 
       if (fields?._payload && typeof fields._payload === 'string') {
-        mutableRequest.data = JSON.parse(fields._payload)
+        req.data = JSON.parse(fields._payload)
       }
     }
-
-    return mutableRequest
   }
-
-  return incomingRequest
 }

@@ -14,7 +14,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-const DefaultSaveDraftButton: React.FC = () => {
+export const DefaultSaveDraftButton: React.FC = () => {
   const {
     routes: { api },
     serverURL,

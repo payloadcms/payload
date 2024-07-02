@@ -6,7 +6,6 @@ import type {
 } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { Metadata as NextMetadata } from 'next'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { JSX } from 'react'
@@ -26,8 +25,8 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { GeneratedTypes, Payload } from '../index.js'
-import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
+import type { Payload, TypedUser } from '../index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
@@ -148,7 +147,7 @@ export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url
 
 type GeneratePreviewURLOptions = {
   locale: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: null | string
 }
 
@@ -251,7 +250,7 @@ export type AccessArgs<TData = any> = {
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 /**
@@ -333,7 +332,7 @@ export type ServerProps = {
   payload: Payload
   permissions?: Permissions
   searchParams?: { [key: string]: string | string[] | undefined }
-  user?: GeneratedTypes['user']
+  user?: TypedUser
 }
 
 export const serverProps: (keyof ServerProps)[] = [

@@ -3,7 +3,7 @@ import count from './count.js'
 import create from './create.js'
 import deleteLocal from './delete.js'
 import { duplicate } from './duplicate.js'
-import find from './find.js'
+import { findLocal } from './find.js'
 import findByID from './findByID.js'
 import findVersionByID from './findVersionByID.js'
 import findVersions from './findVersions.js'
@@ -16,7 +16,7 @@ export default {
   create,
   deleteLocal,
   duplicate,
-  find,
+  find: findLocal,
   findByID,
   findVersionByID,
   findVersions,

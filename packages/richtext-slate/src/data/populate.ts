@@ -1,4 +1,4 @@
-import type { Collection, Field, PayloadRequestWithData, RichTextField } from 'payload'
+import type { Collection, Field, PayloadRequest, RichTextField } from 'payload'
 
 import { createDataloaderCacheKey } from 'payload'
 
@@ -12,7 +12,7 @@ type Arguments = {
   field: RichTextField<any[], AdapterArguments, AdapterArguments>
   key: number | string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 

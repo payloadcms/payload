@@ -28,7 +28,7 @@ export type PointFieldProps = FormFieldBase & {
   width?: string
 }
 
-const PointField: React.FC<PointFieldProps> = (props) => {
+export const _PointField: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -168,4 +168,4 @@ const PointField: React.FC<PointFieldProps> = (props) => {
   )
 }
 
-export const Point = withCondition(PointField)
+export const PointField = withCondition(_PointField)

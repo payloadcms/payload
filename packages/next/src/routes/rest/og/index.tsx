@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
@@ -17,7 +17,7 @@ export const runtime = 'nodejs'
 
 export const contentType = 'image/png'
 
-export const generateOGImage = async ({ req }: { req: PayloadRequestWithData }) => {
+export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
   const config = req.payload.config
 
   if (config.admin.meta.defaultOGImageType === 'off') {

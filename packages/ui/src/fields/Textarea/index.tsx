@@ -18,7 +18,7 @@ import './index.scss'
 
 export { TextAreaInputProps, TextareaFieldProps, TextareaInput }
 
-const TextareaField: React.FC<TextareaFieldProps> = (props) => {
+const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -103,4 +103,4 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
   )
 }
 
-export const Textarea = withCondition(TextareaField)
+export const TextareaField = withCondition(_TextareaField)

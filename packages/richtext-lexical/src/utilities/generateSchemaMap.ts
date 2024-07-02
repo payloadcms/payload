@@ -1,6 +1,8 @@
 import type { RichTextAdapter } from 'payload'
 
-import type { ResolvedServerFeatureMap } from '../features/types.js'
+import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
+
+import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>
@@ -15,13 +17,22 @@ export const getGenerateSchemaMap =
       const schemas = resolvedFeature.generateSchemaMap({
         config,
         i18n,
-        props: resolvedFeature.serverFeatureProps,
+        props: resolvedFeature.sanitizedServerFeatureProps,
         schemaMap,
         schemaPath,
       })
 
       if (schemas) {
         for (const [schemaKey, fields] of schemas.entries()) {
+          // generate schema map entries for sub-fields using traverseFields
+          traverseFields({
+            config,
+            fields,
+            i18n,
+            schemaMap: schemas,
+            schemaPath: schemaKey,
+          })
+
           schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, fields)
         }
       }

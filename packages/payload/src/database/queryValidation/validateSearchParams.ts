@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -19,7 +19,7 @@ type Args = {
   overrideAccess: boolean
   path: string
   policies: EntityPolicies
-  req: PayloadRequestWithData
+  req: PayloadRequest
   val: unknown
   versionFields?: Field[]
 }

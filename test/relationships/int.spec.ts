@@ -1,4 +1,4 @@
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes } from 'crypto'
 
@@ -895,7 +895,7 @@ describe('Relationships', () => {
   describe('Creating', () => {
     describe('With transactions', () => {
       it('should be able to create filtered relations within a transaction', async () => {
-        const req = {} as PayloadRequestWithData
+        const req = {} as PayloadRequest
         req.transactionID = await payload.db.beginTransaction?.()
         const related = await payload.create({
           collection: relationSlug,

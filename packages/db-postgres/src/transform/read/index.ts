@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { Field, TypeWithID } from 'payload'
-import type { SanitizedConfig } from 'payload'
+import type { Field, SanitizedConfig, TypeWithID } from 'payload'
 
 import type { PostgresAdapter } from '../../types.js'
 
@@ -19,7 +18,7 @@ type TransformArgs = {
 
 // This is the entry point to transform Drizzle output data
 // into the shape Payload expects based on field schema
-export const transform = <T extends TypeWithID>({
+export const transform = <T extends Record<string, unknown> | TypeWithID>({
   adapter,
   config,
   data,

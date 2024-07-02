@@ -41,10 +41,16 @@ export class AutoLinkNode extends LinkNode {
     return node
   }
 
+  // @ts-expect-error
   exportJSON(): SerializedAutoLinkNode {
+    const serialized = super.exportJSON()
     return {
-      ...super.exportJSON(),
       type: 'autolink',
+      children: serialized.children,
+      direction: serialized.direction,
+      fields: serialized.fields,
+      format: serialized.format,
+      indent: serialized.indent,
       version: 2,
     }
   }

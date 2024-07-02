@@ -15,7 +15,7 @@ import {
   useFormSubmitted,
   useTranslation,
 } from '@payloadcms/ui'
-import isDeepEqual from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
@@ -128,7 +128,7 @@ export const BlockContent: React.FC<Props> = (props) => {
 
       // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
       // which would trigger the "Leave without saving" dialog unnecessarily
-      if (!isDeepEqual(formData, newFormData)) {
+      if (!dequal(formData, newFormData)) {
         // Running this in the next tick in the meantime fixes this issue: https://github.com/payloadcms/payload/issues/4108
         // I don't know why. When this is called immediately, it might focus out of a nested lexical editor field if an update is made there.
         // My hypothesis is that the nested editor might not have fully finished its update cycle yet. By updating in the next tick, we

@@ -1,4 +1,4 @@
-import type { PayloadRequest, PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { Forbidden } from 'payload'
@@ -16,9 +16,9 @@ export const stripeREST = async (args: {
 
   const { pluginConfig, req } = args
 
-  await addDataAndFileToRequest({ request: req })
+  await addDataAndFileToRequest(req)
 
-  const requestWithData = req as PayloadRequestWithData
+  const requestWithData = req
 
   const {
     data: {

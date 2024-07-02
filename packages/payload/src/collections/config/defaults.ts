@@ -39,6 +39,8 @@ export const defaults = {
     beforeOperation: [],
     beforeRead: [],
     beforeValidate: [],
+    me: [],
+    refresh: [],
   },
   timestamps: true,
   upload: false,

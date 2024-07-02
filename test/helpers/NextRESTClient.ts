@@ -8,7 +8,7 @@ import {
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
 } from '@payloadcms/next/routes'
-import QueryString from 'qs'
+import qs from 'qs'
 
 import { devUser } from '../credentials.js'
 
@@ -31,7 +31,7 @@ type FileArg = {
 }
 
 function generateQueryString(query: RequestOptions['query'], params: ParsedQs): string {
-  return QueryString.stringify(
+  return qs.stringify(
     {
       ...(params || {}),
       ...(query || {}),
@@ -100,7 +100,7 @@ export class NextRESTClient {
     return {
       url,
       slug: slugs.split('/'),
-      params: params ? QueryString.parse(params) : undefined,
+      params: params ? qs.parse(params) : undefined,
     }
   }
 

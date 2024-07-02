@@ -15,7 +15,6 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
-import qs from 'qs'
 import * as React from 'react'
 import { toast } from 'sonner'
 
@@ -74,14 +73,13 @@ export const APIViewClient: React.FC = () => {
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
 
-  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}${qs.stringify(
-    {
-      depth,
-      draft,
-      locale,
-    },
-    { addQueryPrefix: true },
-  )}`
+  const params = new URLSearchParams({
+    depth,
+    draft: String(draft),
+    locale,
+  }).toString()
+
+  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?${params}`
 
   React.useEffect(() => {
     const fetchData = async () => {

@@ -1,8 +1,9 @@
-import type { FeatureProviderProviderServer } from '../types.js'
+import type { CollectionSlug } from 'payload'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { RelationshipFeatureClientComponent } from '../../exports/client/index.js'
+import { RelationshipFeatureClient } from '../../exports/client/index.js'
 import { populate } from '../../populateGraphQL/populate.js'
+import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { createNode } from '../typeUtilities.js'
 import { relationshipPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
@@ -14,7 +15,7 @@ export type ExclusiveRelationshipFeatureProps =
        * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
        * When this property is set, `enabledCollections` will not be available.
        **/
-      disabledCollections?: string[]
+      disabledCollections?: CollectionSlug[]
 
       // Ensures that enabledCollections is not available when disabledCollections is set
       enabledCollections?: never
@@ -27,7 +28,7 @@ export type ExclusiveRelationshipFeatureProps =
        * The collections that should be enabled. Overrides the `enableRichTextRelationship` property in the collection config
        * When this property is set, `disabledCollections` will not be available.
        **/
-      enabledCollections?: string[]
+      enabledCollections?: CollectionSlug[]
     }
 
 export type RelationshipFeatureProps = ExclusiveRelationshipFeatureProps & {
@@ -40,73 +41,64 @@ export type RelationshipFeatureProps = ExclusiveRelationshipFeatureProps & {
   maxDepth?: number
 }
 
-export const RelationshipFeature: FeatureProviderProviderServer<
+export const RelationshipFeature = createServerFeature<
   RelationshipFeatureProps,
   RelationshipFeatureProps
-> = (props) => {
-  return {
-    feature: () => {
-      return {
-        ClientComponent: RelationshipFeatureClientComponent,
-        clientFeatureProps: props,
-        i18n,
-        nodes: [
-          createNode({
-            graphQLPopulationPromises: [relationshipPopulationPromiseHOC(props)],
-            hooks: {
-              afterRead: [
-                ({
+>({
+  feature: ({ props }) => ({
+    ClientFeature: RelationshipFeatureClient,
+    i18n,
+    nodes: [
+      createNode({
+        graphQLPopulationPromises: [relationshipPopulationPromiseHOC(props)],
+        hooks: {
+          afterRead: [
+            ({
+              currentDepth,
+              depth,
+              draft,
+              node,
+              overrideAccess,
+              populationPromises,
+              req,
+              showHiddenFields,
+            }) => {
+              if (!node?.value) {
+                return node
+              }
+              const collection = req.payload.collections[node?.relationTo]
+
+              if (!collection) {
+                return node
+              }
+              // @ts-expect-error
+              const id = node?.value?.id || node?.value // for backwards-compatibility
+
+              const populateDepth =
+                props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
+
+              populationPromises.push(
+                populate({
+                  id,
+                  collectionSlug: collection.config.slug,
                   currentDepth,
-                  depth,
+                  data: node,
+                  depth: populateDepth,
                   draft,
-                  node,
+                  key: 'value',
                   overrideAccess,
-                  populationPromises,
                   req,
                   showHiddenFields,
-                }) => {
-                  if (!node?.value) {
-                    return node
-                  }
-                  const collection = req.payload.collections[node?.relationTo]
+                }),
+              )
 
-                  if (!collection) {
-                    return node
-                  }
-                  // @ts-expect-error
-                  const id = node?.value?.id || node?.value // for backwards-compatibility
-
-                  const populateDepth =
-                    props?.maxDepth !== undefined && props?.maxDepth < depth
-                      ? props?.maxDepth
-                      : depth
-
-                  populationPromises.push(
-                    populate({
-                      id,
-                      collectionSlug: collection.config.slug,
-                      currentDepth,
-                      data: node,
-                      depth: populateDepth,
-                      draft,
-                      key: 'value',
-                      overrideAccess,
-                      req,
-                      showHiddenFields,
-                    }),
-                  )
-
-                  return node
-                },
-              ],
+              return node
             },
-            node: RelationshipNode,
-          }),
-        ],
-        serverFeatureProps: props,
-      }
-    },
-    key: 'relationship',
-    serverFeatureProps: props,
-  }
-}
+          ],
+        },
+        node: RelationshipNode,
+      }),
+    ],
+  }),
+  key: 'relationship',
+})

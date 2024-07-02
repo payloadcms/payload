@@ -17,7 +17,7 @@ import {
   withNullableJSONSchemaType,
 } from 'payload'
 
-import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/types.js'
+import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type {
   AdapterProps,
@@ -72,18 +72,18 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           foundVersions[version] = _pkg
         }
       }
-      if (Object.keys(foundVersions).length !== 1) {
+      if (Object.keys(foundVersions).length > 1) {
         const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
           .map(([version, pkg]) => `${pkg}@${version}`)
           .join(', ')
 
         throw new Error(
-          `Mismatching lexical dependency versions found: ${formattedVersionsWithPackageNameString}. All lexical and @lexical/* packages must have the same version.`,
+          `Mismatching lexical dependency versions found: ${formattedVersionsWithPackageNameString}. All lexical and @lexical/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all lexical and @lexical/* packages have the same version.`,
         )
       }
     }
 
-    let features: FeatureProviderServer<unknown, unknown>[] = []
+    let features: FeatureProviderServer<any, any, any>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -101,7 +101,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
       const rootEditor = config.editor
-      let rootEditorFeatures: FeatureProviderServer<unknown, unknown>[] = []
+      let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []
       if (typeof rootEditor === 'object' && 'features' in rootEditor) {
         rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
       }
@@ -112,7 +112,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               defaultFeatures: cloneDeep(defaultEditorFeatures),
               rootFeatures: rootEditorFeatures,
             })
-          : (props.features as FeatureProviderServer<unknown, unknown>[])
+          : (props.features as FeatureProviderServer<unknown, unknown, unknown>[])
       if (!features) {
         features = cloneDeep(defaultEditorFeatures)
       }
@@ -277,8 +277,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
@@ -375,7 +375,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
+                const data = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
@@ -508,12 +508,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
-                const originalDataWithLocales = subFieldDataFn({
-                  node: originalNodeWithLocalesIDMap[id],
-                  req,
-                })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const originalDataWithLocales =
+                  subFieldDataFn({
+                    node: originalNodeWithLocalesIDMap[id],
+                    req,
+                  }) ?? {}
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
@@ -694,8 +695,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req })
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req })
+                const data = subFieldDataFn({ node, req }) ?? {}
+                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
@@ -810,13 +811,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
-export {
-  $createBlockNode,
-  $isBlockNode,
-  type BlockFields,
-  BlockNode,
-  type SerializedBlockNode,
-} from './features/blocks/nodes/BlocksNode.js'
+export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
 
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
@@ -849,22 +844,9 @@ export { HorizontalRuleFeature } from './features/horizontalRule/feature.server.
 export { IndentFeature } from './features/indent/feature.server.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/feature.server.js'
 
-export {
-  $createAutoLinkNode,
-  $isAutoLinkNode,
-  AutoLinkNode,
-} from './features/link/nodes/AutoLinkNode.js'
-export {
-  $createLinkNode,
-  $isLinkNode,
-  LinkNode,
-  TOGGLE_LINK_COMMAND,
-} from './features/link/nodes/LinkNode.js'
-export type {
-  LinkFields,
-  SerializedAutoLinkNode,
-  SerializedLinkNode,
-} from './features/link/nodes/types.js'
+export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
+export { LinkNode } from './features/link/nodes/LinkNode.js'
+export type { LinkFields } from './features/link/nodes/types.js'
 export { ChecklistFeature } from './features/lists/checklist/feature.server.js'
 export { OrderedListFeature } from './features/lists/orderedList/feature.server.js'
 export { UnorderedListFeature } from './features/lists/unorderedList/feature.server.js'
@@ -897,18 +879,29 @@ export {
   type RelationshipFeatureProps,
 } from './features/relationship/feature.server.js'
 export {
-  $createRelationshipNode,
-  $isRelationshipNode,
   type RelationshipData,
   RelationshipNode,
-  type SerializedRelationshipNode,
 } from './features/relationship/nodes/RelationshipNode.js'
 
 export { FixedToolbarFeature } from './features/toolbars/fixed/feature.server.js'
 export { InlineToolbarFeature } from './features/toolbars/inline/feature.server.js'
 
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
-export { createNode } from './features/typeUtilities.js'
+export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
+export type {
+  ClientComponentProps,
+  ClientFeature,
+  ClientFeatureProviderMap,
+  FeatureProviderClient,
+  FeatureProviderProviderClient,
+  PluginComponent,
+  PluginComponentWithAnchor,
+  ResolvedClientFeature,
+  ResolvedClientFeatureMap,
+  SanitizedClientFeatures,
+  SanitizedPlugin,
+} from './features/typesClient.js'
+
 export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
@@ -919,60 +912,43 @@ export type {
   BeforeChangeNodeHookArgs,
   BeforeValidateNodeHook,
   BeforeValidateNodeHookArgs,
-  ClientComponentProps,
-  ClientFeature,
-  ClientFeatureProviderMap,
-  FeatureProviderClient,
-  FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
   NodeValidation,
   NodeWithHooks,
-  PluginComponent,
-  PluginComponentWithAnchor,
   PopulationPromise,
-  ResolvedClientFeature,
-  ResolvedClientFeatureMap,
   ResolvedServerFeature,
   ResolvedServerFeatureMap,
-  SanitizedClientFeatures,
-  SanitizedPlugin,
   SanitizedServerFeatures,
   ServerFeature,
   ServerFeatureProviderMap,
-} from './features/types.js'
+} from './features/typesServer.js'
 
 export { UploadFeature } from './features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './features/upload/feature.server.js'
-export {
-  $createUploadNode,
-  $isUploadNode,
-  type SerializedUploadNode,
-  type UploadData,
-  UploadNode,
-} from './features/upload/nodes/UploadNode.js'
+export { type UploadData, UploadNode } from './features/upload/nodes/UploadNode.js'
 
+export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
 } from './lexical/config/server/default.js'
-export { loadFeatures, sortFeaturesForOptimalLoading } from './lexical/config/server/loader.js'
 
+export { loadFeatures, sortFeaturesForOptimalLoading } from './lexical/config/server/loader.js'
 export {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './lexical/config/server/sanitize.js'
+
 export type {
   ClientEditorConfig,
   SanitizedClientEditorConfig,
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-
 export { getEnabledNodes } from './lexical/nodes/index.js'
-export { ENABLE_SLASH_MENU_COMMAND } from './lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
 export type { AdapterProps }
 
 export type {
@@ -994,8 +970,16 @@ export {
   TEXT_TYPE_TO_FORMAT,
   TEXT_TYPE_TO_MODE,
 } from './lexical/utils/nodeFormat.js'
-
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
+
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
+
+export { createServerFeature } from './utilities/createServerFeature.js'
+export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
+export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
+
+export * from './nodeTypes.js'
+
+export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'

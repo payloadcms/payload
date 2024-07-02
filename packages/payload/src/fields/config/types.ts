@@ -20,8 +20,9 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
@@ -52,7 +53,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
    */
@@ -85,7 +86,7 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    */
   id?: number | string
   /** The `payload` object to interface with the payload API */
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
@@ -95,7 +96,7 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   data: Partial<TData>,
   siblingData: Partial<TSiblingData>,
-  { user }: { user: PayloadRequestWithData['user'] },
+  { user }: { user: PayloadRequest['user'] },
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {
@@ -110,7 +111,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * The collection `slug` to filter against, limited to this field's `relationTo` property.
    */
-  relationTo: string
+  relationTo: CollectionSlug
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */
@@ -118,7 +119,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * An object containing the currently authenticated user.
    */
-  user: Partial<PayloadRequestWithData['user']>
+  user: Partial<PayloadRequest['user']>
 }
 
 export type FilterOptions<TData = any> =
@@ -174,7 +175,7 @@ export type BaseValidateOptions<TData, TSiblingData> = {
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
-  req: PayloadRequestWithData
+  req: PayloadRequest
   siblingData: Partial<TSiblingData>
 }
 
@@ -499,7 +500,7 @@ export type UploadField = FieldBase & {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-  relationTo: string
+  relationTo: CollectionSlug
   type: 'upload'
 }
 
@@ -604,20 +605,20 @@ type RelationshipAdmin = Admin & {
 }
 export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
-    sortOptions?: { [collectionSlug: string]: string }
+    sortOptions?: { [collectionSlug: CollectionSlug]: string }
   }
-  relationTo: string[]
+  relationTo: CollectionSlug[]
 }
 export type SingleRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
     sortOptions?: string
   }
-  relationTo: string
+  relationTo: CollectionSlug
 }
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
 export type ValueWithRelation = {
-  relationTo: string
+  relationTo: CollectionSlug
   value: number | string
 }
 

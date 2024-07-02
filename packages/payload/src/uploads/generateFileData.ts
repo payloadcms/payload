@@ -7,7 +7,7 @@ import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
@@ -27,7 +27,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   originalDoc?: T
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   throwOnMissingFile?: boolean
 }
 
@@ -297,7 +297,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
   operation: 'create' | 'update'
   originalDoc: unknown
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): UploadEdits {
   const { data, operation, originalDoc, req } = args
 

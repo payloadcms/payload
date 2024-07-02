@@ -34,7 +34,7 @@ Both `graphQL.queries` and `graphQL.mutations` functions should return an object
 `payload.config.js`:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import myCustomQueryResolver from './graphQL/resolvers/myCustomQueryResolver'
 
 export default buildConfig({
@@ -100,9 +100,24 @@ Contextual information about the currently running GraphQL operation. You can ge
 
 We've exposed a few types and utilities to help you extend the API further. Payload uses the GraphQL.js package for which you can view the full list of available types in the [official documentation](https://graphql.org/graphql-js/type/).
 
+**`GraphQLJSON`** & **`GraphQLJSONObject`**
+
+```ts
+import { GraphQLJSON, GraphQLJSONObject } from '@payloadcms/graphql/types'
+```
+
 **`GraphQL`**
 
-You can directly import the GraphQL package used by Payload, most useful for typing. For queries, mutations and handlers make sure you use the `GraphQL` and `payload` instances provided via arguments.
+You can directly import the GraphQL package used by Payload, most useful for typing.
+
+```ts
+import { GraphQL } from '@payloadcms/graphql/types'
+```
+
+<Banner type="warning">
+  For queries, mutations and handlers make sure you use the `GraphQL` and `payload` instances provided via arguments.
+</Banner>
+
 
 **`buildPaginatedListType`**
 
@@ -112,6 +127,8 @@ It takes in two arguments, the first for the name of this new schema type and th
 Example
 
 ```ts
+import { buildPaginatedListType } from '@payloadcms/graphql/types'
+
 export const getMyPosts = (GraphQL, payload) => {
   return {
     args: {},

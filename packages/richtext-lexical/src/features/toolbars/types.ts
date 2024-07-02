@@ -6,22 +6,50 @@ import type { EditorConfigContextType } from '../../lexical/config/client/Editor
 
 export type ToolbarGroup =
   | {
-      ChildComponent?: React.FC
+      /**
+       * All toolbar items part of this toolbar group need to be added here.
+       */
       items: Array<ToolbarGroupItem>
+      /**
+       * Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.
+       */
       key: string
+      /**
+       * Determines where the toolbar group will be.
+       */
       order?: number
-      type: 'dropdown'
+      /**
+       * Controls the toolbar group type. Set to `buttons` to create a buttons toolbar group, which displays toolbar items horizontally using only their icons.
+       */
+      type: 'buttons'
     }
   | {
+      /**
+       * The dropdown toolbar ChildComponent allows you to pass in a React Component which will be displayed within the dropdown button.
+       */
+      ChildComponent?: React.FC
+      /**
+       * All toolbar items part of this toolbar group need to be added here.
+       */
       items: Array<ToolbarGroupItem>
+      /**
+       * Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.
+       */
       key: string
+      /**
+       * Determines where the toolbar group will be.
+       */
       order?: number
-      type: 'buttons'
+      /**
+       * Controls the toolbar group type. Set to `dropdown` to create a buttons toolbar group, which displays toolbar items vertically using their icons and labels, if the dropdown is open.
+       */
+      type: 'dropdown'
     }
 
 export type ToolbarGroupItem = {
+  /** A React component which is rendered within your toolbar item's default button component. Usually, you want this to be an icon. */
   ChildComponent?: React.FC
-  /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
+  /** A React component which is rendered in place of the toolbar item's default button component, thus completely replacing it. The `ChildComponent` and `onSelect` properties will be ignored. */
   Component?: React.FC<{
     active?: boolean
     anchorElem: HTMLElement
@@ -29,6 +57,7 @@ export type ToolbarGroupItem = {
     enabled?: boolean
     item: ToolbarGroupItem
   }>
+  /** This is optional and controls if the toolbar item is highlighted or not. */
   isActive?: ({
     editor,
     editorConfigContext,
@@ -38,6 +67,7 @@ export type ToolbarGroupItem = {
     editorConfigContext: EditorConfigContextType
     selection: BaseSelection
   }) => boolean
+  /** This is optional and controls if the toolbar item is clickable or not. If `false` is returned here, it will be grayed out and unclickable. */
   isEnabled?: ({
     editor,
     editorConfigContext,
@@ -47,9 +77,11 @@ export type ToolbarGroupItem = {
     editorConfigContext: EditorConfigContextType
     selection: BaseSelection
   }) => boolean
+  /** Each toolbar item needs to have a unique key. */
   key: string
-  /** The label is displayed as text if the item is part of a dropdown group */
+  /** The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. */
   label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  /** Each toolbar item needs to have a unique key. */
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }

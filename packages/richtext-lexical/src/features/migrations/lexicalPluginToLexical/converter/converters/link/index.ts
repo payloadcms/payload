@@ -4,6 +4,6 @@ import { LinkConverterClient } from './client.js'
 import { _LinkConverter } from './converter.js'
 
 export const LinkConverter: LexicalPluginNodeConverterProvider = {
-  ClientComponent: LinkConverterClient,
+  ClientConverter: LinkConverterClient,
   converter: _LinkConverter,
 }

@@ -2,7 +2,7 @@
 
 import { useAddClientFunction, useFieldProps, useTableCell } from '@payloadcms/ui'
 
-import type { FeatureProviderClient } from '../features/types.js'
+import type { FeatureProviderClient } from '../features/typesClient.js'
 
 export const useLexicalFeature = <ClientFeatureProps,>(
   featureKey: string,

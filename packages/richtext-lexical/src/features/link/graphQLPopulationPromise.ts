@@ -1,4 +1,4 @@
-import type { PopulationPromise } from '../types.js'
+import type { PopulationPromise } from '../typesServer.js'
 import type { LinkFeatureServerProps } from './feature.server.js'
 import type { SerializedLinkNode } from './nodes/types.js'
 

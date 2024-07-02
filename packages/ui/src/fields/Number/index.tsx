@@ -33,7 +33,7 @@ export type NumberFieldProps = FormFieldBase & {
   width?: string
 }
 
-const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
+const _NumberField: React.FC<NumberFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -226,4 +226,4 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   )
 }
 
-export const NumberField = withCondition(NumberFieldComponent)
+export const NumberField = withCondition(_NumberField)

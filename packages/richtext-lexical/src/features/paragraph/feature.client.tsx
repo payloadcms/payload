@@ -4,10 +4,9 @@ import { $setBlocksType } from '@lexical/selection'
 import { $createParagraphNode, $getSelection, $isParagraphNode, $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../types.js'
 
 import { TextIcon } from '../../lexical/ui/icons/Text/index.js'
-import { createClientComponent } from '../createClientComponent.js'
+import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../shared/toolbar/textDropdownGroup.js'
 
@@ -41,39 +40,31 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
-      slashMenu: {
-        groups: [
-          slashMenuBasicGroupWithItems([
-            {
-              Icon: TextIcon,
-              key: 'paragraph',
-              keywords: ['normal', 'paragraph', 'p', 'text'],
-              label: ({ i18n }) => {
-                return i18n.t('lexical:paragraph:label')
-              },
-              onSelect: ({ editor }) => {
-                editor.update(() => {
-                  const selection = $getSelection()
-                  $setBlocksType(selection, () => $createParagraphNode())
-                })
-              },
-            },
-          ]),
-        ],
-      },
-      toolbarFixed: {
-        groups: toolbarGroups,
-      },
-      toolbarInline: {
-        groups: toolbarGroups,
-      },
-    }),
-  }
-}
-
-export const ParagraphFeatureClientComponent = createClientComponent(ParagraphFeatureClient)
+export const ParagraphFeatureClient = createClientFeature({
+  slashMenu: {
+    groups: [
+      slashMenuBasicGroupWithItems([
+        {
+          Icon: TextIcon,
+          key: 'paragraph',
+          keywords: ['normal', 'paragraph', 'p', 'text'],
+          label: ({ i18n }) => {
+            return i18n.t('lexical:paragraph:label')
+          },
+          onSelect: ({ editor }) => {
+            editor.update(() => {
+              const selection = $getSelection()
+              $setBlocksType(selection, () => $createParagraphNode())
+            })
+          },
+        },
+      ]),
+    ],
+  },
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

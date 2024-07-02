@@ -2,10 +2,9 @@
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { BoldIcon } from '../../../lexical/ui/icons/Bold/index.js'
-import { createClientComponent } from '../../createClientComponent.js'
+import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
 import {
   BOLD_ITALIC_STAR,
@@ -33,27 +32,19 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const BoldFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: ({ featureProviderMap }) => {
-      const markdownTransformers = [BOLD_STAR, BOLD_UNDERSCORE]
-      if (featureProviderMap.get('italic')) {
-        markdownTransformers.push(BOLD_ITALIC_UNDERSCORE, BOLD_ITALIC_STAR)
-      }
+export const BoldFeatureClient = createClientFeature(({ featureProviderMap }) => {
+  const markdownTransformers = [BOLD_STAR, BOLD_UNDERSCORE]
+  if (featureProviderMap.get('italic')) {
+    markdownTransformers.push(BOLD_ITALIC_UNDERSCORE, BOLD_ITALIC_STAR)
+  }
 
-      return {
-        clientFeatureProps: props,
-        markdownTransformers,
-        toolbarFixed: {
-          groups: toolbarGroups,
-        },
-        toolbarInline: {
-          groups: toolbarGroups,
-        },
-      }
+  return {
+    markdownTransformers,
+    toolbarFixed: {
+      groups: toolbarGroups,
+    },
+    toolbarInline: {
+      groups: toolbarGroups,
     },
   }
-}
-
-export const BoldFeatureClientComponent = createClientComponent(BoldFeatureClient)
+})

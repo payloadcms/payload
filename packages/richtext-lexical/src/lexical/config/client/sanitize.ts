@@ -2,7 +2,10 @@
 
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import type { ResolvedClientFeatureMap, SanitizedClientFeatures } from '../../../features/types.js'
+import type {
+  ResolvedClientFeatureMap,
+  SanitizedClientFeatures,
+} from '../../../features/typesClient.js'
 import type { LexicalFieldAdminProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
@@ -51,7 +54,7 @@ export const sanitizeClientFeatures = (
       feature.plugins.forEach((plugin, i) => {
         sanitized.plugins.push({
           Component: plugin.Component,
-          clientProps: feature.clientFeatureProps,
+          clientProps: feature.sanitizedClientFeatureProps,
           key: feature.key + i,
           position: plugin.position,
         })

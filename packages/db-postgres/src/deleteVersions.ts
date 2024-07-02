@@ -1,4 +1,4 @@
-import type { DeleteVersions, PayloadRequestWithData, SanitizedCollectionConfig } from 'payload'
+import type { DeleteVersions, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
@@ -10,7 +10,7 @@ import { findMany } from './find/findMany.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,
-  { collection, locale, req = {} as PayloadRequestWithData, where: where },
+  { collection, locale, req = {} as PayloadRequest, where: where },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config

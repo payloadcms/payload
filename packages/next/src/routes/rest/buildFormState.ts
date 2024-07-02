@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { buildFormState as buildFormStateFn } from '@payloadcms/ui/utilities/buildFormState'
 import httpStatus from 'http-status'
@@ -6,7 +6,7 @@ import httpStatus from 'http-status'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { routeError } from './routeError.js'
 
-export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) => {
+export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   const headers = headersWithCors({
     headers: new Headers(),
     req,

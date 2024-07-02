@@ -25,7 +25,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
 import { v4 as uuid } from 'uuid'
 
-import type { ClientComponentProps } from '../../types.js'
+import type { ClientComponentProps } from '../../typesClient.js'
 import type { BlocksFeatureClientProps } from '../feature.client.js'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
@@ -61,7 +61,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const reducedBlock: ReducedBlock = (
     editorConfig?.resolvedFeatureMap?.get('blocks')
-      ?.clientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
   )?.reducedBlocks?.find((block) => block.slug === formData?.blockType)
 
   const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath)
@@ -72,7 +72,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         apiRoute: config.routes.api,
         body: {
           id,
-          data: JSON.parse(JSON.stringify(formData)),
+          data: formData,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },

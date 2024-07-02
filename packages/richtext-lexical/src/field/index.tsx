@@ -5,7 +5,7 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { FeatureProviderClient } from '../features/types.js'
+import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 
@@ -30,7 +30,9 @@ export const RichTextField: React.FC<
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
 
-  const [featureProviders, setFeatureProviders] = useState<FeatureProviderClient<unknown>[]>([])
+  const [featureProviders, setFeatureProviders] = useState<
+    FeatureProviderClient<unknown, unknown>[]
+  >([])
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
@@ -53,7 +55,7 @@ export const RichTextField: React.FC<
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
-      const featureProvidersLocal: FeatureProviderClient<unknown>[] = []
+      const featureProvidersLocal: FeatureProviderClient<unknown, unknown>[] = []
       let featureProvidersAndComponentsLoaded = 0
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
@@ -123,7 +125,7 @@ export const RichTextField: React.FC<
                       return FeatureComponent
                     })
                   : null}
-                {featureProvider.ClientComponent}
+                {featureProvider.ClientFeature}
               </React.Fragment>
             )
           })}

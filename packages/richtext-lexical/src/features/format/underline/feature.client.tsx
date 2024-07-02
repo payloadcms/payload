@@ -3,10 +3,9 @@
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
-import type { FeatureProviderProviderClient } from '../../types.js'
 
 import { UnderlineIcon } from '../../../lexical/ui/icons/Underline/index.js'
-import { createClientComponent } from '../../createClientComponent.js'
+import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -28,21 +27,11 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-const UnderlineFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
-  return {
-    clientFeatureProps: props,
-    feature: () => {
-      return {
-        clientFeatureProps: props,
-        toolbarFixed: {
-          groups: toolbarGroups,
-        },
-        toolbarInline: {
-          groups: toolbarGroups,
-        },
-      }
-    },
-  }
-}
-
-export const UnderlineFeatureClientComponent = createClientComponent(UnderlineFeatureClient)
+export const UnderlineFeatureClient = createClientFeature({
+  toolbarFixed: {
+    groups: toolbarGroups,
+  },
+  toolbarInline: {
+    groups: toolbarGroups,
+  },
+})

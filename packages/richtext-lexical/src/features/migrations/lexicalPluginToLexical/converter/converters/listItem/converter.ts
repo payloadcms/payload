@@ -1,5 +1,4 @@
-import type { SerializedListItemNode } from '@lexical/list'
-
+import type { SerializedListItemNode } from '../../../../../lists/plugin/index.js'
 import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'

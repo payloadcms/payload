@@ -1,7 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { BoldFeatureClientComponent } from '../../../exports/client/index.js'
+import { BoldFeatureClient } from '../../../exports/client/index.js'
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
@@ -9,22 +8,18 @@ import {
   BOLD_UNDERSCORE,
 } from './markdownTransformers.js'
 
-export const BoldFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
-  return {
-    dependenciesSoft: ['italic'],
-    feature: ({ featureProviderMap }) => {
-      const markdownTransformers = [BOLD_STAR, BOLD_UNDERSCORE]
-      if (featureProviderMap.get('italic')) {
-        markdownTransformers.push(BOLD_ITALIC_UNDERSCORE, BOLD_ITALIC_STAR)
-      }
+export const BoldFeature = createServerFeature({
+  dependenciesSoft: ['italic'],
+  feature: ({ featureProviderMap }) => {
+    const markdownTransformers = [BOLD_STAR, BOLD_UNDERSCORE]
+    if (featureProviderMap.get('italic')) {
+      markdownTransformers.push(BOLD_ITALIC_UNDERSCORE, BOLD_ITALIC_STAR)
+    }
 
-      return {
-        ClientComponent: BoldFeatureClientComponent,
-        markdownTransformers,
-        serverFeatureProps: props,
-      }
-    },
-    key: 'bold',
-    serverFeatureProps: props,
-  }
-}
+    return {
+      ClientFeature: BoldFeatureClient,
+      markdownTransformers,
+    }
+  },
+  key: 'bold',
+})
