@@ -19,6 +19,7 @@ export const VersionView: EditViewComponent = async (props) => {
     docID: id,
     globalConfig,
     permissions,
+    req,
     req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
 
@@ -48,6 +49,7 @@ export const VersionView: EditViewComponent = async (props) => {
         depth: 1,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
 
@@ -58,6 +60,7 @@ export const VersionView: EditViewComponent = async (props) => {
         draft: false,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
 
@@ -68,6 +71,7 @@ export const VersionView: EditViewComponent = async (props) => {
         draft: true,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
     } catch (error) {
@@ -87,6 +91,7 @@ export const VersionView: EditViewComponent = async (props) => {
         depth: 1,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
 
@@ -96,6 +101,7 @@ export const VersionView: EditViewComponent = async (props) => {
         draft: false,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
 
@@ -105,6 +111,7 @@ export const VersionView: EditViewComponent = async (props) => {
         draft: true,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
     } catch (error) {
