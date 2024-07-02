@@ -19,7 +19,9 @@ To swap in your own Custom Views, consult the list of available components. Dete
 
 ## Custom Root Views
 
-Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views. To easily swap Root Views with your own or [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
+Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views.
+
+To easily swap Root Views with your own, or to [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -94,7 +96,9 @@ The above example shows how to add a new [Root View](#custom-root-views), but th
 
 ## Custom Collection Views
 
-Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views. To easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Collection Config](../collections/overview):
+Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views.
+
+To easily swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Collection Config](../collections/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -111,9 +115,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 }
 ```
 
-<strong>
-  For details on how to build Custom Views, see [Building Custom Views](#building-custom-views).
-</strong>
+_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -134,7 +136,9 @@ The following options are available:
 
 ## Custom Global Views
 
-Global Views are views that are scoped under the `/globals` route, such as the Document Edit View. To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Global Config](../globals/overview):
+Global Views are views that are scoped under the `/globals` route, such as the Document Edit View.
+
+To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Global Config](../globals/overview):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload/types'
@@ -171,16 +175,14 @@ The following options are available:
 
 ## Custom Document Views
 
-Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View.
+Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-This approach allows you to replace specific nested views while keeping the overall structure of the Edit View intact, including the title, tabs, etc. If you need to replace the _entire_ Edit View, including the nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#custom-collection-views) or [Custom Global Views](#custom-global-views) for more information.
-
-To easily swap out Document Views with your own or [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview).
+To easily swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
   // ...
   admin: {
     components: {
@@ -200,7 +202,7 @@ _For details on how to build Custom Views, see [Building Custom Views](#building
 
 <Banner type="warning">
  <strong>Note:</strong>
- This applies to _both_ Collection _and_ Global configs.
+ If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#custom-collection-views) or [Custom Global Views](#custom-global-views) for more information.
 </Banner>
 
 The following options are available:
@@ -288,8 +290,7 @@ Your Custom Views will be provided with the following props:
 | `visibleEntities`         | The current user's visible entities according to your [Access Control](../access-control/overview).                                    |
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  <strong>Important:</strong>
   It's up to you to secure your custom views. If your view requires a user to be logged in or to
   have certain access rights, you should handle that within your view component yourself.
 </Banner>
