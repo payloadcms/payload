@@ -1177,6 +1177,9 @@ importers:
       '@lexical/selection':
         specifier: 0.16.1
         version: 0.16.1
+      '@lexical/table':
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/utils':
         specifier: 0.16.1
         version: 0.16.1
