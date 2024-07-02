@@ -23,6 +23,7 @@ import type { PluginComponent } from '../../../typesClient.js'
 
 import { invariant } from '../../../../lexical/utils/invariant.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
+import './index.scss'
 
 export type CellContextShape = {
   cellEditorConfig: CellEditorConfig | null

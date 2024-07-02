@@ -43,6 +43,7 @@ import { createPortal } from 'react-dom'
 
 import type { PluginComponentWithAnchor } from '../../../typesClient.js'
 
+import { MeatballsIcon } from '../../../../lexical/ui/icons/Meatballs/index.js'
 import { invariant } from '../../../../lexical/utils/invariant.js'
 import './index.scss'
 
@@ -455,8 +456,13 @@ function TableActionMenu({
       }}
       ref={dropDownRef}
     >
-      {mergeCellButton}
-      <hr />
+      {mergeCellButton ? (
+        <React.Fragment>
+          {mergeCellButton}
+          <hr />
+        </React.Fragment>
+      ) : null}
+
       <button
         className="item"
         data-test-id="table-insert-row-above"
@@ -655,7 +661,7 @@ function TableCellActionMenuContainer({
       {tableCellNode != null && (
         <React.Fragment>
           <button
-            className="table-cell-action-button chevron-down"
+            className="table-cell-action-button"
             onClick={(e) => {
               e.stopPropagation()
               setIsMenuOpen(!isMenuOpen)
@@ -663,7 +669,7 @@ function TableCellActionMenuContainer({
             ref={menuRootRef}
             type="button"
           >
-            <i className="chevron-down" />V
+            <MeatballsIcon />
           </button>
           {isMenuOpen && (
             <TableActionMenu

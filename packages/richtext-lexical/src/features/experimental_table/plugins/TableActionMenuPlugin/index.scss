@@ -1,3 +1,5 @@
+@import '../../../../scss/styles.scss';
+
 .table-cell-action-button-container {
   position: absolute;
   top: 0;
@@ -6,44 +8,54 @@
 }
 
 .table-cell-action-button {
-  background-color: none;
+  background-color: var(--theme-elevation-300);
   display: flex;
   justify-content: center;
   align-items: center;
   border: 0;
   position: relative;
   border-radius: 15px;
-  color: #222;
+  color: var(--theme-elevation-0);
   display: inline-block;
   cursor: pointer;
+}
+
+html[data-theme='light'] {
+  .table-action-menu-dropdown {
+    @include shadow-m;
+  }
 }
 
 .table-action-menu-dropdown {
   z-index: 100;
   display: block;
   position: fixed;
-  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1),
-  inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
+  background: var(--color-base-0);
+  width: 200px;
+  color: var(--color-base-800);
+  border-radius: 4px;
   min-height: 40px;
-  background-color: #fff;
+  overflow-y: auto;
+  font-family: var(--font-body);
+
 
   .item {
-    margin: 0 8px 0 8px;
     padding: 8px;
-    color: #050505;
+    color: var(--color-base-900);
+    background: var(--color-base-0);
     cursor: pointer;
-    line-height: 16px;
-    font-size: 15px;
+    font-size: 13px;
     display: flex;
     align-content: center;
     flex-direction: row;
     flex-shrink: 0;
     justify-content: space-between;
-    background-color: #fff;
-    border-radius: 8px;
     border: 0;
-    max-width: 250px;
-    min-width: 100px;
+    height: 30px;
+    width: 100%;
+
+    &:hover {
+      background: var(--color-base-100);
+    }
   }
 }
