@@ -1,4 +1,5 @@
 import type {
+  AuthOperationsFromCollectionSlug,
   CollectionSlug,
   DataFromCollectionSlug,
   Payload,
@@ -14,10 +15,7 @@ import { loginOperation } from '../login.js'
 export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
   context?: RequestContext
-  data: {
-    email: string
-    password: string
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
   fallbackLocale?: string
   locale?: string

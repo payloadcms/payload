@@ -6,6 +6,7 @@ import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 import baseAccountLockFields from '../../auth/baseFields/accountLock.js'
 import baseAPIKeyFields from '../../auth/baseFields/apiKey.js'
 import baseAuthFields from '../../auth/baseFields/auth.js'
+import baseLoginField from '../../auth/baseFields/loginField.js'
 import baseVerificationFields from '../../auth/baseFields/verification.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
@@ -135,6 +136,10 @@ export const sanitizeCollection = async (
     }
 
     if (!sanitized.auth.disableLocalStrategy) {
+      const loginField = sanitized.auth.loginWithUsername ? 'username' : 'email'
+
+      authFields = authFields.concat(baseLoginField(loginField))
+
       authFields = authFields.concat(baseAuthFields)
 
       if (sanitized.auth.verify) {

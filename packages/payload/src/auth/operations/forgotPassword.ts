@@ -2,7 +2,11 @@ import crypto from 'crypto'
 import httpStatus from 'http-status'
 import { URL } from 'url'
 
-import type { Collection } from '../../collections/config/types.js'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+} from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -11,12 +15,11 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: {
     [key: string]: unknown
-    email: string
-  }
+  } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
   req: PayloadRequest
@@ -24,9 +27,16 @@ export type Arguments = {
 
 export type Result = string
 
-export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<null | string> => {
-  if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
-    throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
+export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<null | string> => {
+  const loginWithUsername = incomingArgs.collection?.config?.auth?.loginWithUsername
+
+  if (!incomingArgs.data.email && !incomingArgs.data.username) {
+    throw new APIError(
+      `Missing ${loginWithUsername ? 'username' : 'email'}.`,
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   let args = incomingArgs
@@ -68,21 +78,27 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     let token: string = crypto.randomBytes(20).toString('hex')
-
     type UserDoc = {
+      email?: string
       id: number | string
       resetPasswordExpiration?: string
       resetPasswordToken?: string
     }
 
-    if (!data.email) {
-      throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
+    if (!data.email && !data.username) {
+      throw new APIError(
+        `Missing ${loginWithUsername ? 'username' : 'email'}.`,
+        httpStatus.BAD_REQUEST,
+      )
     }
 
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
-      where: { email: { equals: data.email.toLowerCase() } },
+      where:
+        loginWithUsername && data?.username
+          ? { username: { equals: data.username } }
+          : { email: { equals: data.email.toLowerCase() } },
     })
 
     // We don't want to indicate specifically that an email was not found,
@@ -133,7 +149,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
         from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
         html,
         subject,
-        to: data.email,
+        to: loginWithUsername ? user.email : data.email,
       })
     }
 

@@ -66,6 +66,22 @@ import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 
 export interface GeneratedTypes {
+  authUntyped: {
+    [slug: string]: {
+      forgotPassword: {
+        email: string
+      }
+      login: {
+        email: string
+        password: string
+        username?: string
+      }
+      registerFirstUser: {
+        email: string
+        password: string
+      }
+    }
+  }
   collectionsUntyped: {
     [slug: string]: TypeWithID & Record<string, unknown>
   }
@@ -104,6 +120,10 @@ type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
 export type TypedUser = ResolveUserType<GeneratedTypes>
+
+// @ts-expect-error
+type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
+export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -669,6 +689,7 @@ export type {
   AfterReadHook as CollectionAfterReadHook,
   AfterRefreshHook,
   AuthCollection,
+  AuthOperationsFromCollectionSlug,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeLoginHook as CollectionBeforeLoginHook,

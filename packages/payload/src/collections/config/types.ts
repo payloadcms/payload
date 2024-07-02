@@ -28,7 +28,7 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { CollectionSlug, TypedCollection } from '../../index.js'
+import type { CollectionSlug, TypedAuthOperations, TypedCollection } from '../../index.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -38,6 +38,8 @@ import type {
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
+  TypedAuthOperations[TSlug]
 
 export type RequiredDataFromCollection<TData extends Record<string, any>> = MarkOptional<
   TData,

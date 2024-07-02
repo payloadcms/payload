@@ -3,8 +3,8 @@
 import type { FormProps } from '@payloadcms/ui'
 import type { FormState, PayloadRequest } from 'payload'
 
-import { EmailField, Form, FormSubmit, useConfig, useTranslation } from '@payloadcms/ui'
-import { email } from 'payload/shared'
+import { EmailField, Form, FormSubmit, TextField, useConfig, useTranslation } from '@payloadcms/ui'
+import { email, text } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 
 export const ForgotPasswordForm: React.FC = () => {
@@ -17,6 +17,8 @@ export const ForgotPasswordForm: React.FC = () => {
 
   const { t } = useTranslation()
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const loginWithUsername = collectionConfig?.auth?.loginWithUsername
 
   const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
     res
@@ -26,17 +28,29 @@ export const ForgotPasswordForm: React.FC = () => {
         successToast(t('general:submissionSuccessful'))
       })
       .catch(() => {
-        errorToast(t('authentication:emailNotValid'))
+        errorToast(
+          loginWithUsername
+            ? t('authentication:usernameNotValid')
+            : t('authentication:emailNotValid'),
+        )
       })
   }
 
-  const initialState: FormState = {
-    email: {
-      initialValue: '',
-      valid: true,
-      value: undefined,
-    },
-  }
+  const initialState: FormState = loginWithUsername
+    ? {
+        username: {
+          initialValue: '',
+          valid: true,
+          value: undefined,
+        },
+      }
+    : {
+        email: {
+          initialValue: '',
+          valid: true,
+          value: undefined,
+        },
+      }
 
   if (hasSubmitted) {
     return (
@@ -55,24 +69,53 @@ export const ForgotPasswordForm: React.FC = () => {
       method="POST"
     >
       <h1>{t('authentication:forgotPassword')}</h1>
-      <p>{t('authentication:forgotPasswordEmailInstructions')}</p>
-      <EmailField
-        autoComplete="email"
-        label={t('general:email')}
-        name="email"
-        required
-        validate={(value) =>
-          email(value, {
-            name: 'email',
-            type: 'email',
-            data: {},
-            preferences: { fields: {} },
-            req: { t } as PayloadRequest,
-            required: true,
-            siblingData: {},
-          })
-        }
-      />
+      <p>
+        {loginWithUsername
+          ? t('authentication:forgotPasswordUsernameInstructions')
+          : t('authentication:forgotPasswordEmailInstructions')}
+      </p>
+
+      {loginWithUsername ? (
+        <TextField
+          label={t('authentication:username')}
+          name="username"
+          required
+          validate={(value) =>
+            text(value, {
+              name: 'username',
+              type: 'text',
+              data: {},
+              preferences: { fields: {} },
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+              } as PayloadRequest,
+              required: true,
+              siblingData: {},
+            })
+          }
+        />
+      ) : (
+        <EmailField
+          autoComplete="email"
+          label={t('general:email')}
+          name="email"
+          required
+          validate={(value) =>
+            email(value, {
+              name: 'email',
+              type: 'email',
+              data: {},
+              preferences: { fields: {} },
+              req: { t } as PayloadRequest,
+              required: true,
+              siblingData: {},
+            })
+          }
+        />
+      )}
       <FormSubmit>{t('general:submit')}</FormSubmit>
     </Form>
   )

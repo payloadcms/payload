@@ -229,6 +229,7 @@ export const DefaultEditView: React.FC = () => {
                       collectionSlug={collectionConfig.slug}
                       disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
                       email={data?.email}
+                      loginWithUsername={auth?.loginWithUsername}
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
