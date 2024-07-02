@@ -8,11 +8,11 @@
 
 export interface Config {
   auth: {
-    users2: Users2AuthOperations;
+    users: UserAuthOperations;
   };
   collections: {
     posts: Post;
-    users2: Users2;
+    users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -20,23 +20,20 @@ export interface Config {
     menu: Menu;
   };
   locale: null;
-  user: Users2 & {
-    collection: 'users2';
+  user: User & {
+    collection: 'users';
   };
 }
-export interface Users2AuthOperations {
+export interface UserAuthOperations {
   forgotPassword: {
-    username: string;
-    email?: string;
+    email: string;
   };
   login: {
-    username: string;
-    email?: string;
+    email: string;
     password: string;
   };
   registerFirstUser: {
-    username: string;
-    email?: string;
+    email: string;
     password: string;
   };
 }
@@ -83,14 +80,13 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users2".
+ * via the `definition` "users".
  */
-export interface Users2 {
+export interface User {
   id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
-  username: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
@@ -106,8 +102,8 @@ export interface Users2 {
 export interface PayloadPreference {
   id: string;
   user: {
-    relationTo: 'users2';
-    value: string | Users2;
+    relationTo: 'users';
+    value: string | User;
   };
   key?: string | null;
   value?:
