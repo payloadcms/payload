@@ -29,8 +29,8 @@ export interface UserAuthOperations {
     email: string;
   };
   login: {
-    email: string;
     password: string;
+    email: string;
   };
   registerFirstUser: {
     email: string;

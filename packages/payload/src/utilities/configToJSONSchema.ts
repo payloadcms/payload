@@ -585,38 +585,40 @@ function generateOperationJSONSchema(
   config: SanitizedCollectionConfig,
   operation: 'forgotPassword' | 'login' | 'registerFirstUser',
 ): JSONSchema4 {
-  const requiredFields: string[] = []
-  const authFieldProperties: JSONSchema4['properties'] = {}
-
-  if (config.auth?.loginWithUsername) {
-    authFieldProperties['username'] = {
-      type: 'string',
-    }
-    requiredFields.push('username')
-  } else {
-    authFieldProperties['email'] = {
-      type: 'string',
-    }
-    requiredFields.push('email')
-  }
-
-  if (operation === 'forgotPassword') {
-    return {
-      additionalProperties: false,
-      properties: authFieldProperties,
-      required: requiredFields,
-    }
-  }
-
-  authFieldProperties['password'] = {
+  const usernameLogin = config.auth?.loginWithUsername
+  const fieldType: JSONSchema4 = {
     type: 'string',
   }
-  requiredFields.push('password')
+
+  let properties: JSONSchema4['properties'] = {}
+  switch (operation) {
+    case 'login': {
+      properties = {
+        password: fieldType,
+        [usernameLogin ? 'username' : 'email']: fieldType,
+      }
+      break
+    }
+    case 'forgotPassword': {
+      properties = {
+        [usernameLogin ? 'username' : 'email']: fieldType,
+      }
+      break
+    }
+    case 'registerFirstUser': {
+      properties = {
+        email: fieldType,
+        password: fieldType,
+      }
+      if (usernameLogin) properties.username = fieldType
+      break
+    }
+  }
 
   return {
     additionalProperties: false,
-    properties: authFieldProperties,
-    required: requiredFields,
+    properties,
+    required: Object.keys(properties),
   }
 }
 
