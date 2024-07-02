@@ -3,6 +3,7 @@
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 
 import { AIIcon } from '../../lexical/ui/icons/AI/index.js'
+import { TableIcon } from '../../lexical/ui/icons/Table/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../shared/slashMenu/basicGroup.js'
 import { toolbarAddDropdownGroupWithItems } from '../shared/toolbar/addDropdownGroup.js'
@@ -35,7 +36,7 @@ export const TableFeatureClient = createClientFeature({
     groups: [
       slashMenuBasicGroupWithItems([
         {
-          Icon: AIIcon,
+          Icon: TableIcon,
           key: 'table',
           keywords: ['table'],
           label: 'Table',
@@ -50,6 +51,7 @@ export const TableFeatureClient = createClientFeature({
     groups: [
       toolbarAddDropdownGroupWithItems([
         {
+          ChildComponent: TableIcon,
           key: 'table',
           label: 'Table',
           onSelect: ({ editor }) => {

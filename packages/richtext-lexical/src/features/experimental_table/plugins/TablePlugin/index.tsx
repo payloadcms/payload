@@ -10,10 +10,10 @@ import type {
 } from 'lexical'
 import type { JSX } from 'react'
 
-import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
-import { mergeRegister } from '@lexical/utils'
+import { $createTableNodeWithDimensions, TableNode } from '@lexical/table'
+import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
+import { useModal } from '@payloadcms/ui'
 import {
   $getSelection,
   $insertNodes,
@@ -109,11 +109,14 @@ export const TablePlugin: PluginComponent = () => {
       editor.registerCommand<InsertTableCommandPayload>(
         INSERT_NEW_TABLE_COMMAND,
         ({ columns, includeHeaders, rows }) => {
+          console.log('aaaa')
+
           const tableNode = $createTableNodeWithDimensions(
             Number(rows),
             Number(columns),
             includeHeaders,
           )
+          console.log('tableNode', tableNode)
           $insertNodes([tableNode])
           return true
         },
@@ -122,7 +125,6 @@ export const TablePlugin: PluginComponent = () => {
       editor.registerCommand(
         OPEN_TABLE_DRAWER_COMMAND,
         () => {
-          console.log('111')
           let rangeSelection: RangeSelection | null = null
 
           editor.getEditorState().read(() => {
@@ -133,7 +135,6 @@ export const TablePlugin: PluginComponent = () => {
           })
 
           if (rangeSelection) {
-            console.log('222')
             toggleModal(drawerSlug)
           }
           return true
@@ -145,19 +146,24 @@ export const TablePlugin: PluginComponent = () => {
 
   return (
     <FieldsDrawer
-      data={drawerSlug}
-      drawerSlug="table"
+      data={{}}
+      drawerSlug={drawerSlug}
       drawerTitle="Create Table"
       featureKey="experimental_table"
       handleDrawerSubmit={(_fields, data) => {
         closeModal(drawerSlug)
-        if (!data.url) {
+        console.log('data', data)
+
+        if (!data.columns || !data.rows) {
           return
         }
-        editor.dispatchCommand(INSERT_TABLE_COMMAND, {
+        console.log('555', String(data.columns), String(data.rows))
+
+        editor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, {
           columns: String(data.columns),
           rows: String(data.rows),
         })
+        console.log('dispatched')
       }}
       schemaPathSuffix="fields"
     />

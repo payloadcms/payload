@@ -1,6 +1,7 @@
-import type { Field } from 'payload'
+import type { Config, Field } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
+import { sanitizeFields } from 'payload'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { TableFeatureClient } from '../../exports/client/index.js'
@@ -21,26 +22,36 @@ const fields: Field[] = [
   },
 ]
 export const EXPERIMENTAL_TableFeature = createServerFeature({
-  feature: {
-    ClientFeature: TableFeatureClient,
-    generateSchemaMap: () => {
-      const schemaMap = new Map<string, Field[]>()
+  feature: async ({ config, isRoot }) => {
+    const validRelationships = config.collections.map((c) => c.slug) || []
 
-      schemaMap.set('fields', fields)
+    const sanitizedFields = await sanitizeFields({
+      config: config as unknown as Config,
+      fields,
+      requireFieldLevelRichTextEditor: isRoot,
+      validRelationships,
+    })
+    return {
+      ClientFeature: TableFeatureClient,
+      generateSchemaMap: () => {
+        const schemaMap = new Map<string, Field[]>()
 
-      return schemaMap
-    },
-    nodes: [
-      {
-        node: TableNode,
+        schemaMap.set('fields', sanitizedFields)
+
+        return schemaMap
       },
-      {
-        node: TableCellNode,
-      },
-      {
-        node: TableRowNode,
-      },
-    ],
+      nodes: [
+        {
+          node: TableNode,
+        },
+        {
+          node: TableCellNode,
+        },
+        {
+          node: TableRowNode,
+        },
+      ],
+    }
   },
   key: 'experimental_table',
 })
