@@ -131,7 +131,7 @@ export interface Menu {
 export interface CustomT {
   id: string;
   custom?: 'hello' | 'world';
-  withDefintionsUsage?: ObjectWithNumber[];
+  withDefinitionsUsage?: ObjectWithNumber[];
   json: {
     id: string;
     name: string;
@@ -150,6 +150,6 @@ export interface ObjectWithNumber {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

@@ -159,8 +159,7 @@ describe('configToJSONSchema', () => {
       },
     }
 
-    // @ts-expect-error
-    const config: Config = {
+    const config: Partial<Config> = {
       collections: [
         {
           fields: [
@@ -185,7 +184,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = await sanitizeConfig(config as Config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.definitions?.test).toStrictEqual({

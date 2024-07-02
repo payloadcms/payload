@@ -29,7 +29,7 @@ export default buildConfigWithDefaults({
           },
         },
         {
-          name: 'withDefintionsUsage',
+          name: 'withDefinitionsUsage',
           type: 'text',
           typescriptSchema: {
             type: 'array',
@@ -99,18 +99,21 @@ export default buildConfigWithDefaults({
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
-    definitions: {
-      objectWithNumber: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'number',
-            required: true,
+    schema: [
+      ({ jsonSchema }) => {
+        jsonSchema.definitions.objectWithNumber = {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+              required: true,
+            },
           },
-        },
-        required: true,
-        additionalProperties: false,
+          required: true,
+          additionalProperties: false,
+        }
+        return jsonSchema
       },
-    },
+    ],
   },
 })
