@@ -109,14 +109,11 @@ export const TablePlugin: PluginComponent = () => {
       editor.registerCommand<InsertTableCommandPayload>(
         INSERT_NEW_TABLE_COMMAND,
         ({ columns, includeHeaders, rows }) => {
-          console.log('aaaa')
-
           const tableNode = $createTableNodeWithDimensions(
             Number(rows),
             Number(columns),
             includeHeaders,
           )
-          console.log('tableNode', tableNode)
           $insertNodes([tableNode])
           return true
         },
@@ -152,18 +149,15 @@ export const TablePlugin: PluginComponent = () => {
       featureKey="experimental_table"
       handleDrawerSubmit={(_fields, data) => {
         closeModal(drawerSlug)
-        console.log('data', data)
 
         if (!data.columns || !data.rows) {
           return
         }
-        console.log('555', String(data.columns), String(data.rows))
 
         editor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, {
           columns: String(data.columns),
           rows: String(data.rows),
         })
-        console.log('dispatched')
       }}
       schemaPathSuffix="fields"
     />
