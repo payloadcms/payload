@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-[Fields](../fields/overview) within the [Admin Panel](./overview) can be customized in their appearance and behavior without affecting the underlying data structure. From [Conditional Logic](#conditional-logic) to [Custom Field Components](#custom-field-components) and more, fields can be endlessly customized for your specific use case.
+[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in their appearance and behavior without affecting the underlying data structure. Using [Conditional Logic](#conditional-logic), [Custom Field Components](#custom-field-components), [Custom Validations](../fields/overview#validation), and more, fields are designed to withstand heavy modification or even complete replacement.
 
 For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
@@ -36,19 +36,19 @@ The following options are available:
 
 | Option              | Description                                                                                                                                                                                                                      |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `condition`         | Programmatically show / hide fields based on other fields. [More details](../admin/fields#conditional-logic).                                                                                               |
-| `components`        | All Field Components can be swapped out for [Custom Components](../admin/components) that you define. [More details](../admin/fields).                                                                             |
-| `description`       | Helper text to display alongside the field to provide more information for the editor. [More details](../admin/fields#description).                                                                                                 |
-| `position`          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
-| `width`             | Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
-| `style`             | Attach raw [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) style properties to the root DOM element of a field.                                                                                                                                                              |
-| `className`         | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                                                                                                      |
-| `readOnly`          | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
-| `disabled`          | If a field is `disabled`, it is completely omitted from the Admin panel.                                                                                                                                                         |
-| `disableBulkEdit`   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents.                                                                                                 |
-| `disableListColumn` | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                             |
-| `disableListFilter` | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
-| `hidden`            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.        |
+| **`condition`**         | Programmatically show / hide fields based on other fields. [More details](../admin/fields#conditional-logic).                                                                                               |
+| **`components`**        | All Field Components can be swapped out for [Custom Components](../admin/components) that you define. [More details](../admin/fields).                                                                             |
+| **`description`**       | Helper text to display alongside the field to provide more information for the editor. [More details](../admin/fields#description).                                                                                                 |
+| **`position`**          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
+| **`width`**             | Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| **`style`**         | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                           |
+| **`className`**         | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                                                                                                      |
+| **`readOnly`**          | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
+| **`disabled`**          | If a field is `disabled`, it is completely omitted from the Admin panel.                                                                                                                                                         |
+| **`disableBulkEdit`**   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents.                                                                                                 |
+| **`disableListColumn`** | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                             |
+| **`disableListFilter`** | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
+| **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.        |
 
 ## Custom Field Components
 
@@ -82,14 +82,14 @@ export const CollectionConfig: CollectionConfig = {
 The following options are available:
 
 | Component    | Description                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **`Field`**  | The form field rendered of the Edit View. [More details](#the-field-component).                                                |
 | **`Cell`**   | The table cell rendered of the List View. [More details](#the-cell-component).              |
 | **`Filter`** | The filter component rendered in the List View. [More details](#the-filter-component). || Component         | Description                                                                                                     |
 | **`Label`**       | Override the default Label of the Field Component. [More details](#the-label-component).                                    |
 | **`Error`**       | Override the default Error of the Field Component. [More details](#the-error-component).                                    |
-| **`beforeInput`\*** | An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput).|
-| **`afterInput`\***  | An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput). |
+| **`beforeInput`** | An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput).|
+| **`afterInput`**  | An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput). |
 
 _\* **`beforeInput`** and **`afterInput`** are only supported in fields that do not contain other fields, such as [`Text`](../fields/text), and [`Textarea`](../fields/textarea)._
 
@@ -114,7 +114,7 @@ export const CollectionConfig: CollectionConfig = {
       // ...
       admin: {
         components: {
-          Field: MyCustomField, // highlight-line
+          Field: MyFieldComponent, // highlight-line
         },
       },
     }
@@ -126,16 +126,47 @@ export const CollectionConfig: CollectionConfig = {
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#the-label-component), [`Error`](#the-error-component), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
+All Field Components are passed the following props by default:
+
+| Property         | Description                                                                                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`AfterInput`** | The rendered result of the `admin.components.afterInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
+| **`BeforeInput`** | The rendered result of the `admin.components.beforeInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
+| **`CustomDescription`** | The rendered result of the `description` property. [More details](#the-description-component).                                                                                                      |
+| **`CustomError`** | The rendered result of the `admin.components.Error` property. [More details](#the-error-component).                                                                                                      |
+| **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).                                                                                                      |
+| **`className`**  | A string that can be used to add a CSS class to the root element of the field.                                                                                                                                                     |
+| **`custom`**     | The object that contains everything provided to `admin.custom`. |
+| **`descriptionProps`** | An object that contains the props for the `FieldDescription` component.                                                                                                                                                                   |
+| **`disabled`**   | A boolean value that represents if the field is disabled or not.                                                                                                                                                                   |
+| **`docPreferences`** | An object that contains the preferences for the document.                                                                                                                                                                         |
+| **`errorProps`** | An object that contains the props for the error component.                                                                                                                                                                         |
+| **`label`**      | The label value provided in the field, it can be used with i18n.                                                                                                                                                                   |
+| **`labelProps`** | An object that contains the props needed for the `FieldLabel` component.                                                                                                                                                                         |
+| **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
+| **`localized`**  | A boolean value that represents if the field is localized or not. [More details](../fields/localized).                                                                                                                                                                   |
+| **`path`***       | The static path of the field at render time.                                                                                                                                                                                                            |
+| **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
+| **`required`**   | A boolean value that represents if the field is required or not.                                                                                                                                                                   |
+| **`rtl`**        | A boolean value that represents if the field should be rendered right-to-left or not. [More details](../configuration/i18n).                                                                                           |
+| **`style`**      | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                           |
+| **`user`**       | The currently authenticated user.                                                                                                                                                                                                  |
+| **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
+
+_\* The **`path`** prop is static, defined at render time. To use the dynamic path of the field, subscribe to it using the `useFieldProps` hook. [More details](./hooks#usefieldprops)._
+
 #### Sending and receiving values from the form
 
-When swapping out the `Field` component, you are responsible for sending and receiving the field's `value` from the form itself. To do so, import the [`useField`](./hooks#usefield) hook from `@payloadcms/ui` and use it to manage the field's value:
+When swapping out the `Field` component, you are responsible for sending and receiving the field's `value` from the form itself.
+
+To do so, import the [`useField`](./hooks#usefield) hook from `@payloadcms/ui` and use it to manage the field's value:
 
 ```tsx
 'use client'
 import { useField } from '@payloadcms/ui'
 
-const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
-  const { value, setValue } = useField({ path }) // highlight-line
+export const CustomTextField: React.FC = () => {
+  const { value, setValue } = useField() // highlight-line
 
   return (
     <input
@@ -147,7 +178,7 @@ const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
 ```
 
 <Banner type="success">
-  For additional help, see [Building Custom Components](./components#building-custom-components). For a complete list of all available React hooks, see the [Payload React Hooks](./hooks) documentation.
+  For a complete list of all available React hooks, see the [Payload React Hooks](./hooks) documentation. For additional help, see [Building Custom Components](./components#building-custom-components).
 </Banner>
 
 ### The Cell Component
@@ -284,8 +315,8 @@ export const myField: Field = {
 
 Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
 
-- `path` - the path of the field
-- `value` - the current value of the field
+- **`path`** - the path of the field
+- **`value`** - the current value of the field
 
 As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
 
