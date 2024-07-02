@@ -66,7 +66,7 @@ async function buildEmail(emailConfig?: NodemailerAdapterArgs): Promise<{
     transport = await createMockAccount(emailConfig)
   }
 
-  if (emailConfig.skipVerify !== false) {
+  if (!emailConfig.skipVerify) {
     await verifyTransport(transport)
   }
 
