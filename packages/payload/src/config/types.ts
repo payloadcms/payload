@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
+import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { JSX } from 'react'
@@ -744,6 +745,12 @@ export type Config = {
 
     /** Filename to write the generated types to */
     outputFile?: string
+
+    /**
+     * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
+     * to generate the TypeScript interfaces.
+     */
+    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

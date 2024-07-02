@@ -204,6 +204,7 @@ export default joi.object({
     autoGenerate: joi.boolean(),
     declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
     outputFile: joi.string(),
+    schema: joi.array().items(joi.func()),
   }),
   upload: joi.object(),
 })

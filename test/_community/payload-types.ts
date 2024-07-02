@@ -18,6 +18,7 @@ export interface Config {
   };
   globals: {
     menu: Menu;
+    'custom-ts': CustomT;
   };
   locale: null;
   user: User & {
@@ -149,6 +150,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
