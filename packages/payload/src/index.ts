@@ -74,6 +74,7 @@ export interface GeneratedTypes {
       login: {
         email: string
         password: string
+        username?: string
       }
       registerFirstUser: {
         email: string
