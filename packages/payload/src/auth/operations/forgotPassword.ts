@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import { URL } from 'url'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
@@ -19,7 +19,7 @@ export type Arguments = {
   }
   disableEmail?: boolean
   expiration?: number
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export type Result = string

@@ -10,7 +10,7 @@ import type {
 } from 'lexical'
 import type {
   Field,
-  PayloadRequestWithData,
+  PayloadRequest,
   ReplaceAny,
   RequestContext,
   RichTextField,
@@ -59,7 +59,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   node: T
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }) => void
@@ -199,7 +199,7 @@ export type BaseNodeHookArgs<T extends SerializedLexicalNode> = {
   parentRichTextFieldPath: (number | string)[]
   parentRichTextFieldSchemaPath: string[]
   /** The payload request object. It is mocked for Local API operations. */
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export type AfterReadNodeHook<T extends SerializedLexicalNode> = (
@@ -233,14 +233,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    */
   getSubFields?: (args: {
     node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    req: PayloadRequestWithData
+    req: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
    */
   getSubFieldsData?: (args: {
     node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    req: PayloadRequestWithData
+    req: PayloadRequest
   }) => Record<string, unknown>
   /**
    * Allows you to run population logic when a node's data was requested from graphQL.
@@ -398,11 +398,11 @@ export type SanitizedServerFeatures = Required<
 
   getSubFields?: Map<
     string,
-    (args: { node: SerializedLexicalNode; req: PayloadRequestWithData }) => Field[] | null
+    (args: { node: SerializedLexicalNode; req: PayloadRequest }) => Field[] | null
   >
   getSubFieldsData?: Map<
     string,
-    (args: { node: SerializedLexicalNode; req: PayloadRequestWithData }) => Record<string, unknown>
+    (args: { node: SerializedLexicalNode; req: PayloadRequest }) => Record<string, unknown>
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
   hooks?: {

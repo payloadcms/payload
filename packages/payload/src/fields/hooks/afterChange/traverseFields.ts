@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -16,7 +16,7 @@ type Args = {
   path: (number | string)[]
   previousDoc: Record<string, unknown>
   previousSiblingDoc: Record<string, unknown>
-  req: PayloadRequestWithData
+  req: PayloadRequest
   schemaPath: string[]
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>

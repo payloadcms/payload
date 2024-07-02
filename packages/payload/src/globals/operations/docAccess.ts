@@ -1,5 +1,5 @@
 import type { GlobalPermission } from '../../auth/index.js'
-import type { AllOperations, PayloadRequestWithData } from '../../types/index.js'
+import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -9,7 +9,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 
 type Arguments = {
   globalConfig: SanitizedGlobalConfig
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const docAccessOperation = async (args: Arguments): Promise<GlobalPermission> => {

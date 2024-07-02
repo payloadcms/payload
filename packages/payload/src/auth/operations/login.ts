@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -32,7 +32,7 @@ export type Arguments = {
   }
   depth?: number
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 

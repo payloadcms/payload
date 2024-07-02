@@ -1,7 +1,7 @@
 import type { DeepRequired } from 'ts-essentials'
 
 import type { Payload } from '../index.js'
-import type { PayloadRequestWithData, Where } from '../types/index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
 
 export type Permission = {
   permission: boolean
@@ -75,25 +75,25 @@ export type User = {
 export type ClientUser = Omit<User, 'collection'>
 
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: string
   user: TUser
 }) => Promise<string> | string
 
 type GenerateVerifyEmailSubject<TUser = any> = (args: {
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: string
   user: TUser
 }) => Promise<string> | string
 
 type GenerateForgotPasswordEmailHTML<TUser = any> = (args?: {
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   token?: string
   user?: TUser
 }) => Promise<string> | string
 
 type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   token?: string
   user?: TUser
 }) => Promise<string> | string

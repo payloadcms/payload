@@ -2,7 +2,7 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -28,7 +28,7 @@ type Args = {
   parentSchemaPath: string[]
   previousDoc: Record<string, unknown>
   previousSiblingDoc: Record<string, unknown>
-  req: PayloadRequestWithData
+  req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
 }

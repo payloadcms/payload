@@ -1,11 +1,4 @@
-import type {
-  Collection,
-  Endpoint,
-  GlobalConfig,
-  PayloadRequest,
-  PayloadRequestData,
-  SanitizedConfig,
-} from 'payload'
+import type { Collection, Endpoint, GlobalConfig, PayloadRequest, SanitizedConfig } from 'payload'
 
 import httpStatus from 'http-status'
 import { match } from 'path-to-regexp'
@@ -126,22 +119,22 @@ const endpoints = {
 const handleCustomEndpoints = async ({
   endpoints,
   entitySlug,
-  payloadRequest,
+  req,
 }: {
   endpoints: Endpoint[] | GlobalConfig['endpoints']
   entitySlug?: string
-  payloadRequest: PayloadRequest
+  req: PayloadRequest
 }): Promise<Response> => {
   if (endpoints && endpoints.length > 0) {
     let handlerParams = {}
-    const { pathname } = payloadRequest
+    const { pathname } = req
 
     /*
      * This makes sure the next.js basePath property is supported. If basePath is used, payload config.routes.api should include it. This makes all outgoing frontend request
      * target the correct API endpoint starting with basePath, which is good!
      *
      * The incoming request (here) will not include the basePath though, as it's automatically stripped by Next.js. Since we are adding the basePath to the pathPrefix below though
-     * (from payloadRequest.payload.config.routes.api) we need to add it to pathname, which does not contain the basePath. Otherwise, no endpoint will be matched if basePath is set.
+     * (from req.payload.config.routes.api) we need to add it to pathname, which does not contain the basePath. Otherwise, no endpoint will be matched if basePath is set.
      */
     let adjustedPathname = pathname
 
@@ -149,11 +142,10 @@ const handleCustomEndpoints = async ({
       adjustedPathname = process.env.NEXT_BASE_PATH + pathname
     }
 
-    const pathPrefix =
-      payloadRequest.payload.config.routes.api + (entitySlug ? `/${entitySlug}` : '')
+    const pathPrefix = req.payload.config.routes.api + (entitySlug ? `/${entitySlug}` : '')
 
     const customEndpoint = endpoints.find((endpoint) => {
-      if (endpoint.method === payloadRequest.method.toLowerCase()) {
+      if (endpoint.method === req.method.toLowerCase()) {
         const pathMatchFn = match(`${pathPrefix}${endpoint.path}`, {
           decode: decodeURIComponent,
         })
@@ -167,15 +159,15 @@ const handleCustomEndpoints = async ({
     })
 
     if (customEndpoint) {
-      payloadRequest.routeParams = {
-        ...payloadRequest.routeParams,
+      req.routeParams = {
+        ...req.routeParams,
         ...handlerParams,
       }
-      const res = await customEndpoint.handler(payloadRequest)
+      const res = await customEndpoint.handler(req)
 
       if (res instanceof Response) {
-        if (payloadRequest.responseHeaders) {
-          mergeHeaders(payloadRequest.responseHeaders, res.headers)
+        if (req.responseHeaders) {
+          mergeHeaders(req.responseHeaders, res.headers)
         }
 
         return res
@@ -233,7 +225,7 @@ export const GET =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2, slug3, slug4] = slug
-    let req: PayloadRequest | (PayloadRequest & PayloadRequestData)
+    let req: PayloadRequest
     let res: Response
     let collection: Collection
 
@@ -263,19 +255,19 @@ export const GET =
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
           entitySlug: slug1,
-          payloadRequest: req,
+          req,
         })
 
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          const reqWithData = await addDataAndFileToRequest({ request: req })
-          const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
               // /:collection
-              res = await endpoints.collection.GET.find({ collection, req: payloadRequest })
+              res = await endpoints.collection.GET.find({ collection, req })
               break
             case 2:
               if (slug2 in endpoints.collection.GET) {
@@ -285,14 +277,14 @@ export const GET =
                 // /:collection/count
                 res = await (endpoints.collection.GET[slug2] as CollectionRouteHandler)({
                   collection,
-                  req: payloadRequest,
+                  req,
                 })
               } else {
                 // /:collection/:id
                 res = await endpoints.collection.GET.findByID({
                   id: slug2,
                   collection,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
@@ -302,21 +294,21 @@ export const GET =
                 res = await endpoints.collection.GET.getFile({
                   collection,
                   filename: slug3,
-                  req: payloadRequest,
+                  req,
                 })
               } else if (slug3 in endpoints.collection.GET) {
                 // /:collection/:id/preview
                 res = await (endpoints.collection.GET[slug3] as CollectionRouteHandlerWithID)({
                   id: slug2,
                   collection,
-                  req: payloadRequest,
+                  req,
                 })
               } else if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
                 // /:collection/access/:id
                 // /:collection/versions/:id
                 res = await (
                   endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
-                )({ id: slug3, collection, req: payloadRequest })
+                )({ id: slug3, collection, req })
               }
               break
           }
@@ -334,26 +326,26 @@ export const GET =
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: globalConfig.endpoints,
           entitySlug: `${slug1}/${slug2}`,
-          payloadRequest: req,
+          req,
         })
 
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          const reqWithData = await addDataAndFileToRequest({ request: req })
-          const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 2:
               // /globals/:slug
-              res = await endpoints.global.GET.findOne({ globalConfig, req: payloadRequest })
+              res = await endpoints.global.GET.findOne({ globalConfig, req })
               break
             case 3:
               if (slug3 in endpoints.global.GET) {
                 // /globals/:slug/preview
                 res = await (endpoints.global.GET[slug3] as GlobalRouteHandler)({
                   globalConfig,
-                  req: payloadRequest,
+                  req,
                 })
               } else if (`doc-${slug3}` in endpoints.global.GET) {
                 // /globals/:slug/access
@@ -361,7 +353,7 @@ export const GET =
                 // /globals/:slug/preview
                 res = await (endpoints.global.GET?.[`doc-${slug3}`] as GlobalRouteHandler)({
                   globalConfig,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
@@ -373,16 +365,16 @@ export const GET =
                 )({
                   id: slug4,
                   globalConfig,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
           }
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.GET) {
-        const reqWithData = await addDataAndFileToRequest({ request: req })
-        const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
-        res = await endpoints.root.GET[slug1]({ req: payloadRequest })
+        await addDataAndFileToRequest(req)
+        addLocalesToRequestFromData(req)
+        res = await endpoints.root.GET[slug1]({ req })
       }
 
       if (res instanceof Response) {
@@ -396,7 +388,7 @@ export const GET =
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
-        payloadRequest: req,
+        req,
       })
 
       if (customEndpointResponse) return customEndpointResponse
@@ -454,19 +446,19 @@ export const POST =
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
           entitySlug: slug1,
-          payloadRequest: req,
+          req,
         })
 
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          const reqWithData = await addDataAndFileToRequest({ request: req })
-          const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
               // /:collection
-              res = await endpoints.collection.POST.create({ collection, req: payloadRequest })
+              res = await endpoints.collection.POST.create({ collection, req })
               break
             case 2:
               if (slug2 in endpoints.collection.POST) {
@@ -481,7 +473,7 @@ export const POST =
 
                 res = await (endpoints.collection.POST?.[slug2] as CollectionRouteHandler)({
                   collection,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
@@ -492,13 +484,13 @@ export const POST =
                 // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
                 res = await (
                   endpoints.collection.POST[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
-                )({ id: slug3, collection, req: payloadRequest })
+                )({ id: slug3, collection, req })
               } else if (slug3 === 'duplicate' && collection.config.disableDuplicate !== true) {
                 // /:collection/:id/duplicate
                 res = await endpoints.collection.POST.duplicate({
                   id: slug2,
                   collection,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
@@ -517,25 +509,25 @@ export const POST =
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: globalConfig.endpoints,
           entitySlug: `${slug1}/${slug2}`,
-          payloadRequest: req,
+          req,
         })
 
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          const reqWithData = await addDataAndFileToRequest({ request: req })
-          const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
           switch (slug.length) {
             case 2:
               // /globals/:slug
-              res = await endpoints.global.POST.update({ globalConfig, req: payloadRequest })
+              res = await endpoints.global.POST.update({ globalConfig, req })
               break
             case 3:
               if (`doc-${slug3}` in endpoints.global.POST) {
                 // /globals/:slug/access
                 res = await (endpoints.global.POST?.[`doc-${slug3}`] as GlobalRouteHandler)({
                   globalConfig,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
@@ -547,7 +539,7 @@ export const POST =
                 )({
                   id: slug4,
                   globalConfig,
-                  req: payloadRequest,
+                  req,
                 })
               }
               break
@@ -556,9 +548,9 @@ export const POST =
           }
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
-        const reqWithData = await addDataAndFileToRequest({ request: req })
-        const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
-        res = await endpoints.root.POST[slug1]({ req: payloadRequest })
+        await addDataAndFileToRequest(req)
+        addLocalesToRequestFromData(req)
+        res = await endpoints.root.POST[slug1]({ req })
       }
 
       if (res instanceof Response) {
@@ -572,7 +564,7 @@ export const POST =
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
-        payloadRequest: req,
+        req,
       })
 
       if (customEndpointResponse) return customEndpointResponse
@@ -624,25 +616,25 @@ export const DELETE =
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
           entitySlug: slug1,
-          payloadRequest: req,
+          req,
         })
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          const reqWithData = await addDataAndFileToRequest({ request: req })
-          const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
               // /:collection
-              res = await endpoints.collection.DELETE.delete({ collection, req: payloadRequest })
+              res = await endpoints.collection.DELETE.delete({ collection, req })
               break
             case 2:
               // /:collection/:id
               res = await endpoints.collection.DELETE.deleteByID({
                 id: slug2,
                 collection,
-                req: payloadRequest,
+                req,
               })
               break
           }
@@ -660,7 +652,7 @@ export const DELETE =
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
-        payloadRequest: req,
+        req,
       })
 
       if (customEndpointResponse) return customEndpointResponse
@@ -712,26 +704,26 @@ export const PATCH =
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
           entitySlug: slug1,
-          payloadRequest: req,
+          req,
         })
 
         if (customEndpointResponse) {
           return customEndpointResponse
         } else {
-          const reqWithData = await addDataAndFileToRequest({ request: req })
-          const payloadRequest = addLocalesToRequestFromData({ request: reqWithData })
+          await addDataAndFileToRequest(req)
+          addLocalesToRequestFromData(req)
 
           switch (slug.length) {
             case 1:
               // /:collection
-              res = await endpoints.collection.PATCH.update({ collection, req: payloadRequest })
+              res = await endpoints.collection.PATCH.update({ collection, req })
               break
             case 2:
               // /:collection/:id
               res = await endpoints.collection.PATCH.updateByID({
                 id: slug2,
                 collection,
-                req: payloadRequest,
+                req,
               })
               break
           }
@@ -749,7 +741,7 @@ export const PATCH =
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         endpoints: req.payload.config.endpoints,
-        payloadRequest: req,
+        req,
       })
 
       if (customEndpointResponse) return customEndpointResponse

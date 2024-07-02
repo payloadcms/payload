@@ -4,7 +4,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -17,7 +17,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
     email: string
     password: string
   }
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export type Result<TData> = {

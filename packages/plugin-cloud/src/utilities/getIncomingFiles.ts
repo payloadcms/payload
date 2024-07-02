@@ -1,4 +1,4 @@
-import type { FileData, PayloadRequestWithData } from 'payload'
+import type { FileData, PayloadRequest } from 'payload'
 
 import type { File } from '../types.js'
 
@@ -7,7 +7,7 @@ export function getIncomingFiles({
   req,
 }: {
   data: Partial<FileData>
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): File[] {
   const file = req.file
 

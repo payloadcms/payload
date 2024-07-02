@@ -1,7 +1,7 @@
 import type {
   Data,
   Locale,
-  PayloadRequestWithData,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
@@ -14,7 +14,7 @@ export const getDocumentData = async (args: {
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale: Locale
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): Promise<Data> => {
   const { id, collectionConfig, globalConfig, locale, req } = args
 

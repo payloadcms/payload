@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../collections/confi
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../types/index.js'
+import type { PayloadRequest, RequestContext } from '../types/index.js'
 import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<
@@ -130,7 +130,7 @@ export type BaseRichTextHookArgs<
   path: (number | string)[]
 
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
    */
@@ -218,7 +218,7 @@ type RichTextAdapterBase<
     flattenLocales: boolean
     overrideAccess?: boolean
     populationPromises: Promise<void>[]
-    req: PayloadRequestWithData
+    req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>
   }) => void

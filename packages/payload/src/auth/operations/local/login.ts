@@ -4,7 +4,7 @@ import type {
   Payload,
   RequestContext,
 } from '../../../index.js'
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -22,7 +22,7 @@ export type Options<TSlug extends CollectionSlug> = {
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
 }
 
