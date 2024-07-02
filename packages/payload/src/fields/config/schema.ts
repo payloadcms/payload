@@ -65,6 +65,7 @@ export const baseField = joi
     localized: joi.boolean().default(false),
     required: joi.boolean().default(false),
     saveToJWT: joi.alternatives().try(joi.boolean(), joi.string()).default(false),
+    typescriptSchema: joi.array().items(joi.func()),
     unique: joi.boolean().default(false),
     validate: joi.func(),
   })

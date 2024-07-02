@@ -152,6 +152,7 @@ export function fieldsToJSONSchema(
         if (isRequired) requiredFieldNames.add(field.name)
 
         let fieldSchema: JSONSchema4
+
         switch (field.type) {
           case 'text':
             if (field.hasMany === true) {
@@ -189,7 +190,7 @@ export function fieldsToJSONSchema(
           }
 
           case 'json': {
-            fieldSchema = {
+            fieldSchema = field.jsonSchema?.schema || {
               type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
             }
             break
@@ -516,6 +517,12 @@ export function fieldsToJSONSchema(
           }
         }
 
+        if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
+          for (const schema of field.typescriptSchema) {
+            fieldSchema = schema({ jsonSchema: fieldSchema })
+          }
+        }
+
         if (fieldSchema && fieldAffectsData(field)) {
           fieldSchemas.set(field.name, fieldSchema)
         }
@@ -601,9 +608,12 @@ export function configToJSONSchema(
     return acc
   }, {})
 
-  return {
+  let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
-    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    definitions: {
+      ...entityDefinitions,
+      ...Object.fromEntries(interfaceNameDefinitions),
+    },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
     properties: {
@@ -615,4 +625,12 @@ export function configToJSONSchema(
     required: ['user', 'locale', 'collections', 'globals'],
     title: 'Config',
   }
+
+  if (config?.typescript?.schema?.length) {
+    for (const schema of config.typescript.schema) {
+      jsonSchema = schema({ jsonSchema })
+    }
+  }
+
+  return jsonSchema
 }
