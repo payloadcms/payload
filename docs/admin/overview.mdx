@@ -8,9 +8,9 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) admin panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
 
-The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to meet the needs of your editors.
+The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
 
-The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components) and the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production).
+The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components), enabling the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production).
 
 <Banner type="success">
   The Payload Admin Panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](./components).
@@ -25,7 +25,7 @@ The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and b
 
 ## Project Structure
 
-The Admin Panel serves as the entire HTTP layer for Payload, providing a full CRUD interface for your app. This means that both the [REST](../rest-api/overview) and [GraphQL](../graphql/overview) APIs are Next.js routes that exist directly alongside your front-end application.
+The Admin Panel serves as the entire HTTP layer for Payload, providing a full CRUD interface for your app. This means that both the [REST](../rest-api/overview) and [GraphQL](../graphql/overview) APIs are simply [Next.js Routes](https://nextjs.org/docs/app/building-your-application/routing) that exist directly alongside your front-end application.
 
 Once you [install Payload](../getting-started/installation), the following files and directories will be created in your app:
 
@@ -51,11 +51,11 @@ app/
   If you are not familiar with Next.js project structure, you can [learn more about it here](https://nextjs.org/docs/getting-started/project-structure).
 </Banner>
 
-As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper `lang` and `dir` attributes, etc.
+As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper [`lang`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang) and [`dir`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir) attributes, etc.
 
-The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
-Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
+Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
 All auto-generated files will contain the following comments at the top of each file:
 
@@ -66,7 +66,7 @@ All auto-generated files will contain the following comments at the top of each 
 
 ## Admin Options
 
-All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` key.
+All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -79,7 +79,7 @@ const config = buildConfig({
 })
 ```
 
-The following options are available for the Admin Panel:
+The following options are available:
 
 | Option            | Description                                                                                                                                                                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -96,8 +96,8 @@ The following options are available for the Admin Panel:
 | `custom`          | Any custom properties you wish to pass to the Admin Panel.                                                                                                                                                                                                                  |
 
 <Banner type="success">
-  <strong>Note:</strong>
-  These are the _root-level_ options for the Admin Panel. You can also customize the admin options of any Collection or Global through their respective `admin` keys.
+  <strong>Reminder:</strong>
+  These are the _root-level_ options for the Admin Panel. You can also customize the admin options for _Collections and Globals_ through their respective `admin` keys.
 </Banner>
 
 ### The Admin User Collection
@@ -147,7 +147,7 @@ You have full control over the routes that Payload binds itself to. This include
 
 Root-level routes are those that are not behind the `/admin` path, such as the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), or the root path of the Admin Panel itself.
 
-Here is an example of how you might modify root-level routes:
+To customize root-level routes, use the `routes` property of your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -160,18 +160,18 @@ const config = buildConfig({
 })
 ```
 
-You can configure custom paths for the following root-level routes through the `routes` property of your [Payload Config](../configuration/overview):
+The following options are available:
 
 | Option             | Default route           | Description                           |
 | ------------------ | ----------------------- | ------------------------------------- |
 | `admin`            | `/admin`                | The Admin Panel itself.               |
-| `api`              | `/api`                  | The REST API base path.               |
-| `graphQL`          | `/graphql`              | The GraphQL API base path.            |
+| `api`              | `/api`                  | The [REST API](../rest-api/overview) base path.               |
+| `graphQL`          | `/graphql`              | The [GraphQL API](../graphql/overview) base path.            |
 | `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
 
 <Banner type="warning">
   <strong>Reminder:</strong>
-  The `routes` key is defined in the _top-level_ of your [Payload Config](../configuration/overview), _outside_ the `admin` key. To customize the Admin Panel routes, use [admin-level routes](#admin-level-routes) instead.
+  The `routes` key is defined in the _top-level_ of your [Payload Config](../configuration/overview), _outside_ the `admin` key. To customize routes in the _Admin Panel_, use [admin-level routes](#admin-level-routes) instead.
 </Banner>
 
 <Banner type="success">
@@ -183,7 +183,7 @@ You can configure custom paths for the following root-level routes through the `
 
 Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
 
-Here is an example of how you might modify admin-level routes:
+To customize admin-level routes, use the `admin.routes` property of your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -198,7 +198,7 @@ const config = buildConfig({
 })
 ```
 
-You can configure custom paths for the following admin-level routes through the `admin.routes` property of your [Payload Config](../configuration/overview):
+The following options are available:
 
 | Option            | Default route           | Description                                     |
 | ----------------- | ----------------------- | ----------------------------------------------- |
