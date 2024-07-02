@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react'
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
@@ -231,6 +232,11 @@ export interface FieldBase {
   name: string
   required?: boolean
   saveToJWT?: boolean | string
+  /**
+   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
+   * This JSON schema will be used to generate the TypeScript interface of this field.
+   */
+  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
   validate?: Validate
 }
@@ -530,7 +536,11 @@ type JSONAdmin = Admin & {
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: JSONAdmin
-  jsonSchema?: Record<string, unknown>
+  jsonSchema?: {
+    fileMatch: string[]
+    schema: JSONSchema4
+    uri: string
+  }
   type: 'json'
 }
 
