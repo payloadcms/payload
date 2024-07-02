@@ -8,26 +8,28 @@ import {
   useConfig,
   useDocumentInfo,
   useField,
+  useFieldProps,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateImage } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateImage } from '../../types.js'
 
-import { Pill } from '../ui/Pill.js'
+import { Pill } from '../../ui/Pill.js'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type MetaImageProps = UploadInputProps & {
   hasGenerateImageFn: boolean
 }
 
-export const MetaImage: React.FC<MetaImageProps> = (props) => {
+export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { CustomLabel, hasGenerateImageFn, label, labelProps, relationTo, required } = props || {}
+  const { path: pathFromContext } = useFieldProps()
 
-  const field: FieldType<string> = useField(props as Options)
+  const field: FieldType<string> = useField({ ...props, path: pathFromContext } as Options)
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 

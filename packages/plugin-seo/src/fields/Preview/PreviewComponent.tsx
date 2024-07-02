@@ -9,16 +9,23 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { get } from 'http'
 import React, { useEffect, useState } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateURL } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateURL } from '../../types.js'
 
 type PreviewProps = UIField & {
+  descriptionPath?: string
   hasGenerateURLFn: boolean
+  titlePath?: string
 }
 
-export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
+export const PreviewComponent: React.FC<PreviewProps> = ({
+  descriptionPath: descriptionPathFromContext,
+  hasGenerateURLFn,
+  titlePath: titlePathFromContext,
+}) => {
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
@@ -26,9 +33,12 @@ export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
+  const descriptionPath = descriptionPathFromContext || 'meta.description'
+  const titlePath = titlePathFromContext || 'meta.title'
+
   const {
-    'meta.description': { value: metaDescription } = {} as FormField,
-    'meta.title': { value: metaTitle } = {} as FormField,
+    [descriptionPath]: { value: metaDescription } = {} as FormField,
+    [titlePath]: { value: metaTitle } = {} as FormField,
   } = fields
 
   const [href, setHref] = useState<string>()

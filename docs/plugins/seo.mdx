@@ -68,7 +68,7 @@ const config = buildConfig({
         'pages',
       ],
       uploadsCollection: 'media',
-      generateTitle: ({ doc }) => `Website.com — ${doc.title.value}`,
+      generateTitle: ({ doc }) => `Website.com — ${doc.title}`,
       generateDescription: ({ doc }) => doc.excerpt
     })
   ]
@@ -119,7 +119,7 @@ A function that allows you to return any meta title, including from document's c
 {
   // ...
   seoPlugin({
-    generateTitle: ({ ...docInfo, doc, locale }) => `Website.com — ${doc?.title?.value}`,
+    generateTitle: ({ ...docInfo, doc, locale }) => `Website.com — ${doc?.title}`,
   })
 }
 ```
@@ -133,7 +133,7 @@ A function that allows you to return any meta description, including from docume
 {
   // ...
   seoPlugin({
-    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt?.value,
+    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt,
   })
 }
 ```
@@ -147,7 +147,7 @@ A function that allows you to return any meta image, including from document's c
 {
   // ...
   seoPlugin({
-    generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage?.value,
+    generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage,
   })
 }
 ```
@@ -162,7 +162,7 @@ A function called by the search preview component to display the actual URL of y
   // ...
   seoPlugin({
     generateURL: ({ ...docInfo, doc, locale }) =>
-      `https://yoursite.com/${collection?.slug}/${doc?.slug?.value}`,
+      `https://yoursite.com/${collection?.slug}/${doc?.slug}`,
   })
 }
 ```
@@ -200,6 +200,54 @@ seoPlugin({
 })
 ```
 
+## Direct use of fields
+
+There is the option to directly import any of the fields from the plugin so that you can include them anywhere as needed.
+
+<Banner type="info">
+  You will still need to configure the plugin in the Payload config in order to configure the generation functions.
+  Since these fields are imported and used directly, they don't have access to the plugin config so they may need additional arguments to work the same way.
+</Banner>
+
+```ts
+import { MetaDescriptionField, MetaImageField, MetaTitleField, OverviewField, PreviewField } from '@payloadcms/plugin-seo/fields'
+
+// Used as fields
+MetaImageField({
+  // the upload collection slug
+  relationTo: 'media',
+
+  // if the `generateImage` function is configured
+  hasGenerateFn: true,
+})
+
+MetaDescriptionField({
+  // if the `generateDescription` function is configured
+  hasGenerateFn: true,
+})
+
+MetaTitleField({
+  // if the `generateTitle` function is configured
+  hasGenerateFn: true,
+})
+
+PreviewField({
+  // if the `generateUrl` function is configured
+  hasGenerateFn: true,
+
+  // field paths to match the target field for data
+  titlePath: 'meta.title',
+  descriptionPath: 'meta.description',
+})
+
+OverviewField({
+  // field paths to match the target field for data
+  titlePath: 'meta.title',
+  descriptionPath: 'meta.description',
+  imagePath: 'meta.image',
+})
+```
+
 ## TypeScript
 
 All types can be directly imported:
@@ -211,6 +259,18 @@ import {
   GenerateDescription
   GenerateURL
 } from '@payloadcms/plugin-seo/types';
+```
+
+You can then pass the collections from your generated Payload types into the generation types, for example:
+
+```ts
+import { Page } from './payload-types.ts';
+
+import { GenerateTitle } from '@payloadcms/plugin-seo/types';
+
+const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
+  return `Website.com — ${doc?.title}`
+}
 ```
 
 ## Examples

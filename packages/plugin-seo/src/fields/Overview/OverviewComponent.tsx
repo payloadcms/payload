@@ -1,30 +1,44 @@
 'use client'
 
-import type { FormField } from 'payload'
+import type { FormField, UIField } from 'payload'
 
 import { useAllFormFields, useForm, useTranslation } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 
-import { defaults } from '../defaults.js'
+import { defaults } from '../../defaults.js'
 
 const {
   description: { maxLength: maxDesc, minLength: minDesc },
   title: { maxLength: maxTitle, minLength: minTitle },
 } = defaults
 
-export const Overview: React.FC = () => {
+type OverviewProps = UIField & {
+  descriptionPath?: string
+  imagePath?: string
+  titlePath?: string
+}
+
+export const OverviewComponent: React.FC<OverviewProps> = ({
+  descriptionPath: descriptionPathFromContext,
+  imagePath: imagePathFromContext,
+  titlePath: titlePathFromContext,
+}) => {
   const {
     //  dispatchFields,
     getFields,
   } = useForm()
 
+  const descriptionPath = descriptionPathFromContext || 'meta.description'
+  const titlePath = titlePathFromContext || 'meta.title'
+  const imagePath = imagePathFromContext || 'meta.image'
+
   const [
     {
-      'meta.description': { value: metaDesc } = {} as FormField,
-      'meta.image': { value: metaImage } = {} as FormField,
-      'meta.title': { value: metaTitle } = {} as FormField,
+      [descriptionPath]: { value: metaDesc } = {} as FormField,
+      [imagePath]: { value: metaImage } = {} as FormField,
+      [titlePath]: { value: metaTitle } = {} as FormField,
     },
   ] = useAllFormFields()
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()

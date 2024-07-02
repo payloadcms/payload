@@ -14,11 +14,11 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateDescription } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateDescription } from '../../types.js'
 
-import { defaults } from '../defaults.js'
-import { LengthIndicator } from '../ui/LengthIndicator.js'
+import { defaults } from '../../defaults.js'
+import { LengthIndicator } from '../../ui/LengthIndicator.js'
 
 const { maxLength, minLength } = defaults.description
 
@@ -28,8 +28,8 @@ type MetaDescriptionProps = FormFieldBase & {
   path: string
 }
 
-export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, path, required } = props
+export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
+  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, required } = props
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
@@ -39,7 +39,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
   const docInfo = useDocumentInfo()
 
   const field: FieldType<string> = useField({
-    path,
+    path: pathFromContext,
   } as Options)
 
   const { errorMessage, setValue, showError, value } = field
