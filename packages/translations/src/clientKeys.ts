@@ -251,6 +251,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'operators:isLessThan',
   'operators:isGreaterThanOrEqualTo',
   'operators:isLessThanOrEqualTo',
+  'operators:within',
+  'operators:intersects',
 
   'upload:crop',
   'upload:cropToolDescription',

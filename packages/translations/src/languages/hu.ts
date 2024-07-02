@@ -306,6 +306,7 @@ export const huTranslations: DefaultTranslationsObject = {
     contains: 'tartalmaz',
     equals: 'egyenlő',
     exists: 'létezik',
+    intersects: 'metszéspontokban',
     isGreaterThan: 'nagyobb, mint',
     isGreaterThanOrEqualTo: 'nagyobb vagy egyenlő, mint',
     isIn: 'benne van',
@@ -315,6 +316,7 @@ export const huTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nem egyenlő',
     isNotIn: 'nincs benne',
     near: 'közel',
+    within: 'belül',
   },
   upload: {
     crop: 'Termés',

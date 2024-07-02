@@ -302,6 +302,7 @@ export const arTranslations: DefaultTranslationsObject = {
     contains: 'يحتوي',
     equals: 'يساوي',
     exists: 'موجود',
+    intersects: 'يتقاطع',
     isGreaterThan: 'أكبر من',
     isGreaterThanOrEqualTo: 'أكبر أو يساوي',
     isIn: 'موجود في',
@@ -311,6 +312,7 @@ export const arTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'لا يساوي',
     isNotIn: 'غير موجود في',
     near: 'قريب من',
+    within: 'في غضون',
   },
   upload: {
     crop: 'محصول',

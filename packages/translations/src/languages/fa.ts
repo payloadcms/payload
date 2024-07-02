@@ -303,6 +303,7 @@ export const faTranslations: DefaultTranslationsObject = {
     contains: 'شامل',
     equals: 'برابر با',
     exists: 'وجود دارد',
+    intersects: 'تلاقی',
     isGreaterThan: 'بزرگتر است از',
     isGreaterThanOrEqualTo: 'بزرگتر یا مساوی است',
     isIn: 'هست در',
@@ -312,6 +313,7 @@ export const faTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'برابر نیست',
     isNotIn: 'در این نیست',
     near: 'نزدیک',
+    within: 'در داخل',
   },
   upload: {
     crop: 'محصول',

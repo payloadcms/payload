@@ -312,6 +312,7 @@ export const frTranslations: DefaultTranslationsObject = {
     contains: 'contient',
     equals: 'est égal à',
     exists: 'existe',
+    intersects: 'intersecte',
     isGreaterThan: 'est supérieur à',
     isGreaterThanOrEqualTo: 'est supérieur ou égal à',
     isIn: 'est dans',
@@ -321,6 +322,7 @@ export const frTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'n’est pas égal à',
     isNotIn: 'n’est pas dans',
     near: 'proche',
+    within: 'dans',
   },
   upload: {
     crop: 'Recadrer',

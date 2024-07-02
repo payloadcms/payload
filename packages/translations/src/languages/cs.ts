@@ -303,6 +303,7 @@ export const csTranslations: DefaultTranslationsObject = {
     contains: 'obsahuje',
     equals: 'rovná se',
     exists: 'existuje',
+    intersects: 'protíná se',
     isGreaterThan: 'je větší než',
     isGreaterThanOrEqualTo: 'je větší nebo rovno',
     isIn: 'je v',
@@ -312,6 +313,7 @@ export const csTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'není rovno',
     isNotIn: 'není v',
     near: 'blízko',
+    within: 'uvnitř',
   },
   upload: {
     crop: 'Ořez',

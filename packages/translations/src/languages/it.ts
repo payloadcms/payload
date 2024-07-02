@@ -306,6 +306,7 @@ export const itTranslations: DefaultTranslationsObject = {
     contains: 'contiene',
     equals: 'uguale',
     exists: 'esiste',
+    intersects: 'interseca',
     isGreaterThan: 'è maggiore di',
     isGreaterThanOrEqualTo: 'è maggiore o uguale a',
     isIn: 'è in',
@@ -315,6 +316,7 @@ export const itTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'non è uguale a',
     isNotIn: 'non è in',
     near: 'vicino',
+    within: "all'interno",
   },
   upload: {
     crop: 'Raccolto',
