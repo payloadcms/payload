@@ -2,7 +2,7 @@
 
 import type { TableCellNode, TableDOMCell, TableMapType, TableMapValueType } from '@lexical/table'
 import type { LexicalEditor } from 'lexical'
-import type { JSX, MouseEventHandler, ReactPortal } from 'react'
+import type { JSX, MouseEventHandler } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'

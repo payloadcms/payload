@@ -12,7 +12,7 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createTableNodeWithDimensions, TableNode } from '@lexical/table'
-import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
+import { mergeRegister } from '@lexical/utils'
 import { useModal } from '@payloadcms/ui'
 import {
   $getSelection,

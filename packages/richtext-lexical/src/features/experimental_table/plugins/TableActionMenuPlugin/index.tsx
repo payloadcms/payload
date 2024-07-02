@@ -44,7 +44,6 @@ import { createPortal } from 'react-dom'
 import type { PluginComponentWithAnchor } from '../../../typesClient.js'
 
 import { invariant } from '../../../../lexical/utils/invariant.js'
-import { PluginComponent } from '../../../typesClient.js'
 
 function computeSelectionCount(selection: TableSelection): {
   columns: number
