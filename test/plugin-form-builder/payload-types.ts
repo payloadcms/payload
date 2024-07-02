@@ -8,281 +8,280 @@
 
 export interface Config {
   collections: {
-    pages: Page;
-    users: User;
-    forms: Form;
-    'form-submissions': FormSubmission;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
-  locale: 'en' | 'es' | 'de';
+    pages: Page
+    users: User
+    forms: Form
+    'form-submissions': FormSubmission
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
+  locale: 'en' | 'es' | 'de'
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
-  title: string;
-  slug: string;
-  form?: (string | null) | Form;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  slug: string
+  form?: (string | null) | Form
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
 export interface Form {
-  id: string;
-  title: string;
+  id: string
+  title: string
   fields?:
     | (
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            defaultValue?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'checkbox';
+            name: string
+            label?: string | null
+            width?: number | null
+            required?: boolean | null
+            defaultValue?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'checkbox'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'country';
+            name: string
+            label?: string | null
+            width?: number | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'country'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'email';
+            name: string
+            label?: string | null
+            width?: number | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'email'
           }
         | {
             message?:
               | {
-                  [k: string]: unknown;
+                  [k: string]: unknown
                 }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'message';
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'message'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
+            name: string
+            label?: string | null
+            width?: number | null
+            defaultValue?: number | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'number'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            basePrice?: number | null;
+            name: string
+            label?: string | null
+            width?: number | null
+            basePrice?: number | null
             priceConditions?:
               | {
-                  fieldToUse?: string | null;
-                  condition?: ('hasValue' | 'equals' | 'notEquals') | null;
-                  valueForCondition?: string | null;
-                  operator?: ('add' | 'subtract' | 'multiply' | 'divide') | null;
-                  valueType?: ('static' | 'valueOfField') | null;
-                  valueForOperator?: string | null;
-                  id?: string | null;
+                  fieldToUse?: string | null
+                  condition?: ('hasValue' | 'equals' | 'notEquals') | null
+                  valueForCondition?: string | null
+                  operator?: ('add' | 'subtract' | 'multiply' | 'divide') | null
+                  valueType?: ('static' | 'valueOfField') | null
+                  valueForOperator?: string | null
+                  id?: string | null
                 }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'payment';
+              | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'payment'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
+            name: string
+            label?: string | null
+            width?: number | null
+            defaultValue?: string | null
             options?:
               | {
-                  label: string;
-                  value: string;
-                  id?: string | null;
+                  label: string
+                  value: string
+                  id?: string | null
                 }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
+              | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'select'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'state';
+            name: string
+            label?: string | null
+            width?: number | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'state'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
+            name: string
+            label?: string | null
+            width?: number | null
+            defaultValue?: string | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'text'
           }
         | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textarea';
+            name: string
+            label?: string | null
+            width?: number | null
+            defaultValue?: string | null
+            required?: boolean | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'textarea'
           }
         | {
-            value?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'color';
+            value?: string | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'color'
           }
       )[]
-    | null;
-  submitButtonLabel?: string | null;
-  confirmationType?: ('message' | 'redirect') | null;
+    | null
+  submitButtonLabel?: string | null
+  confirmationType?: ('message' | 'redirect') | null
   confirmationMessage?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }[]
-    | null;
+    | null
   redirect?: {
-    type?: ('reference' | 'custom') | null;
+    type?: ('reference' | 'custom') | null
     reference?: {
-      relationTo: 'pages';
-      value: string | Page;
-    } | null;
-    url?: string | null;
-  };
+      relationTo: 'pages'
+      value: string | Page
+    } | null
+    url?: string | null
+  }
   emails?:
     | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
+        emailTo?: string | null
+        cc?: string | null
+        bcc?: string | null
+        replyTo?: string | null
+        emailFrom?: string | null
+        subject: string
         message?:
           | {
-              [k: string]: unknown;
+              [k: string]: unknown
             }[]
-          | null;
-        id?: string | null;
+          | null
+        id?: string | null
       }[]
-    | null;
-  custom?: string | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  custom?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
-  id: string;
-  form: string | Form;
+  id: string
+  form: string | Form
   submissionData?:
     | {
-        field: string;
-        value: string;
-        id?: string | null;
+        field: string
+        value: string
+        id?: string | null
       }[]
-    | null;
-  custom?: string | null;
+    | null
+  custom?: string | null
   payment?: {
-    field?: string | null;
-    status?: string | null;
-    amount?: number | null;
-    paymentProcessor?: string | null;
+    field?: string | null
+    status?: string | null
+    amount?: number | null
+    paymentProcessor?: string | null
     creditCard?: {
-      token?: string | null;
-      brand?: string | null;
-      number?: string | null;
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
+      token?: string | null
+      brand?: string | null
+      number?: string | null
+    }
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    relationTo: 'users';
-    value: string | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 
-
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

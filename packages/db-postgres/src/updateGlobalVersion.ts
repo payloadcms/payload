@@ -1,7 +1,12 @@
-import type { TypeWithVersion, UpdateGlobalVersionArgs } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedGlobalConfig, TypeWithID } from 'payload/types'
+import type {
+  PayloadRequest,
+  SanitizedGlobalConfig,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateGlobalVersionArgs,
+} from 'payload'
 
-import { buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
@@ -15,7 +20,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     id,
     global,
     locale,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     versionData,
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,

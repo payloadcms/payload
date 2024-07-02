@@ -1,18 +1,17 @@
 'use client'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { PopupList } from '../Popup/index.js'
@@ -53,32 +52,33 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
         return
       }
       await requests
-        .post(`${serverURL}${api}/${slug}/${id}/duplicate?locale=${locale.code}`, {
-          body: JSON.stringify({}),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-            credentials: 'include',
+        .post(
+          `${serverURL}${api}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
+          {
+            body: JSON.stringify({}),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+              credentials: 'include',
+            },
           },
-        })
+        )
         .then(async (res) => {
           const { doc, errors, message } = await res.json()
           if (res.status < 400) {
             toast.success(
               message ||
                 t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
-              {
-                autoClose: 3000,
-              },
             )
             setModified(false)
-            router.push(`${admin}/collections/${slug}/${doc.id}?locale=${locale.code}`)
+            router.push(
+              `${admin}/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+            )
           } else {
             toast.error(
               errors?.[0].message ||
                 message ||
                 t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
-              { autoClose: 5000 },
             )
           }
         })
@@ -113,7 +113,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
       </PopupList.Button>
       {modified && hasClicked && (
         <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-          <MinimalTemplate className={`${baseClass}__modal-template`}>
+          <div className={`${baseClass}__modal-template`}>
             <h1>{t('general:confirmDuplication')}</h1>
             <p>{t('general:unsavedChangesDuplicate')}</p>
             <Button
@@ -127,7 +127,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             <Button id="confirm-duplicate" onClick={confirm}>
               {t('general:duplicateWithoutSaving')}
             </Button>
-          </MinimalTemplate>
+          </div>
         </Modal>
       )}
     </React.Fragment>

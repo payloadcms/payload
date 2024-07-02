@@ -4,7 +4,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-import type { AuthStrategyFunction } from 'payload/auth'
+import type { AuthStrategyFunction } from 'payload'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 import { usersSlug } from './shared.js'
@@ -25,12 +25,17 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
   })
 
   const user = usersQuery.docs[0] || null
-  if (!user) return null
+  if (!user) return { user: null }
 
   return {
-    ...user,
-    _strategy: `${usersSlug}-${strategyName}`,
-    collection: usersSlug,
+    user: {
+      ...user,
+      _strategy: `${usersSlug}-${strategyName}`,
+      collection: usersSlug,
+    },
+    responseHeaders: new Headers({
+      'Smile-For-Me': 'please',
+    }),
   }
 }
 

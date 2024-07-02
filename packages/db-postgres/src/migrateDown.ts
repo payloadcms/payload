@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequest } from 'payload'
 
 import {
   commitTransaction,
@@ -7,7 +7,7 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
-} from 'payload/database'
+} from 'payload'
 
 import type { PostgresAdapter } from './types.js'
 
@@ -40,7 +40,7 @@ export async function migrateDown(this: PostgresAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    const req = { payload } as PayloadRequestWithData
+    const req = { payload } as PayloadRequest
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })

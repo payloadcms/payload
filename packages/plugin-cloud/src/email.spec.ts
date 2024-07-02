@@ -1,9 +1,9 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 import type { Payload } from 'payload'
 import nodemailer from 'nodemailer'
 import { jest } from '@jest/globals'
 
-import { defaults } from 'payload/config'
+import { defaults } from 'payload'
 
 import { payloadCloudEmail } from './email.js'
 

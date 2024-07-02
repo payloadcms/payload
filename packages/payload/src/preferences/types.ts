@@ -1,11 +1,11 @@
 import type { User } from '../auth/index.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
   key: string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
-  user: PayloadRequestWithData['user']
+  req: PayloadRequest
+  user: PayloadRequest['user']
 }
 
 export type PreferenceUpdateRequest = PreferenceRequest & { value: unknown }

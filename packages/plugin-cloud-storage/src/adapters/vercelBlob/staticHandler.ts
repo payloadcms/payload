@@ -1,5 +1,5 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig, PayloadRequestWithData, UploadConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { head } from '@vercel/blob'
 import path from 'path'
@@ -17,7 +17,7 @@ export const getStaticHandler = (
 ): StaticHandler => {
   return async (req, { params: { filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, req, filename })
+      const prefix = await getFilePrefix({ collection, filename, req })
 
       const fileUrl = `${baseUrl}/${path.posix.join(prefix, filename)}`
 

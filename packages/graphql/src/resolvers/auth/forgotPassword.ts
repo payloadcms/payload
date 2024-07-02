@@ -1,7 +1,6 @@
-import type { Collection } from 'payload/types'
+import type { Collection } from 'payload'
 
-import { forgotPasswordOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { forgotPasswordOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -11,6 +10,7 @@ function forgotPasswordResolver(collection: Collection): any {
       collection,
       data: {
         email: args.email,
+        username: args.username,
       },
       disableEmail: args.disableEmail,
       expiration: args.expiration,

@@ -1,7 +1,6 @@
-import type { FindGlobalVersions } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
+import type { FindGlobalVersions, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 
-import { buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
@@ -16,7 +15,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     page,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     skip,
     sort: sortArg,
     where,

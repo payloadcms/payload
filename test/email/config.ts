@@ -1,6 +1,6 @@
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'

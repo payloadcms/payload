@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
-import { restoreVersionOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { restoreVersionOperation } from 'payload'
+import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 

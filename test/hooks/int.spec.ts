@@ -1,12 +1,12 @@
 import type { Payload } from 'payload'
 
-import { AuthenticationError } from 'payload/errors'
+import { AuthenticationError } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { NestedAfterReadHook } from './payload-types.js'
 
 import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
@@ -35,22 +35,23 @@ describe('Hooks', () => {
       await payload.db.destroy()
     }
   })
+  if (isMongoose(payload)) {
+    describe('transform actions', () => {
+      it('should create and not throw an error', async () => {
+        // the collection has hooks that will cause an error if transform actions is not handled properly
+        const doc = await payload.create({
+          collection: transformSlug,
+          data: {
+            localizedTransform: [2, 8],
+            transform: [2, 8],
+          },
+        })
 
-  describe('transform actions', () => {
-    it('should create and not throw an error', async () => {
-      // the collection has hooks that will cause an error if transform actions is not handled properly
-      const doc = await payload.create({
-        collection: transformSlug,
-        data: {
-          localizedTransform: [2, 8],
-          transform: [2, 8],
-        },
+        expect(doc.transform).toBeDefined()
+        expect(doc.localizedTransform).toBeDefined()
       })
-
-      expect(doc.transform).toBeDefined()
-      expect(doc.localizedTransform).toBeDefined()
     })
-  })
+  }
 
   describe('hook execution', () => {
     let doc
@@ -325,6 +326,32 @@ describe('Hooks', () => {
   })
 
   describe('auth collection hooks', () => {
+    let hookUser
+    let hookUserToken
+
+    beforeAll(async () => {
+      const email = 'dontrefresh@payloadcms.com'
+
+      hookUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email,
+          password: devUser.password,
+          roles: ['admin'],
+        },
+      })
+
+      const { token } = await payload.login({
+        collection: hooksUsersSlug,
+        data: {
+          email: hookUser.email,
+          password: devUser.password,
+        },
+      })
+
+      hookUserToken = token
+    })
+
     it('should call afterLogin hook', async () => {
       const { user } = await payload.login({
         collection: hooksUsersSlug,
@@ -351,6 +378,31 @@ describe('Hooks', () => {
           data: { email: regularUser.email, password: regularUser.password },
         }),
       ).rejects.toThrow(AuthenticationError)
+    })
+
+    it('should respect refresh hooks', async () => {
+      const response = await restClient.POST(`/${hooksUsersSlug}/refresh-token`, {
+        headers: {
+          Authorization: `JWT ${hookUserToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.exp).toStrictEqual(1)
+      expect(data.refreshedToken).toStrictEqual('fake')
+    })
+
+    it('should respect me hooks', async () => {
+      const response = await restClient.GET(`/${hooksUsersSlug}/me`, {
+        headers: {
+          Authorization: `JWT ${hookUserToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.exp).toStrictEqual(10000)
     })
   })
 

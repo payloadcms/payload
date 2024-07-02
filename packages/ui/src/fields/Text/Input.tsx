@@ -1,14 +1,16 @@
 'use client'
+import type { ChangeEvent } from 'react'
+
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -102,7 +104,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
               disabled={readOnly}
               id={`field-${path?.replace(/\./g, '__')}`}
               name={path}
-              onChange={onChange}
+              onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
               onKeyDown={onKeyDown}
               placeholder={getTranslation(placeholder, i18n)}
               ref={inputRef}

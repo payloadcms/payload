@@ -46,6 +46,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'select-fields': SelectField;
+    'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
     uploads: Upload;
@@ -206,7 +207,7 @@ export interface LexicalMigrateField {
 export interface LexicalLocalizedField {
   id: string;
   title: string;
-  lexicalSimple?: {
+  lexicalBlocksSubLocalized?: {
     root: {
       type: string;
       children: {
@@ -222,21 +223,6 @@ export interface LexicalLocalizedField {
     [k: string]: unknown;
   } | null;
   lexicalBlocksLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  lexicalBlocksSubLocalized?: {
     root: {
       type: string;
       children: {
@@ -686,6 +672,8 @@ export interface TextField {
   text: string;
   localizedText?: string | null;
   i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
   defaultFunction?: string | null;
   defaultAsync?: string | null;
   overrideLength?: string | null;
@@ -929,6 +917,17 @@ export interface JsonField {
     | number
     | boolean
     | null;
+  group?: {
+    jsonWithinGroup?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1122,6 +1121,24 @@ export interface SelectField {
   settings?: {
     category?: ('a' | 'b')[] | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-fields-2".
+ */
+export interface TabsFields2 {
+  id: string;
+  tabsInArray?:
+    | {
+        text?: string | null;
+        tab2?: {
+          text2?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

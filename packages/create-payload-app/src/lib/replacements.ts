@@ -63,12 +63,13 @@ const payloadCloudReplacement: StorageAdapterReplacement = {
 // Removes placeholders
 const diskReplacement: StorageAdapterReplacement = {
   configReplacement: [],
+  importReplacement: '',
 }
 
 export const storageReplacements: Record<StorageAdapterType, StorageAdapterReplacement> = {
+  localDisk: diskReplacement,
   payloadCloud: payloadCloudReplacement,
   vercelBlobStorage: vercelBlobStorageReplacement,
-  localDisk: diskReplacement,
 }
 
 /**

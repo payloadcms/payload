@@ -1,4 +1,4 @@
-import type { ArrayField, Field } from 'payload/types'
+import type { ArrayField, Field } from 'payload'
 
 import type { LinkAppearances } from './link.js'
 

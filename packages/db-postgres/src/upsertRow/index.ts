@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
-import { ValidationError } from 'payload/errors'
+import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -14,7 +14,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { insertArrays } from './insertArrays.js'
 
-export const upsertRow = async <T extends TypeWithID>({
+export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>({
   id,
   adapter,
   data,
@@ -313,12 +313,14 @@ export const upsertRow = async <T extends TypeWithID>({
   } catch (error) {
     throw error.code === '23505'
       ? new ValidationError(
-          [
-            {
-              field: adapter.fieldConstraints[tableName][error.constraint],
-              message: req.t('error:valueMustBeUnique'),
-            },
-          ],
+          {
+            errors: [
+              {
+                field: adapter.fieldConstraints[tableName][error.constraint],
+                message: req.t('error:valueMustBeUnique'),
+              },
+            ],
+          },
           req.t,
         )
       : error

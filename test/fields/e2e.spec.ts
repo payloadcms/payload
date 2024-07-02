@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -19,7 +19,12 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
-import { arrayFieldsSlug, blockFieldsSlug, collapsibleFieldsSlug } from './slugs.js'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  collapsibleFieldsSlug,
+  tabsFields2Slug,
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -100,7 +105,7 @@ describe('fields', () => {
       await page.click('#action-save', { delay: 200 })
 
       // toast error
-      await expect(page.locator('.Toastify')).toContainText(
+      await expect(page.locator('.payload-toast-container')).toContainText(
         'The following field is invalid: uniqueText',
       )
 
@@ -121,7 +126,7 @@ describe('fields', () => {
       await page.locator('#action-save').click()
 
       // toast error
-      await expect(page.locator('.Toastify')).toContainText(
+      await expect(page.locator('.payload-toast-container')).toContainText(
         'The following field is invalid: group.unique',
       )
 
@@ -148,12 +153,34 @@ describe('fields', () => {
       const input = '{"foo": "bar"}'
       await page.goto(url.create)
       await page.waitForURL(url.create)
-      await expect(() => expect(page.locator('.json-field .code-editor')).toBeVisible()).toPass({
+      const jsonCodeEditor = page.locator('.json-field .code-editor').first()
+      await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
-      await page.locator('.json-field .inputarea').fill(input)
+      const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+      await jsonFieldInputArea.fill(input)
+
       await saveDocAndAssert(page)
-      await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
+      const jsonField = page.locator('.json-field').first()
+      await expect(jsonField).toContainText('"foo": "bar"')
+    })
+
+    test('should not unflatten json field containing keys with dots', async () => {
+      const input = '{"foo.with.periods": "bar"}'
+
+      await page.goto(url.create)
+      await page.waitForURL(url.create)
+      const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
+      await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+      const json = page.locator('.group-field .json-field .inputarea')
+      await json.fill(input)
+
+      await saveDocAndAssert(page, '.form-submit button')
+      await expect(page.locator('.group-field .json-field')).toContainText(
+        '"foo.with.periods": "bar"',
+      )
     })
   })
 
@@ -307,7 +334,7 @@ describe('fields', () => {
       await titleInput.fill('Row 123')
       await page.locator('#action-save').click()
       await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
       // ensure the 'title' field is visible in the table header
       await page.goto(url.list)
@@ -329,7 +356,7 @@ describe('fields', () => {
       await titleInput.fill('Row 456')
       await page.locator('#action-save').click()
       await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
       // ensure there are not two ID fields in the table header
       await page.goto(url.list)
@@ -443,6 +470,28 @@ describe('fields', () => {
 
       const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup')
       await expect(fieldRelyingOnSiblingData).toBeVisible()
+    })
+  })
+
+  describe('tabs', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, tabsFields2Slug)
+    })
+
+    test('should correctly save nested unnamed and named tabs', async () => {
+      await page.goto(url.create)
+
+      await page.locator('#field-tabsInArray .array-field__add-row').click()
+      await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
+      await page.locator('.tabs-field__tabs button:nth-child(2)').click()
+      await page.locator('#field-tabsInArray__0__tab2__text2').fill('tab 2 text')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
+      await page.locator('.tabs-field__tabs button:nth-child(2)').click()
+      await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
     })
   })
 })

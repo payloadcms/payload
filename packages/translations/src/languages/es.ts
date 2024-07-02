@@ -4,6 +4,7 @@ export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
     accountOfCurrentUser: 'Cuenta del usuario actual',
+    accountVerified: 'Cuenta verificada con éxito.',
     alreadyActivated: 'Ya Activado',
     alreadyLoggedIn: 'Sesión iniciada',
     apiKey: 'Clave API',
@@ -26,6 +27,8 @@ export const esTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Por favor introduce tu correo electrónico. Recibirás un mensaje con las instrucciones para restablecer tu contraseña.',
     forgotPasswordQuestion: '¿Olvidaste tu contraseña?',
+    forgotPasswordUsernameInstructions:
+      'Por favor, ingrese su nombre de usuario a continuación. Se enviarán instrucciones sobre cómo restablecer su contraseña a la dirección de correo electrónico asociada con su nombre de usuario.',
     generate: 'Generar',
     generateNewAPIKey: 'Generar Nueva Clave de API',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Desbloqueado correctamente',
     tokenRefreshSuccessful: 'Actualización de token exitosa.',
     unableToVerify: 'No se pudo Verificar',
+    username: 'Nombre de usuario',
+    usernameNotValid: 'El nombre de usuario proporcionado no es válido.',
     verified: 'Verificado',
     verifiedSuccessfully: 'Verificación Correcta',
     verify: 'Verificar',
@@ -114,6 +119,10 @@ export const esTranslations: DefaultTranslationsObject = {
       'Ya hay un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
       'Este usuario ha sido bloqueado debido a que tiene muchos intentos fallidos para iniciar sesión.',
+    usernameAlreadyRegistered:
+      'Un usuario con el nombre de usuario proporcionado ya está registrado.',
+    usernameOrPasswordIncorrect:
+      'El nombre de usuario o la contraseña proporcionados son incorrectos.',
     valueMustBeUnique: 'El valor debe ser único',
     verificationTokenInvalid: 'Token de verificación inválido.',
   },
@@ -275,6 +284,7 @@ export const esTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Permanecer en esta página',
     submissionSuccessful: 'Envío realizado correctamente.',
     submit: 'Enviar',
+    submitting: 'Enviando...',
     success: 'Éxito',
     successfullyCreated: '{{label}} creado correctamente.',
     successfullyDuplicated: '{{label}} duplicado correctamente.',
@@ -298,6 +308,7 @@ export const esTranslations: DefaultTranslationsObject = {
     contains: 'contiene',
     equals: 'igual',
     exists: 'existe',
+    intersects: 'interseca',
     isGreaterThan: 'es mayor que',
     isGreaterThanOrEqualTo: 'es mayor o igual que',
     isIn: 'está en',
@@ -307,6 +318,7 @@ export const esTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'no es igual a',
     isNotIn: 'no está en',
     near: 'cerca',
+    within: 'dentro de',
   },
   upload: {
     crop: 'Cultivo',

@@ -28,6 +28,7 @@ export default joi.object({
         email: joi.string(),
         password: joi.string(),
         prefillOnly: joi.boolean(),
+        username: joi.string(),
       }),
       joi.boolean(),
     ),
@@ -69,7 +70,17 @@ export default joi.object({
     meta: joi.object().keys({
       defaultOGImageType: joi.string().valid('off', 'dynamic', 'static'),
       description: joi.string(),
-      icons: joi.array().items(joi.object()),
+      icons: joi.array().items(
+        joi.object().keys({
+          type: joi.string(),
+          color: joi.string(),
+          fetchPriority: joi.string().valid('auto', 'high', 'low'),
+          media: joi.string(),
+          rel: joi.string(),
+          sizes: joi.string(),
+          url: joi.string(),
+        }),
+      ),
       openGraph: openGraphSchema,
       titleSuffix: joi.string(),
     }),
@@ -80,6 +91,7 @@ export default joi.object({
       inactivity: joi.string(),
       login: joi.string(),
       logout: joi.string(),
+      reset: joi.string(),
       unauthorized: joi.string(),
     }),
     user: joi.string(),
@@ -192,6 +204,7 @@ export default joi.object({
     autoGenerate: joi.boolean(),
     declare: joi.alternatives().try(joi.boolean(), joi.object({ ignoreTSError: joi.boolean() })),
     outputFile: joi.string(),
+    schema: joi.array().items(joi.func()),
   }),
   upload: joi.object(),
 })

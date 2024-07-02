@@ -1,16 +1,17 @@
 'use client'
-import type { OptionObject } from 'payload/types'
+import type { OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectFieldProps } from './index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -21,6 +22,7 @@ export type SelectInputProps = Omit<
   | 'docPreferences'
   | 'locale'
   | 'localized'
+  | 'onChange'
   | 'options'
   | 'rtl'
   | 'type'
@@ -28,6 +30,7 @@ export type SelectInputProps = Omit<
   | 'validate'
   | 'value'
 > & {
+  onChange?: ReactSelectAdapterProps['onChange']
   options?: OptionObject[]
   showError?: boolean
   value?: string | string[]

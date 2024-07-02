@@ -41,6 +41,18 @@ export async function generateTypes(
       compiled += `\n\n${declare}`
     }
   }
+
+  // Diff the compiled types against the existing types file
+  try {
+    const existingTypes = fs.readFileSync(outputFile, 'utf-8')
+
+    if (compiled === existingTypes) {
+      return
+    }
+  } catch (_) {
+    // swallow err
+  }
+
   fs.writeFileSync(outputFile, compiled)
   if (shouldLog) logger.info(`Types written to ${outputFile}`)
 }

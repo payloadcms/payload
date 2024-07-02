@@ -4,6 +4,7 @@ export const rsTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Налог',
     accountOfCurrentUser: 'Налог тренутног корисника',
+    accountVerified: 'Nalog je uspešno verifikovan.',
     alreadyActivated: 'Већ активирано',
     alreadyLoggedIn: 'Већ пријављен',
     apiKey: 'АПИ кључ',
@@ -25,6 +26,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Молимо Вас да унесете својy адресy е-поште. Примићете поруку са упутством за поновно постављање лозинке.',
     forgotPasswordQuestion: 'Заборављена лозинка?',
+    forgotPasswordUsernameInstructions:
+      'Unesite svoje korisničko ime ispod. Uputstva o tome kako da resetujete svoju lozinku biće poslata na e-mail adresu koja je povezana sa vašim korisničkim imenom.',
     generate: 'Генериши',
     generateNewAPIKey: 'Генериши нови АПИ кључ',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Успешно откључано',
     tokenRefreshSuccessful: 'Osvežavanje tokena je uspešno.',
     unableToVerify: 'Није могуће потврдити',
+    username: 'Korisničko ime',
+    usernameNotValid: 'Korisničko ime koje ste uneli nije važeće.',
     verified: 'Потврђено',
     verifiedSuccessfully: 'Успешно потврђено',
     verify: 'Потврди',
@@ -112,6 +117,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     unspecific: 'Дошло је до грешке.',
     userEmailAlreadyRegistered: 'Корисник са датом имејл адресом је већ регистрован.',
     userLocked: 'Овај корисник је закључан због превеликог броја неуспешних покушаја пријаве.',
+    usernameAlreadyRegistered: 'Korisnik sa datim korisničkim imenom je već registrovan.',
+    usernameOrPasswordIncorrect: 'Korisničko ime ili lozinka koje ste uneli su netačni.',
     valueMustBeUnique: 'Вредност мора бити јединствена.',
     verificationTokenInvalid: 'Верификациони токен је невалидан.',
   },
@@ -272,6 +279,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Остани на овој страници',
     submissionSuccessful: 'Успешно слање',
     submit: 'Потврди',
+    submitting: 'Podnošenje...',
     success: 'Uspeh',
     successfullyCreated: '{{label}} успешно креирано.',
     successfullyDuplicated: '{{label}} успешно дуплицирано.',
@@ -295,6 +303,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     contains: 'садржи',
     equals: 'једнако',
     exists: 'постоји',
+    intersects: 'preseca',
     isGreaterThan: 'је веће од',
     isGreaterThanOrEqualTo: 'је веће од или једнако',
     isIn: 'је у',
@@ -304,6 +313,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'није једнако',
     isNotIn: 'није у',
     near: 'близу',
+    within: 'unutar',
   },
   upload: {
     crop: 'Исеците слику',

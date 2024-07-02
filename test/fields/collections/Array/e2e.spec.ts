@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -107,7 +107,7 @@ describe('Array', () => {
     await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: arrayWithMinRows',
     )
   })
@@ -290,7 +290,7 @@ describe('Array', () => {
     await targetInput.fill(bulkText)
 
     await page.locator('#edit-array-fields .form-submit .edit-many__save').click()
-    await expect(page.locator('.Toastify__toast--success')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 3 Array Fields successfully.',
     )
   })

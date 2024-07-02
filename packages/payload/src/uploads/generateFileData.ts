@@ -7,7 +7,7 @@ import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
@@ -27,7 +27,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   originalDoc?: T
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   throwOnMissingFile?: boolean
 }
 
@@ -113,7 +113,7 @@ export const generateFileData = async <T>({
   let newData = data
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -131,23 +131,25 @@ export const generateFileData = async <T>({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimated) sharpOptions.animated = true
+    if (fileIsAnimatedType) sharpOptions.animated = true
 
-    if (fileHasAdjustments && sharp) {
+    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
         sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
-      if (resizeOptions) {
-        sharpFile = sharpFile.resize(resizeOptions)
-      }
-      if (formatOptions) {
-        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-      }
-      if (trimOptions) {
-        sharpFile = sharpFile.trim(trimOptions)
+      if (fileHasAdjustments) {
+        if (resizeOptions) {
+          sharpFile = sharpFile.resize(resizeOptions)
+        }
+        if (formatOptions) {
+          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
+        }
+        if (trimOptions) {
+          sharpFile = sharpFile.trim(trimOptions)
+        }
       }
     }
 
@@ -201,7 +203,6 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData && sharp) {
-      const metadata = await sharpFile.metadata()
       const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file, sharp })
 
       filesToSave.push({
@@ -215,7 +216,11 @@ export const generateFileData = async <T>({
         size: info.size,
       }
       fileData.width = info.width
-      fileData.height = fileIsAnimated ? info.height / metadata.pages : info.height
+      fileData.height = info.height
+      if (fileIsAnimatedType) {
+        const metadata = await sharpFile.metadata()
+        fileData.height = metadata.pages ? info.height / metadata.pages : info.height
+      }
       fileData.filesize = info.size
 
       if (file.tempFilePath) {
@@ -292,7 +297,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
   operation: 'create' | 'update'
   originalDoc: unknown
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): UploadEdits {
   const { data, operation, originalDoc, req } = args
 

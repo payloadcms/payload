@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -13,9 +13,11 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
+  path: (number | string)[]
   previousDoc: Record<string, unknown>
   previousSiblingDoc: Record<string, unknown>
-  req: PayloadRequestWithData
+  req: PayloadRequest
+  schemaPath: string[]
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
 }
@@ -28,9 +30,11 @@ export const traverseFields = async ({
   fields,
   global,
   operation,
+  path,
   previousDoc,
   previousSiblingDoc,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
@@ -46,6 +50,8 @@ export const traverseFields = async ({
         field,
         global,
         operation,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         previousDoc,
         previousSiblingDoc,
         req,

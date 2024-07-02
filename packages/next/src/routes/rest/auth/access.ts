@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { accessOperation } from 'payload/operations'
+import { accessOperation } from 'payload'
 
 import type { BaseRouteHandler } from '../types.js'
 

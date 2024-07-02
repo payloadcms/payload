@@ -1,10 +1,10 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
-import { versionDefaults } from 'payload/versions'
+import { versionDefaults } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import {
   useAllFormFields,

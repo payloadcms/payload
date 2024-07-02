@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { UICustomClient } from './UICustomClient.js'
 import { uiFieldsSlug } from './shared.js'

@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -138,7 +138,7 @@ describe('Number', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -151,7 +151,7 @@ describe('Number', () => {
     await page.keyboard.press('Enter')
     await page.click('#action-save', { delay: 100 })
 
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: withMinRows',
     )
   })

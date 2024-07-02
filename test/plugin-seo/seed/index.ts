@@ -1,9 +1,8 @@
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 
 import { mediaSlug } from '../shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -11,7 +10,7 @@ const dirname = path.dirname(filename)
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
-  const req = {} as PayloadRequestWithData
+  const req = {} as PayloadRequest
 
   try {
     // Create image

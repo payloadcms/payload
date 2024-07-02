@@ -1,7 +1,6 @@
 'use client'
 
-import type { FieldTypes } from 'payload/config'
-import type { FieldPermissions } from 'payload/types'
+import type { FieldPermissions, FieldTypes } from 'payload'
 
 import React from 'react'
 
@@ -10,7 +9,7 @@ import type {
   MappedField,
 } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
-import { HiddenInput } from '../../fields/HiddenInput/index.js'
+import { HiddenField } from '../../fields/Hidden/index.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
@@ -72,7 +71,7 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
-  const DefaultField = isHidden ? HiddenInput : fieldComponents[type]
+  const DefaultField = isHidden ? HiddenField : fieldComponents[type]
 
   if (CustomField === undefined && !DefaultField) {
     return null

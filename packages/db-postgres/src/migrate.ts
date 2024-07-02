@@ -1,15 +1,10 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { Payload } from 'payload'
-import type { Migration } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequest } from 'payload'
+import type { Migration } from 'payload'
 
 import { createRequire } from 'module'
-import {
-  commitTransaction,
-  initTransaction,
-  killTransaction,
-  readMigrationFiles,
-} from 'payload/database'
+import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types.js'
@@ -88,7 +83,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
   const { generateDrizzleJson } = require('drizzle-kit/payload')
 
   const start = Date.now()
-  const req = { payload } as PayloadRequestWithData
+  const req = { payload } as PayloadRequest
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 

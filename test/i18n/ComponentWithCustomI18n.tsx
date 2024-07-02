@@ -1,5 +1,5 @@
 'use client'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { CustomTranslationsKeys, CustomTranslationsObject } from './config.js'

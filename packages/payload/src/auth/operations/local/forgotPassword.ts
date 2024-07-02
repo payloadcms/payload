@@ -1,12 +1,12 @@
-import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../forgotPassword.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { forgotPasswordOperation } from '../forgotPassword.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
   context?: RequestContext
   data: {
@@ -14,10 +14,10 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   }
   disableEmail?: boolean
   expiration?: number
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
 }
 
-async function localForgotPassword<T extends keyof GeneratedTypes['collections']>(
+async function localForgotPassword<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {

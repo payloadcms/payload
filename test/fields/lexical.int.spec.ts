@@ -5,8 +5,7 @@ import type {
   SerializedUploadNode,
 } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
-import type { Payload } from 'payload'
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs, Payload } from 'payload'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
@@ -14,6 +13,8 @@ import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
+import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
+import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
@@ -567,6 +568,102 @@ describe('Lexical', () => {
       expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
       // Should now be populated (length 12)
       expect(populatedDocEditorRelationshipNode.value.text).toStrictEqual(textDoc.text)
+    })
+  })
+
+  describe('Localization', () => {
+    it('ensure localized lexical field is different across locales', async () => {
+      const lexicalDocEN = await payload.find({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        where: {
+          title: {
+            equals: 'Localized Lexical en',
+          },
+        },
+      })
+
+      expect(lexicalDocEN.docs[0].lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
+        'English text',
+      )
+
+      const lexicalDocES = await payload.findByID({
+        collection: 'lexical-localized-fields',
+        locale: 'es',
+        id: lexicalDocEN.docs[0].id,
+      })
+
+      expect(lexicalDocES.lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
+        'Spanish text',
+      )
+    })
+
+    it('ensure localized text field within blocks field within unlocalized lexical field is different across locales', async () => {
+      const lexicalDocEN = await payload.find({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        where: {
+          title: {
+            equals: 'Localized Lexical en',
+          },
+        },
+      })
+
+      expect(
+        lexicalDocEN.docs[0].lexicalBlocksSubLocalized.root.children[0].children[0].text,
+      ).toEqual('Shared text')
+
+      expect(
+        (lexicalDocEN.docs[0].lexicalBlocksSubLocalized.root.children[1].fields as any)
+          .textLocalized,
+      ).toEqual('English text in block')
+
+      const lexicalDocES = await payload.findByID({
+        collection: 'lexical-localized-fields',
+        locale: 'es',
+        id: lexicalDocEN.docs[0].id,
+      })
+
+      expect(lexicalDocES.lexicalBlocksSubLocalized.root.children[0].children[0].text).toEqual(
+        'Shared text',
+      )
+
+      expect(
+        (lexicalDocES.lexicalBlocksSubLocalized.root.children[1].fields as any).textLocalized,
+      ).toEqual('Spanish text in block')
+    })
+  })
+
+  describe('Hooks', () => {
+    it('ensure hook within number field within lexical block runs', async () => {
+      const lexicalDocEN = await payload.create({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        data: {
+          title: 'Localized Lexical hooks',
+          lexicalBlocksLocalized: textToLexicalJSON({ text: 'some text' }) as any,
+          lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
+            'Shared text',
+            'English text in block',
+          ) as any,
+        },
+      })
+
+      expect(
+        (lexicalDocEN.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
+      ).toEqual(20) // Initial: 1. BeforeChange: +1 (2). AfterRead: *10 (20)
+
+      // update document with same data
+      const lexicalDocENUpdated = await payload.update({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        id: lexicalDocEN.id,
+        data: lexicalDocEN,
+      })
+
+      expect(
+        (lexicalDocENUpdated.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
+      ).toEqual(210) // Initial: 20. BeforeChange: +1 (21). AfterRead: *10 (210)
     })
   })
 })

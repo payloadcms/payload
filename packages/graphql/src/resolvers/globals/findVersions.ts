@@ -1,7 +1,6 @@
-import type { Document, PayloadRequestWithData, SanitizedGlobalConfig, Where } from 'payload/types'
+import type { Document, PayloadRequest, SanitizedGlobalConfig, Where } from 'payload'
 
-import { findVersionsOperationGlobal } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { findVersionsOperationGlobal, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -16,7 +15,7 @@ export type Resolver = (
     where: Where
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<Document>
 

@@ -1,6 +1,5 @@
 'use client'
 import md5 from 'md5'
-import qs from 'qs'
 import React from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'
@@ -10,11 +9,13 @@ export const GravatarAccountIcon: React.FC = () => {
 
   const hash = md5(user.email.trim().toLowerCase())
 
-  const query = qs.stringify({
+  const params = new URLSearchParams({
     default: 'mp',
     r: 'g',
-    s: 50,
-  })
+    s: '50',
+  }).toString()
+
+  const query = `?${params}`
 
   return (
     <img

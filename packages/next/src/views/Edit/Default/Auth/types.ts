@@ -1,11 +1,11 @@
-import type { VerifyConfig } from 'payload/auth'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, VerifyConfig } from 'payload'
 
 export type Props = {
   className?: string
   collectionSlug: SanitizedCollectionConfig['slug']
   disableLocalStrategy?: boolean
   email: string
+  loginWithUsername: boolean
   operation: 'create' | 'update'
   readOnly: boolean
   requirePassword?: boolean

@@ -1,5 +1,5 @@
 'use client'
-import { formatFilesize } from 'payload/utilities'
+import { formatFilesize } from 'payload/shared'
 import React, { useState } from 'react'
 
 export type FileMetaProps = {
@@ -14,7 +14,7 @@ export type FileMetaProps = {
   width?: number
 }
 
-import { Edit } from '../../../icons/Edit/index.js'
+import { EditIcon } from '../../../icons/Edit/index.js'
 import { CopyToClipboard } from '../../CopyToClipboard/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
@@ -47,7 +47,7 @@ export const FileMeta: React.FC<FileMetaProps> = (props) => {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
           >
-            <Edit />
+            <EditIcon />
             <Tooltip show={hovered}>Edit</Tooltip>
           </DocumentDrawerToggler>
         )}

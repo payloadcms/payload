@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { randomBytes } from 'crypto'
-import { mapAsync } from 'payload/utilities'
+import { mapAsync } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'

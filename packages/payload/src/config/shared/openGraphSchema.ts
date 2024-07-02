@@ -10,7 +10,7 @@ const ogImageObj = joi.object({
 
 export const openGraphSchema = joi.object({
   description: joi.string(),
-  images: joi.alternatives().try(joi.array().items(joi.string()), joi.array().items(ogImageObj)),
+  images: joi.alternatives().try(ogImageObj, joi.array().items(ogImageObj)),
+  siteName: joi.string(),
   title: joi.string(),
-  url: joi.string(),
 })

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { Operation, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
@@ -16,7 +16,7 @@ type Args<T> = {
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: Operation
-  req: PayloadRequestWithData
+  req: PayloadRequest
   skipValidation?: boolean
 }
 
@@ -27,7 +27,7 @@ type Args<T> = {
  * - Validate data
  * - Transform data for storage
  * - beforeDuplicate hooks (if duplicate)
- * - Unflatten locales
+ * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
 export const beforeChange = async <T extends Record<string, unknown>>({
   id,
@@ -59,8 +59,9 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     global,
     mergeLocaleActions,
     operation,
-    path: '',
+    path: [],
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
@@ -68,7 +69,14 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   })
 
   if (errors.length > 0) {
-    throw new ValidationError(errors, req.t)
+    throw new ValidationError(
+      {
+        collection: collection?.slug,
+        errors,
+        global: global?.slug,
+      },
+      req.t,
+    )
   }
 
   await mergeLocaleActions.reduce(async (priorAction, action) => {

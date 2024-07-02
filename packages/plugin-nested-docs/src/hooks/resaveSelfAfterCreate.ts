@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
+import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 

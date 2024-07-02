@@ -1,7 +1,6 @@
-import type { Collection, PayloadRequestWithData, TypeWithID, Where } from 'payload/types'
+import type { Collection, PayloadRequest, TypeWithID, Where } from 'payload'
 
-import { executeAccess } from 'payload/auth'
-import { Forbidden } from 'payload/errors'
+import { Forbidden, executeAccess } from 'payload'
 
 import { endpointsAreDisabled } from '../checkEndpoints.js'
 
@@ -12,7 +11,7 @@ export async function checkFileAccess({
 }: {
   collection: Collection
   filename: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): Promise<Response | TypeWithID> {
   const { config } = collection
   const disableEndpoints = endpointsAreDisabled({ endpoints: config.endpoints, request: req })

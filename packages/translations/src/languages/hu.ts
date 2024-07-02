@@ -4,6 +4,7 @@ export const huTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Fiók',
     accountOfCurrentUser: 'Az aktuális felhasználó fiókja',
+    accountVerified: 'A fiók sikeresen hitelesítve.',
     alreadyActivated: 'Már aktiválva van',
     alreadyLoggedIn: 'Már bejelentkezett',
     apiKey: 'API-kulcs',
@@ -26,6 +27,8 @@ export const huTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Kérjük, adja meg e-mail címét alább. Kapni fog egy e-mail üzenetet a jelszó visszaállításához szükséges utasításokkal.',
     forgotPasswordQuestion: 'Elfelejtette jelszavát?',
+    forgotPasswordUsernameInstructions:
+      'Kérjük, adja meg felhasználónevét lentebb. A jelszó visszaállításáról szóló utasításokat a felhasználónevéhez tartozó e-mail címre küldjük.',
     generate: 'Generálás',
     generateNewAPIKey: 'Új API-kulcs generálása',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +66,8 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Sikeresen feloldva',
     tokenRefreshSuccessful: 'A token frissítése sikeres.',
     unableToVerify: 'Sikertelen megerősítés',
+    username: 'Felhasználónév',
+    usernameNotValid: 'A megadott felhasználónév nem érvényes.',
     verified: 'Megerősítve',
     verifiedSuccessfully: 'Sikeresen megerősítve',
     verify: 'Megerősítés',
@@ -114,6 +119,8 @@ export const huTranslations: DefaultTranslationsObject = {
     unspecific: 'Hiba történt.',
     userEmailAlreadyRegistered: 'A megadott email címmel már regisztráltak egy felhasználót.',
     userLocked: 'Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van.',
+    usernameAlreadyRegistered: 'Egy felhasználó a megadott felhasználónévvel már regisztrált.',
+    usernameOrPasswordIncorrect: 'A megadott felhasználónév vagy jelszó helytelen.',
     valueMustBeUnique: 'Az értéknek egyedinek kell lennie',
     verificationTokenInvalid: 'Az ellenőrző token érvénytelen.',
   },
@@ -275,6 +282,7 @@ export const huTranslations: DefaultTranslationsObject = {
     stayOnThisPage: 'Maradjon ezen az oldalon',
     submissionSuccessful: 'Beküldés sikeres.',
     submit: 'Beküldés',
+    submitting: 'Beküldés...',
     success: 'Siker',
     successfullyCreated: '{{label}} sikeresen létrehozva.',
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
@@ -298,6 +306,7 @@ export const huTranslations: DefaultTranslationsObject = {
     contains: 'tartalmaz',
     equals: 'egyenlő',
     exists: 'létezik',
+    intersects: 'metszéspontokban',
     isGreaterThan: 'nagyobb, mint',
     isGreaterThanOrEqualTo: 'nagyobb vagy egyenlő, mint',
     isIn: 'benne van',
@@ -307,6 +316,7 @@ export const huTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nem egyenlő',
     isNotIn: 'nincs benne',
     near: 'közel',
+    within: 'belül',
   },
   upload: {
     crop: 'Termés',

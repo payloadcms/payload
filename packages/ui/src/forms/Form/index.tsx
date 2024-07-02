@@ -1,14 +1,14 @@
 'use client'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import isDeepEqual from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { wait } from 'payload/utilities'
-import QueryString from 'qs'
+import { wait } from 'payload/shared'
+import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type {
   Context as FormContextType,
@@ -18,7 +18,7 @@ import type {
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import useThrottledEffect from '../../hooks/useThrottledEffect.js'
+import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -157,7 +157,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
     await Promise.all(validationPromises)
 
-    if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
+    if (!dequal(contextRef.current.fields, validatedFieldState)) {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
@@ -178,6 +178,33 @@ export const Form: React.FC<FormProps> = (props) => {
           e.preventDefault()
         }
         return
+      }
+
+      // create new toast promise which will resolve manually later
+      let successToast, errorToast
+      const promise = new Promise((resolve, reject) => {
+        successToast = resolve
+        errorToast = reject
+      })
+
+      const hasFormSubmitAction =
+        actionArg || typeof action === 'string' || typeof action === 'function'
+
+      if (redirect || disableSuccessStatus || !hasFormSubmitAction) {
+        // Do not show submitting toast, as the promise toast may never disappear under these conditions.
+        // Instead, make successToast() or errorToast() throw toast.success / toast.error
+        successToast = (data) => toast.success(data)
+        errorToast = (data) => toast.error(data)
+      } else {
+        toast.promise(promise, {
+          error: (data) => {
+            return data as string
+          },
+          loading: t('general:submitting'),
+          success: (data) => {
+            return data as string
+          },
+        })
       }
 
       if (e) {
@@ -219,7 +246,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If not valid, prevent submission
       if (!isValid) {
-        toast.error(t('error:correctInvalidFields'))
+        errorToast(t('error:correctInvalidFields'))
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
@@ -236,6 +263,15 @@ export const Form: React.FC<FormProps> = (props) => {
         onSubmit(fields, data)
       }
 
+      if (!hasFormSubmitAction) {
+        // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
+        // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
+        setProcessing(false)
+        setSubmitted(true)
+        setDisabled(false)
+        return
+      }
+
       const formData = contextRef.current.createFormData(overrides)
 
       try {
@@ -243,7 +279,7 @@ export const Form: React.FC<FormProps> = (props) => {
         const actionEndpoint =
           actionArg ||
           (typeof action === 'string'
-            ? `${action}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
+            ? `${action}${qs.stringify(formQueryParams, { addQueryPrefix: true })}`
             : null)
 
         if (actionEndpoint) {
@@ -261,7 +297,7 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res)
+          handleResponse(res, successToast, errorToast)
           return
         }
 
@@ -272,7 +308,6 @@ export const Form: React.FC<FormProps> = (props) => {
         let json: Record<string, any> = {}
 
         if (isJSON) json = await res.json()
-
         if (res.status < 400) {
           if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
@@ -281,7 +316,7 @@ export const Form: React.FC<FormProps> = (props) => {
           if (redirect) {
             router.push(redirect)
           } else if (!disableSuccessStatus) {
-            toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
+            successToast(json.message || t('general:submissionSuccessful'))
           }
         } else {
           setProcessing(false)
@@ -289,7 +324,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
-            toast.error(json.message)
+            errorToast(json.message)
 
             return
           }
@@ -304,8 +339,8 @@ export const Form: React.FC<FormProps> = (props) => {
                   newNonFieldErrs.push(err)
                 }
 
-                if (Array.isArray(err?.data)) {
-                  err.data.forEach((dataError) => {
+                if (Array.isArray(err?.data?.errors)) {
+                  err.data?.errors.forEach((dataError) => {
                     if (dataError?.field) {
                       newFieldErrs.push(dataError)
                     } else {
@@ -328,7 +363,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              toast.error(err.message || t('error:unknown'))
+              errorToast(err.message || t('error:unknown'))
             })
 
             return
@@ -336,14 +371,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
           const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
 
-          toast.error(message)
+          errorToast(message)
         }
       } catch (err) {
+        console.error('Error submitting form', err)
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
 
-        toast.error(err)
+        errorToast(err.message)
       }
     },
     [
@@ -593,7 +629,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const actionString =
     typeof action === 'string'
-      ? `${action}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
+      ? `${action}${qs.stringify(formQueryParams, { addQueryPrefix: true })}`
       : ''
 
   return (

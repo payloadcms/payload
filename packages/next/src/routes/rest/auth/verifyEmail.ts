@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { verifyEmailOperation } from 'payload/operations'
+import { verifyEmailOperation } from 'payload'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
@@ -15,7 +15,7 @@ export const verifyEmail: CollectionRouteHandlerWithID = async ({ id, collection
 
   return Response.json(
     {
-      message: t('authentication:emailVerified'),
+      message: t('authentication:accountVerified'),
     },
     {
       headers: headersWithCors({

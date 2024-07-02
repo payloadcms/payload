@@ -1,5 +1,4 @@
 import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
-import type { GraphQLInfo } from 'payload/config'
 import type {
   ArrayField,
   BlockField,
@@ -9,6 +8,7 @@ import type {
   DateField,
   EmailField,
   Field,
+  GraphQLInfo,
   GroupField,
   JSONField,
   NumberField,
@@ -24,7 +24,7 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from 'payload/types'
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -36,9 +36,8 @@ import {
   GraphQLNonNull,
   GraphQLString,
 } from 'graphql'
-import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/types'
-import { toWords } from 'payload/utilities'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { flattenTopLevelFields, toWords } from 'payload'
+import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'

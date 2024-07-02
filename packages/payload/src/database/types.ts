@@ -1,6 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types.js'
-import type { Document, Payload, PayloadRequestWithData, Where } from '../types/index.js'
+import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -170,7 +169,7 @@ export type QueryDraftsArgs = {
   locale?: string
   page?: number
   pagination?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   sort?: string
   where?: Where
 }
@@ -180,7 +179,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 export type FindOneArgs = {
   collection: string
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   where?: Where
 }
 
@@ -193,7 +192,7 @@ export type FindArgs = {
   locale?: string
   page?: number
   pagination?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   skip?: number
   sort?: string
   versions?: boolean
@@ -205,7 +204,7 @@ export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 export type CountArgs = {
   collection: string
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   where?: Where
 }
 
@@ -216,7 +215,7 @@ type BaseVersionArgs = {
   locale?: string
   page?: number
   pagination?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   skip?: number
   sort?: string
   versions?: boolean
@@ -237,7 +236,7 @@ export type FindGlobalVersionsArgs = BaseVersionArgs & {
 
 export type FindGlobalArgs = {
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   slug: string
   where?: Where
 }
@@ -245,7 +244,7 @@ export type FindGlobalArgs = {
 export type UpdateGlobalVersionArgs<T = TypeWithID> = {
   global: string
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   versionData: T
 } & (
   | {
@@ -262,23 +261,25 @@ export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+export type FindGlobal = <T extends Record<string, unknown> = any>(
+  args: FindGlobalArgs,
+) => Promise<T>
 
-export type CreateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
-  req: PayloadRequestWithData
+  req: PayloadRequest
   slug: string
 }
-export type CreateGlobal = <T extends GlobalsTypeWithID = any>(
+export type CreateGlobal = <T extends Record<string, unknown> = any>(
   args: CreateGlobalArgs<T>,
 ) => Promise<T>
 
-export type UpdateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
-  req: PayloadRequestWithData
+  req: PayloadRequest
   slug: string
 }
-export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(
+export type UpdateGlobal = <T extends Record<string, unknown> = any>(
   args: UpdateGlobalArgs<T>,
 ) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
@@ -290,7 +291,7 @@ export type FindGlobalVersions = <T = TypeWithID>(
 export type DeleteVersionsArgs = {
   collection: string
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   sort?: {
     [key: string]: string
   }
@@ -303,7 +304,7 @@ export type CreateVersionArgs<T = TypeWithID> = {
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   updatedAt: string
   versionData: T
 }
@@ -318,7 +319,7 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   globalSlug: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   updatedAt: string
   versionData: T
 }
@@ -332,7 +333,7 @@ export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 export type UpdateVersionArgs<T = TypeWithID> = {
   collection: string
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   versionData: T
 } & (
   | {
@@ -354,7 +355,7 @@ export type CreateArgs = {
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export type Create = (args: CreateArgs) => Promise<Document>
@@ -364,7 +365,7 @@ export type UpdateOneArgs = {
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 } & (
   | {
       id: number | string
@@ -380,7 +381,7 @@ export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
   collection: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   where: Where
 }
 
@@ -388,15 +389,15 @@ export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
   collection: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   where: Where
 }
 
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = MigrationData & {
-  down: ({ payload, req }: { payload: Payload; req: PayloadRequestWithData }) => Promise<boolean>
-  up: ({ payload, req }: { payload: Payload; req: PayloadRequestWithData }) => Promise<boolean>
+  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
+  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
 }
 
 export type MigrationData = {
