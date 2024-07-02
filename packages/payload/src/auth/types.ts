@@ -64,8 +64,9 @@ export type Permissions = {
 export type User = {
   [key: string]: any // This NEEDS to be an any, otherwise it breaks the Omit for ClientUser below
   collection: string
-  email: string
+  email?: string
   id: number | string
+  username?: string
 }
 
 /**
@@ -130,6 +131,7 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
   lockTime?: number
+  loginWithUsername?: boolean
   maxLoginAttempts?: number
   removeTokenFromResponses?: true
   strategies?: AuthStrategy[]

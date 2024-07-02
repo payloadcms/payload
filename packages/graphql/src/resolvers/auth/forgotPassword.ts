@@ -10,6 +10,7 @@ function forgotPasswordResolver(collection: Collection): any {
       collection,
       data: {
         email: args.email,
+        username: args.username,
       },
       disableEmail: args.disableEmail,
       expiration: args.expiration,

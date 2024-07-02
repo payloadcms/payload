@@ -4,6 +4,7 @@ export const azTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesab',
     accountOfCurrentUser: 'Cari istifadəçinin hesabı',
+    accountVerified: 'Hesab uğurla doğrulandı.',
     alreadyActivated: 'Artıq Aktivləşdirilib',
     alreadyLoggedIn: 'Artıq daxil olunub',
     apiKey: 'API Açarı',
@@ -26,6 +27,8 @@ export const azTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Zəhmət olmasa, e-poçt ünvanınızı aşağıda daxil edin. Siz parolunuzu necə sıfırlamaq barədə təlimatları olan e-poçt mesajı alacaqsınız.',
     forgotPasswordQuestion: 'Şifrəni unutmusan?',
+    forgotPasswordUsernameInstructions:
+      'Zəhmət olmasa, aşağıda istifadəçi adınızı daxil edin. İstifadəçi adınıza uyğun e-poçt ünvanınıza əlavə proqramın sıfırlanması ilə əlaqəli təlimatlar göndəriləcək.',
     generate: 'Yarad',
     generateNewAPIKey: 'Yeni API açarı yarad',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Uğurla kilidi açıldı',
     tokenRefreshSuccessful: 'Tokenin yenilənməsi uğurlu oldu.',
     unableToVerify: 'Doğrulamaq mümkün deyil',
+    username: 'İstifadəçi adı',
+    usernameNotValid: 'Təqdim edilən istifadəçi adı düzgün deyil',
     verified: 'Doğrulanmış',
     verifiedSuccessfully: 'Uğurla doğrulandı',
     verify: 'Doğrula',
@@ -112,6 +117,8 @@ export const azTranslations: DefaultTranslationsObject = {
     unspecific: 'Xəta baş verdi.',
     userEmailAlreadyRegistered: 'Verilən e-poçt ünvanı ilə artıq istifadəçi qeydiyyatdan keçib.',
     userLocked: 'Bu istifadəçi çoxsaylı uğursuz giriş cəhdləri səbəbindən kilidlənib.',
+    usernameAlreadyRegistered: 'Verilən istifadəçi adı ilə artıq qeydiyyatdan keçmişdir.',
+    usernameOrPasswordIncorrect: 'Təqdim edilən istifadəçi adı və ya şifrə yanlışdır.',
     valueMustBeUnique: 'Dəyər təkrar olmamalıdır',
     verificationTokenInvalid: 'Doğrulama tokenı yanlışdır.',
   },

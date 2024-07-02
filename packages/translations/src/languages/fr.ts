@@ -4,6 +4,7 @@ export const frTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Compte',
     accountOfCurrentUser: 'Compte de l’utilisateur actuel',
+    accountVerified: 'Compte vérifié avec succès.',
     alreadyActivated: 'Déjà activé',
     alreadyLoggedIn: 'Déjà connecté',
     apiKey: 'Clé API',
@@ -26,6 +27,8 @@ export const frTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Veuillez saisir votre e-mail ci-dessous. Vous recevrez un e-mail avec des instructions concernant comment réinitialiser votre mot de passe.',
     forgotPasswordQuestion: 'Mot de passe oublié ?',
+    forgotPasswordUsernameInstructions:
+      "Veuillez entrer votre nom d'utilisateur ci-dessous. Les instructions sur comment réinitialiser votre mot de passe seront envoyées à l'adresse e-mail associée à votre nom d'utilisateur.",
     generate: 'Générer',
     generateNewAPIKey: 'Générer une nouvelle clé API',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +66,8 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Déverrouillé avec succès',
     tokenRefreshSuccessful: 'Actualisation du jeton réussie.',
     unableToVerify: 'Vérification échouée',
+    username: "Nom d'utilisateur",
+    usernameNotValid: "Le nom d'utilisateur fourni n'est pas valide",
     verified: 'Vérifié',
     verifiedSuccessfully: 'Vérifié avec succès',
     verify: 'Vérifier',
@@ -117,6 +122,9 @@ export const frTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: "Un utilisateur avec l'email donné est déjà enregistré.",
     userLocked:
       'Cet utilisateur est verrouillé en raison d’un trop grand nombre de tentatives de connexion infructueuses.',
+    usernameAlreadyRegistered:
+      "Un utilisateur avec le nom d'utilisateur donné est déjà enregistré.",
+    usernameOrPasswordIncorrect: "Le nom d'utilisateur ou le mot de passe fourni est incorrect.",
     valueMustBeUnique: 'La valeur doit être unique',
     verificationTokenInvalid: 'Le jeton de vérification n’est pas valide.',
   },
