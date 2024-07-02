@@ -74,7 +74,7 @@ type FieldResult<T> = {
 
 ## useFieldProps
 
-All [Custom Field Components](./fields) are rendered on the server, and as such, only have access to static props at render time. But, some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
+All [Custom Field Components](./fields#the-field-component) are rendered on the server, and as such, only have access to static props at render time. But, some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
 
 For this reason, dynamic props like `path` are managed in their own React context, which can be accessed using the `useFieldProps` hook:
 
@@ -895,6 +895,27 @@ const MyComponent: React.FC = () => {
     <button type="button" onClick={resetColumns}>
       Reset columns
     </button>
+  )
+}
+```
+
+## useTableCell
+
+Similar to [`useFieldProps`](#usefieldprops), all [Custom Cell Components](./fields#the-cell-component) are rendered on the server, and as such, only have access to static props at render time. But, some props need to be dynamic, such as the field value itself.
+
+For this reason, dynamic props like `cellData` are managed in their own React context, which can be accessed using the `useTableCell` hook.
+
+```tsx
+'use client'
+import { useTableCell } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  const { cellData } = useTableCell() // highlight-line
+
+  return (
+    <div>
+      {cellData}
+    </div>
   )
 }
 ```

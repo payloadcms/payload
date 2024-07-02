@@ -220,8 +220,6 @@ All Cell Components receive the following props:
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
 | **`name`** | The name of the field. |
-| **`cellData`** | The value of the field. |
-| **`rowData`** | The data of the entire row, including the cell. |
 | **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
 | **`fieldType`** | The `type` property defined in the [Field Config](../fields/overview). |
 | **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
@@ -230,12 +228,16 @@ All Cell Components receive the following props:
 | **`labels`** | An object that contains the labels for the field. |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
-| **`customCellContext`** | An object that contains the context for the custom cell, such as `collectionSlug` or `uploadConfig`. |
 | **`dateDisplayFormat`** | If a [`date`](../fields/date) field, the `admin.dateDisplayFormat` property defined in the [Field Config](../fields/overview). |
 | **`options`** | If a [`select`](../fields/select) field, this is an array of options defined in the [Field Config](../fields/overview). [More details](../fields/select). |
 | **`relationTo`** | If a [`relationship`](../fields/relationship). or [`upload`](../fields/upload) field, this is the collection(s) the field is related to. |
 | **`richTextComponentMap`** | If a [`richText`](../fields/rich-text) field, this is an object that maps the rich text components. [More details](../fields/rich-text). |
 | **`blocks`** | If a [`blocks`](../fields/blocks) field, this is an array of labels and slugs representing the blocks defined in the [Field Config](../fields/overview). [More details](../fields/blocks). |
+
+<Banner type="info">
+  <strong>Tip:</strong>
+  Use the [`useTableCell`](./hooks#usetablecell) hook to subscribe to the field's `cellData` and `rowData`.
+</Banner>
 
 <Banner type="success">
   <strong>Reminder:</strong>
