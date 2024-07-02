@@ -232,8 +232,11 @@ export interface FieldBase {
   name: string
   required?: boolean
   saveToJWT?: boolean | string
-  /** Overrides Payload Typescript generation for the field  */
-  typescriptSchema?: JSONSchema4
+  /**
+   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
+   * This JSON schema will be used to generate the TypeScript interface of this field.
+   */
+  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
   validate?: Validate
 }

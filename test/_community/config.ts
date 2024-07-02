@@ -24,19 +24,23 @@ export default buildConfigWithDefaults({
         {
           name: 'custom',
           type: 'text',
-          typescriptSchema: {
-            enum: ['hello', 'world'],
-          },
+          typescriptSchema: [
+            () => ({
+              enum: ['hello', 'world'],
+            }),
+          ],
         },
         {
           name: 'withDefinitionsUsage',
           type: 'text',
-          typescriptSchema: {
-            type: 'array',
-            items: {
-              $ref: `#/definitions/objectWithNumber`,
-            },
-          },
+          typescriptSchema: [
+            () => ({
+              type: 'array',
+              items: {
+                $ref: `#/definitions/objectWithNumber`,
+              },
+            }),
+          ],
         },
         {
           name: 'json',

@@ -166,7 +166,7 @@ describe('configToJSONSchema', () => {
             {
               type: 'text',
               name: 'withCustom',
-              typescriptSchema: customSchema,
+              typescriptSchema: [() => customSchema],
             },
             {
               type: 'json',
