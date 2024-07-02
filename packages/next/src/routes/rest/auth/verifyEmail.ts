@@ -15,7 +15,7 @@ export const verifyEmail: CollectionRouteHandlerWithID = async ({ id, collection
 
   return Response.json(
     {
-      message: t('authentication:emailVerified'),
+      message: t('authentication:accountVerified'),
     },
     {
       headers: headersWithCors({

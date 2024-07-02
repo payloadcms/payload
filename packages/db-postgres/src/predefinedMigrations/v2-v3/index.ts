@@ -1,5 +1,5 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
@@ -19,7 +19,7 @@ const require = createRequire(import.meta.url)
 type Args = {
   debug?: boolean
   payload: Payload
-  req?: Partial<PayloadRequestWithData>
+  req?: Partial<PayloadRequest>
 }
 
 /**

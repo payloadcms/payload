@@ -1,7 +1,7 @@
 import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 export type FileSize = {
   filename: null | string
@@ -123,7 +123,7 @@ export type UploadConfig = {
    * @default undefined
    */
   handlers?: ((
-    req: PayloadRequestWithData,
+    req: PayloadRequest,
     args: {
       doc: TypeWithID
       params: { collection: string; filename: string }

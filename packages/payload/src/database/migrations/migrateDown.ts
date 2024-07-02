@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -34,7 +34,7 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    const req = { payload } as PayloadRequestWithData
+    const req = { payload } as PayloadRequest
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })

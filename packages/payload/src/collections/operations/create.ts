@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
-import type { Document, PayloadRequestWithData } from '../../types/index.js'
+import type { CollectionSlug } from '../../index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
   BeforeOperationHook,
@@ -37,7 +37,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 

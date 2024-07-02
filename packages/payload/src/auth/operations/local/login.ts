@@ -1,10 +1,11 @@
 import type {
+  AuthOperationsFromCollectionSlug,
   CollectionSlug,
   DataFromCollectionSlug,
   Payload,
   RequestContext,
 } from '../../../index.js'
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -14,15 +15,12 @@ import { loginOperation } from '../login.js'
 export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
   context?: RequestContext
-  data: {
-    email: string
-    password: string
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
 }
 

@@ -23,7 +23,7 @@ import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
@@ -54,7 +54,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
    */
@@ -87,7 +87,7 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    */
   id?: number | string
   /** The `payload` object to interface with the payload API */
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
@@ -97,7 +97,7 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   data: Partial<TData>,
   siblingData: Partial<TSiblingData>,
-  { user }: { user: PayloadRequestWithData['user'] },
+  { user }: { user: PayloadRequest['user'] },
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {
@@ -120,7 +120,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * An object containing the currently authenticated user.
    */
-  user: Partial<PayloadRequestWithData['user']>
+  user: Partial<PayloadRequest['user']>
 }
 
 export type FilterOptions<TData = any> =
@@ -176,7 +176,7 @@ export type BaseValidateOptions<TData, TSiblingData> = {
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
-  req: PayloadRequestWithData
+  req: PayloadRequest
   siblingData: Partial<TSiblingData>
 }
 

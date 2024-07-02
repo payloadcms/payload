@@ -92,6 +92,7 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       lockTime: joi.number(),
+      loginWithUsername: joi.boolean(),
       maxLoginAttempts: joi.number(),
       removeTokenFromResponses: joi.boolean().valid(true),
       strategies: joi.array().items(

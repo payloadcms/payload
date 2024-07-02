@@ -66,6 +66,22 @@ import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 
 export interface GeneratedTypes {
+  authUntyped: {
+    [slug: string]: {
+      forgotPassword: {
+        email: string
+      }
+      login: {
+        email: string
+        password: string
+        username?: string
+      }
+      registerFirstUser: {
+        email: string
+        password: string
+      }
+    }
+  }
   collectionsUntyped: {
     [slug: string]: TypeWithID & Record<string, unknown>
   }
@@ -104,6 +120,10 @@ type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
 export type TypedUser = ResolveUserType<GeneratedTypes>
+
+// @ts-expect-error
+type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
+export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -663,17 +683,25 @@ export type {
   AfterErrorHook as CollectionAfterErrorHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
+  AfterLogoutHook,
+  AfterMeHook,
   AfterOperationHook as CollectionAfterOperationHook,
   AfterReadHook as CollectionAfterReadHook,
+  AfterRefreshHook,
+  AuthCollection,
+  AuthOperationsFromCollectionSlug,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeLoginHook as CollectionBeforeLoginHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
+  BulkOperationResult,
   Collection,
+  CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
+  HookOperationType,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
@@ -813,7 +841,6 @@ export type {
 export { getLocalI18n } from './translations/getLocalI18n.js'
 
 export { combineMerge } from './utilities/combineMerge.js'
-
 export {
   configToJSONSchema,
   entityToJSONSchema,
@@ -822,7 +849,10 @@ export {
 } from './utilities/configToJSONSchema.js'
 
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+
 export { createLocalReq } from './utilities/createLocalReq.js'
+export { deepCopyObject } from './utilities/deepCopyObject.js'
+export { deepMerge } from './utilities/deepMerge.js'
 
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 

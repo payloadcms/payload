@@ -1,5 +1,5 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequestWithData } from '../../../types/index.js'
+import type { Document, PayloadRequest } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -15,7 +15,7 @@ export type Options<TSlug extends GlobalSlug> = {
   id: string
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   slug: TSlug
   user?: Document

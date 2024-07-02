@@ -2,7 +2,7 @@ import type { forgotPasswordOperation } from '../../auth/operations/forgotPasswo
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { AfterOperationHook, SanitizedCollectionConfig } from '../config/types.js'
 import type { countOperation } from './count.js'
 import type { createOperation } from './create.js'
@@ -30,7 +30,7 @@ export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
 export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
-  req: PayloadRequestWithData
+  req: PayloadRequest
 } & (
   | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['count']>[0]

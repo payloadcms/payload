@@ -4,6 +4,7 @@ export const myTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'အကောင့်',
     accountOfCurrentUser: 'သင့် အကောင့်',
+    accountVerified: 'Akaun telah disahkan dengan jayanya.',
     alreadyActivated: 'အတည်ပြုပြီး',
     alreadyLoggedIn: 'ဝင်ရောက်ပြီးသား',
     apiKey: 'API Key',
@@ -26,6 +27,8 @@ export const myTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'ကျေးဇူးပြု၍ သင့်အီးမေးလ်ကို ထည့်သွင်းပါ။ သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်နိုင်ရန် အီးမေးလ်စာတစ်စောင်ကို သင်လက်ခံရရှိမည်ဖြစ်သည်။',
     forgotPasswordQuestion: 'စကားဝှက် မေ့နေပါသလား။',
+    forgotPasswordUsernameInstructions:
+      'Sila masukkan nama pengguna anda di bawah. Arahan mengenai bagaimana untuk menetapkan semula kata laluan anda akan dihantar ke alamat emel yang dikaitkan dengan nama pengguna anda.',
     generate: 'Generate',
     generateNewAPIKey: 'API key အသစ်ဖန်တီးရန်',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'အောင်မြင်စွာသော့ဖွင့်ခဲ့သည်။',
     tokenRefreshSuccessful: 'Token refresh berhasil.',
     unableToVerify: 'စိစစ်၍မရပါ။',
+    username: 'Nama pengguna',
+    usernameNotValid: 'ပေးထားသော အသုံးပြုသူအမည်မှာ တရားဝင်မှု မရှိပါ။',
     verified: 'စိစစ်ပြီး',
     verifiedSuccessfully: 'အတည်ပြုပြီးပါပြီ။',
     verify: 'စိစစ်ခြင်း',
@@ -113,6 +118,8 @@ export const myTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     userLocked:
       'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
+    usernameAlreadyRegistered: 'Pengguna dengan nama pengguna yang diberikan sudah mendaftar.',
+    usernameOrPasswordIncorrect: 'Nama pengguna atau kata laluan yang diberikan tidak betul.',
     valueMustBeUnique: 'value သည် အဓိပ္ပာယ်ရှိရပါမည်။',
     verificationTokenInvalid: 'အတည်ပြုခြင်းတိုကင်သည် မမှန်ကန်ပါ။',
   },

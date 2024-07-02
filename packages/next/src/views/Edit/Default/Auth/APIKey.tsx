@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import {
   CopyToClipboard,
@@ -42,7 +42,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
           config,
         },
         t,
-      } as PayloadRequestWithData,
+      } as PayloadRequest,
       siblingData: {},
     })
 

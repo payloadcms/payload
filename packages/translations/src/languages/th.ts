@@ -4,6 +4,7 @@ export const thTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'บัญชี',
     accountOfCurrentUser: 'บัญชีปัจจุบัน',
+    accountVerified: 'ยืนยันบัญชีสำเร็จแล้ว',
     alreadyActivated: 'เปิดใช้งานแล้ว',
     alreadyLoggedIn: 'ลงชื่อเข้าใช้แล้ว',
     apiKey: 'API Key',
@@ -26,6 +27,8 @@ export const thTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'กรุณาใส่อีเมลของคุณ ระบบจะส่งวิธีการเปลี่ยนรหัสผ่านไปให้คุณทางอีเมล',
     forgotPasswordQuestion: 'ลืมรหัสผ่าน?',
+    forgotPasswordUsernameInstructions:
+      'กรุณากรอกชื่อผู้ใช้ของคุณที่ด้านล่าง คำแนะนำเกี่ยวกับวิธีการรีเซ็ตรหัสผ่านของคุณจะถูกส่งไปยังที่อยู่อีเมลที่เชื่อมโยงกับชื่อผู้ใช้ของคุณ',
     generate: 'สร้าง',
     generateNewAPIKey: 'สร้าง API Key',
     generatingNewAPIKeyWillInvalidate:
@@ -60,6 +63,8 @@ export const thTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'ปลดล็อกบัญชีสำเร็จ',
     tokenRefreshSuccessful: 'การรีเฟรชโทเค็นสำเร็จ',
     unableToVerify: 'ไม่สามารถยืนยันบัญชีได้',
+    username: 'ชื่อผู้ใช้',
+    usernameNotValid: 'ชื่อผู้ใช้ที่ให้มาไม่ถูกต้อง',
     verified: 'ยืนยันบััญชีแล้ว',
     verifiedSuccessfully: 'ยืนยันบัญชีสำเร็จ',
     verify: 'ยืนยันบัญชี',
@@ -110,6 +115,8 @@ export const thTranslations: DefaultTranslationsObject = {
     unspecific: 'เกิดปัญหาบางอย่าง',
     userEmailAlreadyRegistered: 'ผู้ใช้ที่มีอีเมลดังกล่าวได้ลงทะเบียนแล้ว',
     userLocked: 'บัญชีนี้ถูกล็อกเนื่องจากมีการพยายามเข้าสู่ระบบมากเกินไป',
+    usernameAlreadyRegistered: 'ผู้ใช้ที่มีชื่อผู้ใช้ที่ระบุไว้แล้วถูกลงทะเบียนเอาไว้แล้ว',
+    usernameOrPasswordIncorrect: 'ชื่อผู้ใช้หรือรหัสผ่านที่คุณให้มาไม่ถูกต้อง',
     valueMustBeUnique: 'ค่าต้องไม่ซ้ำกับเอกสารอื่น',
     verificationTokenInvalid: 'Token ยืนยันตัวตนไม่ถูกต้อง',
   },

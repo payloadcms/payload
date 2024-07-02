@@ -14,12 +14,12 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateTitle } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateTitle } from '../../types.js'
 
-import { defaults } from '../defaults.js'
-import { LengthIndicator } from '../ui/LengthIndicator.js'
-import './index.scss'
+import { defaults } from '../../defaults.js'
+import { LengthIndicator } from '../../ui/LengthIndicator.js'
+import '../index.scss'
 
 const { maxLength, minLength } = defaults.title
 
@@ -28,14 +28,14 @@ type MetaTitleProps = FormFieldBase & {
   hasGenerateTitleFn: boolean
 }
 
-export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { CustomLabel, hasGenerateTitleFn, label, labelProps, path, required } = props || {}
+export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
+  const { CustomLabel, hasGenerateTitleFn, label, labelProps, required } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const field: FieldType<string> = useField({
-    path,
+    path: pathFromContext,
   } as Options)
 
   const locale = useLocale()

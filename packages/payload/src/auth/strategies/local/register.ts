@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { Payload } from '../../../index.js'
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
@@ -10,7 +10,7 @@ type Args = {
   doc: Record<string, unknown>
   password: string
   payload: Payload
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const registerLocalStrategy = async ({
@@ -20,23 +20,38 @@ export const registerLocalStrategy = async ({
   payload,
   req,
 }: Args): Promise<Record<string, unknown>> => {
+  const loginWithUsername = collection?.auth?.loginWithUsername
+
   const existingUser = await payload.find({
     collection: collection.slug,
     depth: 0,
     limit: 1,
     pagination: false,
     req,
-    where: {
-      email: {
-        equals: doc.email,
-      },
-    },
+    where: loginWithUsername
+      ? {
+          username: {
+            equals: doc.username,
+          },
+        }
+      : {
+          email: {
+            equals: doc.email,
+          },
+        },
   })
 
   if (existingUser.docs.length > 0) {
     throw new ValidationError({
       collection: collection.slug,
-      errors: [{ field: 'email', message: req.t('error:userEmailAlreadyRegistered') }],
+      errors: [
+        loginWithUsername
+          ? {
+              field: 'username',
+              message: req.t('error:usernameAlreadyRegistered'),
+            }
+          : { field: 'email', message: req.t('error:userEmailAlreadyRegistered') },
+      ],
     })
   }
 

@@ -1,5 +1,5 @@
 import type {
-  PayloadRequestWithData,
+  PayloadRequest,
   SanitizedGlobalConfig,
   TypeWithID,
   TypeWithVersion,
@@ -20,7 +20,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     id,
     global,
     locale,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     versionData,
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
