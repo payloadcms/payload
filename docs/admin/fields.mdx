@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-[Fields](../fields/overview) within the [Admin Panel](./overview) can be customized in their appearance and behavior without affecting the underlying data structure. From [Conditional Logic](#conditional-logic) to [Custom Field Components](#custom-field-components) and more, fields can be perfectly tailored to meet the needs of your editors.
+[Fields](../fields/overview) within the [Admin Panel](./overview) can be customized in their appearance and behavior without affecting the underlying data structure. From [Conditional Logic](#conditional-logic) to [Custom Field Components](#custom-field-components) and more, fields can be endlessly customized for your specific use case.
 
 For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
@@ -21,7 +21,7 @@ For example, your app might need to render a specific interface that Payload doe
 You can customize the appearance and behavior of fields within the [Admin Panel](./overvieW) through the `admin` property of any [Field Config](../fields/overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const myField: Field = {
   name: 'myField',
@@ -61,7 +61,7 @@ Within the [Admin Panel](./overview), fields are rendered in three distinct plac
 To easily swap in Field Components with your own, use the `admin.components` property of any [Field Config](../fields/overview):
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const CollectionConfig: CollectionConfig = {
   // ...
@@ -99,10 +99,12 @@ _\* **`beforeInput`** and **`afterInput`** are only supported in fields that do 
 
 ### The Field Component
 
-The Field Component is the actual form field rendered in the Edit View. This is the input that user's will interact with when editing a document. To easily swap in your own Field Component, use the `admin.components.Field` property of your [Field Config](../fields/overview):
+The Field Component is the actual form field rendered in the Edit View. This is the input that user's will interact with when editing a document.
+
+To easily swap in your own Field Component, use the `admin.components.Field` property of your [Field Config](../fields/overview):
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const CollectionConfig: CollectionConfig = {
   // ...
@@ -248,7 +250,7 @@ const CustomError: React.FC<Props> = (props) => {
 
 ### The Description Property
 
-The `description` property is used to provide additional information to the editor about a field, such as special instructions. It's placement varies from field to field, but it is typically displayed beneath the field input with dimmed text.
+The `description` property is used to provide additional information to the editor about a field, such as special instructions. It's placement varies from field to field, but it is typically displayed beneath the field input in a subtle style.
 
 A description can be configured in three ways:
 
@@ -259,17 +261,17 @@ A description can be configured in three ways:
 To easily add a Custom Description to a field, use the `admin.description` property on any [Field Config](../fields/overview):
 
 ```ts
-{
-  fields: [
-    {
-      name: 'message',
-      type: 'text',
-      maxLength: 20,
-      admin: {
-        description: MyCustomDescription // highlight-line
-      },
+import type { Field } from 'payload'
+
+export const myField: Field = {
+  {
+    name: 'message',
+    type: 'text',
+    maxLength: 20,
+    admin: {
+      description: 'Hello, world!' // highlight-line
     },
-  ]
+  },
 }
 ```
 
@@ -336,7 +338,7 @@ With these properties you can add multiple components before and after the input
 
 ```tsx
 import React from 'react'
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 import './style.scss'
 

@@ -124,7 +124,7 @@ Collection Components are those that effect [Collection](../configuration/collec
 To override Collection Components, use the `admin.components` property on any [Collection Config](../configuration/collections):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 import { CustomSaveButton } from './CustomSaveButton'
 
 export const MyCollection: SanitizedCollectionConfig = {
@@ -165,7 +165,7 @@ Global Components are those that effect [Global](../configuration/globals)-speci
 To override Global Components, use the `admin.components` property on any [Global Config](../configuration/globals):
 
 ```ts
-import type { SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedGlobalConfig } from 'payload'
 import { CustomSaveButton } from './CustomSaveButton'
 
 export const MyGlobal: SanitizedGlobalConfig = {

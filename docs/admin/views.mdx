@@ -101,7 +101,7 @@ Collection Views are views that are scoped under the `/collections` route, such 
 To easily swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Collection Config](../collections/overview):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
@@ -141,7 +141,7 @@ Global Views are views that are scoped under the `/globals` route, such as the D
 To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property on any [Global Config](../globals/overview):
 
 ```ts
-import type { SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedGlobalConfig } from 'payload'
 
 export const MyGlobalConfig: SanitizedGlobalConfig = {
   // ...
@@ -180,7 +180,7 @@ Document Views are views that are scoped under the `/collections/:collectionSlug
 To easily swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
   // ...
@@ -220,7 +220,7 @@ The following options are available:
 Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `Component.Tab` key:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export const MyCollection: SanitizedCollectionConfig = {
   slug: 'my-collection',
@@ -260,7 +260,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 Custom Views are just [Custom Components](./components) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 import { MyCustomView } from './MyCustomView'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
