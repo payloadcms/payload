@@ -1,25 +1,17 @@
-import type {
-  PayloadRequest,
-  PayloadRequestData,
-  PayloadRequestWithData,
-  SanitizedConfig,
-} from 'payload'
+import type { PayloadRequest, SanitizedConfig } from 'payload'
 
 /**
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams
  */
-type Args = {
-  request: PayloadRequest & PayloadRequestData
-}
-export function addLocalesToRequestFromData({ request }: Args): PayloadRequestWithData {
+export function addLocalesToRequestFromData(req: PayloadRequest): void {
   const {
     data,
     payload: { config },
-  } = request
+  } = req
 
   if (data) {
-    let localeOnReq = request.locale
-    let fallbackLocaleOnReq = request.fallbackLocale
+    let localeOnReq = req.locale
+    let fallbackLocaleOnReq = req.fallbackLocale
 
     if (!localeOnReq && data?.locale && typeof data.locale === 'string') {
       localeOnReq = data.locale
@@ -39,13 +31,9 @@ export function addLocalesToRequestFromData({ request }: Args): PayloadRequestWi
       localization: config.localization,
     })
 
-    const mutableRequest = request
-    if (locale) mutableRequest.locale = locale
-    if (fallbackLocale) mutableRequest.fallbackLocale = fallbackLocale
-    return mutableRequest
+    if (locale) req.locale = locale
+    if (fallbackLocale) req.fallbackLocale = fallbackLocale
   }
-
-  return request
 }
 
 type SanitizeLocalesArgs = {

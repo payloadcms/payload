@@ -13,6 +13,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
+import { PagesWithImportedFields } from './collections/PagesWithImportedFields.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
@@ -29,7 +30,7 @@ const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
 }
 
 export default buildConfigWithDefaults({
-  collections: [Users, Pages, Media],
+  collections: [Users, Pages, Media, PagesWithImportedFields],
   i18n: {
     supportedLanguages: {
       en,

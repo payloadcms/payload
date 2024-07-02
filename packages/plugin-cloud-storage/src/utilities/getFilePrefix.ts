@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequestWithData, UploadConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload'
 
 export async function getFilePrefix({
   collection,
@@ -7,7 +7,7 @@ export async function getFilePrefix({
 }: {
   collection: CollectionConfig
   filename: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): Promise<string> {
   const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
 

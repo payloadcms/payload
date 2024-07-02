@@ -4,6 +4,7 @@ export const ukTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Обліковий запис',
     accountOfCurrentUser: 'Обліковий запис поточного користувача',
+    accountVerified: 'Рахунок успішно перевірено.',
     alreadyActivated: 'Вже активований',
     alreadyLoggedIn: 'Вже увійшли в систему',
     apiKey: 'API ключ',
@@ -26,6 +27,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Будь ласка, вкажіть адресу вашої електронної пошти нижче. Ви отримаєте лист на вашу електронну пошту з інструкціями щодо скидання пароля.',
     forgotPasswordQuestion: 'Забули пароль?',
+    forgotPasswordUsernameInstructions:
+      "Будь ласка, введіть нижче своє ім'я користувача. Інструкції щодо скидання пароля буде відправлено на адресу електронної пошти, пов'язану з вашим ім'ям користувача.",
     generate: 'Згенерувати',
     generateNewAPIKey: 'Згенерувати новий API ключ',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +65,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Успішно розблоковано',
     tokenRefreshSuccessful: 'Оновлення токену успішне.',
     unableToVerify: 'Неможливо підтвердити',
+    username: "Ім'я користувача",
+    usernameNotValid: "Вказане ім'я користувача недійсне",
     verified: 'Підтверджено',
     verifiedSuccessfully: 'Успішно підтверджено',
     verify: 'Підтвердити',
@@ -113,6 +118,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     unspecific: 'Виникла помилка.',
     userEmailAlreadyRegistered: 'Користувач із вказаною електронною поштою вже зареєстрований.',
     userLocked: 'Цей користувач заблокований через велику кількість невдалих спроб входу.',
+    usernameAlreadyRegistered: 'Користувач з вказаним іменем користувача вже зареєстрований.',
+    usernameOrPasswordIncorrect: "Введене ім'я користувача або пароль неправильні.",
     valueMustBeUnique: 'Значення має бути унікальним.',
     verificationTokenInvalid: 'Токен верифікації недійсний.',
   },

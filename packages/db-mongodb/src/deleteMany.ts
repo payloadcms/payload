@@ -1,4 +1,4 @@
-import type { DeleteMany, PayloadRequestWithData } from 'payload'
+import type { DeleteMany, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -6,7 +6,7 @@ import { withSession } from './withSession.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequestWithData, where },
+  { collection, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
   const options = {

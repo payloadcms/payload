@@ -2,7 +2,7 @@ import type {
   Collection,
   CollectionSlug,
   DataFromCollectionSlug,
-  PayloadRequestWithData,
+  PayloadRequest,
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
@@ -18,7 +18,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<DataFromCollectionSlug<TSlug>>
 

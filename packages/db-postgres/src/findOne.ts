@@ -1,9 +1,4 @@
-import type {
-  FindOneArgs,
-  PayloadRequestWithData,
-  SanitizedCollectionConfig,
-  TypeWithID,
-} from 'payload'
+import type { FindOneArgs, PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -13,7 +8,7 @@ import { findMany } from './find/findMany.js'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
-  { collection, locale, req = {} as PayloadRequestWithData, where }: FindOneArgs,
+  { collection, locale, req = {} as PayloadRequest, where }: FindOneArgs,
 ): Promise<T> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 

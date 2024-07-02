@@ -4,6 +4,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Nalog',
     accountOfCurrentUser: 'Nalog trenutnog korisnika',
+    accountVerified: 'Nalog je uspešno verifikovan.',
     alreadyActivated: 'Već aktivirano',
     alreadyLoggedIn: 'Već prijavljen',
     apiKey: 'API ključ',
@@ -25,6 +26,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Molimo Vas da unesete svoj adresu e-pošte. Primićete poruku sa uputstvom za ponovno postavljanje lozinke.',
     forgotPasswordQuestion: 'Zaboravljena lozinka?',
+    forgotPasswordUsernameInstructions:
+      'Molimo unesite vaše korisničko ime ispod. Instrukcije za resetovanje vaše lozinke biće poslate na email adresu povezanu sa vašim korisničkim imenom.',
     generate: 'Generiši',
     generateNewAPIKey: 'Generiši novi API ključ',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Uspešno otključano',
     tokenRefreshSuccessful: 'Osvežavanje tokena je uspelo.',
     unableToVerify: 'Nije moguće potvrditi',
+    username: 'Korisničko ime',
+    usernameNotValid: 'Uneseno korisničko ime nije validno.',
     verified: 'Potvrđeno',
     verifiedSuccessfully: 'Uspešno potvrđeno',
     verify: 'Potvrdi',
@@ -112,6 +117,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     unspecific: 'Došlo je do greške.',
     userEmailAlreadyRegistered: 'Korisnik sa datom imejl adresom je već registrovan.',
     userLocked: 'Ovaj korisnik je zaključan zbog prevelikog broja neuspešnih pokušaja prijave.',
+    usernameAlreadyRegistered: 'Korisnik sa datim korisničkim imenom je već registrovan.',
+    usernameOrPasswordIncorrect: 'Korisničko ime ili lozinka koju ste uneli su netačni.',
     valueMustBeUnique: 'Vrednost mora biti jedinstvena.',
     verificationTokenInvalid: 'Verifikacioni token je nevalidan.',
   },

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, PayloadRequestWithData, Where } from '../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 type Args = {
   collection?: SanitizedCollectionConfig
@@ -8,7 +8,7 @@ type Args = {
   id?: number | string
   max: number
   payload: Payload
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
 }
 
 export const enforceMaxVersions = async ({

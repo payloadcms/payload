@@ -1,4 +1,4 @@
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -10,7 +10,7 @@ const dirname = path.dirname(filename)
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
-  const req = {} as PayloadRequestWithData
+  const req = {} as PayloadRequest
 
   try {
     // Create image

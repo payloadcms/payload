@@ -598,15 +598,37 @@ export const Orders: CollectionConfig = {
     {
       path: '/:id/tracking',
       method: 'get',
-      handler: async (req, res, next) => {
+      handler: (req) => {
         const tracking = await getTrackingInfo(req.params.id)
-        if (tracking) {
-          res.status(200).send({ tracking })
-        } else {
-          res.status(404).send({ error: 'not found' })
+
+        if (!tracking) {
+          return Response.json({ error: 'not found' }, { status: 404})
         }
+
+        return Response.json({
+          message: `Hello ${req.routeParams.name as string} @ ${req.routeParams.group as string}`,
+        })
       },
     },
+    {
+      path: '/:id/tracking',
+      method: 'post',
+      handler: (req) => {
+        // `data` is not automatically appended to the request
+        // if you would like to read the body of the request
+        // you can use `data = await req.json()`
+        const data = await req.json()
+        await req.payload.update({
+          collection: 'tracking',
+          data: {
+            // data to update the document with
+          }
+        })
+        return Response.json({
+          message: 'successfully updated tracking info'
+        })
+      }
+    }
   ],
   // highlight-end
 }
@@ -618,6 +640,56 @@ export const Orders: CollectionConfig = {
   **req** will have the **payload** object and can be used inside your endpoint handlers for making
   calls like req.payload.find() that will make use of access control and hooks.
 </Banner>
+
+#### Helpful tips
+`req.data`
+
+Data is not automatically appended to the request. You can read the body data by calling `await req.json()`.
+
+Or you could use our helper function that mutates the request and appends data and file if found.
+
+```ts
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: (req) => {
+    await addDataAndFileToRequest(req)
+    await req.payload.update({
+      collection: 'tracking',
+      data: {
+        // data to update the document with
+      }
+    })
+    return Response.json({
+      message: 'successfully updated tracking info'
+    })
+  }
+}
+```
+
+`req.locale` & `req.fallbackLocale`
+
+The locale and the fallback locale are not automatically appended to custom endpoint requests. If you would like to add them you can use this helper function.
+
+```ts
+import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: (req) => {
+    await addLocalesToRequestFromData(req)
+    // you now can access req.locale & req.fallbackLocale
+    return Response.json({ message: 'success' })
+  }
+}
+```
+
+
 
 ## Method Override for GET Requests
 

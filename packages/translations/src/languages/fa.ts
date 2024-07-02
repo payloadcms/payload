@@ -4,6 +4,7 @@ export const faTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'نمایه',
     accountOfCurrentUser: 'نمایه کاربر فعلی',
+    accountVerified: 'حساب با موفقیت تایید شد.',
     alreadyActivated: 'قبلاً فعال شده است',
     alreadyLoggedIn: 'قبلاً وارد شده‌اید',
     apiKey: 'کلید اِی‌پی‌آی',
@@ -26,6 +27,8 @@ export const faTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'لطفا نام کاربری یا نشانی رایانامه خود را وارد نمایید. شما یک پیام با دستورالعمل راه‌اندازی مجدد گذرواژه خود دریافت خواهید کرد.',
     forgotPasswordQuestion: 'بازیابی گذرواژه؟',
+    forgotPasswordUsernameInstructions:
+      'لطفاً نام کاربری خود را در زیر وارد کنید. دستورالعمل هایی در خصوص تغییر رمز عبور به آدرس ایمیل مرتبط با نام کاربری شما ارسال خواهد شد.',
     generate: 'ساخت',
     generateNewAPIKey: 'ساخت کلید اِی‌پی‌آی تازه',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const faTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'با موفقیت باز شد',
     tokenRefreshSuccessful: 'تازه سازی توکن موفق بود.',
     unableToVerify: 'امکان تأیید نیست',
+    username: 'نام کاربری',
+    usernameNotValid: 'نام کاربری ارائه شده معتبر نیست',
     verified: 'تأیید شده',
     verifiedSuccessfully: 'با موفقیت تأیید شد',
     verify: 'تأیید',
@@ -111,6 +116,8 @@ export const faTranslations: DefaultTranslationsObject = {
     unspecific: 'خطایی رخ داد.',
     userEmailAlreadyRegistered: 'کاربری با ایمیل داده شده قبلاً ثبت نام کرده است.',
     userLocked: 'این کاربر به دلیل تلاش های زیاد برای ورود ناموفق قفل شده است.',
+    usernameAlreadyRegistered: 'کاربری با نام کاربری داده شده قبلا ثبت نام کرده است.',
+    usernameOrPasswordIncorrect: 'نام کاربری یا گذرواژه ارائه شده صحیح نیست.',
     valueMustBeUnique: 'مقدار باید منحصر به فرد باشد',
     verificationTokenInvalid: 'ژتون تأیید نامعتبر است.',
   },

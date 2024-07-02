@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
+import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { JSX } from 'react'
@@ -26,7 +27,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, TypedUser } from '../index.js'
-import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
@@ -147,7 +148,7 @@ export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url
 
 type GeneratePreviewURLOptions = {
   locale: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: null | string
 }
 
@@ -250,7 +251,7 @@ export type AccessArgs<TData = any> = {
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 /**
@@ -455,7 +456,7 @@ export type Config = {
            * The email address of the user to login as
            *
            */
-          email: string
+          email?: string
           /** The password of the user to login as */
           password: string
           /**
@@ -464,6 +465,8 @@ export type Config = {
            * @default false
            */
           prefillOnly?: boolean
+          /** The username of the user to login as */
+          username?: string
         }
       | false
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
@@ -742,6 +745,12 @@ export type Config = {
 
     /** Filename to write the generated types to */
     outputFile?: string
+
+    /**
+     * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
+     * to generate the TypeScript interfaces.
+     */
+    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

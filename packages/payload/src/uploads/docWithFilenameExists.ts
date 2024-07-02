@@ -1,10 +1,10 @@
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 type Args = {
   collectionSlug: string
   filename: string
   path: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): Promise<boolean> => {

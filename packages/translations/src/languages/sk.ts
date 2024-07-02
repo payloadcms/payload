@@ -4,6 +4,7 @@ export const skTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
     accountOfCurrentUser: 'Aktuálny používateľský účet',
+    accountVerified: 'Účet úspešne overený.',
     alreadyActivated: 'Už aktivované',
     alreadyLoggedIn: 'Už prihlásený',
     apiKey: 'API kľúč',
@@ -26,6 +27,8 @@ export const skTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Zadajte svoj e-mail nižšie. Dostanete e-mail s pokynmi na obnovenie hesla.',
     forgotPasswordQuestion: 'Zabudli ste heslo?',
+    forgotPasswordUsernameInstructions:
+      'Prosím, zadajte nižšie svoje používateľské meno. Inštrukcie na obnovenie vášho hesla budú odoslané na e-mailovú adresu spojenú s vaším používateľským menom.',
     generate: 'Generovať',
     generateNewAPIKey: 'Vygenerovať nový API kľúč',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +65,8 @@ export const skTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Úspešne odomknuté',
     tokenRefreshSuccessful: 'Obnovenie tokenu bolo úspešné.',
     unableToVerify: 'Nemožno overiť',
+    username: 'Používateľské meno',
+    usernameNotValid: 'Zadané užívateľské meno nie je platné.',
     verified: 'Overené',
     verifiedSuccessfully: 'Úspešne overené',
     verify: 'Overiť',
@@ -114,6 +119,8 @@ export const skTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Používateľ s daným e-mailom je už zaregistrovaný.',
     userLocked:
       'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
+    usernameAlreadyRegistered: 'Používateľ s daným používateľským menom je už zaregistrovaný.',
+    usernameOrPasswordIncorrect: 'Zadané meno alebo heslo je nesprávne.',
     valueMustBeUnique: 'Hodnota musí byť jedinečná',
     verificationTokenInvalid: 'Overovací token je neplatný.',
   },

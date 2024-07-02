@@ -4,6 +4,7 @@ export const ptTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Conta',
     accountOfCurrentUser: 'Conta do usuário ativo',
+    accountVerified: 'Conta verificada com sucesso.',
     alreadyActivated: 'Conta já ativada',
     alreadyLoggedIn: 'Login já realizado',
     apiKey: 'Chave da API',
@@ -26,6 +27,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Por favor, preencha seu email abaixo. Você receberá um email com instruções para gerar uma nova senha',
     forgotPasswordQuestion: 'Esqueceu a senha?',
+    forgotPasswordUsernameInstructions:
+      'Digite seu nome de usuário abaixo. Instruções sobre como redefinir sua senha serão enviadas para o endereço de e-mail associado ao seu nome de usuário.',
     generate: 'Gerar',
     generateNewAPIKey: 'Gerar nova chave API',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +65,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Desbloqueado com sucesso',
     tokenRefreshSuccessful: 'Atualização do token bem-sucedida.',
     unableToVerify: 'Não foi possível verificar',
+    username: 'Nome de usuário',
+    usernameNotValid: 'O nome de usuário fornecido não é válido',
     verified: 'Verificado',
     verifiedSuccessfully: 'Verificado com Sucesso',
     verify: 'Verificar',
@@ -113,6 +118,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     unspecific: 'Ocorreu um erro.',
     userEmailAlreadyRegistered: 'Um usuário com o email fornecido já está registrado.',
     userLocked: 'Esse usuário está bloqueado devido a muitas tentativas de login malsucedidas.',
+    usernameAlreadyRegistered: 'Um usuário com o nome de usuário fornecido já está registrado.',
+    usernameOrPasswordIncorrect: 'O nome de usuário ou senha fornecidos estão incorretos.',
     valueMustBeUnique: 'Valor deve ser único',
     verificationTokenInvalid: 'Token de verificação inválido.',
   },

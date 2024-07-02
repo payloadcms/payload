@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData } from 'payload'
+import type { Collection, PayloadRequest } from 'payload'
 
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
@@ -16,7 +16,7 @@ import { getFileTypeFallback } from './getFileTypeFallback.js'
 type Args = {
   collection: Collection
   filename: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 export const getFile = async ({ collection, filename, req }: Args): Promise<Response> => {
   try {

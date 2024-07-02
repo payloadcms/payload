@@ -4,6 +4,7 @@ export const svTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Konto för nuvarande användare',
+    accountVerified: 'Kontot har verifierats framgångsrikt.',
     alreadyActivated: 'Redan aktiverad',
     alreadyLoggedIn: 'Redan inloggad',
     apiKey: 'API Nyckel',
@@ -26,6 +27,8 @@ export const svTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Vänligen ange din e-postadress nedan. Du kommer att få ett e-postmeddelande med instruktioner om hur du återställer ditt lösenord.',
     forgotPasswordQuestion: 'Glömt lösenordet?',
+    forgotPasswordUsernameInstructions:
+      'Ange ditt användarnamn nedan. Instruktioner om hur du återställer ditt lösenord kommer att skickas till mejladressen kopplad till ditt användarnamn.',
     generate: 'Generera',
     generateNewAPIKey: 'Generera ny API nyckel',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Låst upp framgångsrikt',
     tokenRefreshSuccessful: 'Tokenuppdatering lyckades.',
     unableToVerify: 'Det går inte att Verifiera',
+    username: 'Användarnamn',
+    usernameNotValid: 'Det angivna användarnamnet är inte giltigt',
     verified: 'Verifierad',
     verifiedSuccessfully: 'Framgångsrikt Verifierad',
     verify: 'Verifiera',
@@ -112,6 +117,8 @@ export const svTranslations: DefaultTranslationsObject = {
     unspecific: 'Ett fel har uppstått.',
     userEmailAlreadyRegistered: 'En användare med den angivna e-postadressen är redan registrerad.',
     userLocked: 'Den här användaren är låst på grund av för många misslyckade inloggningsförsök.',
+    usernameAlreadyRegistered: 'En användare med det angivna användarnamnet är redan registrerad.',
+    usernameOrPasswordIncorrect: 'Användarnamnet eller lösenordet som angavs är felaktigt.',
     valueMustBeUnique: 'Värdet måste vara unikt',
     verificationTokenInvalid: 'Verifieringstoken är ogiltig.',
   },

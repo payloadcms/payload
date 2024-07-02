@@ -6,6 +6,7 @@ import {
   ConfirmPasswordField,
   EmailField,
   PasswordField,
+  TextField,
   useConfig,
   useDocumentInfo,
   useFormFields,
@@ -28,6 +29,7 @@ export const Auth: React.FC<Props> = (props) => {
     collectionSlug,
     disableLocalStrategy,
     email,
+    loginWithUsername,
     operation,
     readOnly,
     requirePassword,
@@ -96,14 +98,25 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <EmailField
-            autoComplete="email"
-            disabled={disabled}
-            label={t('general:email')}
-            name="email"
-            readOnly={readOnly}
-            required
-          />
+          {!loginWithUsername && (
+            <EmailField
+              autoComplete="email"
+              disabled={disabled}
+              label={t('general:email')}
+              name="email"
+              readOnly={readOnly}
+              required
+            />
+          )}
+          {loginWithUsername && (
+            <TextField
+              disabled={disabled}
+              label={t('authentication:username')}
+              name="username"
+              readOnly={readOnly}
+              required
+            />
+          )}
           {(changingPassword || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
