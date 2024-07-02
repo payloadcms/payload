@@ -78,6 +78,10 @@ function startsWithSeparator(textContent: string): boolean {
   return isSeparator(textContent[0])
 }
 
+function startsWithFullStop(textContent: string): boolean {
+  return /^\.[a-z\d]+/i.test(textContent)
+}
+
 function isPreviousNodeValid(node: LexicalNode): boolean {
   let previousNode = node.getPreviousSibling()
   if ($isElementNode(previousNode)) {
@@ -340,7 +344,10 @@ function handleBadNeighbors(
   const nextSibling = textNode.getNextSibling()
   const text = textNode.getTextContent()
 
-  if ($isAutoLinkNode(previousSibling) && !startsWithSeparator(text)) {
+  if (
+    $isAutoLinkNode(previousSibling) &&
+    (!startsWithSeparator(text) || startsWithFullStop(text))
+  ) {
     previousSibling.append(textNode)
     handleLinkEdit(previousSibling, matchers, onChange)
     onChange(null, previousSibling.getFields()?.url ?? null)
@@ -418,7 +425,7 @@ function useAutoLink(
 }
 
 const URL_REGEX =
-  /((https?:\/\/(www\.)?)|(www\.))[-\w@:%.+~#=]{1,256}\.[a-zA-Z\d()]{1,6}\b([-\w()@:%+.~#?&/=]*)/
+  /((https?:\/\/(www\.)?)|(www\.))[-\w@:%.+~#=]{1,256}\.[a-zA-Z\d()]{1,6}\b([-\w()@:%+.~#?&/=]*)(?<![-.+():%])/
 
 const EMAIL_REGEX =
   /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-z\-\d]+\.)+[a-z]{2,}))/i
