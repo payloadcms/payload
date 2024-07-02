@@ -21,14 +21,20 @@ For example, your app might need to render a specific interface that Payload doe
 You can customize the appearance and behavior of fields within the [Admin Panel](./overvieW) through the `admin` property of any [Field Config](../fields/overview):
 
 ```ts
-import type { Field } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const myField: Field = {
-  name: 'myField',
-  type: 'text',
-  admin: { // highlight-line
-    hidden: true
-  },
+export const CollectionConfig: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      admin: { // highlight-line
+        // ...
+      },
+    }
+  ]
 }
 ```
 
@@ -71,7 +77,7 @@ export const CollectionConfig: CollectionConfig = {
       // ...
       admin: {
         components: { // highlight-line
-          Field: MyCustomField,
+          // ...
         },
       },
     }
@@ -88,14 +94,11 @@ The following options are available:
 | **`Filter`** | The filter component rendered in the List View. [More details](#the-filter-component). || Component         | Description                                                                                                     |
 | **`Label`**       | Override the default Label of the Field Component. [More details](#the-label-component).                                    |
 | **`Error`**       | Override the default Error of the Field Component. [More details](#the-error-component).                                    |
+| **`Description`** | Override the default Description of the Field Component. [More details](#the-description-component).                      |
 | **`beforeInput`** | An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput).|
 | **`afterInput`**  | An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput). |
 
 _\* **`beforeInput`** and **`afterInput`** are only supported in fields that do not contain other fields, such as [`Text`](../fields/text), and [`Textarea`](../fields/textarea)._
-
-<Banner type="warning">
-  You can also pass a Custom Component to the `admin.description` property to render a custom description for the field. [More details](#the-description-component).
-</Banner>
 
 ### The Field Component
 
@@ -128,7 +131,7 @@ _For details on how to build Custom Components, see [Building Custom Components]
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#the-label-component), [`Error`](#the-error-component), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
-All Field Components receive the following default props:
+All Field Components receive the following props:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -137,12 +140,13 @@ All Field Components receive the following default props:
 | **`CustomDescription`** | The rendered result of the `description` property. [More details](#the-description-component).                                                                                                      |
 | **`CustomError`** | The rendered result of the `admin.components.Error` property. [More details](#the-error-component).                                                                                                      |
 | **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).
-| **`path`***       | The static path of the field at render time.                                                                                                                                                                                                            |                                                                                                    |
+| **`path`**       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
 | **`disabled`**   | The `admin.disabled` property defined in the [Field Config](../fields/overview). |
 | **`required`**   | The `admin.required` property defined in the [Field Config](../fields/overview). |
 | **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
 | **`style`**      | The `admin.style` property defined in the [Field Config](../fields/overview).                                                                                                                                                      |
 | **`custom`**     | The `admin.custom` property defined in the [Field Config](../fields/overview).
+| **`placeholder`** | The `admin.placeholder` property defined in the [Field Config](../fields/overview). |
 | **`descriptionProps`** | An object that contains the props for the `FieldDescription` component.                                                                                                                                                                   |
 | **`labelProps`** | An object that contains the props needed for the `FieldLabel` component.                                                                                                                                                                         |
 | **`errorProps`** | An object that contains the props for the `FieldError` component.                                                                                                                                                                         |
@@ -154,12 +158,13 @@ All Field Components receive the following default props:
 | **`rtl`**        | A boolean value that represents if the field should be rendered right-to-left or not. [More details](../configuration/i18n).                                                                                           |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
 | **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
+| **`hasMany`**    | If a [`relationship`](../fields/relationship) field, the `hasMany` property defined in the [Field Config](../fields/overview). |
+| **`maxLength`**  | If a [`text`](../fields/text) field, the `maxLength` property defined in the [Field Config](../fields/overview). |
+| **`minLength`**  | If a [`text`](../fields/text) field, the `minLength` property defined in the [Field Config](../fields/overview). |
 
-_\* The **`path`** prop is static, defined at render time. To use the dynamic path of the field, subscribe to it using the `useFieldProps` hook. [More details](./hooks#usefieldprops)._
-
-<Banner type="warning">
-  <strong>Note:</strong>
-  Custom Fields also receive various other props that are specific [Field Type](../fields/overview) that is being rendered. For example, [Text Field](../fields/text) receives the `hasMany` prop. For a full list of available props, consult the documentation related to the specific field you are working with.
+<Banner type="success">
+  <strong>Reminder:</strong>
+  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
 
 #### Sending and receiving values from the form
@@ -210,7 +215,7 @@ export const myField: Field = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All Cell Components receive the following default props:
+All Cell Components receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
@@ -232,9 +237,14 @@ All Cell Components receive the following default props:
 | **`richTextComponentMap`** | If a [`richText`](../fields/rich-text) field, this is an object that maps the rich text components. [More details](../fields/rich-text). |
 | **`blocks`** | If a [`blocks`](../fields/blocks) field, this is an array of labels and slugs representing the blocks defined in the [Field Config](../fields/overview). [More details](../fields/blocks). |
 
+<Banner type="success">
+  <strong>Reminder:</strong>
+  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
+</Banner>
+
 ### The Label Component
 
-The Label Component is rendered where a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
+The Label Component is rendered anywhere a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
 
 To easily swap in your own Label Component, use the `admin.components.Label` property of your [Field Config](../fields/overview):
 
@@ -262,9 +272,16 @@ All Label Components receive the following props:
 | **`required`** | The `admin.required` property defined in the [Field Config](../fields/overview). |
 | **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
 
+<Banner type="success">
+  <strong>Reminder:</strong>
+  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
+</Banner>
+
 ### The Error Component
 
 The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
+
+To easily swap in your own Error Component, use the `admin.components.Error` property of your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -286,82 +303,99 @@ All Error Components receive the following props:
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`path`***       | The static path of the field at render time.                                                                                                                                                                                                            |
+| **`path`***       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
 
-_\* The **`path`** prop is static, defined at render time. To use the dynamic path of the field, subscribe to it using the `useFieldProps` hook. [More details](./hooks#usefieldprops)._
+<Banner type="success">
+  <strong>Reminder:</strong>
+  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
+</Banner>
 
 ### The Description Property
 
-The `description` property is used to provide additional information to the editor about a field, such as special instructions. Its placement varies from field to field, but it is typically displayed beneath the field input with subtle style differences.
+Field Descriptions are used to provide additional information to the editor about a field, such as special instructions. Their placement varies from field to field, but typically are displayed with subtle style differences beneath the field inputs.
 
 A description can be configured in three ways:
 
-  - As a string
-  - As a function which returns a string. [More details](#description-function).
-  - As a React component. [More details](#description-component).
+  - As a string.
+  - As a function which returns a string. [More details](#description-functions).
+  - As a React component. [More details](#the-description-component).
 
 To easily add a Custom Description to a field, use the `admin.description` property of your [Field Config](../fields/overview):
 
 ```ts
-import type { Field } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
-export const myField: Field = {
-  {
-    name: 'message',
-    type: 'text',
-    maxLength: 20,
-    admin: {
-      description: 'Hello, world!' // highlight-line
-    },
-  },
-}
-```
-
-<Banner type="warning">
-  <strong>Reminder:</strong>
-  The `description` property is top-level of the [Field Config](../fields/overview), _not_ within the `components` property. This is because the description is not always a component. [More details](#the-description-component).
-</Banner>
-
-#### Description Function
-
-Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
-
-- **`path`** - the path of the field
-- **`value`** - the current value of the field
-
-As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
-
-```ts
-{
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
   fields: [
+    // ...
     {
-      name: 'message',
+      name: 'myField',
       type: 'text',
-      maxLength: 20,
       admin: {
-        // highlight-start
-        description: ({ path, value }) =>
-          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
-        // highlight-end
+        description: 'Hello, world!' // highlight-line
       },
     },
   ]
 }
 ```
 
-#### Description Component
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  To replace the Field Description with a [Custom Component](./components), use the `admin.components.Description` property. [More details](#the-description-component).
+</Banner>
 
-You can also provide a React component to the `description` property. This can be useful when you need to provide more complex feedback to the user.
+#### Description Functions
+
+Custom Descriptions can also be defined as a function. Description Functions are executed on the server and can be used to format simple descriptions based on the user's current [Locale](../configuration/localization).
+
+To easily add a Description Function to a field, set the `admin.description` property to a _function_ in your [Field Config](../fields/overview):
 
 ```ts
-{
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
   fields: [
+    // ...
     {
-      name: 'message',
+      name: 'myField',
       type: 'text',
-      maxLength: 20,
       admin: {
-        description: MyCustomDescription // highlight-line
+        description: ({ t }) => `${t('Hello, world!')}` // highlight-line
+      },
+    },
+  ]
+}
+```
+
+All Description Functions receive the following arguments:
+
+| Argument       | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| **`t`**        | The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n) |
+
+### The Description Component
+
+Alternatively to the [Description Property](#the-description-property), you can also use a [Custom Component](./components) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
+
+To easily add a Description Component to a field, use the `admin.components.Description` property of your [Field Config](../fields/overview):
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+import { MyCustomDescription } from './MyCustomDescription'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      admin: {
+        components: {
+          Description: MyCustomDescription, // highlight-line
+        }
       }
     }
   ]
@@ -376,42 +410,41 @@ All Description Components receive the following props:
 | -------------- | ---------------------------------------------------------------- |
 | **`description`**    | The `description` property defined in the [Field Config](../fields/overview).         |
 
+<Banner type="success">
+  <strong>Reminder:</strong>
+  All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
+</Banner>
+
 ### afterInput and beforeInput
 
-With these properties you can add multiple components before and after the input element. For example, you can add an absolutely positioned button to clear the current field value.
+With these properties you can add multiple components _before_ and _after_ the input element, as their name suggests. This is useful when you need to render additional elements alongside the field without replacing the entire field component.
 
-#### Example
+To add components before and after the input element, use the `admin.components.beforeInput` and `admin.components.afterInput` properties of your [Field Config](../fields/overview):
 
-```tsx
-import React from 'react'
-import type { Field } from 'payload'
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
 
-import './style.scss'
-
-const ClearButton: React.FC = () => {
-  return (
-    <button
-      onClick={() => {
-        /* ... */
-      }}
-    >
-      X
-    </button>
-  )
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      admin: {
+        components: {
+          // highlight-start
+          beforeInput: [MyCustomComponent],
+          afterInput: [MyOtherCustomComponent],
+          // highlight-end
+        }
+      }
+    }
+  ]
 }
-
-const titleField: Field = {
-  name: 'title',
-  type: 'text',
-  admin: {
-    components: {
-      afterInput: [ClearButton],
-    },
-  },
-}
-
-export default titleField
 ```
+
+_For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
 ## Conditional Logic
 

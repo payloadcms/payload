@@ -74,7 +74,7 @@ type FieldResult<T> = {
 
 ## useFieldProps
 
-All [Custom Field Components](./fields) are rendered on the server, and as such, only have access to static props at render time. But fields can be dynamic, like when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. This means that the paths to their subfields are subject to change as items are added, re-ordered, or deleted.
+All [Custom Field Components](./fields) are rendered on the server, and as such, only have access to static props at render time. But, some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
 
 For this reason, dynamic props like `path` are managed in their own React context, which can be accessed using the `useFieldProps` hook:
 
