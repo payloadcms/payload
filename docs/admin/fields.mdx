@@ -6,9 +6,9 @@ desc:
 keywords:
 ---
 
-[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized without affecting the underlying data structure. Everything from [Conditional Logic](#conditional-logic) to [Custom Field Components](#custom-field-components) can be configured to perfectly tailor the appearance and behavior of the Admin UI for your editors.
+[Fields](../fields/overview) within the [Admin Panel](./overview) can be customized in their appearance and behavior without affecting the underlying data structure. From [Conditional Logic](#conditional-logic) to [Custom Field Components](#custom-field-components) and more, fields can be perfectly tailored to meet the needs of your editors.
 
-For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value. Then, you could write a [Custom Validation](../fields/overview#validation) function could ensure the value is acceptable.
+For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
 <Banner type="success">
   <strong>Tip:</strong>
@@ -18,7 +18,21 @@ For example, your app might need to render a specific interface that Payload doe
 
 ## Admin Options
 
-You can customize fields through the `admin` property of any [Field Config](../fields/overview):
+You can customize the appearance and behavior of fields within the [Admin Panel](./overvieW) through the `admin` property of any [Field Config](../fields/overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const myField: Field = {
+  name: 'myField',
+  type: 'text',
+  admin: { // highlight-line
+    hidden: true
+  },
+}
+```
+
+The following options are available:
 
 | Option              | Description                                                                                                                                                                                                                      |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,7 +58,7 @@ Within the [Admin Panel](./overview), fields are rendered in three distinct plac
 - [Cell](#the-cell-component) - The table cell component rendered in the List View.
 - [Filter](#the-filter-component) - The filter component rendered in the List View.
 
-To easily swap in Field Components with your own, use the `admin.components` property of your [Field Config](../fields/overview):
+To easily swap in Field Components with your own, use the `admin.components` property of any [Field Config](../fields/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload/types'
@@ -56,8 +70,8 @@ export const CollectionConfig: CollectionConfig = {
     {
       // ...
       admin: {
-        components: {
-          Field: MyCustomField, // highlight-line
+        components: { // highlight-line
+          Field: MyCustomField,
         },
       },
     }
@@ -69,13 +83,19 @@ The following options are available:
 
 | Component    | Description                                                                                                                 |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **`Field`**  | The form field rendered in the Edit View. [More details](#the-field-component).                                                |
-| **`Cell`**   | The table cell rendered in the List View. [More details](#the-cell-component).              |
+| **`Field`**  | The form field rendered of the Edit View. [More details](#the-field-component).                                                |
+| **`Cell`**   | The table cell rendered of the List View. [More details](#the-cell-component).              |
 | **`Filter`** | The filter component rendered in the List View. [More details](#the-filter-component). || Component         | Description                                                                                                     |
-| **`Label`**       | Override the default Label in the Field Component. [More details](#the-label-component).                                    |
-| **`Error`**       | Override the default Label in the Field Component. [More details](#the-error-component).                                    |
-| **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More details](#afterinput-and-beforeinput).|
-| **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More details](#afterinput-and-beforeinput). |
+| **`Label`**       | Override the default Label of the Field Component. [More details](#the-label-component).                                    |
+| **`Error`**       | Override the default Error of the Field Component. [More details](#the-error-component).                                    |
+| **`beforeInput`\*** | An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput).|
+| **`afterInput`\***  | An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput). |
+
+_\* **`beforeInput`** and **`afterInput`** are only supported in fields that do not contain other fields, such as [`Text`](../fields/text), and [`Textarea`](../fields/textarea)._
+
+<Banner type="warning">
+  You can also pass a Custom Component to the `admin.description` property to render a custom description for the field. [More details](#the-description-component).
+</Banner>
 
 ### The Field Component
 
@@ -100,42 +120,32 @@ export const CollectionConfig: CollectionConfig = {
 }
 ```
 
+<Banner type="warning">
+  Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#the-label-component), [`Error`](#the-error-component), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
+</Banner>
+
 #### Sending and receiving values from the form
 
-When swapping out the `Field` component, you are responsible for sending and receiving the field's `value` from the form itself. To do so, import the [`useField`](./hooks#usefield) hook from `@payloadcms/ui` and use it to manage the field's value.
+When swapping out the `Field` component, you are responsible for sending and receiving the field's `value` from the form itself. To do so, import the [`useField`](./hooks#usefield) hook from `@payloadcms/ui` and use it to manage the field's value:
 
 ```tsx
 'use client'
 import { useField } from '@payloadcms/ui'
 
 const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
-  // highlight-start
-  const { value, setValue } = useField({ path })
-  // highlight-end
+  const { value, setValue } = useField({ path }) // highlight-line
 
-  return <input onChange={(e) => setValue(e.target.value)} value={value} />
+  return (
+    <input
+      onChange={(e) => setValue(e.target.value)}
+      value={value}
+    />
+  )
 }
 ```
 
 <Banner type="success">
-  To make [Building Custom Components](./components#building-custom-components) as easy as possible,
-</Banner>
-
-#### Field Sub-components
-
-As an alternative to replacing the _entire_ Field component, you may want to keep the majority of the default component and only swap specific parts. This can be done by using the following options on `admin.components` property of your [Field Config](../fields/overview):
-
-- [Label](#the-label-component) - The label component rendered in the Field Component.
-- [Error](#the-error-component) - The error component rendered in the Field Component.
-- [beforeInput](#beforeInput)* - An array of elements that will be added before the field's input.
-- [afterInput](#afterInput)* - An array of elements that will be added after the field's input.
-
-<i>
-  \* **`beforeInput`** and **`afterInput`** are only supported in fields that don't contain other fields, with the exception of [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
-</i>
-
-<Banner type="warning">
-  You can also pass a Custom Component to the `admin.description` property to render a custom description for the field. [More details](#the-description-component).
+  For additional help, see [Building Custom Components](./components#building-custom-components). For a complete list of all available React hooks, see the [Payload React Hooks](./hooks) documentation.
 </Banner>
 
 ### The Cell Component
