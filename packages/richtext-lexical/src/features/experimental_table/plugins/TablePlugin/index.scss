@@ -1,3 +1,5 @@
+@import '../../../../scss/styles.scss';
+
 .LexicalEditorTheme {
   &__table {
     border-collapse: collapse;
@@ -23,7 +25,7 @@
   }
 
   &__tableCell {
-    border: 1px solid #bbb;
+    border: 1px solid var(--theme-elevation-200);
     min-width: 75px;
     vertical-align: top;
     text-align: start;
@@ -32,6 +34,7 @@
     cursor: default;
     outline: none;
   }
+
 
   &__tableCellSortedIndicator {
     display: block;
