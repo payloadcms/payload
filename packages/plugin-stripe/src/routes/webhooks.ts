@@ -10,7 +10,7 @@ export const stripeWebhooks = async (args: {
   config: PayloadConfig
   pluginConfig: StripePluginConfig
   req: PayloadRequest
-}): Promise<any> => {
+}): Promise<Response> => {
   const { config, pluginConfig, req } = args
   let returnStatus = 200
 
@@ -41,7 +41,7 @@ export const stripeWebhooks = async (args: {
       }
 
       if (event) {
-        handleWebhooks({
+        await handleWebhooks({
           config,
           event,
           payload: req.payload,
@@ -52,7 +52,7 @@ export const stripeWebhooks = async (args: {
 
         // Fire external webhook handlers if they exist
         if (typeof webhooks === 'function') {
-          webhooks({
+          await webhooks({
             config,
             event,
             payload: req.payload,
@@ -65,7 +65,7 @@ export const stripeWebhooks = async (args: {
         if (typeof webhooks === 'object') {
           const webhookEventHandler = webhooks[event.type]
           if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler({
+            await webhookEventHandler({
               config,
               event,
               payload: req.payload,
