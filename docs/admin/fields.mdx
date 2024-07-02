@@ -246,6 +246,88 @@ const CustomError: React.FC<Props> = (props) => {
 }
 ```
 
+### The Description Property
+
+The `description` property is used to provide additional information to the editor about a field, such as special instructions. It's placement varies from field to field, but it is typically displayed beneath the field input with dimmed text.
+
+A description can be configured in three ways:
+
+  - As a string
+  - As a function which returns a string. [More details](#description-function).
+  - As a React component. [More details](#description-component).
+
+To easily add a Custom Description to a field, use the `admin.description` property on any [Field Config](../fields/overview):
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description: MyCustomDescription // highlight-line
+      },
+    },
+  ]
+}
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  The `description` property is top-level of the [Field Config](../fields/overview), _not_ within the `components` property. This is because the description is not always a component. [More details](#the-description-component).
+</Banner>
+
+#### Description Function
+
+Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
+
+- `path` - the path of the field
+- `value` - the current value of the field
+
+As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        // highlight-start
+        description: ({ path, value }) =>
+          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
+        // highlight-end
+      },
+    },
+  ]
+}
+```
+
+#### Description Component
+
+You can also provide a React component to the `description` property. This can be useful when you need to provide more complex feedback to the user.
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description: MyCustomDescription // highlight-line
+      }
+    }
+  ]
+}
+```
+
+<Banner type="success">
+  For details on how to build a Custom Description, see [Building Custom Components](./components#building-custom-components).
+</Banner>
+
 ### afterInput and beforeInput
 
 With these properties you can add multiple components before and after the input element. For example, you can add an absolutely positioned button to clear the current field value.
@@ -282,73 +364,6 @@ const titleField: Field = {
 
 export default titleField
 ```
-
-### The Description Component
-
-The `description` property is used to provide additional information to the editor about a field. A description can be configured in three ways.
-
-- As a string
-- As a function which returns a string
-- As a React component
-
-Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
-
-- `path` - the path of the field
-- `value` - the current value of the field
-
-As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
-
-**Function Example:**
-
-```ts
-{
-  fields: [
-    {
-      name: 'message',
-      type: 'text',
-      maxLength: 20,
-      admin: {
-        description: ({ path, value }) =>
-          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
-      },
-    },
-  ]
-}
-```
-
-<Banner type="warning">
-  <strong>Note:</strong>
-  The `description` property is top-level of the [Field Config](../fields/overview), not within the `admin` object.
-</Banner>
-
-This example will display the number of characters allowed as the user types.
-
-**Component Example:**
-
-```ts
-{
-  fields: [
-    {
-      name: 'message',
-      type: 'text',
-      maxLength: 20,
-      admin: {
-        description:
-          ({ path, value }) => (
-            <div>
-              Character count:
-              {' '}
-              { value?.length || 0 }
-               (field: {path})
-            </div>
-          )
-      }
-    }
-  ]
-}
-```
-
-This component will count the number of characters entered, as well as display the path of the field.
 
 ## Conditional Logic
 
