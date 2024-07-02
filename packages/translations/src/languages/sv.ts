@@ -308,6 +308,7 @@ export const svTranslations: DefaultTranslationsObject = {
     near: 'nära',
   },
   upload: {
+    addImage: 'Lägg till bild',
     crop: 'Skörd',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',
@@ -322,6 +323,7 @@ export const svTranslations: DefaultTranslationsObject = {
     height: 'Höjd',
     lessInfo: 'Mindre info',
     moreInfo: 'Mer info',
+    pasteURL: 'Klistra in URL',
     previewSizes: 'Förhandsgranska Storlekar',
     selectCollectionToBrowse: 'Välj en Samling att Bläddra i',
     selectFile: 'Välj en fil',

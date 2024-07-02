@@ -310,6 +310,7 @@ export const huTranslations: DefaultTranslationsObject = {
     near: 'közel',
   },
   upload: {
+    addImage: 'Kép hozzáadása',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
@@ -324,6 +325,7 @@ export const huTranslations: DefaultTranslationsObject = {
     height: 'Magasság',
     lessInfo: 'Kevesebb információ',
     moreInfo: 'További információ',
+    pasteURL: 'URL beillesztése',
     previewSizes: 'Előnézeti méretek',
     selectCollectionToBrowse: 'Válassza ki a böngészni kívánt gyűjteményt',
     selectFile: 'Válasszon ki egy fájlt',

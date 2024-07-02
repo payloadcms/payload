@@ -308,6 +308,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     near: '近く',
   },
   upload: {
+    addImage: '画像を追加',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',
@@ -321,6 +322,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     height: '高さ',
     lessInfo: '詳細を隠す',
     moreInfo: '詳細を表示',
+    pasteURL: 'URLを貼り付け',
     previewSizes: 'プレビューサイズ',
     selectCollectionToBrowse: '閲覧するコレクションを選択',
     selectFile: 'ファイルを選択',

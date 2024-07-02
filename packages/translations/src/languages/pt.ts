@@ -309,6 +309,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     near: 'perto',
   },
   upload: {
+    addImage: 'Adicionar imagem',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',
@@ -323,6 +324,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     height: 'Altura',
     lessInfo: 'Ver menos',
     moreInfo: 'Ver mais',
+    pasteURL: 'Colar URL',
     previewSizes: 'Tamanhos de Pré-visualização',
     selectCollectionToBrowse: 'Selecione uma Coleção para Navegar',
     selectFile: 'Selecione um arquivo',

@@ -3,6 +3,7 @@ import type { FormState, SanitizedCollectionConfig } from 'payload'
 
 import { isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
@@ -101,6 +102,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
   })
   const [_crop, setCrop] = useState({ x: 0, y: 0 })
 
+  const [showUrlInput, setShowUrlInput] = React.useState(false)
+  const [fileUrl, setFileUrl] = useState<string>('')
+
   const handleFileChange = React.useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
@@ -116,6 +120,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
       }
 
       setValue(newFile)
+      setShowUrlInput(false)
 
       if (typeof onChange === 'function') {
         onChange(newFile)
@@ -146,6 +151,29 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setReplacingFile(true)
     handleFileChange(null)
     setFileSrc('')
+    setFileUrl('')
+    setShowUrlInput(false)
+
+    // Clear file metadata in doc state
+    setDoc((prevDoc) => ({
+      ...prevDoc,
+      filename: '',
+      filesize: 0,
+      focalX: undefined,
+      focalY: undefined,
+      height: 0,
+      mimeType: '',
+      url: '',
+      width: 0,
+    }))
+
+    // Clear upload edits from query params
+    dispatchFormQueryParams({
+      type: 'SET',
+      params: {
+        uploadEdits: null,
+      },
+    })
   }, [handleFileChange])
 
   const onEditsSave = React.useCallback(
@@ -171,6 +199,50 @@ export const Upload: React.FC<UploadProps> = (props) => {
     },
     [dispatchFormQueryParams, setModified],
   )
+
+  const handlePasteUrlClick = () => {
+    setShowUrlInput((prev) => !prev)
+  }
+
+  const handleUrlSubmit = async () => {
+    if (fileUrl) {
+      try {
+        const response = await fetch(fileUrl)
+        const data = await response.blob()
+
+        // Extract the file name from the URL
+        const fileName = fileUrl.split('/').pop()
+
+        // Create a new File object from the Blob data
+        const file = new File([data], fileName, { type: data.type })
+
+        console.log('Fetched file:', file)
+
+        handleFileChange(file)
+
+        // Clear previous upload edits when adding a new file
+        dispatchFormQueryParams({
+          type: 'SET',
+          params: {
+            uploadEdits: null,
+          },
+        })
+
+        setDoc((prevDoc) => {
+          const updatedDoc = {
+            ...prevDoc,
+            filename: fileName,
+            mimeType: file.type,
+            url: fileUrl,
+          }
+          console.log('Updated doc state:', updatedDoc)
+          return updatedDoc
+        })
+      } catch (e) {
+        toast.error(e.message)
+      }
+    }
+  }
 
   useEffect(() => {
     setDoc(reduceFieldsToValues(initialState || {}, true))
@@ -207,14 +279,47 @@ export const Upload: React.FC<UploadProps> = (props) => {
       )}
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
-          {!value && (
+          {!value && !showUrlInput && (
             <Dropzone
+              allowRemoteUpload={uploadConfig?.allowRemoteUpload}
               className={`${baseClass}__dropzone`}
               mimeTypes={uploadConfig?.mimeTypes}
               onChange={handleFileSelection}
+              onPasteUrlClick={handlePasteUrlClick}
             />
           )}
-
+          {showUrlInput && (
+            <React.Fragment>
+              <div className={`${baseClass}__remote-file-wrap`}>
+                <input
+                  className={`${baseClass}__remote-file`}
+                  onChange={(e) => {
+                    setFileUrl(e.target.value)
+                  }}
+                  type="text"
+                  value={fileUrl}
+                />
+                <div className={`${baseClass}__add-file-wrap`}>
+                  <button
+                    className={`${baseClass}__add-file`}
+                    onClick={handleUrlSubmit}
+                    type="button"
+                  >
+                    {t('upload:addImage')}
+                  </button>
+                </div>
+              </div>
+              <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__remove`}
+                icon="x"
+                iconStyle="with-border"
+                onClick={handleFileRemoval}
+                round
+                tooltip={t('general:cancel')}
+              />
+            </React.Fragment>
+          )}
           {value && fileSrc && (
             <React.Fragment>
               <div className={`${baseClass}__thumbnail-wrap`}>

@@ -307,6 +307,7 @@ export const koTranslations: DefaultTranslationsObject = {
     near: '근처',
   },
   upload: {
+    addImage: '이미지 추가',
     crop: '자르기',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',
@@ -320,6 +321,7 @@ export const koTranslations: DefaultTranslationsObject = {
     height: '높이',
     lessInfo: '정보 숨기기',
     moreInfo: '정보 더보기',
+    pasteURL: 'URL 붙여넣기',
     previewSizes: '미리보기 크기',
     selectCollectionToBrowse: '찾을 컬렉션 선택',
     selectFile: '파일 선택',

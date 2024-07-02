@@ -306,6 +306,7 @@ export const viTranslations: DefaultTranslationsObject = {
     near: 'gần',
   },
   upload: {
+    addImage: 'Thêm hình ảnh',
     crop: 'Mùa vụ',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',
@@ -320,6 +321,7 @@ export const viTranslations: DefaultTranslationsObject = {
     height: 'Chiều cao',
     lessInfo: 'Hiển thị ít hơn',
     moreInfo: 'Thêm',
+    pasteURL: 'Dán URL',
     previewSizes: 'Kích cỡ xem trước',
     selectCollectionToBrowse: 'Chọn một Collection để tìm',
     selectFile: 'Chọn một file',

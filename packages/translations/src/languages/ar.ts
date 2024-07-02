@@ -306,6 +306,7 @@ export const arTranslations: DefaultTranslationsObject = {
     near: 'قريب من',
   },
   upload: {
+    addImage: 'إضافة صورة',
     crop: 'محصول',
     cropToolDescription: 'اسحب الزوايا المحددة للمنطقة، رسم منطقة جديدة أو قم بضبط القيم أدناه.',
     dragAndDrop: 'قم بسحب وإسقاط ملفّ',
@@ -318,6 +319,7 @@ export const arTranslations: DefaultTranslationsObject = {
     height: 'الطّول',
     lessInfo: 'معلومات أقلّ',
     moreInfo: 'معلومات أكثر',
+    pasteURL: 'لصق الرابط',
     previewSizes: 'أحجام المعاينة',
     selectCollectionToBrowse: 'حدّد مجموعة لاستعراضها',
     selectFile: 'اختر ملفّ',

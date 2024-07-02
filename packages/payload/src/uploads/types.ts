@@ -83,6 +83,11 @@ export type UploadConfig = {
    **/
   adminThumbnail?: GetAdminThumbnail | string
   /**
+   * Enables the ability to upload a file from a remote URL instead of selecting a file from your system.
+   * @default false
+   */
+  allowRemoteUpload?: boolean
+  /**
    * Enables cropping of images.
    * @default true
    */

@@ -311,6 +311,7 @@ export const myTranslations: DefaultTranslationsObject = {
     near: 'နီး',
   },
   upload: {
+    addImage: 'ပုံ ထည့်ပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -325,6 +326,7 @@ export const myTranslations: DefaultTranslationsObject = {
     height: 'Height',
     lessInfo: 'အချက်အလက်နည်းတယ်။',
     moreInfo: 'အချက်အလက်',
+    pasteURL: 'URL ကို ကူးထည့်ပါ',
     previewSizes: 'Saiz Pratonton',
     selectCollectionToBrowse: 'စုစည်းမှု တစ်ခုခုကို ရွေးချယ်ပါ။',
     selectFile: 'ဖိုင်ရွေးပါ။',

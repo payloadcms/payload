@@ -308,6 +308,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     near: 'blizu',
   },
   upload: {
+    addImage: 'Dodaj sliku',
     crop: 'Usjev',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',
@@ -322,6 +323,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     height: 'Visina',
     lessInfo: 'Manje informacija',
     moreInfo: 'Više informacija',
+    pasteURL: 'Zalijepi URL',
     previewSizes: 'Veličine pregleda',
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
     selectFile: 'Odaberite datoteku',

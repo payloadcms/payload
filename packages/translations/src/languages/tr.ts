@@ -312,6 +312,7 @@ export const trTranslations: DefaultTranslationsObject = {
     near: 'yakın',
   },
   upload: {
+    addImage: 'Resim ekle',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
@@ -326,6 +327,7 @@ export const trTranslations: DefaultTranslationsObject = {
     height: 'Yükseklik',
     lessInfo: 'Daha az bilgi',
     moreInfo: 'Daha fazla bilgi',
+    pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
     selectCollectionToBrowse: 'Görüntülenecek bir koleksiyon seçin',
     selectFile: 'Dosya seç',

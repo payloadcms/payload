@@ -304,6 +304,7 @@ export const thTranslations: DefaultTranslationsObject = {
     near: 'ใกล้',
   },
   upload: {
+    addImage: 'เพิ่มรูปภาพ',
     crop: 'พืชผล',
     cropToolDescription: 'ลากมุมของพื้นที่ที่เลือก, วาดพื้นที่ใหม่หรือปรับค่าด้านล่าง',
     dragAndDrop: 'ลากและวางไฟล์',
@@ -316,6 +317,7 @@ export const thTranslations: DefaultTranslationsObject = {
     height: 'ความสูง',
     lessInfo: 'ซ่อนข้อมูล',
     moreInfo: 'แสดงข้อมูล',
+    pasteURL: 'วาง URL',
     previewSizes: 'ขนาดตัวอย่าง',
     selectCollectionToBrowse: 'เลือก Collection ที่ต้องการค้นหา',
     selectFile: 'เลือกไฟล์',

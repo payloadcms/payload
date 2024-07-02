@@ -310,6 +310,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     near: 'nabij',
   },
   upload: {
+    addImage: 'Afbeelding toevoegen',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
@@ -324,6 +325,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     height: 'Hoogte',
     lessInfo: 'Minder info',
     moreInfo: 'Meer info',
+    pasteURL: 'URL plakken',
     previewSizes: 'Voorbeeldgroottes',
     selectCollectionToBrowse: 'Selecteer een collectie om door te bladeren',
     selectFile: 'Selecteer een bestand',

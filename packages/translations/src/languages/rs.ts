@@ -307,6 +307,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     near: 'близу',
   },
   upload: {
+    addImage: 'Додај слику',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',
@@ -321,6 +322,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     height: 'Висина',
     lessInfo: 'Мање информација',
     moreInfo: 'Више информација',
+    pasteURL: 'Налепи URL',
     previewSizes: 'Величине прегледа',
     selectCollectionToBrowse: 'Одаберите колекцију за преглед',
     selectFile: 'Одаберите датотеку',

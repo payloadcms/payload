@@ -307,6 +307,7 @@ export const faTranslations: DefaultTranslationsObject = {
     near: 'نزدیک',
   },
   upload: {
+    addImage: 'اضافه کردن تصویر',
     crop: 'محصول',
     cropToolDescription:
       'گوشه‌های منطقه انتخاب شده را بکشید، یک منطقه جدید رسم کنید یا مقادیر زیر را تنظیم کنید.',
@@ -321,6 +322,7 @@ export const faTranslations: DefaultTranslationsObject = {
     height: 'ارتفاع',
     lessInfo: 'اطلاعات کمتر',
     moreInfo: 'اطلاعات بیشتر',
+    pasteURL: 'چسباندن آدرس اینترنتی',
     previewSizes: 'اندازه های پیش نمایش',
     selectCollectionToBrowse: 'یک مجموعه را برای مرور انتخاب کنید',
     selectFile: 'برگزیدن رسانه',
