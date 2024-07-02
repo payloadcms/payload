@@ -606,12 +606,11 @@ export function configToJSONSchema(
     return acc
   }, {})
 
-  return {
+  let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
       ...entityDefinitions,
       ...Object.fromEntries(interfaceNameDefinitions),
-      ...config.typescript.definitions,
     },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
@@ -624,4 +623,12 @@ export function configToJSONSchema(
     required: ['user', 'locale', 'collections', 'globals'],
     title: 'Config',
   }
+
+  if (config?.typescript?.schema?.length) {
+    for (const schema of config.typescript.schema) {
+      jsonSchema = schema({ jsonSchema })
+    }
+  }
+
+  return jsonSchema
 }

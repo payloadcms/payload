@@ -741,11 +741,14 @@ export type Config = {
         }
       | false
 
-    /** Reusable JSON Shema definitions for usage in `typescriptSchema` field property */
-    definitions?: Record<string, JSONSchema4>
-
     /** Filename to write the generated types to */
     outputFile?: string
+
+    /**
+     * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
+     * to generate the TypeScript interfaces.
+     */
+    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
