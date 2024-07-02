@@ -8,16 +8,21 @@
 }
 
 .table-cell-action-button {
-  background-color: var(--theme-elevation-300);
+  background-color: var(--theme-elevation-200);
   display: flex;
   justify-content: center;
   align-items: center;
   border: 0;
+  padding: 2px;
   position: relative;
-  border-radius: 15px;
-  color: var(--theme-elevation-0);
+  border-radius: 4px;
+  color: var(--theme-elevation-800);
   display: inline-block;
   cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-elevation-300);
+  }
 }
 
 html[data-theme='light'] {
