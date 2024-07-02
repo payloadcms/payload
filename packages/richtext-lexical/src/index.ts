@@ -812,12 +812,12 @@ export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
 export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
-
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
+
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
 export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
-
 export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
@@ -830,6 +830,7 @@ export {
 export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/feature.server.js'
 export { TreeViewFeature } from './features/debug/treeView/feature.server.js'
+export { EXPERIMENTAL_TableFeature } from './features/experimental_table/feature.server.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
 
