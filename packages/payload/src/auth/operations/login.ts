@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken'
 
-import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+  DataFromCollectionSlug,
+} from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
 import type { User } from '../types.js'
@@ -24,13 +28,9 @@ export type Result = {
   user?: User
 }
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
-  data: {
-    email?: string
-    password: string
-    username?: string
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequestWithData
@@ -38,7 +38,7 @@ export type Arguments = {
 }
 
 export const loginOperation = async <TSlug extends CollectionSlug>(
-  incomingArgs: Arguments,
+  incomingArgs: Arguments<TSlug>,
 ): Promise<Result & { user: DataFromCollectionSlug<TSlug> }> => {
   let args = incomingArgs
 
@@ -83,7 +83,8 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     let user
     const loginWithUsername = collectionConfig?.auth?.loginWithUsername
-    const { email: unsanitizedEmail, password, username } = data
+    const { email: unsanitizedEmail, password } = data
+    const username = 'username' in data && data.username
 
     if (loginWithUsername && !username) {
       throw new ValidationError({

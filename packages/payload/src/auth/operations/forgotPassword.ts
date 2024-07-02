@@ -2,7 +2,11 @@ import crypto from 'crypto'
 import httpStatus from 'http-status'
 import { URL } from 'url'
 
-import type { Collection } from '../../collections/config/types.js'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+} from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequestWithData } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -11,13 +15,11 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: {
     [key: string]: unknown
-    email?: string
-    username?: string
-  }
+  } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
   req: PayloadRequestWithData
@@ -25,7 +27,9 @@ export type Arguments = {
 
 export type Result = string
 
-export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<null | string> => {
+export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<null | string> => {
   const loginWithUsername = incomingArgs.collection?.config?.auth?.loginWithUsername
 
   if (!incomingArgs.data.email && !incomingArgs.data.username) {

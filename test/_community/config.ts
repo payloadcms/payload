@@ -14,6 +14,13 @@ export default buildConfigWithDefaults({
   collections: [
     PostsCollection,
     // MediaCollection
+    {
+      slug: 'users2',
+      auth: {
+        loginWithUsername: true,
+      },
+      fields: [],
+    },
   ],
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
@@ -34,6 +41,11 @@ export default buildConfigWithDefaults({
       data: {
         text: 'example post',
       },
+    })
+
+    await payload.login({
+      collection: 'users',
+      data: {},
     })
 
     // // Create image

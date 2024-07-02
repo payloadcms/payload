@@ -581,6 +581,87 @@ export function entityToJSONSchema(
   }
 }
 
+function generateOperationJSONSchema(
+  config: SanitizedCollectionConfig,
+  operation: 'forgotPassword' | 'login' | 'registerFirstUser',
+): JSONSchema4 {
+  const requiredFields: string[] = []
+  const authFieldProperties: JSONSchema4['properties'] = {}
+
+  if (config.auth?.loginWithUsername) {
+    authFieldProperties['username'] = {
+      type: 'string',
+    }
+    requiredFields.push('username')
+  } else {
+    authFieldProperties['email'] = {
+      type: 'string',
+    }
+    requiredFields.push('email')
+  }
+
+  if (operation === 'forgotPassword') {
+    return {
+      additionalProperties: false,
+      properties: authFieldProperties,
+      required: requiredFields,
+    }
+  }
+
+  authFieldProperties['password'] = {
+    type: 'string',
+  }
+  requiredFields.push('password')
+
+  return {
+    additionalProperties: false,
+    properties: authFieldProperties,
+    required: requiredFields,
+  }
+}
+
+export function authCollectionToOperationsJSONSchema(
+  config: SanitizedCollectionConfig,
+): JSONSchema4 {
+  const properties = {
+    forgotPassword: {
+      ...generateOperationJSONSchema(config, 'forgotPassword'),
+    },
+    login: {
+      ...generateOperationJSONSchema(config, 'login'),
+    },
+    registerFirstUser: {
+      ...generateOperationJSONSchema(config, 'registerFirstUser'),
+    },
+  }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+    title: `${singular(toWords(`${config.slug}`, true))}AuthOperations`,
+  }
+}
+
+function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
+  const properties = collections.reduce((acc, collection) => {
+    if (collection.auth) {
+      acc[collection.slug] = {
+        $ref: `#/definitions/auth/${collection.slug}`,
+      }
+    }
+    return acc
+  }, {})
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
@@ -601,18 +682,33 @@ export function configToJSONSchema(
     return acc
   }, {})
 
+  const authOperationDefinitions = [...config.collections]
+    .filter(({ auth }) => Boolean(auth))
+    .reduce(
+      (acc, authCollection) => {
+        acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
+        return acc
+      },
+      { auth: {} },
+    )
+
   return {
     additionalProperties: false,
-    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    definitions: {
+      ...entityDefinitions,
+      ...Object.fromEntries(interfaceNameDefinitions),
+      ...authOperationDefinitions,
+    },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
     properties: {
+      auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals'],
+    required: ['user', 'locale', 'collections', 'globals', 'auth'],
     title: 'Config',
   }
 }
