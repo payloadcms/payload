@@ -303,6 +303,7 @@ export const koTranslations: DefaultTranslationsObject = {
     contains: '포함',
     equals: '같음',
     exists: '존재',
+    intersects: '교차합니다',
     isGreaterThan: '보다 큼',
     isGreaterThanOrEqualTo: '보다 크거나 같음',
     isIn: '포함됨',
@@ -312,6 +313,7 @@ export const koTranslations: DefaultTranslationsObject = {
     isNotEqualTo: '같지 않음',
     isNotIn: '포함되지 않음',
     near: '근처',
+    within: '내에서',
   },
   upload: {
     crop: '자르기',

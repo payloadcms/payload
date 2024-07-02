@@ -304,6 +304,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     contains: 'sadrži',
     equals: 'jednako',
     exists: 'postoji',
+    intersects: 'presijeca',
     isGreaterThan: 'je veće od',
     isGreaterThanOrEqualTo: 'je veće od ili jednako',
     isIn: 'je u',
@@ -313,6 +314,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nije jednako',
     isNotIn: 'nije unutra',
     near: 'blizu',
+    within: 'unutar',
   },
   upload: {
     crop: 'Usjev',

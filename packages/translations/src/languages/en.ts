@@ -306,6 +306,7 @@ export const enTranslations = {
     contains: 'contains',
     equals: 'equals',
     exists: 'exists',
+    intersects: 'intersects',
     isGreaterThan: 'is greater than',
     isGreaterThanOrEqualTo: 'is greater than or equal to',
     isIn: 'is in',
@@ -315,6 +316,7 @@ export const enTranslations = {
     isNotEqualTo: 'is not equal to',
     isNotIn: 'is not in',
     near: 'near',
+    within: 'within',
   },
   upload: {
     crop: 'Crop',

@@ -305,6 +305,7 @@ export const azTranslations: DefaultTranslationsObject = {
     contains: 'daxilində',
     equals: 'bərabərdir',
     exists: 'mövcuddur',
+    intersects: 'kəsişir',
     isGreaterThan: 'dən böyük',
     isGreaterThanOrEqualTo: 'böyük və ya bərabər',
     isIn: 'daxildir',
@@ -314,6 +315,7 @@ export const azTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'bərabər deyil',
     isNotIn: 'daxil deyil',
     near: 'yaxın',
+    within: 'daxilinde',
   },
   upload: {
     crop: 'Məhsul',

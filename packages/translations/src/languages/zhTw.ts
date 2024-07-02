@@ -296,6 +296,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     contains: '包含',
     equals: '等於',
     exists: '存在',
+    intersects: '交叉點',
     isGreaterThan: '大於',
     isGreaterThanOrEqualTo: '大於等於',
     isIn: '在',
@@ -305,6 +306,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     isNotEqualTo: '不等於',
     isNotIn: '不在',
     near: '附近',
+    within: '在...之內',
   },
   upload: {
     crop: '裁剪',

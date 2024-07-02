@@ -307,6 +307,7 @@ export const myTranslations: DefaultTranslationsObject = {
     contains: 'ပါဝင်သည်',
     equals: 'ညီမျှ',
     exists: 'တည်ရှိသည်',
+    intersects: 'ကြောက်ခြင်း',
     isGreaterThan: 'ထက်ကြီးသည်',
     isGreaterThanOrEqualTo: 'ထက်ကြီးသည် သို့မဟုတ် ညီမျှသည်',
     isIn: 'ရှိ',
@@ -316,6 +317,7 @@ export const myTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'ညီမျှသည်',
     isNotIn: 'မဝင်ပါ',
     near: 'နီး',
+    within: 'အတွင်း',
   },
   upload: {
     crop: 'သုန်း',

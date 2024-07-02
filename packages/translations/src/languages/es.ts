@@ -308,6 +308,7 @@ export const esTranslations: DefaultTranslationsObject = {
     contains: 'contiene',
     equals: 'igual',
     exists: 'existe',
+    intersects: 'interseca',
     isGreaterThan: 'es mayor que',
     isGreaterThanOrEqualTo: 'es mayor o igual que',
     isIn: 'está en',
@@ -317,6 +318,7 @@ export const esTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'no es igual a',
     isNotIn: 'no está en',
     near: 'cerca',
+    within: 'dentro de',
   },
   upload: {
     crop: 'Cultivo',

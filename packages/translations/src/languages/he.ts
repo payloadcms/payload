@@ -298,6 +298,7 @@ export const heTranslations: DefaultTranslationsObject = {
     contains: 'מכיל',
     equals: 'שווה ל',
     exists: 'קיים',
+    intersects: 'מצטלב',
     isGreaterThan: 'גדול מ',
     isGreaterThanOrEqualTo: 'גדול או שווה ל',
     isIn: 'נמצא ב',
@@ -307,6 +308,7 @@ export const heTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'לא שווה ל',
     isNotIn: 'לא נמצא ב',
     near: 'קרוב ל',
+    within: 'בתוך',
   },
   upload: {
     crop: 'חתוך',

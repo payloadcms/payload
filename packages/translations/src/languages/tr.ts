@@ -308,6 +308,7 @@ export const trTranslations: DefaultTranslationsObject = {
     contains: 'içerir',
     equals: 'eşittir',
     exists: 'var',
+    intersects: 'kesişir',
     isGreaterThan: 'şundan büyüktür',
     isGreaterThanOrEqualTo: 'büyüktür veya eşittir',
     isIn: 'içinde',
@@ -317,6 +318,7 @@ export const trTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'eşit değildir',
     isNotIn: 'içinde değil',
     near: 'yakın',
+    within: 'içinde',
   },
   upload: {
     crop: 'Mahsulat',

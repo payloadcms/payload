@@ -296,6 +296,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     contains: '包含',
     equals: '等于',
     exists: '存在',
+    intersects: '相交',
     isGreaterThan: '大于',
     isGreaterThanOrEqualTo: '大于等于',
     isIn: '在',
@@ -305,6 +306,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     isNotEqualTo: '不等于',
     isNotIn: '不在',
     near: '附近',
+    within: '在...之内',
   },
   upload: {
     crop: '作物',
