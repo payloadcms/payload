@@ -1,8 +1,11 @@
 import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload'
 
+import type { FieldMap } from '../../utilities/buildComponentMap.js'
+
 export type WhereBuilderProps = {
   collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   collectionSlug: SanitizedCollectionConfig['slug']
+  fieldMap?: FieldMap
 }
 
 export type FieldCondition = {
