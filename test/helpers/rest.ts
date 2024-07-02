@@ -3,7 +3,7 @@ import type { Where } from 'payload'
 import type { Config } from 'payload'
 import type { PaginatedDocs } from 'payload'
 
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import { devUser } from '../credentials.js'
 

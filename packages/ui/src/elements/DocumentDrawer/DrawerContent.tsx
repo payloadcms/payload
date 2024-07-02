@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

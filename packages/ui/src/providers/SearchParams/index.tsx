@@ -1,6 +1,6 @@
 'use client'
 import { useSearchParams as useNextSearchParams } from 'next/navigation.js'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useContext } from 'react'
 
 export type SearchParamsContext = {

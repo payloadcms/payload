@@ -2,7 +2,7 @@
 import type { PaginatedDocs, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'

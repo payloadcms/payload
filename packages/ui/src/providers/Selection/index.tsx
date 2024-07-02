@@ -1,7 +1,7 @@
 'use client'
 import type { Where } from 'payload'
 
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../Locale/index.js'

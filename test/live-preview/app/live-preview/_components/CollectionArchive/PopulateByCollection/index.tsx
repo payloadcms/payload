@@ -1,6 +1,6 @@
 'use client'
 
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Post } from '../../../../../payload-types.js'

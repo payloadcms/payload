@@ -2,7 +2,7 @@ import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } 
 
 import { initI18n } from '@payloadcms/translations'
 import { executeAuthStrategies, getDataLoader, parseCookies } from 'payload'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import { URL } from 'url'
 
 import { sanitizeLocales } from './addLocalesToRequest.js'

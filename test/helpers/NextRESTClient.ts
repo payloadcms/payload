@@ -1,5 +1,5 @@
 import type { SanitizedConfig, Where } from 'payload'
-import type { ParsedQs } from 'qs'
+import type { ParsedQs } from 'qs-esm'
 
 import {
   REST_DELETE as createDELETE,
@@ -8,7 +8,7 @@ import {
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
 } from '@payloadcms/next/routes'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import { devUser } from '../credentials.js'
 

@@ -12,7 +12,7 @@ import type {
 } from 'payload'
 
 import { notFound } from 'next/navigation.js'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'

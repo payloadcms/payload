@@ -113,7 +113,7 @@ function require(m) {
     external: [
       '*.scss',
       '*.css',
-      'qs',
+      'qs-esm',
       '@dnd-kit/core',
       '@payloadcms/graphql',
       '@payloadcms/translations',
@@ -165,7 +165,7 @@ const resultShared = await esbuild
     external: [
       '*.scss',
       '*.css',
-      'qs',
+      'qs-esm',
       '@dnd-kit/core',
       '@payloadcms/graphql',
       '@payloadcms/translations',
