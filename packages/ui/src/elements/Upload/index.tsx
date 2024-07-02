@@ -153,27 +153,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setFileSrc('')
     setFileUrl('')
     setShowUrlInput(false)
-
-    // Clear file metadata in doc state
-    setDoc((prevDoc) => ({
-      ...prevDoc,
-      filename: '',
-      filesize: 0,
-      focalX: undefined,
-      focalY: undefined,
-      height: 0,
-      mimeType: '',
-      url: '',
-      width: 0,
-    }))
-
-    // Clear upload edits from query params
-    dispatchFormQueryParams({
-      type: 'SET',
-      params: {
-        uploadEdits: null,
-      },
-    })
   }, [handleFileChange])
 
   const onEditsSave = React.useCallback(
@@ -215,29 +194,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
         // Create a new File object from the Blob data
         const file = new File([data], fileName, { type: data.type })
-
-        console.log('Fetched file:', file)
-
         handleFileChange(file)
-
-        // Clear previous upload edits when adding a new file
-        dispatchFormQueryParams({
-          type: 'SET',
-          params: {
-            uploadEdits: null,
-          },
-        })
-
-        setDoc((prevDoc) => {
-          const updatedDoc = {
-            ...prevDoc,
-            filename: fileName,
-            mimeType: file.type,
-            url: fileUrl,
-          }
-          console.log('Updated doc state:', updatedDoc)
-          return updatedDoc
-        })
       } catch (e) {
         toast.error(e.message)
       }
@@ -360,7 +317,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
         <Drawer Header={null} slug={editDrawerSlug}>
           <EditUpload
             fileName={value?.name || doc?.filename}
-            fileSrc={fileSrc || doc?.url}
+            fileSrc={doc?.url || fileSrc}
             imageCacheTag={doc.updatedAt}
             initialCrop={formQueryParams?.uploadEdits?.crop ?? {}}
             initialFocalPoint={{
