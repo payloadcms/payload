@@ -33,7 +33,9 @@ export const connect: Connect = async function connect(
   if (hotReload) connectionOptions.autoIndex = false
 
   try {
-    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    if (!this.connection) {
+      this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    }
 
     // If we are running a replica set with MongoDB Memory Server,
     // wait until the replica set elects a primary before proceeding
