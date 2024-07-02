@@ -20,7 +20,7 @@ import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { PluginComponent } from '../../../typesClient.js'
+import type { PluginComponent, PluginComponentWithAnchor } from '../../../typesClient.js'
 
 import './index.scss'
 
@@ -82,6 +82,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
           if (cell && activeCell !== cell) {
             editor.update(() => {
               const tableCellNode = $getNearestNodeFromDOMNode(cell.elem)
+
               if (!tableCellNode) {
                 throw new Error('TableCellResizer: Table cell node not found.')
               }

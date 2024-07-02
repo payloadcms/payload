@@ -11,16 +11,11 @@ import type {
 import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $createTableNodeWithDimensions, TableNode } from '@lexical/table'
+import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
+import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
 import { useModal } from '@payloadcms/ui'
-import {
-  $getSelection,
-  $insertNodes,
-  $isRangeSelection,
-  COMMAND_PRIORITY_EDITOR,
-  createCommand,
-} from 'lexical'
+import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
@@ -28,12 +23,6 @@ import type { PluginComponent } from '../../../typesClient.js'
 
 import { invariant } from '../../../../lexical/utils/invariant.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
-
-export type InsertTableCommandPayload = Readonly<{
-  columns: string
-  includeHeaders?: boolean
-  rows: string
-}>
 
 export type CellContextShape = {
   cellEditorConfig: CellEditorConfig | null
@@ -51,10 +40,6 @@ export type CellEditorConfig = Readonly<{
   readOnly?: boolean
   theme?: EditorThemeClasses
 }>
-
-export const INSERT_NEW_TABLE_COMMAND: LexicalCommand<InsertTableCommandPayload> = createCommand(
-  'INSERT_NEW_TABLE_COMMAND',
-)
 
 export const OPEN_TABLE_DRAWER_COMMAND: LexicalCommand<{}> = createCommand(
   'OPEN_EMBED_DRAWER_COMMAND',
@@ -106,19 +91,6 @@ export const TablePlugin: PluginComponent = () => {
     }
 
     return mergeRegister(
-      editor.registerCommand<InsertTableCommandPayload>(
-        INSERT_NEW_TABLE_COMMAND,
-        ({ columns, includeHeaders, rows }) => {
-          const tableNode = $createTableNodeWithDimensions(
-            Number(rows),
-            Number(columns),
-            includeHeaders,
-          )
-          $insertNodes([tableNode])
-          return true
-        },
-        COMMAND_PRIORITY_EDITOR,
-      ),
       editor.registerCommand(
         OPEN_TABLE_DRAWER_COMMAND,
         () => {
@@ -142,24 +114,27 @@ export const TablePlugin: PluginComponent = () => {
   }, [cellContext, editor, toggleModal])
 
   return (
-    <FieldsDrawer
-      data={{}}
-      drawerSlug={drawerSlug}
-      drawerTitle="Create Table"
-      featureKey="experimental_table"
-      handleDrawerSubmit={(_fields, data) => {
-        closeModal(drawerSlug)
+    <React.Fragment>
+      <FieldsDrawer
+        data={{}}
+        drawerSlug={drawerSlug}
+        drawerTitle="Create Table"
+        featureKey="experimental_table"
+        handleDrawerSubmit={(_fields, data) => {
+          closeModal(drawerSlug)
 
-        if (!data.columns || !data.rows) {
-          return
-        }
+          if (!data.columns || !data.rows) {
+            return
+          }
 
-        editor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, {
-          columns: String(data.columns),
-          rows: String(data.rows),
-        })
-      }}
-      schemaPathSuffix="fields"
-    />
+          editor.dispatchCommand(INSERT_TABLE_COMMAND, {
+            columns: String(data.columns),
+            rows: String(data.rows),
+          })
+        }}
+        schemaPathSuffix="fields"
+      />
+      <LexicalReactTablePlugin hasCellBackgroundColor={false} hasCellMerge />
+    </React.Fragment>
   )
 }

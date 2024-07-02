@@ -44,6 +44,7 @@ import { createPortal } from 'react-dom'
 import type { PluginComponentWithAnchor } from '../../../typesClient.js'
 
 import { invariant } from '../../../../lexical/utils/invariant.js'
+import './index.scss'
 
 function computeSelectionCount(selection: TableSelection): {
   columns: number
@@ -210,7 +211,7 @@ function TableActionMenu({
         const position = menuButtonRect.bottom - dropDownElementRect.height
         topPosition = (position < 0 ? margin : position) + window.pageYOffset
       }
-      dropDownElement.style.top = `${topPosition + +window.pageYOffset}px`
+      dropDownElement.style.top = `${topPosition}px`
     }
   }, [contextRef, dropDownRef, editor])
 
@@ -448,7 +449,7 @@ function TableActionMenu({
   return createPortal(
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions,jsx-a11y/click-events-have-key-events
     <div
-      className="dropdown"
+      className="table-action-menu-dropdown"
       onClick={(e) => {
         e.stopPropagation()
       }}
@@ -662,7 +663,7 @@ function TableCellActionMenuContainer({
             ref={menuRootRef}
             type="button"
           >
-            <i className="chevron-down" />
+            <i className="chevron-down" />V
           </button>
           {isMenuOpen && (
             <TableActionMenu
@@ -682,7 +683,9 @@ function TableCellActionMenuContainer({
 export const TableActionMenuPlugin: PluginComponentWithAnchor = ({ anchorElem }) => {
   const isEditable = useLexicalEditable()
   return createPortal(
-    isEditable ? <TableCellActionMenuContainer anchorElem={anchorElem} cellMerge /> : null,
-    anchorElem,
+    isEditable ? (
+      <TableCellActionMenuContainer anchorElem={anchorElem ?? document.body} cellMerge />
+    ) : null,
+    anchorElem ?? document.body,
   )
 }
