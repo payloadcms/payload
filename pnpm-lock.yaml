@@ -633,7 +633,7 @@ importers:
         version: 6.11.0(webpack@5.91.0)
       css-minimizer-webpack-plugin:
         specifier: ^6.0.0
-        version: 6.0.0(webpack@5.91.0)
+        version: 6.0.0(esbuild@0.19.12)(webpack@5.91.0)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.91.0)
@@ -642,7 +642,7 @@ importers:
         version: link:../payload
       postcss-loader:
         specifier: ^8.1.1
-        version: 8.1.1(postcss@8.4.38)(webpack@5.91.0)
+        version: 8.1.1(postcss@8.4.38)(typescript@5.5.2)(webpack@5.91.0)
       postcss-preset-env:
         specifier: ^9.5.14
         version: 9.5.14(postcss@8.4.38)
@@ -657,10 +657,10 @@ importers:
         version: 1.12.1
       terser-webpack-plugin:
         specifier: ^5.3.10
-        version: 5.3.10(@swc/core@1.6.5)(webpack@5.91.0)
+        version: 5.3.10(@swc/core@1.6.5)(esbuild@0.19.12)(webpack@5.91.0)
       webpack:
         specifier: ^5.78.0
-        version: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+        version: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli:
         specifier: ^5.1.4
         version: 5.1.4(webpack@5.91.0)
@@ -1154,32 +1154,32 @@ importers:
         specifier: 2.0.0-beta.0
         version: 2.0.0-beta.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@lexical/headless':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/link':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/list':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/mark':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/markdown':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/react':
-        specifier: 0.16.0
-        version: 0.16.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(yjs@13.6.14)
+        specifier: 0.16.1
+        version: 0.16.1(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(yjs@13.6.14)
       '@lexical/rich-text':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/selection':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/utils':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@types/uuid':
         specifier: ^9.0.8
         version: 9.0.8
@@ -1193,8 +1193,8 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0
       lexical:
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       react:
         specifier: ^19.0.0-rc-f994737d14-20240522
         version: 19.0.0-rc-f994737d14-20240522
@@ -1556,11 +1556,11 @@ importers:
         specifier: ^3.525.0
         version: 3.550.0
       '@lexical/headless':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@lexical/markdown':
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: 0.16.1
+        version: 0.16.1
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../packages/db-mongodb
@@ -5688,42 +5688,42 @@ packages:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
     dev: false
 
-  /@lexical/clipboard@0.16.0:
-    resolution: {integrity: sha512-eYMJ6jCXpWBVC05Mu9HLMysrBbfi++xFfsm+Yo7A6kYGrqYUhpXqjJkYnw1xdZYL3bV73Oe4ByVJuq42GU+Mqw==}
+  /@lexical/clipboard@0.16.1:
+    resolution: {integrity: sha512-0dWs/SwKS5KPpuf6fUVVt9vSCl6HAqcDGhSITw/okv0rrIlXTUT6WhVsMJtXfFxTyVvwMeOecJHvQH3i/jRQtA==}
     dependencies:
-      '@lexical/html': 0.16.0
-      '@lexical/list': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/html': 0.16.1
+      '@lexical/list': 0.16.1
+      '@lexical/selection': 0.16.1
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/code@0.16.0:
-    resolution: {integrity: sha512-1EKCBSFV745UI2zn5v75sKcvVdmd+y2JtZhw8CItiQkRnBLv4l4d/RZYy+cKOuXJGsoBrKtxXn5sl7HebwQbPw==}
+  /@lexical/code@0.16.1:
+    resolution: {integrity: sha512-pOC28rRZ2XkmI2nIJm50DbKaCJtk5D0o7r6nORYp4i0z+lxt5Sf2m82DL9ksUHJRqKy87pwJDpoWvJ2SAI0ohw==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
       prismjs: 1.29.0
 
-  /@lexical/devtools-core@0.16.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
-    resolution: {integrity: sha512-Jt8p0J0UoMHf3UMh3VdyrXbLLwpEZuMqihTmbPRpwo+YQ6NGQU35QgwY2K0DpPAThpxL/Cm7uaFqGOy8Kjrhqw==}
+  /@lexical/devtools-core@0.16.1(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
+    resolution: {integrity: sha512-8CvGERGL7ySDVGLU+YPeq+JupIXsOFlXa3EuJ88koLKqXxYenwMleZgGqayFp6lCP78xqPKnATVeoOZUt/NabQ==}
     peerDependencies:
       react: ^19.0.0-rc-f994737d14-20240522
       react-dom: ^19.0.0-rc-f994737d14-20240522
     dependencies:
-      '@lexical/html': 0.16.0
-      '@lexical/link': 0.16.0
-      '@lexical/mark': 0.16.0
-      '@lexical/table': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/html': 0.16.1
+      '@lexical/link': 0.16.1
+      '@lexical/mark': 0.16.1
+      '@lexical/table': 0.16.1
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
       react: 19.0.0-rc-f994737d14-20240522
       react-dom: 19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522)
     dev: false
 
-  /@lexical/dragon@0.16.0:
-    resolution: {integrity: sha512-Yr29SFZzOPs+S6UrEZaXnnso1fJGVfZOXVJQZbyzlspqJpSHXVH7InOXYHWN6JSWQ8Hs/vU3ksJXwqz+0TCp2g==}
+  /@lexical/dragon@0.16.1:
+    resolution: {integrity: sha512-Rvd60GIYN5kpjjBumS34EnNbBaNsoseI0AlzOdtIV302jiHPCLH0noe9kxzu9nZy+MZmjZy8Dx2zTbQT2mueRw==}
     dependencies:
-      lexical: 0.16.0
+      lexical: 0.16.1
     dev: false
 
   /@lexical/eslint-plugin@0.15.0(eslint@8.57.0):
@@ -5734,108 +5734,108 @@ packages:
       eslint: 8.57.0
     dev: true
 
-  /@lexical/hashtag@0.16.0:
-    resolution: {integrity: sha512-2EdAvxYVYqb0nv6vgxCRgE8ip7yez5p0y0oeUyxmdbcfZdA+Jl90gYH3VdevmZ5Bk3wE0/fIqiLD+Bb5smqjCQ==}
+  /@lexical/hashtag@0.16.1:
+    resolution: {integrity: sha512-G+YOxStAKs3q1utqm9KR4D4lCkwIH52Rctm4RgaVTI+4lvTaybeDRGFV75P/pI/qlF7/FvAYHTYEzCjtC3GNMQ==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
     dev: false
 
-  /@lexical/headless@0.16.0:
-    resolution: {integrity: sha512-B0efH1EYpjPD5kayCsHFRbvneyF64JMB/unC6uYRkUxp6a733pqsWGta8DDn7KQt0W1XPI0jqDoJFDmQKwoi4g==}
+  /@lexical/headless@0.16.1:
+    resolution: {integrity: sha512-L00TQk9vD1o7c25QMNdwD7MvkmQYP/jebG2M8GbX/3KSjHag2QB8MwcFlccSGXBhmbVm1X1Zo7z7urxY//3atw==}
     dependencies:
-      lexical: 0.16.0
+      lexical: 0.16.1
 
-  /@lexical/history@0.16.0:
-    resolution: {integrity: sha512-xwFxgDZGviyGEqHmgt6A6gPhsyU/yzlKRk9TBUVByba3khuTknlJ1a80H5jb+OYcrpiElml7iVuGYt+oC7atCA==}
+  /@lexical/history@0.16.1:
+    resolution: {integrity: sha512-WQhScx0TJeKSQAnEkRpIaWdUXqirrNrom2MxbBUc/32zEUMm9FzV7nRGknvUabEFUo7vZq6xTZpOExQJqHInQA==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
     dev: false
 
-  /@lexical/html@0.16.0:
-    resolution: {integrity: sha512-okxn3q/1qkUpCZNEFRI39XeJj4YRjb6prm3WqZgP4d39DI1W24feeTZJjYRCW+dc3NInwFaolU3pNA2MGkjRtg==}
+  /@lexical/html@0.16.1:
+    resolution: {integrity: sha512-vbtAdCvQ3PaAqa5mFmtmrvbiAvjCu1iXBAJ0bsHqFXCF2Sba5LwHVe8dUAOTpfEZEMbiHfjul6b5fj4vNPGF2A==}
     dependencies:
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/selection': 0.16.1
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/link@0.16.0:
-    resolution: {integrity: sha512-ppvJSh/XGqlzbeymOiwcXJcUcrqgQqTK2QXTBAZq7JThtb0WsJxYd2CSLSN+Ycu23prnwqOqILcU0+34+gAVFw==}
+  /@lexical/link@0.16.1:
+    resolution: {integrity: sha512-zG36gEnEqbIe6tK/MhXi7wn/XMY/zdivnPcOY5WyC3derkEezeLSSIFsC1u5UNeK5pbpNMSy4LDpLhi1Ww4Y5w==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/list@0.16.0:
-    resolution: {integrity: sha512-nBx/DMM7nCgnOzo1JyNnVaIrk/Xi5wIPNi8jixrEV6w9Om2K6dHutn/79Xzp2dQlNGSLHEDjky6N2RyFgmXh0g==}
+  /@lexical/list@0.16.1:
+    resolution: {integrity: sha512-i9YhLAh5N6YO9dP+R1SIL9WEdCKeTiQQYVUzj84vDvX5DIBxMPUjTmMn3LXu9T+QO3h1s2L/vJusZASrl45eAw==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/mark@0.16.0:
-    resolution: {integrity: sha512-WMR4nqygSgIQ6Vdr5WAzohxBGjH+m44dBNTbWTGZGVlRvPzvBT6tieCoxFqpceIq/ko67HGTCNoFj2cMKVwgIA==}
+  /@lexical/mark@0.16.1:
+    resolution: {integrity: sha512-CZRGMLcxn5D+jzf1XnH+Z+uUugmpg1mBwTbGybCPm8UWpBrKDHkrscfMgWz62iRWz0cdVjM5+0zWpNElxFTRjQ==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
     dev: false
 
-  /@lexical/markdown@0.16.0:
-    resolution: {integrity: sha512-7HQLFrBbpY68mcq4A6C1qIGmjgA+fAByditi2WRe7tD2eoIKb/B5baQAnDKis0J+m5kTaCBmdlT6csSzyOPzeQ==}
+  /@lexical/markdown@0.16.1:
+    resolution: {integrity: sha512-0sBLttMvfQO/hVaIqpHdvDowpgV2CoRuWo2CNwvRLZPPWvPVjL4Nkb73wmi8zAZsAOTbX2aw+g4m/+k5oJqNig==}
     dependencies:
-      '@lexical/code': 0.16.0
-      '@lexical/link': 0.16.0
-      '@lexical/list': 0.16.0
-      '@lexical/rich-text': 0.16.0
-      '@lexical/text': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/code': 0.16.1
+      '@lexical/link': 0.16.1
+      '@lexical/list': 0.16.1
+      '@lexical/rich-text': 0.16.1
+      '@lexical/text': 0.16.1
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/offset@0.16.0:
-    resolution: {integrity: sha512-4TqPEC2qA7sgO8Tm65nOWnhJ8dkl22oeuGv9sUB+nhaiRZnw3R45mDelg23r56CWE8itZnvueE7TKvV+F3OXtQ==}
+  /@lexical/offset@0.16.1:
+    resolution: {integrity: sha512-/i2J04lQmFeydUZIF8tKXLQTXiJDTQ6GRnkfv1OpxU4amc0rwGa7+qAz/PuF1n58rP6InpLmSHxgY5JztXa2jw==}
     dependencies:
-      lexical: 0.16.0
+      lexical: 0.16.1
     dev: false
 
-  /@lexical/overflow@0.16.0:
-    resolution: {integrity: sha512-a7gtIRxleEuMN9dj2yO4CdezBBfIr9Mq+m7G5z62+xy7VL7cfMfF+xWjy3EmDYDXS4vOQgAXAUgO4oKz2AKGhQ==}
+  /@lexical/overflow@0.16.1:
+    resolution: {integrity: sha512-xh5YpoxwA7K4wgMQF/Sjl8sdjaxqesLCtH5ZrcMsaPlmucDIEEs+i8xxk+kDUTEY7y+3FvRxs4lGNgX8RVWkvQ==}
     dependencies:
-      lexical: 0.16.0
+      lexical: 0.16.1
     dev: false
 
-  /@lexical/plain-text@0.16.0:
-    resolution: {integrity: sha512-BK7/GSOZUHRJTbNPkpb9a/xN9z+FBCdunTsZhnOY8pQ7IKws3kuMO2Tk1zXfTd882ZNAxFdDKNdLYDSeufrKpw==}
+  /@lexical/plain-text@0.16.1:
+    resolution: {integrity: sha512-GjY4ylrBZIaAVIF8IFnmW0XGyHAuRmWA6gKB8iTTlsjgFrCHFIYC74EeJSp309O0Hflg9rRBnKoX1TYruFHVwA==}
     dependencies:
-      '@lexical/clipboard': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/clipboard': 0.16.1
+      '@lexical/selection': 0.16.1
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
     dev: false
 
-  /@lexical/react@0.16.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(yjs@13.6.14):
-    resolution: {integrity: sha512-WKFQbI0/m1YkLjL5t90YLJwjGcl5QRe6mkfm3ljQuL7Ioj3F92ZN/J2gHFVJ9iC8/lJs6Zzw6oFjiP8hQxJf9Q==}
+  /@lexical/react@0.16.1(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)(yjs@13.6.14):
+    resolution: {integrity: sha512-SsGgLt9iKfrrMRy9lFb6ROVPUYOgv6b+mCn9Al+TLqs/gBReDBi3msA7m526nrtBUKYUnjHdQ1QXIJzuKgOxcg==}
     peerDependencies:
       react: ^19.0.0-rc-f994737d14-20240522
       react-dom: ^19.0.0-rc-f994737d14-20240522
     dependencies:
-      '@lexical/clipboard': 0.16.0
-      '@lexical/code': 0.16.0
-      '@lexical/devtools-core': 0.16.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
-      '@lexical/dragon': 0.16.0
-      '@lexical/hashtag': 0.16.0
-      '@lexical/history': 0.16.0
-      '@lexical/link': 0.16.0
-      '@lexical/list': 0.16.0
-      '@lexical/mark': 0.16.0
-      '@lexical/markdown': 0.16.0
-      '@lexical/overflow': 0.16.0
-      '@lexical/plain-text': 0.16.0
-      '@lexical/rich-text': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/table': 0.16.0
-      '@lexical/text': 0.16.0
-      '@lexical/utils': 0.16.0
-      '@lexical/yjs': 0.16.0(yjs@13.6.14)
-      lexical: 0.16.0
+      '@lexical/clipboard': 0.16.1
+      '@lexical/code': 0.16.1
+      '@lexical/devtools-core': 0.16.1(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
+      '@lexical/dragon': 0.16.1
+      '@lexical/hashtag': 0.16.1
+      '@lexical/history': 0.16.1
+      '@lexical/link': 0.16.1
+      '@lexical/list': 0.16.1
+      '@lexical/mark': 0.16.1
+      '@lexical/markdown': 0.16.1
+      '@lexical/overflow': 0.16.1
+      '@lexical/plain-text': 0.16.1
+      '@lexical/rich-text': 0.16.1
+      '@lexical/selection': 0.16.1
+      '@lexical/table': 0.16.1
+      '@lexical/text': 0.16.1
+      '@lexical/utils': 0.16.1
+      '@lexical/yjs': 0.16.1(yjs@13.6.14)
+      lexical: 0.16.1
       react: 19.0.0-rc-f994737d14-20240522
       react-dom: 19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522)
       react-error-boundary: 3.1.4(react@19.0.0-rc-f994737d14-20240522)
@@ -5843,45 +5843,45 @@ packages:
       - yjs
     dev: false
 
-  /@lexical/rich-text@0.16.0:
-    resolution: {integrity: sha512-AGTD6yJZ+kj2TNah1r7/6vyufs6fZANeSvv9x5eG+WjV4uyUJYkd1qR8C5gFZHdkyr+bhAcsAXvS039VzAxRrQ==}
+  /@lexical/rich-text@0.16.1:
+    resolution: {integrity: sha512-4uEVXJur7tdSbqbmsToCW4YVm0AMh4y9LK077Yq2O9hSuA5dqpI8UbTDnxZN2D7RfahNvwlqp8eZKFB1yeiJGQ==}
     dependencies:
-      '@lexical/clipboard': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/clipboard': 0.16.1
+      '@lexical/selection': 0.16.1
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/selection@0.16.0:
-    resolution: {integrity: sha512-trT9gQVJ2j6AwAe7tHJ30SRuxCpV6yR9LFtggxphHsXSvJYnoHC0CXh1TF2jHl8Gd5OsdWseexGLBE4Y0V3gwQ==}
+  /@lexical/selection@0.16.1:
+    resolution: {integrity: sha512-+nK3RvXtyQvQDq7AZ46JpphmM33pwuulwiRfeXR5T9iFQTtgWOEjsAi/KKX7vGm70BxACfiSxy5QCOgBWFwVJg==}
     dependencies:
-      lexical: 0.16.0
+      lexical: 0.16.1
 
-  /@lexical/table@0.16.0:
-    resolution: {integrity: sha512-A66K779kxdr0yH2RwT2itsMnkzyFLFNPXyiWGLobCH8ON4QPuBouZvjbRHBe8Pe64yJ0c1bRDxSbTqUi9Wt3Gg==}
+  /@lexical/table@0.16.1:
+    resolution: {integrity: sha512-GWb0/MM1sVXpi1p2HWWOBldZXASMQ4c6WRNYnRmq7J/aB5N66HqQgJGKp3m66Kz4k1JjhmZfPs7F018qIBhnFQ==}
     dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
+      '@lexical/utils': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/text@0.16.0:
-    resolution: {integrity: sha512-9ilaOhuNIIGHKC8g8j3K/mEvJ09af9B6RKbm3GNoRcf/WNHD4dEFWNTEvgo/3zCzAS8EUBI6UINmfQQWlMjdIQ==}
+  /@lexical/text@0.16.1:
+    resolution: {integrity: sha512-Os/nKQegORTrKKN6vL3/FMVszyzyqaotlisPynvTaHTUC+yY4uyjM2hlF93i5a2ixxyiPLF9bDroxUP96TMPXg==}
     dependencies:
-      lexical: 0.16.0
+      lexical: 0.16.1
 
-  /@lexical/utils@0.16.0:
-    resolution: {integrity: sha512-GWmFEmd7o3GHqJBaEwzuZQbfTNI3Gg8ReGuHMHABgrkhZ8j2NggoRBlxsQLG0f7BewfTMVwbye22yBPq78775w==}
+  /@lexical/utils@0.16.1:
+    resolution: {integrity: sha512-BVyJxDQi/rIxFTDjf2zE7rMDKSuEaeJ4dybHRa/hRERt85gavGByQawSLeQlTjLaYLVsy+x7wCcqh2fNhlLf0g==}
     dependencies:
-      '@lexical/list': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/table': 0.16.0
-      lexical: 0.16.0
+      '@lexical/list': 0.16.1
+      '@lexical/selection': 0.16.1
+      '@lexical/table': 0.16.1
+      lexical: 0.16.1
 
-  /@lexical/yjs@0.16.0(yjs@13.6.14):
-    resolution: {integrity: sha512-YIJr87DfAXTwoVHDjR7cci//hr4r/a61Nn95eo2JNwbTqQo65Gp8rwJivqVxNfvKZmRdwHTKgvdEDoBmI/tGog==}
+  /@lexical/yjs@0.16.1(yjs@13.6.14):
+    resolution: {integrity: sha512-QHw1bmzB/IypIV1tRWMH4hhwE1xX7wV+HxbzBS8oJAkoU5AYXM/kyp/sQicgqiwVfpai1Px7zatOoUDFgbyzHQ==}
     peerDependencies:
       yjs: '>=13.5.22'
     dependencies:
-      '@lexical/offset': 0.16.0
-      lexical: 0.16.0
+      '@lexical/offset': 0.16.1
+      lexical: 0.16.1
       yjs: 13.6.14
     dev: false
 
@@ -7859,7 +7859,7 @@ packages:
       webpack: 5.x.x
       webpack-cli: 5.x.x
     dependencies:
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.91.0)
     dev: true
 
@@ -7870,7 +7870,7 @@ packages:
       webpack: 5.x.x
       webpack-cli: 5.x.x
     dependencies:
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.91.0)
     dev: true
 
@@ -7885,7 +7885,7 @@ packages:
       webpack-dev-server:
         optional: true
     dependencies:
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.91.0)
     dev: true
 
@@ -9140,21 +9140,6 @@ packages:
       yaml: 1.10.2
     dev: false
 
-  /cosmiconfig@9.0.0:
-    resolution: {integrity: sha512-itvL5h8RETACmOTFc4UfIyB2RfEHi71Ax6E/PivVxq9NseKbOWpeyHEOIbmAw1rs8Ak0VursQNww7lf7YtUwzg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      typescript: 5.5.2
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      env-paths: 2.2.1
-      import-fresh: 3.3.0
-      js-yaml: 4.1.0
-      parse-json: 5.2.0
-    dev: true
-
   /cosmiconfig@9.0.0(typescript@5.5.2):
     resolution: {integrity: sha512-itvL5h8RETACmOTFc4UfIyB2RfEHi71Ax6E/PivVxq9NseKbOWpeyHEOIbmAw1rs8Ak0VursQNww7lf7YtUwzg==}
     engines: {node: '>=14'}
@@ -9276,10 +9261,10 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.38)
       postcss-value-parser: 4.2.0
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
     dev: true
 
-  /css-minimizer-webpack-plugin@6.0.0(webpack@5.91.0):
+  /css-minimizer-webpack-plugin@6.0.0(esbuild@0.19.12)(webpack@5.91.0):
     resolution: {integrity: sha512-BLpR9CCDkKvhO3i0oZQgad6v9pCxUuhSc5RT6iUEy9M8hBXi4TJb5vqF2GQ2deqYHmRi3O6IR9hgAZQWg0EBwA==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
@@ -9306,11 +9291,12 @@ packages:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       cssnano: 6.1.2(postcss@8.4.38)
+      esbuild: 0.19.12
       jest-worker: 29.7.0
       postcss: 8.4.38
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
     dev: true
 
   /css-prefers-color-scheme@9.0.1(postcss@8.4.38):
@@ -13007,8 +12993,8 @@ packages:
     resolution: {integrity: sha512-/7HrPAmtgsc1F+qpv5bFwoQZ6CbH/w3mPPL2AW5P75/QYrqKz4bhvJrc2jozIX0GxtuT/YUYT7w+1sZMtUWbOg==}
     dev: true
 
-  /lexical@0.16.0:
-    resolution: {integrity: sha512-Skn45Qhriazq4fpAtwnAB11U//GKc4vjzx54xsV3TkDLDvWpbL4Z9TNRwRoN3g7w8AkWnqjeOSODKkrjgfRSrg==}
+  /lexical@0.16.1:
+    resolution: {integrity: sha512-+R05d3+N945OY8pTUjTqQrWoApjC+ctzvjnmNETtx9WmVAaiW0tQVG+AYLt5pDGY8dQXtd4RPorvnxBTECt9SA==}
 
   /lib0@0.2.93:
     resolution: {integrity: sha512-M5IKsiFJYulS+8Eal8f+zAqf5ckm1vffW0fFDxfgxJ+uiVopvDdd3PxJmz0GsVi3YNO7QCFSq0nAsiDmNhLj9Q==}
@@ -13358,7 +13344,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-sources: 1.4.3
     dev: true
 
@@ -14692,28 +14678,6 @@ packages:
       postcss: 8.4.38
       semver: 7.6.0
       webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
-    transitivePeerDependencies:
-      - typescript
-    dev: true
-
-  /postcss-loader@8.1.1(postcss@8.4.38)(webpack@5.91.0):
-    resolution: {integrity: sha512-0IeqyAsG6tYiDRCYKQJLAmgQr47DX6N7sFSWvQxt6AcupX8DIdmykuk/o/tx0Lze3ErGHJEp5OSRxrelC6+NdQ==}
-    engines: {node: '>= 18.12.0'}
-    peerDependencies:
-      '@rspack/core': 0.x || 1.x
-      postcss: ^7.0.0 || ^8.0.1
-      webpack: ^5.0.0
-    peerDependenciesMeta:
-      '@rspack/core':
-        optional: true
-      webpack:
-        optional: true
-    dependencies:
-      cosmiconfig: 9.0.0
-      jiti: 1.21.0
-      postcss: 8.4.38
-      semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
     transitivePeerDependencies:
       - typescript
     dev: true
@@ -16129,7 +16093,7 @@ packages:
     dependencies:
       neo-async: 2.6.2
       sass: 1.77.4
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
     dev: true
 
   /sass@1.77.4:
@@ -16916,7 +16880,7 @@ packages:
     dependencies:
       '@swc/core': 1.6.5
       '@swc/counter': 0.1.3
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
     dev: true
 
   /swc-plugin-transform-remove-imports@1.12.1:
@@ -17076,31 +17040,6 @@ packages:
       serialize-javascript: 6.0.2
       terser: 5.30.3
       webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.21.5)
-    dev: true
-
-  /terser-webpack-plugin@5.3.10(@swc/core@1.6.5)(webpack@5.91.0):
-    resolution: {integrity: sha512-BKFPWlPDndPs+NGGCr1U59t0XScL5317Y0UReNrHaw9/FwhPENlq6bfgs+4yPfyP51vqC1bQ4rp1EfXW5ZSH9w==}
-    engines: {node: '>= 10.13.0'}
-    peerDependencies:
-      '@swc/core': '*'
-      esbuild: '*'
-      uglify-js: '*'
-      webpack: ^5.1.0
-    peerDependenciesMeta:
-      '@swc/core':
-        optional: true
-      esbuild:
-        optional: true
-      uglify-js:
-        optional: true
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.6.5
-      jest-worker: 27.5.1
-      schema-utils: 3.3.0
-      serialize-javascript: 6.0.2
-      terser: 5.30.3
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
     dev: true
 
   /terser@5.30.3:
@@ -17858,7 +17797,7 @@ packages:
       import-local: 3.1.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4)
+      webpack: 5.91.0(@swc/core@1.6.5)(esbuild@0.19.12)(webpack-cli@5.1.4)
       webpack-merge: 5.10.0
     dev: true
 
@@ -17957,47 +17896,6 @@ packages:
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.10(@swc/core@1.6.5)(esbuild@0.21.5)(webpack@5.91.0)
       watchpack: 2.4.1
-      webpack-sources: 3.2.3
-    transitivePeerDependencies:
-      - '@swc/core'
-      - esbuild
-      - uglify-js
-    dev: true
-
-  /webpack@5.91.0(@swc/core@1.6.5)(webpack-cli@5.1.4):
-    resolution: {integrity: sha512-rzVwlLeBWHJbmgTC/8TvAcu5vpJNII+MelQpylD4jNERPwpBJOE2lEcko1zJX3QJeLjTTAnQxn/OJ8bjDzVQaw==}
-    engines: {node: '>=10.13.0'}
-    hasBin: true
-    peerDependencies:
-      webpack-cli: '*'
-    peerDependenciesMeta:
-      webpack-cli:
-        optional: true
-    dependencies:
-      '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.5
-      '@webassemblyjs/ast': 1.12.1
-      '@webassemblyjs/wasm-edit': 1.12.1
-      '@webassemblyjs/wasm-parser': 1.12.1
-      acorn: 8.11.3
-      acorn-import-assertions: 1.9.0(acorn@8.11.3)
-      browserslist: 4.23.0
-      chrome-trace-event: 1.0.3
-      enhanced-resolve: 5.16.0
-      es-module-lexer: 1.5.0
-      eslint-scope: 5.1.1
-      events: 3.3.0
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-      json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.0
-      mime-types: 2.1.35
-      neo-async: 2.6.2
-      schema-utils: 3.3.0
-      tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.6.5)(webpack@5.91.0)
-      watchpack: 2.4.1
-      webpack-cli: 5.1.4(webpack@5.91.0)
       webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
