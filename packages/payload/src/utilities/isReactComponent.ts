@@ -25,7 +25,7 @@ export function isReactClientComponent<T extends any>(
   if (component === null || component === undefined) {
     return false
   }
-  return !isReactServerComponentOrFunction(component)
+  return !isReactServerComponentOrFunction(component) && component.$$typeof == clientRefSymbol
 }
 
 export function isReactComponentOrFunction<T extends any>(
