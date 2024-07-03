@@ -47,7 +47,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "dotenv": "16.4.5",
     "prettier": "^3.0.3",
-    "typescript": "5.5.2"
+    "typescript": "5.5.3"
   },
   "publishConfig": {
     "exports": {
