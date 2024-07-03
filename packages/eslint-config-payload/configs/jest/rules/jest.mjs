@@ -1,5 +1,5 @@
-/** @type {import('eslint').Linter.Config} */
-module.exports = {
+/** @type {import('eslint').Linter.FlatConfig} */
+export const index = {
   rules: {
     'jest/consistent-test-it': ['error', { fn: 'it' }],
     'jest/expect-expect': 'error',
@@ -36,3 +36,5 @@ module.exports = {
     'jest/valid-title': 'error',
   },
 }
+
+export default index

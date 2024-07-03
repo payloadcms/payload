@@ -1,5 +1,5 @@
-/** @type {import('eslint').Linter.Config} */
-module.exports = {
+/** @type {import('eslint').Linter.FlatConfig} */
+export const index = {
   rules: {
     'jest-dom/prefer-checked': 'error',
     'jest-dom/prefer-enabled-disabled': 'error',
@@ -8,3 +8,5 @@ module.exports = {
     'jest-dom/prefer-to-have-attribute': 'error',
   },
 }
+
+export default index

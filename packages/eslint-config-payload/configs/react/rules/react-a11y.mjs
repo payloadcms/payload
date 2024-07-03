@@ -1,8 +1,8 @@
-/** @type {import('eslint').Linter.Config} */
 
 // Sourced from https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb/rules/react-a11y.js
 
-module.exports = {
+/** @type {import('eslint').Linter.FlatConfig} */
+export const index = {
   rules: {
     // Enforce that anchors have content
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/anchor-has-content.md
@@ -245,3 +245,5 @@ module.exports = {
     ],
   },
 }
+
+export default index

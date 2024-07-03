@@ -1,3 +1,13 @@
+import eslint from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import perfectionistNatural from 'eslint-plugin-perfectionist/configs/recommended-natural'
+import { configs as regexpPluginConfigs } from "eslint-plugin-regexp"
+import eslintConfigPrettier from "eslint-config-prettier";
+import payloadPlugin from 'eslint-plugin-payload'
+import reactExtends from './configs/react/index.mjs'
+import jestExtends from './configs/jest/index.mjs'
+import globals from "globals";
+
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
@@ -91,112 +101,98 @@ const typescriptRules = {
 }
 
 const baseExtends = [
-  'eslint:recommended',
-  'plugin:perfectionist/recommended-natural',
-  'plugin:regexp/recommended',
+  eslint.configs.recommended,
+  perfectionistNatural,
+  regexpPluginConfigs['flat/recommended']
+
 ]
 
-/** @type {import('eslint').Linter.Config} */
-module.exports = {
-  ignorePatterns: [
-    '*.d.ts',
-    '**/tsconfig.json',
-    'package.json',
-    '*.MD',
-    '.tmp',
-    '**/.git',
-    '**/build',
-    '**/dist/**',
-    '**/node_modules',
-    '**/temp',
-    '*.yml',
-    '*.json',
-  ],
-  env: {
-    es6: true,
-    browser: true,
-    node: true,
+
+export default tseslint.config(
+  {
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+      },
+    }
   },
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
+  {
+    files: ['**/*.ts'],
+    plugins: {
+      payload: payloadPlugin
     },
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-  },
-  plugins: ['import-x'], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
-  overrides: [
-    {
-      files: ['**/*.ts'],
-      plugins: ['@typescript-eslint', 'payload'],
-      extends: [
-        ...baseExtends,
-        'plugin:@typescript-eslint/recommended-type-checked',
-        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
-      ],
-      parser: '@typescript-eslint/parser',
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-      },
-    },
-    {
-      files: ['**/*.tsx'],
-      plugins: ['@typescript-eslint', 'payload'],
-      extends: [
-        ...baseExtends,
-        'plugin:@typescript-eslint/recommended-type-checked',
-        'plugin:react/recommended',
-        'plugin:react-hooks/recommended',
-        './configs/react/index.js',
-        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
-      ],
-      parser: '@typescript-eslint/parser',
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        ...reactRules,
-      },
-    },
-    {
-      files: ['**/*.spec.ts'],
-      plugins: ['@typescript-eslint', 'payload'],
-      extends: [
-        ...baseExtends,
-        'plugin:@typescript-eslint/recommended-type-checked',
-        './configs/jest/index.js',
-        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
-      ],
-      parser: '@typescript-eslint/parser',
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        '@typescript-eslint/unbound-method': 'off',
-      },
-    },
-    {
-      plugins: ['payload'],
-      files: ['*.config.ts'],
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        'no-restricted-exports': 'off',
-      },
-    },
-    {
-      plugins: ['payload'],
-      files: ['config.ts'],
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        'no-restricted-exports': 'off',
-      },
-    },
-  ],
-  rules: {}, // Rules are defined in the overrides to be more specific and only target the files they are meant for.
-  settings: {
-    'import-x/parsers': {
-      '@typescript-eslint/parser': ['.ts', '.tsx'],
+    extends: [
+      ...baseExtends,
+      tseslint.configs.recommendedTypeChecked,
+      eslintConfigPrettier, // prettier needs to come last. It disables eslint rules conflicting with prettier
+    ],
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
     },
   },
-}
+  {
+    files: ['**/*.tsx'],
+    plugins: {
+      payload: payloadPlugin
+    },
+    extends: [
+      ...baseExtends,
+      tseslint.configs.recommendedTypeChecked,
+      reactExtends,
+      eslintConfigPrettier, // prettier needs to come last. It disables eslint rules conflicting with prettier
+    ],
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+      ...reactRules,
+    },
+  },
+  {
+    files: ['**/*.spec.ts'],
+    plugins: {
+      payload: payloadPlugin
+    },
+    extends: [
+      ...baseExtends,
+      tseslint.configs.recommendedTypeChecked,
+      jestExtends,
+      eslintConfigPrettier, // prettier needs to come last. It disables eslint rules conflicting with prettier
+    ],
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  {
+    plugins: {
+      payload: payloadPlugin
+    },
+    files: ['*.config.ts'],
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+      'no-restricted-exports': 'off',
+    },
+  },
+  {
+    plugins: {
+      payload: payloadPlugin
+    },
+
+    files: ['config.ts'],
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+      'no-restricted-exports': 'off',
+    },
+  },
+);

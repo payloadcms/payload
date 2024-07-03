@@ -137,7 +137,7 @@
     "pino-pretty": "10.2.0",
     "playwright": "1.43.0",
     "playwright-core": "1.43.0",
-    "prettier": "^3.0.3",
+    "prettier": "3.3.2",
     "prompts": "2.4.2",
     "react": "^19.0.0-rc-f994737d14-20240522",
     "react-dom": "^19.0.0-rc-f994737d14-20240522",

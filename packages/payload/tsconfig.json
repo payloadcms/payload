@@ -30,8 +30,5 @@
   ],
   /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "ts-node": {
-    "swc": true
-  },
   "references": [{ "path": "../translations" }]
 }

@@ -1,5 +1,5 @@
-/** @type {import('eslint').Linter.Config} */
-module.exports = {
+/** @type {import('eslint').Linter.FlatConfig} */
+export const index = {
   rules: {
     // View link below for react rules documentation
     // https://github.com/yannickcr/eslint-plugin-react#list-of-supported-rules
@@ -545,3 +545,5 @@ module.exports = {
     ],
   },
 }
+
+export default index

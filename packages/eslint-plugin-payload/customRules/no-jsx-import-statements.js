@@ -2,8 +2,10 @@
  * Disallows imports from .jsx extensions. Auto-fixes to .js.
  */
 
+import exp from 'node:constants'
+
 /** @type {import('eslint').Rule.RuleModule} */
-module.exports = {
+export const rule = {
   meta: {
     type: 'problem',
     docs: {
@@ -30,3 +32,5 @@ module.exports = {
     }
   },
 }
+
+export default rule

@@ -1,5 +1,5 @@
 /** @type {import('eslint').Rule.RuleModule} */
-module.exports = {
+export const rule = {
   meta: {
     type: 'problem',
     docs: {
@@ -120,3 +120,5 @@ module.exports = {
     }
   },
 }
+
+export default rule
