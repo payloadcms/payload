@@ -2,7 +2,7 @@ const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
   'arrow-body-style': 0,
-  'import/prefer-default-export': 'off',
+  'import-x/prefer-default-export': 'off',
   'no-restricted-exports': ['warn', { restrictDefaultExports: { direct: true } }],
   'no-console': 'warn',
   'no-sparse-arrays': 'off',
@@ -10,7 +10,7 @@ const baseRules = {
   'no-use-before-define': 'off',
   'object-shorthand': 'warn',
   'no-useless-escape': 'warn',
-  'import/no-duplicates': 'warn',
+  'import-x/no-duplicates': 'warn',
   'perfectionist/sort-objects': [
     'error',
     {
@@ -124,7 +124,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['import'], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
+  plugins: ['import-x'], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
   overrides: [
     {
       files: ['**/*.ts'],
@@ -195,7 +195,7 @@ module.exports = {
   ],
   rules: {}, // Rules are defined in the overrides to be more specific and only target the files they are meant for.
   settings: {
-    'import/parsers': {
+    'import-x/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
   },
