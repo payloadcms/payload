@@ -5,6 +5,9 @@ const clientRefSymbol = Symbol.for('react.client.reference')
 export function isReactServerComponentOrFunction<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
+  if (component === null || component === undefined) {
+    return false
+  }
   const hasClientComponentSymbol = component.$$typeof == clientRefSymbol
 
   const isFunctionalComponent = typeof component === 'function'
@@ -19,6 +22,9 @@ export function isReactServerComponentOrFunction<T extends any>(
 export function isReactClientComponent<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
+  if (component === null || component === undefined) {
+    return false
+  }
   return !isReactServerComponentOrFunction(component)
 }
 
