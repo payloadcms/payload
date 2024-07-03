@@ -727,9 +727,6 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
-      mkdirp:
-        specifier: 1.0.4
-        version: 1.0.4
       monaco-editor:
         specifier: 0.38.0
         version: 0.38.0
@@ -779,9 +776,6 @@ importers:
       '@types/minimist':
         specifier: 1.2.2
         version: 1.2.2
-      '@types/mkdirp':
-        specifier: 1.0.2
-        version: 1.0.2
       '@types/nodemailer':
         specifier: 6.4.14
         version: 6.4.14
@@ -7205,12 +7199,6 @@ packages:
 
   /@types/minimist@1.2.5:
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
-    dev: true
-
-  /@types/mkdirp@1.0.2:
-    resolution: {integrity: sha512-o0K1tSO0Dx5X6xlU5F1D6625FawhC3dU3iqr25lluNv/+/QIVH8RLNEiVokgIZo+mz+87w/3Mkg/VvQS+J51fQ==}
-    dependencies:
-      '@types/node': 20.12.5
     dev: true
 
   /@types/mongoose-aggregate-paginate-v2@1.0.9:
