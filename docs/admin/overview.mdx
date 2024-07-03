@@ -170,12 +170,12 @@ The following options are available:
 | `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
-  The `routes` key is defined in the _top-level_ of your [Payload Config](../configuration/overview), _outside_ the `admin` key. To customize routes in the _Admin Panel_, use [admin-level routes](#admin-level-routes) instead.
+  <strong>Warning:</strong>
+  Changing Root-level Routes _after_ your project was generated will also require you to manually update the corresponding directories in your project. For example, changing `routes.admin` will require you to rename the `(payload)/admin` directory in your project to match the new route. [More details](#project-structure).
 </Banner>
 
 <Banner type="success">
-  <strong>Note:</strong>
+  <strong>Tip:</strong>
    You can easily add _new_ routes to the Admin Panel through the `endpoints` property of the Payload Config. See [Custom Endpoints](../rest-api/overview#custom-endpoints) for more information.
 </Banner>
 
