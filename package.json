@@ -152,7 +152,7 @@
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
     "turbo": "^1.13.3",
-    "typescript": "5.5.2",
+    "typescript": "5.5.3",
     "uuid": "10.0.0"
   },
   "peerDependencies": {
