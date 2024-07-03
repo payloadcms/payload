@@ -3,7 +3,7 @@ import type { Permissions } from './types.js'
 
 import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
 import isolateObjectProperty from '../utilities/isolateObjectProperty.js'
-import { sanitizeObjectOfEmptyOrFalse } from '../utilities/sanitizeObjectOfEmptyOrFalse.js'
+import { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 
 type GetAccessResultsArgs = {
   req: PayloadRequest
@@ -80,5 +80,5 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
     }),
   )
 
-  return sanitizeObjectOfEmptyOrFalse(results)
+  return sanitizePermissions(results)
 }
