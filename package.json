@@ -130,7 +130,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "15.0.0-rc.0",
+    "next": "15.0.0-canary.53",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pino": "8.15.0",
