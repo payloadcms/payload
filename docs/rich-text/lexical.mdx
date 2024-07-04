@@ -222,12 +222,12 @@ If you wish to convert JSON to HTML ad-hoc, use this code snippet:
 ```ts
 import type { SerializedEditorState } from 'lexical'
 import {
-  type SanitizedEditorConfig,
+  type SanitizedServerEditorConfig,
   convertLexicalToHTML,
   consolidateHTMLConverters,
 } from '@payloadcms/richtext-lexical'
 
-async function lexicalToHTML(editorData: SerializedEditorState, editorConfig: SanitizedEditorConfig) {
+async function lexicalToHTML(editorData: SerializedEditorState, editorConfig: SanitizedServerEditorConfig) {
   return await convertLexicalToHTML({
     converters: consolidateHTMLConverters({ editorConfig }),
     data: editorData,
