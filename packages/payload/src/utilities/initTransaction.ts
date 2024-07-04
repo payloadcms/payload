@@ -18,7 +18,7 @@ export async function initTransaction(req: PayloadRequest): Promise<boolean> {
   }
   if (typeof payload.db.beginTransaction === 'function') {
     // create a new transaction
-    req.transactionID = payload.db.beginTransaction().then((transactionID) => {
+    req.transactionID = payload.db.beginTransaction(undefined, req).then((transactionID) => {
       if (transactionID) {
         req.transactionID = transactionID
       }

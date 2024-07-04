@@ -1,5 +1,6 @@
 import type { TransactionOptions } from 'mongodb'
 import type { BeginTransaction } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 
 import { APIError } from 'payload/errors'
 import { v4 as uuid } from 'uuid'
@@ -8,7 +9,7 @@ import type { MongooseAdapter } from '../index'
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: MongooseAdapter,
-  options: TransactionOptions,
+  options?: TransactionOptions,
 ) {
   if (!this.connection) {
     throw new APIError('beginTransaction called while no connection to the database exists')
