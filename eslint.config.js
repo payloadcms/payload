@@ -1,6 +1,25 @@
 import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from 'eslint-plugin-payload'
 
+export const defaultESLintIgnores = [
+  '.tmp',
+  '**/.temp',
+  '**/.*', // ignore all dotfiles
+  '**/.git',
+  '**/.hg',
+  '**/.pnp.*',
+  '**/.svn',
+  '**/.yarn/**',
+  '**/build',
+  '**/dist/**',
+  '**/node_modules',
+  '**/temp',
+  '**/playwright.config.ts',
+  '**/jest.config.js',
+  '**/tsconfig.tsbuildinfo',
+  '**/README.md',
+]
+
 /** @typedef {import('eslint').Linter.FlatConfig} */
 let FlatConfig
 
@@ -8,7 +27,7 @@ let FlatConfig
 export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
-    ignores: ['README.md', 'packages/**/*.spec.ts'],
+    ignores: [...defaultESLintIgnores, 'test/live-preview/next-app', 'packages/**/*.spec.ts'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
