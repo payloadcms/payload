@@ -396,6 +396,9 @@ importers:
       '@types/eslint__js':
         specifier: 8.42.3
         version: 8.42.3
+      '@typescript-eslint/parser':
+        specifier: 7.15.0
+        version: 7.15.0(eslint@9.6.0)(typescript@5.5.3)
       eslint:
         specifier: 9.6.0
         version: 9.6.0
@@ -1677,8 +1680,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/eslint-plugin-payload
       eslint-plugin-playwright:
-        specifier: 1.5.3
-        version: 1.5.3(eslint@9.6.0)
+        specifier: 1.6.2
+        version: 1.6.2(eslint@9.6.0)
       execa:
         specifier: 5.1.1
         version: 5.1.1
@@ -10352,8 +10355,8 @@ packages:
       - typescript
     dev: false
 
-  /eslint-plugin-playwright@1.5.3(eslint@9.6.0):
-    resolution: {integrity: sha512-13fBElB8BGdnOkK6TJ/7yveuIpfUBIVxTjbHtqTtXLsscQe2pF+0PQJkr4y2Gal7DNtg8uvqxyAQA0i/ccf1Dw==}
+  /eslint-plugin-playwright@1.6.2(eslint@9.6.0):
+    resolution: {integrity: sha512-mraN4Em3b5jLt01q7qWPyLg0Q5v3KAWfJSlEWwldyUXoa7DSPrBR4k6B6LROLqipsG8ndkwWMdjl1Ffdh15tag==}
     engines: {node: '>=16.6.0'}
     peerDependencies:
       eslint: '>=8.40.0'

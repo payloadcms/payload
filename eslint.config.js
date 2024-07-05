@@ -5,7 +5,7 @@ import payloadPlugin from 'eslint-plugin-payload'
 let FlatConfig
 
 /** @type {FlatConfig[]} */
-export const index = [
+export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
     ignores: ['README.md', 'packages/**/*.spec.ts'],
@@ -19,11 +19,8 @@ export const index = [
         ecmaVersion: 'latest',
       },
     },
-  },
-  {
-    files: ['packages/**'],
     plugins: {
-      payload: payloadPlugin, // TODO: Check if I really have to define it again here. I don't think I haave to. Not sure!
+      payload: payloadPlugin,
     },
     rules: {
       'payload/no-jsx-import-statements': 'warn',
@@ -32,7 +29,7 @@ export const index = [
     },
   },
   {
-    files: ['scripts/**'],
+    files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-console': 'off',
@@ -41,7 +38,7 @@ export const index = [
     },
   },
   {
-    files: ['packages/eslint-config-payload/**'],
+    files: ['packages/eslint-config-payload/**/*.ts'],
     rules: {
       'perfectionist/sort-objects': 'off',
     },
@@ -52,28 +49,6 @@ export const index = [
       'no-restricted-exports': 'off',
     },
   },
-  {
-    files: ['package.json', 'tsconfig.json'],
-    rules: {
-      'perfectionist/sort-array-includes': 'off',
-      'perfectionist/sort-astro-attributes': 'off',
-      'perfectionist/sort-classes': 'off',
-      'perfectionist/sort-enums': 'off',
-      'perfectionist/sort-exports': 'off',
-      'perfectionist/sort-imports': 'off',
-      'perfectionist/sort-interfaces': 'off',
-      'perfectionist/sort-jsx-props': 'off',
-      'perfectionist/sort-keys': 'off',
-      'perfectionist/sort-maps': 'off',
-      'perfectionist/sort-named-exports': 'off',
-      'perfectionist/sort-named-imports': 'off',
-      'perfectionist/sort-object-types': 'off',
-      'perfectionist/sort-objects': 'off',
-      'perfectionist/sort-svelte-attributes': 'off',
-      'perfectionist/sort-union-types': 'off',
-      'perfectionist/sort-vue-attributes': 'off',
-    },
-  },
 ]
 
-export default index
+export default rootEslintConfig

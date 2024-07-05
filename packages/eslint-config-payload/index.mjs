@@ -1,4 +1,4 @@
-import eslint from '@eslint/js'
+import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionistNatural from 'eslint-plugin-perfectionist/configs/recommended-natural'
 import { configs as regexpPluginConfigs } from "eslint-plugin-regexp"
@@ -7,6 +7,9 @@ import payloadPlugin from 'eslint-plugin-payload'
 import reactExtends from './configs/react/index.mjs'
 import jestExtends from './configs/jest/index.mjs'
 import globals from "globals";
+import importX from 'eslint-plugin-import-x'
+import typescriptParser from '@typescript-eslint/parser'
+import { deepMerge } from './deepMerge.js'
 
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
@@ -100,16 +103,18 @@ const typescriptRules = {
   '@typescript-eslint/ban-types': 'warn',
 }
 
-const baseExtends = [
-  eslint.configs.recommended,
-  perfectionistNatural,
-  regexpPluginConfigs['flat/recommended']
+/** @typedef {import('eslint').Linter.FlatConfig} */
+let FlatConfig
 
-]
+/** @type {FlatConfig} */
+const baseExtends = deepMerge(js.configs.recommended, perfectionistNatural , regexpPluginConfigs['flat/recommended'])
 
 
-export default tseslint.config(
+
+/** @type {FlatConfig[]} */
+export const rootEslintConfig = [
   {
+    name: 'A',
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
@@ -121,78 +126,83 @@ export default tseslint.config(
       globals: {
         ...globals.node,
       },
-    }
+      parser: typescriptParser,
+    },
+    plugins: {
+      'import-x': importX,
+    },
   },
   {
+    name: 'B',
+    // has 3 entries: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/typescript-eslint/src/configs/recommended-type-checked.ts
+    ...deepMerge(
+      baseExtends,
+      tseslint.configs.recommendedTypeChecked[0],
+      tseslint.configs.recommendedTypeChecked[1],
+      tseslint.configs.recommendedTypeChecked[2],
+      eslintConfigPrettier,
+      {
+        plugins: {
+          payload: payloadPlugin,
+        },
+        rules: {
+          ...baseRules,
+          ...typescriptRules,
+        },
+      }
+    ),
     files: ['**/*.ts'],
-    plugins: {
-      payload: payloadPlugin
-    },
-    extends: [
-      ...baseExtends,
-      tseslint.configs.recommendedTypeChecked,
-      eslintConfigPrettier, // prettier needs to come last. It disables eslint rules conflicting with prettier
-    ],
-    rules: {
-      ...baseRules,
-      ...typescriptRules,
-    },
   },
   {
-    files: ['**/*.tsx'],
-    plugins: {
-      payload: payloadPlugin
-    },
-    extends: [
-      ...baseExtends,
-      tseslint.configs.recommendedTypeChecked,
+    name: 'D',
+    ...deepMerge(
+      baseExtends,
+      tseslint.configs.recommendedTypeChecked[0],
+      tseslint.configs.recommendedTypeChecked[1],
+      tseslint.configs.recommendedTypeChecked[2],
       reactExtends,
-      eslintConfigPrettier, // prettier needs to come last. It disables eslint rules conflicting with prettier
-    ],
-    rules: {
-      ...baseRules,
-      ...typescriptRules,
-      ...reactRules,
-    },
+      eslintConfigPrettier,
+      {
+        plugins: {
+          payload: payloadPlugin,
+        },
+        rules: {
+          ...baseRules,
+          ...typescriptRules,
+          ...reactRules,
+        },
+      }
+    ),
+    files: ['**/*.tsx'],
   },
   {
+    name: 'F',
+    ...deepMerge(
+      jestExtends, {
+        plugins: {
+          payload: payloadPlugin
+        },
+        rules: {
+          ...baseRules,
+          ...typescriptRules,
+          '@typescript-eslint/unbound-method': 'off',
+        },
+      }
+    ),
     files: ['**/*.spec.ts'],
-    plugins: {
-      payload: payloadPlugin
-    },
-    extends: [
-      ...baseExtends,
-      tseslint.configs.recommendedTypeChecked,
-      jestExtends,
-      eslintConfigPrettier, // prettier needs to come last. It disables eslint rules conflicting with prettier
-    ],
-    rules: {
-      ...baseRules,
-      ...typescriptRules,
-      '@typescript-eslint/unbound-method': 'off',
-    },
   },
   {
+    name: 'H',
     plugins: {
       payload: payloadPlugin
     },
-    files: ['*.config.ts'],
     rules: {
       ...baseRules,
       ...typescriptRules,
       'no-restricted-exports': 'off',
     },
+    files: ['*.config.ts', 'config.ts'],
   },
-  {
-    plugins: {
-      payload: payloadPlugin
-    },
+]
 
-    files: ['config.ts'],
-    rules: {
-      ...baseRules,
-      ...typescriptRules,
-      'no-restricted-exports': 'off',
-    },
-  },
-);
+export default rootEslintConfig
