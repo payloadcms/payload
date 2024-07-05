@@ -10,9 +10,6 @@ export const index = deepMerge(
   jestRules,
   jestDomRules,
   {
-    env: {
-      jest: true,
-    },
     plugins: {
       jest,
       'jest-dom': jestDom,

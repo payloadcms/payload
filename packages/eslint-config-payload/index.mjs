@@ -178,7 +178,8 @@ export const rootEslintConfig = [
   {
     name: 'F',
     ...deepMerge(
-      jestExtends, {
+      jestExtends,
+      {
         plugins: {
           payload: payloadPlugin
         },

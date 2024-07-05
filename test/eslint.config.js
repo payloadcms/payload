@@ -12,7 +12,7 @@ export const index = [
     ignores: ['README.md', 'packages/**/*.spec.ts'],
     languageOptions: {
       parserOptions: {
-        project: true,
+        project: './tsconfig.json',
         tsconfigDirName: import.meta.dirname,
         EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
         EXPERIMENTAL_useProjectService: true,

@@ -12,7 +12,7 @@ export const index = {
     'jest/no-focused-tests': 'error',
     'jest/no-hooks': 'off',
     'jest/no-identical-title': 'error',
-    'jest/no-if': 'error',
+    'jest/no-conditional-in-test': 'error',
     'jest/no-jasmine-globals': 'error',
     'jest/no-large-snapshots': 'error',
     'jest/no-mocks-import': 'error',
