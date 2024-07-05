@@ -2,8 +2,6 @@
  * Disallows imports from .jsx extensions. Auto-fixes to .js.
  */
 
-import exp from 'node:constants'
-
 /** @type {import('eslint').Rule.RuleModule} */
 export const rule = {
   meta: {
