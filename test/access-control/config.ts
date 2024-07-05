@@ -56,7 +56,7 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
 function isUser(user: Config['user']): user is {
   collection: 'users'
 } & User {
-  return user.collection === 'users'
+  return user?.collection === 'users'
 }
 
 export default buildConfigWithDefaults({
