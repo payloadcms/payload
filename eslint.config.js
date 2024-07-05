@@ -18,6 +18,7 @@ export const defaultESLintIgnores = [
   '**/jest.config.js',
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
+  '**/eslint.config.js',
 ]
 
 /** @typedef {import('eslint').Linter.FlatConfig} */
@@ -33,7 +34,9 @@ export const rootEslintConfig = [
         project: './tsconfig.json',
         tsconfigDirName: import.meta.dirname,
         EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-        EXPERIMENTAL_useProjectService: true,
+        EXPERIMENTAL_useProjectService: {
+          allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
+        },
         sourceType: 'module',
         ecmaVersion: 'latest',
       },

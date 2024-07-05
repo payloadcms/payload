@@ -13,7 +13,9 @@ export const index = [
         project: './tsconfig.json',
         tsconfigDirName: import.meta.dirname,
         EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-        EXPERIMENTAL_useProjectService: true,
+        EXPERIMENTAL_useProjectService: {
+          allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
+        },
         sourceType: 'module',
         ecmaVersion: 'latest',
       },
