@@ -1,4 +1,4 @@
-import { rootEslintConfig } from '../eslint.config.js'
+import { rootEslintConfig, rootParserOptions } from '../eslint.config.js'
 import payloadPlugin from 'eslint-plugin-payload'
 import playwright from 'eslint-plugin-playwright'
 
@@ -14,12 +14,7 @@ export const index = [
       parserOptions: {
         project: './tsconfig.json',
         tsconfigDirName: import.meta.dirname,
-        EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-        EXPERIMENTAL_useProjectService: {
-          allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
-        },
-        sourceType: 'module',
-        ecmaVersion: 'latest',
+        ...rootParserOptions,
       },
     },
     plugins: {

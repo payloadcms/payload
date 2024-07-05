@@ -19,10 +19,20 @@ export const defaultESLintIgnores = [
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
+  '**/payload-types.ts',
 ]
 
 /** @typedef {import('eslint').Linter.FlatConfig} */
 let FlatConfig
+
+export const rootParserOptions = {
+  EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
+  EXPERIMENTAL_useProjectService: {
+    allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
+  },
+  sourceType: 'module',
+  ecmaVersion: 'latest',
+}
 
 /** @type {FlatConfig[]} */
 export const rootEslintConfig = [
@@ -33,12 +43,7 @@ export const rootEslintConfig = [
       parserOptions: {
         project: './tsconfig.json',
         tsconfigDirName: import.meta.dirname,
-        EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-        EXPERIMENTAL_useProjectService: {
-          allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
-        },
-        sourceType: 'module',
-        ecmaVersion: 'latest',
+        ...rootParserOptions,
       },
     },
     plugins: {

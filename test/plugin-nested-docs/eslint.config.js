@@ -1,4 +1,4 @@
-import { rootEslintConfig } from '../../eslint.config.js'
+import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 
 /** @typedef {import('eslint').Linter.FlatConfig} */
 let FlatConfig
@@ -7,7 +7,6 @@ let FlatConfig
 export const index = [
   ...rootEslintConfig,
   {
-    ignores: ['payload-types.ts'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.eslint.json',
