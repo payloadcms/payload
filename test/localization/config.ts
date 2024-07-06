@@ -7,12 +7,15 @@ import { ArrayCollection } from './collections/Array'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
 import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
 import {
+  arabicLocale,
+  arabicTitle,
   blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  portugueseTitle,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
@@ -300,7 +303,28 @@ export default buildConfigWithDefaults({
   localization: {
     defaultLocale,
     fallback: true,
-    locales: [defaultLocale, spanishLocale, portugueseLocale, 'ar'],
+    locales: [
+      {
+        code: englishLocale,
+        label: englishTitle,
+        rtl: false,
+      },
+      {
+        code: spanishLocale,
+        label: spanishTitle,
+        rtl: false,
+      },
+      {
+        code: portugueseLocale,
+        fallbackLocale: spanishLocale,
+        label: portugueseTitle,
+      },
+      {
+        code: arabicLocale,
+        label: arabicTitle,
+        rtl: true,
+      },
+    ],
   },
   onInit: async (payload) => {
     const collection = localizedPostsSlug
