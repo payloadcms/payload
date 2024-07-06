@@ -88,7 +88,11 @@ export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: Redu
     if (field.type === 'group' && 'fieldMap' in field.fieldComponentProps) {
       const translatedLabel = getTranslation(field.fieldComponentProps.label, i18n)
 
-      const labelWithPrefix = labelPrefix ? labelPrefix + ' > ' + translatedLabel : translatedLabel
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? labelPrefix + ' > ' + translatedLabel
+          : labelPrefix
+        : translatedLabel
 
       // Make sure we handle deeply nested groups
       const pathWithPrefix = field.name
