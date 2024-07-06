@@ -1,5 +1,4 @@
-import nextEnvImport from '@next/env'
-const { loadEnvConfig } = nextEnvImport
+import { loadEnvConfig } from '@next/env'
 import { findUpStop, findUpSync } from 'find-up'
 
 /**
