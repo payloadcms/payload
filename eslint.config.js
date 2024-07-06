@@ -2,24 +2,23 @@ import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from 'eslint-plugin-payload'
 
 export const defaultESLintIgnores = [
-  '.tmp',
   '**/.temp',
   '**/.*', // ignore all dotfiles
   '**/.git',
   '**/.hg',
   '**/.pnp.*',
   '**/.svn',
-  '**/.yarn/**',
-  '**/build',
-  '**/dist/**',
-  '**/node_modules',
-  '**/temp',
   '**/playwright.config.ts',
   '**/jest.config.js',
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
   '**/payload-types.ts',
+  '**/dist/',
+  '**/.yarn/',
+  '**/build/',
+  '**/node_modules/',
+  '**/temp/',
 ]
 
 /** @typedef {import('eslint').Linter.FlatConfig} */
@@ -28,7 +27,7 @@ let FlatConfig
 export const rootParserOptions = {
   EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
   EXPERIMENTAL_useProjectService: {
-    allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
+    allowDefaultProjectForFiles: ['./src/*.ts', './src/*.tsx'],
   },
   sourceType: 'module',
   ecmaVersion: 'latest',
@@ -39,6 +38,8 @@ export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
     ignores: [...defaultESLintIgnores, 'test/live-preview/next-app', 'packages/**/*.spec.ts'],
+  },
+  {
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',

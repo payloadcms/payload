@@ -11,13 +11,7 @@ export const index = [
       parserOptions: {
         project: './tsconfig.eslint.json',
         tsconfigDirName: import.meta.dirname,
-        EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-        EXPERIMENTAL_useProjectService: {
-          allowDefaultProjectForFiles: ['./*.ts', './*.tsx'],
-          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: Number.MAX_SAFE_INTEGER,
-        },
-        sourceType: 'module',
-        ecmaVersion: 'latest',
+        ...rootParserOptions,
       },
     },
   },
