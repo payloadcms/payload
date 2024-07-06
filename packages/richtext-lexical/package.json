@@ -50,7 +50,7 @@
     "@lexical/rich-text": "0.16.1",
     "@lexical/selection": "0.16.1",
     "@lexical/utils": "0.16.1",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "10.0.0",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
     "json-schema": "^0.4.0",
@@ -59,7 +59,7 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@lexical/eslint-plugin": "0.15.0",
+    "@lexical/eslint-plugin": " 0.16.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",

@@ -108,7 +108,7 @@
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "css-loader": "^6.10.0",
     "esbuild": "^0.21.4",
