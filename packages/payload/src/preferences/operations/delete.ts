@@ -34,6 +34,7 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const result = await payload.delete({
     collection: 'payload-preferences',
     depth: 0,
+    req,
     user,
     where,
   })
