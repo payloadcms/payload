@@ -26,11 +26,11 @@ import { FormSavePlugin } from './FormSavePlugin.js'
 
 type Props = {
   baseClass: string
-  field: FormFieldBase & {
+  field: {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   formData: BlockFields
   formSchema: FieldMap
   nodeKey: string

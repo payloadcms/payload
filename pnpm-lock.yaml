@@ -387,6 +387,9 @@ importers:
 
   packages/eslint-config-payload:
     dependencies:
+      '@eslint/compat':
+        specifier: 1.1.0
+        version: 1.1.0
       '@eslint/js':
         specifier: 9.6.0
         version: 9.6.0
@@ -427,24 +430,26 @@ importers:
         specifier: 7.34.3
         version: 7.34.3(eslint@9.6.0)
       eslint-plugin-react-hooks:
-        specifier: 4.6.2
-        version: 4.6.2(eslint@9.6.0)
+        specifier: 5.1.0-rc-f38c22b244-20240704
+        version: 5.1.0-rc-f38c22b244-20240704(eslint@9.6.0)
       eslint-plugin-regexp:
         specifier: 2.6.0
         version: 2.6.0(eslint@9.6.0)
+      globals:
+        specifier: 15.8.0
+        version: 15.8.0
       typescript:
         specifier: 5.5.3
         version: 5.5.3
       typescript-eslint:
         specifier: 7.15.0
         version: 7.15.0(eslint@9.6.0)(typescript@5.5.3)
-    devDependencies:
-      globals:
-        specifier: 15.8.0
-        version: 15.8.0
 
   packages/eslint-plugin-payload:
     dependencies:
+      '@eslint/compat':
+        specifier: 1.1.0
+        version: 1.1.0
       '@eslint/js':
         specifier: 9.6.0
         version: 9.6.0
@@ -454,6 +459,9 @@ importers:
       '@types/eslint__js':
         specifier: 8.42.3
         version: 8.42.3
+      '@typescript-eslint/parser':
+        specifier: 7.15.0
+        version: 7.15.0(eslint@9.6.0)(typescript@5.5.3)
       eslint:
         specifier: 9.6.0
         version: 9.6.0
@@ -479,11 +487,14 @@ importers:
         specifier: 7.34.3
         version: 7.34.3(eslint@9.6.0)
       eslint-plugin-react-hooks:
-        specifier: 4.6.2
-        version: 4.6.2(eslint@9.6.0)
+        specifier: 5.1.0-rc-f38c22b244-20240704
+        version: 5.1.0-rc-f38c22b244-20240704(eslint@9.6.0)
       eslint-plugin-regexp:
         specifier: 2.6.0
         version: 2.6.0(eslint@9.6.0)
+      globals:
+        specifier: 15.8.0
+        version: 15.8.0
       typescript:
         specifier: 5.5.3
         version: 5.5.3
@@ -5069,6 +5080,11 @@ packages:
   /@eslint-community/regexpp@4.10.0:
     resolution: {integrity: sha512-Cu96Sd2By9mCNTx2iyKOmq10v22jUVQv0lQnlGNy16oE9589yE+QADPbrMGCkA51cKZSg3Pu/aTJVTGfL/qjUA==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+
+  /@eslint/compat@1.1.0:
+    resolution: {integrity: sha512-s9Wi/p25+KbzxKlDm3VshQdImhWk+cbdblhwGNnyCU5lpSwtWa4v7VQCxSki0FAUrGA3s8nCWgYzAH41mwQVKQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    dev: false
 
   /@eslint/config-array@0.17.0:
     resolution: {integrity: sha512-A68TBu6/1mHHuc5YJL0U0VVeGNiklLAL6rRmhTCP2B5XjWLMnrX+HkO+IAXyHvks5cyyY1jjK5ITPQ1HGS2EVA==}
@@ -10378,11 +10394,11 @@ packages:
       globals: 13.24.0
     dev: true
 
-  /eslint-plugin-react-hooks@4.6.2(eslint@9.6.0):
-    resolution: {integrity: sha512-QzliNJq4GinDBcD8gPB5v0wh6g8q3SUi6EFF0x8N/BL9PoVs0atuGc47ozMRyOWAKdwaZ5OnbOEa3WR+dSGKuQ==}
+  /eslint-plugin-react-hooks@5.1.0-rc-f38c22b244-20240704(eslint@9.6.0):
+    resolution: {integrity: sha512-2AFn/7KOJFx6RGA+7d8VluRqhB31bay0binwDJZeYJCdvrNeDQS3SmKv1/7SExyexEHBZZE/0hy6P6IQIaIZkg==}
     engines: {node: '>=10'}
     peerDependencies:
-      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
+      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
     dependencies:
       eslint: 9.6.0
     dev: false
@@ -11320,7 +11336,7 @@ packages:
   /globals@15.8.0:
     resolution: {integrity: sha512-VZAJ4cewHTExBWDHR6yptdIBlx9YSSZuwojj9Nt5mBRXQzrKakDsVKQ1J63sklLvzAJm0X5+RpO4i3Y2hcOnFw==}
     engines: {node: '>=18'}
-    dev: true
+    dev: false
 
   /globalthis@1.0.3:
     resolution: {integrity: sha512-sFdI5LyBiNTHjRd7cGPWapiHWMOXKyuBNX/cWJ3NfzrZQVa8GI/8cofCl74AOVqq9W5kNmguTIzJ/1s2gyI9wA==}
