@@ -125,7 +125,7 @@
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "6.2.0",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "10.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "esbuild": "^0.21.4",
