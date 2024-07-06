@@ -7,7 +7,6 @@ let FlatConfig
 export const index = [
   ...rootEslintConfig,
   {
-    ignores: ['README.md', 'packages/**/*.spec.ts'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
