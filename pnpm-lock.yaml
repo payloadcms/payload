@@ -783,8 +783,8 @@ importers:
         specifier: 6.2.0
         version: 6.2.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
+        specifier: 10.0.0
+        version: 10.0.0
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1124,8 +1124,8 @@ importers:
         specifier: npm:types-react-dom@19.0.0-beta.2
         version: /types-react-dom@19.0.0-beta.2
       '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
+        specifier: 10.0.0
+        version: 10.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1169,8 +1169,8 @@ importers:
         specifier: 0.16.1
         version: 0.16.1
       '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
+        specifier: 10.0.0
+        version: 10.0.0
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
@@ -1197,8 +1197,8 @@ importers:
         version: 10.0.0
     devDependencies:
       '@lexical/eslint-plugin':
-        specifier: 0.15.0
-        version: 0.15.0(eslint@8.57.0)
+        specifier: ' 0.16.1'
+        version: 0.16.1(eslint@8.57.0)
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
@@ -1502,8 +1502,8 @@ importers:
         specifier: npm:types-react-dom@19.0.0-beta.2
         version: /types-react-dom@19.0.0-beta.2
       '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
+        specifier: 10.0.0
+        version: 10.0.0
       babel-plugin-react-compiler:
         specifier: 0.0.0-experimental-592953e-20240517
         version: 0.0.0-experimental-592953e-20240517
@@ -5714,8 +5714,8 @@ packages:
       lexical: 0.16.1
     dev: false
 
-  /@lexical/eslint-plugin@0.15.0(eslint@8.57.0):
-    resolution: {integrity: sha512-M7e+XX62AtRkq7CACN1v9JTGc/neAYIG4BtrzvESioW2JQ0qE18zli4cDzVbIMizDXsnqvjWV+iodlDaAU2xiA==}
+  /@lexical/eslint-plugin@0.16.1(eslint@8.57.0):
+    resolution: {integrity: sha512-C68eSFBAJ5H8vDae46l9iPUYYw6btC4ZAOr2vMdri8tuN4Aid5c2skDv/Ruiyk12SWsgzz9jHiyo5Fsa1ESLdg==}
     peerDependencies:
       eslint: '>=7.31.0 || ^8.0.0'
     dependencies:
@@ -7338,8 +7338,8 @@ packages:
     dependencies:
       '@types/node': 20.12.5
 
-  /@types/uuid@9.0.8:
-    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
+  /@types/uuid@10.0.0:
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   /@types/webidl-conversions@7.0.3:
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
