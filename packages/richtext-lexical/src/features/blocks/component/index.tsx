@@ -56,8 +56,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const componentMapRenderedFieldsPath = `feature.blocks.fields.${formData?.blockType}`
-  const schemaFieldsPath = `${schemaPath}.feature.blocks.${formData?.blockType}`
+  const componentMapRenderedFieldsPath = `lexical_internal_feature.blocks.fields.${formData?.blockType}`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.${formData?.blockType}`
 
   const reducedBlock: ReducedBlock = (
     editorConfig?.resolvedFeatureMap?.get('blocks')
@@ -145,7 +145,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           formData={formData}
           formSchema={Array.isArray(fieldMap) ? fieldMap : []}
           nodeKey={nodeKey}
-          path={`${path}.feature.blocks.${formData.blockType}`}
+          path={`${path}.lexical_internal_feature.blocks.${formData.blockType}`}
           reducedBlock={reducedBlock}
           schemaPath={schemaFieldsPath}
         />

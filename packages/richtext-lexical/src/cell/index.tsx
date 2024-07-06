@@ -17,10 +17,10 @@ import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js
 import { getEnabledNodes } from '../lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<
-  CellComponentProps & {
+  {
     admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
-  }
+  } & CellComponentProps
 > = (props) => {
   const { admin, lexicalEditorConfig, richTextComponentMap } = props
 
@@ -62,7 +62,7 @@ export const RichTextCell: React.FC<
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          if (!key.includes('.components.')) {
+          if (!key.includes('.lexical_internal_components.')) {
             featureProvidersLocal.push(plugin)
           }
           featureProvidersAndComponentsLoaded++
@@ -167,7 +167,9 @@ export const RichTextCell: React.FC<
           featureProviderComponents.map((featureProvider) => {
             // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
             const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-              key.startsWith(`feature.${featureProvider.key}.components.`),
+              key.startsWith(
+                `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
+              ),
             )
 
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
