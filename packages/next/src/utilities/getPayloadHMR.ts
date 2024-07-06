@@ -53,7 +53,7 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
 
 export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   if (!options?.config) {
-    throw new Error('Error: the payload config is required for getPayload to work.')
+    throw new Error('Error: the payload config is required for getPayloadHMR to work.')
   }
 
   if (cached.payload) {
