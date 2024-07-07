@@ -25,6 +25,7 @@
     ],
     "paths": {
       "react": ["./node_modules/@types/react"],
+      "@/*": ["./src/*"]
     }
   },
   "include": [
