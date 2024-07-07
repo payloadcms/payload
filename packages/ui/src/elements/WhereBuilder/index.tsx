@@ -30,11 +30,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { code: currentLocale } = useLocale()
 
-  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap(fieldMap, i18n))
+  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap({ fieldMap, i18n }))
 
   useEffect(() => {
-    setReducedColumns(reduceFieldMap(fieldMap, i18n, undefined, undefined, currentLocale))
-  }, [fieldMap, i18n, currentLocale])
+    setReducedColumns(reduceFieldMap({ fieldMap, i18n }))
+  }, [fieldMap, i18n])
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
