@@ -1,38 +1,113 @@
 'use client'
+import type { ClientTranslationKeys, I18nClient  } from '@payloadcms/translations'
+
+import { getTranslation } from '@payloadcms/translations';
+
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'
 import fieldTypes from './field-types.js'
 
-export const reduceFieldMap = (
-  fieldMap: FieldMap,
-  i18n,
-  labelPrefix?: string,
-  pathPrefix?: string,
-  locale?: string,
-) => {
+export type ReduceFieldMapArgs = {
+  fieldMap: FieldMap
+  i18n: I18nClient
+  labelPrefix?: string
+  pathPrefix?: string
+}
+
+/**
+ * Reduces a field map to a flat array of fields with labels and values.
+ * Used in the WhereBuilder component to render the fields in the dropdown.
+ */
+export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: ReduceFieldMapArgs) => {
   return fieldMap.reduce((reduced, field) => {
     if (field.disableListFilter) return reduced
 
     if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
       const tabs = field.fieldComponentProps.tabs
       tabs.forEach((tab) => {
-        if (tab.name && typeof tab.label === 'string' && tab.fieldMap) {
-          reduced.push(...reduceFieldMap(tab.fieldMap, i18n, tab.label, tab.name))
+        if (typeof tab.label !== 'boolean') {
+          const localizedTabLabel = getTranslation(tab.label, i18n)
+          const labelWithPrefix = labelPrefix
+            ? labelPrefix + ' > ' + localizedTabLabel
+            : localizedTabLabel
+
+          // Make sure we handle nested tabs
+          const tabPathPrefix = tab.name
+            ? pathPrefix
+              ? pathPrefix + '.' + tab.name
+              : tab.name
+            : pathPrefix
+
+          if (typeof localizedTabLabel === 'string') {
+            reduced.push(
+              ...reduceFieldMap({
+                fieldMap: tab.fieldMap,
+                i18n,
+                labelPrefix: labelWithPrefix,
+                pathPrefix: tabPathPrefix,
+              }),
+            )
+          }
         }
       })
       return reduced
     }
 
-    if (field.type === 'group' && 'fieldMap' in field.fieldComponentProps) {
+    // Rows cant have labels, so we need to handle them differently
+    if (field.type === 'row' && 'fieldMap' in field.fieldComponentProps) {
       reduced.push(
-        ...reduceFieldMap(
-          field.fieldComponentProps.fieldMap,
+        ...reduceFieldMap({
+          fieldMap: field.fieldComponentProps.fieldMap,
           i18n,
-          field.fieldComponentProps.label as string,
-          field.name,
-        ),
+          labelPrefix,
+          pathPrefix,
+        }),
+      )
+      return reduced
+    }
+
+    if (field.type === 'collapsible' && 'fieldMap' in field.fieldComponentProps) {
+      const localizedTabLabel = getTranslation(field.fieldComponentProps.label, i18n)
+      const labelWithPrefix = labelPrefix
+        ? labelPrefix + ' > ' + localizedTabLabel
+        : localizedTabLabel
+
+      reduced.push(
+        ...reduceFieldMap({
+          fieldMap: field.fieldComponentProps.fieldMap,
+          i18n,
+          labelPrefix: labelWithPrefix,
+          pathPrefix,
+        }),
+      )
+      return reduced
+    }
+
+    if (field.type === 'group' && 'fieldMap' in field.fieldComponentProps) {
+      const translatedLabel = getTranslation(field.fieldComponentProps.label, i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? labelPrefix + ' > ' + translatedLabel
+          : labelPrefix
+        : translatedLabel
+
+      // Make sure we handle deeply nested groups
+      const pathWithPrefix = field.name
+        ? pathPrefix
+          ? pathPrefix + '.' + field.name
+          : field.name
+        : pathPrefix
+
+      reduced.push(
+        ...reduceFieldMap({
+          fieldMap: field.fieldComponentProps.fieldMap,
+          i18n,
+          labelPrefix: labelWithPrefix,
+          pathPrefix: pathWithPrefix,
+        }),
       )
       return reduced
     }
@@ -42,18 +117,16 @@ export const reduceFieldMap = (
       const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
+          const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
           acc.push({
             ...operator,
-            label: i18n.t(`operators:${operator.label}`),
+            label: i18n.t(operatorKey),
           })
         }
         return acc
       }, [])
 
-      const localizedLabel =
-        locale && typeof field.fieldComponentProps.label === 'object'
-          ? field.fieldComponentProps.label[locale]
-          : field.fieldComponentProps.label
+      const localizedLabel = getTranslation(field.fieldComponentProps.label, i18n)
 
       const formattedLabel = labelPrefix
         ? combineLabel({
