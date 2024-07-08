@@ -47,6 +47,8 @@ export const rootEslintConfig = [
         ...rootParserOptions,
       },
     },
+  },
+  {
     plugins: {
       payload: payloadPlugin,
     },
@@ -65,6 +67,10 @@ export const rootEslintConfig = [
       'perfectionist/sort-objects': 'off',
     },
   },
+]
+
+export default [
+  ...rootEslintConfig,
   {
     files: ['packages/eslint-config/**/*.ts'],
     rules: {
@@ -78,5 +84,3 @@ export const rootEslintConfig = [
     },
   },
 ]
-
-export default rootEslintConfig
