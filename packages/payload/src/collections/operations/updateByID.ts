@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -41,7 +41,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   id: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
@@ -260,7 +260,10 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     const dataToUpdate: Record<string, unknown> = { ...result }
 
     if (shouldSavePassword && typeof password === 'string') {
-      const { hash, salt } = await generatePasswordSaltHash({ password })
+      const { hash, salt } = await generatePasswordSaltHash({
+        collection: collectionConfig,
+        password,
+      })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash
       delete dataToUpdate.password

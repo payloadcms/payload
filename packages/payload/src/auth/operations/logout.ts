@@ -1,13 +1,13 @@
 import httpStatus from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 
 export type Arguments = {
   collection: Collection
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {

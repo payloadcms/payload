@@ -5,6 +5,7 @@ export type Props = {
   collectionSlug: SanitizedCollectionConfig['slug']
   disableLocalStrategy?: boolean
   email: string
+  loginWithUsername: boolean
   operation: 'create' | 'update'
   readOnly: boolean
   requirePassword?: boolean

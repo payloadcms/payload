@@ -1,11 +1,6 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequestWithData,
-  RequestContext,
-  Where,
-} from '../../../types/index.js'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -28,7 +23,7 @@ export type Options<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: string
   user?: Document

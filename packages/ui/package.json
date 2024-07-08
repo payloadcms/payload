@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.55",
+  "version": "3.0.0-beta.59",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -82,7 +82,6 @@
     "bson-objectid": "2.0.4",
     "date-fns": "3.3.1",
     "dequal": "2.0.3",
-    "is-buffer": "^2.0.5",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "qs-esm": "7.0.1",
@@ -107,7 +106,7 @@
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
     "css-loader": "^6.10.0",
     "esbuild": "^0.21.4",
@@ -121,7 +120,7 @@
     "turbopack": "^0.0.1"
   },
   "peerDependencies": {
-    "next": "^15.0.0-rc.0",
+    "next": "^15.0.0-canary.53",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
     "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"

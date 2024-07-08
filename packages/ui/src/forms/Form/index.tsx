@@ -5,7 +5,12 @@ import type { FormState } from 'payload'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { wait } from 'payload/shared'
+import {
+  getDataByPath as getDataByPathFunc,
+  getSiblingData as getSiblingDataFunc,
+  reduceFieldsToValues,
+  wait,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -28,7 +33,6 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { getFormState } from '../../utilities/getFormState.js'
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -40,8 +44,6 @@ import {
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
-import { getDataByPath as getDataByPathFunc } from './getDataByPath.js'
-import { getSiblingData as getSiblingDataFunc } from './getSiblingData.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 
@@ -339,8 +341,8 @@ export const Form: React.FC<FormProps> = (props) => {
                   newNonFieldErrs.push(err)
                 }
 
-                if (Array.isArray(err?.data)) {
-                  err.data.forEach((dataError) => {
+                if (Array.isArray(err?.data?.errors)) {
+                  err.data?.errors.forEach((dataError) => {
                     if (dataError?.field) {
                       newFieldErrs.push(dataError)
                     } else {

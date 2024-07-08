@@ -15,7 +15,7 @@ import type {
   PgTransaction,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { BaseDatabaseAdapter, Payload, PayloadRequestWithData } from 'payload'
+import type { BaseDatabaseAdapter, Payload, PayloadRequest } from 'payload'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
@@ -96,8 +96,8 @@ export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
+export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequest> }
+export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequest> }
 
 declare module 'payload' {
   export interface DatabaseAdapter

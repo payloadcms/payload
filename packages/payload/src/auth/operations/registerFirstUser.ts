@@ -1,10 +1,11 @@
 import type {
+  AuthOperationsFromCollectionSlug,
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -13,11 +14,9 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
-  data: RequiredDataFromCollectionSlug<TSlug> & {
-    email: string
-    password: string
-  }
-  req: PayloadRequestWithData
+  data: RequiredDataFromCollectionSlug<TSlug> &
+    AuthOperationsFromCollectionSlug<TSlug>['registerFirstUser']
+  req: PayloadRequest
 }
 
 export type Result<TData> = {

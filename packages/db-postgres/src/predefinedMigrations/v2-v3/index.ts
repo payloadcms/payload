@@ -1,5 +1,5 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
@@ -19,7 +19,7 @@ const require = createRequire(import.meta.url)
 type Args = {
   debug?: boolean
   payload: Payload
-  req?: Partial<PayloadRequestWithData>
+  req?: Partial<PayloadRequest>
 }
 
 /**
@@ -38,7 +38,7 @@ type Args = {
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as PostgresAdapter
-  const db = adapter.sessions[req.transactionID]?.db
+  const db = adapter.sessions[await req.transactionID]?.db
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema

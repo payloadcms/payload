@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -40,7 +40,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
   where: Where
 }

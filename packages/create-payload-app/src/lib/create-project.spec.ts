@@ -6,8 +6,8 @@ import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
 import globby from 'globby'
 import { jest } from '@jest/globals'
-
-import tempDirectory from 'temp-dir'
+import fs from 'fs'
+import * as os from 'node:os'
 
 describe('createProject', () => {
   let projectDir: string
@@ -16,6 +16,7 @@ describe('createProject', () => {
   })
 
   beforeEach(() => {
+    const tempDirectory = fs.realpathSync(os.tmpdir())
     projectDir = `${tempDirectory}/${Math.random().toString(36).substring(7)}`
   })
 

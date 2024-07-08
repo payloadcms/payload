@@ -1,5 +1,5 @@
 import type {
-  PayloadRequestWithData,
+  PayloadRequest,
   SanitizedCollectionConfig,
   TypeWithID,
   TypeWithVersion,
@@ -20,12 +20,12 @@ export async function updateVersion<T extends TypeWithID>(
     id,
     collection,
     locale,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = this.tableNameMap.get(

@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { FindVersions, PayloadRequestWithData } from 'payload'
+import type { FindVersions, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 
@@ -17,7 +17,7 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     page,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     skip,
     sort: sortArg,
     where,
@@ -26,7 +26,7 @@ export const findVersions: FindVersions = async function findVersions(
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     limit,
     skip,
   }

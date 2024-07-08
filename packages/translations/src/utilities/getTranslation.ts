@@ -26,7 +26,8 @@ export const getTranslation = <T extends LabelType>(
     }
 
     const fallbackLang = fallbacks.find((language) => label[language])
-    return fallbackLang && label[fallbackLang] ? fallbackLang : label[Object.keys(label)[0]]
+
+    return fallbackLang && label[fallbackLang] ? label[fallbackLang] : label[Object.keys(label)[0]]
   }
 
   if (typeof label === 'function') {

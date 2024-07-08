@@ -1,4 +1,4 @@
-import type { Field, PayloadRequestWithData } from 'payload'
+import type { Field, PayloadRequest } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
 
@@ -13,7 +13,7 @@ type NestedRichTextFieldsArgs = {
   fields: Field[]
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 

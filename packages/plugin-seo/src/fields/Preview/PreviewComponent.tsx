@@ -2,26 +2,43 @@
 
 import type { FormField, UIField } from 'payload'
 
-import { useAllFormFields, useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
+import {
+  useAllFormFields,
+  useDocumentInfo,
+  useForm,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui'
+import { get } from 'http'
 import React, { useEffect, useState } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateURL } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateURL } from '../../types.js'
 
 type PreviewProps = UIField & {
+  descriptionPath?: string
   hasGenerateURLFn: boolean
+  titlePath?: string
 }
 
-export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
+export const PreviewComponent: React.FC<PreviewProps> = ({
+  descriptionPath: descriptionPathFromContext,
+  hasGenerateURLFn,
+  titlePath: titlePathFromContext,
+}) => {
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
+  const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
+  const descriptionPath = descriptionPathFromContext || 'meta.description'
+  const titlePath = titlePathFromContext || 'meta.title'
+
   const {
-    'meta.description': { value: metaDescription } = {} as FormField,
-    'meta.title': { value: metaTitle } = {} as FormField,
+    [descriptionPath]: { value: metaDescription } = {} as FormField,
+    [titlePath]: { value: metaTitle } = {} as FormField,
   } = fields
 
   const [href, setHref] = useState<string>()
@@ -31,7 +48,7 @@ export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
       const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
         body: JSON.stringify({
           ...docInfo,
-          doc: { ...fields },
+          doc: { ...getData() },
           locale: typeof locale === 'object' ? locale?.code : locale,
         } satisfies Parameters<GenerateURL>[0]),
         credentials: 'include',
@@ -49,7 +66,7 @@ export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
     if (hasGenerateURLFn && !href) {
       void getHref()
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn])
+  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData])
 
   return (
     <div>

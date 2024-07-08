@@ -224,6 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               body: JSON.stringify({
                 email: autoLogin.email,
                 password: autoLogin.password,
+                username: autoLogin.username,
               }),
               headers: {
                 'Accept-Language': i18n.language,

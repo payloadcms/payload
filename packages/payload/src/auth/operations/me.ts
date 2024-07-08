@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { ClientUser, User } from '../types.js'
 
 export type MeOperationResult = {
@@ -15,14 +15,12 @@ export type MeOperationResult = {
 export type Arguments = {
   collection: Collection
   currentToken?: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
-export const meOperation = async ({
-  collection,
-  currentToken,
-  req,
-}: Arguments): Promise<MeOperationResult> => {
+export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
+  const { collection, currentToken, req } = args
+
   let result: MeOperationResult = {
     user: null,
   }
@@ -48,16 +46,32 @@ export const meOperation = async ({
 
     delete user.collection
 
-    result = {
-      collection: req.user.collection,
-      strategy: req.user._strategy,
-      user,
+    // /////////////////////////////////////
+    // me hook - Collection
+    // /////////////////////////////////////
+
+    for (const meHook of collection.config.hooks.me) {
+      const hookResult = await meHook({ args, user })
+
+      if (hookResult) {
+        result.user = hookResult.user
+        result.exp = hookResult.exp
+
+        break
+      }
     }
 
-    if (currentToken) {
-      const decoded = jwt.decode(currentToken) as jwt.JwtPayload
-      if (decoded) result.exp = decoded.exp
-      result.token = currentToken
+    result.collection = req.user.collection
+    result.strategy = req.user._strategy
+
+    if (!result.user) {
+      result.user = user
+
+      if (currentToken) {
+        const decoded = jwt.decode(currentToken) as jwt.JwtPayload
+        if (decoded) result.exp = decoded.exp
+        if (!collection.config.auth.removeTokenFromResponses) result.token = currentToken
+      }
     }
   }
 

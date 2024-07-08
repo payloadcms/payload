@@ -1,10 +1,10 @@
 import type { Payload } from '../index.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 type Args = {
   id?: number | string
   payload: Payload
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   slug: string
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.55",
+  "version": "3.0.0-beta.59",
   "private": true,
   "type": "module",
   "scripts": {
@@ -129,7 +129,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "15.0.0-rc.0",
+    "next": "15.0.0-canary.53",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pino": "8.15.0",
@@ -151,7 +151,7 @@
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
     "turbo": "^1.13.3",
-    "typescript": "5.5.2",
+    "typescript": "5.5.3",
     "uuid": "10.0.0"
   },
   "peerDependencies": {

@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { PayloadRequestWithData, QueryDrafts } from 'payload'
+import type { PayloadRequest, QueryDrafts } from 'payload'
 
 import { combineQueries, flattenWhereToOperators } from 'payload'
 
@@ -11,20 +11,11 @@ import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequestWithData,
-    sort: sortArg,
-    where,
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint
   let sort

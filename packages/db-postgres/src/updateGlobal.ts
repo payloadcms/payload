@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData, UpdateGlobalArgs } from 'payload'
+import type { PayloadRequest, UpdateGlobalArgs } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -8,9 +8,9 @@ import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobal<T extends Record<string, unknown>>(
   this: PostgresAdapter,
-  { slug, data, req = {} as PayloadRequestWithData }: UpdateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest }: UpdateGlobalArgs,
 ): Promise<T> {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 

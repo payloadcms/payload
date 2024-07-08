@@ -97,11 +97,15 @@ export const createPayloadRequest = async ({
 
   req.payloadDataLoader = getDataLoader(req)
 
-  req.user = await executeAuthStrategies({
+  const { responseHeaders, user } = await executeAuthStrategies({
     headers: req.headers,
     isGraphQL,
     payload,
   })
+
+  req.user = user
+
+  if (responseHeaders) req.responseHeaders = responseHeaders
 
   return req
 }

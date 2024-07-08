@@ -1,18 +1,13 @@
-import type {
-  DocumentPreferences,
-  Field,
-  FormState,
-  PayloadRequestWithData,
-  TypeWithID,
-} from 'payload'
+import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
+
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { reduceFieldsToValues } from 'payload/shared'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import {} from '../exports/client/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { reduceFieldsToValues } from '../exports/shared/index.js'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
@@ -23,7 +18,7 @@ if (!cached) {
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap => {
+export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
@@ -36,11 +31,7 @@ export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap =
   return cached
 }
 
-export const buildFormState = async ({
-  req,
-}: {
-  req: PayloadRequestWithData
-}): Promise<FormState> => {
+export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
   const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 

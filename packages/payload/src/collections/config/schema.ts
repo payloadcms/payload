@@ -92,6 +92,7 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       lockTime: joi.number(),
+      loginWithUsername: joi.boolean(),
       maxLoginAttempts: joi.number(),
       removeTokenFromResponses: joi.boolean().valid(true),
       strategies: joi.array().items(
@@ -141,6 +142,8 @@ const collectionSchema = joi.object().keys({
     beforeOperation: joi.array().items(joi.func()),
     beforeRead: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
+    me: joi.array().items(joi.func()),
+    refresh: joi.array().items(joi.func()),
   }),
   labels: joi.object({
     plural: joi

@@ -11,7 +11,10 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
   status: number
 
   constructor(message: string, status: number, data: TData, isPublic: boolean) {
-    super(message)
+    super(message, {
+      // show data in cause
+      cause: data,
+    })
     this.name = this.constructor.name
     this.message = message
     this.status = status

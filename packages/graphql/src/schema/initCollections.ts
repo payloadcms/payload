@@ -416,9 +416,6 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
@@ -456,6 +453,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
           args: {
             email: { type: GraphQLString },
             password: { type: GraphQLString },
+            username: { type: GraphQLString },
           },
           resolve: login(collection),
         }

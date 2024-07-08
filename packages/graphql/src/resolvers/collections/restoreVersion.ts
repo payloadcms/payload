@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData } from 'payload'
+import type { Collection, PayloadRequest } from 'payload'
 
 import { isolateObjectProperty, restoreVersionOperation } from 'payload'
 
@@ -10,7 +10,7 @@ export type Resolver = (
     id: number | string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<Document>
 
