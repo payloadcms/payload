@@ -2,8 +2,6 @@
 export { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 export { WithServerSideProps } from '../../elements/WithServerSideProps/index.js'
 export { withMergedProps } from '../../elements/withMergedProps/index.js' // cannot be within a 'use client', thus we export this from shared
-export { getDataByPath } from '../../forms/Form/getDataByPath.js'
-export { getSiblingData } from '../../forms/Form/getSiblingData.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
 export { requests } from '../../utilities/api.js'
@@ -19,4 +17,3 @@ export {
 } from '../../utilities/groupNavItems.js'
 export { hasSavePermission } from '../../utilities/hasSavePermission.js'
 export { isEditing } from '../../utilities/isEditing.js'
-export { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
