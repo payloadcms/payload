@@ -31,6 +31,7 @@ import { RedeployButton } from './payload/components/RedeployButton'
 import { seed } from './payload/endpoints/seed'
 import { Footer } from './payload/globals/Footer/Footer'
 import { Header } from './payload/globals/Header/Header'
+import { revalidateRedirects } from './payload/hooks/revalidateRedirects'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -123,6 +124,9 @@ export default buildConfig({
             }
             return field
           })
+        },
+        hooks: {
+          afterChange: [revalidateRedirects],
         },
       },
     }),

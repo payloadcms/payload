@@ -311,7 +311,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'custom',
             label: 'Source Code',
             newTab: true,
-            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+            url: 'https://github.com/payloadcms/payload/tree/beta/templates/website',
           },
         },
         {
