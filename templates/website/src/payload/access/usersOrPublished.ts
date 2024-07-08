@@ -1,4 +1,4 @@
-import type { Access } from 'payload/config'
+import type { Access } from 'payload'
 
 export const usersOrPublished: Access = ({ req: { user } }) => {
   if (user) {

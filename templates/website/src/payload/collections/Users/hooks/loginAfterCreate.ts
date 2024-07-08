@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook } from 'payload/types'
+import type { CollectionAfterChangeHook } from 'payload'
 
 export const loginAfterCreate: CollectionAfterChangeHook = async ({
   doc,

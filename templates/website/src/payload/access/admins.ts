@@ -1,4 +1,4 @@
-import type { AccessArgs } from 'payload/config'
+import type { AccessArgs } from 'payload'
 
 import type { User } from '../../payload-types'
 

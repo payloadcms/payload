@@ -1,4 +1,4 @@
-import type { GlobalAfterChangeHook } from 'payload/types'
+import type { GlobalAfterChangeHook } from 'payload'
 
 import { revalidate } from '../../../utilities/revalidate'
 

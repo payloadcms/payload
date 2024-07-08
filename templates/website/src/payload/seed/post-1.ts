@@ -181,7 +181,7 @@ export const post1: Partial<Post> = {
             id: '664397d9e0ef87fa1fec2fc0',
             blockName: '',
             blockType: 'code',
-            code: "import { CollectionConfig } from 'payload/types'\n\nexport const Orders: CollectionConfig = {\n  slug: 'orders',\n  fields: [\n    {\n      name: 'total',\n      type: 'number',\n      required: true,\n    },\n    {\n      name: 'placedBy',\n      type: 'relationship',\n      relationTo: 'customers',\n      required: true,\n    },\n  ],\n}",
+            code: "import { CollectionConfig } from 'payload'\n\nexport const Orders: CollectionConfig = {\n  slug: 'orders',\n  fields: [\n    {\n      name: 'total',\n      type: 'number',\n      required: true,\n    },\n    {\n      name: 'placedBy',\n      type: 'relationship',\n      relationTo: 'customers',\n      required: true,\n    },\n  ],\n}",
             language: 'typescript',
           },
           format: '',

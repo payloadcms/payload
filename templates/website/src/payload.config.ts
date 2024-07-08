@@ -17,7 +17,7 @@ import { ItalicFeature } from '@payloadcms/richtext-lexical'
 import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { revalidateRedirect } from 'src/payload/hooks/revalidateRedirect'
 import { fileURLToPath } from 'url'
 
@@ -109,6 +109,9 @@ export default buildConfig({
     redirectsPlugin({
       collections: ['pages', 'posts'],
       overrides: {
+        fields: ({ defaultFields }) => {
+          return defaultFields
+        },
         hooks: {
           afterChange: [revalidateRedirect],
         },
