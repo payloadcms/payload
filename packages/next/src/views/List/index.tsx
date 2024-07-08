@@ -27,6 +27,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     collectionConfig,
     locale: fullLocale,
     permissions,
+    req,
     req: {
       i18n,
       locale,
@@ -53,6 +54,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        req,
         user,
         where: {
           key: {
@@ -109,6 +111,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       locale,
       overrideAccess: false,
       page,
+      req,
       sort,
       user,
       where: whereQuery || {},

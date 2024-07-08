@@ -99,6 +99,10 @@ export type ClientFeature<ClientFeatureProps> = {
       }
   >
   /**
+   * Client Features can register their own providers, which will be nested below the EditorConfigProvider
+   */
+  providers?: Array<React.FC>
+  /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
   sanitizedClientFeatureProps?: ClientComponentProps<ClientFeatureProps>
@@ -207,7 +211,7 @@ export type SanitizedPlugin =
 export type SanitizedClientFeatures = Required<
   Pick<
     ResolvedClientFeature<unknown>,
-    'markdownTransformers' | 'nodes' | 'toolbarFixed' | 'toolbarInline'
+    'markdownTransformers' | 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'
   >
 > & {
   /** The keys of all enabled features */

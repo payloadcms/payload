@@ -745,6 +745,21 @@ export const MyFeature = createClientFeature({
 
 In this example, a new `MyNode` will be inserted into the editor when `+++ ` is typed.
 
+### Providers
+
+You can add providers to your client feature, which will be nested below the `EditorConfigProvider`. This can be useful if you want to provide some context to your nodes or other parts of your feature.
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client';
+import { TableContext } from './context';
+
+export const MyClientFeature = createClientFeature({
+    providers: [TableContext],
+})
+```
+
 ## Props
 
 To accept props in your feature, type them as a generic.

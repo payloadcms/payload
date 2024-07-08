@@ -6,22 +6,22 @@ desc:
 keywords:
 ---
 
-Views are the individual pages that make up the [Admin Panel](./overview), such as the Dashboard, List, and Edit views. One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./components) that can either replace built-in views or be entirely new.
+Views are the individual pages that make up the [Admin Panel](./overview), such as the Dashboard, List, and Edit views. One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./components) that can either replace built-in views or can be entirely new.
 
-To swap in your own Custom Views, consult the list of available components below. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
-
-There are four types of views in Payload:
+Within the Admin Panel, there are four types of views:
 
 - [Root Views](#custom-root-views)
 - [Collection Views](#custom-collection-views)
 - [Global Views](#custom-global-views)
 - [Document Views](#custom-document-views)
 
+To swap in your own Custom Views, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
+
 ## Custom Root Views
 
-Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views. You can easily swap Root Views with your own or [create entirely new ones](#adding-new-root-views) through the `admin.components.views` property of your [Payload Config](../configuration/overview).
+Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views.
 
-Here is an example showing what it might look like to swap out Root Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+To easily swap Root Views with your own, or to [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -37,6 +37,8 @@ const config = buildConfig({
   },
 })
 ```
+
+_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
 
 The following options are available:
 
@@ -94,12 +96,12 @@ The above example shows how to add a new [Root View](#custom-root-views), but th
 
 ## Custom Collection Views
 
-Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views. You can easily swap out Collection Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Collection Config](../collections/overview).
+Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views.
 
-Here is an example showing what it might look like to swap out Collection Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+To easily swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../collections/overview):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
@@ -112,6 +114,8 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
   },
 }
 ```
+
+_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -132,12 +136,12 @@ The following options are available:
 
 ## Custom Global Views
 
-Global Views are views that are scoped under the `/globals` route, such as the Document Edit View. You can easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), through the `admin.components.views` property of your [Global Config](../globals/overview).
+Global Views are views that are scoped under the `/globals` route, such as the Document Edit View.
 
-Here is an example showing what it might look like to swap out Global Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Global Config](../globals/overview):
 
 ```ts
-import type { SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedGlobalConfig } from 'payload'
 
 export const MyGlobalConfig: SanitizedGlobalConfig = {
   // ...
@@ -150,6 +154,8 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
   },
 })
 ```
+
+_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -169,16 +175,14 @@ The following options are available:
 
 ## Custom Document Views
 
-Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View. You can easily swap out Document Views with your own or [create entirely new ones](#adding-new-document-views) through the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview).
+Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-This approach allows you to replace specific nested views while keeping the overall structure of the Edit View intact, including the title, tabs, etc. If you need to replace the _entire_ Edit View, including the nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#custom-collection-views) or [Custom Global Views](#custom-global-views) for more information.
-
-Here's an example showing what it might look like to swap out Document Views for your own Custom Views. See [Building Custom Views](#building-custom-views) for exact details on how to build them:
+To easily swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property of either your [Collection Config](../collections/overview) or [Global Config](../globals/overview):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
   // ...
   admin: {
     components: {
@@ -194,9 +198,11 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 })
 ```
 
+_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+
 <Banner type="warning">
  <strong>Note:</strong>
- This applies to _both_ Collection _and_ Global configs.
+ If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#custom-collection-views) or [Custom Global Views](#custom-global-views) for more information.
 </Banner>
 
 The following options are available:
@@ -214,7 +220,7 @@ The following options are available:
 Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `Component.Tab` key:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export const MyCollection: SanitizedCollectionConfig = {
   slug: 'my-collection',
@@ -249,12 +255,12 @@ export const MyCollection: SanitizedCollectionConfig = {
  This applies to _both_ Collections _and_ Globals.
 </Banner>
 
-### Building Custom Views
+## Building Custom Views
 
 Custom Views are just [Custom Components](./components) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 import { MyCustomView } from './MyCustomView'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
@@ -272,20 +278,22 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                            |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `payload`                 | The [Payload](../local-api/overview) class.                                                                                            |
-| `i18n`                    | The [i18n](../configuration/i18n) object.                                                                                              |
-| `user`                    | The currently logged in user.                                                                                                          |
-| `locale`                  | The current [Locale](../configuration/localization) of the [Admin Panel](./overview).                                                  |
-| `navGroups`               | The grouped navigation items according to `admin.group` in your [Collection Config](../collections/overview) or [Global Config](../globals/overview). |
-| `params`                  | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
-| `permissions`             | The permissions of the currently logged in user.                                                                                       |
-| `searchParams`            | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
-| `visibleEntities`         | The current user's visible entities according to your [Access Control](../access-control/overview).                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |                                                                                            |
+| **`user`**                    | The currently logged in user.                                                                                                          |
+| **`locale`**                  | The current [Locale](../configuration/localization) of the [Admin Panel](./overview).                                                  |
+| **`navGroups`**               | The grouped navigation items according to `admin.group` in your [Collection Config](../collections/overview) or [Global Config](../globals/overview). |
+| **`params`**                  | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
+| **`permissions`**             | The permissions of the currently logged in user.                                                                                       |
+| **`searchParams`**            | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
+| **`visibleEntities`**         | The current user's visible entities according to your [Access Control](../access-control/overview).                                    |
+
+<Banner type="success">
+  <strong>Reminder:</strong>
+  All [Custom Server Components](./components) receive `payload` and `i18n` by default. See [Building Custom Components](./components#building-custom-components) for more details.
+</Banner>
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  <strong>Important:</strong>
   It's up to you to secure your custom views. If your view requires a user to be logged in or to
   have certain access rights, you should handle that within your view component yourself.
 </Banner>

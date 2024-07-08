@@ -738,7 +738,8 @@ describe('admin2', () => {
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
-        await expect(options.locator('text=Title')).toHaveText('Title')
+
+        await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
 
         // list columns
         await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')

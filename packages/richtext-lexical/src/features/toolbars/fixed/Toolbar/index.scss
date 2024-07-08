@@ -66,6 +66,7 @@ html[data-theme='dark'] {
 
   &__group {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 2px;
     z-index: 1;

@@ -33,7 +33,7 @@ export const getGenerateSchemaMap =
             schemaPath: schemaKey,
           })
 
-          schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, fields)
+          schemaMap.set(`${schemaPath}.lexical_internal_feature.${featureKey}.${schemaKey}`, fields)
         }
       }
     }
