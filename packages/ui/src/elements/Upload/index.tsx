@@ -102,10 +102,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
   })
   const [_crop, setCrop] = useState({ x: 0, y: 0 })
 
-  const [showUrlInput, setShowUrlInput] = React.useState(false)
+  const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
 
-  const handleFileChange = React.useCallback(
+  const handleFileChange = useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
         const fileReader = new FileReader()
@@ -139,7 +139,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     }
   }
 
-  const handleFileSelection = React.useCallback(
+  const handleFileSelection = useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
       handleFileChange(fileToUpload)
@@ -155,7 +155,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setShowUrlInput(false)
   }, [handleFileChange])
 
-  const onEditsSave = React.useCallback(
+  const onEditsSave = useCallback(
     ({ crop, focalPosition }) => {
       setCrop({
         x: crop.x || 0,
