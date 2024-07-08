@@ -17,18 +17,18 @@ All Custom Components in Payload are [React Server Components](https://react.dev
 
 There are four main types of Custom Components in Payload:
 
-- [Root Components](#custom-root-components)
-- [Collection Components](#custom-collection-components)
-- [Global Components](#custom-global-components)
+- [Root Components](#root-components)
+- [Collection Components](#collection-components)
+- [Global Components](#global-components)
 - [Field Components](./fields)
 
 To swap in your own Custom Component, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
 
-## Custom Root Components
+## Root Components
 
 Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo or the main nav.
 
-To override Root Components, use the `admin.components` property of the [Payload Config](../getting-started/overview):
+To override Root Components, use the `admin.components` property in your [Payload Config](../getting-started/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -68,14 +68,14 @@ The following options are available:
 | **`views`**           | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                                                                                                                 |
 
 <Banner type="success">
-  <strong>Note:</strong> You can also use the `admin.components` property on any _[Collection](#custom-collection-components) or [Global](#custom-global-components)_.
+  <strong>Note:</strong> You can also use the `admin.components` property in your _[Collection](#collection-components) or [Global](#global-components)_.
 </Banner>
 
 ### Custom Providers
 
 As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app where you can export your own custom hooks, etc.
 
-To add a Custom Provider, use the `admin.components.providers` property of the [Payload Config](../getting-started/overview):
+To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../getting-started/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -115,11 +115,11 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
   <strong>Reminder:</strong> Custom Providers are by definition Client Components. This means they must include the `use client` directive at the top of their files and cannot use server-only code.
 </Banner>
 
-## Custom Collection Components
+## Collection Components
 
 Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview), such as the save button or the List View.
 
-To override Collection Components, use the `admin.components` property of your [Collection Config](../configuration/collections):
+To override Collection Components, use the `admin.components` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -154,11 +154,11 @@ The following options are available:
 | **`edit.PreviewButton`**   | Replace the default `Preview` button with a Custom Component.                                                          |
 | **`views`**                | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                     |
 
-## Custom Global Components
+## Global Components
 
 Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview), such as the save button or the Edit View.
 
-To override Global Components, use the `admin.components` property of your [Global Config](../configuration/globals):
+To override Global Components, use the `admin.components` property in your [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload'
@@ -224,7 +224,7 @@ Each Custom Component receives the following props by default:
 Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For example, [Custom Views](./views) receive the `user` prop. For a full list of available props, consult the documentation related to the specific component you are working with.
 
 <Banner type="success">
-  See [Root Components](#custom-root-components), [Collection Components](#custom-collection-components), [Global Components](#custom-global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
+  See [Root Components](#root-components), [Collection Components](#collection-components), [Global Components](#global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
 </Banner>
 
 ### Client Components
