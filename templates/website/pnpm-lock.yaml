@@ -6,17 +6,17 @@ settings:
 
 dependencies:
   '@lexical/list':
-    specifier: ^0.16
-    version: 0.16.0
+    specifier: 0.16.1
+    version: 0.16.1
   '@lexical/react':
-    specifier: ^0.16
+    specifier: 0.16.1
     version: 0.16.1(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)(yjs@13.6.15)
   '@lexical/rich-text':
-    specifier: ^0.16
-    version: 0.16.0
+    specifier: 0.16.1
+    version: 0.16.1
   '@lexical/utils':
-    specifier: ^0.16
-    version: 0.16.0
+    specifier: 0.16.1
+    version: 0.16.1
   '@payloadcms/db-mongodb':
     specifier: 3.0.0-beta.59
     version: 3.0.0-beta.59(@aws-sdk/client-sso-oidc@3.575.0)(payload@3.0.0-beta.59)
@@ -46,7 +46,7 @@ dependencies:
     version: 3.0.0-beta.59(@payloadcms/translations@3.0.0-beta.59)(@payloadcms/ui@3.0.0-beta.59)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)
   '@payloadcms/richtext-lexical':
     specifier: 3.0.0-beta.59
-    version: 3.0.0-beta.59(@faceless-ui/modal@3.0.0-beta.0)(@faceless-ui/scroll-info@2.0.0-beta.0)(@lexical/headless@0.16.1)(@lexical/link@0.16.1)(@lexical/list@0.16.0)(@lexical/mark@0.16.1)(@lexical/markdown@0.16.1)(@lexical/react@0.16.1)(@lexical/rich-text@0.16.0)(@lexical/selection@0.16.1)(@lexical/table@0.16.1)(@lexical/utils@0.16.0)(@payloadcms/next@3.0.0-beta.59)(@payloadcms/translations@3.0.0-beta.59)(@payloadcms/ui@3.0.0-beta.59)(lexical@0.16.0)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)
+    version: 3.0.0-beta.59(@faceless-ui/modal@3.0.0-beta.0)(@faceless-ui/scroll-info@2.0.0-beta.0)(@lexical/headless@0.16.1)(@lexical/link@0.16.1)(@lexical/list@0.16.1)(@lexical/mark@0.16.1)(@lexical/markdown@0.16.1)(@lexical/react@0.16.1)(@lexical/rich-text@0.16.1)(@lexical/selection@0.16.1)(@lexical/table@0.16.1)(@lexical/utils@0.16.1)(@payloadcms/next@3.0.0-beta.59)(@payloadcms/translations@3.0.0-beta.59)(@payloadcms/ui@3.0.0-beta.59)(lexical@0.16.1)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)
   '@payloadcms/ui':
     specifier: 3.0.0-beta.59
     version: 3.0.0-beta.59(@types/react@18.3.2)(monaco-editor@0.48.0)(next@15.0.0-canary.58)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)
@@ -87,8 +87,8 @@ dependencies:
     specifier: 9.0.1
     version: 9.0.1
   lexical:
-    specifier: ^0.16
-    version: 0.16.0
+    specifier: 0.16.1
+    version: 0.16.1
   lucide-react:
     specifier: ^0.378.0
     version: 0.378.0(react@19.0.0-beta-26f2496093-20240514)
@@ -1948,16 +1948,6 @@ packages:
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
     dev: false
 
-  /@lexical/clipboard@0.16.0:
-    resolution: {integrity: sha512-eYMJ6jCXpWBVC05Mu9HLMysrBbfi++xFfsm+Yo7A6kYGrqYUhpXqjJkYnw1xdZYL3bV73Oe4ByVJuq42GU+Mqw==}
-    dependencies:
-      '@lexical/html': 0.16.0
-      '@lexical/list': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
-    dev: false
-
   /@lexical/clipboard@0.16.1:
     resolution: {integrity: sha512-0dWs/SwKS5KPpuf6fUVVt9vSCl6HAqcDGhSITw/okv0rrIlXTUT6WhVsMJtXfFxTyVvwMeOecJHvQH3i/jRQtA==}
     dependencies:
@@ -2018,14 +2008,6 @@ packages:
       lexical: 0.16.1
     dev: false
 
-  /@lexical/html@0.16.0:
-    resolution: {integrity: sha512-okxn3q/1qkUpCZNEFRI39XeJj4YRjb6prm3WqZgP4d39DI1W24feeTZJjYRCW+dc3NInwFaolU3pNA2MGkjRtg==}
-    dependencies:
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
-    dev: false
-
   /@lexical/html@0.16.1:
     resolution: {integrity: sha512-vbtAdCvQ3PaAqa5mFmtmrvbiAvjCu1iXBAJ0bsHqFXCF2Sba5LwHVe8dUAOTpfEZEMbiHfjul6b5fj4vNPGF2A==}
     dependencies:
@@ -2039,13 +2021,6 @@ packages:
     dependencies:
       '@lexical/utils': 0.16.1
       lexical: 0.16.1
-    dev: false
-
-  /@lexical/list@0.16.0:
-    resolution: {integrity: sha512-nBx/DMM7nCgnOzo1JyNnVaIrk/Xi5wIPNi8jixrEV6w9Om2K6dHutn/79Xzp2dQlNGSLHEDjky6N2RyFgmXh0g==}
-    dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
     dev: false
 
   /@lexical/list@0.16.1:
@@ -2127,15 +2102,6 @@ packages:
       - yjs
     dev: false
 
-  /@lexical/rich-text@0.16.0:
-    resolution: {integrity: sha512-AGTD6yJZ+kj2TNah1r7/6vyufs6fZANeSvv9x5eG+WjV4uyUJYkd1qR8C5gFZHdkyr+bhAcsAXvS039VzAxRrQ==}
-    dependencies:
-      '@lexical/clipboard': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
-    dev: false
-
   /@lexical/rich-text@0.16.1:
     resolution: {integrity: sha512-4uEVXJur7tdSbqbmsToCW4YVm0AMh4y9LK077Yq2O9hSuA5dqpI8UbTDnxZN2D7RfahNvwlqp8eZKFB1yeiJGQ==}
     dependencies:
@@ -2145,23 +2111,10 @@ packages:
       lexical: 0.16.1
     dev: false
 
-  /@lexical/selection@0.16.0:
-    resolution: {integrity: sha512-trT9gQVJ2j6AwAe7tHJ30SRuxCpV6yR9LFtggxphHsXSvJYnoHC0CXh1TF2jHl8Gd5OsdWseexGLBE4Y0V3gwQ==}
-    dependencies:
-      lexical: 0.16.0
-    dev: false
-
   /@lexical/selection@0.16.1:
     resolution: {integrity: sha512-+nK3RvXtyQvQDq7AZ46JpphmM33pwuulwiRfeXR5T9iFQTtgWOEjsAi/KKX7vGm70BxACfiSxy5QCOgBWFwVJg==}
     dependencies:
       lexical: 0.16.1
-    dev: false
-
-  /@lexical/table@0.16.0:
-    resolution: {integrity: sha512-A66K779kxdr0yH2RwT2itsMnkzyFLFNPXyiWGLobCH8ON4QPuBouZvjbRHBe8Pe64yJ0c1bRDxSbTqUi9Wt3Gg==}
-    dependencies:
-      '@lexical/utils': 0.16.0
-      lexical: 0.16.0
     dev: false
 
   /@lexical/table@0.16.1:
@@ -2175,15 +2128,6 @@ packages:
     resolution: {integrity: sha512-Os/nKQegORTrKKN6vL3/FMVszyzyqaotlisPynvTaHTUC+yY4uyjM2hlF93i5a2ixxyiPLF9bDroxUP96TMPXg==}
     dependencies:
       lexical: 0.16.1
-    dev: false
-
-  /@lexical/utils@0.16.0:
-    resolution: {integrity: sha512-GWmFEmd7o3GHqJBaEwzuZQbfTNI3Gg8ReGuHMHABgrkhZ8j2NggoRBlxsQLG0f7BewfTMVwbye22yBPq78775w==}
-    dependencies:
-      '@lexical/list': 0.16.0
-      '@lexical/selection': 0.16.0
-      '@lexical/table': 0.16.0
-      lexical: 0.16.0
     dev: false
 
   /@lexical/utils@0.16.1:
@@ -2704,7 +2648,7 @@ packages:
       react-dom: 19.0.0-beta-26f2496093-20240514(react@19.0.0-beta-26f2496093-20240514)
     dev: false
 
-  /@payloadcms/richtext-lexical@3.0.0-beta.59(@faceless-ui/modal@3.0.0-beta.0)(@faceless-ui/scroll-info@2.0.0-beta.0)(@lexical/headless@0.16.1)(@lexical/link@0.16.1)(@lexical/list@0.16.0)(@lexical/mark@0.16.1)(@lexical/markdown@0.16.1)(@lexical/react@0.16.1)(@lexical/rich-text@0.16.0)(@lexical/selection@0.16.1)(@lexical/table@0.16.1)(@lexical/utils@0.16.0)(@payloadcms/next@3.0.0-beta.59)(@payloadcms/translations@3.0.0-beta.59)(@payloadcms/ui@3.0.0-beta.59)(lexical@0.16.0)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514):
+  /@payloadcms/richtext-lexical@3.0.0-beta.59(@faceless-ui/modal@3.0.0-beta.0)(@faceless-ui/scroll-info@2.0.0-beta.0)(@lexical/headless@0.16.1)(@lexical/link@0.16.1)(@lexical/list@0.16.1)(@lexical/mark@0.16.1)(@lexical/markdown@0.16.1)(@lexical/react@0.16.1)(@lexical/rich-text@0.16.1)(@lexical/selection@0.16.1)(@lexical/table@0.16.1)(@lexical/utils@0.16.1)(@payloadcms/next@3.0.0-beta.59)(@payloadcms/translations@3.0.0-beta.59)(@payloadcms/ui@3.0.0-beta.59)(lexical@0.16.1)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514):
     resolution: {integrity: sha512-kyaL7VCrJp6206rxE9+BZBC10btqOujEswu6863dpfqkqvSsjzB/tkqrSijvMOliruaHIJ+ixD6XuGDt51wlSg==}
     engines: {node: ^18.20.2 || >=20.9.0}
     peerDependencies:
@@ -2732,14 +2676,14 @@ packages:
       '@faceless-ui/scroll-info': 2.0.0-beta.0(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)
       '@lexical/headless': 0.16.1
       '@lexical/link': 0.16.1
-      '@lexical/list': 0.16.0
+      '@lexical/list': 0.16.1
       '@lexical/mark': 0.16.1
       '@lexical/markdown': 0.16.1
       '@lexical/react': 0.16.1(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)(yjs@13.6.15)
-      '@lexical/rich-text': 0.16.0
+      '@lexical/rich-text': 0.16.1
       '@lexical/selection': 0.16.1
       '@lexical/table': 0.16.1
-      '@lexical/utils': 0.16.0
+      '@lexical/utils': 0.16.1
       '@payloadcms/next': 3.0.0-beta.59(@types/react@18.3.2)(graphql@16.8.1)(monaco-editor@0.48.0)(next@15.0.0-canary.58)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)(typescript@5.5.2)
       '@payloadcms/translations': 3.0.0-beta.59
       '@payloadcms/ui': 3.0.0-beta.59(@types/react@18.3.2)(monaco-editor@0.48.0)(next@15.0.0-canary.58)(payload@3.0.0-beta.59)(react-dom@19.0.0-beta-26f2496093-20240514)(react@19.0.0-beta-26f2496093-20240514)
@@ -2747,7 +2691,7 @@ packages:
       bson-objectid: 2.0.4
       dequal: 2.0.3
       json-schema: 0.4.0
-      lexical: 0.16.0
+      lexical: 0.16.1
       payload: 3.0.0-beta.59(@swc/core@1.3.76)(@swc/types@0.1.6)(graphql@16.8.1)(typescript@5.5.2)
       react: 19.0.0-beta-26f2496093-20240514
       react-dom: 19.0.0-beta-26f2496093-20240514(react@19.0.0-beta-26f2496093-20240514)
@@ -7130,10 +7074,6 @@ packages:
       prelude-ls: 1.2.1
       type-check: 0.4.0
     dev: true
-
-  /lexical@0.16.0:
-    resolution: {integrity: sha512-Skn45Qhriazq4fpAtwnAB11U//GKc4vjzx54xsV3TkDLDvWpbL4Z9TNRwRoN3g7w8AkWnqjeOSODKkrjgfRSrg==}
-    dev: false
 
   /lexical@0.16.1:
     resolution: {integrity: sha512-+R05d3+N945OY8pTUjTqQrWoApjC+ctzvjnmNETtx9WmVAaiW0tQVG+AYLt5pDGY8dQXtd4RPorvnxBTECt9SA==}

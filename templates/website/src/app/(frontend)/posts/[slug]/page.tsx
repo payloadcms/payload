@@ -9,7 +9,6 @@ import RichText from 'src/app/components/RichText'
 
 import type { Post } from '../../../../payload-types'
 
-import { PayloadRedirects } from '../../../components/PayloadRedirects'
 import { PostHero } from '../../../heros/PostHero'
 import { generateMeta } from '../../../utilities/generateMeta'
 import PageClient from './page.client'
@@ -27,12 +26,9 @@ export async function generateStaticParams() {
 }
 
 export default async function Post({ params: { slug = '' } }) {
-  const url = '/posts/' + slug
   const post = await queryPostBySlug({ slug })
 
-  if (!post) {
-    return <PayloadRedirects url={url} />
-  }
+  if (!post) return notFound()
 
   return (
     <article className="pt-16 pb-16">

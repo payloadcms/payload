@@ -18,7 +18,6 @@ import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { revalidateRedirect } from 'src/payload/hooks/revalidateRedirect'
 import { fileURLToPath } from 'url'
 
 import Categories from './payload/collections/Categories'
@@ -28,6 +27,7 @@ import { Posts } from './payload/collections/Posts'
 import Users from './payload/collections/Users'
 import BeforeDashboard from './payload/components/BeforeDashboard'
 import BeforeLogin from './payload/components/BeforeLogin'
+import { RedeployButton } from './payload/components/RedeployButton'
 import { seed } from './payload/endpoints/seed'
 import { Footer } from './payload/globals/Footer/Footer'
 import { Header } from './payload/globals/Header/Header'
@@ -51,6 +51,7 @@ export default buildConfig({
       beforeLogin: [BeforeLogin],
       // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
+      afterNavLinks: [RedeployButton],
       beforeDashboard: [BeforeDashboard],
     },
     user: Users.slug,
@@ -109,11 +110,19 @@ export default buildConfig({
     redirectsPlugin({
       collections: ['pages', 'posts'],
       overrides: {
+        // @ts-expect-error
         fields: ({ defaultFields }) => {
-          return defaultFields
-        },
-        hooks: {
-          afterChange: [revalidateRedirect],
+          return defaultFields.map((field) => {
+            if ('name' in field && field.name === 'from') {
+              return {
+                ...field,
+                admin: {
+                  description: 'You will need to rebuild the website when changing this field.',
+                },
+              }
+            }
+            return field
+          })
         },
       },
     }),
