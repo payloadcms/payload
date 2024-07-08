@@ -16,7 +16,7 @@ As with Collection configs, it's often best practice to write your Globals in se
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
-| **`label`**        | Text for the name in the Admin panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                              |
+| **`label`**        | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                              |
 | **`description`**  | Text or React component to display below the Global header to give editors more information.                                                                                                                         |
 | **`admin`**        | Admin-specific configuration. See below for [more detail](/docs/configuration/globals#admin-options).                                                                                                                |
 | **`hooks`**        | Entry points to "tie in" to collection actions at specific points. [More](/docs/hooks/overview#global-hooks)                                                                                                         |
@@ -64,17 +64,32 @@ You can find a few [example Global configs](https://github.com/payloadcms/public
 
 ## Admin options
 
-You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
+You can customize the way that the [Admin Panel](../admin/overview) behaves on a Global-by-Global basis.
+
+To do this, use the `admin` property in your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+const MyGlobal: GlobalConfig = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The following options are available:
 
 | Option        | Description                                                                                                                       |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `group`       | Text used as a label for grouping collection and global links together in the navigation.                                         |
 | `hidden`      | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
 | `components`  | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                           |
-| `preview`     | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).           |
+| `preview`     | Function to generate a preview URL within the [Admin Panel](../admin/overview) for this global that can point to your app. [More](#preview).           |
 | `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).          |
 | `hideAPIURL`  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
-| `meta`        | Metadata overrides to apply to the [Admin panel](../admin/overview). Included properties are `description` and `openGraph`.       |
+| `meta`        | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.       |
 
 ## Preview
 

@@ -16,10 +16,10 @@ keywords: authentication, config, configuration, overview, documentation, Conten
   allows for users to identify themselves to Payload.
 </Banner>
 
-Authentication is used within the Payload Admin panel itself as well as throughout your app(s) themselves however you determine necessary.
+Authentication is used within the [Admin Panel](../admin/overview) itself as well as throughout your app(s) themselves however you determine necessary.
 
 ![Authentication admin panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
-_Admin panel screenshot depicting an Admins Collection with Auth enabled_
+_Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 
 **Here are some common use cases of Authentication outside of Payload's dashboard itself:**
 
@@ -28,7 +28,7 @@ _Admin panel screenshot depicting an Admins Collection with Auth enabled_
 - P2P app or social site where users need to log in and manage their profiles
 - Online game where players need to track their progress over time
 
-By default, Payload provides you with a `User` collection that supports Authentication, which is used to access the Admin panel. But, you can add support to one or many Collections of your own. For more information on how to customize, override, or remove the default `User` collection, [click here](/docs/admin/overview#the-admin-user-collection).
+By default, Payload provides you with a `User` collection that supports Authentication, which is used to access the [Admin Panel](../admin/overview). But, you can add support to one or many Collections of your own. For more information on how to customize, override, or remove the default `User` collection, [click here](/docs/admin/overview#the-admin-user-collection).
 
 ## Enabling Auth on a collection
 
@@ -66,7 +66,7 @@ export const Admins: CollectionConfig = {
 **By enabling Authentication on a config, the following modifications will automatically be made to your Collection:**
 
 1. `email` as well as password `salt` & `hash` fields will be added to your Collection's schema
-1. The Admin panel will feature a new set of corresponding UI to allow for changing password and editing email
+1. The [Admin Panel](../admin/overview) will feature a new set of corresponding UI to allow for changing password and editing email
 1. [A new set of `operations`](/docs/authentication/operations) will be exposed via Payload's REST, Local, and GraphQL APIs
 
 Once enabled, each document that is created within the Collection can be thought of as a `user` - who can make use of commonly required authentication functions such as logging in / out, resetting their password, and more.

@@ -29,7 +29,7 @@
     "temp"
   ],
   /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json", "../ui/src/forms/Form/getDataByPath.ts", "../ui/src/forms/Form/getSiblingData.ts"],
   "ts-node": {
     "swc": true
   },

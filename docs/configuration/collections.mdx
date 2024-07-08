@@ -67,22 +67,36 @@ You can also find full, ready-to-go [Ecommerce](https://github.com/payloadcms/pa
 
 ## Admin options
 
-You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin`
-property on a collection's config.
+You can customize the way that the [Admin Panel](../admin/overview) behaves on a collection-by-collection basis.
+
+To do this, use the `admin` property in your Collection Config:
+
+```ts
+import { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The following options are available:
 
 | Option                       | Description                                                                                                                                                                                           |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `group`                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                             |
 | `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
 | `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                        |
-| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title.                                                |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the [Admin Panel](../admin/overview). If no field is defined, the ID of the document is used as the title.                                                |
 | `description`                | Text or React component to display below the Collection label in the List view to give editors more information.                                                                                      |
 | `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view.                                                                                              |
 | `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                        |
 | `enableRichTextLink`         | The [Rich Text](/docs/fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.         |
 | `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
-| `meta`                       | Metadata overrides to apply to the [Admin panel](../admin/overview). Included properties are `description` and `openGraph`.                                                                           |
-| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview).                                                                                                |
+| `meta`                       | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.                                                                           |
+| `preview`                    | Function to generate preview URLs within the [Admin Panel](../admin/overview) that can point to your app. [More details](#preview).                                                                                                |
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                              |
 | `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                       |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |

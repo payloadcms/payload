@@ -132,7 +132,7 @@ project-name
   <strong>Important:</strong>
   <br />
   If you use an environment variable to configure any properties that are required for the Admin
-  panel to function (ex. serverURL or any routes), you need to make sure that your Admin panel code
+  panel to function (ex. serverURL or any routes), you need to make sure that your [Admin Panel](../admin/overview) code
   can access it. [Click here](/docs/admin/environment-vars) for more info.
 </Banner>
 
@@ -168,7 +168,7 @@ Payload exposes a variety of TypeScript settings that you can leverage on your C
 
 **`autoGenerate`**
 
-By default, in Next.js development mode, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. 
+By default, in Next.js development mode, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines.
 
 You can opt out by setting `typescript.autoGenerate: false`.
 
@@ -202,7 +202,7 @@ import { SanitizedConfig } from 'payload'
 
 ### Server config vs. client config
 
-Payload's full config is only available on the server, but Payload dynamically reduces your config down to only what is safe to send to the client-side admin panel. All server-only properties are removed as well as all functions (hooks, validations, conditional logic, access control, etc). 
+Payload's full config is only available on the server, but Payload dynamically reduces your config down to only what is safe to send to the client-side admin panel. All server-only properties are removed as well as all functions (hooks, validations, conditional logic, access control, etc).
 
 Anywhere within the client-side admin UI, you can access your client-safe config which is typed as `ClientConfig`. The client config is JSON-serializable.
 
