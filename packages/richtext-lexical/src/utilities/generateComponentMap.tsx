@@ -44,7 +44,7 @@ export const getGenerateComponentMap =
 
               if (Component) {
                 componentMap.set(
-                  `feature.${featureKey}.components.${componentKey}`,
+                  `lexical_internal_feature.${featureKey}.lexical_internal_components.${componentKey}`,
                   <WithServerSideProps
                     Component={Component}
                     componentKey={componentKey}
@@ -79,11 +79,14 @@ export const getGenerateComponentMap =
                   disableAddingID: true,
                   fieldSchema: fields,
                   i18n,
-                  parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
+                  parentPath: `${schemaPath}.lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
                   readOnly: false,
                 })
 
-                componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+                componentMap.set(
+                  `lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
+                  mappedFields,
+                )
               }
             }
           }

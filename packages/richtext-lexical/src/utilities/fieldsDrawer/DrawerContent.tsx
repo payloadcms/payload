@@ -34,8 +34,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const componentMapRenderedFieldsPath = `feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
-  const schemaFieldsPath = `${schemaPath}.feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+  const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
   const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath) // Field Schema
 

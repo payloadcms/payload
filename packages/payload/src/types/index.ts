@@ -43,8 +43,9 @@ export type CustomPayloadRequestProperties = {
   t: TFunction
   /**
    * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
+   * Can also be used to ensure consistency when multiple operations try to create a transaction concurrently on the same request.
    */
-  transactionID?: number | string
+  transactionID?: Promise<number | string> | number | string
   /**
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
    */

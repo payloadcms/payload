@@ -196,13 +196,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
   }
 
-  const viewComponentProps: ServerSideEditViewProps = {
-    initPageResult,
-    params,
-    routeSegments: segments,
-    searchParams,
-  }
-
   return (
     <DocumentInfoProvider
       action={action}
@@ -246,13 +239,14 @@ export const Document: React.FC<AdminViewProps> = async ({
             <RenderCustomComponent
               CustomComponent={ViewOverride || CustomView}
               DefaultComponent={DefaultView}
-              componentProps={viewComponentProps}
               serverOnlyProps={{
                 i18n,
+                initPageResult,
                 locale,
                 params,
                 payload,
                 permissions,
+                routeSegments: segments,
                 searchParams,
                 user,
               }}

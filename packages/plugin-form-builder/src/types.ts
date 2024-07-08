@@ -44,8 +44,8 @@ export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 export type FormBuilderPluginConfig = {
   beforeEmail?: BeforeEmail
   fields?: FieldsConfig
-  formOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields: FieldsOverride }
-  formSubmissionOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields: FieldsOverride }
+  formOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
+  formSubmissionOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }

@@ -46,7 +46,9 @@ export const RichTextField: React.FC<
   let featureProvidersAndComponentsToLoad = 0 // feature providers and components
   for (const featureProvider of featureProviderComponents) {
     const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-      key.startsWith(`feature.${featureProvider.key}.components.`),
+      key.startsWith(
+        `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
+      ),
     )
 
     featureProvidersAndComponentsToLoad += 1
@@ -60,9 +62,10 @@ export const RichTextField: React.FC<
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          if (!key.includes('.components.')) {
+          if (!key.includes('.lexical_internal_components.')) {
             featureProvidersLocal.push(plugin)
           }
+
           featureProvidersAndComponentsLoaded++
         }
       })
@@ -112,7 +115,9 @@ export const RichTextField: React.FC<
           featureProviderComponents.map((featureProvider) => {
             // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
             const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-              key.startsWith(`feature.${featureProvider.key}.components.`),
+              key.startsWith(
+                `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
+              ),
             )
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
