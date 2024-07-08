@@ -4,8 +4,8 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import eslintPluginReactConfig from 'eslint-plugin-react/configs/recommended.js'
 import eslintPluginReact from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
-import globals from "globals";
-import { fixupPluginRules } from "@eslint/compat"
+import globals from 'globals';
+import { fixupPluginRules } from '@eslint/compat'
 import { deepMerge } from '../../deepMerge.js'
 
 /** @type {import('eslint').Linter.FlatConfig} */
