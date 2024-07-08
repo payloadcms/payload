@@ -53,6 +53,7 @@
     "eslint-plugin-payload": "workspace:*",
     "eslint-plugin-playwright": "1.5.3",
     "execa": "5.1.1",
+    "file-type": "17.1.6",
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
     "lexical": "0.15.0",
