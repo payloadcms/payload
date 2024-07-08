@@ -14,7 +14,6 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "payload": "payload",
     "reinstall": "rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
-    "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true next dev",
     "start": "next start"
   },
   "dependencies": {
