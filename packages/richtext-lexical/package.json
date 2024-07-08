@@ -53,7 +53,6 @@
     "@types/uuid": "10.0.0",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
-    "json-schema": "^0.4.0",
     "lexical": "0.16.1",
     "react-error-boundary": "4.0.13",
     "uuid": "10.0.0"
