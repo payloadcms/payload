@@ -196,6 +196,7 @@ export type InitOptions = {
   config: Promise<SanitizedConfig> | SanitizedConfig
 
   /**
+   * DANGEROUS.
    * Disable caching the payload instance.
    * This is useful for environments where Payload is initialised in isolation from other instances.
    */
