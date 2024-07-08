@@ -1042,12 +1042,6 @@ export { commitTransaction } from './utilities/commitTransaction.js'
 
 export { getDependencies }
 
-export { getDataByPath } from './utilities/getDataByPath.js'
-
-export { getSiblingData } from './utilities/getSiblingData.js'
-
 export { initTransaction } from './utilities/initTransaction.js'
 
 export { killTransaction } from './utilities/killTransaction.js'
-
-export { reduceFieldsToValues } from './utilities/reduceFieldsToValues.js'

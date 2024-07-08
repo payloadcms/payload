@@ -5,7 +5,11 @@ import type { FormState } from 'payload'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { getDataByPath as getDataByPathFunc , getSiblingData as getSiblingDataFunc, reduceFieldsToValues } from 'payload'
+import {
+  getDataByPath as getDataByPathFunc,
+  getSiblingData as getSiblingDataFunc,
+  reduceFieldsToValues,
+} from 'payload/shared'
 import { wait } from 'payload/shared'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'

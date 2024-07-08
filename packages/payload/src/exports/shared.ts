@@ -49,3 +49,9 @@ export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { versionDefaults } from '../versions/defaults.js'
+
+export { getDataByPath } from '../utilities/getDataByPath.js'
+
+export { getSiblingData } from '../utilities/getSiblingData.js'
+
+export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
