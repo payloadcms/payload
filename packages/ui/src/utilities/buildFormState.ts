@@ -1,12 +1,13 @@
 import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { reduceFieldsToValues } from 'payload/shared'
+
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import {} from '../exports/client/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { reduceFieldsToValues } from '../exports/shared/index.js'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 

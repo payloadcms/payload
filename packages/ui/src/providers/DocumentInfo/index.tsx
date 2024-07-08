@@ -12,6 +12,7 @@ import type {
 } from 'payload'
 
 import { notFound } from 'next/navigation.js'
+import { reduceFieldsToValues } from 'payload/shared'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
@@ -21,7 +22,6 @@ import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'

@@ -1419,9 +1419,6 @@ importers:
       dequal:
         specifier: 2.0.3
         version: 2.0.3
-      is-buffer:
-        specifier: ^2.0.5
-        version: 2.0.5
       md5:
         specifier: 2.3.0
         version: 2.3.0

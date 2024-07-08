@@ -1,7 +1,7 @@
 import type { Data, FormState } from 'payload'
 
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
-import { unflatten } from '../../utilities/unflatten.js'
+import { reduceFieldsToValues } from './reduceFieldsToValues.js'
+import { unflatten } from './unflatten.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
   if (!fields) return null
