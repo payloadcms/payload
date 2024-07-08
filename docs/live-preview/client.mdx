@@ -10,7 +10,7 @@ keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, us
   If your front-end application supports Server Components like the [Next.js App Router](https://nextjs.org/docs/app), etc., we suggest setting up [server-side Live Preview](./server) instead.
 </Banner>
 
-While using Live Preview, the Admin panel emits a new `window.postMessage` event every time your document has changed. Your front-end application can listen for these events and re-render accordingly.
+While using Live Preview, the [Admin Panel](../admin/overview) emits a new `window.postMessage` event every time your document has changed. Your front-end application can listen for these events and re-render accordingly.
 
 If your front-end application is built with [React](#react) or [Vue](#vue), use the `useLivePreview` hooks that Payload provides. In the future, all other major frameworks like Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
 
@@ -44,7 +44,16 @@ And return the following values:
   It is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../getting-started/concepts#depth) for more information.
 </Banner>
 
-## React
+## Frameworks
+
+Live Preview will work with any front-end framework that supports the native [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) API. By default, Payload officially supports the most popular frameworks, including:
+
+- [React](#react)
+- [Vue](#vue)
+
+If your framework is not listed, you can still integrate with Live Preview using the underlying tooling that Payload provides. [More details](#building-your-own-hook).
+
+### React
 
 If your front-end application is built with client-side [React](https://react.dev) like [Next.js Pages Router](https://nextjs.org/docs/pages), you can use the `useLivePreview` hook that Payload provides.
 
@@ -79,7 +88,12 @@ export const PageClient: React.FC<{
 }
 ```
 
-## Vue
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  If you are using [React Server Components](https://react.dev/reference/rsc/server-components), we strongly suggest setting up [server-side Live Preview](./server) instead.
+</Banner>
+
+### Vue
 
 If your front-end application is built with [Vue 3](https://vuejs.org) or [Nuxt 3](https://nuxt.js), you can use the `useLivePreview` composable that Payload provides.
 
@@ -91,7 +105,7 @@ npm install @payloadcms/live-preview-vue
 
 Then, use the `useLivePreview` hook in your Vue component:
 
-```vue
+```ts
 <script setup lang="ts">
 import type { PageData } from '~/types';
 import { defineProps } from 'vue';
@@ -128,10 +142,10 @@ This package provides the following functions:
 
 | Path                     | Description                                                                                                                |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| **`subscribe`**          | Subscribes to the Admin panel's `window.postMessage` events and calls the provided callback function.                      |
-| **`unsubscribe`**        | Unsubscribes from the Admin panel's `window.postMessage` events.                                                           |
-| **`ready`**              | Sends a `window.postMessage` event to the Admin panel to indicate that the front-end is ready to receive messages.         |
-| **`isLivePreviewEvent`** | Checks if a `MessageEvent` originates from the Admin panel and is a Live Preview event, i.e. debounced form state.         |
+| **`subscribe`**          | Subscribes to the Admin Panel's `window.postMessage` events and calls the provided callback function.                      |
+| **`unsubscribe`**        | Unsubscribes from the Admin Panel's `window.postMessage` events.                                                           |
+| **`ready`**              | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages.         |
+| **`isLivePreviewEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a Live Preview event, i.e. debounced form state.         |
 
 The `subscribe` function takes the following args:
 
@@ -154,7 +168,7 @@ import { subscribe, unsubscribe } from '@payloadcms/live-preview'
 // 3. Populating relationships and uploads
 // 4. Calling the `onChange` callback with the result
 // Your hook should also:
-// 1. Tell the Admin panel when it is ready to receive messages
+// 1. Tell the Admin Panel when it is ready to receive messages
 // 2. Handle the results of the `onChange` callback to update the UI
 // 3. Unsubscribe from the `window.postMessage` events when it unmounts
 ```
@@ -186,7 +200,7 @@ export const useLivePreview = <T extends any>(props: {
   }, [])
 
   useEffect(() => {
-    // Listen for `window.postMessage` events from the Admin panel
+    // Listen for `window.postMessage` events from the Admin Panel
     // When a change is made, the `onChange` callback will be called with the merged data
     const subscription = subscribe({
       callback: onChange,
@@ -195,7 +209,7 @@ export const useLivePreview = <T extends any>(props: {
       serverURL,
     })
 
-    // Once subscribed, send a `ready` message back up to the Admin panel
+    // Once subscribed, send a `ready` message back up to the Admin Panel
     // This will indicate that the front-end is ready to receive messages
     if (!hasSentReadyMessage.current) {
       hasSentReadyMessage.current = true
