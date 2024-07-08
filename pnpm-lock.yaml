@@ -712,9 +712,6 @@ importers:
       image-size:
         specifier: ^1.1.1
         version: 1.1.1
-      is-buffer:
-        specifier: ^2.0.5
-        version: 2.0.5
       joi:
         specifier: ^17.12.1
         version: 17.12.3
