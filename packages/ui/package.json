@@ -122,7 +122,7 @@
     "turbopack": "^0.0.1"
   },
   "peerDependencies": {
-    "next": "^15.0.0-rc.0",
+    "next": "^15.0.0-canary.53",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
     "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
