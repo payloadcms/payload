@@ -1,7 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig } from 'payload'
 
-import { isImage } from 'payload/shared'
+import { isImage, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -11,7 +11,6 @@ import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
