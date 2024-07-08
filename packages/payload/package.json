@@ -119,7 +119,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express-fileupload": "1.4.1",
     "@types/joi": "14.3.4",
-    "@types/json-schema": "7.0.12",
+    "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "8.5.9",
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "6.4.14",
