@@ -1,5 +1,5 @@
 import type { TypedUser } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { Permissions } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -10,28 +10,30 @@ import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
   headers: Request['headers']
-  req?: Omit<PayloadRequestWithData, 'user'>
+  req?: Omit<PayloadRequest, 'user'>
 }
 
 export type AuthResult = {
   permissions: Permissions
+  responseHeaders?: Headers
   user: TypedUser | null
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const { headers } = args
-  const req = args.req as PayloadRequestWithData
+  const req = args.req as PayloadRequest
   const { payload } = req
 
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await executeAuthStrategies({
+    const { responseHeaders, user } = await executeAuthStrategies({
       headers,
       payload,
     })
 
     req.user = user
+    req.responseHeaders = responseHeaders
 
     const permissions = await getAccessResults({
       req,
@@ -41,6 +43,7 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
 
     return {
       permissions,
+      responseHeaders,
       user,
     }
   } catch (error: unknown) {

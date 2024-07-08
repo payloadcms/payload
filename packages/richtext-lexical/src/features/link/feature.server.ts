@@ -1,6 +1,5 @@
 import type { CollectionSlug, Config, Field, FieldAffectingData, SanitizedConfig } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { sanitizeFields } from 'payload'
 import { deepCopyObject } from 'payload/shared'
 
@@ -101,25 +100,13 @@ export const LinkFeature = createServerFeature<
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,
       } as ExclusiveLinkCollectionsProps,
-      generateSchemaMap: ({ config, i18n }) => {
+      generateSchemaMap: () => {
         if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
           return null
         }
 
         const schemaMap = new Map<string, Field[]>()
-
-        const validRelationships = config.collections.map((c) => c.slug) || []
-
         schemaMap.set('fields', sanitizedFields)
-
-        traverseFields({
-          config,
-          fields: sanitizedFields,
-          i18n,
-          schemaMap,
-          schemaPath: 'fields',
-          validRelationships,
-        })
 
         return schemaMap
       },

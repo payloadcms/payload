@@ -25,12 +25,17 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
   })
 
   const user = usersQuery.docs[0] || null
-  if (!user) return null
+  if (!user) return { user: null }
 
   return {
-    ...user,
-    _strategy: `${usersSlug}-${strategyName}`,
-    collection: usersSlug,
+    user: {
+      ...user,
+      _strategy: `${usersSlug}-${strategyName}`,
+      collection: usersSlug,
+    },
+    responseHeaders: new Headers({
+      'Smile-For-Me': 'please',
+    }),
   }
 }
 

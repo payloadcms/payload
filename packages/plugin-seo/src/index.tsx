@@ -12,12 +12,12 @@ import type {
   SEOPluginConfig,
 } from './types.js'
 
-import { MetaDescription } from './fields/MetaDescription.js'
-import { MetaImage } from './fields/MetaImage.js'
-import { MetaTitle } from './fields/MetaTitle.js'
+import { MetaDescriptionComponent } from './fields/MetaDescription/MetaDescriptionComponent.js'
+import { MetaImageComponent } from './fields/MetaImage/MetaImageComponent.js'
+import { MetaTitleComponent } from './fields/MetaTitle/MetaTitleComponent.js'
+import { OverviewComponent } from './fields/Overview/OverviewComponent.js'
+import { PreviewComponent } from './fields/Preview/PreviewComponent.js'
 import { translations } from './translations/index.js'
-import { Overview } from './ui/Overview.js'
-import { Preview } from './ui/Preview.js'
 
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
@@ -32,7 +32,7 @@ export const seoPlugin =
             type: 'ui',
             admin: {
               components: {
-                Field: Overview,
+                Field: OverviewComponent,
               },
             },
             label: 'Overview',
@@ -43,7 +43,7 @@ export const seoPlugin =
             admin: {
               components: {
                 Field: withMergedProps({
-                  Component: MetaTitle,
+                  Component: MetaTitleComponent,
                   sanitizeServerOnlyProps: true,
                   toMergeIntoProps: {
                     hasGenerateTitleFn: typeof pluginConfig?.generateTitle === 'function',
@@ -60,7 +60,7 @@ export const seoPlugin =
             admin: {
               components: {
                 Field: withMergedProps({
-                  Component: MetaDescription,
+                  Component: MetaDescriptionComponent,
                   sanitizeServerOnlyProps: true,
                   toMergeIntoProps: {
                     hasGenerateDescriptionFn:
@@ -81,7 +81,7 @@ export const seoPlugin =
                   admin: {
                     components: {
                       Field: withMergedProps({
-                        Component: MetaImage,
+                        Component: MetaImageComponent,
                         sanitizeServerOnlyProps: true,
                         toMergeIntoProps: {
                           hasGenerateImageFn: typeof pluginConfig?.generateImage === 'function',
@@ -105,7 +105,7 @@ export const seoPlugin =
             admin: {
               components: {
                 Field: withMergedProps({
-                  Component: Preview,
+                  Component: PreviewComponent,
                   sanitizeServerOnlyProps: true,
                   toMergeIntoProps: {
                     hasGenerateURLFn: typeof pluginConfig?.generateURL === 'function',
@@ -200,10 +200,13 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateTitle>[0] =
-              reqWithData.data as unknown as Parameters<GenerateTitle>[0]
-            const result = pluginConfig.generateTitle ? await pluginConfig.generateTitle(args) : ''
+            await addDataAndFileToRequest(req)
+            req.t
+            const result = pluginConfig.generateTitle
+              ? await pluginConfig.generateTitle(
+                  req.data as unknown as Parameters<GenerateTitle>[0],
+                )
+              : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -211,11 +214,11 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateDescription>[0] =
-              reqWithData.data as unknown as Parameters<GenerateDescription>[0]
+            await addDataAndFileToRequest(req)
             const result = pluginConfig.generateDescription
-              ? await pluginConfig.generateDescription(args)
+              ? await pluginConfig.generateDescription(
+                  req.data as unknown as Parameters<GenerateDescription>[0],
+                )
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -224,10 +227,10 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateURL>[0] =
-              reqWithData.data as unknown as Parameters<GenerateURL>[0]
-            const result = pluginConfig.generateURL ? await pluginConfig.generateURL(args) : ''
+            await addDataAndFileToRequest(req)
+            const result = pluginConfig.generateURL
+              ? await pluginConfig.generateURL(req.data as unknown as Parameters<GenerateURL>[0])
+              : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -235,10 +238,12 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateImage>[0] =
-              reqWithData.data as unknown as Parameters<GenerateImage>[0]
-            const result = pluginConfig.generateImage ? await pluginConfig.generateImage(args) : ''
+            await addDataAndFileToRequest(req)
+            const result = pluginConfig.generateImage
+              ? await pluginConfig.generateImage(
+                  req.data as unknown as Parameters<GenerateImage>[0],
+                )
+              : ''
             return new Response(result, { status: 200 })
           },
           method: 'post',

@@ -1,12 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequestWithData,
-  RequestContext,
-  Where,
-} from '../../../types/index.js'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type {
   BulkOperationResult,
@@ -36,7 +31,7 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   user?: Document
 }

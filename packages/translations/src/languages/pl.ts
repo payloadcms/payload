@@ -4,6 +4,7 @@ export const plTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Konto bieżącego użytkownika',
+    accountVerified: 'Konto zweryfikowane pomyślnie.',
     alreadyActivated: 'Już aktywowano',
     alreadyLoggedIn: 'Już zalogowano',
     apiKey: 'Klucz API',
@@ -26,6 +27,8 @@ export const plTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Proszę podaj swój email. Otrzymasz wiadomość z instrukcjami, jak zresetować hasło.',
     forgotPasswordQuestion: 'Nie pamiętasz hasła?',
+    forgotPasswordUsernameInstructions:
+      'Proszę wpisać poniżej swoją nazwę użytkownika. Instrukcje dotyczące resetowania hasła zostaną wysłane na adres e-mail powiązany z Twoją nazwą użytkownika.',
     generate: 'Wygeneruj',
     generateNewAPIKey: 'Wygeneruj nowy klucz API',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +64,8 @@ export const plTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Pomyślnie odblokowano',
     tokenRefreshSuccessful: 'Odświeżenie tokenu powiodło się.',
     unableToVerify: 'Nie można zweryfikować',
+    username: 'Nazwa użytkownika',
+    usernameNotValid: 'Podana nazwa użytkownika nie jest prawidłowa.',
     verified: 'Zweryfikowano',
     verifiedSuccessfully: 'Pomyślnie zweryfikowany',
     verify: 'Zweryfikuj',
@@ -112,6 +117,8 @@ export const plTranslations: DefaultTranslationsObject = {
     unspecific: 'Wystąpił błąd',
     userEmailAlreadyRegistered: 'Użytkownik o podanym adresie e-mail jest już zarejestrowany.',
     userLocked: 'Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.',
+    usernameAlreadyRegistered: 'Użytkownik o podanej nazwie użytkownika jest już zarejestrowany.',
+    usernameOrPasswordIncorrect: 'Podana nazwa użytkownika lub hasło jest nieprawidłowe.',
     valueMustBeUnique: 'Wartość musi być unikalna',
     verificationTokenInvalid: 'Token weryfikacyjny jest nieprawidłowy.',
   },
@@ -297,6 +304,7 @@ export const plTranslations: DefaultTranslationsObject = {
     contains: 'zawiera',
     equals: 'równe',
     exists: 'istnieje',
+    intersects: 'przecina się',
     isGreaterThan: 'jest większy niż',
     isGreaterThanOrEqualTo: 'jest większe lub równe',
     isIn: 'jest w',
@@ -306,6 +314,7 @@ export const plTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nie jest równe',
     isNotIn: 'nie ma go w',
     near: 'blisko',
+    within: 'w ciągu',
   },
   upload: {
     crop: 'Przytnij',

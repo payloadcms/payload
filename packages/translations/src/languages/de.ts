@@ -4,6 +4,7 @@ export const deTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Aktuelles Benutzerkonto',
+    accountVerified: 'Konto erfolgreich verifiziert.',
     alreadyActivated: 'Bereits aktiviert',
     alreadyLoggedIn: 'Bereits angemeldet',
     apiKey: 'API-Key',
@@ -26,6 +27,8 @@ export const deTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Bitte gib deine E-Mail-Adresse an. Du wirst eine E-Mail mit Instruktionen zum Zurücksetzen deines Passworts erhalten.',
     forgotPasswordQuestion: 'Passwort vergessen?',
+    forgotPasswordUsernameInstructions:
+      'Bitte geben Sie unten Ihren Benutzernamen ein. Anweisungen zum Zurücksetzen Ihres Passworts werden an die mit Ihrem Benutzernamen verknüpfte E-Mail-Adresse gesendet.',
     generate: 'Generieren',
     generateNewAPIKey: 'Neuen API-Key generieren',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +66,8 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Erfolgreich entsperrt',
     tokenRefreshSuccessful: 'Token-Aktualisierung erfolgreich.',
     unableToVerify: 'Konnte nicht verifiziert werden',
+    username: 'Benutzername',
+    usernameNotValid: 'Der angegebene Benutzername ist nicht gültig.',
     verified: 'Verifiziert',
     verifiedSuccessfully: 'Erfolgreich verifiziert',
     verify: 'Verifizieren',
@@ -115,6 +120,9 @@ export const deTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Ein Benutzer mit der angegebenen E-Mail ist bereits registriert.',
     userLocked:
       'Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.',
+    usernameAlreadyRegistered:
+      'Ein Benutzer mit dem angegebenen Benutzernamen ist bereits registriert.',
+    usernameOrPasswordIncorrect: 'Der angegebene Benutzername oder das Passwort ist falsch.',
     valueMustBeUnique: 'Wert muss einzigartig sein',
     verificationTokenInvalid: 'Verifizierungs-Token ist nicht korrekt.',
   },
@@ -301,6 +309,7 @@ export const deTranslations: DefaultTranslationsObject = {
     contains: 'enthält',
     equals: 'gleich',
     exists: 'existiert',
+    intersects: 'schneidet sich',
     isGreaterThan: 'ist größer als',
     isGreaterThanOrEqualTo: 'ist größer oder gleich',
     isIn: 'ist drin',
@@ -310,6 +319,7 @@ export const deTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'ist nicht gleich',
     isNotIn: 'ist nicht drin',
     near: 'in der Nähe',
+    within: 'innerhalb',
   },
   upload: {
     crop: 'Zuschneiden',

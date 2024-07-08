@@ -39,6 +39,8 @@ export const defaults = {
     beforeOperation: [],
     beforeRead: [],
     beforeValidate: [],
+    me: [],
+    refresh: [],
   },
   timestamps: true,
   upload: false,
@@ -52,6 +54,7 @@ export const authDefaults = {
   },
   forgotPassword: {},
   lockTime: 600000, // 10 minutes
+  loginWithUsername: false,
   maxLoginAttempts: 5,
   tokenExpiration: 7200,
   verify: false,

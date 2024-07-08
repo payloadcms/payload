@@ -1,4 +1,14 @@
-export function generateLexicalRichText() {
+import type {
+  SerializedBlockNode,
+  SerializedParagraphNode,
+  SerializedTextNode,
+  SerializedUploadNode,
+  TypedEditorState,
+} from '@payloadcms/richtext-lexical'
+
+export function generateLexicalRichText(): TypedEditorState<
+  SerializedBlockNode | SerializedParagraphNode | SerializedTextNode | SerializedUploadNode
+> {
   return {
     root: {
       type: 'root',
@@ -22,6 +32,7 @@ export function generateLexicalRichText() {
           format: '',
           indent: 0,
           type: 'paragraph',
+          textFormat: 0,
           version: 1,
         },
         {
@@ -217,6 +228,7 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
+          textFormat: 0,
         },
         {
           format: '',
@@ -247,6 +259,7 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
+          textFormat: 0,
         },
         {
           format: '',
@@ -272,6 +285,7 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
+          textFormat: 0,
         },
         {
           format: '',

@@ -1,6 +1,6 @@
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
 import type { Payload } from '../../../index.js'
-import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -19,7 +19,7 @@ export type Options<TSlug extends CollectionSlug> = {
   id: number | string
   locale?: TypedLocale
   overrideAccess?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   user?: Document
 }

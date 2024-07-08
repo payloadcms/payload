@@ -4,6 +4,7 @@ export const trTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesap',
     accountOfCurrentUser: 'Şu anki kullanıcının hesabı',
+    accountVerified: 'Hesap başarıyla doğrulandı.',
     alreadyActivated: 'Hesap zaten etkinleştirildi',
     alreadyLoggedIn: 'Hesaba zaten giriş yapıldı',
     apiKey: 'API Anahtarı',
@@ -26,6 +27,8 @@ export const trTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Lütfen e-posta adresinizi aşağıdaki alana girin. Parolanızı nasıl sıfırlayacağınızı gösteren bir e-posta adresi alacaksınız.',
     forgotPasswordQuestion: 'Parolanızı mı unuttunuz?',
+    forgotPasswordUsernameInstructions:
+      'Lütfen kullanıcı adınızı aşağıya girin. Şifrenizi nasıl sıfırlayacağınıza dair talimatlar, kullanıcı adınızla ilişkilendirilmiş e-posta adresine gönderilecektir.',
     generate: 'Oluştur',
     generateNewAPIKey: 'Yeni bir API anahtarı oluştur',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +65,8 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Hesabın kilidi başarıyla açıldı',
     tokenRefreshSuccessful: 'Token yenileme başarılı.',
     unableToVerify: 'Doğrulama başarısız',
+    username: 'Kullanıcı Adı',
+    usernameNotValid: 'Sağlanan kullanıcı adı geçerli değil.',
     verified: 'Doğrulandı',
     verifiedSuccessfully: 'Hesap başarıyla doğrulandı',
     verify: 'Doğrula',
@@ -114,6 +119,8 @@ export const trTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
+    usernameAlreadyRegistered: 'Verilen kullanıcı adına sahip bir kullanıcı zaten kayıtlı.',
+    usernameOrPasswordIncorrect: 'Sağlanan kullanıcı adı veya şifre yanlış.',
     valueMustBeUnique: 'Değer benzersiz olmalıdır',
     verificationTokenInvalid: 'Doğrulama tokeni geçersiz.',
   },
@@ -301,6 +308,7 @@ export const trTranslations: DefaultTranslationsObject = {
     contains: 'içerir',
     equals: 'eşittir',
     exists: 'var',
+    intersects: 'kesişir',
     isGreaterThan: 'şundan büyüktür',
     isGreaterThanOrEqualTo: 'büyüktür veya eşittir',
     isIn: 'içinde',
@@ -310,6 +318,7 @@ export const trTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'eşit değildir',
     isNotIn: 'içinde değil',
     near: 'yakın',
+    within: 'içinde',
   },
   upload: {
     crop: 'Mahsulat',

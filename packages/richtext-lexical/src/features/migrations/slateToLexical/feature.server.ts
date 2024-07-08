@@ -18,7 +18,12 @@ export type SlateToLexicalFeatureProps = {
     | SlateNodeConverterProvider[]
 }
 
-export const SlateToLexicalFeature = createServerFeature<SlateToLexicalFeatureProps>({
+export const SlateToLexicalFeature = createServerFeature<
+  SlateToLexicalFeatureProps,
+  {
+    converters?: SlateNodeConverterProvider[]
+  }
+>({
   feature: ({ props }) => {
     if (!props) {
       props = {}
@@ -56,7 +61,9 @@ export const SlateToLexicalFeature = createServerFeature<SlateToLexicalFeaturePr
           node: UnknownConvertedNode,
         },
       ],
-      sanitizedServerFeatureProps: props,
+      sanitizedServerFeatureProps: {
+        converters,
+      },
     }
   },
   key: 'slateToLexical',

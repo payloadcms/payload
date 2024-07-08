@@ -99,6 +99,10 @@ export type ClientFeature<ClientFeatureProps> = {
       }
   >
   /**
+   * Client Features can register their own providers, which will be nested below the EditorConfigProvider
+   */
+  providers?: Array<React.FC>
+  /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
   sanitizedClientFeatureProps?: ClientComponentProps<ClientFeatureProps>
@@ -154,9 +158,9 @@ export type ResolvedClientFeature<ClientFeatureProps> = ClientFeature<ClientFeat
   order: number
 }
 
-export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown>>
+export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<any>>
 
-export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown, unknown>>
+export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, any>>
 
 /**
  * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -207,7 +211,7 @@ export type SanitizedPlugin =
 export type SanitizedClientFeatures = Required<
   Pick<
     ResolvedClientFeature<unknown>,
-    'markdownTransformers' | 'nodes' | 'toolbarFixed' | 'toolbarInline'
+    'markdownTransformers' | 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'
   >
 > & {
   /** The keys of all enabled features */

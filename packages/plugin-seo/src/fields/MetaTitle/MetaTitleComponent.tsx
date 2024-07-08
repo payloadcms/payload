@@ -4,55 +4,55 @@ import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
 
 import {
   FieldLabel,
-  TextareaInput,
-  useAllFormFields,
+  TextInput,
   useDocumentInfo,
   useField,
   useFieldProps,
+  useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateDescription } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateTitle } from '../../types.js'
 
-import { defaults } from '../defaults.js'
-import { LengthIndicator } from '../ui/LengthIndicator.js'
+import { defaults } from '../../defaults.js'
+import { LengthIndicator } from '../../ui/LengthIndicator.js'
+import '../index.scss'
 
-const { maxLength, minLength } = defaults.description
+const { maxLength, minLength } = defaults.title
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type MetaDescriptionProps = FormFieldBase & {
-  hasGenerateDescriptionFn: boolean
-  path: string
+type MetaTitleProps = FormFieldBase & {
+  hasGenerateTitleFn: boolean
 }
 
-export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, path, required } = props
+export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
+  const { CustomLabel, hasGenerateTitleFn, label, labelProps, required } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
-  const locale = useLocale()
-  const [fields] = useAllFormFields()
-  const docInfo = useDocumentInfo()
-
   const field: FieldType<string> = useField({
-    path,
+    path: pathFromContext,
   } as Options)
+
+  const locale = useLocale()
+  const { getData } = useForm()
+  const docInfo = useDocumentInfo()
 
   const { errorMessage, setValue, showError, value } = field
 
-  const regenerateDescription = useCallback(async () => {
-    if (!hasGenerateDescriptionFn) return
+  const regenerateTitle = useCallback(async () => {
+    if (!hasGenerateTitleFn) return
 
-    const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
+    const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
       body: JSON.stringify({
         ...docInfo,
-        doc: { ...fields },
+        doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      } satisfies Parameters<GenerateDescription>[0]),
+      } satisfies Parameters<GenerateTitle>[0]),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -60,10 +60,10 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
       method: 'POST',
     })
 
-    const { result: generatedDescription } = await genDescriptionResponse.json()
+    const { result: generatedTitle } = await genTitleResponse.json()
 
-    setValue(generatedDescription || '')
-  }, [fields, setValue, hasGenerateDescriptionFn, locale, docInfo])
+    setValue(generatedTitle || '')
+  }, [hasGenerateTitleFn, docInfo, getData, locale, setValue])
 
   return (
     <div
@@ -79,11 +79,11 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
       >
         <div className="plugin-seo__field">
           <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
-          {hasGenerateDescriptionFn && (
+          {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                onClick={regenerateDescription}
+                onClick={regenerateTitle}
                 style={{
                   background: 'none',
                   backgroundColor: 'transparent',
@@ -105,14 +105,15 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {t('plugin-seo:lengthTipDescription', { maxLength, minLength })}
+          {t('plugin-seo:lengthTipTitle', { maxLength, minLength })}
           <a
-            href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
+            href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
             target="_blank"
           >
             {t('plugin-seo:bestPractices')}
           </a>
+          .
         </div>
       </div>
       <div
@@ -121,7 +122,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           position: 'relative',
         }}
       >
-        <TextareaInput
+        <TextInput
           CustomError={errorMessage}
           onChange={setValue}
           path={pathFromContext}

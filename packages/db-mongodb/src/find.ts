@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Find, PayloadRequestWithData } from 'payload'
+import type { Find, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 
@@ -11,16 +11,7 @@ import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequestWithData,
-    sort: sortArg,
-    where,
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config

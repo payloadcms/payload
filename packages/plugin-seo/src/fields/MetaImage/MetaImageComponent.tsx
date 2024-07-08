@@ -5,34 +5,36 @@ import type { FieldType, Options, UploadInputProps } from '@payloadcms/ui'
 import {
   FieldLabel,
   UploadInput,
-  useAllFormFields,
   useConfig,
   useDocumentInfo,
   useField,
+  useFieldProps,
+  useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
-import type { GenerateImage } from '../types.js'
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
+import type { GenerateImage } from '../../types.js'
 
-import { Pill } from '../ui/Pill.js'
+import { Pill } from '../../ui/Pill.js'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type MetaImageProps = UploadInputProps & {
   hasGenerateImageFn: boolean
 }
 
-export const MetaImage: React.FC<MetaImageProps> = (props) => {
+export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { CustomLabel, hasGenerateImageFn, label, labelProps, relationTo, required } = props || {}
+  const { path: pathFromContext } = useFieldProps()
 
-  const field: FieldType<string> = useField(props as Options)
+  const field: FieldType<string> = useField({ ...props, path: pathFromContext } as Options)
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
-  const [fields] = useAllFormFields()
+  const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
   const { errorMessage, setValue, showError, value } = field
@@ -43,7 +45,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
         ...docInfo,
-        doc: { ...fields },
+        doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
       } satisfies Parameters<GenerateImage>[0]),
       credentials: 'include',
@@ -56,7 +58,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
     const { result: generatedImage } = await genImageResponse.json()
 
     setValue(generatedImage || '')
-  }, [fields, setValue, hasGenerateImageFn, locale, docInfo])
+  }, [hasGenerateImageFn, docInfo, getData, locale, setValue])
 
   const hasImage = Boolean(value)
 

@@ -1,7 +1,7 @@
 import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 export type FileSize = {
   filename: null | string
@@ -123,9 +123,12 @@ export type UploadConfig = {
    * @default undefined
    */
   handlers?: ((
-    req: PayloadRequestWithData,
-    args: { doc: TypeWithID; params: { collection: string; filename: string } },
-  ) => Promise<Response> | Response | null)[]
+    req: PayloadRequest,
+    args: {
+      doc: TypeWithID
+      params: { collection: string; filename: string }
+    },
+  ) => Promise<Response> | Promise<void> | Response | void)[]
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
@@ -133,6 +136,11 @@ export type UploadConfig = {
    * @default undefined
    */
   mimeTypes?: string[]
+  /**
+   * Ability to modify the response headers fetching a file.
+   * @default undefined
+   */
+  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize

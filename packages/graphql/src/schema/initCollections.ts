@@ -379,6 +379,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             exp: {
               type: GraphQLInt,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             token: {
               type: GraphQLString,
             },
@@ -405,14 +408,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             refreshedToken: {
               type: GraphQLString,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             user: {
               type: collection.graphQL.JWT,
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
@@ -450,6 +453,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
           args: {
             email: { type: GraphQLString },
             password: { type: GraphQLString },
+            username: { type: GraphQLString },
           },
           resolve: login(collection),
         }

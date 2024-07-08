@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { FindGlobalVersions, PayloadRequestWithData } from 'payload'
+import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
 import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
@@ -17,7 +17,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     page,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     skip,
     sort: sortArg,
     where,

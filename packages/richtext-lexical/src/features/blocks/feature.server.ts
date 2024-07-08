@@ -1,6 +1,5 @@
 import type { Block, BlockField, Config, Field } from 'payload'
 
-import { traverseFields } from '@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields'
 import { baseBlockFields, fieldsToJSONSchema, formatLabels, sanitizeFields } from 'payload'
 
 import type { BlocksFeatureClientProps } from './feature.client.js'
@@ -57,9 +56,7 @@ export const BlocksFeature = createServerFeature<
     return {
       ClientFeature: BlocksFeatureClient,
       clientFeatureProps: clientProps,
-      generateSchemaMap: ({ config, i18n, props }) => {
-        const validRelationships = config.collections.map((c) => c.slug) || []
-
+      generateSchemaMap: ({ props }) => {
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
          * sub-fields from the component map. Thus, we need to put them in the component map here.
@@ -68,15 +65,6 @@ export const BlocksFeature = createServerFeature<
 
         for (const block of props.blocks) {
           schemaMap.set(block.slug, block.fields || [])
-
-          traverseFields({
-            config,
-            fields: block.fields,
-            i18n,
-            schemaMap,
-            schemaPath: block.slug,
-            validRelationships,
-          })
         }
 
         return schemaMap

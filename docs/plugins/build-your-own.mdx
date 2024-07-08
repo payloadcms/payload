@@ -6,7 +6,7 @@ desc: Starting to build your own plugin? Find everything you need and learn best
 keywords: plugins, template, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Building your own plugin is easy, and if you&apos;re already familiar with Payload then you&apos;ll have everything you need to get started. You can either start from scratch or use the Payload plugin template to get up and running quickly.
+Building your own [Payload Plugin](./overview) is easy, and if you&apos;re already familiar with Payload then you&apos;ll have everything you need to get started. You can either start from scratch or use the [Plugin Template](#plugin-template) to get up and running quickly.
 
 <Banner type="success">
   To use the template, run `npx create-payload-app@latest -t plugin -n my-new-plugin` directly in
@@ -57,11 +57,11 @@ The initialization process goes in the following order:
 
 ## Plugin Template
 
-In the [Payload plugin template](https://github.com/payloadcms/payload-plugin-template), you will see a common file structure that is used across plugins:
+In the [Payload Plugin Template](https://github.com/payloadcms/payload-plugin-template), you will see a common file structure that is used across plugins:
 
-1. root folder - general configuration
-2. /src folder - everything related to the plugin
-3. /dev folder - sanitized test project for development
+1. `/` root folder - general configuration
+2. `/src` folder - everything related to the plugin
+3. `/dev` folder - sanitized test project for development
 
 ### The root folder
 
@@ -169,7 +169,7 @@ First up, the `src/index.ts` file - this is where the plugin should be imported 
 
 **Plugin.ts**
 
-To reiterate, the essence of a payload plugin is simply to extend the Payload config - and that is exactly what we are doing in this file.
+To reiterate, the essence of a [Payload Plugin](./overview) is simply to extend the [Payload Config](../configuration/overview) - and that is exactly what we are doing in this file.
 
 ```
 export const samplePlugin =
