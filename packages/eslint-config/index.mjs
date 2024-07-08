@@ -114,7 +114,7 @@ const baseExtends = deepMerge(js.configs.recommended, perfectionistNatural , reg
 /** @type {FlatConfig[]} */
 export const rootEslintConfig = [
   {
-    name: 'A',
+    name: 'Settings',
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
@@ -133,7 +133,7 @@ export const rootEslintConfig = [
     },
   },
   {
-    name: 'B',
+    name: 'TypeScript',
     // has 3 entries: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/typescript-eslint/src/configs/recommended-type-checked.ts
     ...deepMerge(
       baseExtends,
@@ -154,7 +154,7 @@ export const rootEslintConfig = [
     files: ['**/*.ts'],
   },
   {
-    name: 'D',
+    name: 'TypeScript-React',
     ...deepMerge(
       baseExtends,
       tseslint.configs.recommendedTypeChecked[0],
@@ -176,7 +176,7 @@ export const rootEslintConfig = [
     files: ['**/*.tsx'],
   },
   {
-    name: 'F',
+    name: 'Unit Tests',
     ...deepMerge(
       jestExtends,
       {
@@ -193,7 +193,7 @@ export const rootEslintConfig = [
     files: ['**/*.spec.ts'],
   },
   {
-    name: 'H',
+    name: 'Payload Config',
     plugins: {
       payload: payloadPlugin
     },
