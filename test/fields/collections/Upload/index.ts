@@ -10,6 +10,7 @@ const dirname = path.dirname(filename)
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
   upload: {
+    allowRemoteUpload: true,
     staticDir: path.resolve(dirname, './uploads'),
   },
   fields: [

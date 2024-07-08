@@ -86,6 +86,32 @@ describe('Upload', () => {
     await uploadImage()
   })
 
+  test('should upload files from remote URL', async () => {
+    await uploadImage()
+
+    await page.goto(url.create)
+
+    const pasteURLButton = page.locator('.file-field__upload .dropzone__file-button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
+
+    const remoteImage =
+      'https://fastly.picsum.photos/id/11/2500/1667.jpg?hmac=xxjFJtAPgshYkysU_aqx2sZir-kIOjNR9vx0te7GycQ'
+
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
+
+    const addImageButton = page.locator('.file-field__add-file')
+    await addImageButton.click()
+
+    await expect(page.locator('.file-field .file-field__filename')).toHaveValue(
+      '1667.jpg?hmac=xxjFJtAPgshYkysU_aqx2sZir-kIOjNR9vx0te7GycQ',
+    )
+
+    await saveDocAndAssert(page)
+  })
+
   // test that the image renders
   test('should render uploaded image', async () => {
     await uploadImage()
