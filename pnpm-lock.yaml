@@ -583,8 +583,8 @@ importers:
         specifier: ^6.2.1
         version: 6.2.2
       qs-esm:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 7.0.2
+        version: 7.0.2
       react-diff-viewer-continued:
         specifier: 3.2.6
         version: 3.2.6(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
@@ -1426,8 +1426,8 @@ importers:
         specifier: 4.5.1
         version: 4.5.1
       qs-esm:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 7.0.2
+        version: 7.0.2
       react:
         specifier: ^19.0.0-rc-f994737d14-20240522
         version: 19.0.0-rc-f994737d14-20240522
@@ -1667,8 +1667,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/payload
       qs-esm:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 7.0.2
+        version: 7.0.2
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -15247,8 +15247,8 @@ packages:
   /pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
-  /qs-esm@7.0.1:
-    resolution: {integrity: sha512-ezmEzDkJmkKoFJFuIxoDZ38zknoRzVJqSgXfkBmrrOXjl+sxyivgER7/GGgEainpG2fOnsbxXKNtwSkq5KXIxA==}
+  /qs-esm@7.0.2:
+    resolution: {integrity: sha512-D8NAthKSD7SGn748v+GLaaO6k08Mvpoqroa35PqIQC4gtUa8/Pb/k+r0m0NnGBVbHDP1gKZ2nVywqfMisRhV5A==}
     engines: {node: '>=18'}
 
   /qs@6.11.0:
