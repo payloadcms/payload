@@ -1,8 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig } from 'payload'
 
-import { reduceFieldsToValues } from 'payload'
-import { isImage } from 'payload/shared'
+import { isImage, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { FieldError } from '../../fields/FieldError/index.js'

@@ -2,7 +2,7 @@ import type { Data, FormState } from 'payload'
 import type React from 'react'
 
 import { useAllFormFields } from '@payloadcms/ui'
-import { reduceFieldsToValues } from 'payload'
+import { reduceFieldsToValues } from 'payload/shared'
 import { useEffect } from 'react'
 
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'

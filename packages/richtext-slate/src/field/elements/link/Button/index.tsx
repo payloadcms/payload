@@ -4,7 +4,7 @@ import type { FormState } from 'payload'
 
 import { useConfig, useDrawerSlug, useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
-import { reduceFieldsToValues } from 'payload'
+import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

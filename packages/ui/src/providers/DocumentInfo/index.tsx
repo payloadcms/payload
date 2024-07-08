@@ -12,7 +12,7 @@ import type {
 } from 'payload'
 
 import { notFound } from 'next/navigation.js'
-import { reduceFieldsToValues } from 'payload'
+import { reduceFieldsToValues } from 'payload/shared'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 

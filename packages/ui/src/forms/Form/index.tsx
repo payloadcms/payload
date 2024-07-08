@@ -9,8 +9,8 @@ import {
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
+  wait,
 } from 'payload/shared'
-import { wait } from 'payload/shared'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'

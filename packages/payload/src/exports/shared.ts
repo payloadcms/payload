@@ -30,6 +30,10 @@ export { deepMerge } from '../utilities/deepMerge.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
+export { getDataByPath } from '../utilities/getDataByPath.js'
+
+export { getSiblingData } from '../utilities/getSiblingData.js'
+
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isNumber } from '../utilities/isNumber.js'
@@ -40,6 +44,8 @@ export {
   isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 
+export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
+
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
@@ -49,9 +55,3 @@ export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { versionDefaults } from '../versions/defaults.js'
-
-export { getDataByPath } from '../utilities/getDataByPath.js'
-
-export { getSiblingData } from '../utilities/getSiblingData.js'
-
-export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
