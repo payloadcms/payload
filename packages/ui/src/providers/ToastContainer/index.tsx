@@ -14,13 +14,14 @@ export const ToastContainer: React.FC = () => {
       closeButton
       // @ts-expect-error
       dir="undefined"
+      gap={8}
       icons={{
         error: <Error />,
         info: <Info />,
         success: <Success />,
         warning: <Warning />,
       }}
-      offset="36px"
+      offset="calc(var(--gutter-h) / 2)"
       toastOptions={{
         classNames: {
           closeButton: 'payload-toast-close-button',
@@ -29,6 +30,7 @@ export const ToastContainer: React.FC = () => {
           icon: 'toast-icon',
           info: 'toast-info',
           success: 'toast-success',
+          title: 'toast-title',
           toast: 'payload-toast-item',
           warning: 'toast-warning',
         },
