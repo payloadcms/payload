@@ -1,6 +1,6 @@
 import type { EditViewComponent, PaginatedDocs } from 'payload'
 
-import { Gutter, ListQueryProvider } from '@payloadcms/ui/client'
+import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React from 'react'
@@ -19,6 +19,7 @@ export const VersionsView: EditViewComponent = async (props) => {
     collectionConfig,
     docID: id,
     globalConfig,
+    req,
     req: {
       i18n,
       payload,
@@ -48,6 +49,7 @@ export const VersionsView: EditViewComponent = async (props) => {
         limit: limitToUse,
         overrideAccess: false,
         page: page ? parseInt(page.toString(), 10) : undefined,
+        req,
         sort: sort as string,
         user,
         where: {
@@ -70,6 +72,7 @@ export const VersionsView: EditViewComponent = async (props) => {
         limit: limitToUse,
         overrideAccess: false,
         page: page ? parseInt(page as string, 10) : undefined,
+        req,
         sort: sort as string,
         user,
       })

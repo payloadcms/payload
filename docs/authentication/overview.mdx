@@ -71,106 +71,34 @@ export const Admins: CollectionConfig = {
 
 Once enabled, each document that is created within the Collection can be thought of as a `user` - who can make use of commonly required authentication functions such as logging in / out, resetting their password, and more.
 
+## Authentication Strategies
+
+Out of the box Payload ships with a few powerful authentication strategies. HTTP-Only Cookies, JWT's and API-Keys, they can work together or individually. You can also have multiple collections that have auth enabled, but only 1 of them can be used to log into the admin panel.
+
+### HTTP-Only Cookies
+
+HTTP-only cookies are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and <strong>cannot be read by JavaScript in the browser</strong>, unlike JWT's.
+
+You can learn more about this strategy from the [HTTP-Only Cookies](/docs/authentication/http-only-cookies) docs.
+
+### JSON Web Tokens
+
+JWT (JSON Web Tokens) can also be utilized to perform authentication. Tokens are generated on `login`, `refresh` and `me` operations and can be attached to future requests to authenticate users.
+
+You can learn more about this strategy from the [JWT](/docs/authentication/jwt) docs.
+
+### API Keys
+
+API Keys can be enabled on auth collections. These are particularly useful when you want to authenticate against Payload from a third party service.
+
+You can learn more about this strategy from the [API Keys](/docs/authentication/api-keys) docs.
+
+### Custom Strategies
+
+There are cases where these may not be enough for your application. Payload is extendable by design so you can wire up your own strategy when you need to.
+
+You can learn more about custom strategies from the [Custom Strategies](/docs/authentication/custom-strategies) docs.
+
 ## Logging in / out, resetting password, etc.
 
 [Click here](/docs/authentication/operations) for a list of all automatically-enabled Auth operations, including `login`, `logout`, `refresh`, and others.
-
-## Token-based auth
-
-Successfully logging in returns a `JWT` (JSON web token) which is how a user will identify themselves to Payload. By providing this JWT via either an HTTP-only cookie or an `Authorization: JWT` or `Authorization: Bearer` header, Payload will automatically identify the user and add its user JWT data to the `req`, which is available throughout Payload including within access control, hooks, and more.
-
-You can specify what data gets encoded to the JWT token by setting `saveToJWT` to true in your auth collection fields. If you wish to use a different key other than the field `name`, you can provide it to `saveToJWT` as a string. It is also possible to use `saveToJWT` on fields that are nested in inside groups and tabs. If a group has a `saveToJWT` set it will include the object with all sub-fields in the token. You can set `saveToJWT: false` for any fields you wish to omit. If a field inside a group has `saveToJWT` set, but the group does not, the field will be included at the top level of the token.
-
-<Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  You can access the logged-in user from access control functions and hooks via the{' '}
-  <strong>req</strong>. The logged-in user is automatically added as the <strong>user</strong>{' '}
-  property.
-</Banner>
-
-## HTTP-only cookies
-
-Payload `login`, `logout`, and `refresh` operations make use of HTTP-only cookies for authentication purposes. HTTP-only cookies are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and cannot be read at all via JavaScript in the browser.
-
-#### Automatic browser inclusion
-
-Modern browsers automatically include `http-only` cookies when making requests directly to URLs—meaning that if you are running your API on http://example.com, and you have logged in and visit http://example.com/test-page, your browser will automatically include the Payload authentication cookie for you.
-
-#### Using Fetch or other HTTP APIs
-
-However, if you use `fetch` or similar APIs to retrieve Payload resources from its REST or GraphQL API, you need to specify to include credentials (cookies).
-
-Fetch example, including credentials:
-
-```ts
-const response = await fetch('http://localhost:3000/api/pages', {
-  credentials: 'include',
-})
-
-const pages = await response.json()
-```
-
-For more about how to automatically include cookies in requests from your app to your Payload API, [click here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Sending_a_request_with_credentials_included).
-
-<Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  To make sure you have a Payload cookie set properly in your browser after logging in, you can use
-  Chrome's Developer Tools - Application - Cookies - [your-domain-here]. The Chrome Developer tools
-  will still show HTTP-only cookies, even when JavaScript running on the page can't.
-</Banner>
-
-## CSRF Protection
-
-CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes many XSS vulnerabilities, however, CSRF attacks can still be possible.
-
-For example, let's say you have a very popular app running at coolsite.com. This app allows users to manage finances and send / receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - no matter what page created the request.
-
-So, if a user of coolsite.com is logged in and just browsing around on the internet, they might stumble onto a page with bad intentions. That bad page might automatically make requests to all sorts of sites to see if they can find one that they can log into - and coolsite.com might be on their list. If your user was logged in while they visited that evil site, the attacker could do whatever they wanted as if they were your coolsite.com user by just sending requests to the coolsite API (which would automatically include the auth cookie). They could send themselves a bunch of money from your user's account, change the user's password, etc. This is what a CSRF attack is.
-
-<Banner type="warning">
-  <strong>
-    To protect against CSRF attacks, Payload only accepts cookie-based authentication from domains
-    that you explicitly whitelist.
-  </strong>
-</Banner>
-
-To define domains that should allow users to identify themselves via the Payload HTTP-only cookie, use the `csrf` option on the base Payload config to whitelist domains that you trust.
-
-`payload.config.ts`:
-
-```ts
-import { buildConfig } from 'payload/config'
-
-const config = buildConfig({
-  collections: [
-    // collections here
-  ],
-  // highlight-start
-  csrf: [
-    // whitelist of domains to allow cookie auth from
-    'https://your-frontend-app.com',
-    'https://your-other-frontend-app.com',
-  ],
-  // highlight-end
-})
-
-export default config
-```
-
-## Identifying users via the Authorization Header
-
-In addition to authenticating via an HTTP-only cookie, you can also identify users via the `Authorization` header on an HTTP request.
-
-Example:
-
-```ts
-const request = await fetch('http://localhost:3000', {
-  headers: {
-    Authorization: `JWT ${token}`,
-  },
-})
-```
-
-You can retrieve a user's token via the response to `login`, `refresh`, and `me` auth operations.

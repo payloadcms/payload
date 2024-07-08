@@ -1,6 +1,6 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
-import type { Payload, PayloadRequestWithData, TypeWithID } from 'payload'
+import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -93,6 +93,7 @@ describe('database', () => {
       const result = await payload.create({
         collection: 'posts',
         data: {
+          // TODO: createdAt should be optional on RequiredDataFromCollectionSlug
           createdAt,
           title: 'hello',
         },
@@ -313,7 +314,7 @@ describe('database', () => {
           const req = {
             payload,
             user,
-          } as PayloadRequestWithData
+          } as unknown as PayloadRequest
 
           await initTransaction(req)
 
@@ -364,7 +365,7 @@ describe('database', () => {
         const req = {
           payload,
           user,
-        } as PayloadRequestWithData
+        } as unknown as PayloadRequest
 
         let first
         let second
@@ -417,7 +418,7 @@ describe('database', () => {
         const req = {
           payload,
           user,
-        } as PayloadRequestWithData
+        } as unknown as PayloadRequest
 
         await initTransaction(req)
 

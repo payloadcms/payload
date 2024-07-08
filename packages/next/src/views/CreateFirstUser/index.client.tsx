@@ -12,7 +12,7 @@ import {
   useComponentMap,
   useConfig,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 

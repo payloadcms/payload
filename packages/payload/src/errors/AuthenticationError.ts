@@ -6,9 +6,11 @@ import httpStatus from 'http-status'
 import { APIError } from './APIError.js'
 
 export class AuthenticationError extends APIError {
-  constructor(t?: TFunction) {
+  constructor(t?: TFunction, loginWithUsername?: boolean) {
     super(
-      t ? t('error:emailOrPasswordIncorrect') : en.translations.error.emailOrPasswordIncorrect,
+      t
+        ? `${loginWithUsername ? t('error:usernameOrPasswordIncorrect') : t('error:emailOrPasswordIncorrect')}`
+        : en.translations.error.emailOrPasswordIncorrect,
       httpStatus.UNAUTHORIZED,
     )
   }

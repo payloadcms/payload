@@ -1,5 +1,5 @@
 'use client'
-import { useDocumentInfo } from '@payloadcms/ui/client'
+import { useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 import { baseClass } from '../../Tab/index.js'

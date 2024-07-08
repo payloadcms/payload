@@ -1,7 +1,7 @@
 'use client'
 import type { Where } from 'payload'
 
-import queryString from 'qs'
+import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../Locale/index.js'
@@ -109,7 +109,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           and: [{ ...additionalParams }, where],
         }
       }
-      return queryString.stringify(
+      return qs.stringify(
         {
           locale,
           where,

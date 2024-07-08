@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { InitPageResult, Locale, PayloadRequestWithData, VisibleEntities } from 'payload'
+import type { InitPageResult, Locale, PayloadRequest, VisibleEntities } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
@@ -59,6 +59,7 @@ export const initPage = async ({
     {
       fallbackLocale: null,
       req: {
+        headers,
         host: headers.get('host'),
         i18n,
         query: qs.parse(queryString, {
@@ -66,7 +67,7 @@ export const initPage = async ({
           ignoreQueryPrefix: true,
         }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequestWithData,
+      } as PayloadRequest,
     },
     payload,
   )

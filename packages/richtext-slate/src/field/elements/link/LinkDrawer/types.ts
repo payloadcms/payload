@@ -1,4 +1,4 @@
-import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { FieldMap } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 export type Props = {

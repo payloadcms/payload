@@ -1,12 +1,18 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired } from 'ts-essentials'
+import type { DeepRequired, MarkOptional } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomUpload,
 } from '../../admin/types.js'
+import type { Arguments as MeArguments } from '../../auth/operations/me.js'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh.js'
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
@@ -22,14 +28,26 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData, RequestContext } from '../../types/index.js'
+import type { CollectionSlug, TypedAuthOperations, TypedCollection } from '../../index.js'
+import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
   SanitizedCollectionVersions,
 } from '../../versions/types.js'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
+
+export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
+  TypedAuthOperations[TSlug]
+
+export type RequiredDataFromCollection<TData extends Record<string, any>> = MarkOptional<
+  TData,
+  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+>
+
+export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'
@@ -53,7 +71,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -71,7 +89,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -89,7 +107,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
@@ -102,7 +120,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
@@ -111,7 +129,7 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   query: { [key: string]: any }
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
@@ -121,7 +139,7 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T
   findMany?: boolean
   query?: { [key: string]: any }
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type BeforeDeleteHook = (args: {
@@ -129,7 +147,7 @@ export type BeforeDeleteHook = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   id: number | string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
@@ -138,12 +156,20 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   id: number | string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
-export type AfterOperationHook<T extends TypeWithID = any> = (
-  arg: AfterOperationArg<T>,
-) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>
+export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string> = (
+  arg: AfterOperationArg<TOperationGeneric>,
+) =>
+  | Awaited<
+      ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
+    >
+  | Promise<
+      Awaited<
+        ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
+      >
+    >
 
 export type AfterErrorHook = (
   err: Error,
@@ -157,7 +183,7 @@ export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequest
   user: T
 }) => any
 
@@ -165,7 +191,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: string
   user: T
 }) => any
@@ -174,23 +200,33 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }) => any
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequestWithData
+  req: PayloadRequest
   response: unknown
 }) => any
+
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
+export type MeHook<T extends TypeWithID = any> = (args: {
+  args: MeArguments
+  user: T
+}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   exp: number
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: string
 }) => any
 
@@ -206,10 +242,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: CustomComponent[]
-    AfterListTable?: CustomComponent[]
-    BeforeList?: CustomComponent[]
-    BeforeListTable?: CustomComponent[]
+    afterList?: CustomComponent[]
+    afterListTable?: CustomComponent[]
+    beforeList?: CustomComponent[]
+    beforeListTable?: CustomComponent[]
     /**
      * Components within the edit view
      */
@@ -236,6 +272,11 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Upload" section
+       * + upload must be enabled
+       */
+      Upload?: CustomUpload
     }
     views?: {
       /**
@@ -302,12 +343,12 @@ export type CollectionAdminOptions = {
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig = {
+export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Access control
    */
   access?: {
-    admin?: ({ req }: { req: PayloadRequestWithData }) => Promise<boolean> | boolean
+    admin?: ({ req }: { req: PayloadRequest }) => Promise<boolean> | boolean
     create?: Access
     delete?: Access
     read?: Access
@@ -365,7 +406,7 @@ export type CollectionConfig = {
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]
     afterMe?: AfterMeHook[]
-    afterOperation?: AfterOperationHook[]
+    afterOperation?: AfterOperationHook<TSlug>[]
     afterRead?: AfterReadHook[]
     afterRefresh?: AfterRefreshHook[]
     beforeChange?: BeforeChangeHook[]
@@ -374,6 +415,19 @@ export type CollectionConfig = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+    me?: MeHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration
@@ -405,7 +459,9 @@ export type CollectionConfig = {
    */
   upload?: UploadConfig | boolean
   /**
-   * Customize the handling of incoming file uploads
+   * Enable versioning. Set it to true to enable default versions settings,
+   * or customize versions options by setting the property equal to an object
+   * containing the version options.
    *
    * @default false // disable versioning
    */
@@ -439,10 +495,10 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
-  docs: GeneratedTypes['collections'][TSlug][]
+export type BulkOperationResult<TSlug extends CollectionSlug> = {
+  docs: DataFromCollectionSlug<TSlug>[]
   errors: {
-    id: GeneratedTypes['collections'][TSlug]['id']
+    id: DataFromCollectionSlug<TSlug>['id']
     message: string
   }[]
 }

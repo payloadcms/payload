@@ -21,7 +21,7 @@ import type {
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { Payload, PayloadRequestWithData} from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 import type { Pool, PoolConfig, QueryResult } from 'pg'
 
 export type Args = {
@@ -131,8 +131,8 @@ export type PostgresAdapter = DrizzleAdapter & {
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
-export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
-export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequestWithData> }
+export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequest> }
+export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequest> }
 
 declare module 'payload' {
   export interface DatabaseAdapter

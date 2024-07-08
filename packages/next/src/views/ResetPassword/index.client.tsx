@@ -11,7 +11,7 @@ import {
   useConfig,
   useFormFields,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
 import { toast } from 'sonner'

@@ -14,7 +14,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormQueryParams,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
@@ -59,7 +59,7 @@ export const DefaultEditView: React.FC = () => {
   const config = useConfig()
   const router = useRouter()
   const { dispatchFormQueryParams } = useFormQueryParams()
-  const { getFieldMap } = useComponentMap()
+  const { getComponentMap, getFieldMap } = useComponentMap()
   const params = useSearchParams()
   const depth = useEditDepth()
   const { reportUpdate } = useDocumentEvents()
@@ -81,6 +81,10 @@ export const DefaultEditView: React.FC = () => {
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
+  const componentMap = getComponentMap({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+  })
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
@@ -225,6 +229,7 @@ export const DefaultEditView: React.FC = () => {
                       collectionSlug={collectionConfig.slug}
                       disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
                       email={data?.email}
+                      loginWithUsername={auth?.loginWithUsername}
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
@@ -234,11 +239,15 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      <Upload
-                        collectionSlug={collectionConfig.slug}
-                        initialState={initialState}
-                        uploadConfig={upload}
-                      />
+                      {componentMap.Upload !== undefined ? (
+                        componentMap.Upload
+                      ) : (
+                        <Upload
+                          collectionSlug={collectionConfig.slug}
+                          initialState={initialState}
+                          uploadConfig={upload}
+                        />
+                      )}
                     </React.Fragment>
                   )}
                 </Fragment>

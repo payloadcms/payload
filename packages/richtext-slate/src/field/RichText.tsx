@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { ClientValidate } from 'payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
@@ -16,7 +16,7 @@ import {
   useFieldProps,
   useTranslation,
   withCondition,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'

@@ -1,10 +1,10 @@
-import type { Collection, GeneratedTypes, PayloadRequestWithData } from 'payload'
+import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
 import { deleteByIDOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
-export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
+export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     draft: boolean
@@ -13,11 +13,11 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
-) => Promise<GeneratedTypes['collections'][TSlug]>
+) => Promise<DataFromCollectionSlug<TSlug>>
 
-export function getDeleteResolver<TSlug extends keyof GeneratedTypes['collections']>(
+export function getDeleteResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

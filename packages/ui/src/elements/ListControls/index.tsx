@@ -164,6 +164,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
+          fieldMap={fieldMap}
           key={String(hasWhereParam.current && !searchParams?.where)}
         />
       </AnimateHeight>

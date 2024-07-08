@@ -1,7 +1,7 @@
 'use client'
 import type { DropdownIndicatorProps } from 'react-select'
 
-import { ChevronIcon } from '@payloadcms/ui/icons/Chevron'
+import { ChevronIcon } from '@payloadcms/ui'
 import React, { type JSX } from 'react'
 
 import type { Option as OptionType } from '../types.js'

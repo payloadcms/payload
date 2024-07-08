@@ -1,5 +1,5 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { SerializedEditorState } from 'lexical'
 
 import {
@@ -9,15 +9,15 @@ import {
   useField,
   useFieldProps,
   withCondition,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
+import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 
-import './index.scss'
+import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import './bundled.css'
-import { LexicalProvider } from './lexical/LexicalProvider.js'
+import './index.scss'
 
 const baseClass = 'rich-text-lexical'
 

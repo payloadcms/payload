@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { createDataloaderCacheKey } from 'payload'
 
@@ -9,13 +9,13 @@ type Arguments = {
   draft: boolean
   key: number | string
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
 export const populate = async ({
   id,
-  collection,
+  collectionSlug,
   currentDepth,
   data,
   depth,
@@ -25,7 +25,7 @@ export const populate = async ({
   req,
   showHiddenFields,
 }: Arguments & {
-  collection: Collection
+  collectionSlug: string
   id: number | string
 }): Promise<void> => {
   const shouldPopulate = depth && currentDepth <= depth
@@ -38,7 +38,7 @@ export const populate = async ({
 
   const doc = await req.payloadDataLoader.load(
     createDataloaderCacheKey({
-      collectionSlug: collection.config.slug,
+      collectionSlug,
       currentDepth: currentDepth + 1,
       depth,
       docID: id as string,

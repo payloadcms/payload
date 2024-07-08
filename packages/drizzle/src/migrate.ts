@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
@@ -73,7 +73,7 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
   const start = Date.now()
-  const req = { payload } as PayloadRequestWithData
+  const req = { payload } as PayloadRequest
   const adapter = payload.db as DrizzleAdapter
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })

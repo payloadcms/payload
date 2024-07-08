@@ -14,6 +14,7 @@ export type {
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
+export type { CustomUpload } from './elements/Upload.js'
 export type {
   WithServerSidePropsComponent,
   WithServerSidePropsComponentProps,

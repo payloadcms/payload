@@ -29,7 +29,7 @@ import {
   useStepNav,
   useTranslation,
   useWindowInfo,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'

@@ -1,5 +1,5 @@
 'use client'
-import queryString from 'qs'
+import qs from 'qs'
 import { useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../providers/Locale/index.js'
@@ -35,7 +35,7 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const { code: locale } = useLocale()
   const hasInitialized = useRef(false)
 
-  const search = queryString.stringify(
+  const search = qs.stringify(
     {
       locale,
       ...(typeof params === 'object' ? params : {}),

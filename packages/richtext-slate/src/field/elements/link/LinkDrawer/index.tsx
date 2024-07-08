@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui'
 
 import {
   Drawer,
@@ -13,7 +13,7 @@ import {
   useFieldProps,
   useHotkey,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useRef } from 'react'
 

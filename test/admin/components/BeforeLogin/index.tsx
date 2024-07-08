@@ -2,7 +2,7 @@
 
 import type { SanitizedConfig } from 'payload'
 
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 export const BeforeLogin: SanitizedConfig['admin']['components']['beforeLogin'][0] = () => {

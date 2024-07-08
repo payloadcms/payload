@@ -47,7 +47,7 @@ import type {
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { FieldDescription } from '../../../exports/client/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { HiddenInput } from '../../../exports/client/index.js'
+import { HiddenField } from '../../../exports/client/index.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -97,7 +97,7 @@ export const mapFields = (args: {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
         if (isHidden) {
           if (CustomFieldComponent) {
-            CustomFieldComponent = HiddenInput
+            CustomFieldComponent = HiddenField
           }
         }
 

@@ -37,7 +37,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const SelectField: React.FC<SelectFieldProps> = (props) => {
+const _SelectField: React.FC<SelectFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -63,7 +63,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     width,
   } = props
 
-  const [options] = useState(formatOptions(optionsFromProps))
+  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
@@ -135,6 +135,6 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 }
 
-export const Select = withCondition(SelectField)
+export const SelectField = withCondition(_SelectField)
 
 export { SelectInput, type SelectInputProps }

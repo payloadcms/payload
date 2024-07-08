@@ -1,24 +1,24 @@
-import type { GeneratedTypes, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload'
+import type { DataFromGlobalSlug, GlobalSlug, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import { isolateObjectProperty, updateOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 
-type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
+type Resolver<TSlug extends GlobalSlug> = (
   _: unknown,
   args: {
-    data?: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
+    data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
     draft?: boolean
     fallbackLocale?: string
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
-) => Promise<GeneratedTypes['globals'][TSlug]>
+) => Promise<DataFromGlobalSlug<TSlug>>
 
-export default function updateResolver<TSlug extends keyof GeneratedTypes['globals']>(
+export default function updateResolver<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

@@ -1,6 +1,8 @@
+import type { RequiredDataFromCollection } from 'payload/types'
+
 import type { ArrayField } from '../../payload-types.js'
 
-export const arrayDoc: Partial<ArrayField> = {
+export const arrayDoc: RequiredDataFromCollection<ArrayField> = {
   arrayWithMinRows: [
     {
       text: 'first row',
@@ -37,7 +39,7 @@ export const arrayDoc: Partial<ArrayField> = {
   title: 'array doc 1',
 }
 
-export const anotherArrayDoc: Partial<ArrayField> = {
+export const anotherArrayDoc: RequiredDataFromCollection<ArrayField> = {
   arrayWithMinRows: [
     {
       text: 'first row',

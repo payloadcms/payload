@@ -37,7 +37,7 @@ import { updateResolver } from '../resolvers/collections/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
-import buildPaginatedListType from './buildPaginatedListType.js'
+import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
 
@@ -379,6 +379,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             exp: {
               type: GraphQLInt,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             token: {
               type: GraphQLString,
             },
@@ -405,14 +408,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             refreshedToken: {
               type: GraphQLString,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             user: {
               type: collection.graphQL.JWT,
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
@@ -450,6 +453,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
           args: {
             email: { type: GraphQLString },
             password: { type: GraphQLString },
+            username: { type: GraphQLString },
           },
           resolve: login(collection),
         }

@@ -1,17 +1,17 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui/client'
+import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
+import type { FeatureProviderClient } from '../features/typesClient.js'
+import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
-import type { FeatureProviderClient } from './features/types.js'
-import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
-import { defaultEditorLexicalConfig } from './lexical/config/client/default.js'
-import { loadClientFeatures } from './lexical/config/client/loader.js'
-import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize.js'
+import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
+import { loadClientFeatures } from '../lexical/config/client/loader.js'
+import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
 
 const RichTextEditor = lazy(() =>
   import('./Field.js').then((module) => ({ default: module.RichText })),
@@ -30,7 +30,9 @@ export const RichTextField: React.FC<
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
 
-  const [featureProviders, setFeatureProviders] = useState<FeatureProviderClient<unknown>[]>([])
+  const [featureProviders, setFeatureProviders] = useState<
+    FeatureProviderClient<unknown, unknown>[]
+  >([])
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
@@ -44,7 +46,9 @@ export const RichTextField: React.FC<
   let featureProvidersAndComponentsToLoad = 0 // feature providers and components
   for (const featureProvider of featureProviderComponents) {
     const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-      key.startsWith(`feature.${featureProvider.key}.components.`),
+      key.startsWith(
+        `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
+      ),
     )
 
     featureProvidersAndComponentsToLoad += 1
@@ -53,14 +57,15 @@ export const RichTextField: React.FC<
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
-      const featureProvidersLocal: FeatureProviderClient<unknown>[] = []
+      const featureProvidersLocal: FeatureProviderClient<unknown, unknown>[] = []
       let featureProvidersAndComponentsLoaded = 0
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          if (!key.includes('.components.')) {
+          if (!key.includes('.lexical_internal_components.')) {
             featureProvidersLocal.push(plugin)
           }
+
           featureProvidersAndComponentsLoaded++
         }
       })
@@ -110,7 +115,9 @@ export const RichTextField: React.FC<
           featureProviderComponents.map((featureProvider) => {
             // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
             const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-              key.startsWith(`feature.${featureProvider.key}.components.`),
+              key.startsWith(
+                `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
+              ),
             )
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
@@ -123,7 +130,7 @@ export const RichTextField: React.FC<
                       return FeatureComponent
                     })
                   : null}
-                {featureProvider.ClientComponent}
+                {featureProvider.ClientFeature}
               </React.Fragment>
             )
           })}

@@ -3,7 +3,7 @@ import type DataLoader from 'dataloader'
 
 import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.js'
 import type payload from '../index.js'
-import type { GeneratedTypes } from '../index.js'
+import type { TypedLocale, TypedUser } from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
@@ -16,7 +16,7 @@ export type CustomPayloadRequestProperties = {
    * The requested locale if specified
    * Only available for localized collections
    */
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   /**
    * The payload object
    */
@@ -31,6 +31,8 @@ export type CustomPayloadRequestProperties = {
   payloadUploadSizes?: Record<string, Buffer>
   /** Query params on the request */
   query: Record<string, unknown>
+  /** Any response headers that are required to be set when a response is sent */
+  responseHeaders?: Headers
   /** The route parameters
    * @example
    * /:collection/:id -> /posts/123
@@ -48,15 +50,25 @@ export type CustomPayloadRequestProperties = {
    */
   transactionIDPromise?: Promise<void>
   /** The signed-in user */
-  user: GeneratedTypes['user'] | null
+  user: TypedUser | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
 >
-export type PayloadRequestData = {
-  /** Data from the request body */
+type PayloadRequestData = {
+  /**
+   * Data from the request body
+   *
+   * Within Payload operations, i.e. hooks, data will be there
+   * BUT in custom endpoints it will not be, you will need to
+   * use either:
+   *  1. `const data = await req.json()`
+   *
+   *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+   *    `await addDataAndFileToRequest(req)`
+   * */
   data?: Record<string, unknown>
-  /** The locale that should be used for a field when it is not translated to the requested locale */
+  /** The file on the request, same rules apply as the `data` property */
   file?: {
     data: Buffer
     mimetype: string
@@ -67,8 +79,9 @@ export type PayloadRequestData = {
 }
 export type PayloadRequest = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
-  CustomPayloadRequestProperties
-export type PayloadRequestWithData = PayloadRequest & PayloadRequestData
+  CustomPayloadRequestProperties &
+  PayloadRequestData
+
 export interface RequestContext {
   [key: string]: unknown
 }

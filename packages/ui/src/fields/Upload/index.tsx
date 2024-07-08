@@ -100,4 +100,4 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
   return null
 }
 
-export const Upload = withCondition(_Upload)
+export const UploadField = withCondition(_Upload)

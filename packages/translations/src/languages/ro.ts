@@ -4,6 +4,7 @@ export const roTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cont',
     accountOfCurrentUser: 'Contul utilizatorului curent',
+    accountVerified: 'Contul a fost verificat cu succes.',
     alreadyActivated: 'Deja activat',
     alreadyLoggedIn: 'Deja autorizat',
     apiKey: 'Cheia API',
@@ -26,6 +27,8 @@ export const roTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Vă rugăm să introduceți emailul dumneavoastră mai jos. Veți primi un mesaj de email cu instrucțiuni despre cum să vă resetați parola.',
     forgotPasswordQuestion: 'Ați uitat parola?',
+    forgotPasswordUsernameInstructions:
+      'Vă rugăm să introduceți numele de utilizator mai jos. Instrucțiunile despre cum să vă resetați parola vor fi trimise la adresa de e-mail asociată cu numele dvs. de utilizator.',
     generate: 'Generează',
     generateNewAPIKey: 'Generează o nouă cheie API',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +66,8 @@ export const roTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Deblocat cu succes',
     tokenRefreshSuccessful: 'Reîmprospătarea tokenului a fost efectuată cu succes.',
     unableToVerify: 'Nu se poate verifica',
+    username: 'Nume de utilizator',
+    usernameNotValid: 'Numele de utilizator furnizat nu este valid.',
     verified: 'Verificat',
     verifiedSuccessfully: 'Verificat cu succes',
     verify: 'Verifică',
@@ -115,6 +120,9 @@ export const roTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Un utilizator cu emailul dat este deja înregistrat.',
     userLocked:
       'Acest utilizator este blocat din cauza unui număr prea mare de încercări de autentificare eșuate.',
+    usernameAlreadyRegistered:
+      'Un utilizator cu numele de utilizator furnizat este deja înregistrat.',
+    usernameOrPasswordIncorrect: 'Numele de utilizator sau parola furnizate sunt incorecte.',
     valueMustBeUnique: 'Valoarea trebuie să fie unică',
     verificationTokenInvalid: 'Tokenul de verificare este invalid.',
   },
@@ -300,6 +308,7 @@ export const roTranslations: DefaultTranslationsObject = {
     contains: 'conține',
     equals: 'egal cu',
     exists: 'există',
+    intersects: 'se intersectează',
     isGreaterThan: 'este mai mare decât',
     isGreaterThanOrEqualTo: 'este mai mare sau egal cu',
     isIn: 'este în',
@@ -309,6 +318,7 @@ export const roTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nu este egal cu',
     isNotIn: 'nu este în',
     near: 'în apropiere de',
+    within: 'înăuntru',
   },
   upload: {
     crop: 'Cultură',

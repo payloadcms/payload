@@ -24,7 +24,6 @@
     "eslint-plugin-jest": "27.9.0",
     "eslint-plugin-jest-dom": "5.1.0",
     "eslint-plugin-jsx-a11y": "6.8.0",
-    "eslint-plugin-node": "11.1.0",
     "eslint-plugin-perfectionist": "2.7.0",
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-react-hooks": "4.6.0",

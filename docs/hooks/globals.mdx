@@ -21,7 +21,7 @@ All Global Hook properties accept arrays of synchronous or asynchronous function
 `globals/example-hooks.js`
 
 ```ts
-import { GlobalConfig } from 'payload/types';
+import type { GlobalConfig } from 'payload';
 
 const ExampleHooks: GlobalConfig = {
   slug: 'header',
@@ -43,7 +43,7 @@ const ExampleHooks: GlobalConfig = {
 Runs before the `update` operation. This hook allows you to add or format data before the incoming data is validated.
 
 ```ts
-import { GlobalBeforeValidateHook } from 'payload/types'
+import type { GlobalBeforeValidateHook } from 'payload'
 
 const beforeValidateHook: GlobalBeforeValidateHook = async ({
   data, // incoming data to update or create with
@@ -59,7 +59,7 @@ const beforeValidateHook: GlobalBeforeValidateHook = async ({
 Immediately following validation, `beforeChange` hooks will run within the `update` operation. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
 
 ```ts
-import { GlobalBeforeChangeHook } from 'payload/types'
+import type { GlobalBeforeChangeHook } from 'payload'
 
 const beforeChangeHook: GlobalBeforeChangeHook = async ({
   data, // incoming data to update or create with
@@ -75,7 +75,7 @@ const beforeChangeHook: GlobalBeforeChangeHook = async ({
 After a global is updated, the `afterChange` hook runs. Use this hook to purge caches of your applications, sync site data to CRMs, and more.
 
 ```ts
-import { GlobalAfterChangeHook } from 'payload/types'
+import type { GlobalAfterChangeHook } from 'payload'
 
 const afterChangeHook: GlobalAfterChangeHook = async ({
   doc, // full document data
@@ -91,7 +91,7 @@ const afterChangeHook: GlobalAfterChangeHook = async ({
 Runs before `findOne` global operation is transformed for output by `afterRead`. This hook fires before hidden fields are removed and before localized fields are flattened into the requested locale. Using this Hook will provide you with all locales and all hidden fields via the `doc` argument.
 
 ```ts
-import { GlobalBeforeReadHook } from 'payload/types'
+import type { GlobalBeforeReadHook } from 'payload'
 
 const beforeReadHook: GlobalBeforeReadHook = async ({
   doc, // full document data
@@ -104,7 +104,7 @@ const beforeReadHook: GlobalBeforeReadHook = async ({
 Runs as the last step before a global is returned. Flattens locales, hides protected fields, and removes fields that users do not have access to.
 
 ```ts
-import { GlobalAfterReadHook } from 'payload/types'
+import type { GlobalAfterReadHook } from 'payload'
 
 const afterReadHook: GlobalAfterReadHook = async ({
   doc, // full document data
@@ -124,5 +124,5 @@ import type {
   GlobalAfterChangeHook,
   GlobalBeforeReadHook,
   GlobalAfterReadHook,
-} from 'payload/types'
+} from 'payload'
 ```

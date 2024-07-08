@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation.js'
-import QueryString from 'qs'
+import qs from 'qs'
 
 import { isAdminAuthRoute, isAdminRoute } from './shared.js'
 
@@ -26,7 +26,7 @@ export const handleAuthRedirect = ({
 
     const redirectRoute = encodeURIComponent(
       route + Object.keys(searchParams ?? {}).length
-        ? `${QueryString.stringify(searchParams, { addQueryPrefix: true })}`
+        ? `${qs.stringify(searchParams, { addQueryPrefix: true })}`
         : undefined,
     )
 
@@ -39,9 +39,9 @@ export const handleAuthRedirect = ({
       ? adminLoginRoute
       : customLoginRoute || loginRouteFromConfig
 
-    const parsedLoginRouteSearchParams = QueryString.parse(loginRoute.split('?')[1] ?? '')
+    const parsedLoginRouteSearchParams = qs.parse(loginRoute.split('?')[1] ?? '')
 
-    const searchParamsWithRedirect = `${QueryString.stringify(
+    const searchParamsWithRedirect = `${qs.stringify(
       {
         ...parsedLoginRouteSearchParams,
         ...(redirectRoute ? { redirect: redirectRoute } : {}),

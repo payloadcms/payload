@@ -29,7 +29,7 @@ If a Collection supports [`Authentication`](/docs/authentication/overview), the 
 **Example Collection config:**
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload';
 
 export const Posts: CollectionConfig = {
   slug: "posts",
@@ -86,7 +86,7 @@ Read access functions can return a boolean result or optionally return a [query 
 **Example:**
 
 ```ts
-import { Access } from 'payload/config'
+import type { Access } from 'payload'
 
 const canReadPage: Access = ({ req: { user } }) => {
   // allow authenticated users
@@ -118,7 +118,7 @@ Update access functions can return a boolean result or optionally return a [quer
 **Example:**
 
 ```ts
-import { Access } from 'payload/config'
+import type { Access } from 'payload'
 
 const canUpdateUser: Access = ({ req: { user }, id }) => {
   // allow users with a role of 'admin'
@@ -144,7 +144,7 @@ Similarly to the Update function, returns a boolean or a [query constraint](/doc
 **Example:**
 
 ```ts
-import { Access } from 'payload/config'
+import type { Access } from 'payload'
 
 const canDeleteCustomer: Access = async ({ req, id }) => {
   if (!id) {

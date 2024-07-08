@@ -1,6 +1,6 @@
 import type { ServerProps, VisibleEntities } from 'payload'
 
-import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui/client'
+import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
 import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 

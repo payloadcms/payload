@@ -124,3 +124,90 @@ Drops all entities from the database and re-runs all migrations from scratch.
 ```text
 npm run payload migrate:fresh
 ```
+
+## When to run migrations
+
+Depending on which database adapter you use, your migration workflow might differ subtly.
+
+In relational databases, migrations will be **required** for non-development database environments. But with MongoDB, you might only need to run migrations once in a while (or never even need them).
+
+#### MongoDB
+
+In MongoDB, you'll only ever really need to run migrations for times where you change your database shape, and you have lots of existing data that you'd like to transform from Shape A to Shape B.
+
+In this case, you can create a migration by running `pnpm payload migrate:create`, and then write the logic that you need to perform to migrate your documents to their new shape. You can then either run your migrations in CI before you build / deploy, or you can run them locally, against your production database, by using your production database connection string on your local computer and running the `pnpm payload migrate` command.
+
+#### Postgres
+
+In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload config (otherwise you'll see errors upon trying to read / write your data).
+
+That means that Postgres users of Payload should become familiar with the entire migration workflow from top to bottom.
+
+Here is an overview of a common workflow for working locally against a development database, creating migrations, and then running migrations against your production database before deploying.
+
+**1 - work locally using push mode**
+
+Payload uses Drizzle ORM's powerful `push` mode to automatically sync data changes to your database for you while in development mode. By default, this is enabled and is the suggested workflow to using Postgres and Payload while doing local development.
+
+You can disable this setting and solely use migrations to manage your local development database (pass `push: false` to your Postgres adapter), but if you do disable it, you may see frequent errors while running development mode. This is because Payload will have updated to your new data shape, but your local database will not have updated.
+
+For this reason, we suggest that you leave `push` as its default setting and treat your local dev database as a sandbox.
+
+For more information about push mode and prototyping in development, [click here](/docs/beta/database/postgres#prototyping-in-dev-mode).
+
+The typical workflow in Payload is to build out your Payload configs, install plugins, and make progress in development mode - allowing Drizzle to push your changes to your local database for you. Once you're finished, you can create a migration.
+
+But importantly, you do not need to run migrations against your development database, because Drizzle will have already pushed your changes to your database for you.
+
+<Banner type="warning">
+  Warning: do not mix "push" and migrations with your local development database. If you use "push"
+  locally, and then try to migrate, Payload will throw a warning, telling you that these two methods
+  are not meant to be used interchangeably.
+</Banner>
+
+**2 - create a migration**
+
+Once you're done with working in your Payload config, you can create a migration. It's best practice to try and complete a specific task or fully build out a feature before you create a migration.
+
+But once you're ready, you can run `pnpm payload migrate:create`, which will perform the following steps for you:
+
+- We will look for any existing migrations, and automatically generate SQL changes necessary to convert your schema from its prior state to the new state of your Payload config
+- We will then create a new migration file in your `/migrations` folder that contains all the SQL necessary to be run
+
+We won't immediately run this migration for you, however. 
+
+<Banner type="success">
+  Tip: migrations created by Payload are relatively programmatic in nature, so there should not be any surprises, but before you check in the created migration it's a good idea to always double-check the contents of the migration files.
+</Banner>
+
+**3 - set up your build process to run migrations**
+
+Generally, you want to run migrations before you build Payload for production. This typically happens in your CI pipeline and can usually be configured on platforms like Payload Cloud, Vercel, or Netlify by specifying your build script.
+
+A common set of scripts in a `package.json`, set up to run migrations in CI, might look like this:
+
+```js
+  "scripts": {
+    // For running in dev mode
+    "dev": "next dev --turbo",
+
+    // To build your Next + Payload app for production
+    "build": "next build",
+
+    // A "tie-in" to Payload's CLI for convenience
+    // this helps you run `pnpm payload migrate:create` and similar
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+
+    // This command is what you'd set your `build script` to.
+    // Notice how it runs `payload migrate` and then `pnpm build`?
+    // This will run all migrations for you before building, in your CI,
+    // against your production database
+    "ci": "payload migrate && pnpm build",
+  },
+```
+
+In the example above, we've specified a `ci` script which we can use as our "build script" in the platform that we are deploying to production with.
+
+This will require that your build pipeline can connect to your database, and it will simply run the `payload migrate` command prior to starting the build process. By calling `payload migrate`, Payload will automatically execute any migrations in your `/migrations` folder that have not yet been executed against your production database, in the order that they were created.
+
+If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up with the shape that your Payload config requires.

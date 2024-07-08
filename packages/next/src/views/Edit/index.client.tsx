@@ -1,6 +1,6 @@
 'use client'
 
-import { SetViewActions, useComponentMap, useDocumentInfo } from '@payloadcms/ui/client'
+import { SetViewActions, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 export const EditViewClient: React.FC = () => {

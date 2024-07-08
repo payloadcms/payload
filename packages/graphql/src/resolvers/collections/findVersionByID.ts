@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequestWithData, TypeWithID, TypeWithVersion } from 'payload'
+import type { Collection, PayloadRequest, TypeWithID, TypeWithVersion } from 'payload'
 
 import { findVersionByIDOperation, isolateObjectProperty } from 'payload'
 
@@ -12,7 +12,7 @@ export type Resolver<T extends TypeWithID = any> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<TypeWithVersion<T>>
 

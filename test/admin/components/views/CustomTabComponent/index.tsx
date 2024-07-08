@@ -1,8 +1,8 @@
-import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
+import type { ServerSideEditViewProps } from 'payload'
+
+import { SetStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
-
-import type { ServerSideEditViewProps } from '../../../../../packages/payload/types.js'
 
 import { customTabViewComponentTitle } from '../../../shared.js'
 

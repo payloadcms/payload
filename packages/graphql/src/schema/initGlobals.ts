@@ -16,7 +16,7 @@ import updateResolver from '../resolvers/globals/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
-import buildPaginatedListType from './buildPaginatedListType.js'
+import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
 

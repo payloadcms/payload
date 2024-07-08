@@ -1,5 +1,5 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type {
   ClientCollectionConfig,
@@ -21,7 +21,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React, { Fragment, useCallback } from 'react'
 

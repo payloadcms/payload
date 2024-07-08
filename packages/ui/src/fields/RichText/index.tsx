@@ -9,6 +9,6 @@ export type RichTextFieldProps = FormFieldBase & {
   width?: string
 }
 
-export const RichText: React.FC<RichTextFieldProps> = () => {
+export const RichTextField: React.FC<RichTextFieldProps> = () => {
   return null
 }

@@ -1,5 +1,5 @@
 'use client'
-import { ReactSelect, useLocale, useTranslation } from '@payloadcms/ui/client'
+import { ReactSelect, useLocale, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { Props } from './types.js'

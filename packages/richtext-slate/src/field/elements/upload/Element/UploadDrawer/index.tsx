@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase, FormProps } from '@payloadcms/ui'
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -8,15 +8,14 @@ import {
   Drawer,
   Form,
   FormSubmit,
+  RenderFields,
   useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
   useModal,
   useTranslation,
-} from '@payloadcms/ui/client'
-import { type FormProps } from '@payloadcms/ui/forms/Form'
-import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+} from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'

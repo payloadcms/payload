@@ -2,7 +2,7 @@ import fs from 'fs'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave } from './types.js'
 
 import { ErrorDeletingFile } from '../errors/index.js'
@@ -14,7 +14,7 @@ type Args = {
   doc: Record<string, unknown>
   files?: FileToSave[]
   overrideDelete: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({

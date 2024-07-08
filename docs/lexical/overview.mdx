@@ -32,7 +32,7 @@ npm install @payloadcms/richtext-lexical
 Once you have it installed, you can pass it to your top-level Payload config as follows:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({
@@ -47,7 +47,7 @@ export default buildConfig({
 You can also override Lexical settings on a field-by-field basis as follows:
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const Pages: CollectionConfig = {
@@ -89,7 +89,7 @@ import { CallToAction } from '../blocks/CallToAction'
 
 {
   editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [
+    features: ({ defaultFeatures, rootFeatures }) => [
       ...defaultFeatures,
       LinkFeature({
         // Example showing how to customize the built-in fields
@@ -134,46 +134,165 @@ import { CallToAction } from '../blocks/CallToAction'
 }
 ```
 
+`features` can be both an array of features, or a function returning an array of features. The function provides the following props:
+
+
+| Prop                  | Description                                                                                                                                                                                                                                            |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`defaultFeatures`** | This opinionated array contains all "recommended" default features. You can see which features are included in the default features in the table below.                                                                                                |
+| **`rootFeatures`**    | This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts). If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty. |
+
+
 ## Features overview
 
 Here's an overview of all the included features:
 
-| Feature Name                   | Included by default | Description                                                                                                                                                                            |
-|--------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`BoldTextFeature`**          | Yes                 | Handles the bold text format                                                                                                                                                           |
-| **`ItalicTextFeature`**        | Yes                 | Handles the italic text format                                                                                                                                                         |
-| **`UnderlineTextFeature`**     | Yes                 | Handles the underline text format                                                                                                                                                      |
-| **`StrikethroughTextFeature`** | Yes                 | Handles the strikethrough text format                                                                                                                                                  |
-| **`SubscriptTextFeature`**     | Yes                 | Handles the subscript text format                                                                                                                                                      |
-| **`SuperscriptTextFeature`**   | Yes                 | Handles the superscript text format                                                                                                                                                    |
-| **`InlineCodeTextFeature`**    | Yes                 | Handles the inline-code text format                                                                                                                                                    |
-| **`ParagraphFeature`**         | Yes                 | Handles paragraphs. Since they are already a key feature of lexical itself, this Feature mainly handles the Slash and Add-Block menu entries for paragraphs                            |
-| **`HeadingFeature`**           | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                   |
-| **`AlignFeature`**             | Yes                 | Allows you to align text left, centered and right                                                                                                                                      |
-| **`IndentFeature`**            | Yes                 | Allows you to indent text with the tab key                                                                                                                                             |
-| **`UnorderedListFeature`**     | Yes                 | Adds unordered lists (ul)                                                                                                                                                              |
-| **`OrderedListFeature`**       | Yes                 | Adds ordered lists (ol)                                                                                                                                                                |
-| **`CheckListFeature`**         | Yes                 | Adds checklists                                                                                                                                                                        |
-| **`LinkFeature`**              | Yes                 | Allows you to create internal and external links                                                                                                                                       |
-| **`RelationshipFeature`**      | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                         |
-| **`BlockQuoteFeature`**        | Yes                 | Allows you to create block-level quotes                                                                                                                                                |
-| **`UploadFeature`**            | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                    |
-| **`HorizontalRuleFeature`**    | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                    |
-| **`InlineToolbarFeature`**     | Yes                 | The inline toolbar is the floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                           |
-| **`FixedToolbarFeature`**      | No                  | This classic toolbar is pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                          |
-| **`BlocksFeature`**            | No                  | Allows you to use Payload's [Blocks Field](/docs/fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
-| **`TreeViewFeature`**          | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                   |
+| Feature Name                    | Included by default | Description                                                                                                                                                                            |
+|---------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`BoldTextFeature`**           | Yes                 | Handles the bold text format                                                                                                                                                           |
+| **`ItalicTextFeature`**         | Yes                 | Handles the italic text format                                                                                                                                                         |
+| **`UnderlineTextFeature`**      | Yes                 | Handles the underline text format                                                                                                                                                      |
+| **`StrikethroughTextFeature`**  | Yes                 | Handles the strikethrough text format                                                                                                                                                  |
+| **`SubscriptTextFeature`**      | Yes                 | Handles the subscript text format                                                                                                                                                      |
+| **`SuperscriptTextFeature`**    | Yes                 | Handles the superscript text format                                                                                                                                                    |
+| **`InlineCodeTextFeature`**     | Yes                 | Handles the inline-code text format                                                                                                                                                    |
+| **`ParagraphFeature`**          | Yes                 | Handles paragraphs. Since they are already a key feature of lexical itself, this Feature mainly handles the Slash and Add-Block menu entries for paragraphs                            |
+| **`HeadingFeature`**            | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                   |
+| **`AlignFeature`**              | Yes                 | Allows you to align text left, centered and right                                                                                                                                      |
+| **`IndentFeature`**             | Yes                 | Allows you to indent text with the tab key                                                                                                                                             |
+| **`UnorderedListFeature`**      | Yes                 | Adds unordered lists (ul)                                                                                                                                                              |
+| **`OrderedListFeature`**        | Yes                 | Adds ordered lists (ol)                                                                                                                                                                |
+| **`CheckListFeature`**          | Yes                 | Adds checklists                                                                                                                                                                        |
+| **`LinkFeature`**               | Yes                 | Allows you to create internal and external links                                                                                                                                       |
+| **`RelationshipFeature`**       | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                         |
+| **`BlockQuoteFeature`**         | Yes                 | Allows you to create block-level quotes                                                                                                                                                |
+| **`UploadFeature`**             | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                    |
+| **`HorizontalRuleFeature`**     | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                    |
+| **`InlineToolbarFeature`**      | Yes                 | The inline toolbar is the floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                           |
+| **`FixedToolbarFeature`**       | No                  | This classic toolbar is pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                          |
+| **`BlocksFeature`**             | No                  | Allows you to use Payload's [Blocks Field](/docs/fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
+| **`TreeViewFeature`**           | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                   |
+| **`EXPERIMENTAL_TableFeature`** | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.                |
 
 Notice how even the toolbars are features? That's how extensible our lexical editor is - you could theoretically create your own toolbar if you wanted to!
 
 ## Creating your own, custom Feature
 
-Creating your own custom feature requires deep knowledge of the Lexical editor. We recommend you take a look at the [Lexical documentation](https://lexical.dev/docs/intro) first - especially the "concepts" section.
+You can find more information about creating your own feature in our [building custom feature docs](lexical/building-custom-features).
 
-Next, take a look at the [features we've already built](https://github.com/payloadcms/payload/tree/main/packages/richtext-lexical/src/field/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of payload or not!
+## TypeScript
 
-## Coming Soon
+Every single piece of saved data is 100% fully-typed within lexical. It provides a type for every single node, which can be imported from `@payloadcms/richtext-lexical` - each type is prefixed with `Serialized`, e.g. `SerializedUploadNode`.
 
-Lots more documentation will be coming soon, which will show in detail how to create your own custom features within Lexical.
+In order to fully type the entire editor JSON, you can use our `TypedEditorState` helper type, which accepts a union of all possible node types as a generic. The reason we do not provide a type which already contains all possible node types is because the possible node types depend on which features you have enabled in your editor. Here is an example:
 
-For now, take a look at the TypeScript interfaces and let us know if you need a hand. Much more will be coming from the Payload team on this topic soon.
+```ts
+import type {
+  SerializedAutoLinkNode,
+  SerializedBlockNode,
+  SerializedHorizontalRuleNode,
+  SerializedLinkNode,
+  SerializedListItemNode,
+  SerializedListNode,
+  SerializedParagraphNode,
+  SerializedQuoteNode,
+  SerializedRelationshipNode,
+  SerializedTextNode,
+  SerializedUploadNode,
+  TypedEditorState,
+  SerializedHeadingNode,
+} from '@payloadcms/richtext-lexical'
+
+const editorState: TypedEditorState<
+  | SerializedAutoLinkNode
+  | SerializedBlockNode
+  | SerializedHorizontalRuleNode
+  | SerializedLinkNode
+  | SerializedListItemNode
+  | SerializedListNode
+  | SerializedParagraphNode
+  | SerializedQuoteNode
+  | SerializedRelationshipNode
+  | SerializedTextNode
+  | SerializedUploadNode
+  | SerializedHeadingNode
+> = {
+  root: {
+    type: 'root',
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Some text. Every property here is fully-typed',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        textFormat: 0,
+        version: 1,
+      },
+    ],
+  },
+}
+```
+
+Alternatively, you can use the `DefaultTypedEditorState` type, which includes all types for all nodes included in the `defaultFeatures`:
+
+```ts
+import type {
+  DefaultTypedEditorState
+} from '@payloadcms/richtext-lexical'
+
+const editorState: DefaultTypedEditorState = {
+  root: {
+    type: 'root',
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Some text. Every property here is fully-typed',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        textFormat: 0,
+        version: 1,
+      },
+    ],
+  },
+}
+```
+
+Just like `TypedEditorState`, the `DefaultTypedEditorState` also accepts an optional node type union as a generic. Here, this would **add** the specified node types to the default ones. Example: `DefaultTypedEditorState<SerializedBlockNode | YourCustomSerializedNode>`.
+
+This is a type-safe representation of the editor state. Looking at the auto-suggestions of `type` it will show you all the possible node types you can use.
+
+Make sure to only use types exported from `@payloadcms/richtext-lexical`, not from the lexical core packages. We only have control over types we export and can guarantee that those are correct, even though lexical core may export types with identical names.
+
+### Automatic type generation
+
+Lexical does not generate the accurate type definitions for your richText fields for you yet - this will be improved in the future. Currently, it only outputs the rough shape of the editor JSON which you can enhance using type assertions.

@@ -1,7 +1,7 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { useSearchParams } from '@payloadcms/ui/client'
+import { useSearchParams } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { useParams, usePathname } from 'next/navigation.js'
 import React from 'react'

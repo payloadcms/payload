@@ -1,9 +1,7 @@
 import type { Data, FormState } from 'payload'
 
-import flatleyImport from 'flatley'
-const { unflatten } = flatleyImport
-
 import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
+import { unflatten } from '../../utilities/unflatten.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
   if (!fields) return null
@@ -39,5 +37,5 @@ export const getSiblingData = (fields: FormState, path: string): Data => {
     }
   })
 
-  return unflatten(siblingFields, { safe: true })
+  return unflatten(siblingFields)
 }

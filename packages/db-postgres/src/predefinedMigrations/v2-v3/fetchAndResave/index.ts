@@ -1,5 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Field, Payload, PayloadRequestWithData } from 'payload'
+import type { Field, Payload, PayloadRequest } from 'payload'
 
 import { upsertRow } from '@payloadcms/drizzle'
 
@@ -18,7 +18,7 @@ type Args = {
   globalSlug?: string
   isVersions: boolean
   payload: Payload
-  req: PayloadRequestWithData
+  req: PayloadRequest
   tableName: string
 }
 
@@ -212,7 +212,6 @@ export const fetchAndResave = async ({
 
           try {
             await upsertRow({
-              id: doc.id,
               adapter,
               data: doc,
               db,

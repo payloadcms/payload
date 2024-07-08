@@ -1,7 +1,7 @@
 'use client'
 import type { TypeWithID } from 'payload'
 
-import querystring from 'qs'
+import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -57,14 +57,23 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
 
         if (idsToLoad.length > 0) {
           const url = `${serverURL}${api}/${slug}`
-          const params = {
-            depth: 0,
-            limit: 250,
-            locale,
-            'where[id][in]': idsToLoad,
+
+          const params = new URLSearchParams()
+
+          params.append('depth', '0')
+          params.append('limit', '250')
+
+          if (locale) {
+            params.append('locale', locale)
           }
 
-          const query = querystring.stringify(params, { addQueryPrefix: true })
+          if (idsToLoad && idsToLoad.length > 0) {
+            const idsToString = idsToLoad.map((id) => String(id))
+            params.append('where[id][in]', idsToString.join(','))
+          }
+
+          const query = `?${params.toString()}`
+
           const result = await fetch(`${url}${query}`, {
             credentials: 'include',
             headers: {

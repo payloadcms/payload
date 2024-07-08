@@ -33,7 +33,7 @@ export type TabsFieldProps = FormFieldBase & {
   width?: string
 }
 
-const TabsField: React.FC<TabsFieldProps> = (props) => {
+const _TabsField: React.FC<TabsFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -195,4 +195,4 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
   )
 }
 
-export const Tabs = withCondition(TabsField)
+export const TabsField = withCondition(_TabsField)

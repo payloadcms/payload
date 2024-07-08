@@ -1,9 +1,7 @@
 'use client'
 import type { CustomComponent, UIField } from 'payload'
 
-import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useFormFields } from '@payloadcms/ui/forms/Form'
+import { CopyToClipboard, useFieldProps, useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
 export const LinkToDoc: CustomComponent<UIField> = () => {

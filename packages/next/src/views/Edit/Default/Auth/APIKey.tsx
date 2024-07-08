@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequestWithData } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import {
   CopyToClipboard,
@@ -9,7 +9,7 @@ import {
   useField,
   useFormFields,
   useTranslation,
-} from '@payloadcms/ui/client'
+} from '@payloadcms/ui'
 import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
@@ -42,7 +42,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
           config,
         },
         t,
-      } as PayloadRequestWithData,
+      } as PayloadRequest,
       siblingData: {},
     })
 
