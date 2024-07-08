@@ -1,7 +1,7 @@
 'use client'
-import type { ClientTranslationKeys, I18nClient  } from '@payloadcms/translations'
+import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
 
-import { getTranslation } from '@payloadcms/translations';
+import { getTranslation } from '@payloadcms/translations'
 
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
