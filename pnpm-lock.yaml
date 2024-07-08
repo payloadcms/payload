@@ -34,7 +34,10 @@ importers:
         version: 14.1.4
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:packages/eslint-config-payload
+        version: link:packages/eslint-config
+      '@payloadcms/eslint-plugin':
+        specifier: workspace:*
+        version: link:packages/eslint-plugin
       '@payloadcms/live-preview-react':
         specifier: workspace:*
         version: link:packages/live-preview-react
@@ -107,9 +110,6 @@ importers:
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
-      eslint-plugin-payload:
-        specifier: workspace:*
-        version: link:packages/eslint-plugin-payload
       execa:
         specifier: 5.1.1
         version: 5.1.1
@@ -300,7 +300,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.9
         version: 1.0.9
@@ -346,7 +346,7 @@ importers:
         version: 0.2.4(esbuild@0.21.5)
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
@@ -385,7 +385,7 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
-  packages/eslint-config-payload:
+  packages/eslint-config:
     dependencies:
       '@eslint/compat':
         specifier: 1.1.0
@@ -393,6 +393,9 @@ importers:
       '@eslint/js':
         specifier: 9.6.0
         version: 9.6.0
+      '@payloadcms/eslint-plugin':
+        specifier: workspace:*
+        version: link:../eslint-plugin
       '@types/eslint':
         specifier: 8.56.10
         version: 8.56.10
@@ -420,9 +423,6 @@ importers:
       eslint-plugin-jsx-a11y:
         specifier: 6.9.0
         version: 6.9.0(eslint@9.6.0)
-      eslint-plugin-payload:
-        specifier: workspace:*
-        version: link:../eslint-plugin-payload
       eslint-plugin-perfectionist:
         specifier: 2.11.0
         version: 2.11.0(eslint@9.6.0)(typescript@5.5.3)
@@ -445,7 +445,7 @@ importers:
         specifier: 7.15.0
         version: 7.15.0(eslint@9.6.0)(typescript@5.5.3)
 
-  packages/eslint-plugin-payload:
+  packages/eslint-plugin:
     dependencies:
       '@eslint/compat':
         specifier: 1.1.0
@@ -519,7 +519,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/pluralize':
         specifier: ^0.0.33
         version: 0.0.33
@@ -534,7 +534,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -553,7 +553,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/react':
         specifier: npm:types-react@19.0.0-beta.2
         version: /types-react@19.0.0-beta.2
@@ -572,7 +572,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -639,7 +639,7 @@ importers:
         version: 14.1.4
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/busboy':
         specifier: ^1.5.3
         version: 1.5.3
@@ -790,7 +790,7 @@ importers:
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/express-fileupload':
         specifier: 1.4.1
         version: 1.4.1
@@ -931,7 +931,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/escape-html':
         specifier: ^1.0.4
         version: 1.0.4
@@ -964,7 +964,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -973,7 +973,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/express':
         specifier: ^4.17.9
         version: 4.17.21
@@ -995,7 +995,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1017,7 +1017,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/express':
         specifier: ^4.17.9
         version: 4.17.21
@@ -1051,7 +1051,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/express':
         specifier: ^4.17.9
         version: 4.17.21
@@ -1100,7 +1100,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
@@ -1137,7 +1137,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
@@ -1234,7 +1234,7 @@ importers:
         version: 0.16.1(eslint@9.6.0)
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
@@ -1292,7 +1292,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1397,7 +1397,7 @@ importers:
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@swc/core':
         specifier: ^1.6.1
         version: 1.6.5
@@ -1518,7 +1518,7 @@ importers:
         version: 0.2.4(esbuild@0.21.5)
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-payload
+        version: link:../eslint-config
       '@types/body-scroll-lock':
         specifier: ^3.1.0
         version: 3.1.2
@@ -1596,7 +1596,10 @@ importers:
         version: link:../packages/email-resend
       '@payloadcms/eslint-config':
         specifier: workspace:*
-        version: link:../packages/eslint-config-payload
+        version: link:../packages/eslint-config
+      '@payloadcms/eslint-plugin':
+        specifier: workspace:*
+        version: link:../packages/eslint-plugin
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -1687,9 +1690,6 @@ importers:
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
-      eslint-plugin-payload:
-        specifier: workspace:*
-        version: link:../packages/eslint-plugin-payload
       eslint-plugin-playwright:
         specifier: 1.6.2
         version: 1.6.2(eslint@9.6.0)

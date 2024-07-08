@@ -1,5 +1,5 @@
 import { rootEslintConfig, rootParserOptions } from '../eslint.config.js'
-import payloadPlugin from 'eslint-plugin-payload'
+import payloadPlugin from '@payloadcms/eslint-plugin'
 import playwright from 'eslint-plugin-playwright'
 
 /** @typedef {import('eslint').Linter.FlatConfig} */

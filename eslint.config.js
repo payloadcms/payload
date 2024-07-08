@@ -1,5 +1,5 @@
 import payloadEsLintConfig from '@payloadcms/eslint-config'
-import payloadPlugin from 'eslint-plugin-payload'
+import payloadPlugin from '@payloadcms/eslint-plugin'
 
 export const defaultESLintIgnores = [
   '**/.temp',
@@ -66,7 +66,7 @@ export const rootEslintConfig = [
     },
   },
   {
-    files: ['packages/eslint-config-payload/**/*.ts'],
+    files: ['packages/eslint-config/**/*.ts'],
     rules: {
       'perfectionist/sort-objects': 'off',
     },

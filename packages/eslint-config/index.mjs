@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint'
 import perfectionistNatural from 'eslint-plugin-perfectionist/configs/recommended-natural'
 import { configs as regexpPluginConfigs } from "eslint-plugin-regexp"
 import eslintConfigPrettier from "eslint-config-prettier";
-import payloadPlugin from 'eslint-plugin-payload'
+import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
 import jestExtends from './configs/jest/index.mjs'
 import globals from "globals";

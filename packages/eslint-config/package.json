@@ -7,7 +7,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/eslint-config-payload"
+    "directory": "packages/eslint-config"
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@eslint/compat": "1.1.0",
     "@eslint/js": "9.6.0",
+    "@payloadcms/eslint-plugin": "workspace:*",
     "@types/eslint": "8.56.10",
     "@types/eslint__js": "8.42.3",
     "@typescript-eslint/parser": "7.15.0",
@@ -28,7 +29,6 @@
     "eslint-plugin-jest": "28.6.0",
     "eslint-plugin-jest-dom": "5.4.0",
     "eslint-plugin-jsx-a11y": "6.9.0",
-    "eslint-plugin-payload": "workspace:*",
     "eslint-plugin-perfectionist": "2.11.0",
     "eslint-plugin-react": "7.34.3",
     "eslint-plugin-react-hooks": "5.1.0-rc-f38c22b244-20240704",

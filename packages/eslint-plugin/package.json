@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-payload",
+  "name": "@payloadcms/eslint-plugin",
   "version": "1.0.0",
   "description": "Payload plugins for ESLint",
   "keywords": [],
@@ -7,7 +7,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/eslint-plugin-payload"
+    "directory": "packages/eslint-plugin"
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
