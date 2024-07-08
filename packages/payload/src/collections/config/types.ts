@@ -459,7 +459,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   upload?: UploadConfig | boolean
   /**
-   * Customize the handling of incoming file uploads
+   * Enable versioning. Set it to true to enable default versions settings,
+   * or customize versions options by setting the property equal to an object
+   * containing the version options.
    *
    * @default false // disable versioning
    */
