@@ -194,6 +194,13 @@ export type InitOptions = {
    * and the backend functionality
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
+
+  /**
+   * Disable caching the payload instance.
+   * This is useful for environments where Payload is initialised in isolation from other instances.
+   */
+  disableCache?: boolean
+
   /**
    * Disable connect to the database on init
    */

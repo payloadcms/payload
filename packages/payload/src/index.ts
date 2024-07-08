@@ -641,6 +641,11 @@ export const getPayload = async (options: InitOptions): Promise<BasePayload> => 
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
+  // If the cache is disabled, return a new instance immediately
+  if (options?.disableCache) {
+    return new BasePayload().init(options)
+  }
+
   if (cached.payload) {
     return cached.payload
   }
