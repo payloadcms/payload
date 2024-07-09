@@ -47,10 +47,9 @@ export const EditUpload: React.FC<{
   fileName: string
   fileSrc: string
   imageCacheTag?: string
-  onSave?: ({ crop, focalPosition }: { crop: CropType; focalPosition: FocalPosition }) => void
   showCrop?: boolean
   showFocalPoint?: boolean
-}> = ({ doc, fileName, fileSrc, imageCacheTag, onSave, showCrop, showFocalPoint }) => {
+}> = ({ doc, fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
   const { updateUploadEdits, uploadEdits } = useUploadEdits()
@@ -128,18 +127,6 @@ export const EditUpload: React.FC<{
         : undefined,
       focalPoint: focalPosition ? focalPosition : undefined,
     })
-    if (typeof onSave === 'function') {
-      onSave({
-        crop: crop
-          ? {
-              ...crop,
-              heightPixels: Number(heightRef.current?.value ?? crop.heightPixels),
-              widthPixels: Number(widthRef.current?.value ?? crop.widthPixels),
-            }
-          : undefined,
-        focalPosition,
-      })
-    }
     closeModal(editDrawerSlug)
   }
 

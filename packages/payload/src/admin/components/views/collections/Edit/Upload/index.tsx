@@ -141,17 +141,6 @@ export const Upload: React.FC<Props> = (props) => {
     }
   }
 
-  const onEditsSave = useCallback(
-    ({ crop, focalPosition }) => {
-      setModified(true)
-      updateUploadEdits({
-        crop: crop || null,
-        focalPoint: focalPosition ? focalPosition : undefined,
-      })
-    },
-    [setModified, updateUploadEdits],
-  )
-
   useEffect(() => {
     setDoc(reduceFieldsToValues(internalState || {}, true))
     setReplacingFile(false)
@@ -269,7 +258,6 @@ export const Upload: React.FC<Props> = (props) => {
             fileName={value?.name || doc?.filename}
             fileSrc={doc?.url || fileSrc}
             imageCacheTag={doc.updatedAt}
-            onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
           />
