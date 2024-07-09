@@ -37,19 +37,25 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
   )
 })
 
+type FocalPosition = {
+  x: number
+  y: number
+}
+
 export const EditUpload: React.FC<{
   doc?: Data
   fileName: string
   fileSrc: string
   imageCacheTag?: string
+  onSave?: ({ crop, focalPosition }: { crop: CropType; focalPosition: FocalPosition }) => void
   showCrop?: boolean
   showFocalPoint?: boolean
-}> = ({ doc, fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
+}> = ({ doc, fileName, fileSrc, imageCacheTag, onSave, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
   const { updateUploadEdits, uploadEdits } = useUploadEdits()
 
-  const [focalPosition, setFocalPosition] = useState<{ x: number; y: number }>({
+  const [focalPosition, setFocalPosition] = useState<FocalPosition>({
     x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
     y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
   })
@@ -122,6 +128,18 @@ export const EditUpload: React.FC<{
         : undefined,
       focalPoint: focalPosition ? focalPosition : undefined,
     })
+    if (typeof onSave === 'function') {
+      onSave({
+        crop: crop
+          ? {
+              ...crop,
+              heightPixels: Number(heightRef.current?.value ?? crop.heightPixels),
+              widthPixels: Number(widthRef.current?.value ?? crop.widthPixels),
+            }
+          : undefined,
+        focalPosition,
+      })
+    }
     closeModal(editDrawerSlug)
   }
 

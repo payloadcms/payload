@@ -1108,6 +1108,9 @@
     "upload": {
       "additionalProperties": false,
       "properties": {
+        "addImage": {
+          "type": "string"
+        },
         "crop": {
           "type": "string"
         },
@@ -1142,6 +1145,9 @@
           "type": "string"
         },
         "moreInfo": {
+          "type": "string"
+        },
+        "pasteURL": {
           "type": "string"
         },
         "previewSizes": {

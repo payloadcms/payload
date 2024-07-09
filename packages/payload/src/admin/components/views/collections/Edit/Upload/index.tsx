@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
@@ -12,10 +13,12 @@ import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
 import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
+import { useForm } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
+import { useUploadEdits } from '../../../../utilities/UploadEdits'
 import './index.scss'
 
 const baseClass = 'file-field'
@@ -49,10 +52,12 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { collection, internalState, onChange, updatedAt } = props
+  const { collection, internalState, onChange } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
+  const { setModified } = useForm()
+  const { updateUploadEdits } = useUploadEdits()
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
@@ -60,52 +65,97 @@ export const Upload: React.FC<Props> = (props) => {
     validate,
   })
 
+  const [showUrlInput, setShowUrlInput] = useState(false)
+  const [fileUrl, setFileUrl] = useState<string>('')
+
+  const handleFileChange = useCallback(
+    (newFile: File) => {
+      if (newFile instanceof File) {
+        const fileReader = new FileReader()
+        fileReader.onload = (e) => {
+          const imgSrc = e.target?.result
+
+          if (typeof imgSrc === 'string') {
+            setFileSrc(imgSrc)
+          }
+        }
+        fileReader.readAsDataURL(newFile)
+      }
+
+      setValue(newFile)
+      setShowUrlInput(false)
+
+      if (typeof onChange === 'function') {
+        onChange(newFile)
+      }
+    },
+    [onChange, setValue],
+  )
+
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value
     if (value) {
       const fileValue = value
       // Creating a new File object with updated properties
       const newFile = new File([fileValue], updatedFileName, { type: fileValue.type })
-      setValue(newFile) // Updating the state with the new File object
+      handleFileChange(newFile)
     }
   }
 
   const handleFileSelection = React.useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
-      setValue(fileToUpload)
+      handleFileChange(fileToUpload)
     },
-    [setValue],
+    [handleFileChange],
   )
 
   const handleFileRemoval = useCallback(() => {
     setReplacingFile(true)
-    setValue(null)
+    handleFileChange(null)
     setFileSrc('')
-  }, [setValue])
+    setFileUrl('')
+    setDoc({})
+    setShowUrlInput(false)
+  }, [handleFileChange])
+
+  const handlePasteUrlClick = () => {
+    setShowUrlInput((prev) => !prev)
+  }
+
+  const handleUrlSubmit = async () => {
+    if (fileUrl) {
+      try {
+        const response = await fetch(fileUrl)
+        const data = await response.blob()
+
+        // Extract the file name from the URL
+        const fileName = fileUrl.split('/').pop()
+
+        // Create a new File object from the Blob data
+        const file = new File([data], fileName, { type: data.type })
+        handleFileChange(file)
+      } catch (e) {
+        toast.error(e.message)
+      }
+    }
+  }
+
+  const onEditsSave = useCallback(
+    ({ crop, focalPosition }) => {
+      setModified(true)
+      updateUploadEdits({
+        crop: crop || null,
+        focalPoint: focalPosition ? focalPosition : undefined,
+      })
+    },
+    [setModified, updateUploadEdits],
+  )
 
   useEffect(() => {
     setDoc(reduceFieldsToValues(internalState || {}, true))
     setReplacingFile(false)
   }, [internalState])
-
-  useEffect(() => {
-    if (value instanceof File) {
-      const fileReader = new FileReader()
-      fileReader.onload = (e) => {
-        const imgSrc = e.target?.result
-
-        if (typeof imgSrc === 'string') {
-          setFileSrc(imgSrc)
-        }
-      }
-      fileReader.readAsDataURL(value)
-    }
-
-    if (typeof onChange === 'function') {
-      onChange(value)
-    }
-  }, [value, onChange, updatedAt])
 
   const canRemoveUpload =
     docPermissions?.update?.permission &&
@@ -135,17 +185,49 @@ export const Upload: React.FC<Props> = (props) => {
           imageCacheTag={doc.updatedAt}
         />
       )}
-
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
-          {!value && (
+          {!value && !showUrlInput && (
             <Dropzone
+              allowRemoteUpload={collection?.upload?.allowRemoteUpload}
               className={`${baseClass}__dropzone`}
               mimeTypes={collection?.upload?.mimeTypes}
               onChange={handleFileSelection}
+              onPasteUrlClick={handlePasteUrlClick}
             />
           )}
-
+          {showUrlInput && (
+            <React.Fragment>
+              <div className={`${baseClass}__remote-file-wrap`}>
+                <input
+                  className={`${baseClass}__remote-file`}
+                  onChange={(e) => {
+                    setFileUrl(e.target.value)
+                  }}
+                  type="text"
+                  value={fileUrl}
+                />
+                <div className={`${baseClass}__add-file-wrap`}>
+                  <button
+                    className={`${baseClass}__add-file`}
+                    onClick={handleUrlSubmit}
+                    type="button"
+                  >
+                    {t('upload:addImage')}
+                  </button>
+                </div>
+              </div>
+              <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__remove`}
+                icon="x"
+                iconStyle="with-border"
+                onClick={handleFileRemoval}
+                round
+                tooltip={t('general:cancel')}
+              />
+            </React.Fragment>
+          )}
           {value && (
             <React.Fragment>
               <div className={`${baseClass}__thumbnail-wrap`}>
@@ -185,8 +267,9 @@ export const Upload: React.FC<Props> = (props) => {
           <EditUpload
             doc={doc || undefined}
             fileName={value?.name || doc?.filename}
-            fileSrc={fileSrc || doc?.url}
+            fileSrc={doc?.url || fileSrc}
             imageCacheTag={doc.updatedAt}
+            onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
           />
