@@ -78,9 +78,9 @@ const startDev = async () => {
     })
   }
 
-  expressApp.listen(3001, async () => {
-    payload.logger.info(`Admin URL on http://localhost:3001${payload.getAdminURL()}`)
-    payload.logger.info(`API URL on http://localhost:3001${payload.getAPIURL()}`)
+  expressApp.listen(3000, async () => {
+    payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`)
+    payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`)
   })
 }
 
