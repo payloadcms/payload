@@ -56,8 +56,7 @@ export const Upload: React.FC<Props> = (props) => {
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
-  const { setModified } = useForm()
-  const { updateUploadEdits } = useUploadEdits()
+  const { resetUploadEdits } = useUploadEdits()
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
@@ -116,8 +115,9 @@ export const Upload: React.FC<Props> = (props) => {
     setFileSrc('')
     setFileUrl('')
     setDoc({})
+    resetUploadEdits()
     setShowUrlInput(false)
-  }, [handleFileChange])
+  }, [handleFileChange, resetUploadEdits])
 
   const handlePasteUrlClick = () => {
     setShowUrlInput((prev) => !prev)
