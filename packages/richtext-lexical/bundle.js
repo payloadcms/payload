@@ -54,7 +54,7 @@ const resultClient = await esbuild
       '*.scss',
       '*.css',
       '*.svg',
-      'qs',
+      'qs-esm',
       '@dnd-kit/core',
       '@payloadcms/graphql',
       '@payloadcms/translations',
