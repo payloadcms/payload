@@ -1690,6 +1690,9 @@ importers:
       execa:
         specifier: 5.1.1
         version: 5.1.1
+      file-type:
+        specifier: 17.1.6
+        version: 17.1.6
       http-status:
         specifier: 1.6.2
         version: 1.6.2
