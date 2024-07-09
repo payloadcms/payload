@@ -17,7 +17,7 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  globals: [
+  globals: [ // highlight-line
     // Your Global Configs go here
   ],
 })
@@ -30,7 +30,7 @@ Here is what a simple Global Config might look like:
 ```ts
 import { GlobalConfig } from 'payload'
 
-const Nav: GlobalConfig = {
+export const Nav: GlobalConfig = {
   slug: 'nav',
   fields: [
     {
@@ -49,12 +49,10 @@ const Nav: GlobalConfig = {
     },
   ],
 }
-
-export default Nav
 ```
 
 <Banner type="success">
-  <strong>More:</strong>
+  <strong>Reminder:</strong>
   For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub.
 </Banner>
 
@@ -149,7 +147,7 @@ The preview function receives two arguments:
 | **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  <strong>Reminder:</strong>
   For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
 </Banner>
 
