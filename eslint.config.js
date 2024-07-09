@@ -26,9 +26,6 @@ let FlatConfig
 
 export const rootParserOptions = {
   EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-  EXPERIMENTAL_useProjectService: {
-    allowDefaultProjectForFiles: ['./src/*.ts', './src/*.tsx'],
-  },
   sourceType: 'module',
   ecmaVersion: 'latest',
 }
@@ -42,7 +39,10 @@ export const rootEslintConfig = [
   {
     languageOptions: {
       parserOptions: {
-        project: './tsconfig.json',
+        projectService: {
+          allowDefaultProject: ['./src/*.ts', './src/*.tsx'],
+          defaultProject: './tsconfig.json',
+        },
         tsconfigDirName: import.meta.dirname,
         ...rootParserOptions,
       },
