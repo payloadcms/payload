@@ -48,7 +48,7 @@ The following options are available:
 | Option             | Description                                                                                                                                                                                                          |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`access`**       | Provide access control functions to define exactly who should be able to do what with this Global. [More details](../access-control/overview/#globals).                                                                    |
-| **`admin`**        | Admin-specific configuration. [More details](#admin-options).                                                                           |
+| **`admin`**        | The configuration options for the Admin Panel. [More details](#admin-options).                                                                           |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
 | **`dbName`**       | Custom table or collection name for this global depending on the database adapter. Auto-generated from slug if not defined. |
 | **`description`**  | Text or React component to display below the Global header to give editors more information.                                                                                                                         |
@@ -101,32 +101,27 @@ The following options are available:
 | **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
 | **`meta`**        | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.       |
 
-### Preview
+#### Preview
 
-If the `admin.preview` property is specified, the Preview Button will automatically appear in the corresponding Global's Edit View. This will allow editors to visit the frontend of your app and preview potentially unpublished changes.
+It is possible to display a Preview Button in the Admin Panel within the Edit View. This will allow editors to visit the frontend of your app the corresponds to the document they are actively editing. This way they can preview the latest, potentially unpublished changes.
 
-To configure the Preview Button, use the `admin.preview` property in your Global Config:
+To configure the Preview Button, set the `admin.preview` property to a function in your Global Config:
 
 ```ts
 import { GlobalConfig } from 'payload'
 
-export const MyGlobal: GlobalConfig = {
-  slug: 'my-global',
-  fields: [
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-    },
-  ],
+export const MainMenu: GlobalConfig = {
+  // ...
   admin: {
+    // highlight-start
     preview: (doc, { locale }) => {
       if (doc?.slug) {
-        return `https://bigbird.com/preview/${doc.slug}?locale=${locale}`
+        return `/${doc.slug}?locale=${locale}`
       }
 
       return null
     },
+    // highlight-end
   },
 }
 ```

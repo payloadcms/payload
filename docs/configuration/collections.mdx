@@ -42,7 +42,7 @@ The following options are available:
 
 | Option                 | Description                                                                                                                                                                                                              |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                               |
+| **`admin`**            | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                               |
 | **`access`**           | Provide access control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/overview/#collections).                                                   |
 | **`auth`**             | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](../authentication/config) documentation.                                                          |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                          |
@@ -99,51 +99,27 @@ The following options are available:
 | **`listSearchableFields`**       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                      |
 | **`pagination`**             | Set pagination-specific options for this collection. [More details](#pagination).                                                                                                                              |
 
-### Pagination
+#### Preview
 
-Here are a few options that you can specify options for pagination on a collection-by-collection basis:
+It is possible to display a Preview Button in the Admin Panel within the Edit View. This will allow editors to visit the frontend of your app the corresponds to the document they are actively editing. This way they can preview the latest, potentially unpublished changes.
 
-| Option         | Description                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------- |
-| `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
-| `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List View. |
-
-### Access Control
-
-You can specify extremely granular access control (what users can do with documents in a collection) on a collection by
-collection basis. To learn more, go to the [Access Control](../access-control/overview) docs.
-
-### Hooks
-
-Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a
-collection by collection basis. To learn more, go to the [Hooks](../hooks/overview) documentation.
-
-### Preview
-
-If the `admin.preview` property is specified, the Preview Button will automatically appear in the corresponding Collection's Edit View. This will allow editors to visit the frontend of your app and preview potentially unpublished changes.
-
-To configure the Preview Button, use the `admin.preview` property in your Collection Config:
+To configure the Preview Button, set the `admin.preview` property to a function in your Collection Config:
 
 ```ts
 import { CollectionConfig } from 'payload'
 
 export const Posts: CollectionConfig = {
-  slug: 'posts',
-  fields: [
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-    },
-  ],
+  // ...
   admin: {
+    // highlight-start
     preview: (doc, { locale }) => {
       if (doc?.slug) {
-        return `https://bigbird.com/preview/posts/${doc.slug}?locale=${locale}`
+        return `/${doc.slug}?locale=${locale}`
       }
 
       return null
     },
+    // highlight-end
   },
 }
 ```
@@ -159,6 +135,45 @@ The preview function receives two arguments:
   <strong>Tip:</strong>
   For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
 </Banner>
+
+### Pagination
+
+All Collections receive their own List View which displays a paginated list of documents that can be sorted and filtered. The pagination behavior of the List View can be customized on a per-Collection basis.
+
+To configure pagination options, use the `admin.pagination` property in your Collection Config:
+
+```ts
+import { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    pagination: {
+      defaultLimit: 10,
+      limits: [10, 20, 50],
+    },
+    // highlight-end
+  },
+}
+```
+
+The following options are available:
+
+| Option         | Description                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
+| `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List View. |
+
+### Access Control
+
+You can specify extremely granular access control (what users can do with documents in a collection) on a collection by
+collection basis. To learn more, go to the [Access Control](../access-control/overview) docs.
+
+### Hooks
+
+Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a
+collection by collection basis. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
 ### List Searchable Fields
 
