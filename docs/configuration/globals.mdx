@@ -65,7 +65,7 @@ The following options are available:
 | **`access`**       | Provide access control functions to define exactly who should be able to do what with this Global. [More details](../access-control/overview/#globals).                                                                    |
 | **`admin`**        | The configuration options for the Admin Panel. [More details](#admin-options).                                                                           |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
-| **`dbName`**       | Custom table or collection name for this global depending on the database adapter. Auto-generated from slug if not defined. |
+| **`dbName`**       | Custom table or collection name for this Global depending on the database adapter. Auto-generated from slug if not defined. |
 | **`description`**  | Text or React component to display below the Global header to give editors more information.                                                                                                                         |
 | **`endpoints`**    | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                  |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
@@ -108,10 +108,10 @@ The following options are available:
 
 | Option        | Description                                                                                                                       |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **`group`**       | Text used as a label for grouping collection and global links together in the navigation.                                         |
-| **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
+| **`group`**       | Text used as a label for grouping Collection and Global links together in the navigation.                                         |
+| **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing. |
 | **`components`**  | Swap in your own React components to be used within this Global. [More details](../admin/components#globals).                           |
-| **`preview`**     | Function to generate a preview URL within the [Admin Panel](../admin/overview) for this global that can point to your app. [More details](#preview).           |
+| **`preview`**     | Function to generate a preview URL within the [Admin Panel](../admin/overview) for this Global that can point to your app. [More details](#preview).           |
 | **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
 | **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
 | **`meta`**        | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.       |
@@ -155,18 +155,18 @@ The preview function receives two arguments:
 
 ## TypeScript
 
-You can import global types as follows:
+You can import Global types as follows:
 
 ```ts
 import { GlobalConfig } from 'payload'
 
-// This is the type used for incoming global configs.
+// This is the type used for incoming Global configs.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
 import { SanitizedGlobalConfig } from 'payload/types'
 
-// This is the type used after an incoming global config is fully sanitized.
+// This is the type used after an incoming Global config is fully sanitized.
 // Generally, this is only used internally by Payload.
 ```

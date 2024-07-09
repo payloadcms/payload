@@ -27,17 +27,14 @@ import { en } from 'payload/i18n/en'
 import { de } from 'payload/i18n/de'
 
 export default buildConfig({
-  /**
-   * Payload accepts specific translations to use.
-   * This is completely optional and will default to English if not provided
-   */
+  // ...
+  // highlight-start
   i18n: {
     // Payload will support either English or German,
     // able to be specified in preferences on a user-by-user basis
     supportedLanguages: { en, de },
   },
-
-  // .. the rest of your config
+  // highlight-end
 })
 ```
 
@@ -67,6 +64,7 @@ export default buildConfig({
   i18n: {
     fallbackLanguage: 'en', // default
     debug: false, // default
+    // highlight-start
     translations: {
       en: {
         custom: {
@@ -79,6 +77,7 @@ export default buildConfig({
         },
       },
     },
+    // highlight-end
   },
   //...
 })

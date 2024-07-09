@@ -54,9 +54,9 @@ The following options are available:
 | **`access`**           | Provide access control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/overview/#collections).                                                   |
 | **`auth`**             | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](../authentication/config) documentation.                                                          |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                          |
-| **`disableDuplicate`** | When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs.                                                                                      |
-| **`defaultSort`**      | Pass a top-level field to sort by default in the collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
-| **`dbName`**      | Custom table or collection name depending on the database adapter. Auto-generated from slug if not defined. |
+| **`disableDuplicate`** | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                      |
+| **`defaultSort`**      | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
+| **`dbName`**      | Custom table or Collection name depending on the database adapter. Auto-generated from slug if not defined. |
 | **`endpoints`**        | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                    |
 | **`fields`** \*        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
 | **`graphQL`**          | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined. Set to `false` to disable GraphQL.                                                            |
@@ -72,7 +72,7 @@ _\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-You can customize the way that the [Admin Panel](../admin/overview) behaves on a collection-by-collection basis.
+You can customize the way that the [Admin Panel](../admin/overview) behaves on a Collection-by-Collection basis.
 
 To configure Collection Admin Options, use the `admin` property in your Collection Config:
 
@@ -91,21 +91,21 @@ The following options are available:
 
 | Option                       | Description                                                                                                                                                                                           |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`group`**                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                             |
-| **`hidden`**                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
-| **`hooks`**                      | Admin-specific hooks for this collection. [More details](#admin-hooks).                                                                                                                                        |
+| **`group`**                      | Text used as a label for grouping Collection and Global links together in the navigation.                                                                                                             |
+| **`hidden`**                     | Set to true or a function, called with the current user, returning true to exclude this Collection from navigation and admin routing.                                                                 |
+| **`hooks`**                      | Admin-specific hooks for this Collection. [More details](#admin-hooks).                                                                                                                                        |
 | **`useAsTitle`**                 | Specify a top-level field to use for a document title throughout the [Admin Panel](../admin/overview). If no field is defined, the ID of the document is used as the title.                                                |
 | **`description`**                | Text or React component to display below the Collection label in the List View to give editors more information.                                                                                      |
-| **`defaultColumns`**             | Array of field names that correspond to which columns to show by default in this collection's List View.                                                                                              |
-| **`hideAPIURL`**                 | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                        |
+| **`defaultColumns`**             | Array of field names that correspond to which columns to show by default in this Collection's List View.                                                                                              |
+| **`hideAPIURL`**                 | Hides the "API URL" meta field while editing documents within this Collection.                                                                                                                        |
 | **`enableRichTextLink`**         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.         |
 | **`enableRichTextRelationship`** | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
 | **`meta`**                       | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.                                                                           |
 | **`preview`**                    | Function to generate preview URLs within the [Admin Panel](../admin/overview) that can point to your app. [More details](#preview).                                                                                                |
 | **`livePreview`**                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                              |
-| **`components`**                 | Swap in your own React components to be used within this collection. [More details](../admin/components#collections).                                                                                       |
+| **`components`**                 | Swap in your own React components to be used within this Collection. [More details](../admin/components#collections).                                                                                       |
 | **`listSearchableFields`**       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                      |
-| **`pagination`**             | Set pagination-specific options for this collection. [More details](#pagination).                                                                                                                              |
+| **`pagination`**             | Set pagination-specific options for this Collection. [More details](#pagination).                                                                                                                              |
 
 #### Preview
 
@@ -175,13 +175,13 @@ The following options are available:
 
 ### Access Control
 
-You can specify extremely granular access control (what users can do with documents in a collection) on a collection by
-collection basis. To learn more, go to the [Access Control](../access-control/overview) docs.
+You can specify extremely granular access control (what users can do with documents in a Collection) on a Collection by
+Collection basis. To learn more, go to the [Access Control](../access-control/overview) docs.
 
 ### Hooks
 
-Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a
-collection by collection basis. To learn more, go to the [Hooks](../hooks/overview) documentation.
+Hooks are a powerful way to extend Collection functionality and execute your own logic, and can be defined on a
+Collection by Collection basis. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
 ### List Searchable Fields
 
@@ -209,18 +209,18 @@ export const Posts: CollectionConfig = {
 
 ## TypeScript
 
-You can import collection types as follows:
+You can import Collection types as follows:
 
 ```ts
 import { CollectionConfig } from 'payload'
 
-// This is the type used for incoming collection configs.
+// This is the type used for incoming Collection configs.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
 import { SanitizedCollectionConfig } from 'payload'
 
-// This is the type used after an incoming collection config is fully sanitized.
+// This is the type used after an incoming Collection config is fully sanitized.
 // Generally, this is only used internally by Payload.
 ```
