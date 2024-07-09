@@ -1,9 +1,11 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-import { revalidate } from '../utilities/revalidate'
+import { revalidateTag } from 'next/cache'
 
 export const revalidateRedirects: CollectionAfterChangeHook = ({ doc, req: { payload } }) => {
-  void revalidate({ type: 'tag', collection: 'redirects', payload, tag: `redirects` })
+  payload.logger.info(`Revalidating redirects`)
+
+  revalidateTag('redirects')
 
   return doc
 }

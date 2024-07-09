@@ -10,7 +10,7 @@ const nextConfig = {
         const url = new URL(item)
 
         return {
-          hostname: url.host,
+          hostname: url.hostname,
           protocol: url.protocol.replace(':', ''),
         }
       }),

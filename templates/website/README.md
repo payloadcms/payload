@@ -195,19 +195,28 @@ The seed script will also create a demo user for demonstration purposes only:
 
 ## Production
 
-To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
+To run Payload in production, you need to build and start the Admin panel. To do so, follow these steps:
 
 1. Invoke the `next build` script by running `pnpm build` or `npm run build` in your project root. This creates a `.next` directory with a production-ready admin bundle.
 1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
 1. When you're ready to go live, see [Deployment](#deployment) for more details.
 
-### Deployment
+### Deploying to Payload Cloud
+
+The easiest way to deploy your project is to use [Payload Cloud](https://payloadcms.com/new/import), a one-click hosting solution to deploy production-ready instances of your Payload apps directly from your GitHub repo.
+
+### Deploying to Vercel
+
+Coming soon.
+
+### Self-hosting
 
 Before deploying your app, you need to:
 
 1. Ensure your app builds and serves in production. See [Production](#production) for more details.
+2. Serve it from a
 
-The easiest way to deploy your project is to use [Payload Cloud](https://payloadcms.com/new/import), a one-click hosting solution to deploy production-ready instances of your Payload apps directly from your GitHub repo. You can also deploy your app manually, check out the [deployment documentation](https://payloadcms.com/docs/beta/production/deployment) for full details.
+You can also deploy your app manually, check out the [deployment documentation](https://payloadcms.com/docs/beta/production/deployment) for full details.
 
 ## Questions
 
