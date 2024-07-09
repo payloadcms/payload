@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { RelatedPosts } from '@/blocks/RelatedPosts'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
@@ -49,6 +50,11 @@ export default async function Post({ params: { slug = '' } }) {
             enableGutter={false}
           />
         </div>
+
+        <RelatedPosts
+          className="mt-12"
+          docs={post.relatedPosts.filter((post) => typeof post !== 'string')}
+        />
       </div>
     </article>
   )

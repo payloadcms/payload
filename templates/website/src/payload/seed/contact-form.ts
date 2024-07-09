@@ -1,7 +1,6 @@
 import type { Form } from '../../payload-types'
 
-export const contactForm: Form = {
-  id: '63c07ffd4cb6b574b4977573',
+export const contactForm: Partial<Form> = {
   confirmationMessage: {
     root: {
       type: 'root',
@@ -36,7 +35,6 @@ export const contactForm: Form = {
   createdAt: '2023-01-12T21:47:41.374Z',
   emails: [
     {
-      id: '6644edb9cffd2c6c48a44730',
       emailFrom: '"Payload" \u003Cdemo@payloadcms.com\u003E',
       emailTo: '{{email}}',
       message: {
@@ -74,7 +72,6 @@ export const contactForm: Form = {
   ],
   fields: [
     {
-      id: '63c07f4e69853127a889530c',
       name: 'full-name',
       blockName: 'full-name',
       blockType: 'text',
@@ -83,7 +80,6 @@ export const contactForm: Form = {
       width: 100,
     },
     {
-      id: '63c07f7069853127a889530d',
       name: 'email',
       blockName: 'email',
       blockType: 'email',
@@ -92,7 +88,6 @@ export const contactForm: Form = {
       width: 100,
     },
     {
-      id: '63c07f8169853127a889530e',
       name: 'phone',
       blockName: 'phone',
       blockType: 'number',
@@ -101,7 +96,6 @@ export const contactForm: Form = {
       width: 100,
     },
     {
-      id: '63c07f9d69853127a8895310',
       name: 'message',
       blockName: 'message',
       blockType: 'textarea',
