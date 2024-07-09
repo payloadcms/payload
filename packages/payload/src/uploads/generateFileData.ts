@@ -177,7 +177,7 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()
+        ext = file.name.split('.').pop().split('?')[0]
       } else {
         ext = ''
       }
