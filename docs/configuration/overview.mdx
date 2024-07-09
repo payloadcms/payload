@@ -104,7 +104,7 @@ _\* An asterisk denotes that a property is required._
   Some properties are removed from the client-side bundle. [More details](../admin/components#accessing-the-payload-config).
 </Banner>
 
-## Customizing & Automating Config Location Detection
+## Config Location
 
 For Payload command-line scripts, we need to be able to locate your Payload Config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including the root current working directory, your `tsconfig`'s `rootDir`, and your `tsconfig`'s `outDir`.
 
@@ -114,7 +114,7 @@ In production mode, Payload will first attempt to find the config file in the ou
 
 Please ensure your `tsconfig.json` is properly configured if you want Payload to accurately auto-detect your configuration file location. If `tsconfig.json` does not exist or doesn't specify `rootDir` or `outDir`, Payload will default to the current working directory.
 
-### Overriding the Config Location
+### Customizing the Config Location
 
 In addition to the above automated detection, you can specify your own location for the Payload Config. This is done by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory. This can be useful in situations where your Payload Config is not in a standard location, or you wish to switch between multiple configurations.
 
