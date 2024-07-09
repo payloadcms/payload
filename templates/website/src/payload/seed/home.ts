@@ -71,7 +71,7 @@ export const home: Partial<Page> = {
                 },
                 format: '',
                 indent: 0,
-                version: 2,
+                version: 3,
               },
               {
                 type: 'text',
@@ -83,7 +83,7 @@ export const home: Partial<Page> = {
                 version: 1,
               },
               {
-                type: 'autolink',
+                type: 'link',
                 children: [
                   {
                     type: 'text',
@@ -91,18 +91,28 @@ export const home: Partial<Page> = {
                     format: 0,
                     mode: 'normal',
                     style: '',
-                    text: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+                    text: 'here',
                     version: 1,
                   },
                 ],
                 direction: 'ltr',
                 fields: {
                   linkType: 'custom',
-                  url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+                  newTab: true,
+                  url: 'https://github.com/payloadcms/payload/tree/beta/templates/website',
                 },
                 format: '',
                 indent: 0,
-                version: 2,
+                version: 3,
+              },
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: '. ',
+                version: 1,
               },
             ],
             direction: 'ltr',
@@ -159,11 +169,6 @@ export const home: Partial<Page> = {
         },
         {
           enableLink: false,
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
           richText: {
             root: {
               type: 'root',
@@ -249,11 +254,6 @@ export const home: Partial<Page> = {
         },
         {
           enableLink: false,
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
           richText: {
             root: {
               type: 'root',
@@ -307,11 +307,6 @@ export const home: Partial<Page> = {
         },
         {
           enableLink: false,
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
           richText: {
             root: {
               type: 'root',
@@ -365,11 +360,6 @@ export const home: Partial<Page> = {
         },
         {
           enableLink: false,
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
           richText: {
             root: {
               type: 'root',
@@ -455,11 +445,6 @@ export const home: Partial<Page> = {
         },
         {
           enableLink: false,
-          link: {
-            label: '',
-            reference: null,
-            url: '',
-          },
           richText: {
             root: {
               type: 'root',
