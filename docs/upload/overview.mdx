@@ -15,7 +15,7 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
   srcLight="https://payloadcms.com/images/docs/upload-admin.jpg"
   srcDark="https://payloadcms.com/images/docs/upload-admin.jpg"
   alt="Shows an Upload enabled collection in the Payload admin panel"
-  caption="Admin panel screenshot depicting a Media Collection with Upload enabled"
+  caption="Admin Panel screenshot depicting a Media Collection with Upload enabled"
 />
 
 **Here are some common use cases of Uploads:**
@@ -27,8 +27,8 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 **By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
 
 1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes`](#image-sizes) array will also be added containing auto-resized image sizes and filenames.
-1. The Admin panel will modify its built-in `List` component to show a thumbnail for each upload within the List view
-1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
+1. The Admin Panel will modify its built-in `List` component to show a thumbnail for each upload within the List View
+1. The Admin Panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
 
 ## Enabling Uploads
@@ -91,12 +91,12 @@ _An asterisk denotes that an option is required._
 
 | Option                         | Description                                                                                                                                                                                                      |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`adminThumbnail`**           | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                          |
-| **`crop`**                     | Set to `false` to disable the cropping tool in the Admin panel. Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                               |
+| **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                          |
+| **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                               |
 | **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                      |
 | **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                   |
 | **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                  |
-| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the Admin panel. The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
+| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
 | **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                          |
 | **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                |
 | **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                               |
@@ -140,7 +140,7 @@ export default buildConfig({
 
 If you specify an array of `imageSizes` to your `upload` config, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.
 
-The Payload Admin panel will also automatically display all available files, including width, height, and filesize, for each of your uploaded files.
+The [Admin Panel](../admin/overview) will also automatically display all available files, including width, height, and filesize, for each of your uploaded files.
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
 
@@ -171,7 +171,7 @@ When an uploaded image is smaller than the defined image size, we have 3 options
 
 This feature is only available for image file types.
 
-Setting `crop: false` and `focalPoint: false` in your Upload config will be disable the respective selector in the Admin panel.
+Setting `crop: false` and `focalPoint: false` in your Upload config will be disable the respective selector in the [Admin Panel](../admin/overview).
 
 Image cropping occurs before any resizing, the resized images will therefore be generated from the cropped image (**not** the original image).
 
