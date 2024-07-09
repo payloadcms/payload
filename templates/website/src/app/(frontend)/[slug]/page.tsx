@@ -22,7 +22,11 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  return pages.docs?.map(({ slug }) => slug)
+  return pages.docs
+    ?.filter((doc) => {
+      return doc.slug !== 'home'
+    })
+    .map(({ slug }) => slug)
 }
 
 export default async function Page({ params: { slug = 'home' } }) {

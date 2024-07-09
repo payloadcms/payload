@@ -238,7 +238,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   const contactForm = await payload.create({
     collection: 'forms',
-    data: contactFormData,
+    data: JSON.parse(JSON.stringify(contactFormData)),
   })
 
   let contactFormID = contactForm.id
