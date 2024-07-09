@@ -56,7 +56,7 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  <strong>Reminder:</strong>
+  <strong>More:</strong>
   For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub.
 </Banner>
 
@@ -99,38 +99,7 @@ _\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
   <strong>Reminder:</strong>
-  If you are trying to access your Payload Config from a client-side environment, some properties are removed from the client-side bundle. [More details](../admin/components#accessing-the-payload-config).
-</Banner>
-
-## Using environment variables in your config
-
-By default, Next.js will load `.env` files based on your `NODE_ENV`. If you are using Payload outside of Next.js, we suggest using the `dotenv` package to handle environment variables from `.env` files. All that's necessary to do is to require the package as high up in your application as possible (for example, at the top of your `payload.config.ts` file), and ensure that it can find an `.env` file that you create.
-
-**If necessary, you can add this code to the top of your Payload config:**
-
-```ts
-import dotenv from 'dotenv'
-dotenv.config()
-
-// ...
-// the rest of your `payload.config.ts` file goes here
-```
-
-**Here is an example project structure w/ `dotenv` and an `.env` file:**
-
-```
-project-name
----- .env
----- package.json
----- payload.config.ts
-```
-
-<Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  If you use an environment variable to configure any properties that are required for the Admin
-  panel to function (ex. serverURL or any routes), you need to make sure that your [Admin Panel](../admin/overview) code
-  can access it. [Click here](/docs/admin/environment-vars) for more info.
+  Some properties are removed from the client-side bundle. [More details](../admin/components#accessing-the-payload-config).
 </Banner>
 
 ## Customizing & Automating Config Location Detection
