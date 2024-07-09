@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation.js'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import { isAdminAuthRoute, isAdminRoute } from './shared.js'
 

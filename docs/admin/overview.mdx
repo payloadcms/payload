@@ -147,7 +147,7 @@ You have full control over the routes that Payload binds itself to. This include
 
 Root-level routes are those that are not behind the `/admin` path, such as the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), or the root path of the Admin Panel itself.
 
-To customize root-level routes, use the `routes` property of your [Payload Config](../configuration/overview):
+To customize root-level routes, use the `routes` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -183,7 +183,7 @@ The following options are available:
 
 Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
 
-To customize admin-level routes, use the `admin.routes` property of your [Payload Config](../configuration/overview):
+To customize admin-level routes, use the `admin.routes` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'

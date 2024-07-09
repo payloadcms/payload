@@ -1,15 +1,16 @@
 import type { Metadata } from 'next'
 
+import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
 import React from 'react'
+import { homeStatic } from 'src/payload/seed/home-static'
 
-import type { Page } from '../../../payload-types'
+import type { Page as PageType } from '../../../payload-types'
 
 import { Blocks } from '../../components/Blocks'
 import { Hero } from '../../components/Hero'
-import { PayloadRedirects } from '../../components/PayloadRedirects'
 import { generateMeta } from '../../utilities/generateMeta'
 
 export async function generateStaticParams() {
@@ -27,9 +28,16 @@ export async function generateStaticParams() {
 export default async function Page({ params: { slug = 'home' } }) {
   const url = '/' + slug
 
-  const page = await queryPageBySlug({
+  let page: PageType | null
+
+  page = await queryPageBySlug({
     slug,
   })
+
+  // Remove this code once your website is seeded
+  if (!page) {
+    page = homeStatic
+  }
 
   if (!page) {
     return <PayloadRedirects url={url} />
@@ -39,6 +47,9 @@ export default async function Page({ params: { slug = 'home' } }) {
 
   return (
     <article className="pt-16 pb-24">
+      {/* Allows redirects for valid pages too */}
+      <PayloadRedirects disableNotFound url={url} />
+
       <Hero {...hero} />
       <Blocks blocks={layout} />
     </article>

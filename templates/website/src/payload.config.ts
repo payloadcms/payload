@@ -17,8 +17,7 @@ import { ItalicFeature } from '@payloadcms/richtext-lexical'
 import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
-import { buildConfig } from 'payload/config'
-import { revalidateRedirect } from 'src/payload/hooks/revalidateRedirect'
+import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import Categories from './payload/collections/Categories'
@@ -31,6 +30,7 @@ import BeforeLogin from './payload/components/BeforeLogin'
 import { seed } from './payload/endpoints/seed'
 import { Footer } from './payload/globals/Footer/Footer'
 import { Header } from './payload/globals/Header/Header'
+import { revalidateRedirects } from './payload/hooks/revalidateRedirects'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -109,8 +109,22 @@ export default buildConfig({
     redirectsPlugin({
       collections: ['pages', 'posts'],
       overrides: {
+        // @ts-expect-error
+        fields: ({ defaultFields }) => {
+          return defaultFields.map((field) => {
+            if ('name' in field && field.name === 'from') {
+              return {
+                ...field,
+                admin: {
+                  description: 'You will need to rebuild the website when changing this field.',
+                },
+              }
+            }
+            return field
+          })
+        },
         hooks: {
-          afterChange: [revalidateRedirect],
+          afterChange: [revalidateRedirects],
         },
       },
     }),

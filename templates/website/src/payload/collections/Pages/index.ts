@@ -1,7 +1,7 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import { admins } from '../../access/admins'
-import { usersOrPublished } from '../../access/usersOrPublished'
+import { authenticated } from '../../access/authenticated'
+import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock'
 import { CallToAction } from '../../blocks/CallToAction'
 import { Content } from '../../blocks/Content'
@@ -16,10 +16,10 @@ import { revalidatePage } from './hooks/revalidatePage'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
-    create: admins,
-    delete: admins,
-    read: usersOrPublished,
-    update: admins,
+    create: authenticated,
+    delete: authenticated,
+    read: authenticatedOrPublished,
+    update: authenticated,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],

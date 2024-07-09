@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in appearance and behavior without affecting their underlying data structure. Using [Conditional Logic](#conditional-logic), [Custom Field Components](#custom-field-components), [Custom Validations](../fields/overview#validation), and more, fields are designed to withstand heavy modification or even complete replacement.
+[Fields](../fields/overview) within the [Admin Panel](./overview) can be endlessly customized in their appearance and behavior without affecting their underlying data structure. Fields are designed to withstand heavy modification or even complete replacement through the use of [Custom Field Components](#field-components), [Conditional Logic](#conditional-logic), [Custom Validations](../fields/overview#validation), and more.
 
 For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
@@ -56,7 +56,7 @@ The following options are available:
 | **`disableListFilter`** | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
 | **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.        |
 
-## Custom Field Components
+## Field Components
 
 Within the [Admin Panel](./overview), fields are rendered in three distinct places:
 
@@ -64,7 +64,7 @@ Within the [Admin Panel](./overview), fields are rendered in three distinct plac
 - [Cell](#the-cell-component) - The table cell component rendered in the List View.
 - [Filter](#the-filter-component) - The filter component rendered in the List View.
 
-To easily swap in Field Components with your own, use the `admin.components` property of any [Field Config](../fields/overview):
+To easily swap in Field Components with your own, use the `admin.components` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -104,7 +104,7 @@ _\* **`beforeInput`** and **`afterInput`** are only supported in fields that do 
 
 The Field Component is the actual form field rendered in the Edit View. This is the input that user's will interact with when editing a document.
 
-To easily swap in your own Field Component, use the `admin.components.Field` property of your [Field Config](../fields/overview):
+To easily swap in your own Field Component, use the `admin.components.Field` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -137,7 +137,7 @@ All Field Components receive the following props:
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`AfterInput`** | The rendered result of the `admin.components.afterInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
 | **`BeforeInput`** | The rendered result of the `admin.components.beforeInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
-| **`CustomDescription`** | The rendered result of the `description` property. [More details](#the-description-component).                                                                                                      |
+| **`CustomDescription`** | The rendered result of the `admin.components.Description` property. [More details](#the-description-component).                                                                                                      |
 | **`CustomError`** | The rendered result of the `admin.components.Error` property. [More details](#the-error-component).                                                                                                      |
 | **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).
 | **`path`**       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
@@ -197,7 +197,7 @@ export const CustomTextField: React.FC = () => {
 
 The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
 
-To easily swap in your own Cell Component, use the `admin.components.Cell` property of your [Field Config](../fields/overview):
+To easily swap in your own Cell Component, use the `admin.components.Cell` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -248,7 +248,7 @@ All Cell Components receive the following props:
 
 The Label Component is rendered anywhere a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
 
-To easily swap in your own Label Component, use the `admin.components.Label` property of your [Field Config](../fields/overview):
+To easily swap in your own Label Component, use the `admin.components.Label` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -283,7 +283,7 @@ All Label Components receive the following props:
 
 The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
 
-To easily swap in your own Error Component, use the `admin.components.Error` property of your [Field Config](../fields/overview):
+To easily swap in your own Error Component, use the `admin.components.Error` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -322,7 +322,7 @@ A description can be configured in three ways:
   - As a function which returns a string. [More details](#description-functions).
   - As a React component. [More details](#the-description-component).
 
-To easily add a Custom Description to a field, use the `admin.description` property of your [Field Config](../fields/overview):
+To easily add a Custom Description to a field, use the `admin.description` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -381,7 +381,7 @@ All Description Functions receive the following arguments:
 
 Alternatively to the [Description Property](#the-description-property), you can also use a [Custom Component](./components) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
 
-To easily add a Description Component to a field, use the `admin.components.Description` property of your [Field Config](../fields/overview):
+To easily add a Description Component to a field, use the `admin.components.Description` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -421,7 +421,7 @@ All Description Components receive the following props:
 
 With these properties you can add multiple components _before_ and _after_ the input element, as their name suggests. This is useful when you need to render additional elements alongside the field without replacing the entire field component.
 
-To add components before and after the input element, use the `admin.components.beforeInput` and `admin.components.afterInput` properties of your [Field Config](../fields/overview):
+To add components before and after the input element, use the `admin.components.beforeInput` and `admin.components.afterInput` properties in your [Field Config](../fields/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'

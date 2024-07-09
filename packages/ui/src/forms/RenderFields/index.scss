@@ -1,5 +1,12 @@
 @import '../../scss/styles.scss';
 
+// Positioned field-type__wrap is needed for correct positioning of field tooltips.
+// This is set outside of .render-fields, so that manually rendered fields (e.g. in Auth/index.tsx)
+// outside RenderFields also receive this styling.
+.field-type__wrap {
+  position: relative;
+}
+
 .render-fields {
   --spacing-field: var(--base);
 
@@ -9,10 +16,6 @@
 
   &--margins-none {
     --spacing-field: 0;
-  }
-
-  .field-type__wrap {
-    position: relative;
   }
 
   & > .field-type {

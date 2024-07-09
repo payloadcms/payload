@@ -59,7 +59,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding demo author and user...`)
 
   await Promise.all(
-    ['demo-author@payloadcms.com', 'demo-user@payloadcms.com'].map(async (email) => {
+    ['demo-author@payloadcms.com'].map(async (email) => {
       await payload.delete({
         collection: 'users',
         where: {
@@ -78,16 +78,6 @@ export const seed = async (payload: Payload): Promise<void> => {
         name: 'Demo Author',
         email: 'demo-author@payloadcms.com',
         password: 'password',
-        roles: ['admin'],
-      },
-    }),
-    await payload.create({
-      collection: 'users',
-      data: {
-        name: 'Demo User',
-        email: 'demo-user@payloadcms.com',
-        password: 'password',
-        roles: ['user'],
       },
     }),
   ])
@@ -311,7 +301,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'custom',
             label: 'Source Code',
             newTab: true,
-            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+            url: 'https://github.com/payloadcms/payload/tree/beta/templates/website',
           },
         },
         {
