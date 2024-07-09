@@ -1,4 +1,4 @@
-import type { PayloadHandler } from 'payload/config'
+import type { PayloadHandler } from 'payload'
 
 import { seed as seedScript } from '../seed'
 
