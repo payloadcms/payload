@@ -11,7 +11,6 @@ import type { AuthContext } from './types'
 import { requests } from '../../../api'
 import useDebounce from '../../../hooks/useDebounce'
 import { useConfig } from '../Config'
-import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
 
@@ -21,9 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
+  const [strategy, setStrategy] = useState<string>()
   const { pathname } = useLocation()
   const { push } = useHistory()
-  const { code } = useLocale()
 
   const config = useConfig()
 
@@ -39,8 +38,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { closeAllModals, openModal } = useModal()
   const [lastLocationChange, setLastLocationChange] = useState(0)
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000)
+  const userIDRef = React.useRef<null | number | string>()
 
   const id = user?.id
+
+  const refreshPermissions = useCallback(
+    async ({ locale }: { locale?: string } = {}) => {
+      const params = {
+        locale,
+      }
+      try {
+        const request = await requests.get(
+          `${serverURL}${api}/access${qs.stringify(params, { addQueryPrefix: true })}`,
+          {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          },
+        )
+
+        if (request.status === 200) {
+          const json: Permissions = await request.json()
+          setPermissions(json)
+        } else {
+          throw new Error(`Fetching permissions failed with status code ${request.status}`)
+        }
+      } catch (e) {
+        toast.error(`Refreshing permissions failed: ${e.message}`)
+      }
+    },
+    [serverURL, api, i18n],
+  )
+
+  const setActiveUser = React.useCallback(
+    (user: User | null) => {
+      setUser(user)
+      userIDRef.current = user?.id || null
+      void refreshPermissions()
+    },
+    [refreshPermissions],
+  )
 
   const redirectToInactivityRoute = useCallback(() => {
     if (window.location.pathname.startsWith(admin)) {
@@ -57,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
     setTokenExpiration(undefined)
+    setStrategy(undefined)
   }, [])
 
   const setTokenAndExpiration = useCallback(
@@ -65,6 +103,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token && json?.exp) {
         setTokenInMemory(token)
         setTokenExpiration(json.exp)
+        if (json.strategy) {
+          setStrategy(json.strategy)
+        }
       } else {
         revokeTokenAndExpire()
       }
@@ -88,10 +129,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (request.status === 200) {
               const json = await request.json()
-              setUser(json.user)
+              setActiveUser(json.user)
               setTokenAndExpiration(json)
             } else {
-              setUser(null)
+              setActiveUser(null)
               redirectToInactivityRoute()
             }
           } catch (e) {
@@ -105,9 +146,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       serverURL,
       api,
       userSlug,
-      i18n,
-      redirectToInactivityRoute,
+      i18n.language,
+      setActiveUser,
       setTokenAndExpiration,
+      redirectToInactivityRoute,
     ],
   )
 
@@ -123,13 +165,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (request.status === 200) {
           const json = await request.json()
           if (!skipSetUser) {
-            setUser(json.user)
+            setActiveUser(json.user)
             setTokenAndExpiration(json)
           }
           return json.user
         }
 
-        setUser(null)
+        setActiveUser(null)
         redirectToInactivityRoute()
         return null
       } catch (e) {
@@ -137,36 +179,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null
       }
     },
-    [serverURL, api, userSlug, i18n, redirectToInactivityRoute, setTokenAndExpiration],
+    [
+      serverURL,
+      api,
+      userSlug,
+      i18n,
+      redirectToInactivityRoute,
+      setTokenAndExpiration,
+      setActiveUser,
+    ],
   )
 
   const logOut = useCallback(() => {
-    setUser(null)
+    setActiveUser(null)
     revokeTokenAndExpire()
-    requests.post(`${serverURL}${api}/${userSlug}/logout`)
-  }, [serverURL, api, userSlug, revokeTokenAndExpire])
-
-  const refreshPermissions = useCallback(async () => {
-    const params = {
-      locale: code,
-    }
-    try {
-      const request = await requests.get(`${serverURL}${api}/access?${qs.stringify(params)}`, {
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      })
-
-      if (request.status === 200) {
-        const json: Permissions = await request.json()
-        setPermissions(json)
-      } else {
-        throw new Error(`Fetching permissions failed with status code ${request.status}`)
-      }
-    } catch (e) {
-      toast.error(`Refreshing permissions failed: ${e.message}`)
-    }
-  }, [serverURL, api, i18n, code])
+    void requests.post(`${serverURL}${api}/${userSlug}/logout`)
+  }, [serverURL, api, userSlug, revokeTokenAndExpire, setActiveUser])
 
   const fetchFullUser = React.useCallback(async () => {
     try {
@@ -180,7 +208,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const json = await request.json()
 
         if (json?.user) {
-          setUser(json.user)
+          setActiveUser(json.user)
           if (json?.token) {
             setTokenAndExpiration(json)
           }
@@ -199,28 +227,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })
           if (autoLoginResult.status === 200) {
             const autoLoginJson = await autoLoginResult.json()
-            setUser(autoLoginJson.user)
+            setActiveUser(autoLoginJson.user)
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
           } else {
-            setUser(null)
+            setActiveUser(null)
             revokeTokenAndExpire()
           }
         } else {
-          setUser(null)
+          setActiveUser(null)
           revokeTokenAndExpire()
         }
       }
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [serverURL, api, userSlug, i18n, autoLogin, setTokenAndExpiration, revokeTokenAndExpire])
+  }, [
+    serverURL,
+    api,
+    userSlug,
+    i18n,
+    autoLogin,
+    setTokenAndExpiration,
+    revokeTokenAndExpire,
+    setActiveUser,
+  ])
 
   // On mount, get user and set
   useEffect(() => {
-    fetchFullUser()
-  }, [fetchFullUser])
+    if (id === undefined || id !== userIDRef.current) {
+      void fetchFullUser()
+    }
+  }, [fetchFullUser, id])
 
   // When location changes, refresh cookie
   useEffect(() => {
@@ -232,13 +271,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     setLastLocationChange(Date.now())
   }, [pathname])
-
-  // When user changes, get new access
-  useEffect(() => {
-    if (id) {
-      refreshPermissions()
-    }
-  }, [i18n, id, api, serverURL, refreshPermissions])
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>
@@ -267,7 +299,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(
         () => {
-          setUser(null)
+          setActiveUser(null)
           revokeTokenAndExpire()
           redirectToInactivityRoute()
         },
@@ -278,7 +310,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       if (forceLogOut) clearTimeout(forceLogOut)
     }
-  }, [tokenExpiration, closeAllModals, i18n, redirectToInactivityRoute, revokeTokenAndExpire])
+  }, [
+    tokenExpiration,
+    closeAllModals,
+    i18n,
+    redirectToInactivityRoute,
+    revokeTokenAndExpire,
+    setActiveUser,
+  ])
 
   return (
     <Context.Provider
@@ -289,8 +328,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshCookie,
         refreshCookieAsync,
         refreshPermissions,
-        setUser,
+        setUser: setActiveUser,
+        strategy,
         token: tokenInMemory,
+        tokenExpiration,
         user,
       }}
     >
