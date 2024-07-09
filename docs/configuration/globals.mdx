@@ -93,13 +93,13 @@ The following options are available:
 
 | Option        | Description                                                                                                                       |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `group`       | Text used as a label for grouping collection and global links together in the navigation.                                         |
-| `hidden`      | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
-| `components`  | Swap in your own React components to be used within this Global. [More details](../admin/components#globals).                           |
-| `preview`     | Function to generate a preview URL within the [Admin Panel](../admin/overview) for this global that can point to your app. [More details](#preview).           |
-| `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
-| `hideAPIURL`  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
-| `meta`        | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.       |
+| **`group`**       | Text used as a label for grouping collection and global links together in the navigation.                                         |
+| **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
+| **`components`**  | Swap in your own React components to be used within this Global. [More details](../admin/components#globals).                           |
+| **`preview`**     | Function to generate a preview URL within the [Admin Panel](../admin/overview) for this global that can point to your app. [More details](#preview).           |
+| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
+| **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
+| **`meta`**        | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.       |
 
 ### Preview
 
@@ -135,8 +135,8 @@ The preview function receives two arguments:
 
 | Argument | Description |
 | --- | --- |
-| `doc` | The document being edited |
-| `ctx` | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
+| **`doc`** | The document being edited |
+| **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
 
 <Banner type="success">
   <strong>Tip:</strong>
