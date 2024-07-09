@@ -81,7 +81,6 @@ describe('Upload', () => {
     await saveDocAndAssert(page)
   }
 
-  // eslint-disable-next-line playwright/expect-expect
   test('should upload files', async () => {
     await uploadImage()
   })
