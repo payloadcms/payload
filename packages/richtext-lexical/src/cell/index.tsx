@@ -17,10 +17,10 @@ import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js
 import { getEnabledNodes } from '../lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<
-  CellComponentProps & {
+  {
     admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
-  }
+  } & CellComponentProps
 > = (props) => {
   const { admin, lexicalEditorConfig, richTextComponentMap } = props
 
