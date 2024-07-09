@@ -6,11 +6,20 @@ desc: Manage and customize internationalization support in your CMS editor exper
 keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Not only does Payload support managing localized content, it also has internationalization support so that admin users can work in their preferred language. 
+The [Admin Panel](../admin/overview) is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). With i18n, editors can navigate the interface and read API error messages in their preferred language. Users can easily select a language from the Account View and have their preference saved for future visits.
 
-By default, Payload comes with English installed as the language it uses. But, you can import and pass other languages to the Payload config as well. It's best to only support the languages that you need, because that way, the bundled JavaScript is kept to a minimum for your project.
+By default, Payload comes with preinstalled with English, but you can easily load other languages into your own application. Languages are automatically detected based on the user's browser. If no language was detected, or if the user's language is not yet supported by your application, English will be chosen.
 
-Here's an example for how to pass additional languages to Payload for use in translating:
+<Banner type="success">
+  <strong>Note:</strong>
+  If there is a language that Payload does not yet support, we accept [code contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
+</Banner>
+
+## Config Options
+
+You can easily customize and override any of the i18n settings that Payload provides by default. Payload will use your custom options and merge them in with its own.
+
+To add a new language, use the `i18n` key in your [Payload Config](./overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -18,26 +27,34 @@ import { en } from 'payload/i18n/en'
 import { de } from 'payload/i18n/de'
 
 export default buildConfig({
-  /**
-   * Payload accepts specific translations to use.
-   * This is completely optional and will default to English if not provided
-   */
+  // ...
+  // highlight-start
   i18n: {
     // Payload will support either English or German,
     // able to be specified in preferences on a user-by-user basis
     supportedLanguages: { en, de },
   },
-
-  // .. the rest of your config
+  // highlight-end
 })
 ```
 
+<Banner type="warning">
+ <strong>Tip:</strong>
+ It's best to only support the languages that you need so that the bundled JavaScript is kept to a minimum for your project.
+</Banner>
 
-### Configuration Options
+The following options are available:
 
-In your Payload config, you can add translations and customize the settings in `i18n`. Payload will use your custom options and merge it with the default, allowing you to override the settings Payload provides.
+| Option                | Description                                                                                                                                                                                                                   |
+| --------------------- | --------------------------------|
+| **`fallbackLanguage`**     | The language to fall back to if the user's preferred language is not supported. Default is `'en'`.                                                                                                                           |
+| **`debug`**           | Whether to log debug information to the console. Default is `false`.                                                                                                                                                         |
+| **`translations`**    | An object containing the translations. The keys are the language codes and the values are the translations.                                                                                                                |
+| **`supportedLanguages`** | An object containing the supported languages. The keys are the language codes and the values are the translations.                                                                                                         |
 
-**Example Payload config extending i18n:**
+## Custom Translations
+
+Here is an example of how you can add custom translations to your project:
 
 ```ts
 import { buildConfig } from 'payload/config'
@@ -45,9 +62,10 @@ import { buildConfig } from 'payload/config'
 export default buildConfig({
   //...
   i18n: {
-    fallbackLng: 'en', // default
+    fallbackLanguage: 'en', // default
     debug: false, // default
-    resources: {
+    // highlight-start
+    translations: {
       en: {
         custom: {
           // namespace can be anything you want
@@ -59,6 +77,7 @@ export default buildConfig({
         },
       },
     },
+    // highlight-end
   },
   //...
 })
@@ -112,57 +131,17 @@ export const Articles: CollectionConfig = {
 }
 ```
 
-## Admin UI
-
-The [Admin Panel](../admin/overview) reads the language settings of a user's browser and display all text in that language, or will fall back to English if the user's language is not yet supported.
-After a user logs in, they can change their language selection in the `/account` view.
-
-<Banner>
-  <strong>Note:</strong>
-  <br />
-  If there is a language that Payload does not yet support, we accept code
-  [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md). You can also make and import your own translation files.
-</Banner>
-
 ## Node
 
 Payload's backend sets the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
 Anywhere in your Payload app that you have access to the `req` object, you can access payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
-## Configuration Options
+## TypeScript
 
-In your Payload config, you can add translations and customize the settings in `i18n`. Payload will use your custom options and merge it with the default, allowing you to override the settings Payload provides.
+In order to use custom translations in your project, you need to provide the types for the translations.
 
-**Example Payload config extending i18n:**
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  //...
-  i18n: {
-    fallbackLanguage: 'en', // default
-    translations: {
-      en: {
-        custom: {
-          // namespace can be anything you want
-          key1: 'Translation with {{variable}}', // translation
-        },
-        // override existing translation keys
-        general: {
-          dashboard: 'Home',
-        },
-      },
-    },
-  },
-  //...
-})
-```
-
-## Types for custom translations
-
-In order to use custom translations in your project, you need to provide the types for the translations. Here is an example of how you can define the types for the custom translations in a custom react component:
+Here is an example of how you can define the types for the custom translations in a [Custom Component](../admin/components):
 
 ```ts
 'use client'
