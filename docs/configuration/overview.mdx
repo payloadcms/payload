@@ -2,7 +2,7 @@
 title: The Payload Config
 label: Overview
 order: 10
-desc: The Payload config is central to everything that Payload does, from adding custom React components, to modifying collections, controlling localization and much more.
+desc: The Payload Config is central to everything that Payload does, from adding custom React components, to modifying collections, controlling localization and much more.
 keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
@@ -20,9 +20,11 @@ export default buildConfig({
 })
 ```
 
+The Payload Config is strongly typed and ties directly into Payload's TypeScript codebase. This means your IDE (such as VSCode) will provide helpful information like type-ahead suggestions while you write your config.
+
 <Banner type="success">
   <strong>Tip:</strong>
-  The Payload Config is strongly typed, so your IDE (such as VSCode) will provide helpful information like type-ahead suggestions while you write your config.
+  The location of your Payload Config can be customized. [More details](#customizing--automating-config-location-detection).
 </Banner>
 
 ## Options
@@ -104,7 +106,7 @@ _\* An asterisk denotes that a property is required._
 
 ## Customizing & Automating Config Location Detection
 
-For Payload command-line scripts, we need to be able to locate your Payload config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including the root current working directory, your `tsconfig`'s `rootDir`, and your `tsconfig`'s `outDir`.
+For Payload command-line scripts, we need to be able to locate your Payload Config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including the root current working directory, your `tsconfig`'s `rootDir`, and your `tsconfig`'s `outDir`.
 
 In development mode, if the configuration file is not found at the root, Payload will attempt to read your `tsconfig.json`, and search in the directory specified in `compilerOptions.rootDir` (typically "src").
 
@@ -114,7 +116,7 @@ Please ensure your `tsconfig.json` is properly configured if you want Payload to
 
 ### Overriding the Config Location
 
-In addition to the above automated detection, you can specify your own location for the Payload config file. This is done by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory. This can be useful in situations where your Payload config is not in a standard location, or you wish to switch between multiple configurations.
+In addition to the above automated detection, you can specify your own location for the Payload Config. This is done by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory. This can be useful in situations where your Payload Config is not in a standard location, or you wish to switch between multiple configurations.
 
 **Example in package.json:**
 
@@ -140,7 +142,7 @@ You can opt out by setting `typescript.autoGenerate: false`.
 
 **`declare`**
 
-By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. This promotes strong typing across all of Payload's APIs. However, if you are using your Payload config in a monorepo sub-package, and you are using it in multiple applications, you might want to disable this automatic declaration and then manually add the `declare` block to a file that you control.
+By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. This promotes strong typing across all of Payload's APIs. However, if you are using your Payload Config in a monorepo sub-package, and you are using it in multiple applications, you might want to disable this automatic declaration and then manually add the `declare` block to a file that you control.
 
 In these cases, you can set `typescript.declare: false` to opt out.
 
@@ -148,26 +150,26 @@ In these cases, you can set `typescript.declare: false` to opt out.
 
 You can control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.
 
-### Importing Payload config types
+### Importing Payload Config types
 
 You can import config types as follows:
 
 ```ts
 import { Config } from 'payload'
 
-// This is the type used for an incoming Payload config.
+// This is the type used for an incoming Payload Config.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
 import { SanitizedConfig } from 'payload'
 
-// This is the type used after an incoming Payload config is fully sanitized.
+// This is the type used after an incoming Payload Config is fully sanitized.
 // Generally, this is only used internally by Payload.
 ```
 
 ## Telemetry
 
-Payload collects **completely anonymous** telemetry data about general usage. This data is super important to us and helps us accurately understand how we're growing and what we can do to build the software into everything that it can possibly be. The telemetry that we collect also help us demonstrate our growth in an accurate manner, which helps us as we seek investment to build and scale our team. If we can accurately demonstrate our growth, we can more effectively continue to support Payload as free and open-source software. To opt out of telemetry, you can pass `telemetry: false` within your Payload config.
+Payload collects **completely anonymous** telemetry data about general usage. This data is super important to us and helps us accurately understand how we're growing and what we can do to build the software into everything that it can possibly be. The telemetry that we collect also help us demonstrate our growth in an accurate manner, which helps us as we seek investment to build and scale our team. If we can accurately demonstrate our growth, we can more effectively continue to support Payload as free and open-source software. To opt out of telemetry, you can pass `telemetry: false` within your Payload Config.
 
 For more information about what we track, take a look at our [privacy policy](/privacy).
