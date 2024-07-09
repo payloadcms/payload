@@ -27,7 +27,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",
-    "src/**/*.json"
-, "src/forms/Form/getDataByPath.ts", "src/forms/Form/getSiblingData.ts"  ],
+    "src/**/*.json",
+  ],
   "references": [{ "path": "../payload" }, { "path": "../translations" }]
 }
