@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -9,8 +9,8 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { BlocksFeature } from '@payloadcms/richtext-lexical'
 
-import { admins } from '../../access/admins'
-import { usersOrPublished } from '../../access/usersOrPublished'
+import { authenticated } from '../../access/authenticated'
+import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Banner } from '../../blocks/Banner'
 import { Code } from '../../blocks/Code'
 import { MediaBlock } from '../../blocks/MediaBlock'
@@ -22,10 +22,10 @@ import { revalidatePost } from './hooks/revalidatePost'
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
-    create: admins,
-    delete: admins,
-    read: usersOrPublished,
-    update: admins,
+    create: authenticated,
+    delete: authenticated,
+    read: authenticatedOrPublished,
+    update: authenticated,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],

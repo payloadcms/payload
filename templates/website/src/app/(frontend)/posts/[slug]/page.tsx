@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
@@ -9,7 +10,6 @@ import RichText from 'src/app/components/RichText'
 
 import type { Post } from '../../../../payload-types'
 
-import { PayloadRedirects } from '../../../components/PayloadRedirects'
 import { PostHero } from '../../../heros/PostHero'
 import { generateMeta } from '../../../utilities/generateMeta'
 import PageClient from './page.client'
@@ -30,13 +30,14 @@ export default async function Post({ params: { slug = '' } }) {
   const url = '/posts/' + slug
   const post = await queryPostBySlug({ slug })
 
-  if (!post) {
-    return <PayloadRedirects url={url} />
-  }
+  if (!post) return <PayloadRedirects url={url} />
 
   return (
     <article className="pt-16 pb-16">
       <PageClient />
+
+      {/* Allows redirects for valid pages too */}
+      <PayloadRedirects disableNotFound url={url} />
 
       <PostHero post={post} />
 
