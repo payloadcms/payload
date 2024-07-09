@@ -422,9 +422,9 @@ describe('access control', () => {
       existingDoc = await payload.create({
         collection: docLevelAccessSlug,
         data: {
+          approvedForRemoval: false,
           approvedTitle: 'Title',
           lockTitle: true,
-          approvedForRemoval: false,
         },
       })
     })
@@ -466,12 +466,12 @@ describe('access control', () => {
       await page.waitForURL(logoutURL)
 
       await login({
-        page,
-        serverURL,
         data: {
           email: noAdminAccessEmail,
           password: 'test',
         },
+        page,
+        serverURL,
       })
 
       await expect(page.locator('.next-error-h1')).toBeVisible()
@@ -481,12 +481,12 @@ describe('access control', () => {
 
       // Log back in for the next test
       await login({
-        page,
-        serverURL,
         data: {
           email: devUser.email,
           password: devUser.password,
         },
+        page,
+        serverURL,
       })
     })
 
@@ -500,9 +500,9 @@ describe('access control', () => {
       await page.goto(logoutURL)
       await page.waitForURL(logoutURL)
 
-      const nonAdminUser: NonAdminUser & {
+      const nonAdminUser: {
         token?: string
-      } = await payload.login({
+      } & NonAdminUser = await payload.login({
         collection: nonAdminUserSlug,
         data: {
           email: nonAdminUserEmail,
@@ -513,8 +513,8 @@ describe('access control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          value: nonAdminUser.token,
           url: serverURL,
+          value: nonAdminUser.token,
         },
       ])
 
@@ -554,10 +554,9 @@ describe('access control', () => {
   })
 })
 
-// eslint-disable-next-line @typescript-eslint/require-await
-async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown>> {
+async function createDoc(data: any): Promise<Record<string, unknown> & TypeWithID> {
   return payload.create({
     collection: slug,
     data,
-  }) as any as Promise<TypeWithID & Record<string, unknown>>
+  }) as any as Promise<Record<string, unknown> & TypeWithID>
 }
