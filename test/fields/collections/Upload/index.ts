@@ -9,32 +9,6 @@ const Uploads: CollectionConfig = {
   upload: {
     allowRemoteUpload: true,
     staticDir: path.resolve(__dirname, './uploads'),
-    // imageSizes: [
-    //   {
-    //     name: 'squareSmall',
-    //     width: 480,
-    //     height: 480,
-    //     position: 'centre',
-    //     withoutEnlargement: false,
-    //   },
-    //   {
-    //     name: 'undefinedHeight',
-    //     width: 300,
-    //     height: undefined,
-    //   },
-    //   {
-    //     name: 'undefinedWidth',
-    //     width: undefined,
-    //     height: 300,
-    //   },
-    //   {
-    //     name: 'undefinedAll',
-    //     width: undefined,
-    //     height: undefined,
-    //     fit: 'fill',
-    //   },
-    // ],
-    // focalPoint: false,
   },
   fields: [
     {
