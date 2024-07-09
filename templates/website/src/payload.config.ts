@@ -1,3 +1,4 @@
+// storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 
 import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
@@ -6,15 +7,13 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import {
+  BoldFeature,
   FixedToolbarFeature,
   HeadingFeature,
-  LinkFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+  ItalicFeature,
+ LinkFeature , lexicalEditor } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
 import { UnderlineFeature } from '@payloadcms/richtext-lexical'
-import { ItalicFeature } from '@payloadcms/richtext-lexical'
-import { BoldFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -163,7 +162,7 @@ export default buildConfig({
         },
       },
     }),
-    payloadCloudPlugin(),
+    payloadCloudPlugin(), // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
