@@ -1,5 +1,5 @@
 'use client'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import { useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../providers/Locale/index.js'

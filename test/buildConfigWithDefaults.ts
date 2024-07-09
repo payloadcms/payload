@@ -1,4 +1,4 @@
-import type { SanitizedConfig, Config } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -163,12 +163,6 @@ export async function buildConfigWithDefaults(
 
     ...testConfig,
 
-    typescript: {
-      declare: {
-        ignoreTSError: true,
-      },
-      ...testConfig?.typescript,
-    },
     i18n: {
       supportedLanguages: {
         de,
@@ -176,6 +170,12 @@ export async function buildConfigWithDefaults(
         es,
       },
       ...(testConfig?.i18n || {}),
+    },
+    typescript: {
+      declare: {
+        ignoreTSError: true,
+      },
+      ...testConfig?.typescript,
     },
   }
 

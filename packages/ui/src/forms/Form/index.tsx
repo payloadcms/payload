@@ -11,7 +11,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 

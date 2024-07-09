@@ -72,7 +72,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.0-beta.0",
+    "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@lexical/headless": "0.16.1",
     "@lexical/link": "0.16.1",

@@ -154,7 +154,7 @@ This one isn't too bad, but more complex queries get unavoidably more difficult 
 **For example, using fetch:**
 
 ```js
-import qs from 'qs'
+import { stringify } from 'qs-esm'
 
 const query = {
   color: {
@@ -165,7 +165,7 @@ const query = {
 }
 
 const getPosts = async () => {
-  const stringifiedQuery = qs.stringify(
+  const stringifiedQuery = stringify(
     {
       where: query, // ensure that `qs` adds the `where` property, too!
     },
