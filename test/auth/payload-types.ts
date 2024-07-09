@@ -34,46 +34,28 @@ export interface Config {
       });
 }
 export interface UserAuthOperations {
-  login:
-    | {
-        email: string;
-        password: string;
-      }
-    | {
-        username: string;
-        password: string;
-      };
-  forgotPassword:
-    | {
-        email: string;
-      }
-    | {
-        username: string;
-      };
-  registerFirstUser:
-    | {
-        email: string;
-        password: string;
-      }
-    | {
-        username: string;
-        password: string;
-      };
-  unlock:
-    | {
-        email: string;
-      }
-    | {
-        username: string;
-      };
-}
-export interface ApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
   login: {
     email: string;
     password: string;
   };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+  };
+}
+export interface ApiKeyAuthOperations {
   forgotPassword: {
     email: string;
+  };
+  login: {
+    email: string;
+    password: string;
   };
   registerFirstUser: {
     email: string;
@@ -84,12 +66,12 @@ export interface ApiKeyAuthOperations {
   };
 }
 export interface PublicUserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
   login: {
     email: string;
     password: string;
-  };
-  forgotPassword: {
-    email: string;
   };
   registerFirstUser: {
     email: string;
@@ -128,7 +110,6 @@ export interface User {
   updatedAt: string;
   createdAt: string;
   email: string;
-  username: string;
   password?: string | null;
 }
 /**
