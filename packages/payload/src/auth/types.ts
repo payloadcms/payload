@@ -119,8 +119,8 @@ export type AuthStrategy = {
 }
 
 export type LoginWithUsernameOptions = {
-  allowEmailLogin: boolean
-  requireEmail: boolean
+  allowEmailLogin?: boolean
+  requireEmail?: boolean
 }
 
 export interface IncomingAuthType {
@@ -155,7 +155,8 @@ export type VerifyConfig = {
   generateEmailSubject?: GenerateVerifyEmailSubject
 }
 
-export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'verify'> {
+export interface Auth
+  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
