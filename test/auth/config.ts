@@ -36,6 +36,10 @@ export default buildConfigWithDefaults({
         tokenExpiration: 7200, // 2 hours
         useAPIKey: true,
         verify: false,
+        loginWithUsername: {
+          allowEmailLogin: true,
+          requireEmail: false,
+        },
       },
       fields: [
         {

@@ -6,7 +6,7 @@ import type {
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -82,26 +82,44 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     let user
-    const loginWithUsername = collectionConfig?.auth?.loginWithUsername
     const { email: unsanitizedEmail, password } = data
+    const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+
+    const sanitizedEmail =
+      typeof unsanitizedEmail !== 'string' ? null : unsanitizedEmail.toLowerCase().trim()
     const username = 'username' in data && data.username
 
-    if (loginWithUsername && !username) {
+    const canLoginWithUsername = Boolean(loginWithUsername)
+    const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+
+    // cannot login with email, did not provide username
+    if (!canLoginWithEmail && !username) {
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
       })
     }
 
-    if (
-      !loginWithUsername &&
-      (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '')
-    ) {
+    // cannot login with username, did not provide email
+    if (!canLoginWithUsername && !sanitizedEmail) {
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
       })
     }
+
+    // can login with either email or username, did not provide either
+    if (!username && !sanitizedEmail) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [
+          { field: 'email', message: req.i18n.t('validation:required') },
+          { field: 'username', message: req.i18n.t('validation:required') },
+        ],
+      })
+    }
+
+    // did not provide password for login
     if (typeof password !== 'string' || password.trim() === '') {
       throw new ValidationError({
         collection: collectionConfig.slug,
@@ -109,19 +127,30 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       })
     }
 
-    const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
+    let whereConstraint: Where = {}
+
+    if (canLoginWithEmail && sanitizedEmail) {
+      whereConstraint = {
+        email: {
+          equals: sanitizedEmail,
+        },
+      }
+    } else if (canLoginWithUsername && username) {
+      whereConstraint = {
+        username: {
+          equals: username,
+        },
+      }
+    }
 
     user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       req,
-      where:
-        loginWithUsername && username
-          ? { username: { equals: username } }
-          : { email: { equals: unsanitizedEmail.toLowerCase() } },
+      where: whereConstraint,
     })
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
-      throw new AuthenticationError(req.t, loginWithUsername)
+      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && username))
     }
 
     if (user && isLocked(user.lockUntil)) {
@@ -160,7 +189,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      email,
+      email: sanitizedEmail,
       user,
     })
 

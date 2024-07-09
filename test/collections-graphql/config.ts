@@ -344,6 +344,9 @@ export default buildConfigWithDefaults({
     {
       slug: 'cyclical-relationship',
       access: openAccess,
+      admin: {
+        useAsTitle: 'title',
+      },
       fields: [
         {
           name: 'title',
@@ -353,7 +356,8 @@ export default buildConfigWithDefaults({
         {
           name: 'relationToSelf',
           type: 'relationship',
-          relationTo: 'cyclical-relationship',
+          relationTo: ['cyclical-relationship'],
+          hasMany: true,
         },
         {
           type: 'upload',

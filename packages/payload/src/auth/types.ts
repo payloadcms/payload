@@ -118,6 +118,11 @@ export type AuthStrategy = {
   name: string
 }
 
+export type LoginWithUsernameOptions = {
+  allowEmailLogin: boolean
+  requireEmail: boolean
+}
+
 export interface IncomingAuthType {
   cookies?: {
     domain?: string
@@ -131,7 +136,7 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
   lockTime?: number
-  loginWithUsername?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | boolean
   maxLoginAttempts?: number
   removeTokenFromResponses?: true
   strategies?: AuthStrategy[]
@@ -155,6 +160,7 @@ export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPasswo
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+  loginWithUsername: LoginWithUsernameOptions | false
   verify?: VerifyConfig | boolean
 }
 
