@@ -151,6 +151,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     handleFileChange(null)
     setFileSrc('')
     setFileUrl('')
+    setDoc({})
     setShowUrlInput(false)
   }, [handleFileChange])
 
