@@ -11,7 +11,9 @@ import {
   FixedToolbarFeature,
   HeadingFeature,
   ItalicFeature,
- LinkFeature , lexicalEditor } from '@payloadcms/richtext-lexical'
+  LinkFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
 import { UnderlineFeature } from '@payloadcms/richtext-lexical'
 import dotenv from 'dotenv'
