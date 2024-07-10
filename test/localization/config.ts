@@ -300,7 +300,28 @@ export default buildConfigWithDefaults({
   localization: {
     defaultLocale,
     fallback: true,
-    locales: [defaultLocale, spanishLocale, portugueseLocale, 'ar'],
+    locales: [
+      {
+        code: defaultLocale,
+        label: 'English',
+        rtl: false,
+      },
+      {
+        code: spanishLocale,
+        label: 'Spanish',
+        rtl: false,
+      },
+      {
+        code: portugueseLocale,
+        fallbackLocale: spanishLocale,
+        label: 'Portuguese',
+      },
+      {
+        code: 'ar',
+        label: 'Arabic',
+        rtl: true,
+      },
+    ],
   },
   onInit: async (payload) => {
     const collection = localizedPostsSlug

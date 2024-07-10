@@ -66,7 +66,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
     void initializeLocale()
   }, [defaultLocale, getPreference, handleLocaleChange, localeFromParams, localization, user])
-  console.log({ locale })
+
   return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
 }
 
