@@ -16,8 +16,11 @@ const require = createRequire(import.meta.url)
 export const pushDevSchema = async (db: PostgresAdapter) => {
   const { pushSchema } = require('drizzle-kit/payload')
 
+  // isolate changes to only use the custom schema if configured
+  const schemaFilters = db.pgSchema ? [db.pgSchema] : []
+
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { apply, hasDataLoss, warnings } = await pushSchema(db.schema, db.drizzle)
+  const { apply, hasDataLoss, warnings } = await pushSchema(db.schema, db.drizzle, schemaFilters)
 
   if (warnings.length) {
     let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`

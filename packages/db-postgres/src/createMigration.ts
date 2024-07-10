@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
+ 
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
@@ -35,12 +35,12 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
     schemas: {},
     tables: {},
   },
-  dialect: 'pg',
+  dialect: 'postgresql',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
   tables: {},
-  version: '5',
+  version: '7',
 })
 
 export const createMigration: CreateMigration = async function createMigration(
