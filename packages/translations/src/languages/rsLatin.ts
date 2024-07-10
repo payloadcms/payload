@@ -316,6 +316,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     within: 'unutar',
   },
   upload: {
+    addImage: 'Dodaj sliku',
     crop: 'Isecite sliku',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',
@@ -330,6 +331,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     height: 'Visina',
     lessInfo: 'Manje informacija',
     moreInfo: 'Više informacija',
+    pasteURL: 'Nalepi URL',
     previewSizes: 'Veličine pregleda',
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
     selectFile: 'Odaberite datoteku',

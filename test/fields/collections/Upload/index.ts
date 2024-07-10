@@ -9,29 +9,29 @@ const dirname = path.dirname(filename)
 
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
-  upload: {
-    staticDir: path.resolve(dirname, './uploads'),
-  },
   fields: [
     {
-      type: 'text',
       name: 'text',
+      type: 'text',
     },
     {
-      type: 'upload',
       name: 'media',
-      relationTo: uploadsSlug,
+      type: 'upload',
       filterOptions: {
         mimeType: {
           equals: 'image/png',
         },
       },
+      relationTo: uploadsSlug,
     },
     {
-      type: 'richText',
       name: 'richText',
+      type: 'richText',
     },
   ],
+  upload: {
+    staticDir: path.resolve(dirname, './uploads'),
+  },
 }
 
 export default Uploads
