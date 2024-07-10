@@ -23,11 +23,16 @@ export async function writeEnvFile(args: {
   const envOutputPath = path.join(projectDir, '.env')
 
   try {
-    if (fs.existsSync(envOutputPath)) {
-      if (template?.type === 'starter') {
-        // Parse .env file into key/value pairs
-        const envFile = await fs.readFile(path.join(projectDir, '.env.example'), 'utf8')
-        const envWithValues: string[] = envFile
+    let fileContents: string
+
+    if (template?.type === 'starter') {
+      // Parse .env file into key/value pairs
+      const envExample = path.join(projectDir, '.env.example')
+      const envFile = await fs.readFile(envExample, 'utf8')
+
+      fileContents =
+        `# Added by Payload\n` +
+        envFile
           .split('\n')
           .filter((e) => e)
           .map((line) => {
@@ -46,18 +51,17 @@ export async function writeEnvFile(args: {
 
             return `${key}=${value}`
           })
-
-        // Write new .env file
-        await fs.writeFile(envOutputPath, envWithValues.join('\n'))
-      } else {
-        const existingEnv = await fs.readFile(envOutputPath, 'utf8')
-        const newEnv =
-          existingEnv + `\nDATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}\n`
-        await fs.writeFile(envOutputPath, newEnv)
-      }
+          .join('\n')
     } else {
-      const content = `DATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
-      await fs.outputFile(`${projectDir}/.env`, content)
+      fileContents = `# Added by Payload\nDATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}\n`
+    }
+
+    if (fs.existsSync(envOutputPath)) {
+      const existingEnv = await fs.readFile(envOutputPath, 'utf8')
+      const newEnv = existingEnv + '\n# Added by Payload' + fileContents
+      await fs.writeFile(envOutputPath, newEnv)
+    } else {
+      await fs.writeFile(envOutputPath, fileContents)
     }
   } catch (err: unknown) {
     error('Unable to write .env file')
