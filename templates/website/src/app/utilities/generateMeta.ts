@@ -14,6 +14,10 @@ export const generateMeta = async (args: { doc: Page | Post }): Promise<Metadata
     'url' in doc.meta.image &&
     `${process.env.NEXT_PUBLIC_SERVER_URL}${doc.meta.image.url}`
 
+  const title = doc?.meta?.title
+    ? doc?.meta?.title + ' | Payload Website Template'
+    : 'Payload Website Template'
+
   return {
     description: doc?.meta?.description,
     openGraph: mergeOpenGraph({
@@ -25,9 +29,9 @@ export const generateMeta = async (args: { doc: Page | Post }): Promise<Metadata
             },
           ]
         : undefined,
-      title: doc?.meta?.title || 'Payload',
+      title,
       url: Array.isArray(doc?.slug) ? doc?.slug.join('/') : '/',
     }),
-    title: doc?.meta?.title || 'Payload',
+    title,
   }
 }

@@ -1,8 +1,14 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  Payload,
+  PayloadRequest,
+  RequiredDataFromCollectionSlug,
+} from 'payload'
 
 import { Forbidden } from 'payload'
 
-import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js'
+import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise, { requestHeaders } from './config.js'
@@ -23,7 +29,7 @@ let payload: Payload
 
 describe('Access Control', () => {
   let post1: Post
-  let restricted: Restricted
+  let restricted: FullyRestricted
 
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(configPromise))
@@ -32,7 +38,7 @@ describe('Access Control', () => {
   beforeEach(async () => {
     post1 = await payload.create({
       collection: slug,
-      data: { name: 'name' },
+      data: {},
     })
 
     restricted = await payload.create({
@@ -65,21 +71,21 @@ describe('Access Control', () => {
     })
 
     await payload.update({
-      collection: hiddenFieldsSlug,
       id: doc.id,
+      collection: hiddenFieldsSlug,
       data: {
         title: 'Doc Title',
       },
     })
 
     const updatedDoc = await payload.findByID({
-      collection: hiddenFieldsSlug,
       id: doc.id,
+      collection: hiddenFieldsSlug,
       showHiddenFields: true,
     })
 
-    expect(updatedDoc.partiallyHiddenGroup.value).toEqual('private_value')
-    expect(updatedDoc.partiallyHiddenArray[0].value).toEqual('private_value')
+    expect(updatedDoc.partiallyHiddenGroup.value).toStrictEqual('private_value')
+    expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
   })
 
   it('should not affect hidden fields when patching data - update many', async () => {
@@ -101,22 +107,22 @@ describe('Access Control', () => {
 
     await payload.update({
       collection: hiddenFieldsSlug,
-      where: {
-        id: { equals: docsMany.id },
-      },
       data: {
         title: 'Doc Title',
+      },
+      where: {
+        id: { equals: docsMany.id },
       },
     })
 
     const updatedMany = await payload.findByID({
-      collection: hiddenFieldsSlug,
       id: docsMany.id,
+      collection: hiddenFieldsSlug,
       showHiddenFields: true,
     })
 
-    expect(updatedMany.partiallyHiddenGroup.value).toEqual('private_value')
-    expect(updatedMany.partiallyHiddenArray[0].value).toEqual('private_value')
+    expect(updatedMany.partiallyHiddenGroup.value).toStrictEqual('private_value')
+    expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
   })
 
   it('should be able to restrict access based upon siblingData', async () => {
@@ -125,12 +131,12 @@ describe('Access Control', () => {
       data: {
         array: [
           {
-            text: firstArrayText,
             allowPublicReadability: true,
+            text: firstArrayText,
           },
           {
-            text: secondArrayText,
             allowPublicReadability: false,
+            text: secondArrayText,
           },
         ],
       },
@@ -159,27 +165,27 @@ describe('Access Control', () => {
   describe('Collections', () => {
     describe('restricted collection', () => {
       it('field without read access should not show', async () => {
-        const { id } = await createDoc<Post>({ restrictedField: 'restricted' })
+        const { id } = await createDoc({ restrictedField: 'restricted' })
 
-        const retrievedDoc = await payload.findByID({ collection: slug, id, overrideAccess: false })
+        const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: false })
 
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
       it('field without read access should not show when overrideAccess: true', async () => {
-        const { id, restrictedField } = await createDoc<Post>({ restrictedField: 'restricted' })
+        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
 
-        const retrievedDoc = await payload.findByID({ collection: slug, id, overrideAccess: true })
+        const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
 
-        expect(retrievedDoc.restrictedField).toEqual(restrictedField)
+        expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
 
       it('field without read access should not show when overrideAccess default', async () => {
-        const { id, restrictedField } = await createDoc<Post>({ restrictedField: 'restricted' })
+        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
 
-        const retrievedDoc = await payload.findByID({ collection: slug, id })
+        const retrievedDoc = await payload.findByID({ id, collection: slug })
 
-        expect(retrievedDoc.restrictedField).toEqual(restrictedField)
+        expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
     })
     describe('non-enumerated request properties passed to access control', () => {
@@ -190,25 +196,25 @@ describe('Access Control', () => {
         const name = 'name'
         const overrideAccess = false
 
-        const { id } = await createDoc<RelyOnRequestHeader>({ name }, relyOnRequestHeadersSlug, {
-          req,
+        const { id } = await createDoc({ name }, relyOnRequestHeadersSlug, {
           overrideAccess,
+          req,
         })
         const docById = await payload.findByID({
-          collection: relyOnRequestHeadersSlug,
           id,
-          req,
+          collection: relyOnRequestHeadersSlug,
           overrideAccess,
+          req,
         })
         const { docs: docsByName } = await payload.find({
           collection: relyOnRequestHeadersSlug,
+          overrideAccess,
+          req,
           where: {
             name: {
               equals: name,
             },
           },
-          req,
-          overrideAccess,
         })
 
         expect(docById).not.toBeUndefined()
@@ -220,23 +226,25 @@ describe('Access Control', () => {
         const overrideAccess = false
 
         await expect(() =>
-          createDoc<RelyOnRequestHeader>({ name }, relyOnRequestHeadersSlug, { overrideAccess }),
+          createDoc({ name }, relyOnRequestHeadersSlug, {
+            overrideAccess,
+          }),
         ).rejects.toThrow(Forbidden)
-        const { id } = await createDoc<RelyOnRequestHeader>({ name }, relyOnRequestHeadersSlug)
+        const { id } = await createDoc({ name }, relyOnRequestHeadersSlug)
 
         await expect(() =>
-          payload.findByID({ collection: relyOnRequestHeadersSlug, id, overrideAccess }),
+          payload.findByID({ id, collection: relyOnRequestHeadersSlug, overrideAccess }),
         ).rejects.toThrow(Forbidden)
 
         await expect(() =>
           payload.find({
             collection: relyOnRequestHeadersSlug,
+            overrideAccess,
             where: {
               name: {
                 equals: name,
               },
             },
-            overrideAccess,
           }),
         ).rejects.toThrow(Forbidden)
       })
@@ -248,8 +256,8 @@ describe('Access Control', () => {
       it('should allow overrideAccess: false', async () => {
         const req = async () =>
           await payload.update({
-            collection: slug,
             id: post1.id,
+            collection: slug,
             data: { restrictedField: restricted.id },
             overrideAccess: false, // this should respect access control
           })
@@ -259,8 +267,8 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: true', async () => {
         const doc = await payload.update({
-          collection: slug,
           id: post1.id,
+          collection: slug,
           data: { restrictedField: restricted.id },
           overrideAccess: true, // this should override access control
         })
@@ -270,8 +278,8 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess by default', async () => {
         const doc = await payload.update({
-          collection: slug,
           id: post1.id,
+          collection: slug,
           data: { restrictedField: restricted.id },
         })
 
@@ -282,11 +290,11 @@ describe('Access Control', () => {
         const req = async () =>
           await payload.update({
             collection: slug,
+            data: { restrictedField: restricted.id },
+            overrideAccess: false, // this should respect access control
             where: {
               id: { equals: post1.id },
             },
-            data: { restrictedField: restricted.id },
-            overrideAccess: false, // this should respect access control
           })
 
         await expect(req).rejects.toThrow(Forbidden)
@@ -295,11 +303,11 @@ describe('Access Control', () => {
       it('should allow overrideAccess: true - update many', async () => {
         const doc = await payload.update({
           collection: slug,
+          data: { restrictedField: restricted.id },
+          overrideAccess: true, // this should override access control
           where: {
             id: { equals: post1.id },
           },
-          data: { restrictedField: restricted.id },
-          overrideAccess: true, // this should override access control
         })
 
         expect(doc.docs[0]).toMatchObject({ id: post1.id })
@@ -308,10 +316,10 @@ describe('Access Control', () => {
       it('should allow overrideAccess by default - update many', async () => {
         const doc = await payload.update({
           collection: slug,
+          data: { restrictedField: restricted.id },
           where: {
             id: { equals: post1.id },
           },
-          data: { restrictedField: restricted.id },
         })
 
         expect(doc.docs[0]).toMatchObject({ id: post1.id })
@@ -324,8 +332,8 @@ describe('Access Control', () => {
       it('should allow overrideAccess: false', async () => {
         const req = async () =>
           await payload.update({
-            collection: fullyRestrictedSlug,
             id: restricted.id,
+            collection: fullyRestrictedSlug,
             data: { name: updatedName },
             overrideAccess: false, // this should respect access control
           })
@@ -335,8 +343,8 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess: true', async () => {
         const doc = await payload.update({
-          collection: fullyRestrictedSlug,
           id: restricted.id,
+          collection: fullyRestrictedSlug,
           data: { name: updatedName },
           overrideAccess: true, // this should override access control
         })
@@ -346,8 +354,8 @@ describe('Access Control', () => {
 
       it('should allow overrideAccess by default', async () => {
         const doc = await payload.update({
-          collection: fullyRestrictedSlug,
           id: restricted.id,
+          collection: fullyRestrictedSlug,
           data: { name: updatedName },
         })
 
@@ -358,11 +366,11 @@ describe('Access Control', () => {
         const req = async () =>
           await payload.update({
             collection: fullyRestrictedSlug,
+            data: { name: updatedName },
+            overrideAccess: false, // this should respect access control
             where: {
               id: { equals: restricted.id },
             },
-            data: { name: updatedName },
-            overrideAccess: false, // this should respect access control
           })
 
         await expect(req).rejects.toThrow(Forbidden)
@@ -371,11 +379,11 @@ describe('Access Control', () => {
       it('should allow overrideAccess: true - update many', async () => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
+          data: { name: updatedName },
+          overrideAccess: true, // this should override access control
           where: {
             id: { equals: restricted.id },
           },
-          data: { name: updatedName },
-          overrideAccess: true, // this should override access control
         })
 
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
@@ -384,10 +392,10 @@ describe('Access Control', () => {
       it('should allow overrideAccess by default - update many', async () => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
+          data: { name: updatedName },
           where: {
             id: { equals: restricted.id },
           },
-          data: { name: updatedName },
         })
 
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
@@ -407,8 +415,8 @@ describe('Access Control', () => {
       await payload.create({
         collection: hiddenAccessSlug,
         data: {
-          title: 'hello',
           hidden: true,
+          title: 'hello',
         },
       })
 
@@ -431,8 +439,8 @@ describe('Access Control', () => {
       await payload.create({
         collection: hiddenAccessCountSlug,
         data: {
-          title: 'hello',
           hidden: true,
+          title: 'hello',
         },
       })
 
@@ -461,11 +469,11 @@ describe('Access Control', () => {
         },
       })
       const { docs } = await payload.findVersions({
+        collection: restrictedVersionsSlug,
+        overrideAccess: false,
         where: {
           'version.name': { equals: 'match' },
         },
-        collection: restrictedVersionsSlug,
-        overrideAccess: false,
       })
 
       expect(docs).toHaveLength(1)
@@ -473,14 +481,16 @@ describe('Access Control', () => {
   })
 })
 
-async function createDoc<Collection>(
-  data: Partial<Collection>,
-  overrideSlug = slug,
+async function createDoc<TSlug extends CollectionSlug = 'posts'>(
+  data: RequiredDataFromCollectionSlug<TSlug>,
+  overrideSlug?: TSlug,
   options?: Partial<Parameters<Payload['create']>[0]>,
-) {
+): Promise<DataFromCollectionSlug<TSlug>> {
+  // @ts-expect-error
   return await payload.create({
     ...options,
-    collection: overrideSlug,
+    collection: overrideSlug ?? slug,
+    // @ts-expect-error
     data: data ?? {},
   })
 }

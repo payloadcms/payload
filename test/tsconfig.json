@@ -43,7 +43,7 @@
       "@payload-config": ["./_community/config.ts"]
     }
   },
-  "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
+  "exclude": ["dist", "build", "node_modules", "eslint.config.js", "dist/**/*.js", "**/dist/**/*.js"],
   "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }

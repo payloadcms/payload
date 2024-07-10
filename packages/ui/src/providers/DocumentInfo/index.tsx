@@ -13,7 +13,7 @@ import type {
 
 import { notFound } from 'next/navigation.js'
 import { reduceFieldsToValues } from 'payload/shared'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
@@ -35,9 +35,9 @@ export type * from './types.js'
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<
-  DocumentInfoProps & {
+  {
     children: React.ReactNode
-  }
+  } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
     id,

@@ -8,6 +8,6 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "strict": true
   },
-  "exclude": ["dist", "build", "tests", "test", "node_modules", ".eslintrc.js"],
+  "exclude": ["dist", "build", "tests", "test", "node_modules", "eslint.config.js"],
   "include": ["src/**/*.ts", "src/**/*.spec.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"]
 }
