@@ -126,6 +126,31 @@ export const email: Validate<string, unknown, unknown, EmailField> = (
   return true
 }
 
+export const username: Validate<string, unknown, unknown, TextField> = (
+  value,
+  {
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+  },
+) => {
+  let maxLength: number
+
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
+
+  if (value && maxLength && value.length > maxLength) {
+    return t('validation:shorterThanMax', { maxLength })
+  }
+
+  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
+    return t('validation:username')
+  }
+
+  return true
+}
+
 export const textarea: Validate<string, unknown, unknown, TextareaField> = (
   value,
   {
@@ -168,7 +193,7 @@ export const code: Validate<string, unknown, unknown, CodeField> = (
   return true
 }
 
-export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = async (
+export const json: Validate<string, unknown, unknown, { jsonError?: string } & JSONField> = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -250,7 +275,7 @@ export const date: Validate<Date, unknown, unknown, DateField> = (
   { req: { t }, required },
 ) => {
   if (value && !isNaN(Date.parse(value.toString()))) {
-    /* eslint-disable-line */
+     
     return true
   }
 

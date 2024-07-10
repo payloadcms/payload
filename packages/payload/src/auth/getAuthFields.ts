@@ -1,47 +1,22 @@
 import type { Field } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
-import { email } from '../fields/validations.js'
 import { accountLockFields } from './baseFields/accountLock.js'
 import { apiKeyFields } from './baseFields/apiKey.js'
+import { baseAuthFields } from './baseFields/auth.js'
+import { emailField } from './baseFields/email.js'
+import { usernameField } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
-
-const emailField = ({ required }: { required: boolean }): Field => ({
-  name: 'email',
-  type: 'email',
-  admin: {
-    components: {
-      Field: required ? () => null : undefined,
-    },
-  },
-  label: ({ t }) => t('general:email'),
-  required,
-  unique: required,
-  validate: email,
-})
-
-const usernameField: Field = {
-  name: 'username',
-  type: 'text',
-  admin: {
-    components: {
-      Field: () => null,
-    },
-  },
-  label: ({ t }) => t('authentication:username'),
-  required: true,
-  unique: true,
-}
 
 export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
   const authFields: Field[] = []
 
   if (authConfig.useAPIKey) {
-    authFields.concat(apiKeyFields)
+    authFields.push(...apiKeyFields)
   }
 
   if (!authConfig.disableLocalStrategy) {
-    const emailFieldIndex = authFields.push(emailField({ required: true }))
+    const emailFieldIndex = authFields.push(emailField({ required: true })) - 1
 
     if (authConfig.loginWithUsername) {
       if (
@@ -54,12 +29,14 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
       authFields.push(usernameField)
     }
 
+    authFields.push(...baseAuthFields)
+
     if (authConfig.verify) {
-      authFields.concat(verificationFields)
+      authFields.push(...verificationFields)
     }
 
     if (authConfig.maxLoginAttempts > 0) {
-      authFields.concat(accountLockFields)
+      authFields.push(...accountLockFields)
     }
   }
 

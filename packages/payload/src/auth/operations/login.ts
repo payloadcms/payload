@@ -39,7 +39,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
 
 export const loginOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
-): Promise<Result & { user: DataFromCollectionSlug<TSlug> }> => {
+): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
 
   try {
@@ -128,19 +128,45 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
 
     let whereConstraint: Where = {}
+    const emailConstraint: Where = {
+      email: {
+        equals: sanitizedEmail,
+      },
+    }
+    const usernameConstraint: Where = {
+      username: {
+        equals: username,
+      },
+    }
 
-    if (canLoginWithEmail && sanitizedEmail) {
-      whereConstraint = {
-        email: {
-          equals: sanitizedEmail,
-        },
+    if (canLoginWithEmail && canLoginWithUsername && (username || sanitizedEmail)) {
+      if (username) {
+        whereConstraint = {
+          or: [
+            usernameConstraint,
+            {
+              email: {
+                equals: username,
+              },
+            },
+          ],
+        }
+      } else {
+        whereConstraint = {
+          or: [
+            emailConstraint,
+            {
+              username: {
+                equals: sanitizedEmail,
+              },
+            },
+          ],
+        }
       }
+    } else if (canLoginWithEmail && sanitizedEmail) {
+      whereConstraint = emailConstraint
     } else if (canLoginWithUsername && username) {
-      whereConstraint = {
-        username: {
-          equals: username,
-        },
-      }
+      whereConstraint = usernameConstraint
     }
 
     user = await payload.db.findOne<any>({
@@ -282,7 +308,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })) || user
     }, Promise.resolve())
 
-    let result: Result & { user: DataFromCollectionSlug<TSlug> } = {
+    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       exp: (jwt.decode(token) as jwt.JwtPayload).exp,
       token,
       user,
