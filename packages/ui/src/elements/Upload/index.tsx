@@ -269,6 +269,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           {showUrlInput && (
             <React.Fragment>
               <div className={`${baseClass}__remote-file-wrap`}>
+                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                 <input
                   className={`${baseClass}__remote-file`}
                   onChange={(e) => {
@@ -308,6 +309,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>
+                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
