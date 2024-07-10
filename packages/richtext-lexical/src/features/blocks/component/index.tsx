@@ -34,13 +34,8 @@ import './index.scss'
 
 type Props = {
   children?: React.ReactNode
-
   formData: BlockFields
   nodeKey?: string
-  /**
-   * This transformedFormData already comes wrapped in blockFieldWrapperName
-   */
-  transformedFormData: BlockFields
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
