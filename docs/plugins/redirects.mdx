@@ -32,7 +32,7 @@ For example, if you have a page at `/about` and you want to change it to `/about
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-redirects
+  pnpm add @payloadcms/plugin-redirects
 ```
 
 ## Basic Usage
@@ -41,7 +41,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```ts
 import { buildConfig } from 'payload/config'
-import redirects from '@payloadcms/plugin-redirects'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
 const config = buildConfig({
   collections: [
@@ -51,7 +51,7 @@ const config = buildConfig({
     },
   ],
   plugins: [
-    redirects({
+    redirectsPlugin({
       collections: ['pages'],
     }),
   ],
@@ -66,6 +66,25 @@ export default config
 | ------------- | ---------- | ----------------------------------------------------------------------------------------------- |
 | `collections` | `string[]` | An array of collection slugs to populate in the `to` field of each redirect.                    |
 | `overrides`   | `object`   | A partial collection config that allows you to override anything on the `redirects` collection. |
+
+Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
+
+```ts
+redirectsPlugin({
+  collections: ['pages'],
+  overrides: {
+    fields: ({ defaultFields }) => {
+      return [
+        ...defaultFields,
+        {
+          type: 'text',
+          name: 'customField',
+        },
+      ]
+    },
+  },
+})
+```
 
 ## TypeScript
 

@@ -7,7 +7,7 @@ keywords: date, fields, config, configuration, documentation, Content Management
 ---
 
 <Banner>
-  The Date field type saves a Date in the database and provides the Admin panel with a customizable
+  The Date field type saves a Date in the database and provides the Admin Panel with a customizable
   time picker interface.
 </Banner>
 
@@ -15,23 +15,23 @@ keywords: date, fields, config, configuration, documentation, Content Management
   srcLight="https://payloadcms.com/images/docs/fields/date.png"
   srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
   alt="Shows a Date field in the Payload admin panel"
-  caption="Admin panel screenshot of a Date field"
+  caption="Admin Panel screenshot of a Date field"
 />
 
-This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin panel component.
+This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin Panel component.
 
 ## Config
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`label`**            | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                     |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`validate`**         | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
 | **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
 | **`hooks`**            | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
 | **`access`**           | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
-| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                            |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                            |
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
