@@ -2085,8 +2085,7 @@ describe('fields', () => {
       })
       await pasteURLButton.click()
 
-      const remoteImage =
-        'https://fastly.picsum.photos/id/11/2500/1667.jpg?hmac=xxjFJtAPgshYkysU_aqx2sZir-kIOjNR9vx0te7GycQ'
+      const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
 
       const inputField = page.locator('.file-field__upload .file-field__remote-file')
       await inputField.fill(remoteImage)
@@ -2094,15 +2093,13 @@ describe('fields', () => {
       const addImageButton = page.locator('.file-field__add-file')
       await addImageButton.click()
 
-      await expect(page.locator('.file-field .file-field__filename')).toHaveValue(
-        '1667.jpg?hmac=xxjFJtAPgshYkysU_aqx2sZir-kIOjNR9vx0te7GycQ',
-      )
+      await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
 
       await saveDocAndAssert(page)
 
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
-        /\/uploads\/1667\.jpg(\?.*)?$/,
+        /\/uploads\/og-image\.jpg(\?.*)?$/,
       )
     })
 

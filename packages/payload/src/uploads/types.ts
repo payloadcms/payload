@@ -73,7 +73,6 @@ export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => fals
 
 export type IncomingUploadType = {
   adminThumbnail?: GetAdminThumbnail | string
-  allowRemoteUpload?: boolean
   crop?: boolean
   disableLocalStorage?: boolean
   /**
@@ -98,11 +97,6 @@ export type IncomingUploadType = {
 
 export type Upload = {
   adminThumbnail?: GetAdminThumbnail | string
-  /**
-   * Enables the ability to upload a file from a remote URL instead of selecting a file from your system.
-   * @default false
-   */
-  allowRemoteUpload?: boolean
   crop?: boolean
   disableLocalStorage?: boolean
   filesRequiredOnCreate?: boolean

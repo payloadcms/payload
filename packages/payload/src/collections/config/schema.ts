@@ -169,7 +169,6 @@ const collectionSchema = joi.object().keys({
   upload: joi.alternatives().try(
     joi.object({
       adminThumbnail: joi.alternatives().try(joi.string(), joi.func()),
-      allowRemoteUpload: joi.bool(),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),
       externalFileHeaderFilter: joi.func(),

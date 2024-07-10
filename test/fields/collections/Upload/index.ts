@@ -7,7 +7,6 @@ import { uploadsSlug } from '../../slugs'
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
   upload: {
-    allowRemoteUpload: true,
     staticDir: path.resolve(__dirname, './uploads'),
   },
   fields: [
