@@ -14,6 +14,7 @@ import type {
   PgTableWithColumns,
   PgTransaction,
 } from 'drizzle-orm/pg-core'
+import type { pgEnum } from 'drizzle-orm/pg-core/columns/enum'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { BaseDatabaseAdapter, Payload, PayloadRequest } from 'payload'
 import type { Pool, PoolConfig } from 'pg'
@@ -58,7 +59,7 @@ export type DrizzleTransaction = PgTransaction<
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
-export type PostgresAdapter = BaseDatabaseAdapter & {
+export type PostgresAdapter = {
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
   /**
@@ -70,7 +71,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   initializing: Promise<void>
   localesSuffix?: string
   logger: DrizzleConfig['logger']
-  pgSchema?: { table: PgTableFn } | PgSchema
+  pgSchema?: { enum: typeof pgEnum; table: PgTableFn } | PgSchema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -90,7 +91,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable | PgTableWithColumns<any>>
   versionsSuffix?: string
-}
+} & BaseDatabaseAdapter
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 

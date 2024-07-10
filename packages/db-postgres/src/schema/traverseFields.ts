@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+ 
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { Field, TabAsField } from 'payload'
@@ -14,7 +14,6 @@ import {
   integer,
   jsonb,
   numeric,
-  pgEnum,
   text,
   timestamp,
   varchar,
@@ -232,7 +231,7 @@ export const traverseFields = ({
           throwValidationError,
         })
 
-        adapter.enums[enumName] = pgEnum(
+        adapter.enums[enumName] = adapter.pgSchema.enum(
           enumName,
           field.options.map((option) => {
             if (optionIsObject(option)) {
