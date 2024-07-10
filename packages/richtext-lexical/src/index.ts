@@ -973,14 +973,14 @@ export {
 } from './lexical/utils/nodeFormat.js'
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
+export type * from './nodeTypes.js'
+
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
-
 export { createServerFeature } from './utilities/createServerFeature.js'
-export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
-export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
-
-export * from './nodeTypes.js'
-
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
+
+export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
+
+export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
