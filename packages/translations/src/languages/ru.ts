@@ -18,7 +18,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Подтверждение пароля',
     createFirstUser: 'Создание первого пользователя',
     emailNotValid: 'Указанный адрес электронной почты неверен',
-    emailOrUsername: undefined,
+    emailOrUsername: 'Электронная почта или Имя пользователя',
     emailSent: 'Email отправлен',
     emailVerified: 'Электронная почта успешно подтверждена.',
     enableAPIKey: 'Активировать API ключ',
@@ -300,7 +300,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     updating: 'Обновление',
     uploading: 'Загрузка',
     user: 'пользователь',
-    username: undefined,
+    username: 'Имя пользователя',
     users: 'пользователи',
     value: 'Значение',
     welcome: 'Добро пожаловать',
@@ -363,7 +363,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'В этом поле требуется два числа.',
     shorterThanMax: 'Это значение должно быть короче максимальной длины символов {{maxLength}}.',
     trueOrFalse: 'Это поле может быть равно только true или false.',
-    username: undefined,
+    username:
+      'Пожалуйста, введите действительное имя пользователя. Может содержать буквы, цифры, дефисы, точки и подчёркивания.',
     validUploadID: "'Это поле не является действительным ID загрузки.'",
   },
   version: {

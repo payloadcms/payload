@@ -18,7 +18,7 @@ export const itTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Conferma Password',
     createFirstUser: 'Crea il primo utente',
     emailNotValid: "L'email fornita non è valida",
-    emailOrUsername: undefined,
+    emailOrUsername: 'Email o Nome utente',
     emailSent: 'Email Inviata',
     emailVerified: 'Email verificata con successo.',
     enableAPIKey: 'Abilita la Chiave API',

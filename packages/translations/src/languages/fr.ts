@@ -370,7 +370,8 @@ export const frTranslations: DefaultTranslationsObject = {
     shorterThanMax:
       'Cette valeur doit être inférieure à la longueur maximale de {{maxLength}} caractères.',
     trueOrFalse: 'Ce champ ne peut être égal qu’à vrai ou faux.',
-    username: undefined,
+    username:
+      "Veuillez entrer un nom d'utilisateur valide. Il peut contenir des lettres, des chiffres, des tirets, des points et des tirets bas.",
     validUploadID: 'Ce champ n’est pas un valide identifiant de fichier.',
   },
   version: {

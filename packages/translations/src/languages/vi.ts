@@ -17,7 +17,7 @@ export const viTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Xác nhận mật khẩu',
     createFirstUser: 'Tạo người dùng đầu tiên',
     emailNotValid: 'Email không chính xác',
-    emailOrUsername: undefined,
+    emailOrUsername: 'Email hoặc Tên tài khoản',
     emailSent: 'Email đã được gửi',
     emailVerified: 'Email đã được xác minh thành công.',
     enableAPIKey: 'Kích hoạt API Key',
@@ -295,7 +295,7 @@ export const viTranslations: DefaultTranslationsObject = {
     updating: 'Đang cập nhật',
     uploading: 'Đang tải lên',
     user: 'Người dùng',
-    username: undefined,
+    username: 'Tên đăng nhập',
     users: 'Người dùng',
     value: 'Giá trị',
     welcome: 'Xin chào',
@@ -358,7 +358,8 @@ export const viTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Field này cần tối thiểu 2 chữ số.',
     shorterThanMax: 'Giá trị phải ngắn hơn hoặc bằng {{maxLength}} ký tự.',
     trueOrFalse: 'Field này chỉ có thể chứa giá trị true hoặc false.',
-    username: undefined,
+    username:
+      'Vui lòng nhập một tên người dùng hợp lệ. Có thể chứa các chữ cái, số, dấu gạch ngang, dấu chấm và dấu gạch dưới.',
     validUploadID: "'Field này không chứa ID tải lên hợp lệ.'",
   },
   version: {

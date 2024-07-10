@@ -18,7 +18,7 @@ export const koTranslations: DefaultTranslationsObject = {
     confirmPassword: '비밀번호 확인',
     createFirstUser: '첫 번째 사용자 생성',
     emailNotValid: '입력한 이메일은 유효하지 않습니다.',
-    emailOrUsername: undefined,
+    emailOrUsername: '이메일 또는 사용자 이름',
     emailSent: '이메일 전송됨',
     emailVerified: '이메일이 성공적으로 인증되었습니다.',
     enableAPIKey: 'API 키 활성화',

@@ -18,7 +18,7 @@ export const roTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Confirmați parola',
     createFirstUser: 'Creați primul utilizator',
     emailNotValid: 'Emailul furnizat nu este valid',
-    emailOrUsername: undefined,
+    emailOrUsername: 'Email sau Nume de utilizator',
     emailSent: 'Email trimis',
     emailVerified: 'E-mail verificat cu succes.',
     enableAPIKey: 'Activați cheia API',
@@ -368,7 +368,8 @@ export const roTranslations: DefaultTranslationsObject = {
     shorterThanMax:
       'Această valoare trebuie să fie mai scurtă decât lungimea maximă de {{maxLength}} caractere.',
     trueOrFalse: 'Acest câmp poate fi doar egal cu true sau false.',
-    username: undefined,
+    username:
+      'Vă rugăm să introduceți un nume de utilizator valid. Poate conține litere, numere, cratime, puncte și sublinieri.',
     validUploadID: 'Acest câmp nu este un ID de încărcare valid.',
   },
   version: {

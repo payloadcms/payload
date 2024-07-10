@@ -296,7 +296,7 @@ export const faTranslations: DefaultTranslationsObject = {
     updating: 'در حال به‌روزرسانی',
     uploading: 'در حال بارگذاری',
     user: 'کاربر',
-    username: undefined,
+    username: 'نام کاربری',
     users: 'کاربران',
     value: 'مقدار',
     welcome: 'خوش‌آمدید',

@@ -18,7 +18,7 @@ export const skTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Potvrdiť heslo',
     createFirstUser: 'Vytvorenie prvého používateľa',
     emailNotValid: 'Zadaný e-mail nie je platný',
-    emailOrUsername: undefined,
+    emailOrUsername: 'E-mail alebo Užívateľské meno',
     emailSent: 'E-mail bol odoslaný',
     emailVerified: 'Email úspešne overený.',
     enableAPIKey: 'Povolenie API kľúča',
@@ -298,7 +298,7 @@ export const skTranslations: DefaultTranslationsObject = {
     updating: 'Aktualizácia',
     uploading: 'Nahrávanie',
     user: 'Používateľ',
-    username: undefined,
+    username: 'Používateľské meno',
     users: 'Používatelia',
     value: 'Hodnota',
     welcome: 'Vitajte',
@@ -361,7 +361,8 @@ export const skTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Toto pole vyžaduje dve čísla.',
     shorterThanMax: 'Táto hodnota musí byť kratšia ako maximálna dĺžka {{maxLength}} znakov.',
     trueOrFalse: 'Toto pole môže byť rovné iba true alebo false.',
-    username: undefined,
+    username:
+      'Prosím, zadajte platné používateľské meno. Môže obsahovať písmená, čísla, pomlčky, bodky a podčiarknutia.',
     validUploadID: 'Toto pole nie je platné ID pre odoslanie.',
   },
   version: {

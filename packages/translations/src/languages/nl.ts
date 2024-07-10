@@ -18,7 +18,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Wachtwoord bevestigen',
     createFirstUser: 'Eerste gebruiker aanmaken',
     emailNotValid: 'Het ingevoerde e-mailadres is niet geldig',
-    emailOrUsername: undefined,
+    emailOrUsername: 'E-mail of Gebruikersnaam',
     emailSent: 'E-mail verzonden',
     emailVerified: 'E-mail succesvol geverifieerd.',
     enableAPIKey: 'Activeer API-sleutel',
