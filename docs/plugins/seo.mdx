@@ -37,7 +37,7 @@ To help you visualize what your page might look like in a search engine, a previ
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-seo
+  pnpm add @payloadcms/plugin-seo
 ```
 
 ## Basic Usage
@@ -46,7 +46,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```ts
 import { buildConfig } from 'payload/config';
-import seoPlugin from '@payloadcms/plugin-seo';
+import { seoPlugin } from '@payloadcms/plugin-seo';
 
 const config = buildConfig({
   collections: [

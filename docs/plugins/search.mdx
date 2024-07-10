@@ -39,7 +39,7 @@ This plugin is a great way to implement a fast, immersive search experience such
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-search
+  pnpm add @payloadcms/plugin-search
 ```
 
 ## Basic Usage
@@ -48,7 +48,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config'
-import search from '@payloadcms/plugin-search'
+import { searchPlugin } from '@payloadcms/plugin-search'
 
 const config = buildConfig({
   collections: [
@@ -62,7 +62,7 @@ const config = buildConfig({
     },
   ],
   plugins: [
-    search({
+    searchPlugin({
       collections: ['pages', 'posts'],
       defaultPriorities: {
         pages: 10,
