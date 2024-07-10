@@ -31,15 +31,19 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {
   const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
+  const { data } = incomingArgs
 
   const canLoginWithUsername = Boolean(loginWithUsername)
   const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
 
-  const sanitizedIncomingEmail =
-    canLoginWithEmail && (incomingArgs.data.email || '').toLowerCase().trim()
-  const incomingUsername = canLoginWithUsername && incomingArgs.data?.username
+  const sanitizedEmail =
+    (canLoginWithEmail && (incomingArgs.data.email || '').toLowerCase().trim()) || null
+  const sanitizedUsername =
+    'username' in data && typeof data?.username === 'string'
+      ? data.username.toLowerCase().trim()
+      : null
 
-  if (!sanitizedIncomingEmail && !incomingUsername) {
+  if (!sanitizedEmail && !sanitizedUsername) {
     throw new APIError(
       `Missing ${loginWithUsername ? 'username' : 'email'}.`,
       httpStatus.BAD_REQUEST,
@@ -92,7 +96,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       resetPasswordToken?: string
     }
 
-    if (!sanitizedIncomingEmail && !incomingUsername) {
+    if (!sanitizedEmail && !sanitizedUsername) {
       throw new APIError(
         `Missing ${loginWithUsername ? 'username' : 'email'}.`,
         httpStatus.BAD_REQUEST,
@@ -101,16 +105,16 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
 
     let whereConstraint: Where = {}
 
-    if (canLoginWithEmail && sanitizedIncomingEmail) {
+    if (canLoginWithEmail && sanitizedEmail) {
       whereConstraint = {
         email: {
-          equals: sanitizedIncomingEmail,
+          equals: sanitizedEmail,
         },
       }
-    } else if (canLoginWithUsername && incomingUsername) {
+    } else if (canLoginWithUsername && sanitizedUsername) {
       whereConstraint = {
         username: {
-          equals: incomingUsername,
+          equals: sanitizedUsername,
         },
       }
     }

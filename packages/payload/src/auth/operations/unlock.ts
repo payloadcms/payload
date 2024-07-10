@@ -35,11 +35,15 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
   const canLoginWithUsername = Boolean(loginWithUsername)
   const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
 
-  const sanitizedIncomingEmail = canLoginWithEmail && (args?.data?.email || '').toLowerCase().trim()
-  const incomingUsername =
-    (canLoginWithUsername && 'username' in args.data && args.data.username) || ''
+  const sanitizedEmail = canLoginWithEmail && (args.data?.email || '').toLowerCase().trim()
+  const sanitizedUsername =
+    (canLoginWithUsername &&
+      'username' in args.data &&
+      typeof args.data.username === 'string' &&
+      args.data.username.toLowerCase().trim()) ||
+    null
 
-  if (!sanitizedIncomingEmail && !incomingUsername) {
+  if (!sanitizedEmail && !sanitizedUsername) {
     throw new APIError(
       `Missing ${collectionConfig.auth.loginWithUsername ? 'username' : 'email'}.`,
       httpStatus.BAD_REQUEST,
@@ -63,16 +67,16 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
 
     let whereConstraint: Where = {}
 
-    if (canLoginWithEmail && sanitizedIncomingEmail) {
+    if (canLoginWithEmail && sanitizedEmail) {
       whereConstraint = {
         email: {
-          equals: sanitizedIncomingEmail,
+          equals: sanitizedEmail,
         },
       }
-    } else if (canLoginWithUsername && incomingUsername) {
+    } else if (canLoginWithUsername && sanitizedUsername) {
       whereConstraint = {
         username: {
-          equals: incomingUsername,
+          equals: sanitizedUsername,
         },
       }
     }

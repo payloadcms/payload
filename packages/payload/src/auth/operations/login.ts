@@ -86,14 +86,17 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     const loginWithUsername = collectionConfig.auth.loginWithUsername
 
     const sanitizedEmail =
-      typeof unsanitizedEmail !== 'string' ? null : unsanitizedEmail.toLowerCase().trim()
-    const username = 'username' in data && data.username
+      typeof unsanitizedEmail === 'string' ? unsanitizedEmail.toLowerCase().trim() : null
+    const sanitizedUsername =
+      'username' in data && typeof data?.username === 'string'
+        ? data.username.toLowerCase().trim()
+        : null
 
     const canLoginWithUsername = Boolean(loginWithUsername)
     const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
 
     // cannot login with email, did not provide username
-    if (!canLoginWithEmail && !username) {
+    if (!canLoginWithEmail && !sanitizedUsername) {
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
@@ -109,7 +112,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
 
     // can login with either email or username, did not provide either
-    if (!username && !sanitizedEmail) {
+    if (!sanitizedUsername && !sanitizedEmail) {
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [
@@ -135,18 +138,18 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
     const usernameConstraint: Where = {
       username: {
-        equals: username,
+        equals: sanitizedUsername,
       },
     }
 
-    if (canLoginWithEmail && canLoginWithUsername && (username || sanitizedEmail)) {
-      if (username) {
+    if (canLoginWithEmail && canLoginWithUsername && (sanitizedUsername || sanitizedEmail)) {
+      if (sanitizedUsername) {
         whereConstraint = {
           or: [
             usernameConstraint,
             {
               email: {
-                equals: username,
+                equals: sanitizedUsername,
               },
             },
           ],
@@ -165,7 +168,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       }
     } else if (canLoginWithEmail && sanitizedEmail) {
       whereConstraint = emailConstraint
-    } else if (canLoginWithUsername && username) {
+    } else if (canLoginWithUsername && sanitizedUsername) {
       whereConstraint = usernameConstraint
     }
 
@@ -176,7 +179,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     })
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
-      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && username))
+      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
     }
 
     if (user && isLocked(user.lockUntil)) {
