@@ -2,7 +2,7 @@
 import type { FormState, SanitizedCollectionConfig } from 'payload'
 
 import { isImage, reduceFieldsToValues } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -104,6 +104,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
 
+  const cursorPositionRef = useRef(null)
+  const urlInputRef = useRef<HTMLInputElement>(null)
+
   const handleFileChange = useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
@@ -130,6 +133,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value
+    const cursorPosition = e.target.selectionStart
+
+    cursorPositionRef.current = cursorPosition
+
     if (value) {
       const fileValue = value
       // Creating a new File object with updated properties
@@ -137,6 +144,13 @@ export const Upload: React.FC<UploadProps> = (props) => {
       handleFileChange(newFile)
     }
   }
+
+  useEffect(() => {
+    const inputElement = document.querySelector(`.${baseClass}__filename`)
+    if (inputElement && cursorPositionRef.current !== null) {
+      inputElement.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current)
+    }
+  }, [value])
 
   const handleFileSelection = useCallback(
     (files: FileList) => {
@@ -206,6 +220,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setReplacingFile(false)
   }, [initialState])
 
+  useEffect(() => {
+    if (showUrlInput && urlInputRef.current) {
+      urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
+    }
+  }, [showUrlInput])
+
   const canRemoveUpload =
     docPermissions?.update?.permission &&
     'delete' in docPermissions &&
@@ -253,6 +273,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                   onChange={(e) => {
                     setFileUrl(e.target.value)
                   }}
+                  ref={urlInputRef}
                   type="text"
                   value={fileUrl}
                 />
