@@ -1,6 +1,8 @@
 import type { UpdateOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
+import { flatten } from 'flatley'
+
 import type { MongooseAdapter } from '.'
 
 import handleError from './utilities/handleError'
@@ -27,7 +29,13 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
   try {
-    result = await Model.findOneAndUpdate(query, data, options)
+    let dataToUse = data
+
+    if (!this.strict) {
+      dataToUse = flatten(data)
+    }
+
+    result = await Model.findOneAndUpdate(query, dataToUse, options)
   } catch (error) {
     handleError(error, req)
   }

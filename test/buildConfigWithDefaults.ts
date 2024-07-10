@@ -28,6 +28,7 @@ const databaseAdapters = {
   mongoose: mongooseAdapter({
     migrationDir,
     url: 'mongodb://127.0.0.1/payloadtests',
+    // strict: false,
   }),
   postgres: postgresAdapter({
     migrationDir,

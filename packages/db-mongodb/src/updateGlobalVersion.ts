@@ -1,6 +1,8 @@
 import type { UpdateGlobalVersionArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
+import { flatten } from 'flatley'
+
 import type { MongooseAdapter } from '.'
 
 import { withSession } from './withSession'
@@ -30,7 +32,13 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  let dataToUse = versionData
+
+  if (!this.strict) {
+    dataToUse = flatten(versionData)
+  }
+
+  const doc = await VersionModel.findOneAndUpdate(query, dataToUse, options)
 
   const result = JSON.parse(JSON.stringify(doc))
 

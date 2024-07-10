@@ -446,6 +446,9 @@ importers:
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
+      flatley:
+        specifier: ^5.2.0
+        version: 5.2.0
       get-port:
         specifier: 5.1.1
         version: 5.1.1
@@ -10373,6 +10376,12 @@ packages:
   /flat@5.0.2:
     resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
     hasBin: true
+
+  /flatley@5.2.0:
+    resolution: {integrity: sha512-vsb0/03uIHu7/3jRqABweblFUJMLokz1uMrcgFlvx6OAr6V3FiSic2iXeiJCj+cciTiQeumSDsIFAAnN1yvu4w==}
+    dependencies:
+      is-buffer: 1.1.6
+    dev: false
 
   /flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}

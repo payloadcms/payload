@@ -1,6 +1,8 @@
 import type { UpdateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
+import { flatten } from 'flatley'
+
 import type { MongooseAdapter } from '.'
 
 import { withSession } from './withSession'
@@ -23,7 +25,13 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     where: whereToUse,
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  let dataToUse = versionData
+
+  if (!this.strict) {
+    dataToUse = flatten(versionData)
+  }
+
+  const doc = await VersionModel.findOneAndUpdate(query, dataToUse, options)
 
   const result = JSON.parse(JSON.stringify(doc))
 

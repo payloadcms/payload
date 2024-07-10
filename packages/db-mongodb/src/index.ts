@@ -50,6 +50,10 @@ export interface Args {
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   migrationDir?: string
+  /** Disable Strict mode in Mongoose to preserve external data within your database.
+   * See: https://mongoosejs.com/docs/guide.html#strict
+   */
+  strict?: boolean
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -94,6 +98,7 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   migrationDir: migrationDirArg,
+  strict = true,
   transactionOptions = {},
   url,
 }: Args): MongooseAdapterResult {
@@ -114,9 +119,11 @@ export function mongooseAdapter({
       globals: undefined,
       mongoMemoryServer: undefined,
       sessions: {},
+      strict,
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
       versions: {},
+
       // DatabaseAdapter
       beginTransaction: transactionOptions ? beginTransaction : undefined,
       commitTransaction,

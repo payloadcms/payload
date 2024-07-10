@@ -1,28 +1,30 @@
 import type { PaginateOptions, Schema } from 'mongoose'
-import type { SanitizedConfig } from 'payload/config'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import paginate from 'mongoose-paginate-v2'
+
+import type { MongooseAdapter } from '..'
 
 import getBuildQueryPlugin from '../queries/buildQuery'
 import buildSchema from './buildSchema'
 
 const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
-  config: SanitizedConfig,
+  adapter: MongooseAdapter,
   schemaOptions = {},
 ): Schema => {
-  const schema = buildSchema(config, collection.fields, {
+  const schema = buildSchema(adapter, collection.fields, {
     draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
-    indexSortableFields: config.indexSortableFields,
+    indexSortableFields: adapter.payload.config.indexSortableFields,
     options: {
       minimize: false,
+      strict: adapter.strict,
       timestamps: collection.timestamps !== false,
       ...schemaOptions,
     },
   })
 
-  if (config.indexSortableFields && collection.timestamps !== false) {
+  if (adapter.payload.config.indexSortableFields && collection.timestamps !== false) {
     schema.index({ updatedAt: 1 })
     schema.index({ createdAt: 1 })
   }
