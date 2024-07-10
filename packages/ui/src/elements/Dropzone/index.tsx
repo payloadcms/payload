@@ -13,20 +13,13 @@ const handleDragOver = (e: DragEvent) => {
 const baseClass = 'dropzone'
 
 export type Props = {
-  allowRemoteUpload?: boolean
   className?: string
   mimeTypes?: string[]
   onChange: (e: FileList) => void
   onPasteUrlClick?: () => void
 }
 
-export const Dropzone: React.FC<Props> = ({
-  allowRemoteUpload,
-  className,
-  mimeTypes,
-  onChange,
-  onPasteUrlClick,
-}) => {
+export const Dropzone: React.FC<Props> = ({ className, mimeTypes, onChange, onPasteUrlClick }) => {
   const dropRef = React.useRef<HTMLDivElement>(null)
   const [dragging, setDragging] = React.useState(false)
   const inputRef = React.useRef(null)
@@ -118,17 +111,14 @@ export const Dropzone: React.FC<Props> = ({
       >
         {t('upload:selectFile')}
       </Button>
-      {allowRemoteUpload && (
-        <Button
-          buttonStyle="secondary"
-          className={`${baseClass}__file-button`}
-          onClick={onPasteUrlClick}
-          size="small"
-        >
-          {t('upload:pasteURL')}
-        </Button>
-      )}
-
+      <Button
+        buttonStyle="secondary"
+        className={`${baseClass}__file-button`}
+        onClick={onPasteUrlClick}
+        size="small"
+      >
+        {t('upload:pasteURL')}
+      </Button>
       <input
         accept={mimeTypes?.join(',')}
         className={`${baseClass}__hidden-input`}

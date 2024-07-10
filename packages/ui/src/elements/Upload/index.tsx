@@ -239,7 +239,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
             <Dropzone
-              allowRemoteUpload={uploadConfig?.allowRemoteUpload}
               className={`${baseClass}__dropzone`}
               mimeTypes={uploadConfig?.mimeTypes}
               onChange={handleFileSelection}
