@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 
@@ -13,7 +13,6 @@ import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
 import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
-import { useForm } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
@@ -67,6 +66,9 @@ export const Upload: React.FC<Props> = (props) => {
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
 
+  const cursorPositionRef = useRef(null)
+  const urlInputRef = useRef<HTMLInputElement>(null)
+
   const handleFileChange = useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
@@ -93,6 +95,10 @@ export const Upload: React.FC<Props> = (props) => {
 
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value
+    const cursorPosition = e.target.selectionStart
+
+    cursorPositionRef.current = cursorPosition
+
     if (value) {
       const fileValue = value
       // Creating a new File object with updated properties
@@ -100,6 +106,14 @@ export const Upload: React.FC<Props> = (props) => {
       handleFileChange(newFile)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const inputElement = document.querySelector(`.${baseClass}__filename`) as HTMLInputElement
+    if (inputElement && cursorPositionRef.current !== null) {
+      inputElement.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current)
+    }
+  }, [value])
 
   const handleFileSelection = React.useCallback(
     (files: FileList) => {
@@ -145,6 +159,12 @@ export const Upload: React.FC<Props> = (props) => {
     setDoc(reduceFieldsToValues(internalState || {}, true))
     setReplacingFile(false)
   }, [internalState])
+
+  useEffect(() => {
+    if (showUrlInput && urlInputRef.current) {
+      urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
+    }
+  }, [showUrlInput])
 
   const canRemoveUpload =
     docPermissions?.update?.permission &&
@@ -192,6 +212,7 @@ export const Upload: React.FC<Props> = (props) => {
                   onChange={(e) => {
                     setFileUrl(e.target.value)
                   }}
+                  ref={urlInputRef}
                   type="text"
                   value={fileUrl}
                 />
