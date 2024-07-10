@@ -36,7 +36,7 @@ Forms can be as simple or complex as you need, from a basic contact form, to a m
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-yarn add @payloadcms/plugin-form-builder
+pnpm add @payloadcms/plugin-form-builder
 ```
 
 ## Basic Usage
@@ -45,7 +45,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```ts
 import { buildConfig } from 'payload/config'
-import formBuilder from '@payloadcms/plugin-form-builder'
+import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 
 const config = buildConfig({
   collections: [
@@ -55,7 +55,7 @@ const config = buildConfig({
     },
   ],
   plugins: [
-    formBuilder({
+    formBuilderPlugin({
       // see below for a list of available options
     }),
   ],
@@ -123,6 +123,8 @@ formBuilder({
 
 Override anything on the `forms` collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formOverrides` property.
 
+Note that the `fields` property is a function that receives the default fields and returns an array of fields. This is because the `fields` property is a special case that is merged with the default fields, rather than replacing them. This allows you to map over default fields and modify them as needed.
+
 ```ts
 // payload.config.ts
 formBuilder({
@@ -133,12 +135,15 @@ formBuilder({
       read: () => true,
       update: () => false,
     },
-    fields: [
-      {
-        name: 'custom-field',
-        type: 'text',
-      },
-    ],
+    fields: ({ defaultFields }) => {
+      return [
+        ...defaultFields,
+        {
+          name: 'custom',
+          type: 'text',
+        },
+      ]
+    },
   },
 })
 ```
@@ -162,6 +167,15 @@ formBuilder({
   // ...
   formSubmissionOverrides: {
     slug: 'leads',
+    fields: ({ defaultFields }) => {
+      return [
+        ...defaultFields,
+        {
+          name: 'custom',
+          type: 'text',
+        },
+      ]
+    },
   },
 })
 ```
@@ -371,13 +385,12 @@ This plugin relies on the [email configuration](https://payloadcms.com/docs/emai
 
 All types can be directly imported:
 
-```js
-import {
+```ts
+import type {
   PluginConfig,
   Form,
   FormSubmission,
   FieldsConfig,
-  BeforePayment,
   BeforeEmail,
   HandlePayment,
   ...

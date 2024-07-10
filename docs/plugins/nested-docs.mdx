@@ -48,7 +48,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-nested-docs
+  pnpm add @payloadcms/plugin-nested-docs
 ```
 
 ## Basic Usage
@@ -58,7 +58,7 @@ with [options](#options):
 
 ```ts
 import { buildConfig } from 'payload/config'
-import nestedDocs from '@payloadcms/plugin-nested-docs'
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 
 const config = buildConfig({
   collections: [
@@ -77,7 +77,7 @@ const config = buildConfig({
     },
   ],
   plugins: [
-    nestedDocs({
+    nestedDocsPlugin({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title,
       generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),

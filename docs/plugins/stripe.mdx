@@ -39,7 +39,7 @@ The beauty of this plugin is the entirety of your application's content and busi
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-stripe
+  pnpm add @payloadcms/plugin-stripe
 ```
 
 ## Basic Usage
@@ -48,7 +48,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```ts
 import { buildConfig } from 'payload/config'
-import stripePlugin from '@payloadcms/plugin-stripe'
+import { stripePlugin } from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
   plugins: [
@@ -128,7 +128,7 @@ If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 Development:
 
 1. Login using Stripe cli `stripe login`
-1. Forward events to localhost `stripe listen --forward-to localhost:3000/stripe/webhooks`
+1. Forward events to localhost `stripe listen --forward-to localhost:3000/api/stripe/webhooks`
 1. Paste the given secret into your `.env` file as `STRIPE_WEBHOOKS_ENDPOINT_SECRET`
 
 Production:
