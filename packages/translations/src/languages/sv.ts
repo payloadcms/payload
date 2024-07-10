@@ -18,6 +18,7 @@ export const svTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Bekräfta Lösenord',
     createFirstUser: 'Skapa första användaren',
     emailNotValid: 'Angiven e-postadress är inte giltig',
+    emailOrUsername: undefined,
     emailSent: 'E-posten Skickad',
     emailVerified: 'E-post verifierad framgångsrikt.',
     enableAPIKey: 'Aktivera API nyckel',
@@ -296,6 +297,7 @@ export const svTranslations: DefaultTranslationsObject = {
     updating: 'Uppdatering',
     uploading: 'Uppladdning',
     user: 'Användare',
+    username: undefined,
     users: 'Användare',
     value: 'Värde',
     welcome: 'Välkommen',
@@ -358,6 +360,7 @@ export const svTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Detta fält kräver två nummer.',
     shorterThanMax: 'Detta värde måste vara kortare än maxlängden på {{maxLength}} tecken.',
     trueOrFalse: 'Detta fält kan bara vara lika med sant eller falskt.',
+    username: undefined,
     validUploadID: 'Det här fältet är inte ett giltigt uppladdnings-ID',
   },
   version: {

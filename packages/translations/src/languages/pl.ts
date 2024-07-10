@@ -18,6 +18,7 @@ export const plTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Potwierdź hasło',
     createFirstUser: 'Utwórz pierwszego użytkownika',
     emailNotValid: 'Podany email jest nieprawidłowy',
+    emailOrUsername: undefined,
     emailSent: 'Wysłano email',
     emailVerified: 'Email zweryfikowany pomyślnie.',
     enableAPIKey: 'Aktywuj klucz API',
@@ -296,6 +297,7 @@ export const plTranslations: DefaultTranslationsObject = {
     updating: 'Aktualizacja',
     uploading: 'Przesyłanie',
     user: 'użytkownik',
+    username: undefined,
     users: 'użytkownicy',
     value: 'Wartość',
     welcome: 'Witaj',
@@ -358,6 +360,8 @@ export const plTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'To pole wymaga dwóch liczb.',
     shorterThanMax: 'Ta wartość musi być krótsza niż maksymalna długość znaków: {{maxLength}}.',
     trueOrFalse: "To pole może mieć wartość tylko 'true' lub 'false'.",
+    username:
+      'Proszę wprowadzić prawidłową nazwę użytkownika. Może zawierać litery, cyfry, myślniki, kropki i podkreślniki.',
     validUploadID: 'To pole nie jest prawidłowym identyfikatorem przesyłania.',
   },
   version: {

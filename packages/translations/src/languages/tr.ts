@@ -18,6 +18,7 @@ export const trTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Parolayı Onayla',
     createFirstUser: 'İlk kullanıcı oluştur',
     emailNotValid: 'Girilen e-posta geçersiz',
+    emailOrUsername: undefined,
     emailSent: 'E-posta gönderildi',
     emailVerified: 'E-posta başarıyla doğrulandı.',
     enableAPIKey: 'Api anahtarını etkinleştir',
@@ -300,6 +301,7 @@ export const trTranslations: DefaultTranslationsObject = {
     updating: 'Güncelleniyor',
     uploading: 'Yükleniyor',
     user: 'kullanıcı',
+    username: 'Kullanıcı Adı',
     users: 'kullanıcı',
     value: 'Değer',
     welcome: 'Hoşgeldiniz',
@@ -362,6 +364,7 @@ export const trTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Bu alana en az iki rakam girilmesi zorunludur.',
     shorterThanMax: 'Bu alan {{maxLength}} karakterden daha kısa olmalıdır.',
     trueOrFalse: 'Bu alan yalnızca doğru ve yanlış olabilir.',
+    username: undefined,
     validUploadID: "'Bu alan geçerli bir karşıya yükleme ID'sine sahip değil.'",
   },
   version: {

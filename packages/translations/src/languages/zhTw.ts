@@ -17,6 +17,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     confirmPassword: '確認密碼',
     createFirstUser: '建立第一個使用者',
     emailNotValid: '提供的電子郵件無效',
+    emailOrUsername: undefined,
     emailSent: '電子郵件已寄出',
     emailVerified: '電子郵件驗證成功。',
     enableAPIKey: '啟用API金鑰',
@@ -288,6 +289,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     updating: '更新中',
     uploading: '上傳中',
     user: '使用者',
+    username: undefined,
     users: '使用者',
     value: '值',
     welcome: '歡迎',
@@ -348,6 +350,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: '該字串需要兩個數字。',
     shorterThanMax: '該值長度必須小於{{maxLength}}個字元',
     trueOrFalse: '該字串只能等於是或否。',
+    username: undefined,
     validUploadID: '該字串不是有效的上傳ID。',
   },
   version: {

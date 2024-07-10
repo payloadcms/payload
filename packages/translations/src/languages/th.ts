@@ -18,6 +18,7 @@ export const thTranslations: DefaultTranslationsObject = {
     confirmPassword: 'ยืนยันรหัสผ่าน',
     createFirstUser: 'สร้างผู้ใช้แรก',
     emailNotValid: 'อีเมลไม่ถูกต้อง',
+    emailOrUsername: undefined,
     emailSent: 'ส่งอีเมลเรียบร้อยแล้ว',
     emailVerified: 'อีเมลได้รับการยืนยันเรียบร้อยแล้ว',
     enableAPIKey: 'เปิดใช้ API Key',
@@ -292,6 +293,7 @@ export const thTranslations: DefaultTranslationsObject = {
     updating: 'กำลังอัปเดต',
     uploading: 'กำลังอัปโหลด',
     user: 'ผู้ใช้',
+    username: undefined,
     users: 'ผู้ใช้',
     value: 'ค่า',
     welcome: 'ยินดีต้อนรับ',
@@ -352,6 +354,7 @@ export const thTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'ต้องมีตัวเลข 2 ค่า',
     shorterThanMax: 'ค่าต้องมีความยาวน้อยกว่า {{maxLength}} ตัวอักษร',
     trueOrFalse: 'เป็นได้แค่ "ใช่" หรือ "ไม่ใช่"',
+    username: undefined,
     validUploadID: 'ไม่ใช่ ID ของการอัปโหลดที่ถูกต้อง',
   },
   version: {
