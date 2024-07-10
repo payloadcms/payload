@@ -30,7 +30,7 @@ export type Result = string
 export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {
-  const loginWithUsername = incomingArgs.collection?.config?.auth?.loginWithUsername
+  const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
 
   const canLoginWithUsername = Boolean(loginWithUsername)
   const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin

@@ -83,7 +83,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     let user
     const { email: unsanitizedEmail, password } = data
-    const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+    const loginWithUsername = collectionConfig.auth.loginWithUsername
 
     const sanitizedEmail =
       typeof unsanitizedEmail !== 'string' ? null : unsanitizedEmail.toLowerCase().trim()

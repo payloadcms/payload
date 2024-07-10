@@ -31,7 +31,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
     req,
   } = args
 
-  const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+  const loginWithUsername = collectionConfig.auth.loginWithUsername
   const canLoginWithUsername = Boolean(loginWithUsername)
   const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
 

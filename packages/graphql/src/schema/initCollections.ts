@@ -1,6 +1,5 @@
-/* eslint-disable no-param-reassign */
-import type { GraphQLInfo } from 'payload'
-import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
+ 
+import type { Collection , Field, GraphQLInfo, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
 
 import {
   GraphQLBoolean,
@@ -428,8 +427,8 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
         const authArgs = {}
 
         const canLoginWithEmail =
-          collectionConfig.auth.loginWithUsername &&
-          collectionConfig.auth.loginWithUsername.allowEmailLogin
+          !collectionConfig.auth.loginWithUsername ||
+          collectionConfig.auth.loginWithUsername?.allowEmailLogin
         const canLoginWithUsername = collectionConfig.auth.loginWithUsername
 
         if (canLoginWithEmail) {
