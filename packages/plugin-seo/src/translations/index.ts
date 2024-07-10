@@ -1,6 +1,31 @@
 import type { NestedKeysStripped } from '@payloadcms/translations'
 
 export const translations = {
+  de: {
+    $schema: './translation-schema.json',
+    pluginSeo: {
+      almostThere: 'Fast da',
+      autoGenerate: 'Automatisch generieren',
+      bestPractices: 'Best Practices',
+      characterCount: '{{current}}/{{minLength}}-{{maxLength}} Zeichen, ',
+      charactersLeftOver: '{{characters}} übrig geblieben',
+      charactersToGo: '{{characters}} übrig',
+      charactersTooMany: '{{characters}} zu viel',
+      checksPassing: '{{current}}/{{max}} Prüfungen bestanden',
+      good: 'Gut',
+      imageAutoGenerationTip: 'Die automatische Generierung ruft das ausgewählte Hauptbild ab.',
+      lengthTipDescription:
+        'Dies sollte zwischen {{minLength}} und {{maxLength}} Zeichen lang sein. Für Hilfe beim Schreiben von qualitativ hochwertigen Meta-Beschreibungen siehe ',
+      lengthTipTitle:
+        'Dies sollte zwischen {{minLength}} und {{maxLength}} Zeichen lang sein. Für Hilfe beim Schreiben von qualitativ hochwertigen Meta-Titeln siehe ',
+      noImage: 'Kein Bild',
+      preview: 'Vorschau',
+      previewDescription:
+        'Die genauen Ergebnislisten können je nach Inhalt und Suchrelevanz variieren.',
+      tooLong: 'Zu lang',
+      tooShort: 'Zu kurz',
+    },
+  },
   en: {
     $schema: './translation-schema.json',
     'plugin-seo': {
