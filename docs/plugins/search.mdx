@@ -104,6 +104,8 @@ The `defaultPriorities` property is used to set a fallback `priority` on search 
 
 This plugin automatically creates the `search` collection, but you can override anything on this collection via the `searchOverrides` property. It accepts anything from the [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) and merges it in with the default `search` collection config provided by the plugin.
 
+Note that the `fields` property is a function that receives an object with a `defaultFields` key. This is an array of fields that are automatically added to the `search` collection. You can modify this array or add new fields to it.
+
 ```ts
 // payload.config.ts
 {
@@ -111,6 +113,16 @@ This plugin automatically creates the `search` collection, but you can override 
   searchPlugin({
     searchOverrides: {
       slug: 'search-results',
+      fields: ({ defaultFields }) => [
+        ...defaultFields,
+        {
+          name: 'excerpt',
+          type: 'textarea',
+          admin: {
+            position: 'sidebar',
+          },
+        },
+      ],
     },
   }),
 }
