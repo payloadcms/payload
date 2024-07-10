@@ -978,7 +978,7 @@ export {
 } from './lexical/utils/nodeFormat.js'
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
-export * from './nodeTypes.js'
+export type * from './nodeTypes.js'
 
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 

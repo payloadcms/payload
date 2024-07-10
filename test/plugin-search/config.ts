@@ -41,14 +41,14 @@ export default buildConfigWithDefaults({
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
       },
       searchOverrides: {
-        fields: [
+        fields: ({ defaultFields }) => [
+          ...defaultFields,
           {
             name: 'excerpt',
-            type: 'text',
+            type: 'textarea',
             admin: {
-              readOnly: true,
+              position: 'sidebar',
             },
-            label: 'Excerpt',
           },
         ],
       },
