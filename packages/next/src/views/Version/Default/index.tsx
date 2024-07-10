@@ -122,6 +122,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 globalSlug={globalSlug}
                 label={collectionConfig?.labels.singular || globalConfig?.label}
                 originalDocID={id}
+                status={doc?.version?._status}
                 versionDate={formattedCreatedAt}
                 versionID={versionID}
               />
