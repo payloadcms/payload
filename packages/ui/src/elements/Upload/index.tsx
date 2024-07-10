@@ -146,7 +146,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
   }
 
   useEffect(() => {
-    const inputElement = document.querySelector(`.${baseClass}__filename`)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const inputElement = document.querySelector(`.${baseClass}__filename`) as HTMLInputElement
     if (inputElement && cursorPositionRef.current !== null) {
       inputElement.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current)
     }
