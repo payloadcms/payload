@@ -39,7 +39,7 @@ This multi-faceted software offers a range of features that will help you manage
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-sentry
+  pnpm add @payloadcms/plugin-sentry
 ```
 
 ## Basic Usage
@@ -48,13 +48,13 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```ts
 import { buildConfig } from 'payload/config'
-import { sentry } from '@payloadcms/plugin-sentry'
+import { sentryPlugin } from '@payloadcms/plugin-sentry'
 import { Pages, Media } from './collections'
 
 const config = buildConfig({
   collections: [Pages, Media],
   plugins: [
-    sentry({
+    sentryPlugin({
       dsn: 'https://61edebas776889984d323d777@o4505289711681536.ingest.sentry.io/4505357433352176',
     }),
   ],
@@ -129,5 +129,5 @@ export default config
 All types can be directly imported:
 
 ```ts
-import { PluginOptions } from '@payloadcms/plugin-sentry/types'
+import { PluginOptions } from '@payloadcms/plugin-sentry'
 ```
