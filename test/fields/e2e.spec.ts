@@ -2102,7 +2102,7 @@ describe('fields', () => {
 
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
-        /\/api\/uploads\/file\/1667\.jpg(\?.*)?$/,
+        /\/uploads\/1667\.jpg(\?.*)?$/,
       )
     })
 
