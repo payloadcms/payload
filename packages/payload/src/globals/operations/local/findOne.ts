@@ -10,6 +10,7 @@ import findOne from '../findOne'
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
   depth?: number
+  disableErrors?: boolean
   draft?: boolean
   fallbackLocale?: string
   locale?: string
@@ -27,6 +28,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   const {
     slug: globalSlug,
     depth,
+    disableErrors,
     draft = false,
     overrideAccess = true,
     showHiddenFields,
@@ -43,6 +45,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   return findOne({
     slug: globalSlug as string,
     depth,
+    disableErrors,
     draft,
     globalConfig,
     overrideAccess,
