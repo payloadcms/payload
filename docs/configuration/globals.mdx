@@ -6,11 +6,9 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. You can define as many Globals as your application needs. Each Global saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define.
+Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. You can define as many Globals as your application needs. Each Global saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates the [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) so you can query and mutate your Documents.
 
 Globals are the primary way to structure singletons in Payload, such as a header navigation, site-wide banner alerts, or app-wide localized strings. Each Global can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
-
-All Globals are automatically accessible through the [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
 
 To define a Global Config, use the `globals` property in your [Payload Config](./overview):
 
