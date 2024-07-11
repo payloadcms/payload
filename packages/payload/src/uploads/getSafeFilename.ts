@@ -37,7 +37,6 @@ export async function getSafeFileName({
 }: Args): Promise<string> {
   let modifiedFilename = desiredFilename
 
-  // eslint-disable-next-line no-await-in-loop
   while (
     (await docWithFilenameExists({
       collectionSlug,

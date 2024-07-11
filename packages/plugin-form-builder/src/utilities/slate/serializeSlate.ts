@@ -12,7 +12,7 @@ interface Node {
   url?: string
 }
 
-const isTextNode = (node: Node): node is Node & { text: string } => {
+const isTextNode = (node: Node): node is { text: string } & Node => {
   return 'text' in node
 }
 

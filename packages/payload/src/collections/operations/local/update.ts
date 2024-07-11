@@ -36,15 +36,15 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   user?: Document
 }
 
-export type ByIDOptions<TSlug extends CollectionSlug> = BaseOptions<TSlug> & {
+export type ByIDOptions<TSlug extends CollectionSlug> = {
   id: number | string
   where?: never
-}
+} & BaseOptions<TSlug>
 
-export type ManyOptions<TSlug extends CollectionSlug> = BaseOptions<TSlug> & {
+export type ManyOptions<TSlug extends CollectionSlug> = {
   id?: never
   where: Where
-}
+} & BaseOptions<TSlug>
 
 export type Options<TSlug extends CollectionSlug> = ByIDOptions<TSlug> | ManyOptions<TSlug>
 

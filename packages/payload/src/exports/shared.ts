@@ -1,7 +1,5 @@
-export * from '../fields/validations.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 export { serverProps } from '../config/types.js'
-
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -18,6 +16,8 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from '../fields/config/types.js'
+
+export * from '../fields/validations.js'
 
 export { validOperators } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'

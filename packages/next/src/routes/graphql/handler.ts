@@ -50,7 +50,6 @@ const handleError = async (
 let cached = global._payload_graphql
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload_graphql = { graphql: null, promise: null }
 }
 

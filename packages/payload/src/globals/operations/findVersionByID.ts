@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'

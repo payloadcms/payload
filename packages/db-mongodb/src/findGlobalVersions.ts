@@ -104,7 +104,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

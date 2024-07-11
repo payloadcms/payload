@@ -34,7 +34,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-export type BlocksFieldProps = FormFieldBase & {
+export type BlocksFieldProps = {
   blocks?: ReducedBlock[]
   forceRender?: boolean
   isSortable?: boolean
@@ -44,7 +44,7 @@ export type BlocksFieldProps = FormFieldBase & {
   name?: string
   slug?: string
   width?: string
-}
+} & FormFieldBase
 
 const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()

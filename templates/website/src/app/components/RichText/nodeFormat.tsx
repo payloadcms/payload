@@ -1,5 +1,3 @@
-/* eslint-disable regexp/no-obscure-range */
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 // @ts-nocheck
 //This copy-and-pasted from lexical here here: https://github.com/facebook/lexical/blob/c2ceee223f46543d12c574e62155e619f9a18a5d/packages/lexical/src/LexicalConstants.ts
 
@@ -76,9 +74,8 @@ const LTR =
   '\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u200E\u2C00-\uFB1C' +
   '\uFE00-\uFE6F\uFEFD-\uFFFF'
 
-// eslint-disable-next-line no-misleading-character-class, regexp/no-misleading-unicode-character
 export const RTL_REGEX = new RegExp('^[^' + LTR + ']*[' + RTL + ']')
-// eslint-disable-next-line no-misleading-character-class, regexp/no-misleading-unicode-character
+
 export const LTR_REGEX = new RegExp('^[^' + RTL + ']*[' + LTR + ']')
 
 export const TEXT_TYPE_TO_FORMAT: Record<TextFormatType | string, number> = {

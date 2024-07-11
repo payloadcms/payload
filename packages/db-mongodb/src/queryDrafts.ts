@@ -87,7 +87,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc = {
         _id: doc.parent,
         id: doc.parent,

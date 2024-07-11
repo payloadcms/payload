@@ -47,20 +47,19 @@
     "@types/express": "^4.17.9",
     "@types/jest": "29.5.12",
     "@types/node": "20.12.5",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "nodemon": "3.0.3",
     "payload": "workspace:*",
-    "ts-jest": "^29.1.0",
-    "webpack": "^5.78.0"
+    "ts-jest": "^29.1.0"
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
+    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
   },
   "publishConfig": {
     "exports": {
@@ -75,7 +74,7 @@
   },
   "homepage:": "https://payloadcms.com",
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }

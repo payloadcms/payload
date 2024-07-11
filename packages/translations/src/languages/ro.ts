@@ -321,6 +321,7 @@ export const roTranslations: DefaultTranslationsObject = {
     within: 'înăuntru',
   },
   upload: {
+    addImage: 'Adaugă imagine',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',
@@ -335,6 +336,7 @@ export const roTranslations: DefaultTranslationsObject = {
     height: 'Înălțime',
     lessInfo: 'Mai puține informații',
     moreInfo: 'Mai multe informații',
+    pasteURL: 'Lipește URL',
     previewSizes: 'Dimensiuni Previzualizare',
     selectCollectionToBrowse: 'Selectați o colecție pentru navigare',
     selectFile: 'Selectați un fișier',

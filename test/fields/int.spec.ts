@@ -111,7 +111,6 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
@@ -476,7 +475,6 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
@@ -527,7 +525,7 @@ describe('Fields', () => {
         indexes.forEach((index) => {
           const field = Object.keys(index[0])[0]
           definitions[field] = index[0][field]
-          // eslint-disable-next-line prefer-destructuring
+
           options[field] = index[1]
         })
       })
@@ -585,7 +583,7 @@ describe('Fields', () => {
         indexes.forEach((index) => {
           const field = Object.keys(index[0])[0]
           definitions[field] = index[0][field]
-          // eslint-disable-next-line prefer-destructuring
+
           options[field] = index[1]
         })
       })

@@ -39,7 +39,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
 
 export const loginOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
-): Promise<Result & { user: DataFromCollectionSlug<TSlug> }> => {
+): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
 
   try {
@@ -253,7 +253,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })) || user
     }, Promise.resolve())
 
-    let result: Result & { user: DataFromCollectionSlug<TSlug> } = {
+    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       exp: (jwt.decode(token) as jwt.JwtPayload).exp,
       token,
       user,

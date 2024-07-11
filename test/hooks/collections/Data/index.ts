@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import type { CollectionConfig } from 'payload'
 
 export const dataHooksSlug = 'data-hooks'

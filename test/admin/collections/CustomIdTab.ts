@@ -2,23 +2,18 @@ import type { CollectionConfig } from 'payload'
 
 export const CustomIdTab: CollectionConfig = {
   slug: 'customIdTab',
-  labels: {
-    singular: 'Custom Id Tab',
-    plural: 'Custom Ids Tab',
-  },
   admin: {
-    description: 'Description',
-    listSearchableFields: ['id', 'title', 'description', 'number'],
-    group: 'One',
-    useAsTitle: 'title',
     defaultColumns: ['id', 'number', 'title'],
+    description: 'Description',
+    group: 'One',
+    listSearchableFields: ['id', 'title', 'description', 'number'],
+    useAsTitle: 'title',
   },
   fields: [
     {
       type: 'tabs',
       tabs: [
         {
-          label: 'Tab 1',
           fields: [
             {
               name: 'title',
@@ -37,8 +32,13 @@ export const CustomIdTab: CollectionConfig = {
               type: 'number',
             },
           ],
+          label: 'Tab 1',
         },
       ],
     },
   ],
+  labels: {
+    plural: 'Custom Ids Tab',
+    singular: 'Custom Id Tab',
+  },
 }

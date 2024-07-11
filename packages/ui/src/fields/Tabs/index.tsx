@@ -25,13 +25,13 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-export type TabsFieldProps = FormFieldBase & {
+export type TabsFieldProps = {
   forceRender?: boolean
   name?: string
   path?: string
   tabs?: MappedTab[]
   width?: string
-}
+} & FormFieldBase
 
 const _TabsField: React.FC<TabsFieldProps> = (props) => {
   const {

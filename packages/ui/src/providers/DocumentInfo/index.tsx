@@ -35,9 +35,9 @@ export type * from './types.js'
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<
-  DocumentInfoProps & {
+  {
     children: React.ReactNode
-  }
+  } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
     id,

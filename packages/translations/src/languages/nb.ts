@@ -317,6 +317,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     within: 'innen',
   },
   upload: {
+    addImage: 'Legg til bilde',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',
@@ -331,6 +332,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     height: 'Høyde',
     lessInfo: 'Mindre info',
     moreInfo: 'Mer info',
+    pasteURL: 'Lim inn URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
     selectCollectionToBrowse: 'Velg en samling å bla i',
     selectFile: 'Velg en fil',

@@ -1,7 +1,7 @@
 import type { Post } from '../../payload-types'
 
 export const post3: Partial<Post> = {
-  slug: 'post-3',
+  slug: 'dollar-and-sense-the-financial-forecast',
   _status: 'published',
   authors: ['{{AUTHOR}}'],
   content: {

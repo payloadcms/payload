@@ -10,9 +10,9 @@ import Nested from '../Nested/index.js'
 const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<
-  Omit<Props, 'field'> & {
+  {
     field: MappedField & TabsFieldProps
-  }
+  } & Omit<Props, 'field'>
 > = ({ comparison, diffComponents, field, i18n, locale, locales, permissions, version }) => {
   return (
     <div className={baseClass}>

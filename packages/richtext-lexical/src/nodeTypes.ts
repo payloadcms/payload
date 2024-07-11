@@ -15,7 +15,7 @@ import type { SerializedListItemNode, SerializedListNode } from './features/list
 import type { SerializedRelationshipNode } from './features/relationship/nodes/RelationshipNode.js'
 import type { SerializedUploadNode } from './features/upload/nodes/UploadNode.js'
 
-export {
+export type {
   SerializedAutoLinkNode,
   SerializedBlockNode,
   SerializedHeadingNode,
