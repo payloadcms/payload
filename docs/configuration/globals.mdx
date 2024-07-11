@@ -10,7 +10,7 @@ Globals are in many ways similar to [Collections](../configuration/collections),
 
 Globals are the primary way to structure singletons in Payload, such as a header navigation, site-wide banner alerts, or app-wide localized strings. Each Global can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
 
-Globals will automatically generate their own [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
+All Globals are automatically accessible through the [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
 
 To define a Global Config, use the `globals` property in your [Payload Config](./overview):
 
