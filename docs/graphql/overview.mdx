@@ -8,13 +8,13 @@ keywords: graphql, resolvers, mutations, config, configuration, documentation, C
 
 In addition to its REST and Local APIs, Payload ships with a fully featured and extensible GraphQL API.
 
-By default, the GraphQL API is exposed via `/api/graphql`, but you can customize this URL via specifying your `routes` within the main Payload config.
+By default, the GraphQL API is exposed via `/api/graphql`, but you can customize this URL via specifying your `routes` within the main Payload Config.
 
 The labels you provide for your Collections and Globals are used to name the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.
 
 ## GraphQL Options
 
-At the top of your Payload config you can define all the options to manage GraphQL.
+At the top of your Payload Config you can define all the options to manage GraphQL.
 
 | Option                          | Description                                                                                                                     |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -93,7 +93,7 @@ const Header: GlobalConfig = {
 
 ## Preferences
 
-User [preferences](/docs/admin/overview#preferences) for the admin panel are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
+User [preferences](/docs/admin/overview#preferences) for the [Admin Panel](../admin/overview) are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
 
 **Payload will open the following query:**
 
@@ -110,7 +110,7 @@ User [preferences](/docs/admin/overview#preferences) for the admin panel are als
 
 ## GraphQL Playground
 
-GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload config.
+GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload Config.
 
 You can even log in using the `login[collection-singular-label-here]` mutation to use the Playground as an authenticated user.
 

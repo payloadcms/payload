@@ -11,9 +11,9 @@ keywords: documentation, getting started, guide, Content Management System, cms,
   title="Payload Introduction - Closing the Gap Between Headless CMS and Application Frameworks"
 />
 
-**Payload is the Next.js fullstack framework.** Write a Payload config and instantly get:
+**Payload is the Next.js fullstack framework.** Write a Payload Config and instantly get:
 
-- A full admin panel using React server / client components, matching the shape of your data and completely extensible with your own React components
+- A full Admin Panel using React server / client components, matching the shape of your data and completely extensible with your own React components
 - Automatic database schema, including direct DB access and ownership, with migrations, transactions, proper indexing, and more
 - Instant REST, GraphQL, and straight-to-DB Node APIs
 - Authentication which can be used in your own apps
@@ -34,11 +34,11 @@ It's fully open source with an MIT license and you can self-host anywhere that y
 
 Even in spite of how much you get out of the box, you still have full control over every aspect of your app - be it database, admin UI, or anything else. Every part of Payload has been designed to be extensible and customizable with modern TypeScript / React. And you'll fully understand the code that you write.
 
-In Payload, there are no "click ops" - as in clicking around in an admin panel to define your schema. In Payload, everything is done the right way—code-first and version controlled like a proper backend. But once developers define how Payload should work, non-technical users can independently make use of its admin panel to manage whatever they need to without having to know code whatsoever.
+In Payload, there are no "click ops" - as in clicking around in an Admin Panel to define your schema. In Payload, everything is done the right way—code-first and version controlled like a proper backend. But once developers define how Payload should work, non-technical users can independently make use of its Admin Panel to manage whatever they need to without having to know code whatsoever.
 
 ## Use cases
 
-Payload started as a headless Content Management System (CMS), but since, we've seen our community leverage Payload in ways far outside of simply managing pages and blog posts. It's grown into a full-stack TypeScript app framework. 
+Payload started as a headless Content Management System (CMS), but since, we've seen our community leverage Payload in ways far outside of simply managing pages and blog posts. It's grown into a full-stack TypeScript app framework.
 
 Large enterprises use Payload to power significant internal tools, retailers power their entire storefronts without the need for headless Shopify, and massive amounts of digital assets are stored + managed within Payload. Of course, websites large and small still use Payload for content management as well.
 
@@ -48,7 +48,7 @@ The biggest barrier in large web projects cited by marketers is engineering. On 
 
 Payload has restored a little love back into the dev / marketer equation with features like Live Preview, redirects, form builders, visual editing, static A/B testing, and more. But even with all this focus on marketing efficiency, we aren't compromising on the developer experience. That way engineers and marketers alike can be proud of the products they build.
 
-If you're building a website and your frontend is on Next.js, then Payload is a no-brainer. 
+If you're building a website and your frontend is on Next.js, then Payload is a no-brainer.
 
 <Banner type="success">
   Instead of going out and signing up for a SaaS vendor that makes it so you have to manage two completely separate concerns, with little to no native connection back and forth, just install Payload in your existing Next.js repo and instantly get a full CMS.
@@ -71,7 +71,7 @@ When a large organization starts up a new software initiative, there's a lot of 
 - Implement a migrations workflow for the database as it changes over time
 - Integrate with other third party solutions by crafting a system of webhooks or similar
 
-And then there's the admin panel. Most enterprise tools require an admin UI, and building one from scratch can be the most time-consuming aspect of any new enterprise tool. There are off-the-shelf packages for app frameworks like Rails, but often the customization is so involved that using Material UI or similar from scratch might be better.
+And then there's the [Admin Panel](../admin/overview). Most enterprise tools require an admin UI, and building one from scratch can be the most time-consuming aspect of any new enterprise tool. There are off-the-shelf packages for app frameworks like Rails, but often the customization is so involved that using Material UI or similar from scratch might be better.
 
 Then there are no-code admin builders that could be used. However, wiring up access control and the connection to the data layer, with proper version control, makes this a challenging task as well.
 
@@ -85,7 +85,7 @@ npx create-payload-app@latest -t blank
 
 ### Headless commerce
 
-Companies who prioritize UX generally run into frontend constraints with traditional commerce vendors. These companies will then opt for frontend frameworks like Next.js which allow them to fine-tune their user experience as much as possible—promoting conversions, personalizing experiences, and optimizing for SEO. 
+Companies who prioritize UX generally run into frontend constraints with traditional commerce vendors. These companies will then opt for frontend frameworks like Next.js which allow them to fine-tune their user experience as much as possible—promoting conversions, personalizing experiences, and optimizing for SEO.
 
 But the challenge with using something like Next.js for headless commerce is that in order for non-technical users to manage the storefront, you instantly need to pair a headless commerce product with a headless CMS. Then, your editors need to bounce back and forth between different admin UIs for different functionality. The code required to seamlessly glue them together on the frontend becomes overly complex.
 
@@ -121,7 +121,7 @@ Payload flattens CMS and DAM into a single tool that makes no compromises on eit
 
 - If you can manage your project fully with code, and don't need an admin UI
 - If you are building a website that fits within the limits a tool like Webflow or Framer
-- If you already have a full database and just need to visualize the data somehow 
+- If you already have a full database and just need to visualize the data somehow
 - If you are confident that you won't need code / data ownership at any point in the future
 
 Ready to get started? First, let's review some high-level concepts that are used in Payload.

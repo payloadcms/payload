@@ -9,11 +9,11 @@ The core logic and principles of Payload remain the same for 3.0. The brunt of t
 
 ## To migrate from Payload 2.0 to 3.0:
 
-1. Delete the `admin.bundler` property from your Payload config:
+1. Delete the `admin.bundler` property from your Payload Config:
 
-Payload no longer bundles the admin panel. Instead, we rely directly on Next.js for bundling. This also means that the `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite` packages have been deprecated. You can completely uninstall those from your project by removing them from your `package.json` file and re-running your package manager’s installation process, i.e. `pnpm i`.
+Payload no longer bundles the Admin Panel. Instead, we rely directly on Next.js for bundling. This also means that the `@payloadcms/bundler-webpack` and `@payloadcms/bundler-vite` packages have been deprecated. You can completely uninstall those from your project by removing them from your `package.json` file and re-running your package manager’s installation process, i.e. `pnpm i`.
 
-2. Add the `secret` property to your Payload config. This used to be set in the `payload.init()` function of your `server.ts` file. Move it to `payload.config.ts` instead:
+2. Add the `secret` property to your Payload Config. This used to be set in the `payload.init()` function of your `server.ts` file. Move it to `payload.config.ts` instead:
 
 ```tsx
 // payload.config.ts
@@ -24,7 +24,7 @@ buildConfig({
 })
 ```
 
-3. The `admin.css` and `admin.scss` properties in the Payload config have been removed:
+3. The `admin.css` and `admin.scss` properties in the Payload Config have been removed:
 
 Instead for any global styles you can:
 
@@ -414,7 +414,7 @@ export const MyClientComponent = {
 }
 ```
 
-8. The `custom` property in the Payload config, i.e. collections, globals, blocks, and fields are now ***server only***.
+8. The `custom` property in the Payload Config, i.e. collections, globals, blocks, and fields are now ***server only***.
 
 Use `admin.custom` properties will be available in both server and client bundles.
 
@@ -868,7 +868,7 @@ const { i18n, t } = useTranslation()
 return <p>{t('general:cancel')}</p>
 ```
 
-- `react-i18n` was removed, the `Trans` component from react-i18n has been replaced with a payload provided solution. You can instead `import { Translation } from "@payloadcms/ui"`
+- `react-i18n` was removed, the `Trans` component from react-i18n has been replaced with a Payload provided solution. You can instead `import { Translation } from "@payloadcms/ui"`
 
 ```tsx
 // Translation string example
@@ -1017,7 +1017,7 @@ import { addLocalesToRequest } from '@payloadcms/next/utilities'
 
 ## Uploads
 
-- `staticDir` must now be an absolute path. Before it would attempt to use the location of the payload config and merge the relative path set for staticDir.
+- `staticDir` must now be an absolute path. Before it would attempt to use the location of the Payload Config and merge the relative path set for staticDir.
 - `staticURL` has been removed. If you were using this format URLs when using an external provider, you can leverage the `generateFileURL` functions in order to do the same.
 
 ## Email Adapters
