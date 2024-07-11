@@ -10,7 +10,7 @@ A Collection is a group of records, called Documents, that share a common schema
 
 Collections are the primary way to structure recurring data in your application, such as users, products, pages, posts, and other types of content that you might want to manage. Each Collection can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
 
-Collections will automatically generate their own [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
+All Collections automatically accessible through the [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
 
 To define a Collection Config, use the `collection` property in your [Payload Config](./overview):
 
@@ -24,6 +24,11 @@ export default buildConfig({
   ],
 })
 ```
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  If your Collection is only ever meant to contain a single Document, consider using a [Global](./globals) instead.
+</Banner>
 
 ## Config Options
 
@@ -60,7 +65,7 @@ The following options are available:
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                          |
 | **`disableDuplicate`** | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                      |
 | **`defaultSort`**      | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
-| **`dbName`**      | Custom table or Collection name depending on the database adapter. Auto-generated from slug if not defined. |
+| **`dbName`**      | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined. |
 | **`endpoints`**        | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                    |
 | **`fields`** \*        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
 | **`graphQL`**          | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined. Set to `false` to disable GraphQL.                                                            |

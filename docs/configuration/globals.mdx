@@ -10,7 +10,7 @@ Globals are in many ways similar to [Collections](../configuration/collections),
 
 Globals are the primary way to structure singletons in Payload, such as a header navigation, site-wide banner alerts, or app-wide localized strings. Each Global can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
 
-Globals will automatically generate their own [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
+All Globals are automatically accessible through the [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
 
 To define a Global Config, use the `globals` property in your [Payload Config](./overview):
 
@@ -24,6 +24,11 @@ export default buildConfig({
   ],
 })
 ```
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  If you have more than one Global that share the same structure, consider using a [Collection](../configuration/collections) instead.
+</Banner>
 
 ## Config Options
 
@@ -67,7 +72,7 @@ The following options are available:
 | **`access`**       | Provide access control functions to define exactly who should be able to do what with this Global. [More details](../access-control/overview/#globals).                                                                    |
 | **`admin`**        | The configuration options for the Admin Panel. [More details](#admin-options).                                                                           |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
-| **`dbName`**       | Custom table or collection name for this Global depending on the database adapter. Auto-generated from slug if not defined. |
+| **`dbName`**       | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined. |
 | **`description`**  | Text or React component to display below the Global header to give editors more information.                                                                                                                         |
 | **`endpoints`**    | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                  |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
@@ -170,7 +175,7 @@ import { GlobalConfig } from 'payload'
 ```
 
 ```ts
-import { SanitizedGlobalConfig } from 'payload/types'
+import { SanitizedGlobalConfig } from 'payload'
 
 // This is the type used after an incoming Global config is fully sanitized.
 // Generally, this is only used internally by Payload.

@@ -6,11 +6,26 @@ desc: Plugins provide a great way to modularize Payload functionalities into eas
 keywords: plugins, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload Plugins take full advantage of the modularity of the [Payload Config](../configuration/overview), allowing developers to easily extend Payload's core functionality in a precise and granular way. This pattern allows developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point.
+Payload Plugins take full advantage of the modularity of the [Payload Config](../configuration/overview), allowing developers to extend Payload's core functionality in a precise and granular way. This pattern allows developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point.
 
 There are many [Official Plugins](#official-plugins) available that solve for some of the most common uses cases, such as the [Form Builder Plugin](./seo) or [SEO Plugin](./seo). There are also [Community Plugins](#community-plugins) available, maintained entirely by contributing members. To extend Payload's functionality in some other way, you can easily [build your own plugin](./build-your-own).
 
-Writing plugins is no more complex than writing regular JavaScript. If you know the basic concept of [callback functions](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function) or how [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) works, and are up to speed with Payload concepts, then writing a plugin will be a breeze.
+To configure Plugins, use the `plugins` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  // highlight-start
+  plugins: [
+    // Add Plugins here
+  ],
+  // highlight-end
+})
+```
+
+Writing Plugins is no more complex than writing regular JavaScript. If you know the basic concept of [callback functions](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function) or how [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) works, and are up to speed with Payload concepts, then writing a plugin will be a breeze.
 
 <Banner type="success">
   Because we rely on a simple config-based structure, Payload Plugins simply take in an
@@ -59,32 +74,19 @@ Some plugins have become so widely used that they are adopted as an [Official Pl
   For maintainers building plugins for others to use, please add the `payload-plugin` topic on [GitHub](https://github.com/topics/payload-plugin) to help others find it.
 </Banner>
 
-## Installing Plugins
+## Example
 
 The base [Payload Config](../configuration/overview) allows for a `plugins` property which takes an `array` of [Plugin Configs](./build-your-own).
 
 ```ts
-import { buildConfig } from 'payload/config'
-// note: these plugins are not real (yet?)
-import addLastModified from 'payload-add-last-modified'
-import passwordProtect from 'payload-password-protect'
+import { buildConfig } from 'payload'
+import { addLastModified } from './addLastModified.ts'
 
 const config = buildConfig({
   // ...
   // highlight-start
   plugins: [
-    // Many plugins require options to be passed.
-    // In the following example, we call the function
-    // and pass it options accordingly
-    passwordProtect(['pages']),
-
-    // This plugin takes no options and just
-    // needs to be passed directly
     addLastModified,
-
-    // ..
-    // To understand how to use the plugins you're interested in,
-    // consult their corresponding documentation
   ],
   // highlight-end
 })
@@ -97,9 +99,9 @@ const config = buildConfig({
 Here is an example what the `addLastModified` plugin from above might look like. It adds a `lastModifiedBy` field to all Payload collections. For full details, see [how to build your own plugin](./build-your-own).
 
 ```ts
-import { Config, Plugin } from 'payload/config'
+import { Config, Plugin } from 'payload'
 
-const addLastModified: Plugin = (incomingConfig: Config): Config => {
+export const addLastModified: Plugin = (incomingConfig: Config): Config => {
   // Find all incoming auth-enabled collections
   // so we can create a lastModifiedBy relationship field
   // to all auth collections
@@ -142,6 +144,9 @@ const addLastModified: Plugin = (incomingConfig: Config): Config => {
 
   return config
 }
-
-export default addLastModified
 ```
+
+<Banner type="success">
+  <strong>Reminder:</strong>
+  See [how to build your own plugin](./build-your-own) for a more in-depth explication on how create your own Payload Plugin.
+</Banner>

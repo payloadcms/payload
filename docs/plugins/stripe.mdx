@@ -47,7 +47,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { stripePlugin } from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
@@ -140,7 +140,7 @@ Production:
 1. Then, handle these events using the `webhooks` portion of this plugin's config:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
@@ -239,7 +239,7 @@ This option will setup a basic sync between Payload collections and Stripe resou
 </Banner>
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
