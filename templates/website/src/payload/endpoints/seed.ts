@@ -1,4 +1,4 @@
-import type { PayloadHandler } from 'payload'
+import { type PayloadHandler, commitTransaction, initTransaction } from 'payload'
 
 import { seed as seedScript } from '../seed'
 
@@ -10,7 +10,9 @@ export const seed: PayloadHandler = async (req): Promise<Response> => {
   }
 
   try {
-    await seedScript(payload)
+    await initTransaction(req)
+    await seedScript({ payload, req })
+    await commitTransaction(req)
     return Response.json({ success: true })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
