@@ -6,7 +6,8 @@
 
   .tooltip:not([aria-hidden='true']) {
     right: auto;
-    position: relative;
+    position: static;
+    transform: translateY(calc(var(--caret-size) * -1));
     margin-bottom: 0.2em;
     max-width: fit-content;
   }
