@@ -103,8 +103,8 @@
     "@types/minimist": "1.2.5",
     "@types/node": "20.12.5",
     "@types/prompts": "^2.4.5",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "@types/semver": "^7.5.3",
     "@types/shelljs": "0.8.15",
     "chalk": "^4.1.2",
@@ -138,8 +138,8 @@
     "playwright-core": "1.43.0",
     "prettier": "3.3.2",
     "prompts": "2.4.2",
-    "react": "^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0-rc-f994737d14-20240522",
+    "react": "^19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "^19.0.0-rc-6230622a1a-20240610",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
     "sharp": "0.32.6",
@@ -155,8 +155,8 @@
     "uuid": "10.0.0"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
+    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
@@ -168,8 +168,8 @@
       "domexception": "4"
     },
     "overrides": {
-      "@types/react": "npm:types-react@19.0.0-beta.2",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+      "@types/react": "npm:types-react@19.0.0-rc.0",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
@@ -185,8 +185,8 @@
     }
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   },
   "workspaces:": [
     "packages/*",
