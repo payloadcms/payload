@@ -606,6 +606,9 @@ importers:
       sonner:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)
+      uuid:
+        specifier: 10.0.0
+        version: 10.0.0
       ws:
         specifier: ^8.16.0
         version: 8.18.0
@@ -625,6 +628,9 @@ importers:
       '@types/react-dom':
         specifier: npm:types-react-dom@19.0.0-rc.0
         version: /types-react-dom@19.0.0-rc.0
+      '@types/uuid':
+        specifier: 10.0.0
+        version: 10.0.0
       '@types/ws':
         specifier: ^8.5.10
         version: 8.5.10
