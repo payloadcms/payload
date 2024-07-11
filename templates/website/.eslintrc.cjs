@@ -29,6 +29,13 @@ module.exports = {
         'perfectionist/sort-vue-attributes': 'off',
       },
     },
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        'perfectionist/sort-imports': 'warn',
+        'perfectionist/sort-objects': 'warn',
+      },
+    },
   ],
   parserOptions: {
     project: ['./tsconfig.json'],
