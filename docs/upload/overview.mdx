@@ -43,7 +43,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 </Banner>
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -113,7 +113,7 @@ Upload options are specifiable on a Collection by Collection basis, you can also
 A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: [
@@ -197,7 +197,7 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 1. `adminThumbnail` as a **string**, equal to one of your provided image size names.
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -226,7 +226,7 @@ export const Media: CollectionConfig = {
 2. `adminThumbnail` as a **function** that takes the document's data and sends back a full URL to load the thumbnail.
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -247,7 +247,7 @@ Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `applicat
 **Example mimeTypes usage:**
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',

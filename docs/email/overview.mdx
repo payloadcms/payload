@@ -49,7 +49,7 @@ Simple Mail Transfer Protocol (SMTP) options can be passed in using the `transpo
 **Example email options using SMTP:**
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 export default buildConfig({
@@ -72,7 +72,7 @@ export default buildConfig({
 **Example email options using nodemailer.createTransport:**
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 
@@ -99,7 +99,7 @@ You also have the ability to bring your own nodemailer transport. This is an exa
 
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailerSendgrid from 'nodemailer-sendgrid'
 
@@ -136,7 +136,7 @@ The Resend adapter requires an API key to be passed in the options. This can be 
 | apiKey | The API key for the Resend service. |
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { resendAdapter } from '@payloadcms/email-resend'
 
 export default buildConfig({

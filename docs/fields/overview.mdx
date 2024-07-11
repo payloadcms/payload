@@ -6,9 +6,22 @@ desc: Fields are the building blocks of Payload, find out how to add or remove a
 keywords: overview, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Fields are the building blocks of Payload. They are to define the schema of [Collection](../configuration/collections) and [Global](../configuration/globals) Documents that will be stored in the [Database](../database/overview), as well as automatically generate the corresponding UI within the [Admin Panel](../admin/overview).
+Fields are the building blocks of Payload. They define the schema of the Documents that will be stored in the [Database](../database/overview), as well as automatically generate the corresponding UI within the [Admin Panel](../admin/overview).
 
 There are many [Field Types](#field-types) to choose from, ranging anywhere from simple text strings to nested arrays and blocks. Most fields save data to the database, while others are strictly presentational. Fields can have [Custom Validations](#validations), [Conditional Logic](../admin/fields#conditional-logic), [Access Control](#field-level-access-control), [Hooks](#field-level-hooks), and so much more.
+
+To configure fields, use the `fields` property in your [Collection](../configuration/collections) or [Global](../configuration/globals) config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Page: CollectionConfig = {
+  // ...
+  fields: [ // highlight-line
+    // ...
+  ]
+}
+```
 
 <Banner type="success">
   You can fully customize the appearance and behavior of all fields within the Admin Panel. [More details](../admin/fields).
