@@ -6,20 +6,23 @@ keywords: database, mongodb, postgres, documentation, Content Management System,
 desc: With Payload, you bring your own database and own your data. You have full control.
 ---
 
-Payload interacts with your database via the database adapter that you choose. Right now, Payload officially supports two database adapters:
+Payload interacts with your database via the Database Adapter that you choose. Currently, Payload officially supports the following Database Adapters:
 
-1. [MongoDB](/docs/database/mongodb) w/ [Mongoose](https://mongoosejs.com/)
-1. [Postgres](/docs/database/postgres) w/ [Drizzle](https://drizzle.team/)
-
-We will be adding support for SQLite and MySQL in the near future using Drizzle ORM.
+- [MongoDB](/docs/database/mongodb) with [Mongoose](https://mongoosejs.com/)
+- [Postgres](/docs/database/postgres) with [Drizzle](https://drizzle.team/)
 
 To use a specific database adapter, you need to install it and configure it according to its own specifications. Visit the documentation for your applicable database adapter to learn more.
+
+<Banner type="success">
+  <strong>Note:</strong>
+  In the future, we will be adding support for SQLite and MySQL using Drizzle.
+</Banner>
 
 ## Selecting a database
 
 There are several factors to consider when choosing which database technology and hosting option is right for your project and workload. Payload can theoretically support any database, but it's up to you to decide which database to use.
 
-### When to use MongoDB
+### Non-Relational Databases
 
 If your project has a lot of dynamic fields, and you are comfortable with allowing Payload to enforce data integrity across your documents, MongoDB is a great choice. With it, your Payload documents are stored as _one_ document in your database—no matter if you have localization enabled, how many block or array fields you have, etc. This means that the shape of your data in your database will very closely reflect your field schema, and there is minimal complexity involved in storing or retrieving your data.
 
@@ -30,7 +33,7 @@ You should prefer MongoDB if:
 - Most (or everything) in your project is localized
 - You leverage a lot of array fields, block fields, or `hasMany` select fields and similar
 
-### When to use a relational DB
+### Relational Databases
 
 Many projects might call for more rigid database architecture where the shape of your data is strongly enforced at the database level. For example, if you know the shape of your data and it's relatively "flat", and you don't anticipate it to change often, your workload might suit relational databases like Postgres very well.
 
