@@ -66,7 +66,6 @@ const reactRules = {
 
 const typescriptRules = {
   '@typescript-eslint/no-use-before-define': 'off',
-  '@typescript-eslint/ban-ts-comment': 'off',
 
   // Type-aware any rules:
   '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -82,7 +81,7 @@ const typescriptRules = {
   // Type-aware any rules end
 
   // ts-expect preferred over ts-ignore. It will error if the expected error is no longer present.
-  '@typescript-eslint/prefer-ts-expect-error': 'error',
+  '@typescript-eslint/ban-ts-comment': 'warn', // Recommended over deprecated @typescript-eslint/prefer-ts-expect-error: https://github.com/typescript-eslint/typescript-eslint/issues/8333. Set to warn to ease migration.
   // By default, it errors for unused variables. This is annoying, warnings are enough.
   '@typescript-eslint/no-unused-vars': [
     'warn',
@@ -99,8 +98,7 @@ const typescriptRules = {
   '@typescript-eslint/no-base-to-string': 'warn',
   '@typescript-eslint/restrict-template-expressions': 'warn',
   '@typescript-eslint/no-redundant-type-constituents': 'warn',
-  '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
-  '@typescript-eslint/ban-types': 'warn',
+  '@typescript-eslint/no-unnecessary-type-constraint': 'warn'
 }
 
 /** @typedef {import('eslint').Linter.FlatConfig} */
