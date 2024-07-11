@@ -67,7 +67,7 @@ Instead, use the new `beforeDuplicate` field-level hook which take the usual fie
 ```tsx
 // ❌ Before
 // file: collections/Posts.ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const PostsCollection: CollectionConfig = {
   slug: 'posts',
@@ -708,11 +708,11 @@ This was changed for improved semantics. If you were previously importing this t
 ```tsx
 // ❌ Before
 
-import type { Fields } from 'payload/types'
+import type { Fields } from 'payload'
 
 // ✅ After
 
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 ```
 
 16. The `useDocumentInfo` hook no longer returns a `SanizitedCollectionConfig` or `SanitizedGlobalConfig`:

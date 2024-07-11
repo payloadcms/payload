@@ -35,7 +35,7 @@ all changes that you attempt to make within the migration, and the `down` should
 
 For an added level of safety, migrations should leverage Payload [transactions](/docs/database/transactions). Migration
 functions should make use of the `req` by adding it to the arguments of your Payload Local API calls such
-as `payload.create` and database adapter methods like `payload.db.create`.
+as `payload.create` and Database Adapter methods like `payload.db.create`.
 
 Here is an example migration file:
 
@@ -127,7 +127,7 @@ npm run payload migrate:fresh
 
 ## When to run migrations
 
-Depending on which database adapter you use, your migration workflow might differ subtly.
+Depending on which Database Adapter you use, your migration workflow might differ subtly.
 
 In relational databases, migrations will be **required** for non-development database environments. But with MongoDB, you might only need to run migrations once in a while (or never even need them).
 
