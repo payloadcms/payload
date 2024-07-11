@@ -5,17 +5,20 @@ import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import { getTranslation } from '@payloadcms/translations'
 
 import { BlockIcon } from '../../lexical/ui/icons/Block/index.js'
+import { InlineBlocksIcon } from '../../lexical/ui/icons/InlineBlocks/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { BlockNode } from './nodes/BlocksNode.js'
-import { INSERT_BLOCK_COMMAND } from './plugin/commands.js'
+import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
+import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 
 export type BlocksFeatureClientProps = {
   reducedBlocks: ReducedBlock[]
+  reducedInlineBlocks: ReducedBlock[]
 }
 
 export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>(({ props }) => ({
-  nodes: [BlockNode],
+  nodes: [BlockNode, InlineBlockNode],
   plugins: [
     {
       Component: BlocksPlugin,
@@ -52,6 +55,35 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
           return i18n.t('lexical:blocks:label')
         },
       },
+      {
+        items: props.reducedInlineBlocks.map((inlineBlock) => {
+          return {
+            Icon: InlineBlocksIcon,
+            key: 'inlineBlocks-' + inlineBlock.slug,
+            keywords: ['inlineBlock', 'inline block', inlineBlock.slug],
+            label: ({ i18n }) => {
+              if (!inlineBlock.labels.singular) {
+                return inlineBlock.slug
+              }
+
+              return getTranslation(inlineBlock.labels.singular, i18n)
+            },
+            onSelect: ({ editor }) => {
+              editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
+                fields: {
+                  id: null,
+                  blockName: '',
+                  blockType: inlineBlock.slug,
+                },
+              })
+            },
+          }
+        }),
+        key: 'inlineBlocks',
+        label: ({ i18n }) => {
+          return i18n.t('lexical:blocks:inlineBlocks:label')
+        },
+      },
     ],
   },
   toolbarFixed: {
@@ -83,6 +115,34 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
         }),
         key: 'blocks',
         order: 20,
+      },
+      {
+        type: 'dropdown',
+        ChildComponent: InlineBlocksIcon,
+        items: props.reducedInlineBlocks.map((inlineBlock, index) => {
+          return {
+            ChildComponent: InlineBlocksIcon,
+            isActive: undefined,
+            key: 'inlineBlock-' + inlineBlock.slug,
+            label: ({ i18n }) => {
+              if (!inlineBlock.labels.singular) {
+                return inlineBlock.slug
+              }
+
+              return getTranslation(inlineBlock.labels.singular, i18n)
+            },
+            onSelect: ({ editor }) => {
+              editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
+                fields: {
+                  blockType: inlineBlock.slug,
+                },
+              })
+            },
+            order: index,
+          }
+        }),
+        key: 'inlineBlocks',
+        order: 25,
       },
     ],
   },

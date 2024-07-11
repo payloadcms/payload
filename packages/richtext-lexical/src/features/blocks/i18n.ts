@@ -17,6 +17,11 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Blöcke',
   },
   en: {
+    inlineBlocks: {
+      edit: 'Edit Inline Blocks',
+      label: 'Inline Blocks',
+      remove: 'Remove Inline Blocks',
+    },
     label: 'Blocks',
   },
   es: {

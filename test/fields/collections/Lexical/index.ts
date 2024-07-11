@@ -9,7 +9,6 @@ import {
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HeadingFeature,
-  InlineFieldsFeature,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
@@ -82,47 +81,20 @@ const editorConfig: ServerEditorConfig = {
         ConditionalLayoutBlock,
         TabBlock,
       ],
-    }),
-    EXPERIMENTAL_TableFeature(),
-    InlineFieldsFeature({
-      inlineFields: [
+      inlineBlocks: [
         {
-          fields: [
-            {
-              name: 'test',
-              type: 'text',
-            },
-          ],
-          key: 'test',
-          label: 'Test',
-        },
-        {
-          display: ({ data }) => data.key,
+          slug: 'translationKey',
           fields: [
             {
               name: 'key',
               type: 'select',
               options: ['value1', 'value2', 'value3'],
-
-              hooks: {
-                afterChange: [
-                  () => {
-                    console.log('field hook: afterChange')
-                  },
-                ],
-                afterRead: [
-                  () => {
-                    console.log('field hook: afterRead')
-                  },
-                ],
-              },
             },
           ],
-          key: 'translationKey',
-          label: 'Translation Key',
         },
       ],
     }),
+    EXPERIMENTAL_TableFeature(),
   ],
 }
 

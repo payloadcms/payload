@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const InlineFieldsIcon: React.FC = () => (
+export const InlineBlocksIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="icon"

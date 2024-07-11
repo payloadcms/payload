@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef } from 'react'
-const baseClass = 'inline-fields'
+const baseClass = 'inline-block'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
@@ -17,31 +17,27 @@ import {
   KEY_DELETE_COMMAND,
 } from 'lexical'
 
-import type { Fields } from '../nodes/InlineFieldsNode.js'
+import type { BlockFields } from '../nodes/BlocksNode.js'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
-import { $isInlineFieldsNode } from '../nodes/InlineFieldsNode.js'
-import {
-  INSERT_INLINE_FIELDS_COMMAND,
-  OPEN_INLINE_FIELDS_DRAWER_COMMAND,
-} from '../plugin/commands.js'
+import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
+import { OPEN_INLINE_BLOCK_DRAWER_COMMAND } from '../plugin/commands.js'
 import './index.scss'
 
 type Props = {
-  fieldsKey: string
-  formData: Fields
+  formData: BlockFields
   nodeKey?: string
 }
 
-export const InlineFieldsComponent: React.FC<Props> = (props) => {
-  const { fieldsKey, formData, nodeKey } = props
+export const InlineBlockComponent: React.FC<Props> = (props) => {
+  const { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
-  const { i18n, t } = useTranslation<{}, string>()
+  const { t } = useTranslation<{}, string>()
   const { field } = useEditorConfigContext()
-  const inlineFieldsElemElemRef = useRef<HTMLDivElement | null>(null)
+  const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const removeInlineFields = useCallback(() => {
+  const removeInlineBlock = useCallback(() => {
     editor.update(() => {
       $getNodeByKey(nodeKey).remove()
     })
@@ -53,7 +49,7 @@ export const InlineFieldsComponent: React.FC<Props> = (props) => {
         const event: KeyboardEvent = payload
         event.preventDefault()
         const node = $getNodeByKey(nodeKey)
-        if ($isInlineFieldsNode(node)) {
+        if ($isInlineBlockNode(node)) {
           node.remove()
           return true
         }
@@ -65,10 +61,10 @@ export const InlineFieldsComponent: React.FC<Props> = (props) => {
   const onClick = useCallback(
     (payload: MouseEvent) => {
       const event = payload
-      // Check if inlineFieldsElemElemRef.target or anything WITHIN inlineFieldsElemElemRef.target was clicked
+      // Check if inlineBlockElemElemRef.target or anything WITHIN inlineBlockElemElemRef.target was clicked
       if (
-        event.target === inlineFieldsElemElemRef.current ||
-        inlineFieldsElemElemRef.current?.contains(event.target as Node)
+        event.target === inlineBlockElemElemRef.current ||
+        inlineBlockElemElemRef.current?.contains(event.target as Node)
       ) {
         if (event.shiftKey) {
           setSelected(!isSelected)
@@ -97,10 +93,14 @@ export const InlineFieldsComponent: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[baseClass, baseClass + '-' + fieldsKey, isSelected && `${baseClass}--selected`]
+      className={[
+        baseClass,
+        baseClass + '-' + formData.blockType,
+        isSelected && `${baseClass}--selected`,
+      ]
         .filter(Boolean)
         .join(' ')}
-      ref={inlineFieldsElemElemRef}
+      ref={inlineBlockElemElemRef}
     >
       {formData?._internal_text_output}
       {editor.isEditable() && (
@@ -112,15 +112,15 @@ export const InlineFieldsComponent: React.FC<Props> = (props) => {
             el="div"
             icon="edit"
             onClick={() => {
-              editor.dispatchCommand(OPEN_INLINE_FIELDS_DRAWER_COMMAND, {
+              editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                 fields: formData,
-                key: fieldsKey,
+
                 nodeKey,
               })
             }}
             round
             size="small"
-            tooltip={t('lexical:inlineFields:editInlineFields')}
+            tooltip={t('lexical:blocks:inlineBlocks:edit')}
           />
           <Button
             buttonStyle="icon-label"
@@ -129,11 +129,11 @@ export const InlineFieldsComponent: React.FC<Props> = (props) => {
             icon="x"
             onClick={(e) => {
               e.preventDefault()
-              removeInlineFields()
+              removeInlineBlock()
             }}
             round
             size="small"
-            tooltip={t('lexical:inlineFields:removeInlineFields')}
+            tooltip={t('lexical:blocks:inlineBlocks:remove')}
           />
         </div>
       )}

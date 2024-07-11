@@ -1,10 +1,10 @@
 @import '../../../scss/styles.scss';
 
-.inline-fields-container {
+.inline-block-container {
   display: inline-block;
 }
 
-.inline-fields {
+.inline-block {
   @extend %body;
   @include shadow-sm;
   padding: calc(var(--base) * 0.15);

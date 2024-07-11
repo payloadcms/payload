@@ -1,12 +1,14 @@
+import type { Block } from 'payload'
+
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 
 import type { NodeValidation } from '../typesServer.js'
-import type { BlocksFeatureProps } from './feature.server.js'
 import type { BlockFields, SerializedBlockNode } from './nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from './nodes/InlineBlocksNode.js'
 
 export const blockValidationHOC = (
-  props: BlocksFeatureProps,
-): NodeValidation<SerializedBlockNode> => {
+  blocks: Block[],
+): NodeValidation<SerializedBlockNode | SerializedInlineBlockNode> => {
   return async ({ node, validation }) => {
     const blockFieldData = node.fields ?? ({} as BlockFields)
 
@@ -15,7 +17,7 @@ export const blockValidationHOC = (
     } = validation
 
     // find block
-    const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)
+    const block = blocks.find((block) => block.slug === blockFieldData.blockType)
 
     // validate block
     if (!block) {

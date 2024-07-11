@@ -844,10 +844,6 @@ export { HeadingFeature, type HeadingFeatureProps } from './features/heading/fea
 export { HorizontalRuleFeature } from './features/horizontalRule/feature.server.js'
 export { IndentFeature } from './features/indent/feature.server.js'
 
-export {
-  InlineFieldsFeature,
-  type InlineFieldsFeatureProps,
-} from './features/inlineFields/feature.server.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/feature.server.js'
 
 export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
