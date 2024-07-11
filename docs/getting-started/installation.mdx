@@ -42,7 +42,7 @@ First, you'll want to add the required Payload packages to your project and can 
 pnpm i payload@beta @payloadcms/next@beta @payloadcms/richtext-lexical@beta sharp graphql
 ```
 
-You'll also need to install the database adapter that you'd like to use. You have the option of Postgres (`@payloadcms/db-postgres`) or MongoDB (`@payloadcms/db-mongodb`).
+You'll also need to install the Database Adapter that you'd like to use. You have the option of Postgres (`@payloadcms/db-postgres`) or MongoDB (`@payloadcms/db-mongodb`).
 
 #### 2 - copy Payload files into your Next.js app folder
 
@@ -135,13 +135,11 @@ export default buildConfig({
 
   // Your Payload secret - should be a complex and secure string, unguessable
   secret: process.env.PAYLOAD_SECRET || '',
-
-  // Whichever database adapter you're using should go here
+  // Whichever Database Adapter you're using should go here
   // Mongoose is shown as an example, but you can also use Postgres
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-
   // If you want to resize images, crop, set focal point, etc.
   // make sure to install it and pass it to the config.
   // This is optional - if you don't need to do these things,
