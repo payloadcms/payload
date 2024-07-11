@@ -1,4 +1,4 @@
-import { rootEslintConfig, rootParserOptions } from '../eslint.config.js'
+import { defaultESLintIgnores, rootEslintConfig, rootParserOptions } from '../eslint.config.js'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import playwright from 'eslint-plugin-playwright'
 
@@ -8,6 +8,9 @@ let FlatConfig
 /** @type {FlatConfig[]} */
 export const testEslintConfig = [
   ...rootEslintConfig,
+  {
+    ignores: [...defaultESLintIgnores, '**/payload-types.ts'],
+  },
   {
     languageOptions: {
       parserOptions: {
