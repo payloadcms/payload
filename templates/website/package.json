@@ -11,6 +11,7 @@
     "generate:types": "payload generate:types",
     "ii": "pnpm --ignore-workspace install",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "payload": "payload",
     "reinstall": "rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "next start"
