@@ -1,4 +1,5 @@
-/** @type {import('jest').Config} */ const baseJestConfig = {
+/** @type {import('jest').Config} */
+const baseJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   setupFiles: ['<rootDir>/test/jest.setup.env.js'],
   setupFilesAfterEnv: ['<rootDir>/test/jest.setup.js'],
@@ -18,7 +19,7 @@
 }
 
 if (process.env.CI) {
-  //baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
+  baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
 }
 
 export default baseJestConfig

@@ -21,7 +21,7 @@ const customJestConfig = {
 }
 
 if (process.env.CI) {
-  //customJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
+  customJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
 }
 
 export default customJestConfig
