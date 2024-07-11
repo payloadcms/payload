@@ -74,7 +74,6 @@ export const seoPlugin =
           },
           ...(pluginConfig?.uploadsCollection
             ? [
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 {
                   name: 'image',
                   type: 'upload',

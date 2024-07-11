@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { Field, FieldAffectingData } from 'payload'
 
 import { GraphQLInputObjectType, GraphQLList } from 'graphql'

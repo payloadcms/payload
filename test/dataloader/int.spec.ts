@@ -65,8 +65,8 @@ describe('dataloader', () => {
         const normalizedResponse = JSON.parse(JSON.stringify(data))
 
         expect(normalizedResponse).toStrictEqual({
-          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
           Items: { docs: [{ name: 'item1', itemTags: [{ name: 'tag1' }] }] },
+          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
         })
       }
     })

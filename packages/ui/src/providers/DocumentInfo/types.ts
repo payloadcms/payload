@@ -37,7 +37,7 @@ export type DocumentInfoProps = {
   onSave?: (data: Data) => Promise<void> | void
 }
 
-export type DocumentInfoContext = DocumentInfoProps & {
+export type DocumentInfoContext = {
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
@@ -47,10 +47,10 @@ export type DocumentInfoContext = DocumentInfoProps & {
   isInitializing: boolean
   isLoading: boolean
   preferencesKey?: string
-  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
+  publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setDocFieldPreferences: (
     field: string,
-    fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
+    fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentTitle: (title: string) => void
   slug?: string
@@ -58,4 +58,4 @@ export type DocumentInfoContext = DocumentInfoProps & {
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
-}
+} & DocumentInfoProps

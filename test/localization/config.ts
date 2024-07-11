@@ -26,12 +26,12 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 
-export type LocalizedPostAllLocale = LocalizedPost & {
+export type LocalizedPostAllLocale = {
   title: {
     en?: string
     es?: string
   }
-}
+} & LocalizedPost
 
 const openAccess = {
   create: () => true,

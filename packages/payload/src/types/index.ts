@@ -78,10 +78,10 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = Partial<Request> &
-  Required<Pick<Request, 'headers'>> &
-  CustomPayloadRequestProperties &
-  PayloadRequestData
+export type PayloadRequest = CustomPayloadRequestProperties &
+  Partial<Request> &
+  PayloadRequestData &
+  Required<Pick<Request, 'headers'>>
 
 export interface RequestContext {
   [key: string]: unknown

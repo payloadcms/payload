@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-use-before-define */
+
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /**
  * Created by Ivo Meißner on 28.07.17.

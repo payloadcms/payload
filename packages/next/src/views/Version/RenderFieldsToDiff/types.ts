@@ -15,8 +15,8 @@ export type Props = {
   version: Record<string, any>
 }
 
-export type FieldDiffProps = Props & {
+export type FieldDiffProps = {
   diffMethod: DiffMethod
   field: MappedField
   isRichText: boolean
-}
+} & Props

@@ -40,7 +40,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
   let docBeingAccessed
 
-  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<TypeWithID & Document> {
+  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<Document & TypeWithID> {
     if (entity.slug) {
       if (type === 'global') {
         return payload.findGlobal({

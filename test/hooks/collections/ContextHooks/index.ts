@@ -1,6 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { CollectionConfig } from 'payload'
-import type { PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 
 export const contextHooksSlug = 'context-hooks'
 const ContextHooks: CollectionConfig = {
@@ -14,7 +12,6 @@ const ContextHooks: CollectionConfig = {
   hooks: {
     beforeOperation: [
       ({ context, args }) => {
-        // eslint-disable-next-line prefer-destructuring
         const req: PayloadRequest = args.req
 
         if (req.searchParams.size === 0) {

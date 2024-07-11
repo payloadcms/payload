@@ -43,10 +43,10 @@ export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
   /** Extra configuration options */
-  connectOptions?: ConnectOptions & {
+  connectOptions?: {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
-  }
+  } & ConnectOptions
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   migrationDir?: string
@@ -59,19 +59,19 @@ export interface Args {
   url: false | string
 }
 
-export type MongooseAdapter = BaseDatabaseAdapter &
-  Args & {
-    collections: {
-      [slug: string]: CollectionModel
-    }
-    connection: Connection
-    globals: GlobalModel
-    mongoMemoryServer: MongoMemoryReplSet
-    sessions: Record<number | string, ClientSession>
-    versions: {
-      [slug: string]: CollectionModel
-    }
+export type MongooseAdapter = {
+  collections: {
+    [slug: string]: CollectionModel
   }
+  connection: Connection
+  globals: GlobalModel
+  mongoMemoryServer: MongoMemoryReplSet
+  sessions: Record<number | string, ClientSession>
+  versions: {
+    [slug: string]: CollectionModel
+  }
+} & Args &
+  BaseDatabaseAdapter
 
 declare module 'payload' {
   export interface DatabaseAdapter

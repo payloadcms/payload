@@ -105,7 +105,7 @@ export const UploadFeature = createServerFeature<
 
                 if (req?.payload) {
                   const uploadDocument: {
-                    value?: TypeWithID & FileData
+                    value?: FileData & TypeWithID
                   } = {}
 
                   try {
@@ -158,9 +158,9 @@ export const UploadFeature = createServerFeature<
 
                   // Iterate through each size in the data.sizes object
                   for (const size in uploadDocument.value?.sizes) {
-                    const imageSize: FileSize & {
+                    const imageSize: {
                       url?: string
-                    } = uploadDocument.value?.sizes[size]
+                    } & FileSize = uploadDocument.value?.sizes[size]
 
                     // Skip if any property of the size object is null
                     if (

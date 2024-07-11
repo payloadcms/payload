@@ -4,13 +4,13 @@ import type React from 'react'
 
 import type { UseDraggableSortableReturn } from '../useDraggableSortable/types.js'
 
-export type DragHandleProps = UseDraggableArguments & {
+export type DragHandleProps = {
   attributes: UseDraggableArguments['attributes']
   listeners: SyntheticListenerMap
-}
+} & UseDraggableArguments
 
 export type ChildFunction = (args: UseDraggableSortableReturn) => React.ReactNode
 
-export type Props = UseDraggableArguments & {
+export type Props = {
   children: ChildFunction
-}
+} & UseDraggableArguments

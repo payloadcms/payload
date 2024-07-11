@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-use-before-define */
+
 import type { EditorProps } from '@monaco-editor/react'
 import type { CSSProperties } from 'react'
 
@@ -241,8 +241,8 @@ export interface FieldBase {
   validate?: Validate
 }
 
-export type NumberField = FieldBase & {
-  admin?: Admin & {
+export type NumberField = {
+  admin?: {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
@@ -255,33 +255,34 @@ export type NumberField = FieldBase & {
     placeholder?: Record<string, string> | string
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
-  }
+  } & Admin
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
   /** Minimum value accepted. Used in the default `validation` function. */
   min?: number
   type: 'number'
 } & (
-    | {
-        /** Makes this field an ordered array of numbers instead of just a single number. */
-        hasMany: true
-        /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
-        maxRows?: number
-        /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-        minRows?: number
-      }
-    | {
-        /** Makes this field an ordered array of numbers instead of just a single number. */
-        hasMany?: false | undefined
-        /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
-        maxRows?: undefined
-        /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-        minRows?: undefined
-      }
-  )
+  | {
+      /** Makes this field an ordered array of numbers instead of just a single number. */
+      hasMany: true
+      /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+      maxRows?: number
+      /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+      minRows?: number
+    }
+  | {
+      /** Makes this field an ordered array of numbers instead of just a single number. */
+      hasMany?: false | undefined
+      /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+      maxRows?: undefined
+      /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+      minRows?: undefined
+    }
+) &
+  FieldBase
 
-export type TextField = FieldBase & {
-  admin?: Admin & {
+export type TextField = {
+  admin?: {
     autoComplete?: string
     components?: {
       Error?: CustomComponent<ErrorProps>
@@ -291,31 +292,32 @@ export type TextField = FieldBase & {
     }
     placeholder?: Record<string, string> | string
     rtl?: boolean
-  }
+  } & Admin
   maxLength?: number
   minLength?: number
   type: 'text'
 } & (
-    | {
-        /** Makes this field an ordered array of strings instead of just a single string. */
-        hasMany: true
-        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
-        maxRows?: number
-        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
-        minRows?: number
-      }
-    | {
-        /** Makes this field an ordered array of strings instead of just a single string. */
-        hasMany?: false | undefined
-        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
-        maxRows?: undefined
-        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
-        minRows?: undefined
-      }
-  )
+  | {
+      /** Makes this field an ordered array of strings instead of just a single string. */
+      hasMany: true
+      /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+      maxRows?: number
+      /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+      minRows?: number
+    }
+  | {
+      /** Makes this field an ordered array of strings instead of just a single string. */
+      hasMany?: false | undefined
+      /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+      maxRows?: undefined
+      /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+      minRows?: undefined
+    }
+) &
+  FieldBase
 
-export type EmailField = FieldBase & {
-  admin?: Admin & {
+export type EmailField = {
+  admin?: {
     autoComplete?: string
     components?: {
       Error?: CustomComponent<ErrorProps>
@@ -324,12 +326,12 @@ export type EmailField = FieldBase & {
       beforeInput?: CustomComponent[]
     }
     placeholder?: Record<string, string> | string
-  }
+  } & Admin
   type: 'email'
-}
+} & FieldBase
 
-export type TextareaField = FieldBase & {
-  admin?: Admin & {
+export type TextareaField = {
+  admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
       Label?: CustomComponent<LabelProps>
@@ -339,26 +341,26 @@ export type TextareaField = FieldBase & {
     placeholder?: Record<string, string> | string
     rows?: number
     rtl?: boolean
-  }
+  } & Admin
   maxLength?: number
   minLength?: number
   type: 'textarea'
-}
+} & FieldBase
 
-export type CheckboxField = FieldBase & {
-  admin?: Admin & {
+export type CheckboxField = {
+  admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
       Label?: CustomComponent<LabelProps>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
-  }
+  } & Admin
   type: 'checkbox'
-}
+} & FieldBase
 
-export type DateField = FieldBase & {
-  admin?: Admin & {
+export type DateField = {
+  admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
       Label?: CustomComponent<LabelProps>
@@ -367,14 +369,14 @@ export type DateField = FieldBase & {
     }
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
-  }
+  } & Admin
   type: 'date'
-}
+} & FieldBase
 
-export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
-  admin?: Admin & {
+export type GroupField = {
+  admin?: {
     hideGutter?: boolean
-  }
+  } & Admin
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
@@ -384,47 +386,48 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
    */
   interfaceName?: string
   type: 'group'
-}
+} & Omit<FieldBase, 'required' | 'validation'>
 
 export type RowAdmin = Omit<Admin, 'description'>
 
-export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
+export type RowField = {
   admin?: RowAdmin
   fields: Field[]
   type: 'row'
-}
+} & Omit<FieldBase, 'admin' | 'label' | 'name'>
 
-export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
+export type CollapsibleField = {
   fields: Field[]
   type: 'collapsible'
 } & (
-    | {
-        admin: Admin & {
-          components: {
-            RowLabel: RowLabelComponent
-          } & Admin['components']
-          initCollapsed?: boolean
-        }
-        label?: Required<FieldBase['label']>
-      }
-    | {
-        admin?: Admin & {
-          initCollapsed?: boolean
-        }
-        label: Required<FieldBase['label']>
-      }
-  )
+  | {
+      admin: {
+        components: {
+          RowLabel: RowLabelComponent
+        } & Admin['components']
+        initCollapsed?: boolean
+      } & Admin
+      label?: Required<FieldBase['label']>
+    }
+  | {
+      admin?: {
+        initCollapsed?: boolean
+      } & Admin
+      label: Required<FieldBase['label']>
+    }
+) &
+  Omit<FieldBase, 'label' | 'name'>
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
-type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
+type TabBase = {
   description?: Description
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
-}
+} & Omit<FieldBase, 'required' | 'validation'>
 
-export type NamedTab = TabBase & {
+export type NamedTab = {
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
@@ -432,9 +435,9 @@ export type NamedTab = TabBase & {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
-}
+} & TabBase
 
-export type UnnamedTab = Omit<TabBase, 'name'> & {
+export type UnnamedTab = {
   interfaceName?: never
   /**
    * Can be either:
@@ -448,20 +451,20 @@ export type UnnamedTab = Omit<TabBase, 'name'> & {
     | LabelFunction
     | string
   localized?: never
-}
+} & Omit<TabBase, 'name'>
 
 export type Tab = NamedTab | UnnamedTab
 
-export type TabsField = Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT'> & {
+export type TabsField = {
   admin?: TabsAdmin
   tabs: Tab[]
   type: 'tabs'
-}
+} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT'>
 
-export type TabAsField = Tab & {
+export type TabAsField = {
   name?: string
   type: 'tab'
-}
+} & Tab
 
 export type UIField = {
   admin: {
@@ -492,7 +495,7 @@ export type UIField = {
   type: 'ui'
 }
 
-export type UploadField = FieldBase & {
+export type UploadField = {
   admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
@@ -508,33 +511,33 @@ export type UploadField = FieldBase & {
   maxDepth?: number
   relationTo: CollectionSlug
   type: 'upload'
-}
+} & FieldBase
 
-type CodeAdmin = Admin & {
+type CodeAdmin = {
   components?: {
     Error?: CustomComponent<ErrorProps>
     Label?: CustomComponent<LabelProps>
   }
   editorOptions?: EditorProps['options']
   language?: string
-}
+} & Admin
 
-export type CodeField = Omit<FieldBase, 'admin'> & {
+export type CodeField = {
   admin?: CodeAdmin
   maxLength?: number
   minLength?: number
   type: 'code'
-}
+} & Omit<FieldBase, 'admin'>
 
-type JSONAdmin = Admin & {
+type JSONAdmin = {
   components?: {
     Error?: CustomComponent<ErrorProps>
     Label?: CustomComponent<LabelProps>
   }
   editorOptions?: EditorProps['options']
-}
+} & Admin
 
-export type JSONField = Omit<FieldBase, 'admin'> & {
+export type JSONField = {
   admin?: JSONAdmin
   jsonSchema?: {
     fileMatch: string[]
@@ -542,17 +545,17 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
     uri: string
   }
   type: 'json'
-}
+} & Omit<FieldBase, 'admin'>
 
-export type SelectField = FieldBase & {
-  admin?: Admin & {
+export type SelectField = {
+  admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
       Label?: CustomComponent<LabelProps>
     }
     isClearable?: boolean
     isSortable?: boolean
-  }
+  } & Admin
   /**
    * Customize the SQL table name
    */
@@ -564,9 +567,9 @@ export type SelectField = FieldBase & {
   hasMany?: boolean
   options: Option[]
   type: 'select'
-}
+} & FieldBase
 
-type SharedRelationshipProperties = FieldBase & {
+type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
   hasMany?: boolean
   /**
@@ -577,54 +580,55 @@ type SharedRelationshipProperties = FieldBase & {
   maxDepth?: number
   type: 'relationship'
 } & (
-    | {
-        hasMany: true
-        /**
-         * @deprecated Use 'maxRows' instead
-         */
-        max?: number
-        maxRows?: number
-        /**
-         * @deprecated Use 'minRows' instead
-         */
-        min?: number
-        minRows?: number
-      }
-    | {
-        hasMany?: false | undefined
-        /**
-         * @deprecated Use 'maxRows' instead
-         */
-        max?: undefined
-        maxRows?: undefined
-        /**
-         * @deprecated Use 'minRows' instead
-         */
-        min?: undefined
-        minRows?: undefined
-      }
-  )
+  | {
+      hasMany: true
+      /**
+       * @deprecated Use 'maxRows' instead
+       */
+      max?: number
+      maxRows?: number
+      /**
+       * @deprecated Use 'minRows' instead
+       */
+      min?: number
+      minRows?: number
+    }
+  | {
+      hasMany?: false | undefined
+      /**
+       * @deprecated Use 'maxRows' instead
+       */
+      max?: undefined
+      maxRows?: undefined
+      /**
+       * @deprecated Use 'minRows' instead
+       */
+      min?: undefined
+      minRows?: undefined
+    }
+) &
+  FieldBase
 
-type RelationshipAdmin = Admin & {
+type RelationshipAdmin = {
   allowCreate?: boolean
   components?: {
     Error?: CustomComponent<ErrorProps>
     Label?: CustomComponent<LabelProps>
   }
   isSortable?: boolean
-}
-export type PolymorphicRelationshipField = SharedRelationshipProperties & {
-  admin?: RelationshipAdmin & {
+} & Admin
+export type PolymorphicRelationshipField = {
+  admin?: {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
-  }
+  } & RelationshipAdmin
   relationTo: CollectionSlug[]
-}
-export type SingleRelationshipField = SharedRelationshipProperties & {
-  admin?: RelationshipAdmin & {
+} & SharedRelationshipProperties
+export type SingleRelationshipField = {
+  admin?: {
     sortOptions?: string
-  }
+  } & RelationshipAdmin
   relationTo: CollectionSlug
-}
+} & SharedRelationshipProperties
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
 export type ValueWithRelation = {
@@ -646,13 +650,13 @@ export type RichTextField<
   Value extends object = any,
   AdapterProps = any,
   ExtraProperties = object,
-> = FieldBase & {
-  admin?: Admin & {
+> = {
+  admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
       Label?: CustomComponent<LabelProps>
     }
-  }
+  } & Admin
   editor?:
     | RichTextAdapter<Value, AdapterProps, AdapterProps>
     | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
@@ -663,10 +667,11 @@ export type RichTextField<
    */
   maxDepth?: number
   type: 'richText'
-} & ExtraProperties
+} & ExtraProperties &
+  FieldBase
 
-export type ArrayField = FieldBase & {
-  admin?: Admin & {
+export type ArrayField = {
+  admin?: {
     components?: {
       RowLabel?: RowLabelComponent
     } & Admin['components']
@@ -675,7 +680,7 @@ export type ArrayField = FieldBase & {
      * Disable drag and drop sorting
      */
     isSortable?: boolean
-  }
+  } & Admin
   /**
    * Customize the SQL table name
    */
@@ -692,16 +697,16 @@ export type ArrayField = FieldBase & {
   maxRows?: number
   minRows?: number
   type: 'array'
-}
+} & FieldBase
 
-export type RadioField = FieldBase & {
-  admin?: Admin & {
+export type RadioField = {
+  admin?: {
     components?: {
       Error?: CustomComponent<ErrorProps>
       Label?: CustomComponent<LabelProps>
     }
     layout?: 'horizontal' | 'vertical'
-  }
+  } & Admin
   /**
    * Customize the SQL table name
    */
@@ -712,7 +717,7 @@ export type RadioField = FieldBase & {
   enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
-}
+} & FieldBase
 
 export type Block = {
   admin?: {
@@ -743,25 +748,25 @@ export type Block = {
   slug: string
 }
 
-export type BlockField = FieldBase & {
-  admin?: Admin & {
+export type BlockField = {
+  admin?: {
     initCollapsed?: boolean
     /**
      * Disable drag and drop sorting
      */
     isSortable?: boolean
-  }
+  } & Admin
   blocks: Block[]
   defaultValue?: unknown
   labels?: Labels
   maxRows?: number
   minRows?: number
   type: 'blocks'
-}
+} & FieldBase
 
-export type PointField = FieldBase & {
+export type PointField = {
   type: 'point'
-}
+} & FieldBase
 
 export type Field =
   | ArrayField
@@ -828,9 +833,9 @@ export type NonPresentationalField =
   | TextareaField
   | UploadField
 
-export type FieldWithPath = Field & {
+export type FieldWithPath = {
   path?: string
-}
+} & Field
 
 export type FieldWithSubFields = ArrayField | CollapsibleField | GroupField | RowField
 

@@ -4,7 +4,6 @@ import noRelativeMonorepoImports from './customRules/no-relative-monorepo-import
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 
-
 /**
  * @type {import('eslint').ESLint.Plugin}
  */

@@ -71,7 +71,6 @@ describe('field error states', () => {
   })
 
   describe('draft validations', () => {
-    // eslint-disable-next-line playwright/expect-expect
     test('should not validate drafts by default', async () => {
       await page.goto(validateDraftsOff.create)
       await saveDocAndAssert(page, '#action-save-draft')
