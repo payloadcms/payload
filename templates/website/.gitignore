@@ -6,4 +6,5 @@ node_modules
 .next
 .vercel
 
-media
+# Payload default media upload directory
+./public/media
