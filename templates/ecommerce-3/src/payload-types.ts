@@ -138,11 +138,11 @@ export interface Product {
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null
   enableVariants?: boolean | null
   variants?: {
-    keys?:
+    options?:
       | {
           label: string
           slug: string
-          options?:
+          values?:
             | {
                 label: string
                 slug: string

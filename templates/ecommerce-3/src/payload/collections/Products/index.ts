@@ -134,7 +134,7 @@ export const Products: CollectionConfig = {
               },
               fields: [
                 {
-                  name: 'keys',
+                  name: 'options',
                   type: 'array',
                   admin: {
                     components: {
@@ -159,7 +159,7 @@ export const Products: CollectionConfig = {
                       ],
                     },
                     {
-                      name: 'options',
+                      name: 'values',
                       type: 'array',
                       admin: {
                         components: {
@@ -186,7 +186,7 @@ export const Products: CollectionConfig = {
                       ],
                     },
                   ],
-                  label: 'Variant keys',
+                  label: 'Variant options',
                   minRows: 1,
                 },
                 {
@@ -197,7 +197,7 @@ export const Products: CollectionConfig = {
                       RowLabel: VariantLabel,
                     },
                     condition: (data, siblingData) => {
-                      return Boolean(siblingData?.keys?.length)
+                      return Boolean(siblingData?.options?.length)
                     },
                   },
                   fields: [

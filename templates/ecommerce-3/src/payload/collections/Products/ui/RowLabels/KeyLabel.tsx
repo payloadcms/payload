@@ -11,9 +11,9 @@ export const KeyLabel: React.FC = () => {
   useEffect(() => {
     if (data.label) {
       const title = `${data.label}`
-      const options = data?.options?.map((option) => option.label) ?? []
+      const values = data?.values?.map((option) => option.label) ?? []
 
-      const label = `${title} (${options.join(', ')})`
+      const label = `${title} (${values.join(', ')})`
       setLabel(label)
     } else {
       setLabel(`Key ${rowNumber}`)

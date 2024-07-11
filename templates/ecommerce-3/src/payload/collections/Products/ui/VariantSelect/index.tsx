@@ -20,7 +20,7 @@ export const VariantSelect: React.FC<TextField> = (props) => {
   const { getDataByPath } = useForm()
   const variantInfoPath = path.includes('.') ? variantPath + '.info' : 'info'
 
-  const keys: Product['variants']['keys'] = getDataByPath('variants.keys')
+  const keys: Product['variants']['options'] = getDataByPath('variants.options')
 
   const { dispatchFields, infoField } = useFormFields(([fields, dispatchFields]) => ({
     dispatchFields,
@@ -37,7 +37,7 @@ export const VariantSelect: React.FC<TextField> = (props) => {
 
       newValue.forEach((value: string) => {
         keys.forEach((group) => {
-          group.options.forEach((option) => {
+          group.values.forEach((option) => {
             if (option.slug === value) {
               options.push({
                 slug: option.slug,
@@ -86,7 +86,7 @@ export const VariantSelect: React.FC<TextField> = (props) => {
                   <RadioGroup
                     fullArray={keys}
                     group={key}
-                    options={key.options}
+                    options={key.values}
                     path={path}
                     setValue={handleUpdate}
                     value={value}

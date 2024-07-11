@@ -153,10 +153,6 @@ export default function CartModal() {
               <div>
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                   <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                    <p>Shipping</p>
-                    <p className="text-right">Calculated at checkout</p>
-                  </div>
-                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                     <p>Total</p>
                     <Price
                       amount={cartTotal.amount}

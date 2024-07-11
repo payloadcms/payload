@@ -1,7 +1,7 @@
 import type { Product } from '@/payload-types'
 
-export type OptionKey = Product['variants']['keys'][number]
-export type Option = OptionKey['options'][number]
+export type OptionKey = Product['variants']['options'][number]
+export type Option = OptionKey['values'][number]
 export type ProductVariant = Product['variants']['variants'][number]
 
 export type KeysFieldValue = {
@@ -12,7 +12,7 @@ export interface RadioGroupProps {
   /**
    * Required for sorting the array
    */
-  fullArray: Product['variants']['keys']
+  fullArray: Product['variants']['options']
   group: OptionKey
   options: Option[]
   path: string
