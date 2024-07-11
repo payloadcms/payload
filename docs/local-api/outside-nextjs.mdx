@@ -2,7 +2,7 @@
 title: Using Payload outside Next.js
 label: Outside Next.js
 order: 20
-desc: Payload can be used outside of Next.js within standalone scripts or in other frameworks like Remix, Sveltekit, Nuxt, and similar. 
+desc: Payload can be used outside of Next.js within standalone scripts or in other frameworks like Remix, Sveltekit, Nuxt, and similar.
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -11,16 +11,16 @@ Payload can be used completely outside of Next.js which is helpful in cases like
 <Banner>
   <strong>Note:</strong>
   <br/>
-  Payload and all of its official packages are fully ESM. If you want to use Payload within your own projects, make sure you are writing your scripts in ESM format or dynamically importing the Payload config.
+  Payload and all of its official packages are fully ESM. If you want to use Payload within your own projects, make sure you are writing your scripts in ESM format or dynamically importing the Payload Config.
 </Banner>
 
-## Importing the Payload config outside of Next.js
+## Importing the Payload Config outside of Next.js
 
-Your Payload config likely has imports which need to be handled properly, such as CSS imports and similar. If you were to try and import your config without any Node support for SCSS / CSS files, you'll see errors that arise accordingly. 
+Your Payload Config likely has imports which need to be handled properly, such as CSS imports and similar. If you were to try and import your config without any Node support for SCSS / CSS files, you'll see errors that arise accordingly.
 
-This is especially relevant if you are importing your Payload config outside of a bundler context, such as in standalone Node scripts.
+This is especially relevant if you are importing your Payload Config outside of a bundler context, such as in standalone Node scripts.
 
-For these cases, you can use Payload's `importConfig` function to handle importing your config safely. It will handle everything you need to be able to load and use your Payload config, without any client-side files present.
+For these cases, you can use Payload's `importConfig` function to handle importing your config safely. It will handle everything you need to be able to load and use your Payload Config, without any client-side files present.
 
 Here's an example of a seed script that creates a few documents for local development / testing purposes, using Payload's `importConfig` function to safely import Payload, and the `getPayload` function to retrieve an initialized copy of Payload.
 
@@ -30,7 +30,7 @@ Here's an example of a seed script that creates a few documents for local develo
 // you should always use `import { getPayloadHMR } from '@payloadcms/next/utilities'` instead.
 import { getPayload } from 'payload'
 
-// This is a helper function that will make sure we can safely load the Payload config
+// This is a helper function that will make sure we can safely load the Payload Config
 // and all of its client-side files, such as CSS, SCSS, etc.
 import { importConfig } from 'payload/node'
 
@@ -43,7 +43,7 @@ import dotenv from 'dotenv'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// If you don't need to load your .env file, 
+// If you don't need to load your .env file,
 // then you can skip this part!
 dotenv.config({
   path: path.resolve(dirname, '../.env'),

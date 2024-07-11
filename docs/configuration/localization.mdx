@@ -2,19 +2,19 @@
 title: Localization
 label: Localization
 order: 50
-desc: Add and maintain as many locales as you need by adding Localization to your Payload config, set options for default locale, fallbacks, fields and more.
+desc: Add and maintain as many locales as you need by adding Localization to your Payload Config, set options for default locale, fallbacks, fields and more.
 keywords: localization, internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Payload features deep field-based localization support. Maintaining as many locales as you need is easy. All
 localization support is opt-in by default. To do so, follow the two steps below.
 
-## Enabling in the Payload config
+## Enabling in the Payload Config
 
-Add the `localization` property to your Payload config to enable localization project-wide. You'll need to provide a
+Add the `localization` property to your Payload Config to enable localization project-wide. You'll need to provide a
 list of all locales that you'd like to support as well as set a few other options.
 
-**Example Payload config set up for localization:**
+**Example Payload Config set up for localization:**
 
 ```ts
 import { buildConfig } from 'payload'
@@ -31,7 +31,7 @@ export default buildConfig({
 })
 ```
 
-**Example Payload config set up for localization with full locales objects:**
+**Example Payload Config set up for localization with full locales objects:**
 
 ```ts
 import { buildConfig } from 'payload'
@@ -60,7 +60,7 @@ export default buildConfig({
 })
 ```
 
-**Example Payload config set up for localization with full locales objects (
+**Example Payload Config set up for localization with full locales objects (
 including [internationalization](/docs/configuration/i18n) support):**
 
 ```ts
@@ -127,7 +127,7 @@ fall back to the fallback locale value. If this property is not enabled, the val
 
 ## Field by field localization
 
-Payload localization works on a **field** level—not a document level. In addition to configuring the base Payload config
+Payload localization works on a **field** level—not a document level. In addition to configuring the base Payload Config
 to support localization, you need to specify each field that you would like to localize.
 
 **Here is an example of how to enable localization for a field:**
@@ -182,7 +182,7 @@ Specify your desired locale by providing the `locale` query parameter directly i
 **`?fallback-locale=`**
 
 Specify fallback locale to be used by providing the `fallback-locale` query parameter. This can be provided as either a
-valid locale as provided to your base Payload config, or `'null'`, `'false'`, or `'none'` to disable falling back.
+valid locale as provided to your base Payload Config, or `'null'`, `'false'`, or `'none'` to disable falling back.
 
 **Example:**
 

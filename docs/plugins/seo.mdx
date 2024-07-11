@@ -42,7 +42,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 
 ## Basic Usage
 
-In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```ts
 import { buildConfig } from 'payload/config';
@@ -205,7 +205,7 @@ seoPlugin({
 There is the option to directly import any of the fields from the plugin so that you can include them anywhere as needed.
 
 <Banner type="info">
-  You will still need to configure the plugin in the Payload config in order to configure the generation functions.
+  You will still need to configure the plugin in the Payload Config in order to configure the generation functions.
   Since these fields are imported and used directly, they don't have access to the plugin config so they may need additional arguments to work the same way.
 </Banner>
 

@@ -64,7 +64,7 @@ The following options are available:
 | **`endpoints`**        | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                    |
 | **`fields`** \*        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
 | **`graphQL`**          | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined. Set to `false` to disable GraphQL.                                                            |
-| **`hooks`**            | Entry points to "tie in" to Collection actions at specific points. [More details](../hooks/overview#collection-hooks).                                                                                                         |
+| **`hooks`**            | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                         |
 | **`labels`**           | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
 | **`slug`** \*          | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                          |
 | **`timestamps`**       | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                       |
@@ -76,19 +76,17 @@ _\* An asterisk denotes that a property is required._
 
 ### Access Control
 
-You can specify extremely granular access control (what users can do with documents in a Collection) on a Collection by
-Collection basis. To learn more, go to the [Access Control](../access-control/overview) docs.
+Access Control determines what a user can and cannot do with a Document. To learn more, go to the [Access Control](../access-control/overview) docs.
 
 ### Hooks
 
-Hooks are a powerful way to extend Collection functionality and execute your own logic, and can be defined on a
-Collection by Collection basis. To learn more, go to the [Hooks](../hooks/overview) documentation.
+Hooks allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
 ### Admin Options
 
 You can customize the way that the [Admin Panel](../admin/overview) behaves on a Collection-by-Collection basis.
 
-To configure Collection Admin Options, use the `admin` property in your Collection Config:
+To configure Admin Options for Collections, use the `admin` property in your Collection Config:
 
 ```ts
 import { CollectionConfig } from 'payload'

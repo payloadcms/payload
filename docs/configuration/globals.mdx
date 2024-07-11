@@ -72,7 +72,7 @@ The following options are available:
 | **`endpoints`**    | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                  |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                          |
-| **`hooks`**        | Entry points to "tie in" to collection actions at specific points. [More details](../hooks/overview#global-hooks).  |
+| **`hooks`**        | Entry point for Hooks. [More details](../hooks/overview#global-hooks).  |
 | **`label`**        | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                                                                                                                      |
 | **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.    |
@@ -82,17 +82,17 @@ _\* An asterisk denotes that a property is required._
 
 ### Access Control
 
-As with Collections, you can specify extremely granular access control (what users can do with this Global) on a Global-by-Global basis. However, Globals only have `update` and `read` access control due to their nature of only having one document. To learn more, go to the [Access Control](../access-control/overview) docs.
+Access Control determines what a user can and cannot do with a Document. To learn more, go to the [Access Control](../access-control/overview) docs.
 
 ### Hooks
 
-Globals also fully support a smaller subset of Hooks. To learn more, go to the [Hooks](../hooks/overview) documentation.
+Hooks allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
 ### Admin Options
 
 You can customize the way that the [Admin Panel](../admin/overview) behaves on a Global-by-Global basis.
 
-To configure Collection Admin Options, use the `admin` property in your Global Config:
+To configure Admin Options for Globals, use the `admin` property in your Global Config:
 
 ```ts
 import { GlobalConfig } from 'payload'
