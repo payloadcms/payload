@@ -6,9 +6,7 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload Globals are in many ways similar to [Collections](../configuration/collections). The big difference is that Collections will potentially contain _many_ documents, while a Global is a "one-off". Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
-
-## Config Options
+Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
 
 To define a Global Config, use the `globals` property in your [Payload Config](./overview):
 
@@ -18,12 +16,14 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   globals: [ // highlight-line
-    // Your Global Configs go here
+    // Your Globals go here
   ],
 })
 ```
 
-It's often best practice to write your Globals in separate files and then import them into the main Payload Config.
+## Config Options
+
+It's often best practice to write your Globals in separate files and then import them into the main [Payload Config](./overview).
 
 Here is what a simple Global Config might look like:
 

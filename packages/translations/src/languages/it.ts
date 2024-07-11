@@ -319,6 +319,7 @@ export const itTranslations: DefaultTranslationsObject = {
     within: "all'interno",
   },
   upload: {
+    addImage: 'Aggiungi immagine',
     crop: 'Raccolto',
     cropToolDescription:
       "Trascina gli angoli dell'area selezionata, disegna una nuova area o regola i valori qui sotto.",
@@ -333,6 +334,7 @@ export const itTranslations: DefaultTranslationsObject = {
     height: 'Altezza',
     lessInfo: 'Meno info',
     moreInfo: 'Più info',
+    pasteURL: 'Incolla URL',
     previewSizes: 'Anteprime Dimensioni',
     selectCollectionToBrowse: 'Seleziona una Collezione da Sfogliare',
     selectFile: 'Seleziona un file',

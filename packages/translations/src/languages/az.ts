@@ -318,6 +318,7 @@ export const azTranslations: DefaultTranslationsObject = {
     within: 'daxilinde',
   },
   upload: {
+    addImage: 'Şəkil əlavə et',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
@@ -332,6 +333,7 @@ export const azTranslations: DefaultTranslationsObject = {
     height: 'Hündürlük',
     lessInfo: 'Daha az məlumat',
     moreInfo: 'Daha çox məlumat',
+    pasteURL: 'URL yapışdır',
     previewSizes: 'Öncədən baxış ölçüləri',
     selectCollectionToBrowse: 'Gözdən keçirmək üçün bir Kolleksiya seçin',
     selectFile: 'Fayl seçin',

@@ -319,6 +319,7 @@ export const enTranslations = {
     within: 'within',
   },
   upload: {
+    addImage: 'Add Image',
     crop: 'Crop',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',
@@ -333,6 +334,7 @@ export const enTranslations = {
     height: 'Height',
     lessInfo: 'Less info',
     moreInfo: 'More info',
+    pasteURL: 'Paste URL',
     previewSizes: 'Preview Sizes',
     selectCollectionToBrowse: 'Select a Collection to Browse',
     selectFile: 'Select a file',
