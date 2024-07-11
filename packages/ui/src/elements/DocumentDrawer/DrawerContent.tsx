@@ -12,7 +12,10 @@ import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
+import {
+  FormQueryParamsProvider,
+  useFormQueryParams,
+} from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -114,7 +117,16 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onLoadError={onLoadError}
       onSave={onSave}
     >
-      {Edit}
+      <FormQueryParamsProvider
+        initialParams={{
+          depth: 1,
+          'fallback-locale': 'null',
+          locale: locale?.code,
+          uploadEdits: undefined,
+        }}
+      >
+        {Edit}
+      </FormQueryParamsProvider>
     </DocumentInfoProvider>
   )
 }
