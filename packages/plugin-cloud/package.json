@@ -31,12 +31,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity": "^3.525.0",
-    "@aws-sdk/client-s3": "^3.525.0",
-    "@aws-sdk/credential-providers": "^3.525.0",
-    "@aws-sdk/lib-storage": "^3.525.0",
+    "@aws-sdk/client-cognito-identity": "^3.614.0",
+    "@aws-sdk/client-s3": "^3.614.0",
+    "@aws-sdk/credential-providers": "^3.614.0",
+    "@aws-sdk/lib-storage": "^3.614.0",
     "@payloadcms/email-nodemailer": "workspace:*",
-    "amazon-cognito-identity-js": "^6.1.2",
+    "amazon-cognito-identity-js": "^6.3.12",
     "nodemailer": "6.9.10",
     "resend": "^0.17.2"
   },
@@ -44,7 +44,7 @@
     "@types/jest": "29.5.12",
     "@types/nodemailer": "6.4.14",
     "payload": "workspace:*",
-    "ts-jest": "^29.1.0"
+    "ts-jest": "^29.2.2"
   },
   "peerDependencies": {
     "payload": "workspace:*"

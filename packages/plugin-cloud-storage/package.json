@@ -67,10 +67,10 @@
     "range-parser": "^1.2.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.525.0",
-    "@aws-sdk/lib-storage": "^3.525.0",
-    "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^7.7.0",
+    "@aws-sdk/client-s3": "^3.614.0",
+    "@aws-sdk/lib-storage": "^3.614.0",
+    "@azure/storage-blob": "^12.23.0",
+    "@google-cloud/storage": "^7.11.3",
     "@types/find-node-modules": "^2.1.2",
     "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
