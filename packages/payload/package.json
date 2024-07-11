@@ -134,7 +134,7 @@
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "@swc/core": "^1.6.1",
+    "@swc/core": "^1.6.13",
     "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {
