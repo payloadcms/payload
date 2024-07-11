@@ -81,7 +81,6 @@ async function cleanDirectories(patterns) {
       const options = {
         ignore: ignoreNodeModules ? '**/node_modules/**' : '',
         onlyDirectories: pattern.endsWith('/') ? true : false,
-        //expandDirectories: true,
       }
       fulleDelete = options.onlyDirectories
 
