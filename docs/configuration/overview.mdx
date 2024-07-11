@@ -6,7 +6,7 @@ desc: The Payload Config is central to everything that Payload does, from adding
 keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload is a _config-based_, code-first CMS and application framework. The Payload Config is central to everything that Payload does, allowing for the deep configuration of your application through a simple API.
+Payload is a _config-based_, code-first CMS and application framework. The Payload Config is central to everything that Payload does, allowing for deep configuration of your application through a simple and intuitive API.
 
 Everything from your [Database](../database/overview) choice, to the appearance of the [Admin Panel](../admin/overview), is fully controlled through the Payload Config. From here you can define [Fields](../fields/overview), add [Localization](./localization), enable [Authentication](../authentication/overview), configure [Access Control](../access-control/overview), and so much more.
 
@@ -58,7 +58,7 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  <strong>More:</strong>
+  <strong>Reminder:</strong>
   For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub.
 </Banner>
 
@@ -104,6 +104,50 @@ _\* An asterisk denotes that a property is required._
   Some properties are removed from the client-side bundle. [More details](../admin/components#accessing-the-payload-config).
 </Banner>
 
+
+### TypeScript
+
+Payload exposes a variety of TypeScript settings that you can leverage. These settings are used to auto-generate TypeScript interfaces for your Collections and Globals, and to ensure that Payload uses your [Generated Types](../typescript/overview) for all Local API methods.
+
+To customize the TypeScript settings, use the `typescript` property in your Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  typescript: { // highlight-line
+    // ...
+  }
+})
+```
+
+The following options are available:
+
+| Option          | Description                                                                                                                                                                                                 |
+| --------------- | --------------------- |
+| **`autoGenerate`** | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview). |
+| **`declare`**     | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`. |
+| **`outputFile`**  | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path. |
+
+#### Importing Payload Config types
+
+You can import config types as follows:
+
+```ts
+import { Config } from 'payload'
+
+// This is the type used for an incoming Payload Config.
+// Only the bare minimum properties are marked as required.
+```
+
+```ts
+import { SanitizedConfig } from 'payload'
+
+// This is the type used after an incoming Payload Config is fully sanitized.
+// Generally, this is only used internally by Payload.
+```
+
 ## Config Location
 
 For Payload command-line scripts, we need to be able to locate your Payload Config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including the root current working directory, your `tsconfig`'s `rootDir`, and your `tsconfig`'s `outDir`.
@@ -129,44 +173,6 @@ In addition to the above automated detection, you can specify your own location 
 ```
 
 When `PAYLOAD_CONFIG_PATH` is set, Payload will use this path to load the configuration, bypassing all automated detection.
-
-## TypeScript
-
-Payload exposes a variety of TypeScript settings that you can leverage on your Config's `typescript` property.
-
-**`autoGenerate`**
-
-By default, in Next.js development mode, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines.
-
-You can opt out by setting `typescript.autoGenerate: false`.
-
-**`declare`**
-
-By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. This promotes strong typing across all of Payload's APIs. However, if you are using your Payload Config in a monorepo sub-package, and you are using it in multiple applications, you might want to disable this automatic declaration and then manually add the `declare` block to a file that you control.
-
-In these cases, you can set `typescript.declare: false` to opt out.
-
-**`outputFile`**
-
-You can control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.
-
-### Importing Payload Config types
-
-You can import config types as follows:
-
-```ts
-import { Config } from 'payload'
-
-// This is the type used for an incoming Payload Config.
-// Only the bare minimum properties are marked as required.
-```
-
-```ts
-import { SanitizedConfig } from 'payload'
-
-// This is the type used after an incoming Payload Config is fully sanitized.
-// Generally, this is only used internally by Payload.
-```
 
 ## Telemetry
 
