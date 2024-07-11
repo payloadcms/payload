@@ -116,9 +116,6 @@ importers:
       fs-extra:
         specifier: 10.1.0
         version: 10.1.0
-      glob:
-        specifier: 8.1.0
-        version: 8.1.0
       globby:
         specifier: 11.1.0
         version: 11.1.0
