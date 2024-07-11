@@ -75,7 +75,7 @@ fetch('https://localhost:3000/api/posts?depth=2') // highlight-line
 
 ## Max Depth
 
-Fields like [`relationship`](../fields/relationship) or [`upload`](../fields/upload) can set a maximum depth that limits the population despite the depth parameter in the query. If the current depth when the field is accessed exceeds the `maxDepth`, the field will not be populated.
+Fields like the [Relationship Field](../fields/relationship) or the [Upload Field](../fields/upload) can also set a maximum depth. If exceeded, this will limit the population depth regardless of the depth of the request.
 
 To set a max depth for a field, use the `maxDepth` property in your field configuration:
 
