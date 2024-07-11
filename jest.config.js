@@ -1,4 +1,4 @@
-/** @type {import('jest').Config} */
+/** @type {import('jest').Config}  */
 const baseJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   setupFiles: ['<rootDir>/test/jest.setup.env.js'],
