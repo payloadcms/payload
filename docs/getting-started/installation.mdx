@@ -56,7 +56,7 @@ You can copy the Payload `/app` folder files from the Payload blank template on 
 https://github.com/payloadcms/payload/tree/beta/templates/blank-3.0/src/app/(payload)
 ```
 
-Notice how the Payload files are all kept within the `(payload)` [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups)? That's so that the Payload admin UI can have its own separate [Root Layout](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts#root-layout-required) which will allow it to not interfere whatsoever with an existing Next.js app if you have one. 
+Notice how the Payload files are all kept within the `(payload)` [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups)? That's so that the Payload admin UI can have its own separate [Root Layout](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts#root-layout-required) which will allow it to not interfere whatsoever with an existing Next.js app if you have one.
 
 <Banner type="warning">
   You may need to copy all of your existing frontend files, including your existing root layout, into its own newly created route group.
@@ -114,11 +114,11 @@ You can do this in one of two ways:
 
 In either case, all `require`s and `export`s in your `next.config` file will need to be converted to `import` / `export` if they are not set up that way already.
 
-#### 4 - create a Payload config and add it to your TypeScript config
+#### 4 - create a Payload Config and add it to your TypeScript config
 
-Finally, you need to create a barebones Payload config.
+Finally, you need to create a barebones Payload Config.
 
-Generally the Payload config is located at the root of your repository, or next to your `/app` folder, and is named `payload.config.ts`. Here's what Payload needs at a bare minimum:
+Generally the Payload Config is located at the root of your repository, or next to your `/app` folder, and is named `payload.config.ts`. Here's what Payload needs at a bare minimum:
 
 ```ts
 import sharp from 'sharp'
@@ -133,18 +133,18 @@ export default buildConfig({
   // Define and configure your collections in this array
   collections: [],
 
-  // Your Payload secret - should be a complex and secure string, unguessable  
+  // Your Payload secret - should be a complex and secure string, unguessable
   secret: process.env.PAYLOAD_SECRET || '',
 
   // Whichever database adapter you're using should go here
-  // Mongoose is shown as an example, but you can also use Postgres 
+  // Mongoose is shown as an example, but you can also use Postgres
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
 
   // If you want to resize images, crop, set focal point, etc.
   // make sure to install it and pass it to the config.
-  // This is optional - if you don't need to do these things, 
+  // This is optional - if you don't need to do these things,
   // you don't need it!
   sharp,
 })

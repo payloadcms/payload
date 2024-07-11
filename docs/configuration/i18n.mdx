@@ -135,7 +135,7 @@ export const Articles: CollectionConfig = {
 
 Payload's backend sets the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
-Anywhere in your Payload app that you have access to the `req` object, you can access payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
+Anywhere in your Payload app that you have access to the `req` object, you can access Payload's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
 ## TypeScript
 
@@ -169,7 +169,7 @@ export const MyComponent: React.FC = () => {
 
 ```
 
-Additionally, payload exposes the `t` function in various places, for example in labels. Here is how you would type those:
+Additionally, Payload exposes the `t` function in various places, for example in labels. Here is how you would type those:
 
 ```ts
 import type {

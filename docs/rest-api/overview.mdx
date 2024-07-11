@@ -570,7 +570,7 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 
 ## Custom Endpoints
 
-Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
+Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
 Each endpoint object needs to have:
 
@@ -579,7 +579,7 @@ Each endpoint object needs to have:
 | **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
 | **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
 | **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Next.js](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)                                                                                          |
-| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
+| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
 Example:
