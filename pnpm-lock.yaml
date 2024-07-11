@@ -1492,9 +1492,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      turbopack:
-        specifier: ^0.0.1
-        version: 0.0.1
 
   test:
     devDependencies:
@@ -15604,10 +15601,6 @@ packages:
       turbo-linux-arm64: 1.13.4
       turbo-windows-64: 1.13.4
       turbo-windows-arm64: 1.13.4
-    dev: true
-
-  /turbopack@0.0.1:
-    resolution: {integrity: sha512-urgN2cl9AY9JnNi2bNJREMFkdnjyTo2bQlFnegAMEHBozMhB1fuCrQdsag1mHQwY83odPxNtip4BsxBrL7KbRQ==}
     dev: true
 
   /type-check@0.4.0:
