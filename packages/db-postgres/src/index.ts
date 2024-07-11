@@ -38,6 +38,8 @@ import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
 import { countDistinct } from './countDistinct.js'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
+import { createJSONQuery } from './createJSONQuery/index.js'
 import { createMigration } from './createMigration.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { deleteWhere } from './deleteWhere.js'
@@ -99,11 +101,13 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       beginTransaction,
       commitTransaction,
       connect,
+      convertPathToJSONTraversal,
       count,
       countDistinct,
       create,
       createGlobal,
       createGlobalVersion,
+      createJSONQuery,
       createMigration,
       createVersion,
       defaultIDType: payloadIDType,

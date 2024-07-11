@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
+import { createTableName } from '@payloadcms/drizzle'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { SQLiteAdapter } from './types.js'
 
-import { createTableName } from '../../drizzle/src/createTableName.js'
 import { buildTable } from './schema/build.js'
 
 export const init: Init = function init(this: SQLiteAdapter) {

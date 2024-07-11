@@ -24,6 +24,7 @@
     "src/**/*.spec.tsx"
   ],
   "include": [
+    "src",
     "src/**/*.ts",
   ],
   "references": [

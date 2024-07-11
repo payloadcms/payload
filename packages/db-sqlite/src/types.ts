@@ -11,7 +11,7 @@ import type {
   SQLiteTableWithColumns,
 } from 'drizzle-orm/sqlite-core'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
-import type { Payload, PayloadRequestWithData } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import {
   type ColumnDataType,
@@ -131,12 +131,12 @@ export type IDType = 'integer' | 'numeric' | 'text'
 export type MigrateUpArgs = {
   db: LibSQLDatabase
   payload: Payload
-  req?: Partial<PayloadRequestWithData>
+  req?: Partial<PayloadRequest>
 }
 export type MigrateDownArgs = {
   db: LibSQLDatabase
   payload: Payload
-  req?: Partial<PayloadRequestWithData>
+  req?: Partial<PayloadRequest>
 }
 
 declare module 'payload' {

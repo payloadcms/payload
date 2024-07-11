@@ -18,7 +18,7 @@ import type {
   MigrationData,
   MigrationTemplateArgs,
   Payload,
-  PayloadRequestWithData,
+  PayloadRequest,
 } from 'payload'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
@@ -132,7 +132,7 @@ export type Migration = MigrationData & {
   }: {
     db?: DrizzleTransaction | LibSQLDatabase<Record<string, never>> | PostgresDB
     payload: Payload
-    req: PayloadRequestWithData
+    req: PayloadRequest
   }) => Promise<boolean>
   up: ({
     db,
@@ -141,12 +141,23 @@ export type Migration = MigrationData & {
   }: {
     db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
     payload: Payload
-    req: PayloadRequestWithData
+    req: PayloadRequest
   }) => Promise<boolean>
 }
 
+export type CreateJSONQueryArgs = {
+  operator: string
+  pathSegments: string[]
+  table?: string
+  treatAsArray?: string[]
+  treatRootAsArray?: boolean
+  value: boolean | number | string
+}
+
 export type DrizzleAdapter = BaseDatabaseAdapter & {
+  convertPathToJSONTraversal: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
+  createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
   deleteWhere: DeleteWhere
   drizzle: LibSQLDatabase | PostgresDB

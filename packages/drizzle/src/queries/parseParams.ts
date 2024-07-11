@@ -10,8 +10,6 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
-import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
-import { createJSONQuery } from './createJSONQuery/index.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -107,9 +105,17 @@ export async function parseParams({
                   segments.unshift(table[columnName].name)
 
                   if (field.type === 'richText') {
-                    const jsonQuery = createJSONQuery({
+                    // use the table name from the nearest join to handle blocks, arrays, etc. or use the tableName arg
+                    const jsonTable =
+                      joins.length === 0
+                        ? tableName
+                        : joins[joins.length - 1].table[
+                            Object.getOwnPropertySymbols(joins[joins.length - 1].table)[0]
+                          ]
+                    const jsonQuery = adapter.createJSONQuery({
                       operator,
                       pathSegments: segments,
+                      table: jsonTable,
                       treatAsArray: ['children'],
                       treatRootAsArray: true,
                       value: val,
@@ -119,7 +125,7 @@ export async function parseParams({
                     break
                   }
 
-                  const jsonQuery = convertPathToJSONTraversal(pathSegments)
+                  const jsonQuery = adapter.convertPathToJSONTraversal(pathSegments)
                   const operatorKeys = {
                     contains: { operator: 'like', wildcard: '%' },
                     equals: { operator: '=', wildcard: '' },
@@ -127,8 +133,13 @@ export async function parseParams({
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
                   }
-                  let formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
 
+                  let formattedValue = val
+                  if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
+                    formattedValue = val
+                  } else {
+                    formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
+                  }
                   if (operator === 'exists') {
                     formattedValue = ''
                   }
