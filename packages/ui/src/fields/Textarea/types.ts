@@ -4,7 +4,7 @@ import { type ChangeEvent } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-export type TextareaFieldProps = FormFieldBase & {
+export type TextareaFieldProps = {
   maxLength?: number
   minLength?: number
   name?: string
@@ -12,11 +12,11 @@ export type TextareaFieldProps = FormFieldBase & {
   placeholder?: TextareaFieldType['admin']['placeholder']
   rows?: number
   width?: string
-}
+} & FormFieldBase
 
-export type TextAreaInputProps = TextareaFieldProps & {
+export type TextAreaInputProps = {
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   rows?: number
   showError?: boolean
   value?: string
-}
+} & TextareaFieldProps

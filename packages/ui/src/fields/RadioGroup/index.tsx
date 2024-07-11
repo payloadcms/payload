@@ -1,5 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import type { Option } from 'payload'
 
@@ -22,7 +20,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type RadioFieldProps = FormFieldBase & {
+export type RadioFieldProps = {
   layout?: 'horizontal' | 'vertical'
   name?: string
   onChange?: OnChange
@@ -30,7 +28,7 @@ export type RadioFieldProps = FormFieldBase & {
   path?: string
   value?: string
   width?: string
-}
+} & FormFieldBase
 
 export type OnChange<T = string> = (value: T) => void
 

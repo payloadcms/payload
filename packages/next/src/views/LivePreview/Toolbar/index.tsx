@@ -56,9 +56,9 @@ const StaticToolbar: React.FC<EditViewProps> = (props) => {
 }
 
 export const LivePreviewToolbar: React.FC<
-  EditViewProps & {
+  {
     draggable?: boolean
-  }
+  } & EditViewProps
 > = (props) => {
   const { draggable } = props
 

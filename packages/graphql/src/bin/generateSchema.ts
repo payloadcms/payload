@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import type { SanitizedConfig } from 'payload'
 
 import fs from 'fs'

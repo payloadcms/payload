@@ -3,7 +3,7 @@ import type { ClientCollectionConfig, RelationshipField, SanitizedConfig } from 
 
 import type { FormFieldBase } from '../shared/index.js'
 
-export type RelationshipFieldProps = FormFieldBase & {
+export type RelationshipFieldProps = {
   allowCreate?: RelationshipField['admin']['allowCreate']
   hasMany?: boolean
   isSortable?: boolean
@@ -11,7 +11,7 @@ export type RelationshipFieldProps = FormFieldBase & {
   relationTo?: RelationshipField['relationTo']
   sortOptions?: RelationshipField['admin']['sortOptions']
   width?: string
-}
+} & FormFieldBase
 
 export type Option = {
   label: string

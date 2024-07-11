@@ -168,7 +168,7 @@ export const code: Validate<string, unknown, unknown, CodeField> = (
   return true
 }
 
-export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = async (
+export const json: Validate<string, unknown, unknown, { jsonError?: string } & JSONField> = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -250,7 +250,6 @@ export const date: Validate<Date, unknown, unknown, DateField> = (
   { req: { t }, required },
 ) => {
   if (value && !isNaN(Date.parse(value.toString()))) {
-    /* eslint-disable-line */
     return true
   }
 

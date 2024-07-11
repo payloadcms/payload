@@ -98,7 +98,7 @@ export const buildAfterOperation = async <
   TOperationGeneric extends CollectionSlug,
   O extends keyof AfterOperationMap<TOperationGeneric> = keyof AfterOperationMap<TOperationGeneric>,
 >(
-  operationArgs: Omit<AfterOperationArg<TOperationGeneric>, 'req'> & { operation: O },
+  operationArgs: { operation: O } & Omit<AfterOperationArg<TOperationGeneric>, 'req'>,
 ): Promise<OperationResult<TOperationGeneric, O> | any> => {
   const { args, collection, operation, result } = operationArgs
 

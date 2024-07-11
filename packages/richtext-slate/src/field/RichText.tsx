@@ -43,14 +43,14 @@ const baseClass = 'rich-text'
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Editor: BaseEditor & HistoryEditor & ReactEditor
     Element: ElementNode
     Text: TextNode
   }
 }
 
 const RichTextField: React.FC<
-  FormFieldBase & {
+  {
     elements: EnabledFeatures['elements']
     leaves: EnabledFeatures['leaves']
     name: string
@@ -58,7 +58,7 @@ const RichTextField: React.FC<
     plugins: RichTextPlugin[]
     richTextComponentMap: Map<string, React.ReactNode>
     width?: string
-  }
+  } & FormFieldBase
 > = (props) => {
   const {
     name,

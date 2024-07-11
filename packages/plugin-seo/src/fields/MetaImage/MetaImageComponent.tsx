@@ -20,10 +20,9 @@ import type { GenerateImage } from '../../types.js'
 
 import { Pill } from '../../ui/Pill.js'
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type MetaImageProps = UploadInputProps & {
+type MetaImageProps = {
   hasGenerateImageFn: boolean
-}
+} & UploadInputProps
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { CustomLabel, hasGenerateImageFn, label, labelProps, relationTo, required } = props || {}

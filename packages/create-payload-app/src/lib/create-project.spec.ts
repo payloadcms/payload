@@ -1,18 +1,20 @@
+import { jest } from '@jest/globals'
+import fs from 'fs'
 import fse from 'fs-extra'
+import globby from 'globby'
+import * as os from 'node:os'
 import path from 'path'
+
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
+
 import { createProject } from './create-project.js'
 import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
-import globby from 'globby'
-import { jest } from '@jest/globals'
-import fs from 'fs'
-import * as os from 'node:os'
 
 describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
-    console.log = jest.fn()
+    jest.spyOn(console, 'log').mockImplementation()
   })
 
   beforeEach(() => {
@@ -27,7 +29,6 @@ describe('createProject', () => {
   })
 
   describe('#createProject', () => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
@@ -41,15 +42,15 @@ describe('createProject', () => {
       const template: ProjectTemplate = {
         name: 'plugin',
         type: 'plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
         description: 'Template for creating a Payload plugin',
+        url: 'https://github.com/payloadcms/payload-plugin-template',
       }
       await createProject({
         cliArgs: args,
-        projectName,
-        projectDir,
-        template,
         packageManager,
+        projectDir,
+        projectName,
+        template,
       })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
@@ -84,14 +85,14 @@ describe('createProject', () => {
 
         await createProject({
           cliArgs,
-          projectName,
-          projectDir,
-          template: template as ProjectTemplate,
-          packageManager,
           dbDetails: {
-            dbUri: `${db}://localhost:27017/create-project-test`,
             type: db as DbType,
+            dbUri: `${db}://localhost:27017/create-project-test`,
           },
+          packageManager,
+          projectDir,
+          projectName,
+          template: template as ProjectTemplate,
         })
 
         const dbReplacement = dbReplacements[db as DbType]

@@ -7,7 +7,7 @@ import './index.scss'
 
 export const baseClass = 'doc-tab'
 
-export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (props) => {
+export const DocumentTab: React.FC<DocumentTabConfig & DocumentTabProps> = (props) => {
   const {
     Pill,
     apiURL,

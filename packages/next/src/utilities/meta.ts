@@ -12,7 +12,7 @@ const defaultOpenGraph = {
   title: 'Payload App',
 }
 
-export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
+export const meta = async (args: { serverURL: string } & MetaConfig): Promise<any> => {
   const {
     defaultOGImageType,
     description,

@@ -33,10 +33,10 @@ export type SlashMenuGroup = {
   label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
 }
 
-export type SlashMenuItemInternal = SlashMenuItem & {
+export type SlashMenuItemInternal = {
   ref: MutableRefObject<HTMLButtonElement | null>
-}
+} & SlashMenuItem
 
-export type SlashMenuGroupInternal = SlashMenuGroup & {
+export type SlashMenuGroupInternal = {
   items: Array<SlashMenuItemInternal>
-}
+} & SlashMenuGroup

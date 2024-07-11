@@ -45,8 +45,8 @@ export const seed = async (_payload) => {
           _payload.create({
             collection: postsCollectionSlug,
             data: {
-              title: 'Title',
               description: 'Description',
+              title: 'Title',
             },
             depth: 0,
             overrideAccess: true,
@@ -122,9 +122,9 @@ export const seed = async (_payload) => {
 
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
-    snapshotKey: 'adminTest',
-    collectionSlugs,
     _payload,
+    collectionSlugs,
     seedFunction: seed,
+    snapshotKey: 'adminTest',
   })
 }

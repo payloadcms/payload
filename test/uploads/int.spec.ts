@@ -726,7 +726,6 @@ describe('Collections - Uploads', () => {
   })
 
   describe('Required Files', () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
       const successfulCreate = await payload.create({
         collection: 'optional-file',

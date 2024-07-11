@@ -9,10 +9,10 @@ type ElementContextType<T> = {
   children: React.ReactNode
   editorRef: React.MutableRefObject<HTMLDivElement>
   element: T
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   path: string
   schemaPath: string
 }
@@ -28,9 +28,9 @@ const ElementContext = React.createContext<ElementContextType<Element>>({
 })
 
 export const ElementProvider: React.FC<
-  ElementContextType<Element> & {
+  {
     childNodes: React.ReactNode
-  }
+  } & ElementContextType<Element>
 > = (props) => {
   const { childNodes, children, ...rest } = props
 

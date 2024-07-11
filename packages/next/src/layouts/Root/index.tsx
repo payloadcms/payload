@@ -109,7 +109,6 @@ export const RootLayout = async ({
           fallbackLang={clientConfig.i18n.fallbackLanguage}
           languageCode={languageCode}
           languageOptions={languageOptions}
-          // eslint-disable-next-line react/jsx-no-bind
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}

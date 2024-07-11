@@ -34,10 +34,10 @@ const headers = {
 }
 
 const createFirstUser = async ({
-  page,
-  serverURL,
   customAdminRoutes,
   customRoutes,
+  page,
+  serverURL,
 }: {
   customAdminRoutes?: SanitizedConfig['admin']['routes']
   customRoutes?: SanitizedConfig['routes']
